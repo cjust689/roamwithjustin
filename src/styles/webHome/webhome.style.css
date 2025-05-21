@@ -1,0 +1,194 @@
+* {
+    font-family: 'Rubik', sans-serif;
+    font-family: 'Ubuntu', sans-serif;
+    color: #f9a825;
+}
+
+h1 {
+    /*font-family: acumin-pro-semi-condensed, sans-serif;*/
+    font-weight: 900;
+    font-style: normal
+}
+
+p {
+    font-weight: 700;
+    font-style: normal
+}
+
+h2 {
+    font-weight: 800;
+}
+
+.z-depth-3 {
+    background-color: #231f20 !important;
+}
+
+.section {
+    background-color: #f9a825 !important;
+}
+
+.grey-text{
+ color: hsl(210, 9%, 9%) !important
+}
+
+
+html {
+    background-color: #231f20;
+    height: 100%;
+}
+
+html,
+body,
+.block {
+    height: 100%;
+}
+
+#landing {
+    background-color: #231f20;
+}
+
+.landing_image {}
+
+#red {
+    height: 100%;
+}
+
+
+.carousel-item {
+    max-height: 100%;
+}
+.carousel .carousel-item {
+    height: 100%;
+    width: unset;
+}
+
+.brand-logo {
+    font-family: 'Montserrat', sans-serif;
+}
+
+nav {
+    background-color: black;
+}
+
+.fullHeight {
+    height: 100%;
+}
+
+#red,
+#blue,
+#green {
+    background-color: #ffffff;
+}
+
+.parallax {
+    background-color: #231f20;
+}
+
+.contactBTN {
+    position: fixed;
+    width: 5em !important;
+    height: 5em !important;
+    /* font-size: 2em; */
+    right: 5%;
+    bottom: 5%;
+    line-height: 7.2em;
+}
+
+.btn-large i {
+    font-size: 3em !important;
+}
+
+
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    /* Preferred icon size */
+    display: inline-block;
+    line-height: 1;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
+
+    /* Support for all WebKit browsers. */
+    -webkit-font-smoothing: antialiased;
+    /* Support for Safari and Chrome. */
+    text-rendering: optimizeLegibility;
+
+    /* Support for Firefox. */
+    -moz-osx-font-smoothing: grayscale;
+
+    /* Support for IE. */
+    font-feature-settings: 'liga';
+}
+
+
+nav {
+    height: 05%
+}
+
+.parallax,
+.parallax-container {
+    pointer-events: none;
+}
+
+iframe {
+    pointer-events: auto;
+}
+
+
+h6 {
+    padding: 1em;
+}
+
+
+img {
+    width: 100vw;
+}
+
+.shrsl_liveWid_leaderBoard_53733 div.leaderBoard{
+    border: none !important;
+}
+
+
+/* Styling for the popup container */
+    .popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+    }
+
+    /* Overlay for dimming the background */
+    .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    li {
+        list-style: none;
+    }
+
+    html {
+        /* background-color: #231f20 !important; */
+    }
+
+    .webworks-home {
+        /* background-color: #231f20 !important; */
+    }
