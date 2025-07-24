@@ -1,16 +1,16 @@
 <template>
   <div class="gear valign-wrapper">
     <div class="row container">
-      <ComingSoon />
+      <GearGrid />
     </div>
   </div>
 </template>
 
 <script>
-import ComingSoon from "@/components/ComingSoon.vue"
+import GearGrid from "@/components/GearGrid.vue"
 
 export default {
-  components: { ComingSoon },
+  components: { GearGrid },
 }
 </script>
 
