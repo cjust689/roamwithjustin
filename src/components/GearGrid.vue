@@ -16,6 +16,7 @@
         class="gallery-card"
         target="_blank"
         rel="noopener noreferrer"
+        ref="gearLinks"
       >
         <div
           class="card-banner"
@@ -37,6 +38,7 @@
         class="gallery-card"
         target="_blank"
         rel="noopener noreferrer"
+        ref="gearLinks"
       >
         <div
           class="card-banner"
@@ -50,6 +52,7 @@
     </div>
   </div>
 </template>
+import { trackClickEvent } from "@/utils/tracking";
 
 <script>
 export default {
@@ -200,6 +203,56 @@ export default {
         // Add more clothing, shoes, accessories here
       ],
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const links = this.$refs.gearLinks
+
+      if (!Array.isArray(links)) return
+
+      links.forEach(link => {
+        let href = link.getAttribute("href")
+        if (!href || href === "#") return
+
+        try {
+          const url = new URL(href, window.location.origin)
+
+          // 👇 Add or update utm_source param
+          if (!url.searchParams.has("utm_source")) {
+            url.searchParams.append("utm_source", "roamwithjustin")
+            link.href = url.toString()
+          }
+
+          const hostname = url.hostname
+          let eventName = "gear_click"
+          let category = "affiliate"
+          let label = link.textContent.trim() || hostname
+
+          if (hostname.includes("amazon")) {
+            eventName = "amazon_click"
+            category = "amazon"
+          } else if (
+            hostname.includes("djiglobal") ||
+            hostname.includes("dji")
+          ) {
+            eventName = "dji_click"
+            category = "dji"
+          } else if (hostname.includes("sony")) {
+            eventName = "sony_click"
+            category = "sony"
+          }
+
+          link.addEventListener("click", () => {
+            trackClickEvent({
+              url: url.toString(),
+              label: link.textContent.trim(),
+            })
+          })
+        } catch (err) {
+          console.warn("Invalid link skipped:", href)
+        }
+      })
+    })
   },
 }
 </script>
