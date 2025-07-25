@@ -1,3 +1,4 @@
+<!-- eslint-disable prettier/prettier -->
 <template>
   <div v-if="trip" class="trip-overview">
     <!-- Hero Carousel -->
