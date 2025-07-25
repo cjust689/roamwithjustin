@@ -1,39 +1,40 @@
-export function trackClickEvent({ url, label = "", extra = {} }) {
+export function trackClickEvent({
+  url,
+  label = "",
+  domain = "",
+  category,
+  eventName,
+}) {
   try {
     const parsedUrl = new URL(url)
     const hostname = parsedUrl.hostname
+    const brand = hostname
 
-    // Dynamic domain-based classification
-    let category = "affiliate"
-    let eventName = "affiliate_click"
-
-    if (hostname.includes("amazon")) {
-      category = "amazon"
-      eventName = "amazon_click"
-    } else if (hostname.includes("djiglobal") || hostname.includes("dji")) {
-      category = "dji"
-      eventName = "dji_click"
-    } else if (hostname.includes("sony")) {
-      category = "sony"
-      eventName = "sony_click"
+    // Allow eventName/category to be overridden, else derive based on hostname
+    if (!eventName || !category) {
+      if (hostname.includes("amazon")) {
+        eventName = eventName || "amazon_click"
+        category = category || "amazon"
+      } else if (hostname.includes("dji")) {
+        eventName = eventName || "dji_click"
+        category = category || "dji"
+      } else if (hostname.includes("sony")) {
+        eventName = eventName || "sony_click"
+        category = category || "sony"
+      } else {
+        eventName = eventName || "affiliate_click"
+        category = category || "affiliate"
+      }
     }
 
-    // Track in Google Analytics (GA4-style)
     window.gtag?.("event", eventName, {
       event_category: category,
-      event_label: label || hostname,
+      event_label: label,
       domain: hostname,
-      ...extra, // you can pass extra data if needed
-    })
-
-    // You could also push to your own event log system here if needed
-
-    console.log(`[TRACKED] ${eventName}`, {
-      category,
-      label,
-      domain: hostname,
+      brand: brand,
+      url: url,
     })
   } catch (err) {
-    console.warn("Invalid URL in tracking:", url)
+    console.warn("Tracking error:", err)
   }
 }

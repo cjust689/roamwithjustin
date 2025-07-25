@@ -12,11 +12,12 @@
       <a
         v-for="item in photoGear"
         :key="item.title"
+        ref="gearLink"
+        v-bind:ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
         rel="noopener noreferrer"
-        ref="gearLinks"
       >
         <div
           class="card-banner"
@@ -34,11 +35,12 @@
       <a
         v-for="item in adventureGear"
         :key="item.title"
+        ref="gearLink"
+        v-bind:ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
         rel="noopener noreferrer"
-        ref="gearLinks"
       >
         <div
           class="card-banner"
@@ -206,7 +208,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      const links = this.$refs.gearLinks
+      const links = this.$refs.gearLink || []
 
       if (!Array.isArray(links)) return
 
@@ -226,7 +228,11 @@ export default {
           const hostname = url.hostname
           let eventName = "gear_click"
           let category = "affiliate"
-          let label = link.textContent.trim() || hostname
+          let label = (
+            link.querySelector("h3")?.textContent ||
+            link.textContent ||
+            ""
+          ).trim()
 
           if (hostname.includes("amazon")) {
             eventName = "amazon_click"
@@ -243,9 +249,12 @@ export default {
           }
 
           link.addEventListener("click", () => {
+            console.log("🔍 Tracking click for:", label, url.toString())
             trackClickEvent({
               url: url.toString(),
-              label: link.textContent.trim(),
+              label,
+              category,
+              eventName,
             })
           })
         } catch (err) {
