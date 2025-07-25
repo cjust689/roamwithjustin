@@ -13,7 +13,7 @@
         v-for="item in photoGear"
         :key="item.title"
         ref="gearLink"
-        v-bind:ref-in-for="true"
+        :ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
@@ -36,7 +36,7 @@
         v-for="item in adventureGear"
         :key="item.title"
         ref="gearLink"
-        v-bind:ref-in-for="true"
+        :ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
@@ -54,9 +54,10 @@
     </div>
   </div>
 </template>
-import { trackClickEvent } from "@/utils/tracking";
 
 <script>
+import { trackClickEvent } from "@/utils/tracking"
+
 export default {
   name: "GearGrid",
   data() {

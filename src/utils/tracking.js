@@ -1,10 +1,4 @@
-export function trackClickEvent({
-  url,
-  label = "",
-  domain = "",
-  category,
-  eventName,
-}) {
+export function trackClickEvent({ url, label = "", category, eventName }) {
   try {
     const parsedUrl = new URL(url)
     const hostname = parsedUrl.hostname
