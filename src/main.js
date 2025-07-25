@@ -15,20 +15,20 @@ const isWebworks = hostname.includes("webworksmedia.club")
 // 🌐 Make available to all components via prototype
 Vue.prototype.$isRoam = isRoam
 Vue.prototype.$isWebworks = isWebworks
-if (isRoam && window.location.pathname === "/") {
-  window.location.href = "/roam"
-}
-new Vue({
-  router,
-  render: h => h(App),
-  data: {
-    nav: "",
-    sideNav: "",
-    homeImage: '<img src="img/background.png">',
-  },
-  methods: {},
-  mounted: function() {
-    //randomQuote(this)
-    M.AutoInit()
-  },
-}).$mount("#app")
+// if (isRoam && window.location.pathname === "/") {
+//   window.location.href = "/roam"
+// }
+router.onReady(() => {
+  new Vue({
+    router,
+    render: h => h(App),
+    data: {
+      nav: "",
+      sideNav: "",
+      homeImage: '<img src="img/background.png">',
+    },
+    mounted: function () {
+      M.AutoInit()
+    },
+  }).$mount("#app")
+})

@@ -60,5 +60,11 @@ const router = new VueRouter({
     }
   },
 })
-
+router.beforeEach((to, from, next) => {
+  if (window.location.hostname.includes("roamwithjustin") && to.path === "/") {
+    next("/roam")
+  } else {
+    next()
+  }
+})
 export default router
