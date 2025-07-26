@@ -4,9 +4,9 @@
       <div class="container nav-wrapper">
         <router-link
           class="logo black-text"
-          to="/roam"
+          to="/"
           exact
-          :class="$route.path === '/roam' ? 'no-active-style' : ''"
+          :class="$route.path === '/' ? 'no-active-style' : ''"
         >
           ROAM
         </router-link>
@@ -50,17 +50,17 @@
         >
       </li>
       <li>
-        <router-link class="black-text" to="//trips" @click="closeMenu"
+        <router-link class="black-text" to="/trips" @click="closeMenu"
           >Blog</router-link
         >
       </li>
       <li>
-        <router-link class="black-text" to="//gear" @click="closeMenu"
+        <router-link class="black-text" to="/gear" @click="closeMenu"
           >Gear</router-link
         >
       </li>
       <li>
-        <router-link class="black-text" to="//about" @click="closeMenu"
+        <router-link class="black-text" to="/about" @click="closeMenu"
           >About</router-link
         >
       </li>
