@@ -9,7 +9,7 @@ let x = 0
 Vue.config.productionTip = false
 // 🧠 Detect current domain
 const hostname = window.location.hostname
-const isRoam = hostname.includes("roam.with.justin")
+const isRoam = hostname.includes("roamwithjustin")
 const isWebworks = hostname.includes("webworksmedia.club")
 
 // 🌐 Make available to all components via prototype
@@ -18,7 +18,7 @@ Vue.prototype.$isWebworks = isWebworks
 // if (isRoam && window.location.pathname === "/") {
 //   window.location.href = "/roam"
 // }
-router.onReady(() => {
+//router.onReady(() => {
   new Vue({
     router,
     render: h => h(App),
@@ -29,7 +29,6 @@ router.onReady(() => {
     },
     mounted: function () {
       M.AutoInit()
-      console.log("mounted App")
     },
   }).$mount("#app")
-})
+//})

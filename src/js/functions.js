@@ -1,5 +1,4 @@
 export const randomRoamImage = (category = "default") => {
-  console.log("here")
   const roamImageCategories = {
     beaches: ["beach1.jpg", "beach2.jpg", "beach3.jpg"],
     jungle: ["jungle1.jpg", "jungle2.jpg", "jungle3.jpg"],
