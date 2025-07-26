@@ -3,7 +3,7 @@
     <div class="row container">
       <div v-for="trip in trips" :key="trip.id" class="col s12 l4">
         <router-link
-          :to="trip.comingSoon ? '#' : `/roam/trips/${trip.id}`"
+          :to="trip.comingSoon ? '#' : `/trips/${trip.id}`"
           class="card-link"
         >
           <div class="card trip-card">

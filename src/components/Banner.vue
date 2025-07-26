@@ -1,6 +1,6 @@
 <template>
   <div class="banner-wrapper yellow darken-2 center-align">
-    <router-link class="banner-link black-text pulsate" to="/roam/Affiliates">
+    <router-link class="banner-link black-text pulsate" to="/affiliates">
       Affiliate Links
     </router-link>
     <div class="affiliate-disclaimer">

@@ -13,20 +13,20 @@
 
         <!-- Desktop Links -->
         <ul class="right hide-on-med-and-down">
-          <li><router-link class="black-text" to="/roam">Home</router-link></li>
+          <li><router-link class="black-text" to="/">Home</router-link></li>
           <li>
-            <router-link class="black-text" to="/roam/trips"
+            <router-link class="black-text" to="/trips"
               >Travel Guides</router-link
             >
           </li>
           <li>
-            <router-link class="black-text" to="/roam/gear">Gear</router-link>
+            <router-link class="black-text" to="/gear">Gear</router-link>
           </li>
           <li>
-            <router-link class="black-text" to="/roam/about">About</router-link>
+            <router-link class="black-text" to="/about">About</router-link>
           </li>
           <li>
-            <router-link class="black-text" to="/roam/affiliates"
+            <router-link class="black-text" to="/affiliates"
               >Affiliates</router-link
             >
           </li>
@@ -45,22 +45,22 @@
     <!-- Mobile Nav -->
     <ul v-if="menuOpen" class="mobile-nav">
       <li>
-        <router-link class="black-text" to="/roam" @click="closeMenu"
+        <router-link class="black-text" to="/" @click="closeMenu"
           >Home</router-link
         >
       </li>
       <li>
-        <router-link class="black-text" to="/roam/trips" @click="closeMenu"
+        <router-link class="black-text" to="//trips" @click="closeMenu"
           >Blog</router-link
         >
       </li>
       <li>
-        <router-link class="black-text" to="/roam/gear" @click="closeMenu"
+        <router-link class="black-text" to="//gear" @click="closeMenu"
           >Gear</router-link
         >
       </li>
       <li>
-        <router-link class="black-text" to="/roam/about" @click="closeMenu"
+        <router-link class="black-text" to="//about" @click="closeMenu"
           >About</router-link
         >
       </li>

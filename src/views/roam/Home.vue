@@ -20,7 +20,7 @@
           <div class="center-align">
             <router-link
               style="z-index: 9999; position: relative"
-              to="/roam/trips"
+              to="/trips"
               class="cta-button yellow darken-2 black-text"
             >
               🧭 Explore the Travel Guide

@@ -39,7 +39,7 @@ export default {
       return RoamHeader
     },
     showBanner() {
-      const hiddenRoutes = ["/roam", "/roam/about", "/roam/affiliates"]
+      const hiddenRoutes = ["/", "/about", "/affiliates"]
       return !hiddenRoutes.includes(this.$route.path)
     },
   },
