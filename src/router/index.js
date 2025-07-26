@@ -6,39 +6,34 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: "/roam/about",
+    path: "/about",
     name: "About",
     component: () => import("../views/roam/About.vue"),
   },
   {
-    path: "/roam/trips",
+    path: "/trips",
     name: "RoamTrips",
     component: () => import("../views/roam/RoamTripList.vue"),
   },
   {
-    path: "/roam/trips/:id",
+    path: "/trips/:id",
     name: "RoamTripOverview",
     props: true,
     component: () => import("../views/roam/RoamTripOverview.vue"),
   },
   {
-    path: "/roam/gear",
+    path: "/gear",
     name: "Gear",
     component: () => import("../views/roam/Gear.vue"),
   },
   {
     path: "/",
-    name: "WebHome",
-    component: () => import("../components/WebHome.vue"),
-  },
-  {
-    path: "/roam",
     name: "Home",
     component: () => import("../views/roam/Home.vue"),
   },
 
   {
-    path: "/roam/affiliates",
+    path: "/affiliates",
     name: "affiliates",
     component: () => import("../views/roam/Affiliates.vue"),
   },
@@ -59,12 +54,5 @@ const router = new VueRouter({
       return { x: 0, y: 0 }
     }
   },
-})
-router.beforeEach((to, from, next) => {
-  if (window.location.hostname.includes("roamwithjustin") && to.path === "/") {
-    next("/roam")
-  } else {
-    next()
-  }
 })
 export default router
