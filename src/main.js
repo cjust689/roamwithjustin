@@ -29,6 +29,7 @@ router.onReady(() => {
     },
     mounted: function () {
       M.AutoInit()
+      console.log("mounted App")
     },
   }).$mount("#app")
 })
