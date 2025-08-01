@@ -5835,7 +5835,7 @@ body.keyboard-focused .dropdown-content li:focus {
 }
 
 .modal .modal-content {
-    padding: 24px
+    padding: 24px;
 }
 
 .modal .modal-close {

@@ -23,7 +23,7 @@
       class="trip-day container section-block"
     >
       <h2>{{ day.label }}</h2>
-      <p>{{ day.summary }}</p>
+      <p v-html="formatSummary(day.summary)"></p>
       <ul v-if="day.routes && day.routes.length" class="route-links">
         <li v-for="(route, i) in day.routes" :key="i">
           <a :href="route.link" target="_blank" class="map-link">
@@ -168,6 +168,9 @@ export default {
     openLocation(ref) {
       this.activeLocation = this.getLocation(ref)
       this.modalOpen = true
+    },
+    formatSummary(text) {
+      return text.replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>")
     },
   },
 }

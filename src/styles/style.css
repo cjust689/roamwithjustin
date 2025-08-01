@@ -458,3 +458,16 @@ p {}
   color: inherit;
 }
 
+.modal-content {
+    width: 60% !important;
+}
+
+.modal-gallery {
+    margin: auto;
+}
+
+.modal-gallery img{
+    max-width: 400px;
+    max-height: 400px;
+}
+

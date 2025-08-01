@@ -477,10 +477,576 @@ export const trips = [
   {
     id: "puerto-rico",
     name: "Puerto Rico",
-    cover: "/img/locations/puerto-rico/puerto-rico.jpg",
+    cover: "/img/locations/puerto-rico/puerto-rico-beach-sunset.jpg",
     fullImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
-    comingSoon: true,
+    gallery: [
+      "/img/locations/puerto-rico/old-san-juan-2.jpg",
+      "/img/locations/puerto-rico/cueva-del-indio.jpg",
+      "/img/locations/puerto-rico/puerto-rico-beach-beach-1.jpg",
+      "/img/locations/puerto-rico/puerto-rico-beach-beach-2.jpg",
+      "/img/locations/puerto-rico/puerto-rico-watewerfall-2.jpg",
+    ],
+    description:
+      "A 7-day road trip through Puerto Rico's coastlines, colonial towns, waterfalls, and party scenes. From the rich history of Old San Juan to hidden waterfalls in the west, this was a vibrant blend of city and nature.",
+    dates: "August 2024",
+    duration: "7 Days",
+    who: "Couples, content creators, nature lovers, partygoers",
+    costLevel: "$$",
+    bestTimeToGo: "December to April",
+    gearHighlights: [
+      {
+        name: "Sony FX30",
+        link: "https://amzn.to/sony-fx30-affiliate",
+      },
+      {
+        name: "Sony A6700",
+        link: "https://amzn.to/sony-fx30-affiliate",
+      },
+      {
+        name: "DJI Air 3",
+        link: "https://amzn.to/dji-air-3-affiliate",
+      },
+      {
+        name: "Sirui Sniper 75mm f/1.2",
+        link: "https://amzn.to/tamron-17-70-affiliate",
+      },
+      {
+        name: "Tamron 17-70mm",
+        link: "https://amzn.to/tamron-17-70-affiliate",
+      },
+      {
+        name: "PGYTECH OneMo 2 Backpack",
+        link: "https://amzn.to/grayl-geopress-affiliate",
+      },
+    ],
+    travelNotes: [
+      "Flew into Luis Muñoz Marín International Airport (SJU)",
+      "Rented a car for the full trip — essential for exploring the west side of the island",
+      "Stayed in San Juan and Moca, used each as a base for nearby attractions",
+    ],
+    tips: [
+      "Start early for popular spots like Gozalandia — they fill up fast",
+      "Bring water shoes for waterfall hikes and rocky beaches",
+      "Traffic can get heavy around San Juan — plan city days during weekdays",
+      "Download offline Google Maps for the west side, signal is spotty inland",
+      "Rent a snorkel set and fins for the time your out West, we picked up just outside San Juan.",
+    ],
+    lodging: [
+      {
+        name: "Don Rafa Boutique Hotel",
+        location: "San Juan",
+        nights: 2,
+        blurb:
+          "Boutique charm with easy access to both Old San Juan and the beachside nightlife.",
+        image: "/img/locations/puerto-rico/PXL_20240804_023431011.jpg",
+        link: "https://donrafapr.com/",
+      },
+      {
+        name: "Hacienda Florecer",
+        location: "Moca",
+        nights: 3,
+        blurb:
+          "Modern container home with sweeping mountain views — peaceful and photogenic.",
+        image: "/img/locations/puerto-rico/puerto-rico-hacienda.jpg",
+        link: "https://www.airbnb.com/rooms/907364972249282822",
+      },
+    ],
+    locations: [
+      {
+        id: "san-juan",
+        name: "San Juan",
+        description:
+          "Colorful colonial streets, historic forts, and vibrant energy & food. Great for photography and slow walks.",
+        type: "attraction",
+        droneAllowed: false,
+        image: "/img/locations/puerto-rico/PXL_20240804_023431011.jpg",
+        gallery: ["/img/locations/puerto-rico/puerto-rico-bar.jpg"],
+        notes: ["Grabbed rental car", "Checked in", "Quick bite to eat"],
+        video: "",
+      },
+      {
+        id: "old-san-juan",
+        name: "Old San Juan",
+        description:
+          "Colorful colonial streets, historic forts, and vibrant energy. Great for photography and slow walks.",
+        type: "attraction",
+        droneAllowed: false,
+        image: "/img/locations/puerto-rico/old-san-juan-3.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/old-san-juan-3.jpg",
+          "/img/locations/puerto-rico/old-san-juan-2.jpg",
+        ],
+        notes: [
+          "Quick breakfast at the hotel",
+          "Driove ourselves to Old San Juan",
+          "Visited San Cristobol Castle",
+          "Lunch in the old city ended the day byt the hotel pool",
+        ],
+        video: "",
+      },
+      {
+        id: "fairmont-el-san-juan",
+        name: "Fairmont El San Juan Hotel Nightclub",
+        description:
+          "Classy beachfront resort clubbing — upscale nightlife, food, drinks and atmosphere.",
+        type: "nightlife",
+        droneAllowed: false,
+        image: "/img/locations/puerto-rico/locations/fairmont.jpg",
+        gallery: [],
+        notes: [
+          "Went late on a Saturday",
+          "Upscale attire recommended",
+          "Nice beachside ambiance even at night",
+        ],
+        video: "",
+      },
+
+      {
+        id: "cueva-del-indio",
+        name: "Cueva del Indio",
+        description:
+          "Scenic cave and coastal rock formations near Arecibo — cinematic ocean shots and cliff views.",
+        type: "landscape",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/cueva-del-indio.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/Still001.jpg",
+          "/img/locations/puerto-rico/cueva-indio-1.jpg",
+        ],
+        notes: [
+          "Easy parking just off the road",
+          "Short walk to cliffside overlook and sea caves",
+          "No bathrooms or amenities",
+          "Dramatic cliffs — ideal for drone and wide-angle shots",
+          "Waves below are rough; stay clear of edges",
+        ],
+        video: "",
+      },
+      {
+        id: "estatua-de-colon",
+        name: "Estatua de Colón",
+        description:
+          "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
+        type: "attraction",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/puerto-rico-statue-2.jpg",
+        gallery: [],
+        notes: [
+          "Visible from highway — quick detour",
+          "Easy parking along nearby pull-offs",
+          "No amenities or signage on-site",
+          "Impressive in scale — worth a 10-minute stop",
+        ],
+        video: "",
+      },
+      {
+        id: "calle-c-canals",
+        name: "Calle C. Canals",
+        description:
+          "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
+        type: "attraction",
+        droneAllowed: true,
+        image: "",
+        gallery: [],
+        notes: [
+          "Visible from highway — quick detour",
+          "Easy parking along nearby pull-offs",
+          "No amenities or signage on-site",
+          "Impressive in scale — worth a 10-minute stop",
+        ],
+        video: "",
+      },
+      {
+        id: "shacks-beach",
+        name: "Shacks Beach",
+        description:
+          "A scenic beach on the northwest coast of Puerto Rico, known for turquoise waters, offshore coral reefs, snorkeling, and kite surfing.",
+        type: "beach",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/shacks-1.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/shacks-2.jpg",
+          "/img/locations/puerto-rico/shacks-3.jpg",
+        ],
+        notes: [
+          "Excellent for snorkeling and kite surfing,",
+          "Calm, clear waters closer to shore; stronger currents near reefs,",
+          "No formal facilities or lifeguards,",
+          "Limited roadside parking; arrive early for a spot,",
+          "Quiet and laid-back, popular with locals and adventure travelers,",
+        ],
+        video: "",
+      },
+      {
+        id: "pena-blanca-beach",
+        name: "Peña Blanca Beach",
+        description:
+          "A small, picturesque cove in Aguadilla with calm water and rocky outcrops, ideal for swimming, relaxing, and photography.",
+        type: "beach",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/horse-2.jpg",
+        gallery: [],
+        notes: [
+          "Secluded and peaceful beach with a natural cove feel,",
+          "Water is usually calm and great for swimming or floating,",
+          "Limited parking along the roadside, no official lot,",
+          "No bathrooms or food vendors — bring what you need,",
+          "Excellent for drone shots and golden hour photography,",
+        ],
+        video: "",
+      },
+      {
+        id: "mar-chiquita",
+        name: "Mar Chiquita",
+        description:
+          "Small, protected beach cove with calm turquoise water and surrounding rock walls — popular for relaxing or swimming.",
+        type: "beach",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/Still006.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/Still007.jpg",
+          "/img/locations/puerto-rico/Still008.jpg",
+        ],
+        notes: [
+          "Calm water thanks to rocky natural barrier",
+          "Free parking nearby",
+          "Some vendors and bathrooms available",
+          "Can get crowded on weekends",
+          "Great swimming, drone shots, or short stops",
+        ],
+        video: "",
+      },
+      {
+        id: "playa-pastillo",
+        name: "Playa Pastillo",
+        description:
+          "Remote, undeveloped beach near Coto with dramatic rock formations and rough surf — peaceful and photogenic.",
+        type: "beach",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/Still004.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/Still003.jpg",
+          "/img/locations/puerto-rico/Still005.jpg",
+        ],
+        notes: [
+          "No bathrooms or vendors — pack in/out",
+          "Plenty of informal roadside parking",
+          "Not ideal for swimming due to waves",
+          "Beautiful for walking, relaxing, or shooting moody coastal footage",
+          "Very quiet compared to nearby beaches",
+        ],
+        video: "",
+      },
+      {
+        id: "la-cara-del-indio",
+        name: "La Cara del Indio",
+        description:
+          "Iconic roadside rock carving of a Taíno chief’s face overlooking the coast near Isabela. A quick cultural and historical stop along the north coast drive.",
+        type: "attraction",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/20240807_110059.jpg",
+        gallery: ["/img/locations/puerto-rico/puerto-rico-statue.jpg"],
+        notes: [
+          "Quick roadside stop with small informal pull-offs for parking",
+          "Depicts a Taíno chief carved into the coastal rockface",
+          "No amenities or facilities; purely a photo opportunity",
+          "Located just minutes from Playa Pastillo and other scenic spots",
+          "Works well as a brief cultural stop on the scenic north coast drive",
+        ],
+        video: "",
+      },
+      {
+        id: "hacienda-florecer",
+        name: "Hacienda Florecer",
+        description:
+          "Modern luxury retreat built from upcycled shipping containers, perched in the foothills of Moca with sweeping mountain views and serene seclusion.",
+        type: "attraction",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/florecer-5.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/florecer-9.jpg",
+          "/img/locations/puerto-rico/florecer-13.jpg",
+          "/img/locations/puerto-rico/florecer-6.jpg",
+          "/img/locations/puerto-rico/puerto-rico-hacienda.jpg",
+        ],
+        notes: [
+          "Three bedrooms, three bathrooms in a modern container‑based villa with industrial‑chic design.",
+          "Infinity pool, hot tub, fire pit, outdoor kitchen and BBQ area set amid tropical gardens.",
+          "Free private on‑site parking; roads are accessible—no 4×4 needed.",
+          "Fully equipped kitchen, laundry, free Wi‑Fi, air conditioning in all rooms.",
+          "Pet‑friendly property (up to 3 pets, 50 lb max).",
+          "Ideal for relaxing after coastal drives—mountain breeze, quiet, and a view‑filled sunset spot.",
+          "A true sanctuary: very private and peaceful, but still within ~20–30 minutes of Aguadilla, Isabela or Rincón.",
+        ],
+        video: "",
+      },
+      {
+        id: "playuelas-horse-rides",
+        name: "Playuelas Horse Rides",
+        description:
+          "Family-friendly equestrian center near Aguadilla offering private horseback tours across coastal meadows, jungle trails, beaches and historic ruins.",
+        type: "activity",
+        droneAllowed: false,
+        image: "/img/locations/puerto-rico/horse-8.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/horse-1.jpg",
+          "/img/locations/puerto-rico/horse-2.jpg",
+          "/img/locations/puerto-rico/horse-3.jpg",
+          "/img/locations/puerto-rico/horse-9.jpg",
+        ],
+        notes: [
+          "About a 25‑minute drive from Hacienda Florecer to the ranch (on Carr 107).",
+          "Tour length ~1 to 1.5 hours; guided private tour routed through fields, forest edge, beach-side trails and ruins.",
+          "Paso Fino horses—smooth gait, beginner‑friendly, gentle demeanor.",
+        ],
+        video: "",
+      },
+      {
+        id: "aguadilla",
+        name: "ARTe – Aguadilla Rooftop Experience",
+        description:
+          "Chic rooftop restaurant and bar in downtown Aguadilla with oceanfront sunset views over Aguadilla Bay, creative Criollo‑inspired cuisine, and tropical cocktails.",
+        type: "dining",
+        droneAllowed: false,
+        image: "/img/locations/puerto-rico/aguadilla-1.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/aguadilla-1.jpg",
+          "/img/locations/puerto-rico/puerto-rico-beach-sunset.jpg",
+        ],
+        notes: [
+          "Centrally located in Aguadilla pueblo, just steps from the waterfront promenade.",
+          "Dining terrace overlooks Aguadilla Bay and Rompeolas Beach — perfect for sunset views.",
+          "Creative ‘Criollo fusion’ menu and tropical cocktails; evening ambiance with subtle music.",
+          "Friendly and attentive service; good street parking or valet options in town.",
+          "No live bands — music is background lounge-style, ideal for relaxed dinner vibes.",
+          "Accessible via short walk from downtown plaza (Parroquia San Carlos Borromeo & El Parterre area).",
+          "Popular on weekends; reservations recommended if you want a table at dusk.",
+        ],
+        video: "",
+      },
+      {
+        id: "gozalandia",
+        name: "Gozalandia Falls",
+        description:
+          "Two-tiered waterfall hike with swimming spots — early morning solitude and misty jungle vibes.",
+        type: "hike",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/puerto-rico-watewerfall-2.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/puerto-rico-water-6.jpg",
+          "/img/locations/puerto-rico/puerto-rico-watewerfall-3.jpg",
+          "/img/locations/puerto-rico/puerto-rico-watewerfall-4.jpg",
+          "/img/locations/puerto-rico/waterfall-1.jpg",
+        ],
+        notes: [
+          "Arrived right at opening for privacy",
+          "Visited both main and hidden upper falls - another 10-15 minute walk",
+          "Used waterproof gear for water-level footage",
+        ],
+        video: "",
+      },
+      {
+        id: "crash-boat-beach",
+        name: "Crash Boat Beach",
+        description:
+          "Popular beach with piers, snorkeling, and cliff jumping. Bright water and lots of local families.",
+        type: "beach",
+        droneAllowed: true,
+        image: "/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
+        gallery: [
+          "/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
+          "/img/locations/puerto-rico/puerto-rico-crash-boat.jpg",
+          "/img/locations/puerto-rico/Underwater Reel_Fast.00_00_36_10.Still004.jpg",
+          //"/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
+        ],
+        notes: [
+          "Shot handheld and drone footage of piers",
+          "Stayed for golden hour colors",
+          "Great sunset views",
+          "Good food & good vibes,",
+          "popular destination for locals",
+        ],
+        video: "",
+      },
+    ],
+    reel: "",
+    featuredShots: [
+      {
+        img: "/img/locations/puerto-rico/featured/puerto-rico-gozalandia.jpg",
+        caption:
+          "Early morning light cutting through the jungle at Gozalandia Falls — cinematic and peaceful.",
+      },
+      {
+        img: "/img/locations/puerto-rico/featured/puerto-rico-crash-boat.jpg",
+        caption:
+          "Crash Boat pier in silhouette as the sun dips low — a perfect drone fly-through.",
+      },
+    ],
+    days: [
+      {
+        label: "Day 1 – San Juan Arrival",
+        summary: `Landed in San Juan around 8pm on a Friday evening, and the arrival experience at Luis Muñoz Marín International Airport was smooth — deplaning, customs, and baggage claim were quick and hassle‑free. We picked up our rental car from AVIS right at the airport and were on the road within 30 minutes of landing.\n\n
+The drive into central San Juan is short and straightforward, about 15–20 minutes, and traffic at night is usually light. That said, the closer you get to the city, the streets become narrow and more densely packed, so navigation can feel a bit hectic if you're not used to urban island driving.\n\n
+We arrived at Don Rafa Boutique Hotel, a stylish and modern property just 8 minutes from Old San Juan. After checking in and settling into our room, we ran across the street to a lively local taco spot for some late‑night food and drinks.\n\n
+Before calling it a night, we drove over to Ashford Avenue, the lively strip in Condado lined with upscale hotels, restaurants, and bars. It was busy but not packed, with a mix of music and nightlife energy, giving us a quick taste of San Juan’s evening scene before turning in for our first night on the island.`,
+        locations: [
+          {
+            ref: "san-juan",
+            notes:
+              "Check-in, dinner at a local taco bar, quick visit to Ashford Ave nightlife",
+          },
+        ],
+        routes: [],
+      },
+      {
+        label: "Day 2 – Old San Juan & Nightlife",
+        summary: `Woke up early to beat the heat, grabbed breakfast at the hotel, and made our way to Old San Juan.\n\n
+        This 500-year-old city is one of the oldest European settlements in the Americas, and it still feels like walking through a time capsule.\n\n
+        We started our morning exploring the imposing Castillo San Cristóbal, the largest fort in Puerto Rico, with panoramic views of the coastline and colorful old city below. Afterwards, we wandered the cobblestone streets past vibrant colonial buildings and lively squares filled with cafes, artisans, and souvenir shops.\n\n
+        The textures, colors, and history around every corner made it a photographer’s dream. We stopped for a local meal at La Carreta before wrapping up along the coast — the ocean views from the old city walls are incredible.\n\n
+        By mid‑afternoon, we returned to Don Rafa to relax at the rooftop pool. It’s more of a sleek lounge pool than a full‑size swimming pool — perfect for adults to unwind with a drink and soak in the city views, though less suited for kids.\n\n
+        As evening fell, we dressed up and headed to the Fairmont El San Juan before moving over to Calle C. Canals, one of the main nightlife strips west of Old San Juan. The bars and clubs were lively but not overcrowded, with music ranging from salsa and reggaetón to hip‑hop and electronic. We bar‑hopped until we found our groove — the energy here is perfect for a fun night out in San Juan.`,
+        locations: [
+          {
+            ref: "old-san-juan",
+            notes:
+              "Historic fort, colorful colonial streets, artisan shops, and stunning coastline — great half-day photography walk.",
+          },
+          {
+            ref: "fairmont-el-san-juan",
+            notes:
+              "Upscale vibes. Great for classy B-roll, though not much filming done inside due to crowds.",
+          },
+          {
+            ref: "calle-c-canals",
+            notes:
+              "Calle C. Canals nightlife: bar-hopping along a packed and energetic strip with music ranging from salsa and reggaetón to hip-hop, dance, and electronic. The crowds were big and mixed — ages ranged from early 20s to 60s. There’s likely a bar or club here that fits your vibe. Very busy, but worth a visit if you want a lively night out.",
+          },
+        ],
+        routes: [],
+      },
+
+      {
+        label: "Day 3 – Scenic Drive to Moca",
+        summary: `We started our morning in San Juan with a quick breakfast before checking out and beginning our scenic drive along the north coast toward Moca.\n\n
+Our first stop was Cueva del Indio in Arecibo, famous for its dramatic cliffs, sea caves, and panoramic ocean views. It’s a short walk from the parking area, and the combination of rugged coastline and crashing waves makes it a great spot for photography or drone footage.\n\n
+Next, we made a quick stop at the towering Estatua de Colón, the massive Christopher Columbus statue visible from the highway. It’s a short pull‑off with easy parking and makes for an impressive, if brief, visit.\n\n
+Just a few minutes further west, we visited La Cara del Indio — a striking rock carving of a Taíno chief’s face, right along the roadside. It’s a very quick stop for photos but offers a neat cultural touchpoint along the drive.\n\n
+From there, we continued into the lush foothills of Moca and arrived at Hacienda Florecer, our beautiful Airbnb retreat built from shipping containers with sweeping mountain views. The property felt like the perfect place to unwind after a day of scenic stops and coastal exploration.`,
+        locations: [
+          {
+            ref: "cueva-del-indio",
+            notes:
+              "Dramatic cliffs and sea caves along the Arecibo coast. Short walk from parking, great for photos and drone footage. Waves can be rough, no amenities on site.",
+          },
+          {
+            ref: "estatua-de-colon",
+            notes:
+              "Massive Christopher Columbus statue visible from the highway. Quick roadside stop with easy parking, no facilities.",
+          },
+          {
+            ref: "la-cara-del-indio",
+            notes:
+              "Roadside rock carving of a Taíno chief’s face near Isabela. Very quick photo stop — no parking lot, just small pull-offs nearby.",
+          },
+          {
+            ref: "hacienda-florecer",
+            notes:
+              "Hacienda Florecer in Moca — a modern container home Airbnb with sweeping mountain views. Peaceful spot to relax after the scenic drive.",
+          },
+        ],
+        routes: [
+          {
+            label: "San Juan to Moca (via north coast)",
+            link: "https://www.google.com/maps/dir/San+Juan,+Puerto+Rico/Moca,+Puerto+Rico/",
+            duration: "2 hr drive",
+          },
+        ],
+      },
+      {
+        label: "Day 4 – Horseback & Beach Hopping + Rooftop Dinner",
+        summary: `We started the morning with a 25‑minute drive from Hacienda Florecer to Playuelas Horse Rides for a private tour. For about 60–90 minutes, we rode gentle Paso Fino horses through open fields, tropical greenery, and along quiet coastal stretches, even passing some old ruins. Our guide was friendly and full of energy, often singing along to classic songs as we rode.\n\n
+      After the ride, we set out to explore a few of Aguadilla’s beaches. We stopped at Shacks Beach, known for its turquoise water and offshore reefs, and then at Peña Blanca Beach — a small, picturesque cove with calm water ideal for relaxing and photos.\n\n
+      We finished our beach hopping at the famous Crash Boat Beach. The colorful piers and lively local vibe made for a fun afternoon. We captured drone footage, slow‑motion pier jumps, and soaked in the golden hour before heading to dinner.\n\n
+      In the evening, we went to ARTe Aguadilla Rooftop, a modern open‑air restaurant and bar overlooking the bay. Sunset views over the coast were spectacular, and the lively, laid‑back atmosphere was the perfect way to wrap up a long, adventure‑filled day.`,
+        locations: [
+          {
+            ref: "playuelas-horse-rides",
+            notes:
+              "Private horseback tour through fields, tropical greenery, and coastal trails. Gentle Paso Fino horses with a fun, singing guide!",
+          },
+          {
+            ref: "shacks-beach",
+            notes:
+              "Beautiful turquoise water and coral reefs. Known for snorkeling and kite surfing. No major amenities.",
+          },
+          {
+            ref: "pena-blanca-beach",
+            notes:
+              "Small, scenic cove with calm water. Great for relaxing, swimming, and photos. Limited parking and no facilities.",
+          },
+          {
+            ref: "crash-boat-beach",
+            notes:
+              "Iconic beach with colorful piers and clear water. Great for swimming, cliff jumps, and drone shots at golden hour.",
+          },
+          {
+            ref: "aguadilla",
+            notes:
+              "Modern rooftop restaurant and bar overlooking Aguadilla Bay. Perfect for sunset dining and cocktails.",
+          },
+        ],
+        routes: [],
+      },
+      {
+        label: "Day 5 – Gozalandia Waterfall & Poolside Airbnb",
+        summary: `We headed to Gozalandia Falls first thing and arrived right at opening, which gave us a quiet, almost private experience at the main pool. We swam, explored the hidden upper falls, and grabbed a few water-level shots before the crowds rolled in.\n\nAfter the waterfall, we made it a recovery day back at Hacienda Florecer—slow afternoon by the lounge pool, mountain views, and some time to recharge before our final day on the island.`,
+        locations: [
+          {
+            ref: "gozalandia",
+            notes:
+              "Early arrival for low crowds; swam at the main pool and visited the hidden upper falls.",
+          },
+          {
+            ref: "hacienda-florecer",
+            notes:
+              "Poolside reset at Hacienda Florecer—relaxed vibe, mountain views, and a perfect mid‑trip breather.",
+          },
+        ],
+        routes: [],
+      },
+      {
+        label: "Day 6 – Mar Chiquita, Playa Pastillo & Departure",
+        summary: `Checked out in the morning and looped east along the coast for a final beach run before flying out. We stopped at Mar Chiquita for a quick walk and coastal shots—its natural rock walls keep the water calm and turquoise. Then we continued to Big Cave Beach (Polito) to explore the rocky shoreline and cave features—great textures and moody frames depending on tide and swell.\n\nFrom there, we drove back to San Juan, returned the car at SJU, and wrapped the trip.`,
+        locations: [
+          {
+            ref: "mar-chiquita",
+            notes:
+              "Protected cove—calm turquoise water and easy parking; quick walk for photos/swim.",
+          },
+          {
+            ref: "playa-pastillo",
+            notes:
+              "Remote and rugged beach with dramatic rocks and a nearby cave about a mile walk from the main beach access. Rough surf, no amenities, and very few visitors—best for photos, quiet walks, and moody coastal shots.",
+          },
+        ],
+        routes: [
+          {
+            label: "Moca to SJU Airport",
+            link: "https://www.google.com/maps/dir/Moca,+Puerto+Rico/Luis+Mu%C3%B1oz+Mar%C3%ADn+International+Airport,+San+Juan,+Puerto+Rico/",
+            duration: "≈2 hr 15 min drive",
+          },
+        ],
+      },
+    ],
   },
+  // {
+  //   id: "puerto-rico",
+  //   name: "Puerto Rico",
+  //   cover: "/img/locations/puerto-rico/puerto-rico.jpg",
+  //   fullImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
+  //   comingSoon: true,
+  // },
   {
     id: "usvi",
     name: "US Virgin Islands",
