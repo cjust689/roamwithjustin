@@ -105,6 +105,18 @@ npx serve -s dist -l 5000
 
 Then open <http://localhost:5000>.
 
+## Interactive Travel Atlas
+
+The experimental atlas is isolated at `/atlas` and is lazy-loaded separately
+from the existing site. Its components, data, persistence, map configuration,
+environment setup, content instructions, and removal checklist are documented
+in [`src/features/atlas/README.md`](src/features/atlas/README.md).
+
+The atlas works locally with a basic preview map. Satellite imagery and 3D
+terrain require `VUE_APP_MAPTILER_KEY`; copy `.env.example` to an uncommitted
+`.env.local` and add a MapTiler browser key. Production reads the key from the
+GitHub Actions secret `MAPTILER_API_KEY`.
+
 ## Image optimization
 
 GitHub Pages serves the files in `public/` without resizing or recompressing
