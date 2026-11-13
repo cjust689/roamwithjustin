@@ -857,7 +857,6 @@ export const trips = [
           "/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
           "/img/locations/puerto-rico/puerto-rico-crash-boat.jpg",
           "/img/locations/puerto-rico/Underwater Reel_Fast.00_00_36_10.Still004.jpg",
-          //"/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
         ],
         notes: [
           "Shot handheld and drone footage of piers",
@@ -1040,13 +1039,6 @@ From there, we continued into the lush foothills of Moca and arrived at Hacienda
       },
     ],
   },
-  // {
-  //   id: "puerto-rico",
-  //   name: "Puerto Rico",
-  //   cover: "/img/locations/puerto-rico/puerto-rico.jpg",
-  //   fullImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
-  //   comingSoon: true,
-  // },
   {
     id: "usvi",
     name: "US Virgin Islands",

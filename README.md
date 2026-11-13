@@ -9,10 +9,10 @@ Pages.
 
 This repository contains two branches with different histories:
 
-| Branch | Contents | Purpose |
-| --- | --- | --- |
-| `main` | Vue source, public assets, build configuration, and deployment workflow | The source of truth |
-| `pages` | An older snapshot of generated HTML, CSS, JavaScript, and images | Legacy manual deployment output |
+| Branch  | Contents                                                                | Purpose                         |
+| ------- | ----------------------------------------------------------------------- | ------------------------------- |
+| `main`  | Vue source, public assets, build configuration, and deployment workflow | The source of truth             |
+| `pages` | An older snapshot of generated HTML, CSS, JavaScript, and images        | Legacy manual deployment output |
 
 The branches have separate histories (there is no shared merge base). Do not
 merge `pages` into `main`: that would mix generated bundles with the source
@@ -29,7 +29,7 @@ enabled and verified, the `pages` branch is no longer needed.
 
 ### Requirements
 
-- Node.js 17 or newer (as declared in `package.json`)
+- Node.js 20.9 or newer (as declared in `package.json` and required by Sharp)
 - npm
 - Git
 
@@ -105,6 +105,51 @@ npx serve -s dist -l 5000
 
 Then open <http://localhost:5000>.
 
+## Image optimization
+
+GitHub Pages serves the files in `public/` without resizing or recompressing
+them. Image optimization therefore happens before deployment, and optimized
+images are committed to the source branch so local development, CI, and
+production all use the same assets.
+
+The project uses [Sharp](https://sharp.pixelplumbing.com/) as a development
+dependency for deterministic image processing. This re-encodes the existing
+pixels; it does not use generative AI or recreate the photographs.
+
+The agreed optimization policy is:
+
+- resize photographs to a maximum width or height of 2560 pixels without
+  enlarging smaller images;
+- auto-orient images before removing unnecessary camera metadata;
+- encode JPEG files at quality 82 with MozJPEG and progressive scans;
+- optimize PNG files losslessly and preserve transparency;
+- preserve existing filenames, extensions, and public URLs so application
+  references do not need to change;
+- write each result to a temporary file and replace the source only when the
+  result is smaller; and
+- provide a dry-run report showing the original and estimated output sizes
+  before changing any files.
+
+Preview the changes without modifying any images:
+
+```bash
+npm run images:optimize:dry
+```
+
+Review the reported dimensions and potential savings. Then optimize the
+committed images:
+
+```bash
+npm run images:optimize
+```
+
+The optimizer only processes JPEG and PNG files whose width or height exceeds
+2560 pixels. Images already within that limit are skipped, making repeat runs
+safe from repeated lossy JPEG encoding. An oversized file is also left
+unchanged when the optimized output would be larger than its current file.
+Run the production build after an optimization pass and visually review the
+main galleries before committing the binary changes.
+
 ## How production works
 
 Production is a static site; GitHub Pages does not run Node, Express, Docker,
@@ -161,8 +206,8 @@ the rollback path for the currently published site.
 - Docker installs Vue CLI globally without pinned versions even though the
   project already declares local CLI dependencies.
 - Vue 2 and Vue CLI are legacy dependencies and should eventually be upgraded.
-- The deployment branch tracks generated source maps and large media files,
-  which makes the repository and its history unusually large.
+- A small number of already-compressed images remain larger than 2560 pixels
+  because resizing and re-encoding them would increase their file size.
 
 ## Recommended next steps
 
@@ -176,9 +221,11 @@ the rollback path for the currently published site.
 4. **Repair the local tooling.** Correct or remove the `start` script, align
    ESLint with Vue 2, add a repository line-ending policy, and pin a supported
    Node version.
-5. **Modernize separately.** After deployment is reliable, plan the Vue 2/Vue
-   CLI migration and optimize oversized images without combining those changes
-   with the deployment repair.
+5. **Review optimized images.** Visually check the main galleries and random
+   backgrounds, then commit the Sharp script and optimized binaries as a
+   dedicated change.
+6. **Modernize separately.** After deployment is reliable, plan the Vue 2/Vue
+   CLI migration without combining it with deployment or image changes.
 
 The branches do not need to be merged. The target state is one maintained
 source branch plus an automated Pages artifact that can be recreated at any
