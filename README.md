@@ -7,23 +7,23 @@ Pages.
 
 ## Repository structure
 
-This repository currently uses two branches with different jobs:
+This repository contains two branches with different histories:
 
 | Branch | Contents | Purpose |
 | --- | --- | --- |
-| `main` | Vue components, routes, source assets, and build configuration | The editable source code |
-| `pages` | Generated HTML, CSS, JavaScript bundles, images, and Pages support files | The static production site served by GitHub Pages |
+| `main` | Vue source, public assets, build configuration, and deployment workflow | The source of truth |
+| `pages` | An older snapshot of generated HTML, CSS, JavaScript, and images | Legacy manual deployment output |
 
 The branches have separate histories (there is no shared merge base). Do not
 merge `pages` into `main`: that would mix generated bundles with the source
-code. The intended flow appears to be:
+code. The automated deployment flow is:
 
 ```text
-main source -> npm build -> dist/ -> pages branch root -> GitHub Pages
+push main -> GitHub Actions -> npm ci -> npm run build -> dist/ artifact -> GitHub Pages
 ```
 
-The source branch is the place to make application changes. The `pages` branch
-should be treated as generated deployment output.
+Make application changes only on `main`. Once the Actions deployment has been
+enabled and verified, the `pages` branch is no longer needed.
 
 ## Local development
 
@@ -110,46 +110,46 @@ Then open <http://localhost:5000>.
 Production is a static site; GitHub Pages does not run Node, Express, Docker,
 or `npm run serve`.
 
-The current `pages` branch contains:
+The workflow at `.github/workflows/deploy-pages.yml` runs after every push to
+`main` and can also be started manually from the Actions tab. It:
 
-- `index.html`, which starts the Vue application;
-- hashed files under `js/` and `css/`, produced by Vue CLI;
-- images and other static assets;
-- `CNAME`, containing `roamwithjustin.com`;
-- `.nojekyll`, which tells GitHub Pages to serve the files directly; and
-- `404.html`, currently a copy of the built `index.html`.
+1. checks out `main`;
+2. installs the locked npm dependencies on Node 22;
+3. runs `npm run build`, including the automatic `postbuild` fallback step;
+4. uploads `dist/` as a GitHub Pages artifact; and
+5. deploys that artifact to the `github-pages` environment.
+
+Generated files are not committed to `main` or copied to another branch.
 
 Vue Router uses history mode, producing clean URLs such as `/trips/utah`.
 GitHub Pages has no configurable server rewrite rule, so a direct request for
 one of those URLs falls through to `404.html`. Making `404.html` match the
 built `index.html` loads Vue, after which Vue Router handles the route.
 
-The repository contains no GitHub Actions workflow and no deploy script in
-`package.json`. Based on the branch contents and history, production builds
-have been copied to the root of `pages` and committed manually. GitHub Pages
-must be configured in the repository settings to publish from the root of the
-`pages` branch.
+The custom domain remains configured in GitHub under **Settings > Pages**.
+`public/CNAME` is included in each build, but the file does not replace the
+repository's Pages custom-domain setting or its DNS records.
 
-## Current manual deployment requirements
+## Enable the automated deployment
 
-Until deployment is automated, a release needs to do all of the following:
+The workflow is committed with the source, but GitHub must be told to use it:
 
-1. Check out `main`, install dependencies, lint, and run `npm run build`.
-2. Verify that the post-build hook created a `dist/404.html` matching
-   `dist/index.html`, and that `dist/CNAME` and `dist/.nojekyll` are present.
-3. Publish the contents of `dist/` to the root of `pages`--not to a nested
-   `dist/` directory.
-4. Commit and push `pages`, then verify the home page and a direct nested URL
-   such as `/trips`.
+1. Push the workflow and current `main` changes to GitHub.
+2. Open **Settings > Pages** in the GitHub repository.
+3. Under **Build and deployment**, change **Source** to **GitHub Actions**.
+4. Confirm that the custom domain is still `roamwithjustin.com`.
+5. Open the **Actions** tab and watch **Deploy to GitHub Pages** complete.
+6. Verify the homepage, a direct nested URL such as `/trips`, and the favicon.
+7. After the Actions deployment is confirmed, archive or delete the legacy
+   `pages` branch.
 
-The Pages support files are stored under `public/` on `main` and are included in
-every new build. Do not remove them from the generated deployment artifact.
+Do not delete `pages` before the first Actions deployment succeeds; it remains
+the rollback path for the currently published site.
 
 ## Known gaps
 
-- Deployment is manual and its original command or procedure is not recorded.
-- `main` and `pages` can drift because nothing links a source commit to a
-  deployed build.
+- The repository still has a legacy `pages` branch until the first Actions
+  deployment is verified.
 - The `start` script is currently `node server server.js`; it should be reviewed
   before use. The Express server also lacks history-mode fallback for direct
   SPA routes.
@@ -166,12 +166,10 @@ every new build. Do not remove them from the generated deployment artifact.
 
 ## Recommended next steps
 
-1. **Automate deployment from `main`.** Add a GitHub Actions workflow that runs
-   `npm ci`, linting, and the production build, prepares `404.html`, `CNAME`,
-   and `.nojekyll`, and deploys the resulting artifact to GitHub Pages.
-2. **Keep one source of truth.** Retain `main` as the editable source branch and
-   treat `pages` as disposable generated output. Do not manually edit minified
-   files or source maps on `pages`.
+1. **Enable and verify GitHub Actions Pages deployment.** Change the publishing
+   source in the repository settings, push `main`, and test the deployed site.
+2. **Retire the legacy branch.** Delete `pages` only after the new deployment
+   works and the custom domain is confirmed.
 3. **Keep deployment support in the build.** Preserve `public/CNAME`,
    `public/.nojekyll`, and the post-build SPA fallback when deployment is moved
    into GitHub Actions.
@@ -182,6 +180,6 @@ every new build. Do not remove them from the generated deployment artifact.
    CLI migration and optimize oversized images without combining those changes
    with the deployment repair.
 
-The branches do not need to be merged to simplify this. The safer end state is
-one maintained source branch plus an automated Pages deployment whose generated
-artifacts can be recreated at any time.
+The branches do not need to be merged. The target state is one maintained
+source branch plus an automated Pages artifact that can be recreated at any
+time.
