@@ -35,6 +35,10 @@ removes the atlas without changing the existing routes or content.
 The route is lazy-loaded, so MapLibre and atlas code are not downloaded by
 visitors who only use the existing site.
 
+The atlas brand uses a normal document link back to `/`. This deliberately
+reloads the legacy Materialize homepage instead of swapping the legacy and
+standalone application layouts during the same Vue render cycle.
+
 MapLibre 6 requires an explicit worker URL when bundled with webpack. The map
 component uses `setWorkerUrl(new URL(..., import.meta.url))`, which makes Vue
 CLI emit the worker as a JavaScript asset. Do not remove that setup: otherwise
