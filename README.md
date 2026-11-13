@@ -145,9 +145,10 @@ npm run images:optimize
 
 The optimizer only processes JPEG and PNG files whose width or height exceeds
 2560 pixels. Images already within that limit are skipped, making repeat runs
-safe from repeated lossy JPEG encoding. Run the production build after an
-optimization pass and visually review the main galleries before committing the
-binary changes.
+safe from repeated lossy JPEG encoding. An oversized file is also left
+unchanged when the optimized output would be larger than its current file.
+Run the production build after an optimization pass and visually review the
+main galleries before committing the binary changes.
 
 ## How production works
 
@@ -205,8 +206,8 @@ the rollback path for the currently published site.
 - Docker installs Vue CLI globally without pinned versions even though the
   project already declares local CLI dependencies.
 - Vue 2 and Vue CLI are legacy dependencies and should eventually be upgraded.
-- The Sharp optimizer has not yet been applied to the retained full-resolution
-  photographs.
+- A small number of already-compressed images remain larger than 2560 pixels
+  because resizing and re-encoding them would increase their file size.
 
 ## Recommended next steps
 
@@ -220,9 +221,9 @@ the rollback path for the currently published site.
 4. **Repair the local tooling.** Correct or remove the `start` script, align
    ESLint with Vue 2, add a repository line-ending policy, and pin a supported
    Node version.
-5. **Run image optimization.** Run the dry report, apply the reviewed Sharp
-   pass, verify the galleries, and commit the optimized images as a dedicated
-   change.
+5. **Review optimized images.** Visually check the main galleries and random
+   backgrounds, then commit the Sharp script and optimized binaries as a
+   dedicated change.
 6. **Modernize separately.** After deployment is reliable, plan the Vue 2/Vue
    CLI migration without combining it with deployment or image changes.
 
