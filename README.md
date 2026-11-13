@@ -155,9 +155,9 @@ the rollback path for the currently published site.
   SPA routes.
 - ESLint is configured with `plugin:vue/vue3-recommended`, although the project
   uses Vue 2.
-- Prettier requires LF line endings while the system Git configuration may
-  check files out as CRLF, causing thousands of `Delete CR` lint errors on
-  Windows.
+- Existing Windows checkouts may still contain CRLF files until they are
+  refreshed. The repository now uses `.gitattributes` to require LF for future
+  checkouts and commits.
 - Docker installs Vue CLI globally without pinned versions even though the
   project already declares local CLI dependencies.
 - Vue 2 and Vue CLI are legacy dependencies and should eventually be upgraded.
