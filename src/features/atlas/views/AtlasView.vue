@@ -9,14 +9,10 @@
     />
 
     <header class="atlas-toolbar">
-      <router-link
-        class="atlas-brand"
-        to="/"
-        aria-label="Roam With Justin home"
-      >
+      <a class="atlas-brand" href="/" aria-label="Roam With Justin home">
         <span>RWJ</span>
         <strong>Travel Atlas</strong>
-      </router-link>
+      </a>
       <AtlasBreadcrumbs :crumbs="breadcrumbs" @select="selectNode" />
       <div class="atlas-tools">
         <button type="button" @click="surpriseMe">Surprise me</button>
