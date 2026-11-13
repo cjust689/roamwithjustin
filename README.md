@@ -42,7 +42,7 @@ npm ci
 Start the Vue development server for this computer only:
 
 ```bash
-npm run server
+npm run serve
 ```
 
 Open <http://localhost:8080>. The development server includes SPA history
@@ -53,7 +53,7 @@ To test from another phone or computer on the same local network, bind the
 development server to all network interfaces:
 
 ```bash
-npm run server --network
+npm run serve --network
 ```
 
 Open the `Network` URL printed by Vue, such as
@@ -66,8 +66,8 @@ policy blocks `npm.ps1`:
 
 ```powershell
 npm.cmd ci
-npm.cmd run server
-npm.cmd run server --network
+npm.cmd run serve
+npm.cmd run serve --network
 ```
 
 If `vue-cli-service` is reported as missing, the dependencies are not installed
