@@ -165,6 +165,7 @@ export default {
     },
     moveCamera(camera) {
       if (!this.map || !this.ready || !camera) return
+      if (this.cameraMatchesMap(camera)) return
 
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -181,6 +182,20 @@ export default {
       } else {
         this.map.flyTo({ ...options, duration: 1600, essential: false })
       }
+    },
+    cameraMatchesMap(camera) {
+      const center = this.map.getCenter()
+      const bearingDelta = Math.abs(
+        ((((this.map.getBearing() - camera.bearing) % 360) + 540) % 360) - 180
+      )
+
+      return (
+        Math.abs(center.lng - camera.center[0]) < 0.00001 &&
+        Math.abs(center.lat - camera.center[1]) < 0.00001 &&
+        Math.abs(this.map.getZoom() - camera.zoom) < 0.0001 &&
+        Math.abs(this.map.getPitch() - camera.pitch) < 0.001 &&
+        bearingDelta < 0.001
+      )
     },
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
