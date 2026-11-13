@@ -2,11 +2,15 @@
   "name": "unityarm-app",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=17" },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "postbuild": "node scripts/prepare-pages.js",
+    "images:optimize": "node scripts/optimize-images.js",
+    "images:optimize:dry": "node scripts/optimize-images.js --dry-run",
     "lint": "vue-cli-service lint",
     "start": "node server server.js"
   },
@@ -30,6 +34,7 @@
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-vue": "^9.33.0",
     "prettier": "^3.5.3",
+    "sharp": "^0.35.5",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
