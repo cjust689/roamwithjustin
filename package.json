@@ -6,6 +6,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "postbuild": "node scripts/prepare-pages.js",
     "lint": "vue-cli-service lint",
     "start": "node server server.js"
   },

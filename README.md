@@ -92,7 +92,10 @@ npm run build
 ```
 
 Vue CLI writes the result to `dist/`. That directory is ignored by Git on
-`main` because its contents are generated.
+`main` because its contents are generated. After Vue CLI finishes, npm
+automatically runs `scripts/prepare-pages.js`, which replaces `dist/404.html`
+with a copy of the generated `dist/index.html`. Vue CLI also copies
+`public/CNAME` and `public/.nojekyll` into `dist/`.
 
 To preview the built site with SPA fallback:
 
@@ -132,29 +135,21 @@ must be configured in the repository settings to publish from the root of the
 Until deployment is automated, a release needs to do all of the following:
 
 1. Check out `main`, install dependencies, lint, and run `npm run build`.
-2. Replace `dist/404.html` with a copy of the generated `dist/index.html`.
-   The current `public/404.html` is copied as a plain HTML file and does not
-   receive Vue CLI's generated script and stylesheet tags.
-3. Add `dist/CNAME` containing exactly `roamwithjustin.com`.
-4. Add an empty `dist/.nojekyll` file.
-5. Publish the contents of `dist/` to the root of `pages`--not to a nested
+2. Verify that the post-build hook created a `dist/404.html` matching
+   `dist/index.html`, and that `dist/CNAME` and `dist/.nojekyll` are present.
+3. Publish the contents of `dist/` to the root of `pages`--not to a nested
    `dist/` directory.
-6. Commit and push `pages`, then verify the home page and a direct nested URL
+4. Commit and push `pages`, then verify the home page and a direct nested URL
    such as `/trips`.
 
-The `CNAME` and `.nojekyll` files currently exist only on `pages`, so a full
-replacement of that branch can accidentally remove the custom domain or change
-routing behavior. Preserve or regenerate them on every deployment.
+The Pages support files are stored under `public/` on `main` and are included in
+every new build. Do not remove them from the generated deployment artifact.
 
 ## Known gaps
 
 - Deployment is manual and its original command or procedure is not recorded.
 - `main` and `pages` can drift because nothing links a source commit to a
   deployed build.
-- `public/404.html` is not automatically converted into the required built SPA
-  fallback.
-- `CNAME` and `.nojekyll` are production requirements but are absent from the
-  source branch.
 - The `start` script is currently `node server server.js`; it should be reviewed
   before use. The Express server also lacks history-mode fallback for direct
   SPA routes.
@@ -177,9 +172,9 @@ routing behavior. Preserve or regenerate them on every deployment.
 2. **Keep one source of truth.** Retain `main` as the editable source branch and
    treat `pages` as disposable generated output. Do not manually edit minified
    files or source maps on `pages`.
-3. **Move deployment support into the build.** Store `CNAME` and `.nojekyll`
-   under `public/`, and generate the SPA fallback after the build so every
-   artifact is complete before deployment.
+3. **Keep deployment support in the build.** Preserve `public/CNAME`,
+   `public/.nojekyll`, and the post-build SPA fallback when deployment is moved
+   into GitHub Actions.
 4. **Repair the local tooling.** Correct or remove the `start` script, align
    ESLint with Vue 2, add a repository line-ending policy, and pin a supported
    Node version.
