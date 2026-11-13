@@ -134,6 +134,13 @@ const nodes = [
       "/img/locations/utah/locations/utah-canyonlands.jpg",
       "/img/locations/utah/gallery/utah-canyonlands-1.jpg",
       "/img/locations/utah/gallery/utah-canyonlands-2.jpg",
+      {
+        type: "video",
+        src: "https://media.roamwithjustin.com/videos/usa/utah/canyonlands/canyonlands_1.mp4",
+        mimeType: "video/mp4",
+        poster: "/img/locations/utah/locations/utah-canyonlands.jpg",
+        alt: "Canyonlands National Park travel video",
+      },
     ],
     childIds: [],
     relatedIds: ["dead-horse-point", "arches-national-park"],

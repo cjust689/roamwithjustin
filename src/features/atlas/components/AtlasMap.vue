@@ -333,7 +333,11 @@ export default {
 
       this.hidePreview()
 
-      const media = node.media.length ? node.media : [node.image]
+      const media = (node.media.length ? node.media : [node.image])
+        .map(item =>
+          typeof item === "string" ? item : item.poster || item.src
+        )
+        .filter(Boolean)
       const index = this.previewCounts[node.id] || 0
       const card = document.createElement("article")
       const image = document.createElement("img")
@@ -645,10 +649,22 @@ export default {
   .atlas-marker::after {
     left: 50%;
   }
+}
+
+@media (orientation: portrait) {
+  .atlas-route-key {
+    top: 5rem;
+    left: 0.7rem;
+    padding: 0.5rem 0.65rem;
+  }
 
   .atlas-map .maplibregl-ctrl-bottom-left {
-    bottom: 64vh;
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
     left: 0.7rem;
+  }
+
+  .atlas-map .maplibregl-ctrl-bottom-right {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 }
 
