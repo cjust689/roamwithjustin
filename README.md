@@ -39,22 +39,35 @@ Install the exact dependencies recorded in `package-lock.json`:
 npm ci
 ```
 
-Start the Vue development server:
+Start the Vue development server for this computer only:
 
 ```bash
-npm run serve
+npm run server
 ```
 
 Open <http://localhost:8080>. The development server includes SPA history
 fallback, so routes such as `/trips` and `/gear` should work when opened
 directly.
 
+To test from another phone or computer on the same local network, bind the
+development server to all network interfaces:
+
+```bash
+npm run server --network
+```
+
+Open the `Network` URL printed by Vue, such as
+`http://192.168.1.25:8080`. Allow Node.js through the private-network Windows
+Firewall prompt if one appears. The local network origin must also be included
+in the MapTiler key's allowed HTTP origins for the Atlas map to load.
+
 On Windows PowerShell, use `npm.cmd` and `npx.cmd` if the PowerShell execution
 policy blocks `npm.ps1`:
 
 ```powershell
 npm.cmd ci
-npm.cmd run serve
+npm.cmd run server
+npm.cmd run server --network
 ```
 
 If `vue-cli-service` is reported as missing, the dependencies are not installed
