@@ -1,7 +1,7 @@
 <template>
   <div id="app-container">
-    <!-- If on / (WebHome), render only the view -->
-    <router-view v-if="$route.path === '/'" />
+    <!-- Root and explicitly standalone routes render without legacy site chrome. -->
+    <router-view v-if="$route.path === '/' || $route.meta.standalone" />
     <!-- Else, render layout + view -->
     <template v-else>
       <!-- Show different headers depending on the route -->
