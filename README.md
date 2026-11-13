@@ -50,16 +50,20 @@ fallback, so routes such as `/trips` and `/gear` should work when opened
 directly.
 
 To test from another phone or computer on the same local network, bind the
-development server to all network interfaces:
+development server to the primary private LAN address:
 
 ```bash
 npm run serve --network
 ```
 
-Open the `Network` URL printed by Vue, such as
-`http://192.168.1.25:8080`. Allow Node.js through the private-network Windows
-Firewall prompt if one appears. The local network origin must also be included
-in the MapTiler key's allowed HTTP origins for the Atlas map to load.
+The launcher prefers a physical Ethernet or Wi-Fi adapter over common VPN and
+virtual adapters, then prints the selected interface and address. Open the
+`Network` URL printed by Vue, such as `http://192.168.1.25:8080`. Allow Node.js
+through the Windows administrator prompt. On Windows, the launcher temporarily
+allows the Node.js process on TCP port 8080 for Private networks and devices on
+the local subnet only. Press `Ctrl+C` in the elevated server window to stop the
+server and remove that firewall rule. The local network origin must also be
+included in the MapTiler key's allowed HTTP origins for the Atlas map to load.
 
 On Windows PowerShell, use `npm.cmd` and `npx.cmd` if the PowerShell execution
 policy blocks `npm.ps1`:
