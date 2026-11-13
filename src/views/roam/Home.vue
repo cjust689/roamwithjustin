@@ -15,7 +15,11 @@
 
       <section class="journey-options" aria-label="Ways to explore">
         <router-link class="journey-card atlas-card" to="/atlas">
-          <span class="journey-card-background" aria-hidden="true"></span>
+          <span
+            class="journey-card-background"
+            :style="{ backgroundImage: `url('${atlasImage}')` }"
+            aria-hidden="true"
+          ></span>
           <span class="journey-card-shade" aria-hidden="true"></span>
           <span class="journey-card-content">
             <span class="journey-label">
@@ -32,7 +36,11 @@
         </router-link>
 
         <router-link class="journey-card guides-card" to="/trips">
-          <span class="journey-card-background" aria-hidden="true"></span>
+          <span
+            class="journey-card-background"
+            :style="{ backgroundImage: `url('${guidesImage}')` }"
+            aria-hidden="true"
+          ></span>
           <span class="journey-card-shade" aria-hidden="true"></span>
           <span class="journey-card-content">
             <span class="journey-label">Travel guides</span>
@@ -63,6 +71,8 @@ export default {
   name: "RoamHome",
   data() {
     return {
+      atlasImage: "/img/locations/utah/utah-full.jpg",
+      guidesImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
       heroImage: heroImages[Math.floor(Math.random() * heroImages.length)],
     }
   },
@@ -176,14 +186,6 @@ export default {
   background-position: center;
   background-size: cover;
   transition: transform 700ms cubic-bezier(0.2, 0.75, 0.2, 1);
-}
-
-.atlas-card .journey-card-background {
-  background-image: url("/img/locations/utah/utah-full.jpg");
-}
-
-.guides-card .journey-card-background {
-  background-image: url("/img/locations/puerto-rico/puerto-rico-full.jpg");
 }
 
 .journey-card-shade {
