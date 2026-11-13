@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/require-explicit-emits -- Vue 2 uses implicit component events. -->
 <template>
-  <nav class="atlas-breadcrumbs" aria-label="Atlas location">
+  <div class="atlas-breadcrumbs" role="navigation" aria-label="Atlas location">
     <ol>
       <li v-for="(crumb, index) in crumbs" :key="crumb.id || 'world'">
         <button
@@ -13,7 +13,7 @@
         <span v-if="index < crumbs.length - 1" aria-hidden="true">/</span>
       </li>
     </ol>
-  </nav>
+  </div>
 </template>
 
 <script>
