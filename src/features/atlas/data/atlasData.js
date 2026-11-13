@@ -188,6 +188,196 @@ const nodes = [
       },
     ],
   },
+  {
+    id: "puerto-rico",
+    parentId: null,
+    title: "Puerto Rico",
+    eyebrow: "Destination",
+    category: "Island road trip",
+    coordinates: [-66.5901, 18.2208],
+    camera: {
+      center: [-66.55, 18.28],
+      zoom: 7.35,
+      pitch: 46,
+      bearing: -8,
+    },
+    summary:
+      "A seven-day road trip through colonial streets, Atlantic cliffs, jungle waterfalls, and the beaches of the northwest coast.",
+    personalNote:
+      "We split the trip between San Juan and Moca, following the north coast west before slowing down around Aguadilla and San Sebastián.",
+    image: "/img/locations/puerto-rico/puerto-rico-beach-sunset.jpg",
+    media: [
+      "/img/locations/puerto-rico/puerto-rico-beach-sunset.jpg",
+      "/img/locations/puerto-rico/old-san-juan-2.jpg",
+      "/img/locations/puerto-rico/puerto-rico-watewerfall-2.jpg",
+    ],
+    childIds: [
+      "old-san-juan",
+      "cueva-del-indio",
+      "crash-boat-beach",
+      "gozalandia-falls",
+    ],
+    relatedIds: [],
+    actions: [
+      {
+        label: "Read the Puerto Rico trip story",
+        href: "/trips/puerto-rico",
+        type: "internal",
+      },
+    ],
+  },
+  {
+    id: "old-san-juan",
+    parentId: "puerto-rico",
+    title: "Old San Juan",
+    eyebrow: "Historic city",
+    category: "Architecture and street photography",
+    coordinates: [-66.11028, 18.46639],
+    camera: {
+      center: [-66.11028, 18.46639],
+      zoom: 14,
+      pitch: 62,
+      bearing: -20,
+    },
+    summary:
+      "Colorful colonial streets, historic fortifications, ocean views, and a city made for slow walks with a camera.",
+    personalNote:
+      "We started early at Castillo San Cristóbal, then wandered the old city before the afternoon heat and crowds arrived.",
+    image: "/img/locations/puerto-rico/old-san-juan-3.jpg",
+    media: [
+      "/img/locations/puerto-rico/old-san-juan-3.jpg",
+      "/img/locations/puerto-rico/old-san-juan-2.jpg",
+      "/img/locations/puerto-rico/PXL_20240804_023431011.jpg",
+    ],
+    childIds: [],
+    relatedIds: ["cueva-del-indio"],
+    actions: [
+      {
+        label: "View on Google Maps",
+        href: "https://www.google.com/maps/search/?api=1&query=18.46639%2C-66.11028",
+        type: "external",
+      },
+      {
+        label: "Read the Puerto Rico trip story",
+        href: "/trips/puerto-rico",
+        type: "internal",
+      },
+    ],
+  },
+  {
+    id: "cueva-del-indio",
+    parentId: "puerto-rico",
+    title: "Cueva del Indio",
+    eyebrow: "Atlantic coast",
+    category: "Cliffs and sea caves",
+    coordinates: [-66.641578, 18.49269],
+    camera: {
+      center: [-66.641578, 18.49269],
+      zoom: 13.2,
+      pitch: 66,
+      bearing: 18,
+    },
+    summary:
+      "A rugged stretch of limestone cliffs, sea caves, petroglyphs, and wide Atlantic views near Arecibo.",
+    personalNote:
+      "The short walk opens onto dramatic cliff edges and textured rock formations that worked especially well for wide-angle and aerial footage.",
+    image: "/img/locations/puerto-rico/cueva-del-indio.jpg",
+    media: [
+      "/img/locations/puerto-rico/cueva-del-indio.jpg",
+      "/img/locations/puerto-rico/Still001.jpg",
+      "/img/locations/puerto-rico/cueva-indio-1.jpg",
+    ],
+    childIds: [],
+    relatedIds: ["old-san-juan", "crash-boat-beach"],
+    actions: [
+      {
+        label: "View on Google Maps",
+        href: "https://www.google.com/maps/search/?api=1&query=18.49269%2C-66.641578",
+        type: "external",
+      },
+      {
+        label: "Read the Puerto Rico trip story",
+        href: "/trips/puerto-rico",
+        type: "internal",
+      },
+    ],
+  },
+  {
+    id: "gozalandia-falls",
+    parentId: "puerto-rico",
+    title: "Gozalandia Falls",
+    eyebrow: "Jungle waterfall",
+    category: "Swim and hike",
+    coordinates: [-66.9831, 18.36093],
+    camera: {
+      center: [-66.9831, 18.36093],
+      zoom: 14.1,
+      pitch: 68,
+      bearing: -24,
+    },
+    summary:
+      "A two-tier waterfall in the hills of San Sebastián with swimming pools, misty jungle light, and an upper-falls trail.",
+    personalNote:
+      "Arriving at opening gave us a quiet first swim and time to reach the upper falls before the busiest part of the day.",
+    image: "/img/locations/puerto-rico/puerto-rico-watewerfall-2.jpg",
+    media: [
+      "/img/locations/puerto-rico/puerto-rico-watewerfall-2.jpg",
+      "/img/locations/puerto-rico/puerto-rico-water-6.jpg",
+      "/img/locations/puerto-rico/waterfall-1.jpg",
+    ],
+    childIds: [],
+    relatedIds: ["crash-boat-beach"],
+    actions: [
+      {
+        label: "View on Google Maps",
+        href: "https://www.google.com/maps/search/?api=1&query=18.36093%2C-66.9831",
+        type: "external",
+      },
+      {
+        label: "Read the Puerto Rico trip story",
+        href: "/trips/puerto-rico",
+        type: "internal",
+      },
+    ],
+  },
+  {
+    id: "crash-boat-beach",
+    parentId: "puerto-rico",
+    title: "Crash Boat Beach",
+    eyebrow: "Northwest coast",
+    category: "Beach and snorkeling",
+    coordinates: [-67.16525, 18.45972],
+    camera: {
+      center: [-67.16525, 18.45972],
+      zoom: 14.4,
+      pitch: 63,
+      bearing: 28,
+    },
+    summary:
+      "Clear water, colorful piers, snorkeling, and a lively local beach atmosphere on Aguadilla's northwest coast.",
+    personalNote:
+      "We stayed through golden hour for pier jumps, underwater footage, and the warm color across Aguadilla Bay.",
+    image: "/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
+    media: [
+      "/img/locations/puerto-rico/puerto-rico-crashboat.jpg",
+      "/img/locations/puerto-rico/puerto-rico-crash-boat.jpg",
+      "/img/locations/puerto-rico/Underwater Reel_Fast.00_00_36_10.Still004.jpg",
+    ],
+    childIds: [],
+    relatedIds: ["cueva-del-indio", "gozalandia-falls"],
+    actions: [
+      {
+        label: "View on Google Maps",
+        href: "https://www.google.com/maps/search/?api=1&query=18.45972%2C-67.16525",
+        type: "external",
+      },
+      {
+        label: "Read the Puerto Rico trip story",
+        href: "/trips/puerto-rico",
+        type: "internal",
+      },
+    ],
+  },
 ]
 
 export const atlasNodes = Object.freeze(
@@ -197,7 +387,7 @@ export const atlasNodes = Object.freeze(
   }, {})
 )
 
-export const atlasRootIds = Object.freeze(["utah"])
+export const atlasRootIds = Object.freeze(["utah", "puerto-rico"])
 
 export function getAtlasNode(id) {
   return id ? atlasNodes[id] || null : null

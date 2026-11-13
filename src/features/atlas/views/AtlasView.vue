@@ -2,6 +2,7 @@
   <main class="atlas-page">
     <AtlasMap
       :nodes="visibleNodes"
+      :journey-nodes="journeyNodes"
       :selected-node="currentNode"
       :camera="activeCamera"
       @select="selectNode"
@@ -27,10 +28,17 @@
       <h1>The journey starts with a place.</h1>
       <p>
         Move through destinations, stories, and photographic locations. This
-        first atlas chapter follows the existing Utah road trip.
+        atlas follows the existing Utah and Puerto Rico road trips.
       </p>
       <div>
         <button type="button" @click="selectNode('utah')">Explore Utah</button>
+        <button
+          class="secondary"
+          type="button"
+          @click="selectNode('puerto-rico')"
+        >
+          Explore Puerto Rico
+        </button>
         <button
           v-if="resumeNode"
           class="secondary"
@@ -85,9 +93,9 @@ import {
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
 
 const worldCamera = {
-  center: [-103.5, 39.5],
-  zoom: 3.15,
-  pitch: 28,
+  center: [-91.5, 30.5],
+  zoom: 2.55,
+  pitch: 22,
   bearing: 0,
 }
 
@@ -130,11 +138,20 @@ export default {
     relatedNodes() {
       return getAtlasNodes(this.currentNode?.relatedIds)
     },
+    journeyNodes() {
+      if (!this.currentNode) return []
+
+      const journeyParent = this.currentNode.childIds.length
+        ? this.currentNode
+        : getAtlasNode(this.currentNode.parentId)
+
+      return getAtlasNodes(journeyParent?.childIds)
+    },
     visibleNodes() {
       if (!this.currentNode) return getAtlasNodes(atlasRootIds)
 
-      const discoveries = this.childNodes.length
-        ? this.childNodes
+      const discoveries = this.journeyNodes.length
+        ? this.journeyNodes
         : this.relatedNodes
 
       return [this.currentNode, ...discoveries].filter(

@@ -21,6 +21,10 @@
         </p>
       </article>
     </div>
+    <div v-if="journeyNodes.length > 1" class="atlas-route-key">
+      <span>Journey path</span>
+      <strong>{{ journeyNodes.length }} stops in visit order</strong>
+    </div>
   </section>
 </template>
 
@@ -29,6 +33,10 @@
 import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { mapStyleUrl, terrainSource } from "../config/mapConfig"
+
+const journeySourceId = "atlas-journey-route"
+const journeyShadowLayerId = "atlas-journey-shadow"
+const journeyLineLayerId = "atlas-journey-line"
 
 maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
@@ -47,6 +55,10 @@ export default {
   name: "AtlasMap",
   props: {
     nodes: {
+      type: Array,
+      default: () => [],
+    },
+    journeyNodes: {
       type: Array,
       default: () => [],
     },
@@ -76,6 +88,10 @@ export default {
   },
   watch: {
     nodes() {
+      this.renderMarkers()
+    },
+    journeyNodes() {
+      this.renderJourney()
       this.renderMarkers()
     },
     selectedNode() {
@@ -141,6 +157,7 @@ export default {
             )
           }
 
+          this.renderJourney()
           this.renderMarkers()
         })
 
@@ -201,6 +218,66 @@ export default {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
     },
+    renderJourney() {
+      if (!this.map || !this.ready) return
+
+      const coordinates = this.journeyNodes.map(node => node.coordinates)
+      const data = {
+        type: "FeatureCollection",
+        features:
+          coordinates.length > 1
+            ? [
+                {
+                  type: "Feature",
+                  properties: {},
+                  geometry: {
+                    type: "LineString",
+                    coordinates,
+                  },
+                },
+              ]
+            : [],
+      }
+      const source = this.map.getSource(journeySourceId)
+
+      if (source) {
+        source.setData(data)
+        return
+      }
+
+      this.map.addSource(journeySourceId, {
+        type: "geojson",
+        data,
+      })
+      this.map.addLayer({
+        id: journeyShadowLayerId,
+        type: "line",
+        source: journeySourceId,
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": "rgba(5, 8, 10, 0.72)",
+          "line-width": 8,
+        },
+      })
+      this.map.addLayer({
+        id: journeyLineLayerId,
+        type: "line",
+        source: journeySourceId,
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": "#f6bd60",
+          "line-dasharray": [1.3, 1.5],
+          "line-opacity": 0.92,
+          "line-width": 3,
+        },
+      })
+    },
     renderMarkers() {
       if (!this.map || !this.ready) return
 
@@ -211,10 +288,21 @@ export default {
         const image = document.createElement("img")
         const label = document.createElement("span")
         const selected = this.selectedNode?.id === node.id
+        const journeyIndex = this.journeyNodes.findIndex(
+          journeyNode => journeyNode.id === node.id
+        )
 
         element.type = "button"
         element.className = `atlas-marker${selected ? " selected" : ""}`
-        element.setAttribute("aria-label", `Explore ${node.title}`)
+        if (journeyIndex >= 0) {
+          element.dataset.stop = String(journeyIndex + 1)
+        }
+        element.setAttribute(
+          "aria-label",
+          journeyIndex >= 0
+            ? `Stop ${journeyIndex + 1}: Explore ${node.title}`
+            : `Explore ${node.title}`
+        )
         image.src = node.image
         image.alt = ""
         label.textContent = node.title
@@ -313,6 +401,36 @@ export default {
   color: #fff;
 }
 
+.atlas-route-key {
+  position: absolute;
+  z-index: 4;
+  top: 5.85rem;
+  left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(246, 189, 96, 0.34);
+  border-radius: 13px;
+  padding: 0.65rem 0.8rem;
+  background: rgba(7, 11, 14, 0.8);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
+  color: #fff;
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+.atlas-route-key span {
+  color: #f6bd60;
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.atlas-route-key strong {
+  margin-top: 0.12rem;
+  font-size: 0.72rem;
+}
+
 .atlas-map-loading span {
   width: 38px;
   height: 38px;
@@ -378,6 +496,7 @@ export default {
 }
 
 .atlas-marker {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -393,6 +512,25 @@ export default {
   transition:
     transform 180ms ease,
     border-color 180ms ease;
+}
+
+.atlas-marker[data-stop]::before {
+  position: absolute;
+  z-index: 2;
+  top: -0.58rem;
+  left: -0.45rem;
+  display: grid;
+  place-items: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #f6bd60;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4);
+  color: #111;
+  content: attr(data-stop);
+  font-size: 0.65rem;
+  font-weight: 900;
 }
 
 .atlas-marker::after {
@@ -490,6 +628,12 @@ export default {
 }
 
 @media (max-width: 720px) {
+  .atlas-route-key {
+    top: 5rem;
+    left: 0.7rem;
+    padding: 0.5rem 0.65rem;
+  }
+
   .atlas-marker span {
     display: none;
   }

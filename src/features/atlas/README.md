@@ -1,9 +1,8 @@
 # Travel Atlas feature
 
 This directory is a self-contained, lazy-loaded vertical slice of the
-interactive travel atlas. The initial content uses existing Utah and Moab
-photography because the repository does not currently contain a verified Split,
-Croatia media set.
+interactive travel atlas. Its destination chapters use the repository's
+existing Utah and Puerto Rico trip photography and stories.
 
 ## Isolation boundary
 
@@ -29,8 +28,9 @@ removes the atlas without changing the existing routes or content.
 
 - `/atlas` opens the atlas landing view.
 - `/atlas/utah` opens the Utah destination directly.
-- `/atlas/moab` and the location IDs in `data/atlasData.js` are shareable deep
-  links.
+- `/atlas/puerto-rico` opens the Puerto Rico destination directly.
+- `/atlas/moab`, `/atlas/old-san-juan`, and the other location IDs in
+  `data/atlasData.js` are shareable deep links.
 
 The route is lazy-loaded, so MapLibre and atlas code are not downloaded by
 visitors who only use the existing site.
@@ -73,7 +73,9 @@ VUE_APP_MAPTILER_STYLE_URL=https://api.maptiler.com/maps/your-style/style.json?k
 
 Add a node to `data/atlasData.js` with a unique ID, verified coordinates,
 camera settings, existing media URLs, and optional actions. Connect it using
-`parentId`, `childIds`, and `relatedIds`.
+`parentId`, `childIds`, and `relatedIds`. The order of `childIds` is also the
+displayed journey sequence: the map numbers those stops and connects them with
+an approximate path. It communicates visit order, not turn-by-turn directions.
 
 Do not add unverified business information. Only include website, directions,
 phone, or booking actions when the source has been confirmed. The `actions`

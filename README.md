@@ -259,3 +259,43 @@ the rollback path for the currently published site.
 The branches do not need to be merged. The target state is one maintained
 source branch plus an automated Pages artifact that can be recreated at any
 time.
+
+New-NetFirewallRule -Name "VueDevServer80" -DisplayName "Vue Dev Server 80" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+New-NetFirewallRule -Name "VueDevServer8080" -DisplayName "Vue Dev Server 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+Remove-NetFirewallRule -Name "VueDevServer80"
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallPortFilter | Format-List Protocol,LocalPort
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallAddressFilter | Format-List RemoteAddress
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List Enabled,Profile,EnforcementStatus
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List Enabled,AllowInboundRules,AllowLocalFirewallRules,DefaultInboundAction
+
+Set-NetFirewallProfile -Name Private -AllowInboundRules True
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List EnforcementStatus
+
+Get-CimInstance -Namespace root/SecurityCenter2 -ClassName FirewallProduct | Format-Table displayName,productState -AutoSize
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List DisabledInterfaceAliases
+
+ping -n 1 192.168.86.247 arp -a | findstr 192.168.86.247
+
+Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Get-NetFirewallApplicationFilter | Select-Object Program
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Select-Object Name, Enabled, Direction, Action, Profile
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-\*" | Remove-NetFirewallRule
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-26220" | Get-NetFirewallAddressFilter | Format-List
+
+New-NetFirewallRule `    -DisplayName "Node 8080 Diagnostic"`
+-Direction Inbound `    -Protocol TCP`
+-LocalPort 8080 `    -Action Allow`
+-Profile Private `
+-RemoteAddress Any

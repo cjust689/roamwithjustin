@@ -45,14 +45,14 @@
             <strong>{{ children.length }} places</strong>
           </div>
           <button
-            v-for="child in children"
+            v-for="(child, childIndex) in children"
             :key="child.id"
             type="button"
             @click="$emit('select', child.id)"
           >
             <img :src="child.image" alt="" loading="lazy" />
             <span
-              ><small>{{ child.eyebrow }}</small
+              ><small>Stop {{ childIndex + 1 }} · {{ child.eyebrow }}</small
               >{{ child.title }}</span
             >
             <span aria-hidden="true">&rarr;</span>
