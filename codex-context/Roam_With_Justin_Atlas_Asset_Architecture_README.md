@@ -407,6 +407,7 @@ Recommended selectors:
     getTripViewModel(slug)
     getAtlasViewModel(context)
     getAtlasNodeViewModel(placeId, context)
+    getGuidedJourneyViewModel(journeyId)
 
 Components must receive usable view models. They should not know:
 
@@ -432,6 +433,28 @@ A resolved media view should be consistent:
     }
 
 AtlasDetailPanel, AtlasMap, HeroCarousel and LocationModal should eventually consume this shared shape rather than implement their own normalization.
+
+### Guided Journey playback - future projection
+
+A guided or "autopilot" tour should be a playback projection of an existing Journey, not a new content authority. It reads the Journey's ordered visits, resolves each visit's Place, camera and curated Media usages, and produces a sequence the Atlas can play without copying coordinates, route order, stories or assets.
+
+Recommended interaction:
+
+1. The visitor explicitly starts the journey.
+2. The map animates toward the next ordered visit; an optional transport icon moves along the route only when the Journey contains a confirmed transport mode.
+3. Playback pauses automatically at the stop, opens its detail drawer and presents the curated photos or video.
+4. The visitor chooses Next, Previous, Resume or Exit. A separate opt-in may auto-advance after a readable dwell time, but auto-pause should remain the default.
+5. Manual map interaction pauses playback instead of fighting the visitor for camera control.
+
+The player should use an explicit state machine such as `idle -> traveling -> pausedAtStop -> presentingMedia -> complete`. Playback position, mute state and current media index are temporary UI state; they do not belong in Media, Places or Journeys. Optional transition facts such as `mode`, a confirmed duration or a public route geometry belong to the Journey visit-to-visit relationship, never to the Place hierarchy.
+
+Accessibility and delivery constraints:
+
+- Always expose Play/Pause, Previous, Next and Exit controls with readable labels and large touch targets.
+- Under `prefers-reduced-motion`, replace camera flights and moving icons with direct cuts between stops.
+- Never start audible video without a visitor gesture; retain native controls, captions when available and poster-first loading.
+- Announce the current stop and sequence position, preserve keyboard operation, and keep every stop available through its direct Atlas URL.
+- Suspend timers and media when the page is hidden, the drawer is manually closed or the visitor takes control of the map.
 
 ### Compatibility after migration
 
