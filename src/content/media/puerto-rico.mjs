@@ -39,10 +39,10 @@ export const puertoRicoMedia = Object.freeze([
       status: "owned",
     },
     capture: {
-      placeId: "san-juan",
+      placeId: "don-rafa-boutique-hotel",
       capturedAt: null,
     },
-    defaultAlt: "San Juan travel photograph",
+    defaultAlt: "Traveler at the entrance to Don Rafa Boutique Hotel",
   },
   {
     id: "image-puerto-rico-hacienda-pxl-20240804-205303943",
@@ -1055,5 +1055,290 @@ export const puertoRicoMedia = Object.freeze([
       capturedAt: null,
     },
     defaultAlt: "Gozalandia Falls travel photograph",
+  },
+  {
+    id: "image-puerto-rico-hacienda-hf-001",
+    kind: "image",
+    source: {
+      provider: "r2",
+      objectKey: "photos/usa/puerto-rico/hf_1.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 1920,
+      height: 1080,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt:
+      "Aerial overview of Hacienda Florecer, its pool, and the surrounding Moca hills",
+  },
+  {
+    id: "image-puerto-rico-hacienda-hf-002",
+    kind: "image",
+    source: {
+      provider: "r2",
+      objectKey: "photos/usa/puerto-rico/hf_2.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 1920,
+      height: 1080,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt:
+      "Pool, hot tub, and container home at Hacienda Florecer in the Moca hills",
+  },
+  {
+    id: "image-puerto-rico-hacienda-hf-003",
+    kind: "image",
+    source: {
+      provider: "r2",
+      objectKey: "photos/usa/puerto-rico/hf_3.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 1920,
+      height: 1080,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Pool loungers facing the mountain view at Hacienda Florecer",
+  },
+  {
+    id: "image-puerto-rico-hacienda-hf-004",
+    kind: "image",
+    source: {
+      provider: "r2",
+      objectKey: "photos/usa/puerto-rico/hf_4.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 1920,
+      height: 1080,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Sunset spreading across the hills beyond Hacienda Florecer",
+  },
+  {
+    id: "image-puerto-rico-playuelas-collage-001",
+    kind: "image",
+    source: {
+      provider: "r2",
+      objectKey: "photos/usa/puerto-rico/horse_1.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 684,
+      height: 1080,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "playuelas-horse-rides",
+      capturedAt: null,
+    },
+    defaultAlt:
+      "Horseback ride collage with a coastal trail, stone ruins, and forest canopy",
+  },
+  {
+    id: "video-puerto-rico-don-rafa-001",
+    kind: "video",
+    source: {
+      provider: "r2",
+      // This is the verified live object. The supplied display name included
+      // an extra "Part" that is not present in the R2 key.
+      objectKey: "videos/usa/puerto-rico/Day 2 - Hotel.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-pxl-20240804-023431011",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "don-rafa-boutique-hotel",
+      capturedAt: null,
+    },
+    defaultAlt: "Don Rafa Boutique Hotel stay in San Juan",
+  },
+  {
+    id: "video-puerto-rico-don-rafa-002",
+    kind: "video",
+    source: {
+      provider: "r2",
+      objectKey: "videos/usa/puerto-rico/Day 2 - Hotel Part 2.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-pxl-20240804-023431011",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "don-rafa-boutique-hotel",
+      capturedAt: null,
+    },
+    defaultAlt: "Rooftop and hotel moments at Don Rafa in San Juan",
+  },
+  {
+    id: "video-puerto-rico-old-san-juan-001",
+    kind: "video",
+    source: {
+      provider: "r2",
+      objectKey: "videos/usa/puerto-rico/Day 2 - Old San Juan.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-old-san-juan-3",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "old-san-juan",
+      capturedAt: null,
+    },
+    defaultAlt: "Walking through the streets of Old San Juan",
+  },
+  {
+    id: "video-puerto-rico-san-cristobal-001",
+    kind: "video",
+    source: {
+      provider: "r2",
+      // The live object uses the correct "Cristobal" spelling rather than
+      // the "Cristobol" spelling in the supplied filename.
+      objectKey: "videos/usa/puerto-rico/Day 2 - San Cristobal.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-old-san-juan-3",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "old-san-juan",
+      capturedAt: null,
+    },
+    defaultAlt: "Exploring Castillo San Cristobal in Old San Juan",
+  },
+  {
+    id: "video-puerto-rico-hacienda-sunset-002",
+    kind: "video",
+    source: {
+      provider: "r2",
+      objectKey: "videos/usa/puerto-rico/Day 3 - AirBnb - Sunset_2.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-hacienda-hf-004",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Sunset at Hacienda Florecer in the Moca hills",
+  },
+  {
+    id: "video-puerto-rico-hacienda-sunset-003",
+    kind: "video",
+    source: {
+      provider: "r2",
+      objectKey: "videos/usa/puerto-rico/Day 3 - AirBnb - Sunset_3.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-hacienda-hf-004",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Evening light over Hacienda Florecer and the mountains",
+  },
+  {
+    id: "video-puerto-rico-hacienda-sunset-004",
+    kind: "video",
+    source: {
+      provider: "r2",
+      objectKey: "videos/usa/puerto-rico/Day 3 - AirBnb - Sunset_4.mp4",
+    },
+    intrinsic: {
+      mimeType: "video/mp4",
+      durationSeconds: null,
+      width: null,
+      height: null,
+    },
+    posterAssetId: "image-puerto-rico-hacienda-hf-004",
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "The last sunset glow at Hacienda Florecer",
   },
 ])

@@ -176,6 +176,13 @@ export default {
     handleMarkerMediaChange() {
       this.renderMarkers()
     },
+    collapseAttribution() {
+      const attributionElement = this.$refs.map?.querySelector(
+        ".maplibregl-ctrl-attrib"
+      )
+      attributionElement?.classList.remove("maplibregl-compact-show")
+      attributionElement?.removeAttribute("open")
+    },
     getMarkerPinOffset() {
       return this.compactMarkerMedia?.matches
         ? markerPinOffsets.compact
@@ -296,9 +303,20 @@ export default {
           pitch: this.camera.pitch,
           bearing: this.camera.bearing,
           maxPitch: 78,
-          attributionControl: true,
+          // Add attribution explicitly below so MapLibre cannot choose the
+          // expanded desktop pill as its initial state.
+          attributionControl: false,
           cooperativeGestures: true,
         })
+
+        this.map.addControl(
+          new maplibregl.AttributionControl({ compact: true }),
+          "bottom-right"
+        )
+        // MapLibre deliberately expands a new compact attribution control once
+        // on mount. Start with only its information icon and let the visitor
+        // open the attribution when needed.
+        this.collapseAttribution()
 
         this.map.addControl(
           new maplibregl.NavigationControl({ visualizePitch: true }),
@@ -307,6 +325,9 @@ export default {
 
         this.map.on("load", () => {
           this.ready = true
+          // Style initialization can re-run MapLibre's compact-state update.
+          // Close it again after load so the initial UI is icon-only.
+          this.collapseAttribution()
 
           if (terrainSource && !this.map.getSource("atlas-terrain")) {
             this.map.addSource("atlas-terrain", terrainSource)

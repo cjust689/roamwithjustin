@@ -23,11 +23,26 @@
         <router-link v-if="storyHref" class="atlas-story-link" :to="storyHref">
           Story
         </router-link>
-        <button class="atlas-surprise" type="button" @click="surpriseMe">
-          Surprise me
+        <button
+          class="atlas-surprise"
+          type="button"
+          aria-label="Surprise me with an Atlas stop"
+          @click="surpriseMe"
+        >
+          <span class="atlas-surprise-desktop">Surprise me</span>
+          <span class="atlas-surprise-mobile" aria-hidden="true">
+            Surprise
+          </span>
         </button>
-        <button type="button" @click="savedOpen = true">
-          Saved <span>{{ favoriteNodes.length }}</span>
+        <button
+          class="atlas-saved-trigger"
+          type="button"
+          aria-label="Open saved Atlas places"
+          @click="savedOpen = true"
+        >
+          <span class="atlas-saved-label">Saved</span>
+          <span class="atlas-saved-icon" aria-hidden="true">&#9825;</span>
+          <span class="atlas-saved-count">{{ favoriteNodes.length }}</span>
         </button>
       </div>
     </header>
@@ -48,34 +63,78 @@
       @exit="exitGuidedJourney"
     />
 
-    <section v-if="!currentNode" class="atlas-welcome">
-      <span>Explore through a photographer's eyes</span>
-      <h1>The journey starts with a place.</h1>
-      <p>
-        Utah and Puerto Rico are fully mapped today. Three more registered
-        journeys are available as story previews while their public routes and
-        coordinates are verified.
-      </p>
-      <div>
-        <button type="button" @click="selectNode('utah')">Explore Utah</button>
-        <button
-          class="secondary"
-          type="button"
-          @click="selectNode('puerto-rico')"
+    <section
+      v-if="!currentNode"
+      class="atlas-welcome"
+      :class="{ 'is-collapsed': !welcomeExpanded }"
+      aria-label="Atlas journey explorer"
+    >
+      <button
+        class="atlas-welcome-toggle"
+        type="button"
+        aria-controls="atlas-welcome-content"
+        :aria-expanded="String(welcomeExpanded)"
+        @click="toggleWelcome"
+      >
+        <span class="atlas-welcome-toggle-copy">
+          <small>Explore journeys</small>
+          <strong>
+            {{
+              welcomeExpanded
+                ? "Choose a place to begin"
+                : `${rootNodes.length} mapped journeys`
+            }}
+          </strong>
+        </span>
+        <span class="atlas-welcome-toggle-action">
+          {{ welcomeExpanded ? "Collapse" : "Open" }}
+          <b aria-hidden="true">{{ welcomeExpanded ? "-" : "+" }}</b>
+        </span>
+      </button>
+
+      <div
+        v-show="welcomeExpanded"
+        id="atlas-welcome-content"
+        class="atlas-welcome-content"
+      >
+        <div class="atlas-welcome-intro">
+          <span>Explore through a photographer's eyes</span>
+          <h1>The journey starts with a place.</h1>
+          <p>
+            Open a mapped journey for its route, stories, photos, and films.
+            Collapse this guide whenever you want the map back.
+          </p>
+        </div>
+
+        <div
+          class="atlas-journey-nav"
+          role="navigation"
+          aria-label="Mapped journeys"
         >
-          Explore Puerto Rico
-        </button>
-        <button
-          v-if="resumeNode"
-          class="secondary"
-          type="button"
-          @click="selectNode(resumeNode.id)"
-        >
-          Resume {{ resumeNode.title }}
-        </button>
-        <router-link class="atlas-journey-library" to="/trips">
-          Browse all journeys
-        </router-link>
+          <button
+            v-for="node in rootNodes"
+            :key="node.id"
+            type="button"
+            @click="selectNode(node.id)"
+          >
+            <span>Explore</span>
+            <strong>{{ node.title }}</strong>
+          </button>
+        </div>
+
+        <div class="atlas-welcome-actions">
+          <button
+            v-if="resumeNode"
+            class="secondary"
+            type="button"
+            @click="selectNode(resumeNode.id)"
+          >
+            Resume {{ resumeNode.title }}
+          </button>
+          <router-link class="atlas-journey-library" to="/trips">
+            Browse all journeys
+          </router-link>
+        </div>
       </div>
     </section>
 
@@ -161,6 +220,9 @@ export default {
       announcement: "",
       previousTitle: "",
       stateLoaded: false,
+      // The root Atlas always introduces its journey navigator in the open
+      // state. Visitors can collapse it without losing the quick-nav trigger.
+      welcomeExpanded: true,
       mapPinExpandRequest: 0,
       pendingMapPinNodeId: null,
       detailCollapseRequest: 0,
@@ -258,9 +320,15 @@ export default {
     resumeNode() {
       return getAtlasNode(this.lastContext?.nodeId)
     },
+    rootNodes() {
+      return getAtlasNodes(atlasRootIds)
+    },
   },
   watch: {
     nodeId(nodeId) {
+      // Returning to the canonical /atlas root restores the open landing
+      // navigator, including browser back and the World breadcrumb.
+      if (!nodeId) this.welcomeExpanded = true
       if (this.stateLoaded) this.handleRoute(nodeId)
       if (this.pendingMapPinNodeId === nodeId) {
         this.pendingMapPinNodeId = null
@@ -525,6 +593,12 @@ export default {
 
       this.persist()
     },
+    toggleWelcome() {
+      this.welcomeExpanded = !this.welcomeExpanded
+      this.announcement = this.welcomeExpanded
+        ? "Journey explorer opened"
+        : "Journey explorer collapsed. The map is ready to explore."
+    },
     surpriseMe() {
       const leaves = getAtlasLeaves()
       const currentIndex = leaves.findIndex(
@@ -617,13 +691,14 @@ export default {
 
 .atlas-tools {
   display: flex;
+  min-width: 0;
+  align-items: center;
   gap: 0.45rem;
 }
 
 .atlas-tools button,
-.atlas-tools a,
-.atlas-welcome button,
-.atlas-welcome a {
+.atlas-tools a {
+  flex: 0 0 auto;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   padding: 0.68rem 0.9rem;
@@ -634,6 +709,7 @@ export default {
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .atlas-tools button:hover,
@@ -648,7 +724,15 @@ export default {
   color: #f8d79f;
 }
 
-.atlas-tools button span {
+.atlas-surprise-mobile {
+  display: none;
+}
+
+.atlas-saved-icon {
+  display: none;
+}
+
+.atlas-tools .atlas-saved-count {
   display: inline-grid;
   place-items: center;
   min-width: 1.25rem;
@@ -663,66 +747,199 @@ export default {
 .atlas-welcome {
   position: absolute;
   z-index: 8;
-  top: 50%;
-  left: clamp(1.25rem, 7vw, 7rem);
-  width: min(580px, calc(100vw - 2.5rem));
-  transform: translateY(-48%);
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.55);
+  top: 6.15rem;
+  left: clamp(1rem, 3vw, 2rem);
+  width: min(500px, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 22px;
+  background: rgba(7, 11, 14, 0.88);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(18px);
 }
 
-.atlas-welcome > span,
-.atlas-provider-note {
+.atlas-welcome.is-collapsed {
+  width: min(300px, calc(100vw - 2rem));
+}
+
+.atlas-welcome-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 0;
+  padding: 0.9rem 1rem;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.atlas-welcome-toggle:hover,
+.atlas-welcome-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.atlas-welcome-toggle:focus-visible {
+  outline: 2px solid #f6bd60;
+  outline-offset: -3px;
+}
+
+.atlas-welcome-toggle-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.atlas-welcome-toggle-copy small,
+.atlas-welcome-intro > span {
   color: #f6bd60;
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   font-weight: 800;
-  letter-spacing: 0.17em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
-.atlas-welcome h1 {
-  max-width: 560px;
-  margin: 0.45rem 0 1rem;
+.atlas-welcome-toggle-copy strong {
+  overflow: hidden;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.atlas-welcome-toggle-action {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.atlas-welcome-toggle-action b {
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid rgba(246, 189, 96, 0.5);
+  border-radius: 50%;
+  color: #f6bd60;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.atlas-welcome-content {
+  min-width: 0;
+  max-height: calc(100vh - 10.5rem);
+  max-height: calc(100dvh - 10.5rem);
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(246, 189, 96, 0.55) transparent;
+  scrollbar-width: thin;
+}
+
+.atlas-welcome-intro {
+  min-width: 0;
+  padding: 1rem 1rem 0.85rem;
+}
+
+.atlas-welcome-intro h1 {
+  max-width: 100%;
+  margin: 0.35rem 0 0.7rem;
   font-family: Georgia, serif;
-  font-size: clamp(3.2rem, 7.6vw, 7rem);
+  font-size: clamp(2.25rem, 4.4vw, 3.6rem);
   font-weight: 500;
-  line-height: 0.91;
+  line-height: 0.98;
+  overflow-wrap: break-word;
 }
 
-.atlas-welcome p {
-  max-width: 520px;
+.atlas-welcome-intro p {
+  margin: 0;
   color: rgba(255, 255, 255, 0.78);
-  font-size: clamp(0.94rem, 1.5vw, 1.12rem);
-  line-height: 1.65;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
-.atlas-welcome > div {
+.atlas-journey-nav {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 0.55rem;
+  padding: 0 1rem 1rem;
+}
+
+.atlas-journey-nav button {
+  display: grid;
+  min-width: 0;
+  min-height: 4rem;
+  align-content: center;
+  gap: 0.08rem;
+  border: 1px solid rgba(246, 189, 96, 0.42);
+  border-radius: 15px;
+  padding: 0.7rem 0.8rem;
+  background: rgba(246, 189, 96, 0.1);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.atlas-journey-nav button:hover,
+.atlas-journey-nav button:focus-visible {
+  border-color: #f6bd60;
+  background: rgba(246, 189, 96, 0.18);
+  outline: 0;
+}
+
+.atlas-journey-nav button > span {
+  color: #f6bd60;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.atlas-journey-nav button > strong {
+  overflow: hidden;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+}
+
+.atlas-welcome-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-top: 1.5rem;
+  gap: 0.55rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 0.8rem 1rem 1rem;
 }
 
-.atlas-welcome button {
-  border-color: #f6bd60;
-  padding: 0.85rem 1.2rem;
-  background: #f6bd60;
-  color: #14181a;
-}
-
-.atlas-welcome button.secondary {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(7, 11, 14, 0.62);
-  color: #fff;
-}
-
+.atlas-welcome-actions button,
 .atlas-welcome .atlas-journey-library {
   display: inline-flex;
+  min-height: 2.65rem;
   align-items: center;
-  border-color: rgba(255, 255, 255, 0.3);
-  padding: 0.85rem 1.2rem;
-  background: rgba(7, 11, 14, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.62rem 0.85rem;
+  background: rgba(255, 255, 255, 0.055);
   color: #fff;
-  text-shadow: none;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.atlas-welcome-actions button:hover,
+.atlas-welcome-actions button:focus-visible,
+.atlas-welcome .atlas-journey-library:hover,
+.atlas-welcome .atlas-journey-library:focus-visible {
+  border-color: #f6bd60;
 }
 
 .atlas-provider-note {
@@ -734,7 +951,10 @@ export default {
   padding: 0.45rem 0.65rem;
   background: rgba(5, 8, 10, 0.68);
   color: rgba(255, 255, 255, 0.56);
+  font-size: 0.68rem;
+  font-weight: 800;
   letter-spacing: 0.09em;
+  text-transform: uppercase;
   backdrop-filter: blur(8px);
 }
 
@@ -752,10 +972,10 @@ export default {
     top: 0.65rem;
     right: 0.65rem;
     left: 0.65rem;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.55rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.45rem;
     min-height: 4rem;
-    padding: 0.6rem 0.7rem;
+    padding: 0.55rem 0.6rem;
   }
 
   .atlas-brand > span {
@@ -764,49 +984,161 @@ export default {
     font-size: 0.82rem;
   }
 
-  .atlas-brand strong,
-  .atlas-tools .atlas-surprise {
+  .atlas-brand strong {
     display: none;
+  }
+
+  .atlas-tools {
+    gap: 0.3rem;
   }
 
   .atlas-tools button,
   .atlas-tools a {
-    min-height: 2.75rem;
-    padding: 0.6rem 0.78rem;
-    font-size: 0.88rem;
+    min-height: 2.65rem;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.78rem;
   }
 
-  .atlas-tools button span {
-    min-width: 1.45rem;
-    height: 1.45rem;
-    font-size: 0.75rem;
+  .atlas-surprise-desktop {
+    display: none;
+  }
+
+  .atlas-surprise-mobile {
+    display: inline;
+  }
+
+  .atlas-tools .atlas-saved-count {
+    min-width: 1.35rem;
+    height: 1.35rem;
+    font-size: 0.7rem;
   }
 
   .atlas-welcome {
-    top: auto;
-    right: 1rem;
-    bottom: 2rem;
-    left: 1rem;
+    top: 5.55rem;
+    right: 0.65rem;
+    bottom: auto;
+    left: 0.65rem;
     width: auto;
-    transform: none;
+    max-width: none;
+    border-radius: 18px;
   }
 
-  .atlas-welcome h1 {
-    font-size: clamp(3rem, 15vw, 4.7rem);
+  .atlas-welcome.is-collapsed {
+    right: auto;
+    width: min(18rem, calc(100vw - 1.3rem));
   }
 
-  .atlas-welcome p {
-    font-size: 1.02rem;
+  .atlas-welcome-toggle {
+    min-height: 3.6rem;
+    padding: 0.72rem 0.8rem;
   }
 
-  .atlas-welcome button,
-  .atlas-welcome a {
-    min-height: 3rem;
-    font-size: 0.92rem;
+  .atlas-welcome-toggle-action {
+    font-size: 0.66rem;
+  }
+
+  .atlas-welcome-toggle-action b {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .atlas-welcome-content {
+    max-height: calc(100vh - 10rem);
+    max-height: calc(100dvh - 10rem);
+  }
+
+  .atlas-welcome-intro {
+    padding: 0.85rem 0.85rem 0.7rem;
+  }
+
+  .atlas-welcome-intro h1 {
+    font-size: clamp(2rem, 9vw, 2.8rem);
+  }
+
+  .atlas-welcome-intro p {
+    font-size: 0.86rem;
+  }
+
+  .atlas-journey-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    padding: 0 0.85rem 0.85rem;
+  }
+
+  .atlas-journey-nav button {
+    min-height: 3.8rem;
+    padding: 0.62rem 0.7rem;
+  }
+
+  .atlas-welcome-actions {
+    padding: 0.72rem 0.85rem 0.85rem;
+  }
+
+  .atlas-welcome-actions button,
+  .atlas-welcome .atlas-journey-library {
+    min-height: 2.75rem;
+    font-size: 0.76rem;
   }
 
   .atlas-provider-note {
     display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .atlas-toolbar {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .atlas-tools {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    padding-top: 0.45rem;
+  }
+
+  .atlas-welcome {
+    top: 8.45rem;
+  }
+
+  .atlas-welcome-content {
+    max-height: calc(100vh - 12.9rem);
+    max-height: calc(100dvh - 12.9rem);
+  }
+}
+
+@media (max-width: 390px) {
+  .atlas-toolbar {
+    right: 0.45rem;
+    left: 0.45rem;
+    gap: 0.3rem;
+    padding-inline: 0.48rem;
+  }
+
+  .atlas-brand > span {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .atlas-tools button,
+  .atlas-tools a {
+    padding-inline: 0.52rem;
+    font-size: 0.72rem;
+  }
+
+  .atlas-saved-label {
+    display: none;
+  }
+
+  .atlas-saved-icon {
+    display: inline;
+    font-size: 1.1rem;
+  }
+
+  .atlas-welcome {
+    top: 8.25rem;
+    right: 0.45rem;
+    left: 0.45rem;
   }
 }
 

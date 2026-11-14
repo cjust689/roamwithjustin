@@ -102,7 +102,7 @@ export const puertoRico2024Journey = Object.freeze({
         assetId: "image-puerto-rico-pxl-20240804-023431011",
         role: "lodging",
       },
-      link: "https://donrafapr.com/",
+      link: "https://donrafaboutiquehotel.com/",
     },
     {
       name: "Hacienda Florecer",
@@ -148,6 +148,43 @@ export const puertoRico2024Journey = Object.freeze({
       socialLinks: [],
     },
     {
+      id: "puerto-rico-2024-don-rafa-boutique-hotel",
+      legacyId: "don-rafa-boutique-hotel",
+      placeId: "don-rafa-boutique-hotel",
+      date: null,
+      visitStatus: "visited",
+      evidenceStatus: "confirmed",
+      type: "lodging",
+      droneAllowed: false,
+      description:
+        "Don Rafa gives the San Juan days a center. We arrive after dark, use the Miramar hotel as the launch point for Old San Juan and the city's nightlife, then come back to the rooftop pool when the afternoon heat makes slowing down feel earned. It is not just where we leave the bags; it becomes part of how the city days breathe.",
+      summary:
+        "A Miramar base that connects late arrival, Old San Juan, and the rooftop pause between the city's busiest hours.",
+      notes: [
+        "Stayed two nights while exploring San Juan",
+        "Used the rooftop pool as an afternoon reset",
+        "Walkable food nearby made the arrival night easy",
+      ],
+      hero: {
+        assetId: "image-puerto-rico-pxl-20240804-023431011",
+        role: "hero",
+        alt: "Traveler at the entrance to Don Rafa Boutique Hotel",
+      },
+      media: [
+        {
+          assetId: "video-puerto-rico-don-rafa-001",
+          role: "gallery",
+          caption: "Settling into Don Rafa during the San Juan stay",
+        },
+        {
+          assetId: "video-puerto-rico-don-rafa-002",
+          role: "gallery",
+          caption: "More of the hotel and rooftop pause between city outings",
+        },
+      ],
+      socialLinks: [],
+    },
+    {
       id: "puerto-rico-2024-old-san-juan",
       legacyId: "old-san-juan",
       placeId: "old-san-juan",
@@ -181,6 +218,16 @@ export const puertoRico2024Journey = Object.freeze({
           assetId: "image-puerto-rico-old-san-juan-2",
           role: "gallery",
           alt: "Old San Juan photo 2",
+        },
+        {
+          assetId: "video-puerto-rico-old-san-juan-001",
+          role: "gallery",
+          caption: "Walking through the color and movement of Old San Juan",
+        },
+        {
+          assetId: "video-puerto-rico-san-cristobal-001",
+          role: "gallery",
+          caption: "Exploring Castillo San Cristobal before the city heats up",
         },
       ],
       socialLinks: [],
@@ -404,6 +451,41 @@ export const puertoRico2024Journey = Object.freeze({
           role: "gallery",
           alt: "Traveler overlooking the mountain pool at Hacienda Florecer",
         },
+        {
+          assetId: "image-puerto-rico-hacienda-hf-001",
+          role: "gallery",
+          alt: "Aerial overview of Hacienda Florecer and its mountain setting",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-hf-002",
+          role: "gallery",
+          alt: "Pool, hot tub, and container home at Hacienda Florecer",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-hf-003",
+          role: "gallery",
+          alt: "Pool loungers facing the Moca hills at Hacienda Florecer",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-hf-004",
+          role: "gallery",
+          alt: "Sunset over the hills beyond Hacienda Florecer",
+        },
+        {
+          assetId: "video-puerto-rico-hacienda-sunset-002",
+          role: "gallery",
+          caption: "The first sunset sequence from the Hacienda Florecer stay",
+        },
+        {
+          assetId: "video-puerto-rico-hacienda-sunset-003",
+          role: "gallery",
+          caption: "Evening light moving across the mountains near Moca",
+        },
+        {
+          assetId: "video-puerto-rico-hacienda-sunset-004",
+          role: "gallery",
+          caption: "The final glow beyond the pool at Hacienda Florecer",
+        },
       ],
       socialLinks: [],
     },
@@ -450,6 +532,11 @@ export const puertoRico2024Journey = Object.freeze({
           assetId: "image-puerto-rico-horse-9",
           role: "gallery",
           alt: "Playuelas Horse Rides photo 4",
+        },
+        {
+          assetId: "image-puerto-rico-playuelas-collage-001",
+          role: "gallery",
+          alt: "Horseback ride collage with coast, ruins, and forest trail",
         },
       ],
       socialLinks: [],
@@ -746,6 +833,11 @@ export const puertoRico2024Journey = Object.freeze({
           notes:
             "We are barely unpacked before dinner across the street and a quick drive along Ashford Avenue pull us back into the night.",
         },
+        {
+          visitId: "puerto-rico-2024-don-rafa-boutique-hotel",
+          notes:
+            "Don Rafa gives the arrival a landing place, close enough to food that we can settle in without letting the first night disappear.",
+        },
       ],
       routes: [],
     },
@@ -758,6 +850,11 @@ export const puertoRico2024Journey = Object.freeze({
           visitId: "puerto-rico-2024-old-san-juan",
           notes:
             "The fort gives us the wide view; the streets give us the details. Starting early leaves enough room to notice both before the afternoon heat pushes us back to the hotel.",
+        },
+        {
+          visitId: "puerto-rico-2024-don-rafa-boutique-hotel",
+          notes:
+            "The rooftop pool becomes the hinge between the heat of Old San Juan and the dressed-up night ahead.",
         },
         {
           visitId: "puerto-rico-2024-fairmont-el-san-juan",
@@ -903,6 +1000,8 @@ export const puertoRico2024Journey = Object.freeze({
       "We land in San Juan after dark, follow the north coast west, and let a house in the Moca hills change the trip from constant motion to something slower.",
     "san-juan":
       "Rental keys, narrowing streets, tacos across from the hotel, and a quick pass along Ashford Avenue pull us into the city before we have fully arrived.",
+    "don-rafa-boutique-hotel":
+      "The Miramar hotel gives both San Juan days a center, from the first late check-in to the rooftop pause after Old San Juan.",
     "old-san-juan":
       "We move from Castillo San Cristóbal into bright streets and lunch at La Carreta, then retreat to the rooftop pool when the afternoon heat takes over.",
     "fairmont-el-san-juan":

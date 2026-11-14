@@ -97,6 +97,27 @@ export const puertoRicoPlaces = Object.freeze([
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
   {
+    id: "don-rafa-boutique-hotel",
+    name: "Don Rafa Boutique Hotel & Residences",
+    // The public venue coordinate keeps the Atlas pin on the hotel rather than
+    // using the broader San Juan destination center.
+    coordinates: [-66.0849, 18.4563],
+    parentPlaceId: "puerto-rico",
+    countryCode: "PR",
+    regionCode: "PR",
+    category: "lodging",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "venue",
+    description:
+      "A Miramar boutique hotel that became the San Juan base, with quick access to Old San Juan and a rooftop pool for the afternoon reset.",
+    externalLinks: {
+      official: "https://donrafaboutiquehotel.com/",
+      maps: "https://www.google.com/maps/search/?api=1&query=18.4563%2C-66.0849",
+    },
+    verificationNotes:
+      "Public venue coordinate for 601 Avenida Miramar, confirmed from the hotel's current site and listing sources on November 14, 2026.",
+  },
+  {
     id: "fairmont-el-san-juan",
     name: "Fairmont El San Juan Hotel Nightclub",
     coordinates: null,
