@@ -2,10 +2,11 @@ import { createIdRegistry } from "../contracts.mjs"
 import { placeAliases } from "./aliases.mjs"
 import { puertoRicoPlaces } from "./puerto-rico.mjs"
 import { upcomingPlaces } from "./upcoming.mjs"
+import { usviPlaces } from "./usvi.mjs"
 import { utahPlaces } from "./utah.mjs"
 
 const registry = createIdRegistry(
-  [...utahPlaces, ...puertoRicoPlaces, ...upcomingPlaces],
+  [...utahPlaces, ...puertoRicoPlaces, ...usviPlaces, ...upcomingPlaces],
   "Place registry"
 )
 

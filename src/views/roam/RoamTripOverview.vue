@@ -168,9 +168,19 @@
                 <span class="location-image">
                   <img
                     :src="getLocation(entry.ref).image"
-                    :alt="getLocation(entry.ref).name"
+                    :alt="
+                      getLocation(entry.ref).mediaPending
+                        ? `${trip.name} journey cover; ${getLocation(entry.ref).name} photos coming soon`
+                        : getLocation(entry.ref).name
+                    "
                     loading="lazy"
                   />
+                  <span
+                    v-if="getLocation(entry.ref).mediaPending"
+                    class="location-media-status"
+                  >
+                    Location photos coming soon
+                  </span>
                 </span>
                 <span class="location-copy">
                   <span>{{ getLocation(entry.ref).type || "Trip stop" }}</span>
@@ -205,7 +215,15 @@
             :key="stay.name"
             class="lodging-card"
           >
-            <img :src="stay.image" :alt="stay.name" loading="lazy" />
+            <img
+              v-if="stay.image"
+              :src="stay.image"
+              :alt="stay.name"
+              loading="lazy"
+            />
+            <div v-else class="lodging-media-placeholder" aria-hidden="true">
+              <span>Photography coming soon</span>
+            </div>
             <div>
               <span>{{ stay.location }}</span>
               <h3>{{ stay.name }}</h3>
@@ -726,9 +744,26 @@ export default {
 }
 
 .location-image {
+  position: relative;
   display: block;
   height: 220px;
   overflow: hidden;
+}
+
+.location-media-status {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.45rem 0.65rem;
+  background: rgba(7, 11, 14, 0.82);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
 }
 
 .location-image img {
@@ -813,11 +848,34 @@ export default {
   background: #11191d;
 }
 
-.lodging-card > img {
+.lodging-card > img,
+.lodging-media-placeholder {
   width: 100%;
   height: 100%;
   min-height: 270px;
+}
+
+.lodging-card > img {
   object-fit: cover;
+}
+
+.lodging-media-placeholder {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(
+      circle at 70% 20%,
+      rgba(246, 189, 96, 0.18),
+      transparent 34%
+    ),
+    linear-gradient(145deg, #18252b, #0b1114);
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .lodging-card > div {
@@ -1019,7 +1077,8 @@ export default {
     grid-template-columns: 1fr;
   }
 
-  .lodging-card > img {
+  .lodging-card > img,
+  .lodging-media-placeholder {
     height: 240px;
     min-height: 0;
   }

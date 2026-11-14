@@ -1,21 +1,6 @@
 // Canonical destinations behind the existing coming-soon cards.
 export const upcomingPlaces = Object.freeze([
   {
-    id: "us-virgin-islands",
-    name: "US Virgin Islands",
-    coordinates: null,
-    parentPlaceId: null,
-    countryCode: "VI",
-    regionCode: "VI",
-    category: "territory",
-    evidenceStatus: "confirmed",
-    coordinatePrecision: "unknown",
-    description: "",
-    externalLinks: {},
-    verificationNotes:
-      "St. John imagery is confirmed; specific public pins wait for gallery and journal verification.",
-  },
-  {
     id: "north-georgia-blue-ridge",
     name: "North Georgia",
     coordinates: null,

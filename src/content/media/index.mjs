@@ -1,12 +1,13 @@
 import { createIdRegistry } from "../contracts.mjs"
 import { puertoRicoMedia } from "./puerto-rico.mjs"
 import { upcomingMedia } from "./upcoming.mjs"
+import { usviMedia } from "./usvi.mjs"
 import { utahMedia } from "./utah.mjs"
 
 // This is the only composition root for controlled media. Destination modules
 // remain independently editable while every consumer uses one stable lookup.
 const registry = createIdRegistry(
-  [...utahMedia, ...puertoRicoMedia, ...upcomingMedia],
+  [...utahMedia, ...puertoRicoMedia, ...usviMedia, ...upcomingMedia],
   "Media registry"
 )
 

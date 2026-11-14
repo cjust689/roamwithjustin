@@ -1,12 +1,18 @@
 import { createIdRegistry } from "../contracts.mjs"
 import { puertoRico2024Journey } from "./puerto-rico-2024.mjs"
 import { upcomingJourneys } from "./upcoming.mjs"
+import { usviStJohn2025Journey } from "./usvi-st-john-2025.mjs"
 import { utahWinter2025Journey } from "./utah-winter-2025.mjs"
 
 // Public URLs remain slug-based, allowing stable /trips/:slug routes while
 // canonical Journey IDs carry the specific trip identity and approximate year.
 const registry = createIdRegistry(
-  [utahWinter2025Journey, puertoRico2024Journey, ...upcomingJourneys],
+  [
+    utahWinter2025Journey,
+    puertoRico2024Journey,
+    usviStJohn2025Journey,
+    ...upcomingJourneys,
+  ],
   "Journey registry"
 )
 

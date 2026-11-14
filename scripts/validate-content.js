@@ -498,6 +498,40 @@ async function main() {
     report("Puerto Rico Atlas route does not follow Journey visit order")
   }
 
+  const stJohn = completeAtlasViews.find(node => node.id === "st-john")
+  const orderedStJohn = projections
+    .orderAtlasNodesByJourney(
+      (stJohn?.childIds || [])
+        .map(id => completeAtlasViews.find(node => node.id === id))
+        .filter(Boolean)
+    )
+    .map(node => node.id)
+  const expectedStJohnOrder = [
+    "cruz-bay",
+    "maho-bay",
+    "great-cruz-bay",
+    "lovango-cay",
+    "trunk-bay",
+    "cinnamon-bay",
+    "waterlemon-cay",
+  ]
+  if (orderedStJohn.join("|") !== expectedStJohnOrder.join("|")) {
+    report("St. John Atlas route does not follow Journey visit order")
+  }
+
+  // The creator confirmed this charter stop by name, but its formal island
+  // identity is unresolved. Validation prevents a plausible guess from
+  // silently turning it into a public pin during a later media pass.
+  const hermitCrabIsland = placeModule.getPlace("hermit-crab-island")
+  if (hermitCrabIsland?.coordinates !== null) {
+    report(
+      "Hermit Crab Island must remain unmapped until its identity is verified"
+    )
+  }
+  if (presentationIds.has("hermit-crab-island")) {
+    report("Hermit Crab Island must not have an Atlas presentation yet")
+  }
+
   const guidedJourneys = [
     {
       journeyId: "utah-winter-2025",
@@ -506,6 +540,10 @@ async function main() {
     {
       journeyId: "puerto-rico-2024",
       expectedStops: expectedPuertoRicoOrder,
+    },
+    {
+      journeyId: "usvi-st-john-2025",
+      expectedStops: expectedStJohnOrder,
     },
   ].map(({ journeyId, expectedStops }) => {
     const guidedJourney = projections.buildGuidedJourneyViewModel(

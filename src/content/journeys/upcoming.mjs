@@ -1,47 +1,6 @@
 // Canonical journey stubs behind the existing coming-soon cards.
 export const upcomingJourneys = Object.freeze([
   {
-    id: "usvi-st-john-2025",
-    slug: "usvi",
-    title: "US Virgin Islands",
-    publicationStatus: "coming-soon",
-    evidenceStatus: "confirmed",
-    dateRange: {
-      start: null,
-      end: null,
-      label: "2025",
-    },
-    hero: {
-      assetId: "image-usvi-usvi",
-      role: "hero",
-      alt: "US Virgin Islands cover photograph",
-    },
-    fullImage: {
-      assetId: "image-usvi-usvi-full",
-      role: "full",
-      alt: "US Virgin Islands destination photograph",
-    },
-    gallery: [],
-    description:
-      "A non-chronological St. John photo journey through quiet tropical moments, clear water, snorkeling, beaches, and island perspectives.",
-    duration: "",
-    audience: "",
-    costLevel: "",
-    bestTimeToGo: "",
-    gearHighlights: [],
-    travelNotes: [],
-    tips: [],
-    lodging: [],
-    visits: [],
-    days: [],
-    socialLinks: [],
-    featuredMedia: [],
-    atlasNotes: {},
-    relatedPlaceIds: ["us-virgin-islands"],
-    verificationNotes:
-      "St. John imagery is confirmed; precise dates, route, lodging, and operators remain to verify.",
-  },
-  {
     id: "north-georgia-2026",
     slug: "north-georgia",
     title: "North Georgia, USA",

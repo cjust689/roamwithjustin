@@ -57,6 +57,7 @@ export function buildTripLocationView(journey, visit) {
   // cover instead of inventing a location-specific asset association.
   const hero = resolveMediaReference(visit.hero || journey.hero)
   const media = resolveMediaList(visit.media)
+  const mediaPending = !visit.hero && media.length === 0
   const gallery = media
     .filter(item => item.kind === "image")
     .map(item => item.src)
@@ -71,6 +72,9 @@ export function buildTripLocationView(journey, visit) {
     type: visit.type || place.category,
     droneAllowed: Boolean(visit.droneAllowed),
     image: hero?.src || "",
+    // The journey cover can keep a new location card visually usable while
+    // this flag tells the UI that stop-specific photography is still pending.
+    mediaPending,
     gallery,
     media,
     notes: [...(visit.notes || [])],

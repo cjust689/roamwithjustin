@@ -425,4 +425,232 @@ export const atlasPresentation = Object.freeze([
     ],
     relatedIds: ["cueva-del-indio", "gozalandia-falls"],
   },
+  // St. John nodes reuse the journey-level cover only as an explicit visual
+  // placeholder. Location-specific Lightroom selections will replace these
+  // usages without changing Place, Journey, or Atlas node identities.
+  {
+    id: "st-john",
+    placeId: "st-john",
+    journeyId: "usvi-st-john-2025",
+    parentId: null,
+    eyebrow: "Destination",
+    category: "Island journey",
+    camera: {
+      center: [-64.7495816, 18.3396764],
+      zoom: 10.25,
+      pitch: 48,
+      bearing: -10,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey cover photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey cover photograph",
+      },
+    ],
+    relatedIds: [],
+  },
+  {
+    id: "cruz-bay",
+    placeId: "cruz-bay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Island arrival",
+    category: "Flight to ferry",
+    camera: {
+      center: [-64.79413, 18.33595],
+      zoom: 14.2,
+      pitch: 58,
+      bearing: 20,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Cruz Bay photography will be added in the next media pass.",
+      },
+    ],
+    relatedIds: ["great-cruz-bay", "maho-bay"],
+  },
+  {
+    id: "maho-bay",
+    placeId: "maho-bay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Family favorite",
+    category: "Beach and paddleboarding",
+    camera: {
+      center: [-64.7484706, 18.3566202],
+      zoom: 14.4,
+      pitch: 61,
+      bearing: -24,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Maho photography will be added in the next media pass.",
+      },
+    ],
+    relatedIds: ["great-cruz-bay", "trunk-bay", "cinnamon-bay"],
+  },
+  {
+    id: "great-cruz-bay",
+    placeId: "great-cruz-bay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Home base",
+    category: "Villa and bay views",
+    camera: {
+      center: [-64.78803, 18.32295],
+      zoom: 13.7,
+      pitch: 60,
+      bearing: 16,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Oceana Villa photography will be added after review.",
+      },
+    ],
+    relatedIds: ["cruz-bay", "maho-bay"],
+  },
+  {
+    id: "lovango-cay",
+    placeId: "lovango-cay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Boat day",
+    category: "Lunch and relaxation",
+    camera: {
+      center: [-64.80375, 18.3624533],
+      zoom: 13.7,
+      pitch: 62,
+      bearing: 26,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Lovango charter photography will be added after review.",
+      },
+    ],
+    relatedIds: ["cruz-bay", "trunk-bay"],
+  },
+  {
+    id: "trunk-bay",
+    placeId: "trunk-bay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Underwater chapter",
+    category: "Family beach day",
+    camera: {
+      center: [-64.77, 18.35202],
+      zoom: 14.5,
+      pitch: 62,
+      bearing: 18,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Trunk Bay photography will be added in the next media pass.",
+      },
+    ],
+    relatedIds: ["maho-bay", "cinnamon-bay", "lovango-cay"],
+  },
+  {
+    id: "cinnamon-bay",
+    placeId: "cinnamon-bay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "North shore",
+    category: "Beach day",
+    camera: {
+      center: [-64.75787, 18.35342],
+      zoom: 14.3,
+      pitch: 61,
+      bearing: -18,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption:
+          "Cinnamon Bay photography will be added in the next media pass.",
+      },
+    ],
+    relatedIds: ["maho-bay", "trunk-bay", "waterlemon-cay"],
+  },
+  {
+    id: "waterlemon-cay",
+    placeId: "waterlemon-cay",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Worth the effort",
+    category: "Walk and island outing",
+    camera: {
+      center: [-64.72347, 18.3668977],
+      zoom: 14.1,
+      pitch: 64,
+      bearing: 22,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption:
+          "Waterlemon Cay photography will be added in the next media pass.",
+      },
+    ],
+    relatedIds: ["cinnamon-bay", "maho-bay"],
+  },
 ])

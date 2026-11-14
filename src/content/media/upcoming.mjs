@@ -88,48 +88,4 @@ export const upcomingMedia = Object.freeze([
     },
     defaultAlt: "nga",
   },
-  {
-    id: "image-usvi-usvi-full",
-    kind: "image",
-    source: {
-      provider: "local",
-      path: "/img/locations/usvi/usvi-full.jpg",
-    },
-    intrinsic: {
-      mimeType: "image/jpeg",
-      width: 2560,
-      height: 1707,
-    },
-    rights: {
-      owner: "roam-with-justin",
-      status: "owned",
-    },
-    capture: {
-      placeId: null,
-      capturedAt: null,
-    },
-    defaultAlt: "usvi full",
-  },
-  {
-    id: "image-usvi-usvi",
-    kind: "image",
-    source: {
-      provider: "local",
-      path: "/img/locations/usvi/usvi.jpg",
-    },
-    intrinsic: {
-      mimeType: "image/jpeg",
-      width: 2560,
-      height: 1707,
-    },
-    rights: {
-      owner: "roam-with-justin",
-      status: "owned",
-    },
-    capture: {
-      placeId: null,
-      capturedAt: null,
-    },
-    defaultAlt: "usvi",
-  },
 ])
