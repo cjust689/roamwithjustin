@@ -144,6 +144,23 @@
 
           <p class="day-summary">{{ day.summary }}</p>
 
+          <div
+            v-if="day.partners && day.partners.length"
+            class="experience-links"
+          >
+            <a
+              v-for="partner in day.partners"
+              :key="partner.id"
+              :href="partner.href"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span>Experience operator</span>
+              <strong>{{ partner.name }}</strong>
+              <small>{{ partner.disclosure }}</small>
+            </a>
+          </div>
+
           <div v-if="day.routes && day.routes.length" class="route-links">
             <a
               v-for="route in day.routes"
@@ -661,9 +678,47 @@ export default {
 }
 
 .day-summary,
+.experience-links,
 .route-links,
 .location-grid {
   grid-column: 2;
+}
+
+.experience-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.4rem;
+}
+
+.experience-links a {
+  display: grid;
+  gap: 0.22rem;
+  max-width: 520px;
+  border: 1px solid rgba(246, 189, 96, 0.28);
+  border-radius: 16px;
+  padding: 0.8rem 0.95rem;
+  background: rgba(246, 189, 96, 0.05);
+  color: #fff;
+  text-decoration: none;
+}
+
+.experience-links span {
+  color: #f6bd60;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.experience-links strong {
+  font-size: 0.85rem;
+}
+
+.experience-links small {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.66rem;
+  line-height: 1.45;
 }
 
 .day-summary {

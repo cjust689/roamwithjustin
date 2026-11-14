@@ -110,6 +110,7 @@ async function main() {
     placeModule,
     aliasModule,
     journeyModule,
+    partnerModule,
     projections,
     atlasModule,
     atlasRootsModule,
@@ -119,6 +120,7 @@ async function main() {
     importContent("src/content/places/index.mjs"),
     importContent("src/content/places/aliases.mjs"),
     importContent("src/content/journeys/index.mjs"),
+    importContent("src/content/partners/index.mjs"),
     importContent("src/content/selectors/projections.mjs"),
     importContent("src/content/atlas/presentation.mjs"),
     importContent("src/content/atlas/roots.mjs"),
@@ -251,6 +253,19 @@ async function main() {
     }
   })
 
+  partnerModule.partnerRecords.forEach(partner => {
+    const owner = 'Partner "' + partner.id + '"'
+    if (!partner.name || !partner.kind || !partner.relationship) {
+      report(owner + " is missing identity or relationship metadata")
+    }
+    if (!/^https:\/\//i.test(partner.officialUrl || "")) {
+      report(owner + " has an invalid official URL")
+    }
+    if (!partner.disclosure) {
+      report(owner + " is missing its relationship disclosure")
+    }
+  })
+
   const journeySlugs = new Set()
   let visitCount = 0
   journeyModule.journeyRecords.forEach(journey => {
@@ -310,6 +325,18 @@ async function main() {
       })
     })
     ;(journey.days || []).forEach(day => {
+      ;(day.partnerIds || []).forEach(partnerId => {
+        if (!partnerModule.getPartner(partnerId)) {
+          report(
+            owner +
+              ' day "' +
+              day.label +
+              '" references unknown partner "' +
+              partnerId +
+              '"'
+          )
+        }
+      })
       ;(day.visits || []).forEach(entry => {
         if (!visitIds.has(entry.visitId)) {
           report(
@@ -320,6 +347,11 @@ async function main() {
               entry.visitId +
               '"'
           )
+        }
+      })
+      ;(day.routes || []).forEach(route => {
+        if (!/^https:\/\//i.test(route.link || "")) {
+          report(owner + ' day "' + day.label + '" has an invalid route URL')
         }
       })
     })
@@ -507,6 +539,8 @@ async function main() {
     )
     .map(node => node.id)
   const expectedStJohnOrder = [
+    "cyril-e-king-airport",
+    "red-hook-ferry-terminal",
     "cruz-bay",
     "maho-bay",
     "great-cruz-bay",

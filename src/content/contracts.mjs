@@ -38,6 +38,17 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {string|null} date Leave null when the exact date is unverified.
  * @property {MediaUsage} [hero]
  * @property {MediaUsage[]} [media]
+ *
+ * @typedef {Object} Partner
+ * @property {string} id Stable provider or partner identity.
+ * @property {string} name
+ * @property {"operator"|string} kind
+ * @property {string} officialUrl
+ * @property {string} relationship Describes the real Journey relationship.
+ * @property {string} disclosure Prevents a provider link from implying sponsorship or affiliation.
+ *
+ * Journey day records may reference `partnerIds`. Selectors resolve those IDs
+ * into public links so business identity does not get duplicated in stories.
  */
 
 // Registries reject duplicate or missing IDs as soon as content is imported,

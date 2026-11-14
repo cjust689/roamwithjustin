@@ -456,6 +456,62 @@ export const atlasPresentation = Object.freeze([
     relatedIds: [],
   },
   {
+    id: "cyril-e-king-airport",
+    placeId: "cyril-e-king-airport",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Arrival",
+    category: "Island airport",
+    camera: {
+      center: [-64.9733611, 18.3373056],
+      zoom: 13.4,
+      pitch: 58,
+      bearing: -18,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "St. Thomas arrival photography will be added after review.",
+      },
+    ],
+    relatedIds: ["red-hook-ferry-terminal"],
+  },
+  {
+    id: "red-hook-ferry-terminal",
+    placeId: "red-hook-ferry-terminal",
+    journeyId: "usvi-st-john-2025",
+    parentId: "st-john",
+    eyebrow: "Island crossing",
+    category: "Passenger ferry",
+    camera: {
+      center: [-64.84917, 18.32669],
+      zoom: 14.15,
+      pitch: 60,
+      bearing: 24,
+    },
+    hero: {
+      assetId: "image-usvi-usvi",
+      role: "hero",
+      alt: "St. John journey photograph",
+    },
+    media: [
+      {
+        assetId: "image-usvi-usvi",
+        role: "gallery",
+        alt: "St. John journey photograph",
+        caption: "Red Hook ferry photography will be added after review.",
+      },
+    ],
+    relatedIds: ["cyril-e-king-airport", "cruz-bay"],
+  },
+  {
     id: "cruz-bay",
     placeId: "cruz-bay",
     journeyId: "usvi-st-john-2025",
@@ -481,7 +537,7 @@ export const atlasPresentation = Object.freeze([
         caption: "Cruz Bay photography will be added in the next media pass.",
       },
     ],
-    relatedIds: ["great-cruz-bay", "maho-bay"],
+    relatedIds: ["red-hook-ferry-terminal", "great-cruz-bay", "maho-bay"],
   },
   {
     id: "maho-bay",

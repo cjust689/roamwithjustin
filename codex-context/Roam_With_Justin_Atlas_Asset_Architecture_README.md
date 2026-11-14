@@ -395,6 +395,8 @@ Keep business identity, URLs, affiliate disclosures and booking data in Partner 
 
 Third-party hotel images should remain explicit external URLs until ownership or usage permission is confirmed. Do not automatically copy vendor media into R2.
 
+The first canonical provider record is now implemented in `src/content/partners/index.mjs` for Nate's Custom Charters. Journey days reference it through `partnerIds`; selectors resolve the public operator link and disclosure, and validation rejects unknown providers or unsafe URLs. This establishes the Partner boundary without turning the charter day into a premature standalone Experience.
+
 ## Derived application views
 
 Selectors form the boundary between canonical content and Vue components.
@@ -488,7 +490,7 @@ All existing content is canonical:
 
 - `src/data/trips.js` and `src/features/atlas/data/atlasData.js` no longer exist.
 - Trip selectors project all five current cards and all five routable Journey pages from Journeys, Places and Media. Utah, Puerto Rico and St. John expose their verified itineraries; North Georgia and Hungary retain evidence-aware previews until stop, route and coordinate facts are ready.
-- Atlas selectors project nineteen nodes from canonical facts plus Atlas-only presentation settings.
+- Atlas selectors project twenty-one nodes from canonical facts plus Atlas-only presentation settings.
 - Compatibility selectors preserve current Vue prop shapes without owning content.
 - New content must not reintroduce raw local media paths in Journey or Atlas records.
 
@@ -518,7 +520,7 @@ All existing content is canonical:
         experiences/
           README.md
         partners/
-          index.js
+          index.mjs
         selectors/
           media.mjs
           places.mjs
@@ -753,8 +755,8 @@ Still out of scope:
 - Missing local files fail validation.
 - Route order is not inferred from geographic hierarchy.
 - All 92 controlled assets are registered once in Media.
-- All five existing trip cards and 35 detailed visits are Journey projections.
-- All nineteen Atlas nodes are canonical projections; no `atlasData.js` authority remains.
+- All five existing trip cards and 37 detailed visits are Journey projections.
+- All twenty-one Atlas nodes are canonical projections; no `atlasData.js` authority remains.
 - Missing or unverified coordinates remain `null` outside map-visible Atlas nodes.
 - The build contains no R2 write credentials.
 - No database, backend or generalized content framework has been introduced.

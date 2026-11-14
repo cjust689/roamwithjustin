@@ -18,6 +18,62 @@ export const usviPlaces = Object.freeze([
       "This territory record groups the Journey geography; the Atlas opens on St. John rather than an arbitrary territory-wide centerpoint.",
   },
   {
+    id: "st-thomas",
+    name: "St. Thomas",
+    coordinates: null,
+    parentPlaceId: "us-virgin-islands",
+    countryCode: "VI",
+    regionCode: "VI",
+    category: "island",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "unknown",
+    description:
+      "The arrival island for the St. John journey, connecting the airport, Charlotte Amalie harbor views, and the ferry departure from Red Hook.",
+    externalLinks: {
+      maps: "https://www.google.com/maps?q=St.+Thomas,+USVI",
+    },
+    verificationNotes:
+      "The drive across St. Thomas is creator-confirmed; no arbitrary island centerpoint is needed for the current Atlas story.",
+  },
+  {
+    id: "cyril-e-king-airport",
+    name: "Cyril E. King Airport",
+    coordinates: [-64.9733611, 18.3373056],
+    parentPlaceId: "st-thomas",
+    countryCode: "VI",
+    regionCode: "VI",
+    category: "airport",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "airport",
+    description:
+      "St. Thomas's public airport and the first island-scale contrast after departing Atlanta.",
+    externalLinks: {
+      official: "https://www.viport.com/cekastt",
+      maps: "https://www.google.com/maps?q=Cyril+E.+King+Airport,+St.+Thomas",
+    },
+    verificationNotes:
+      "Airport identity and public reference point checked against Virgin Islands Port Authority and FAA records.",
+  },
+  {
+    id: "red-hook-ferry-terminal",
+    name: "Red Hook Ferry Terminal",
+    coordinates: [-64.84917, 18.32669],
+    parentPlaceId: "st-thomas",
+    countryCode: "VI",
+    regionCode: "VI",
+    category: "ferry-terminal",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "terminal",
+    description:
+      "The east-St. Thomas passenger-ferry departure point for the short crossing into Cruz Bay.",
+    externalLinks: {
+      official: "https://dpw.vi.gov/ferries/",
+      maps: "https://www.google.com/maps?q=Red+Hook+Ferry+Terminal,+St.+Thomas,+USVI",
+    },
+    verificationNotes:
+      "Terminal identity and public map point checked against Virgin Islands government ferry information and NPS geographic material.",
+  },
+  {
     id: "st-john",
     name: "St. John",
     coordinates: [-64.7495816, 18.3396764],
@@ -98,11 +154,11 @@ export const usviPlaces = Object.freeze([
     parentPlaceId: "us-virgin-islands",
     countryCode: "VI",
     regionCode: "VI",
-    category: "charter-stop",
+    category: "informal-charter-stop",
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A creator-confirmed boat-day stop preserved under the firsthand name Hermit Crab Island while its formal geographic identity is resolved.",
+      "A creator-confirmed boat-day stop preserved under Justin's nickname, Hermit Crab Island, while its formal geographic identity is resolved.",
     externalLinks: {},
     verificationNotes:
       "Do not create an Atlas pin or alias this to Cas Cay or another island without creator or itinerary confirmation.",

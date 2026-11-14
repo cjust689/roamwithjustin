@@ -5,6 +5,7 @@ import {
   journeyRecords,
 } from "../journeys/index.mjs"
 import { getPlace } from "../places/index.mjs"
+import { getPartner } from "../partners/index.mjs"
 import { resolveMediaList, resolveMediaReference } from "./media.mjs"
 
 function firstSocialLink(record, provider) {
@@ -141,6 +142,15 @@ export function buildTripViewModel(journey) {
         ref: locationByVisitId.get(entry.visitId)?.id || entry.visitId,
         ...(entry.notes ? { notes: entry.notes } : {}),
       })),
+      partners: (day.partnerIds || [])
+        .map(getPartner)
+        .filter(Boolean)
+        .map(partner => ({
+          id: partner.id,
+          name: partner.name,
+          href: partner.officialUrl,
+          disclosure: partner.disclosure,
+        })),
       routes: [...(day.routes || [])],
     })),
     reel: firstSocialLink(journey, "instagram"),
