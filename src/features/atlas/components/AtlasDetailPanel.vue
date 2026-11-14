@@ -59,6 +59,7 @@
         id="atlas-detail-content"
         ref="detailScroll"
         class="atlas-detail-scroll"
+        @scroll.passive="handleDetailScroll"
       >
         <div class="atlas-detail-hero">
           <button
@@ -67,7 +68,11 @@
             :aria-label="`View ${guidedHeroMedia.alt} full screen`"
             @click="openGallery(guidedHeroMedia)"
           >
-            <img :src="guidedHeroImage" :alt="guidedHeroMedia.alt" />
+            <img
+              :src="guidedHeroImage"
+              :alt="guidedHeroMedia.alt"
+              @load="updateScrollCue"
+            />
             <span>{{ guidedHeroLabel }}</span>
           </button>
           <div class="atlas-detail-shade"></div>
@@ -161,6 +166,7 @@
                   :src="media.src"
                   :alt="media.alt"
                   loading="lazy"
+                  @load="updateScrollCue"
                 />
                 <video
                   v-else
@@ -169,6 +175,7 @@
                   preload="metadata"
                   :poster="media.poster"
                   :aria-label="media.alt"
+                  @loadedmetadata="updateScrollCue"
                 >
                   <source :src="media.src" :type="media.mimeType" />
                 </video>
@@ -204,6 +211,17 @@
           </div>
         </div>
       </div>
+
+      <button
+        v-if="detailCanScroll && showScrollCue"
+        class="atlas-scroll-cue"
+        type="button"
+        aria-label="Scroll down for more information about this stop"
+        @click="scrollDetailsForward"
+      >
+        <span>Scroll for story, photos &amp; links</span>
+        <b aria-hidden="true">&#8964;</b>
+      </button>
     </aside>
 
     <div
@@ -303,6 +321,9 @@ export default {
       previouslyFocusedElement: null,
       guidedHeroIndex: 0,
       guidedHeroTimer: null,
+      detailCanScroll: false,
+      showScrollCue: false,
+      detailResizeObserver: null,
     }
   },
   computed: {
@@ -352,6 +373,7 @@ export default {
       this.mobileExpanded = false
       this.guidedHeroIndex = 0
       this.closeGallery(false)
+      this.scrollDetailsToTop()
     },
     expandRequest() {
       // Match the same condition that turns this panel into a bottom drawer.
@@ -375,13 +397,17 @@ export default {
   },
   mounted() {
     window.addEventListener("keydown", this.handleGalleryKeydown)
+    window.addEventListener("resize", this.updateScrollCue)
     document.addEventListener("visibilitychange", this.handleVisibilityChange)
+    this.$nextTick(this.observeDetailSize)
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
     this.stopGuidedHeroCycle()
+    this.detailResizeObserver?.disconnect()
     window.removeEventListener("keydown", this.handleGalleryKeydown)
+    window.removeEventListener("resize", this.updateScrollCue)
     document.removeEventListener(
       "visibilitychange",
       this.handleVisibilityChange
@@ -390,8 +416,12 @@ export default {
   methods: {
     toggleMobileDrawer() {
       this.mobileExpanded = !this.mobileExpanded
-      if (this.mobileExpanded) this.startGuidedHeroCycle()
-      else this.stopGuidedHeroCycle()
+      if (this.mobileExpanded) {
+        this.startGuidedHeroCycle()
+        this.$nextTick(this.updateScrollCue)
+      } else {
+        this.stopGuidedHeroCycle()
+      }
     },
     startGuidedHeroCycle() {
       this.stopGuidedHeroCycle()
@@ -432,6 +462,46 @@ export default {
           ? "auto"
           : "smooth"
         this.$refs.detailScroll?.scrollTo({ top: 0, behavior })
+        this.updateScrollCue()
+      })
+    },
+    observeDetailSize() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      this.detailResizeObserver?.disconnect()
+      if (typeof ResizeObserver !== "undefined") {
+        this.detailResizeObserver = new ResizeObserver(this.updateScrollCue)
+        this.detailResizeObserver.observe(scroller)
+        if (scroller.firstElementChild) {
+          this.detailResizeObserver.observe(scroller.firstElementChild)
+        }
+      }
+      this.updateScrollCue()
+    },
+    updateScrollCue() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      const remaining =
+        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
+      this.detailCanScroll = scroller.scrollHeight - scroller.clientHeight > 24
+      this.showScrollCue = this.detailCanScroll && remaining > 28
+    },
+    handleDetailScroll() {
+      this.updateScrollCue()
+    },
+    scrollDetailsForward() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "auto"
+        : "smooth"
+      scroller.scrollBy({
+        top: Math.max(220, scroller.clientHeight * 0.68),
+        behavior,
       })
     },
     normalizeMedia(entry) {
@@ -535,6 +605,81 @@ export default {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-color: #f6bd60 rgba(255, 255, 255, 0.08);
+  scrollbar-width: thin;
+}
+
+.atlas-detail-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.atlas-detail-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.atlas-detail-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #f6bd60;
+}
+
+.atlas-scroll-cue {
+  position: absolute;
+  z-index: 5;
+  right: 1rem;
+  bottom: 0.85rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  border: 1px solid rgba(246, 189, 96, 0.5);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  background: rgba(7, 11, 14, 0.92);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 -24px 32px 14px rgba(9, 14, 17, 0.76);
+  color: #fff;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+
+.atlas-scroll-cue b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  background: #f6bd60;
+  color: #111719;
+  font-size: 1rem;
+  line-height: 1;
+  animation: atlas-scroll-nudge 1.8s ease-in-out infinite;
+}
+
+.atlas-scroll-cue:hover,
+.atlas-scroll-cue:focus-visible {
+  border-color: #f6bd60;
+  background: rgba(17, 25, 29, 0.98);
+}
+
+.atlas-scroll-cue:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes atlas-scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
 }
 
 .atlas-detail-hero {
@@ -931,6 +1076,18 @@ export default {
     display: none;
   }
 
+  .atlas-detail:not(.is-expanded) .atlas-scroll-cue {
+    display: none;
+  }
+
+  .atlas-scroll-cue {
+    right: 0.85rem;
+    bottom: calc(5.75rem + env(safe-area-inset-bottom) + 0.7rem);
+    left: 0.85rem;
+    min-height: 3.15rem;
+    font-size: 0.82rem;
+  }
+
   .atlas-detail-scroll {
     order: 1;
     min-height: 0;
@@ -1131,6 +1288,12 @@ export default {
   .atlas-lightbox-next {
     width: 3rem;
     height: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-scroll-cue b {
+    animation: none;
   }
 }
 </style>

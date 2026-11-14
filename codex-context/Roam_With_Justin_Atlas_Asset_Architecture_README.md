@@ -463,6 +463,16 @@ Current delivery notes:
 - Reduced-motion visitors receive near-instant camera changes and no automatic media cycling.
 - Confirmed per-transition modes and public road-following route geometry remain content-model extensions; the player and transport marker are ready to consume them without moving those facts into Places.
 
+### Trip story and Atlas navigation - implemented
+
+Trip stories and the Atlas expose two presentations of the same Journey. Their cross-navigation is derived by `addTripAtlasNavigation`; it is not stored on Journey or Place records and does not create a separate route mapping.
+
+- A trip-level link resolves to the Atlas root node with the same `journeyId`.
+- A location-level link resolves to the exact Atlas node when its canonical `placeId` is publicly mapped.
+- A visited Place without an Atlas presentation falls back to the Journey root instead of inventing a pin.
+- Atlas nodes continue to derive their "Read the trip story" action from the Journey slug.
+- Build-time validation checks root fallbacks and exact Place-to-pin links for drift.
+
 ### Compatibility after migration
 
 The resolver may temporarily accept:
