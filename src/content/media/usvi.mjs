@@ -39,7 +39,6 @@ export const usviMedia = Object.freeze([
       width: null,
       height: null,
     },
-    posterAssetId: "image-usvi-usvi-full",
     rights: {
       owner: "roam-with-justin",
       status: "owned",
@@ -65,7 +64,6 @@ export const usviMedia = Object.freeze([
       width: null,
       height: null,
     },
-    posterAssetId: "image-usvi-usvi-full",
     rights: {
       owner: "roam-with-justin",
       status: "owned",
@@ -90,7 +88,6 @@ export const usviMedia = Object.freeze([
       width: null,
       height: null,
     },
-    posterAssetId: "image-usvi-usvi-full",
     rights: {
       owner: "roam-with-justin",
       status: "owned",

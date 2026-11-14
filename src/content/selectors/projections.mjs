@@ -98,13 +98,18 @@ export function buildTripLocationView(journey, visit) {
   const place = getPlace(visit.placeId)
   if (!place) return null
 
-  // A visit with no verified image intentionally falls back to its Journey
-  // cover instead of inventing a location-specific asset association.
-  const hero = resolveMediaReference(visit.hero || journey.hero)
   const media = uniqueMedia([
     ...resolveMediaList(visit.media),
     ...getVisitPublishedMedia(journey.id, visit.id),
   ])
+  // Explicit editorial heroes always win. When a Visit has no curated hero,
+  // its first published Place/Visit image is the truthful display default.
+  // Never borrow the Journey cover for a specific Place: an empty image is
+  // preferable to implying that the destination cover was captured there.
+  const hero =
+    resolveMediaReference(visit.hero) ||
+    media.find(item => item.kind === "image") ||
+    null
   // A video makes a stop richer, but it does not make the shared Journey
   // cover a verified location photograph. Keep the photo-pending cue visible
   // until this visit owns either a hero or a location-specific image.
@@ -124,8 +129,6 @@ export function buildTripLocationView(journey, visit) {
     type: visit.type || place.category,
     droneAllowed: Boolean(visit.droneAllowed),
     image: hero?.src || "",
-    // The journey cover can keep a new location card visually usable while
-    // this flag tells the UI that stop-specific photography is still pending.
     mediaPending,
     gallery,
     media,
@@ -310,15 +313,24 @@ export function buildAtlasNodeView(presentation) {
 
   if (!place || !journey) return null
 
-  const hero = resolveMediaReference(presentation.hero || visit?.hero)
+  const publishedMedia = visit
+    ? getVisitPublishedMedia(journey.id, visit.id)
+    : []
   const media = uniqueMedia(
     [
       ...resolveMediaList(
         presentation.media || [visit?.hero, ...(visit?.media || [])]
       ),
-      ...(visit ? getVisitPublishedMedia(journey.id, visit.id) : []),
+      ...publishedMedia,
     ]
   )
+  // Curated presentation/Visit heroes are protected. Otherwise, prefer the
+  // first verified image placed on this Visit and leave image empty when the
+  // Place has none instead of repeating a Journey-level cover across pins.
+  const hero =
+    resolveMediaReference(presentation.hero || visit?.hero) ||
+    media.find(item => item.kind === "image") ||
+    null
   const personalNote =
     visit?.summary || visit?.description || journey.atlasNotes?.[place.id] || ""
 

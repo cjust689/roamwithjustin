@@ -628,9 +628,9 @@ export const atlasPresentation = Object.freeze([
     ],
     relatedIds: ["cueva-del-indio", "gozalandia-falls"],
   },
-  // St. John nodes reuse the journey-level cover only as an explicit visual
-  // placeholder. Location-specific Lightroom selections will replace these
-  // usages without changing Place, Journey, or Atlas node identities.
+  // The destination node owns the Journey cover. Child nodes intentionally
+  // omit generic placeholders: their published Place/Visit placements become
+  // display media automatically, and nodes without verified images stay empty.
   {
     id: "st-john",
     placeId: "st-john",
@@ -649,13 +649,7 @@ export const atlasPresentation = Object.freeze([
       role: "hero",
       alt: "St. John journey cover photograph",
     },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey cover photograph",
-      },
-    ],
+    media: [],
     relatedIds: [],
   },
   {
@@ -671,19 +665,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 58,
       bearing: -18,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "St. Thomas arrival photography will be added after review.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["red-hook-ferry-terminal"],
   },
   {
@@ -699,19 +682,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 60,
       bearing: 24,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Red Hook ferry photography will be added after review.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["cyril-e-king-airport", "cruz-bay"],
   },
   {
@@ -727,18 +699,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 58,
       bearing: 20,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
+    hero: null,
     media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Cruz Bay photography will be added in the next media pass.",
-      },
       {
         assetId: "video-usvi-arrival-ferry-001",
         role: "gallery",
@@ -760,19 +722,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 61,
       bearing: -24,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Maho photography will be added in the next media pass.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["great-cruz-bay", "trunk-bay", "cinnamon-bay"],
   },
   {
@@ -788,19 +739,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 60,
       bearing: 16,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Oceana Villa photography will be added after review.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["cruz-bay", "maho-bay"],
   },
   {
@@ -816,18 +756,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 62,
       bearing: 26,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
+    hero: null,
     media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Lovango charter photography will be added after review.",
-      },
       {
         assetId: "video-usvi-nates-charters-001",
         role: "gallery",
@@ -850,19 +780,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 62,
       bearing: 18,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption: "Trunk Bay photography will be added in the next media pass.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["maho-bay", "cinnamon-bay", "lovango-cay"],
   },
   {
@@ -878,20 +797,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 61,
       bearing: -18,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
-    media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption:
-          "Cinnamon Bay photography will be added in the next media pass.",
-      },
-    ],
+    hero: null,
+    media: [],
     relatedIds: ["maho-bay", "trunk-bay", "waterlemon-cay"],
   },
   {
@@ -907,19 +814,8 @@ export const atlasPresentation = Object.freeze([
       pitch: 64,
       bearing: 22,
     },
-    hero: {
-      assetId: "image-usvi-usvi-full",
-      role: "hero",
-      alt: "St. John journey photograph",
-    },
+    hero: null,
     media: [
-      {
-        assetId: "image-usvi-usvi-full",
-        role: "gallery",
-        alt: "St. John journey photograph",
-        caption:
-          "Waterlemon Cay photography will be added in the next media pass.",
-      },
       {
         assetId: "video-usvi-waterlemon-001",
         role: "gallery",

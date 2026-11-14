@@ -184,14 +184,18 @@
               <button type="button" @click="openLocation(entry.ref)">
                 <span class="location-image">
                   <img
+                    v-if="getLocation(entry.ref).image"
                     :src="getLocation(entry.ref).image"
-                    :alt="
-                      getLocation(entry.ref).mediaPending
-                        ? `${trip.name} journey cover; ${getLocation(entry.ref).name} photos coming soon`
-                        : getLocation(entry.ref).name
-                    "
+                    :alt="getLocation(entry.ref).name"
                     loading="lazy"
                   />
+                  <span
+                    v-else
+                    class="location-image-placeholder"
+                    aria-hidden="true"
+                  >
+                    Photography pending
+                  </span>
                   <span
                     v-if="getLocation(entry.ref).mediaPending"
                     class="location-media-status"
@@ -883,6 +887,21 @@ export default {
   display: block;
   height: 220px;
   overflow: hidden;
+  background:
+    radial-gradient(circle at 28% 22%, rgba(246, 189, 96, 0.18), transparent 35%),
+    linear-gradient(145deg, #15242a, #091014);
+}
+
+.location-image-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .location-media-status {
