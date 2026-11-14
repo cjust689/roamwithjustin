@@ -501,6 +501,14 @@ export default {
     left: 0.65rem;
     grid-template-columns: auto 1fr auto;
     gap: 0.55rem;
+    min-height: 4rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .atlas-brand > span {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 0.82rem;
   }
 
   .atlas-brand strong,
@@ -509,7 +517,15 @@ export default {
   }
 
   .atlas-tools button {
-    padding: 0.55rem 0.7rem;
+    min-height: 2.75rem;
+    padding: 0.6rem 0.78rem;
+    font-size: 0.88rem;
+  }
+
+  .atlas-tools button span {
+    min-width: 1.45rem;
+    height: 1.45rem;
+    font-size: 0.75rem;
   }
 
   .atlas-welcome {
@@ -523,6 +539,15 @@ export default {
 
   .atlas-welcome h1 {
     font-size: clamp(3rem, 15vw, 4.7rem);
+  }
+
+  .atlas-welcome p {
+    font-size: 1.02rem;
+  }
+
+  .atlas-welcome button {
+    min-height: 3rem;
+    font-size: 0.92rem;
   }
 
   .atlas-provider-note {

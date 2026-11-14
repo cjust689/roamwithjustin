@@ -77,4 +77,17 @@ export default {
   outline-offset: 3px;
   border-radius: 2px;
 }
+
+@media (max-width: 720px) {
+  .atlas-breadcrumbs ol,
+  .atlas-breadcrumbs li {
+    gap: 0.6rem;
+  }
+
+  .atlas-breadcrumbs button {
+    min-height: 2.75rem;
+    padding: 0.65rem 0;
+    font-size: 0.92rem;
+  }
+}
 </style>

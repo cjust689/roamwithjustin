@@ -43,7 +43,7 @@ const journeyLineLayerId = "atlas-journey-line"
 const compactMarkerQuery = "(max-width: 720px), (any-pointer: coarse)"
 const markerPinOffsets = {
   default: [-24, -2],
-  compact: [-29, -2],
+  compact: [-31, -2],
 }
 
 maplibregl.setWorkerUrl(
@@ -676,9 +676,17 @@ export default {
 
 @media (max-width: 720px) {
   .atlas-route-key {
-    top: 5rem;
+    top: 5.65rem;
     left: 0.7rem;
-    padding: 0.5rem 0.65rem;
+    padding: 0.65rem 0.8rem;
+  }
+
+  .atlas-route-key span {
+    font-size: 0.76rem;
+  }
+
+  .atlas-route-key strong {
+    font-size: 0.86rem;
   }
 }
 
@@ -689,21 +697,21 @@ export default {
  */
 @media (max-width: 720px), (any-pointer: coarse) {
   .atlas-marker {
-    --marker-avatar-size: 48px;
-    --marker-pin-x: 29px;
+    --marker-avatar-size: 52px;
+    --marker-pin-x: 31px;
 
-    min-width: 58px;
-    min-height: 58px;
+    min-width: 64px;
+    min-height: 64px;
     gap: 0.5rem;
     padding: 4px;
     border-width: 2px;
   }
 
   .atlas-marker[data-stop]::before {
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     border-width: 2px;
-    font-size: 0.78rem;
+    font-size: 0.88rem;
   }
 
   .atlas-marker::after {
@@ -722,24 +730,33 @@ export default {
     display: block;
     max-width: min(34vw, 150px);
     padding-right: 0.45rem;
-    font-size: 0.82rem;
+    font-size: 0.94rem;
+  }
+
+  .atlas-map .maplibregl-ctrl-group button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .atlas-map .maplibregl-ctrl-group button span {
+    transform: scale(1.12);
   }
 }
 
 @media (orientation: portrait) {
   .atlas-route-key {
-    top: 5rem;
+    top: 5.65rem;
     left: 0.7rem;
-    padding: 0.5rem 0.65rem;
+    padding: 0.65rem 0.8rem;
   }
 
   .atlas-map .maplibregl-ctrl-bottom-left {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    bottom: calc(6.4rem + env(safe-area-inset-bottom));
     left: 0.7rem;
   }
 
   .atlas-map .maplibregl-ctrl-bottom-right {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    bottom: calc(6.4rem + env(safe-area-inset-bottom));
   }
 }
 

@@ -810,7 +810,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: 78dvh;
+    max-height: 82dvh;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -835,9 +835,9 @@ export default {
   .atlas-detail-dock {
     order: 2;
     display: grid;
-    grid-template-columns: 4.25rem minmax(0, 1fr) 4.25rem;
+    grid-template-columns: 5rem minmax(0, 1fr) 5rem;
     align-items: stretch;
-    min-height: 4.85rem;
+    min-height: 5.75rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(7, 11, 14, 0.96);
   }
@@ -861,13 +861,13 @@ export default {
     justify-content: center;
     gap: 0.18rem;
     color: rgba(255, 255, 255, 0.7) !important;
-    font-size: 0.58rem !important;
+    font-size: 0.76rem !important;
     font-weight: 700 !important;
   }
 
   .atlas-dock-action > span {
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.35rem;
   }
 
   .atlas-dock-action.active,
@@ -877,17 +877,17 @@ export default {
 
   .atlas-dock-place {
     display: grid;
-    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    grid-template-columns: 3.75rem minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.7rem;
     min-width: 0;
-    padding: 0.55rem 0.45rem;
+    padding: 0.65rem 0.5rem;
     text-align: left;
   }
 
   .atlas-dock-place img {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 3.75rem;
+    height: 3.75rem;
     border-radius: 12px;
     object-fit: cover;
   }
@@ -902,7 +902,7 @@ export default {
   .atlas-dock-place small {
     overflow: hidden;
     color: #f6bd60;
-    font-size: 0.57rem;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.13em;
     text-overflow: ellipsis;
@@ -912,7 +912,7 @@ export default {
 
   .atlas-dock-place strong {
     overflow: hidden;
-    font-size: 0.82rem;
+    font-size: 1rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -926,13 +926,13 @@ export default {
   }
 
   .atlas-dock-toggle > span {
-    font-size: 1.05rem;
+    font-size: 1.3rem;
     line-height: 0.8;
   }
 
   .atlas-dock-toggle > small {
     color: rgba(255, 255, 255, 0.62);
-    font-size: 0.5rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0;
     text-transform: none;
@@ -944,7 +944,72 @@ export default {
   }
 
   .atlas-detail-hero {
-    min-height: 230px;
+    min-height: 250px;
+  }
+
+  .atlas-detail-hero-image span {
+    font-size: 0.8rem;
+  }
+
+  .atlas-detail-title span,
+  .atlas-note span,
+  .atlas-section-heading span {
+    font-size: 0.8rem;
+  }
+
+  .atlas-detail-title h1 {
+    font-size: clamp(2.25rem, 10vw, 3rem);
+  }
+
+  .atlas-detail-title p,
+  .atlas-note p {
+    font-size: 1rem;
+  }
+
+  .atlas-detail-content {
+    padding: 1.4rem;
+  }
+
+  .atlas-summary {
+    font-size: 1.08rem;
+  }
+
+  .atlas-section-heading strong {
+    font-size: 0.82rem;
+  }
+
+  .atlas-discoveries > button {
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    min-height: 5rem;
+    padding: 0.85rem 0;
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .atlas-discoveries img {
+    width: 72px;
+    height: 60px;
+  }
+
+  .atlas-discoveries small {
+    font-size: 0.76rem;
+  }
+
+  .atlas-related button {
+    min-height: 2.75rem;
+    font: inherit;
+    font-size: 0.9rem;
+  }
+
+  .atlas-actions a {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .atlas-media-badge {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.78rem;
   }
 
   .atlas-lightbox {
@@ -960,8 +1025,8 @@ export default {
 
   .atlas-lightbox-previous,
   .atlas-lightbox-next {
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 3rem;
+    height: 3rem;
   }
 }
 </style>
