@@ -211,6 +211,25 @@ export default {
   text-align: center;
 }
 
+@media (max-width: 760px) {
+  /* Trip details and calls-to-action occupy the lower portion of the mobile
+     hero. Keep image navigation in the quiet upper corner instead. */
+  .carousel-controls {
+    top: 1rem;
+    right: 1rem;
+    bottom: auto;
+  }
+
+  .carousel-controls button {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .carousel-controls span {
+    min-width: 2.8rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .carousel-track {
     transition: none;
