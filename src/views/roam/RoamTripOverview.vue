@@ -268,7 +268,8 @@
               :key="item.name"
               :href="item.link"
               target="_blank"
-              rel="noopener noreferrer"
+              :rel="item.rel || 'noopener noreferrer'"
+              :title="item.disclosure || null"
             >
               {{ item.name }} <span>&nearr;</span>
             </a>
@@ -276,6 +277,10 @@
               {{ item.name }}
             </span>
           </div>
+          <p v-if="hasAffiliateGear" class="gear-disclosure">
+            Some gear links are affiliate links. They may support Roam With
+            Justin at no additional cost to you.
+          </p>
         </article>
 
         <article
@@ -365,6 +370,9 @@ export default {
     },
     gearWithoutLinks() {
       return this.trip?.gearHighlights.filter(item => !item.link) || []
+    },
+    hasAffiliateGear() {
+      return this.trip?.gearHighlights.some(item => item.affiliate) || false
     },
   },
   methods: {
@@ -999,6 +1007,13 @@ export default {
 .gear-list a {
   border-color: rgba(246, 189, 96, 0.35);
   color: #f8d79f;
+}
+
+.gear-disclosure {
+  margin: 1rem 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.72rem;
+  line-height: 1.55;
 }
 
 .notes-grid {

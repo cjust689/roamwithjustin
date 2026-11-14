@@ -2,6 +2,7 @@ const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
 const { pathToFileURL } = require("url")
+const { validateGearRecords } = require("./lib/gear-ingestion.js")
 
 const projectRoot = path.resolve(__dirname, "..")
 const errors = []
@@ -111,21 +112,25 @@ async function main() {
   const [
     contracts,
     mediaModule,
+    gearModule,
     placeModule,
     aliasModule,
     journeyModule,
     partnerModule,
     projections,
+    gearSelectors,
     atlasModule,
     atlasRootsModule,
   ] = await Promise.all([
     importContent("src/content/contracts.mjs"),
     importContent("src/content/media/index.mjs"),
+    importContent("src/content/gear/index.mjs"),
     importContent("src/content/places/index.mjs"),
     importContent("src/content/places/aliases.mjs"),
     importContent("src/content/journeys/index.mjs"),
     importContent("src/content/partners/index.mjs"),
     importContent("src/content/selectors/projections.mjs"),
+    importContent("src/content/selectors/gear.mjs"),
     importContent("src/content/atlas/presentation.mjs"),
     importContent("src/content/atlas/roots.mjs"),
   ])
@@ -214,6 +219,34 @@ async function main() {
     }
   })
   await Promise.all(localImageChecks)
+
+  const gearValidation = validateGearRecords(
+    {
+      schemaVersion: gearModule.gearSchemaVersion,
+      items: gearModule.gearRecords,
+      usage: gearModule.gearUsageRecords,
+    },
+    {
+      journeys: journeyModule.journeyRecords,
+      media: mediaModule.mediaRecords,
+    }
+  )
+  gearValidation.errors.forEach(report)
+  gearValidation.warnings.forEach(warning =>
+    console.warn("Gear validation warning: " + warning)
+  )
+
+  journeyModule.journeyRecords.forEach(journey => {
+    gearSelectors.getJourneyGear(journey.id).forEach(item => {
+      if (!item.id || !item.name || !item.category) {
+        report(
+          'Journey gear selector returned an invalid item for "' +
+            journey.id +
+            '"'
+        )
+      }
+    })
+  })
 
   placeModule.placeRecords.forEach(place => {
     const owner = 'Place "' + place.id + '"'
@@ -734,6 +767,10 @@ async function main() {
     "Content validation passed: " +
       mediaModule.mediaRecords.length +
       " media, " +
+      gearModule.gearRecords.length +
+      " gear, " +
+      gearModule.gearUsageRecords.length +
+      " gear usages, " +
       placeModule.placeRecords.length +
       " places, " +
       journeyModule.journeyRecords.length +

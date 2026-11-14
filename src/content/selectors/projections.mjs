@@ -6,6 +6,7 @@ import {
 } from "../journeys/index.mjs"
 import { getPlace } from "../places/index.mjs"
 import { getPartner } from "../partners/index.mjs"
+import { getJourneyGear } from "./gear.mjs"
 import { resolveMediaList, resolveMediaReference } from "./media.mjs"
 
 function firstSocialLink(record, provider) {
@@ -62,6 +63,30 @@ function journeyPreviewCopy(journey) {
   }
 
   return "This destination is registered as a future story. Dates, stops, and route details remain unpublished until they can be verified."
+}
+
+function journeyGearHighlights(journey, canonicalGear) {
+  const canonical = canonicalGear.map(item => ({
+    gearId: item.id,
+    name: item.name,
+    category: item.category,
+    notes: item.notes || item.whyItWorked,
+    link: item.primaryLink?.url || "",
+    rel: item.primaryLink?.rel || "noopener noreferrer",
+    affiliate: Boolean(item.primaryLink?.affiliate),
+    disclosure: item.primaryLink?.affiliate ? "Affiliate link" : "",
+    canonical: true,
+  }))
+  const canonicalNames = new Set(
+    canonical.map(item => item.name.trim().toLowerCase())
+  )
+  const legacy = (journey.gearHighlights || []).filter(
+    item => !canonicalNames.has(item.name.trim().toLowerCase())
+  )
+
+  // Existing journey arrays remain a compatibility fallback while verified
+  // products move into the generated canonical Gear/Usage records.
+  return [...canonical, ...legacy]
 }
 
 export function buildTripLocationView(journey, visit) {
@@ -125,6 +150,8 @@ export function buildTripViewModel(journey) {
   const locationByVisitId = new Map(
     locations.map(location => [location.visitId, location])
   )
+  const gear = getJourneyGear(journey.id)
+  const gearHighlights = journeyGearHighlights(journey, gear)
 
   return {
     id: journey.slug,
@@ -151,7 +178,8 @@ export function buildTripViewModel(journey) {
     who: journey.audience,
     costLevel: journey.costLevel,
     bestTimeToGo: journey.bestTimeToGo,
-    gearHighlights: [...(journey.gearHighlights || [])],
+    gear,
+    gearHighlights,
     travelNotes: [...(journey.travelNotes || [])],
     tips: [...(journey.tips || [])],
     lodging: (journey.lodging || []).map(stay => ({
@@ -191,7 +219,7 @@ export function buildTripViewModel(journey) {
     ).size,
     hasItinerary: Boolean(journey.days?.length && locations.length),
     hasFieldNotes: Boolean(
-      journey.gearHighlights?.length ||
+      gearHighlights.length ||
         journey.travelNotes?.length ||
         journey.tips?.length
     ),
