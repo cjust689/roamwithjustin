@@ -1,0 +1,2392 @@
+{
+  "schemaVersion": 1,
+  "assets": [
+    {
+      "id": "image-usvi-380d1e6f91eb-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "380d1e6f91eb630d9e216756da93807f540c39f64f2681127e5d8a5f6f4b1096",
+        "byteSize": 274908,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-c03c19c1aa55-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "c03c19c1aa555f6b5e626c7a00a23f4bafc3fa5371de8d73d183b39f51203c7d",
+        "byteSize": 851477,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-a7860d27aa67-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "a7860d27aa672cc4e26a337b7b5d1ba28c8c812cdc13e80590eeefe277a14e34",
+        "byteSize": 707895,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-a1fa6a303fcb-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1920,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "a1fa6a303fcb8b76dbd752091319d0bbbda5b888f3e1db9a189ea235a31f1978",
+        "byteSize": 377814,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-f58f06c4c9a5-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "f58f06c4c9a58de0bd5eac19612a3fe5ebbfaaf035a199b52f6f3a48c422ed71",
+        "byteSize": 299821,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-be51bc25d104-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "be51bc25d1044109ed8a73bfdf856c5bdc875e05792e5dd7280857a4cc816d68",
+        "byteSize": 612463,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-2961bd7d7b92-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "2961bd7d7b92b82004b42ebfea3294cf26344ef95859fee00b615fe1e7cc5d82",
+        "byteSize": 589649,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-0519339867a0-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cinnamon-bay/media-usvi-cinnamon-bay-d1296a8f2621eb82/cinnamon-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "0519339867a03162828d6c1e690a1dcaae9a31b2b07efc090d5a7281ccc2645d",
+        "byteSize": 323102,
+        "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
+      }
+    },
+    {
+      "id": "image-usvi-c51002a482c9-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "c51002a482c90a612e159f72652387068dcdb9b5583419aeb1abfd6356f28494",
+        "byteSize": 818751,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-1b58d938875c-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1064
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "1b58d938875c687a0c5b1a1a563fded6d1ca6fab50928423567f17ae3c3a13a7",
+        "byteSize": 558822,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-e39fe0f94b2b-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "e39fe0f94b2b3c0f45ba88c1ee684c3c82a30b386a703c7ef60e9f6af8749761",
+        "byteSize": 591272,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-60f355c6f25a-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "60f355c6f25a22ba6a5670ba36601b325fc5f9593faf44e418165138ca8b767f",
+        "byteSize": 315163,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-fce917462f0d-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "fce917462f0db2f5fbf484102f1b455deee697f2474b828b0544b595c97ce699",
+        "byteSize": 810513,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-983fc18624b6-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1439,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "983fc18624b662ccbe371cf8ec0bb58794475974e029cb4e790aa78eb3725129",
+        "byteSize": 399237,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-efaec5a67f91-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "efaec5a67f9191ea21f4fc75c75a859bb12a5a8a658c8a4c229dfabce751394b",
+        "byteSize": 378251,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-55234f4de095-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "55234f4de09554e604d7ee3d5ad295db1b78337606fd04b02b9a75e686e2e919",
+        "byteSize": 818420,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-0fdd28a2b459-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "0fdd28a2b4595312466dae675cc30c9d54d716c5af1d0b5cb4cca7240032b74b",
+        "byteSize": 162908,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-77110d58c7db-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "77110d58c7db4710eaac3775b49c246e8e492d7e30800b58b55ee85e9e61f8ca",
+        "byteSize": 240321,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-b625fcaf6766-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "b625fcaf67668acf8eda06ab627d3a0db541d8d1dc12d63f46a4cdbc489dd683",
+        "byteSize": 349766,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-3d711ac74d6e-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "3d711ac74d6e23b2aab444216c5ac463670587ce2440ef94b66f47f9838affd6",
+        "byteSize": 840408,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-8c4703549399-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "8c4703549399e38999dcee44421bc9b869324aea5203e9a01849a8f4bd4157d8",
+        "byteSize": 992461,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-d37c2d94428e-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "d37c2d94428ee12e791458059247204df31804541f64869abcd631a48c24cebe",
+        "byteSize": 357111,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-3d0544c055d7-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "3d0544c055d7afe33b27265d223541363811a488784a0023bf993f1e2a9ada59",
+        "byteSize": 841398,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-b05191dafca1-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "b05191dafca1e00ad971f0d3f044f7d306cead6078886fd9b87bc1743d42b7b3",
+        "byteSize": 491564,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-55134d613eb7-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "55134d613eb799fbc8e41d775524738c2affcf74c9ec5577d244925b0d839320",
+        "byteSize": 565608,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-2fbb84382558-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "2fbb84382558f8ee9c6573afb0bee93051341f2ab6d9d4089bfaf1bb30345d6b",
+        "byteSize": 574735,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-cb2d2d6958ba-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "cb2d2d6958baf0d2c3a22c469f40e7eeed8523280b54da24f0e5c20db5848793",
+        "byteSize": 327888,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
+    },
+    {
+      "id": "image-usvi-947d03fffff4-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "947d03fffff4aaf0c6b72c6bf43cda2a756953ee2f2ec5cdcd52828c47a31736",
+        "byteSize": 210963,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
+    },
+    {
+      "id": "image-usvi-6b6ef0214420-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-003.png"
+      },
+      "intrinsic": {
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 1536
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "6b6ef0214420e99c9002165783873f1b093fa8b3eb96b3b67b8cddcf4f1ebf3c",
+        "byteSize": 1790788,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
+    },
+    {
+      "id": "image-usvi-a881ac07538a-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/trunk-bay/media-usvi-trunk-bay-1db0cfdc028bcad4/trunk-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1712
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "a881ac07538ab9b2723ce46ea67b4e0e7bdac72f4641635cac2f0a6cb54816a4",
+        "byteSize": 438080,
+        "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+      }
+    },
+    {
+      "id": "image-usvi-e128d450d1f8-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/trunk-bay/media-usvi-trunk-bay-1db0cfdc028bcad4/trunk-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "e128d450d1f8ef6d41479d80114c3d227a4baf52e5fec6f6940d9a3901df075d",
+        "byteSize": 230971,
+        "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+      }
+    },
+    {
+      "id": "image-usvi-0d11b0f7967a-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/trunk-bay/media-usvi-trunk-bay-1db0cfdc028bcad4/trunk-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1920,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "0d11b0f7967a0ec556000adb87f57e0711e0d844f35cbd1c35aa675a19d3f564",
+        "byteSize": 431386,
+        "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+      }
+    },
+    {
+      "id": "image-usvi-f8edda4d6e14-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/trunk-bay/media-usvi-trunk-bay-1db0cfdc028bcad4/trunk-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "f8edda4d6e146115ffc640e89959ac1dc5952b662caa3c46edeb8699e543dff0",
+        "byteSize": 356276,
+        "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+      }
+    },
+    {
+      "id": "image-usvi-d77cadb09fe4-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/media-usvi-028eb53149d731bf/usvi-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "d77cadb09fe4444401aa129f6534da9114d9d4575845b212c543533b8f1b59de",
+        "byteSize": 353508,
+        "batchId": "media-usvi-028eb53149d731bf"
+      }
+    },
+    {
+      "id": "image-usvi-2e66cdf0f1ef-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/media-usvi-028eb53149d731bf/usvi-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "2e66cdf0f1ef19d66b5d83886cf02b8e7c0a08770e8fa519809485aaade8086f",
+        "byteSize": 425863,
+        "batchId": "media-usvi-028eb53149d731bf"
+      }
+    },
+    {
+      "id": "image-usvi-4ee53a4622ff-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/media-usvi-028eb53149d731bf/usvi-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "4ee53a4622ff5c546e1496dbbd182db632b51bb45375d4f2ad15d871921528ca",
+        "byteSize": 481791,
+        "batchId": "media-usvi-028eb53149d731bf"
+      }
+    },
+    {
+      "id": "image-usvi-562cfaf223d3-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/media-usvi-028eb53149d731bf/usvi-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "562cfaf223d34f1ed502b320aedb592965527623d7f455ab148c250b93768341",
+        "byteSize": 128043,
+        "batchId": "media-usvi-028eb53149d731bf"
+      }
+    },
+    {
+      "id": "image-usvi-763451e6b884-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/media-usvi-028eb53149d731bf/usvi-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "763451e6b884c92b2dd02169c2b71afe35ea5c27f65391d35497d929c06a5a8a",
+        "byteSize": 232988,
+        "batchId": "media-usvi-028eb53149d731bf"
+      }
+    },
+    {
+      "id": "image-usvi-e4c381fa292b-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 2,
+        "sha256": "e4c381fa292b000a68cb0dd48418a0d68df7d27af48a04712fb64c69dac9f224",
+        "byteSize": 233137,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-0497e9e1b43b-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 2,
+        "sha256": "0497e9e1b43b1e6de90e72dbed046718e94ad6f2c4f11fffa74a72122a5ecc92",
+        "byteSize": 198302,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-8562a2c3a5e3-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 2,
+        "sha256": "8562a2c3a5e34b08a514a48456db278b843120d557a571765458c02b09cb4a3b",
+        "byteSize": 179259,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-a4accfb6df47-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 2,
+        "sha256": "a4accfb6df47db8d6e41c50ee97583f666fe5f7b6f348ca05534f9e13b130c4c",
+        "byteSize": 177891,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-547fbdbbd8fb-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 2,
+        "sha256": "547fbdbbd8fb6959e2fb06585e4f78a4f8881346505d68eb03a6c65aae42ce6e",
+        "byteSize": 109334,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-c90774847502-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 2,
+        "sha256": "c9077484750282f87ca24a9e7ea1d84ea987d4a776d739495c8e72bac36040c3",
+        "byteSize": 331846,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-0d4f1c0c43c1-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 7",
+      "publication": {
+        "revision": 2,
+        "sha256": "0d4f1c0c43c15fc750d84f43fbdb879bd808b38a6a33e8b04bc14df27b24418f",
+        "byteSize": 847501,
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+      }
+    },
+    {
+      "id": "image-usvi-8db684083864-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1068
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "8db684083864e18fa74c0da8831c83cb0b3c449ecde5a273c167d53d3cc3385a",
+        "byteSize": 417301,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    },
+    {
+      "id": "image-usvi-1ede4b349592-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1703,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "1ede4b34959246265e00938cdae7aae316e7aa92ffdf71ac21a7adf1f3c99fab",
+        "byteSize": 437795,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    },
+    {
+      "id": "image-usvi-c3a4a9e1299a-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "c3a4a9e1299a2fffedea511b4c223d408ad1b6b9f7ba4f83ef107af7fac1e58c",
+        "byteSize": 645488,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    },
+    {
+      "id": "image-usvi-9c3418002fc9-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "9c3418002fc9b8a3c53670c101caa4507c36333d044f1f544a8ad9ff8a7e1e1a",
+        "byteSize": 652288,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    },
+    {
+      "id": "image-usvi-ed02b39559eb-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-005.png"
+      },
+      "intrinsic": {
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 1536
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "ed02b39559eb7c70d8aed08720b406e836ab2b4c6629515e871451ba1eba337e",
+        "byteSize": 1885627,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    },
+    {
+      "id": "image-usvi-763451e6b884-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/hermit-crab-island/media-usvi-hermit-crab-island-42036dbfb7dd6b4b/hermit-crab-island-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "763451e6b884c92b2dd02169c2b71afe35ea5c27f65391d35497d929c06a5a8a",
+        "byteSize": 232988,
+        "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+      }
+    }
+  ],
+  "placements": [
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-380d1e6f91eb-001",
+      "assetId": "image-usvi-380d1e6f91eb-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-c03c19c1aa55-002",
+      "assetId": "image-usvi-c03c19c1aa55-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-a7860d27aa67-003",
+      "assetId": "image-usvi-a7860d27aa67-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-a1fa6a303fcb-004",
+      "assetId": "image-usvi-a1fa6a303fcb-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-f58f06c4c9a5-005",
+      "assetId": "image-usvi-f58f06c4c9a5-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-be51bc25d104-006",
+      "assetId": "image-usvi-be51bc25d104-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-2961bd7d7b92-007",
+      "assetId": "image-usvi-2961bd7d7b92-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cinnamon-bay-image-usvi-0519339867a0-001",
+      "assetId": "image-usvi-0519339867a0-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cinnamon-bay",
+      "placeId": "cinnamon-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 2,
+      "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-c51002a482c9-001",
+      "assetId": "image-usvi-c51002a482c9-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-1b58d938875c-002",
+      "assetId": "image-usvi-1b58d938875c-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-e39fe0f94b2b-003",
+      "assetId": "image-usvi-e39fe0f94b2b-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-60f355c6f25a-004",
+      "assetId": "image-usvi-60f355c6f25a-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-fce917462f0d-001",
+      "assetId": "image-usvi-fce917462f0d-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-983fc18624b6-002",
+      "assetId": "image-usvi-983fc18624b6-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-efaec5a67f91-003",
+      "assetId": "image-usvi-efaec5a67f91-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-55234f4de095-004",
+      "assetId": "image-usvi-55234f4de095-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-0fdd28a2b459-005",
+      "assetId": "image-usvi-0fdd28a2b459-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-77110d58c7db-001",
+      "assetId": "image-usvi-77110d58c7db-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-b625fcaf6766-002",
+      "assetId": "image-usvi-b625fcaf6766-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-3d711ac74d6e-003",
+      "assetId": "image-usvi-3d711ac74d6e-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-8c4703549399-004",
+      "assetId": "image-usvi-8c4703549399-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-d37c2d94428e-005",
+      "assetId": "image-usvi-d37c2d94428e-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-3d0544c055d7-006",
+      "assetId": "image-usvi-3d0544c055d7-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-b05191dafca1-007",
+      "assetId": "image-usvi-b05191dafca1-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-55134d613eb7-008",
+      "assetId": "image-usvi-55134d613eb7-008",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-2fbb84382558-009",
+      "assetId": "image-usvi-2fbb84382558-009",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-cb2d2d6958ba-001",
+      "assetId": "image-usvi-cb2d2d6958ba-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-947d03fffff4-002",
+      "assetId": "image-usvi-947d03fffff4-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-6b6ef0214420-003",
+      "assetId": "image-usvi-6b6ef0214420-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-trunk-bay-image-usvi-a881ac07538a-001",
+      "assetId": "image-usvi-a881ac07538a-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-trunk-bay",
+      "placeId": "trunk-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 7,
+      "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-trunk-bay-image-usvi-e128d450d1f8-002",
+      "assetId": "image-usvi-e128d450d1f8-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-trunk-bay",
+      "placeId": "trunk-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 7,
+      "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-trunk-bay-image-usvi-0d11b0f7967a-003",
+      "assetId": "image-usvi-0d11b0f7967a-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-trunk-bay",
+      "placeId": "trunk-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 7,
+      "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-trunk-bay-image-usvi-f8edda4d6e14-004",
+      "assetId": "image-usvi-f8edda4d6e14-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-trunk-bay",
+      "placeId": "trunk-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 7,
+      "batchId": "media-usvi-trunk-bay-1db0cfdc028bcad4"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-journey-image-usvi-d77cadb09fe4-001",
+      "assetId": "image-usvi-d77cadb09fe4-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": null,
+      "placeId": null,
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 8,
+      "batchId": "media-usvi-028eb53149d731bf"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-journey-image-usvi-2e66cdf0f1ef-002",
+      "assetId": "image-usvi-2e66cdf0f1ef-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": null,
+      "placeId": null,
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 8,
+      "batchId": "media-usvi-028eb53149d731bf"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-journey-image-usvi-4ee53a4622ff-003",
+      "assetId": "image-usvi-4ee53a4622ff-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": null,
+      "placeId": null,
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 8,
+      "batchId": "media-usvi-028eb53149d731bf"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-journey-image-usvi-562cfaf223d3-004",
+      "assetId": "image-usvi-562cfaf223d3-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": null,
+      "placeId": null,
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 8,
+      "batchId": "media-usvi-028eb53149d731bf"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-journey-image-usvi-763451e6b884-005",
+      "assetId": "image-usvi-763451e6b884-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": null,
+      "placeId": null,
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 8,
+      "batchId": "media-usvi-028eb53149d731bf"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-8db684083864-001",
+      "assetId": "image-usvi-8db684083864-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-1ede4b349592-002",
+      "assetId": "image-usvi-1ede4b349592-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-c3a4a9e1299a-003",
+      "assetId": "image-usvi-c3a4a9e1299a-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-9c3418002fc9-004",
+      "assetId": "image-usvi-9c3418002fc9-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-ed02b39559eb-005",
+      "assetId": "image-usvi-ed02b39559eb-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-763451e6b884-006",
+      "assetId": "image-usvi-763451e6b884-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-hermit-crab-island",
+      "placeId": "hermit-crab-island",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 10,
+      "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-e4c381fa292b-001",
+      "assetId": "image-usvi-e4c381fa292b-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-0497e9e1b43b-002",
+      "assetId": "image-usvi-0497e9e1b43b-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-8562a2c3a5e3-003",
+      "assetId": "image-usvi-8562a2c3a5e3-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-a4accfb6df47-004",
+      "assetId": "image-usvi-a4accfb6df47-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-547fbdbbd8fb-005",
+      "assetId": "image-usvi-547fbdbbd8fb-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-c90774847502-006",
+      "assetId": "image-usvi-c90774847502-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-0d4f1c0c43c1-007",
+      "assetId": "image-usvi-0d4f1c0c43c1-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    }
+  ],
+  "batches": [
+    {
+      "id": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44",
+      "sequence": 1,
+      "manifestSha256": "7abc9d08d42cd3fb15a2044008fca33851806ccff07d73b4d8188fd535b8e395",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-380d1e6f91eb-001",
+        "image-usvi-c03c19c1aa55-002",
+        "image-usvi-a7860d27aa67-003",
+        "image-usvi-a1fa6a303fcb-004",
+        "image-usvi-f58f06c4c9a5-005",
+        "image-usvi-be51bc25d104-006",
+        "image-usvi-2961bd7d7b92-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "4c49603c255aa88661eda5f0a2fffe897c68f3f42131f944ffa1d277058cbd1f"
+      }
+    },
+    {
+      "id": "media-usvi-cinnamon-bay-d1296a8f2621eb82",
+      "sequence": 2,
+      "manifestSha256": "e131bbe07452674999f16ed0ec163fc2a70384a5f30ec6e475bf6be2f4e55302",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-0519339867a0-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "b14a29f013e56ec030a8497fd9b944c050d3659977fa26d20bbcd5d1022b4b17"
+      }
+    },
+    {
+      "id": "media-usvi-cruz-bay-ca586690c6aecd4e",
+      "sequence": 3,
+      "manifestSha256": "a974e0b24bc122c3d38be6dfb50447cad565a8c5329aadf8a2cb8d6f5063e0f5",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-c51002a482c9-001",
+        "image-usvi-1b58d938875c-002",
+        "image-usvi-e39fe0f94b2b-003",
+        "image-usvi-60f355c6f25a-004"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "d696bcb53e863ed5aaa16ea551e57e4ab33785a8fc122c8d8098f6621136259b"
+      }
+    },
+    {
+      "id": "media-usvi-great-cruz-bay-48a482b493966122",
+      "sequence": 4,
+      "manifestSha256": "2d1e63af2f8657f2abe0ed1398f9b504075689063ef4c38a66cdc928b0ce38b0",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-fce917462f0d-001",
+        "image-usvi-983fc18624b6-002",
+        "image-usvi-efaec5a67f91-003",
+        "image-usvi-55234f4de095-004",
+        "image-usvi-0fdd28a2b459-005"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "52d25952c7431b0425d821f5e4e7f0d2d82fef3982dcd666c0290ae9c2a59076"
+      }
+    },
+    {
+      "id": "media-usvi-maho-bay-ccc0c4184d9caf77",
+      "sequence": 5,
+      "manifestSha256": "9634a1afbbb6d3a84964a84f63a95cd7b73bdb77fc77dfba72398898902a771b",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-77110d58c7db-001",
+        "image-usvi-b625fcaf6766-002",
+        "image-usvi-3d711ac74d6e-003",
+        "image-usvi-8c4703549399-004",
+        "image-usvi-d37c2d94428e-005",
+        "image-usvi-3d0544c055d7-006",
+        "image-usvi-b05191dafca1-007",
+        "image-usvi-55134d613eb7-008",
+        "image-usvi-2fbb84382558-009"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "239249efee2f8d628a4d5a76670b445c3ef35f07e17e9c86b26ee59dc106f8b7"
+      }
+    },
+    {
+      "id": "media-usvi-lovango-cay-09628b5dc993a5e5",
+      "sequence": 6,
+      "manifestSha256": "38d99c5f305b3a83eed59b518c7e3190c6b87d443b6c24e987bff1cb4a2f3dad",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-cb2d2d6958ba-001",
+        "image-usvi-947d03fffff4-002",
+        "image-usvi-6b6ef0214420-003"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "388ecaaf1ce71e96f79d53648baa4866b4c75277c9631de4a3eee7800d972ae2"
+      }
+    },
+    {
+      "id": "media-usvi-trunk-bay-1db0cfdc028bcad4",
+      "sequence": 7,
+      "manifestSha256": "b0dcf10aef1a49aacc315bbe841792b38883357ee3f9c32c97c84441920669be",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-a881ac07538a-001",
+        "image-usvi-e128d450d1f8-002",
+        "image-usvi-0d11b0f7967a-003",
+        "image-usvi-f8edda4d6e14-004"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "f01008a94f9415f4cbaf424a84e94150fae692de86cdc3e94bf57e70f82b8bf6"
+      }
+    },
+    {
+      "id": "media-usvi-028eb53149d731bf",
+      "sequence": 8,
+      "manifestSha256": "a9e2ee529d34b9b8bc121eb20a7c671dfc1b2da8e3654b27a89041dc78969d89",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-d77cadb09fe4-001",
+        "image-usvi-2e66cdf0f1ef-002",
+        "image-usvi-4ee53a4622ff-003",
+        "image-usvi-562cfaf223d3-004",
+        "image-usvi-763451e6b884-005"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "b91a1aed1ebe4e8821e1f0976e91903c25cb875b32017054ff1d2eafd9c10173"
+      }
+    },
+    {
+      "id": "media-usvi-842b85a59b6c4b60",
+      "sequence": 9,
+      "manifestSha256": "89e0d57b0b0afada61ee0f0465f7c7bf1a363c7e8f81ac6c729e8e382ad87b39",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-e4c381fa292b-001",
+        "image-usvi-0497e9e1b43b-002",
+        "image-usvi-8562a2c3a5e3-003",
+        "image-usvi-a4accfb6df47-004",
+        "image-usvi-547fbdbbd8fb-005",
+        "image-usvi-c90774847502-006",
+        "image-usvi-0d4f1c0c43c1-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "2331e1a3fa003fc9be29e09f69a141d6997fc408ed3d3f98a8fc6744ebd02336"
+      }
+    },
+    {
+      "id": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b",
+      "sequence": 10,
+      "manifestSha256": "0e90b83616cb96ac61d65b2bd5fedea9971462ed3095dc0b4e93d6d1b62bed2e",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-8db684083864-001",
+        "image-usvi-1ede4b349592-002",
+        "image-usvi-c3a4a9e1299a-003",
+        "image-usvi-9c3418002fc9-004",
+        "image-usvi-ed02b39559eb-005",
+        "image-usvi-763451e6b884-006"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "a82e24e823ed7ff93b1522814c9f0403668b75ebb94f42d1f306df9d6bbf2c90"
+      }
+    },
+    {
+      "id": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44",
+      "sequence": 11,
+      "manifestSha256": "612069b801ac72b9c17881f04f6bc136bfda364e53bfb7ea9a5791593cdceef3",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-e4c381fa292b-001",
+        "image-usvi-0497e9e1b43b-002",
+        "image-usvi-8562a2c3a5e3-003",
+        "image-usvi-a4accfb6df47-004",
+        "image-usvi-547fbdbbd8fb-005",
+        "image-usvi-c90774847502-006",
+        "image-usvi-0d4f1c0c43c1-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "840cfa257c9c9496fd4f7fc3d3fb4c4ea0b5d6b0236a6a465425a3f695316ad3"
+      }
+    }
+  ]
+}

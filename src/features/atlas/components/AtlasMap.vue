@@ -1,5 +1,9 @@
 <template>
-  <section class="atlas-map-shell" aria-label="Interactive travel map">
+  <section
+    class="atlas-map-shell"
+    :class="{ 'is-moving': mapMoving }"
+    aria-label="Interactive travel map"
+  >
     <div
       ref="map"
       class="atlas-map"
@@ -21,7 +25,10 @@
         </p>
       </article>
     </div>
-    <div v-if="journeyNodes.length > 1" class="atlas-route-key">
+    <div
+      v-if="journeyNodes.length > 1 && !guidedControlsVisible"
+      class="atlas-route-key"
+    >
       <span>Journey path</span>
       <strong>{{ journeyNodes.length }} stops in visit order</strong>
     </div>
@@ -33,13 +40,29 @@
 import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { mapStyleUrl, terrainSource } from "../config/mapConfig"
+import {
+  atlasMarkerClusterRadius,
+  atlasMarkerCompactClusterRadius,
+  buildAtlasMarkerGroups,
+} from "../config/markerLayout.mjs"
 
 const journeySourceId = "atlas-journey-route"
 const journeyShadowLayerId = "atlas-journey-shadow"
 const journeyLineLayerId = "atlas-journey-line"
-// The visible pin dot sits 24px from the pill's left edge and 2px below it.
-// Anchor the geographic coordinate there so route endpoints and pins coincide.
-const markerPinOffset = [-24, -2]
+const compactMarkerQuery = "(max-width: 720px), (any-pointer: coarse)"
+const transportIcons = {
+  drive: "🚗",
+  car: "🚗",
+  walk: "🥾",
+  hike: "🥾",
+  bike: "🚲",
+  bicycle: "🚲",
+  ferry: "⛴",
+  boat: "⛴",
+  train: "🚆",
+  flight: "✈",
+  plane: "✈",
+}
 
 maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
@@ -73,6 +96,11 @@ export default {
       type: Object,
       required: true,
     },
+    guidedControlsVisible: Boolean,
+    journeyTravel: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
@@ -82,6 +110,8 @@ export default {
       ready: false,
       error: "",
       previewCounts: {},
+      mapMoving: false,
+      markerRefreshFrame: null,
     }
   },
   computed: {
@@ -106,18 +136,158 @@ export default {
         this.moveCamera(camera)
       },
     },
+    journeyTravel: {
+      deep: true,
+      handler(travel) {
+        if (!travel) {
+          this.cancelJourneyTravel()
+          return
+        }
+        this.startJourneyTravel(travel)
+      },
+    },
   },
   mounted() {
+    this.compactMarkerMedia = window.matchMedia(compactMarkerQuery)
+    if (this.compactMarkerMedia.addEventListener) {
+      this.compactMarkerMedia.addEventListener(
+        "change",
+        this.handleMarkerMediaChange
+      )
+    } else {
+      // Safari versions before 14 use the legacy MediaQueryList API.
+      this.compactMarkerMedia.addListener(this.handleMarkerMediaChange)
+    }
     this.initializeMap()
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.cancelScheduledMarkerRefresh()
+    if (this.compactMarkerMedia?.removeEventListener) {
+      this.compactMarkerMedia.removeEventListener(
+        "change",
+        this.handleMarkerMediaChange
+      )
+    } else if (this.compactMarkerMedia) {
+      this.compactMarkerMedia.removeListener(this.handleMarkerMediaChange)
+    }
     this.clearMarkers()
+    this.cancelJourneyTravel()
     if (this.popup) this.popup.remove()
     if (this.map) this.map.remove()
   },
   methods: {
+    handleMarkerMediaChange() {
+      this.renderMarkers()
+    },
+    collapseAttribution() {
+      const attributionElement = this.$refs.map?.querySelector(
+        ".maplibregl-ctrl-attrib"
+      )
+      attributionElement?.classList.remove("maplibregl-compact-show")
+      attributionElement?.removeAttribute("open")
+    },
+    startJourneyTravel(travel) {
+      if (!this.map || !this.ready || !travel) return
+      if (this.activeJourneyTravelId === travel.id) return
+
+      this.cancelJourneyTravel()
+      this.activeJourneyTravelId = travel.id
+      this.activeJourneyTravel = travel
+      this.transportProgress = 0
+
+      if (!travel.fromCoordinates || !travel.toCoordinates) return
+      // Reduced-motion playback still changes stops, but it must not introduce
+      // a moving decorative marker between the direct camera cuts.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+      const element = document.createElement("div")
+      const mode = (travel.mode || "").toLowerCase()
+      element.className = "atlas-transport-marker"
+      element.setAttribute("role", "img")
+      element.setAttribute(
+        "aria-label",
+        mode ? `${mode} journey progress` : "Journey progress"
+      )
+      element.textContent = transportIcons[mode] || "✦"
+
+      this.transportMarker = new maplibregl.Marker({
+        element,
+        anchor: "center",
+      })
+        .setLngLat(travel.fromCoordinates)
+        .addTo(this.map)
+
+      this.animateJourneyTransport(0, travel.duration)
+    },
+    animateJourneyTransport(startProgress, duration) {
+      if (!this.transportMarker || !this.activeJourneyTravel) return
+
+      const travel = this.activeJourneyTravel
+      const startedAt = performance.now()
+      const safeDuration = Math.max(1, duration || 1)
+
+      const step = now => {
+        const elapsedRatio = Math.min(1, (now - startedAt) / safeDuration)
+        const progress = startProgress + (1 - startProgress) * elapsedRatio
+        const easedProgress = 1 - Math.pow(1 - progress, 2)
+        const longitude =
+          travel.fromCoordinates[0] +
+          (travel.toCoordinates[0] - travel.fromCoordinates[0]) * easedProgress
+        const latitude =
+          travel.fromCoordinates[1] +
+          (travel.toCoordinates[1] - travel.fromCoordinates[1]) * easedProgress
+
+        this.transportProgress = progress
+        this.transportMarker.setLngLat([longitude, latitude])
+        if (elapsedRatio < 1) {
+          this.transportAnimationFrame = requestAnimationFrame(step)
+        } else {
+          this.transportAnimationFrame = null
+        }
+      }
+
+      this.transportAnimationFrame = requestAnimationFrame(step)
+    },
+    pauseJourneyTravel() {
+      if (this.map) this.map.stop()
+      if (this.transportAnimationFrame) {
+        cancelAnimationFrame(this.transportAnimationFrame)
+        this.transportAnimationFrame = null
+      }
+    },
+    resumeJourneyTravel(camera, duration) {
+      if (!this.map || !this.ready || !camera) return
+
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      const options = {
+        center: camera.center,
+        zoom: camera.zoom,
+        pitch: camera.pitch,
+        bearing: camera.bearing,
+      }
+
+      if (prefersReducedMotion) this.map.jumpTo(options)
+      else this.map.flyTo({ ...options, duration, essential: false })
+
+      this.animateJourneyTransport(this.transportProgress || 0, duration)
+    },
+    cancelJourneyTravel() {
+      if (this.transportAnimationFrame) {
+        cancelAnimationFrame(this.transportAnimationFrame)
+        this.transportAnimationFrame = null
+      }
+      if (this.transportMarker) {
+        this.transportMarker.remove()
+        this.transportMarker = null
+      }
+      this.activeJourneyTravel = null
+      this.activeJourneyTravelId = null
+      this.transportProgress = 0
+    },
     initializeMap() {
       if (!supportsWebGL2()) {
         this.error = "WebGL 2 is unavailable"
@@ -133,9 +303,20 @@ export default {
           pitch: this.camera.pitch,
           bearing: this.camera.bearing,
           maxPitch: 78,
-          attributionControl: true,
+          // Add attribution explicitly below so MapLibre cannot choose the
+          // expanded desktop pill as its initial state.
+          attributionControl: false,
           cooperativeGestures: true,
         })
+
+        this.map.addControl(
+          new maplibregl.AttributionControl({ compact: true }),
+          "bottom-right"
+        )
+        // MapLibre deliberately expands a new compact attribution control once
+        // on mount. Start with only its information icon and let the visitor
+        // open the attribution when needed.
+        this.collapseAttribution()
 
         this.map.addControl(
           new maplibregl.NavigationControl({ visualizePitch: true }),
@@ -144,6 +325,9 @@ export default {
 
         this.map.on("load", () => {
           this.ready = true
+          // Style initialization can re-run MapLibre's compact-state update.
+          // Close it again after load so the initial UI is icon-only.
+          this.collapseAttribution()
 
           if (terrainSource && !this.map.getSource("atlas-terrain")) {
             this.map.addSource("atlas-terrain", terrainSource)
@@ -162,9 +346,17 @@ export default {
 
           this.renderJourney()
           this.renderMarkers()
+          if (this.journeyTravel) this.startJourneyTravel(this.journeyTravel)
+        })
+
+        this.map.on("movestart", event => {
+          this.cancelScheduledMarkerRefresh()
+          this.mapMoving = true
+          if (event.originalEvent) this.$emit("manual-interaction")
         })
 
         this.map.on("moveend", () => {
+          this.mapMoving = false
           const center = this.map.getCenter()
           this.$emit("camera-change", {
             center: [center.lng, center.lat],
@@ -172,6 +364,7 @@ export default {
             pitch: this.map.getPitch(),
             bearing: this.map.getBearing(),
           })
+          this.scheduleMarkerRefresh()
         })
 
         this.map.on("error", event => {
@@ -220,6 +413,25 @@ export default {
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
+    },
+    cancelScheduledMarkerRefresh() {
+      if (this.markerRefreshFrame === null) return
+      window.cancelAnimationFrame(this.markerRefreshFrame)
+      this.markerRefreshFrame = null
+    },
+    scheduleMarkerRefresh() {
+      this.cancelScheduledMarkerRefresh()
+      // MapLibre can emit moveend before its final DOM marker transforms have
+      // painted. Recreate the markers after two paint frames so releasing a
+      // drag/rotation always snaps cards back to the final projected points.
+      this.markerRefreshFrame = window.requestAnimationFrame(() => {
+        this.markerRefreshFrame = window.requestAnimationFrame(() => {
+          this.markerRefreshFrame = null
+          if (!this.map || !this.ready || this.mapMoving) return
+          this.renderMarkers()
+          this.map.triggerRepaint()
+        })
+      })
     },
     renderJourney() {
       if (!this.map || !this.ready) return
@@ -286,50 +498,184 @@ export default {
 
       this.clearMarkers()
 
-      this.nodes.forEach(node => {
-        const element = document.createElement("button")
-        const image = document.createElement("img")
-        const label = document.createElement("span")
-        const selected = this.selectedNode?.id === node.id
-        const journeyIndex = this.journeyNodes.findIndex(
-          journeyNode => journeyNode.id === node.id
-        )
+      // A selected structural destination already owns the detail panel. Hide
+      // its broad center marker while presenting its child stops so it cannot
+      // compete with the more precise Place coordinates.
+      const markerNodes = this.nodes.filter(
+        node =>
+          !(
+            node.id === this.selectedNode?.id &&
+            node.childIds?.length &&
+            this.journeyNodes.length
+          )
+      )
+      const clusterRadius = this.compactMarkerMedia?.matches
+        ? atlasMarkerCompactClusterRadius
+        : atlasMarkerClusterRadius
+      const groups = buildAtlasMarkerGroups(markerNodes, {
+        zoom: this.map.getZoom(),
+        project: coordinates => this.map.project(coordinates),
+        selectedId: this.selectedNode?.id || "",
+        clusterRadius,
+      })
 
-        element.type = "button"
-        element.className = `atlas-marker${selected ? " selected" : ""}`
-        if (journeyIndex >= 0) {
-          element.dataset.stop = String(journeyIndex + 1)
-        }
-        element.setAttribute(
-          "aria-label",
-          journeyIndex >= 0
-            ? `Stop ${journeyIndex + 1}: Explore ${node.title}`
-            : `Explore ${node.title}`
-        )
-        image.src = node.image
-        image.alt = ""
-        label.textContent = node.title
-        element.append(image, label)
+      groups.forEach(group => {
+        if (group.isCluster) this.addClusterMarker(group)
+        else this.addPlaceMarker(group.nodes[0])
+      })
+    },
+    addPlaceMarker(node) {
+      const element = document.createElement("button")
+      const card = document.createElement("span")
+      const avatar = document.createElement(node.image ? "img" : "span")
+      const label = document.createElement("span")
+      const selected = this.selectedNode?.id === node.id
+      const journeyIndex = this.journeyNodes.findIndex(
+        journeyNode => journeyNode.id === node.id
+      )
 
-        element.addEventListener("mouseenter", () => this.showPreview(node))
-        element.addEventListener("mouseleave", () => this.hidePreview())
-        element.addEventListener("focus", () => this.showPreview(node))
-        element.addEventListener("blur", () => this.hidePreview())
-        element.addEventListener("click", event => {
-          event.stopPropagation()
-          this.hidePreview()
-          this.$emit("select", node.id)
-        })
+      element.type = "button"
+      element.className = `atlas-marker${selected ? " selected" : ""}`
+      element.setAttribute(
+        "aria-label",
+        journeyIndex >= 0
+          ? `Stop ${journeyIndex + 1}: Explore ${node.title}`
+          : `Explore ${node.title}`
+      )
+      card.className = "atlas-marker-card"
+      label.className = "atlas-marker-label"
+      label.textContent = node.title
 
-        const marker = new maplibregl.Marker({
-          element,
-          anchor: "bottom-left",
-          offset: markerPinOffset,
-        })
-          .setLngLat(node.coordinates)
-          .addTo(this.map)
+      if (node.image) {
+        avatar.src = node.image
+        avatar.alt = ""
+      } else {
+        avatar.className = "atlas-marker-placeholder"
+        avatar.setAttribute("aria-hidden", "true")
+      }
+      card.append(avatar, label)
+      element.append(card)
 
-        this.markers.push(marker)
+      element.addEventListener("mouseenter", () => this.showPreview(node))
+      element.addEventListener("mouseleave", () => this.hidePreview())
+      element.addEventListener("focus", () => this.showPreview(node))
+      element.addEventListener("blur", () => this.hidePreview())
+      element.addEventListener("click", event => {
+        event.stopPropagation()
+        this.hidePreview()
+        this.$emit("select", node.id)
+      })
+
+      this.addCoordinatePin(node.coordinates, {
+        nodeId: node.id,
+        label: journeyIndex >= 0 ? String(journeyIndex + 1) : "",
+        selected,
+      })
+      element.dataset.nodeId = node.id
+      this.addCardMarker(element, node.coordinates)
+    },
+    addClusterMarker(group) {
+      const element = document.createElement("button")
+      const card = document.createElement("span")
+      const count = document.createElement("span")
+      const label = document.createElement("span")
+      const titles = group.nodes.map(node => node.title)
+
+      element.type = "button"
+      element.className = "atlas-marker atlas-marker-cluster"
+      element.setAttribute(
+        "aria-label",
+        `Zoom in to ${group.nodes.length} nearby stops: ${titles.join(", ")}`
+      )
+      card.className = "atlas-marker-card"
+      count.className = "atlas-marker-cluster-count"
+      count.textContent = String(group.nodes.length)
+      label.className = "atlas-marker-label"
+      label.textContent = `${group.nodes.length} nearby stops`
+      card.append(count, label)
+      element.append(card)
+
+      element.addEventListener("click", event => {
+        event.stopPropagation()
+        this.hidePreview()
+        this.zoomToMarkerGroup(group)
+      })
+
+      this.addCoordinatePin(group.coordinates, {
+        cluster: true,
+        groupId: group.id,
+      })
+      element.dataset.clusterId = group.id
+      this.addCardMarker(element, group.coordinates)
+    },
+    addCoordinatePin(
+      coordinates,
+      {
+        label = "",
+        selected = false,
+        cluster = false,
+        nodeId = "",
+        groupId = "",
+      } = {}
+    ) {
+      const pin = document.createElement("span")
+      pin.className = [
+        "atlas-coordinate-pin",
+        label ? "is-numbered" : "",
+        selected ? "is-selected" : "",
+        cluster ? "is-cluster" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")
+      pin.setAttribute("aria-hidden", "true")
+      pin.textContent = label
+      if (nodeId) pin.dataset.nodeId = nodeId
+      if (groupId) pin.dataset.clusterId = groupId
+
+      const marker = new maplibregl.Marker({
+        element: pin,
+        anchor: "center",
+        rotationAlignment: "map",
+        pitchAlignment: "map",
+        subpixelPositioning: true,
+        opacityWhenCovered: 0.35,
+      })
+        .setLngLat(coordinates)
+        .addTo(this.map)
+
+      this.markers.push(marker)
+    },
+    addCardMarker(element, coordinates) {
+      const marker = new maplibregl.Marker({
+        element,
+        anchor: "bottom",
+        offset: [0, this.compactMarkerMedia?.matches ? -21 : -14],
+        rotationAlignment: "viewport",
+        pitchAlignment: "viewport",
+        subpixelPositioning: true,
+        opacityWhenCovered: 0.35,
+      })
+        .setLngLat(coordinates)
+        .addTo(this.map)
+
+      this.markers.push(marker)
+    },
+    zoomToMarkerGroup(group) {
+      if (!this.map || group.nodes.length < 2) return
+
+      const bounds = group.nodes.reduce(
+        (result, node) => result.extend(node.coordinates),
+        new maplibregl.LngLatBounds()
+      )
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+
+      this.map.fitBounds(bounds, {
+        padding: this.compactMarkerMedia?.matches ? 72 : 110,
+        maxZoom: 13.4,
+        duration: reducedMotion ? 0 : 850,
+        essential: false,
       })
     },
     showPreview(node) {
@@ -344,21 +690,26 @@ export default {
         .filter(Boolean)
       const index = this.previewCounts[node.id] || 0
       const card = document.createElement("article")
-      const image = document.createElement("img")
       const content = document.createElement("div")
       const eyebrow = document.createElement("span")
       const title = document.createElement("strong")
       const summary = document.createElement("p")
 
-      this.previewCounts[node.id] = (index + 1) % media.length
       card.className = "atlas-map-preview"
-      image.src = media[index % media.length]
-      image.alt = ""
+      if (media.length) {
+        const image = document.createElement("img")
+        this.previewCounts[node.id] = (index + 1) % media.length
+        image.src = media[index % media.length]
+        image.alt = ""
+        card.append(image)
+      } else {
+        this.previewCounts[node.id] = 0
+      }
       eyebrow.textContent = node.eyebrow
       title.textContent = node.title
       summary.textContent = node.summary
       content.append(eyebrow, title, summary)
-      card.append(image, content)
+      card.append(content)
 
       this.popup = new maplibregl.Popup({
         closeButton: false,
@@ -503,8 +854,43 @@ export default {
   line-height: 1.6;
 }
 
+.atlas-transport-marker {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border: 3px solid #f6bd60;
+  border-radius: 50%;
+  background: rgba(7, 11, 14, 0.94);
+  box-shadow:
+    0 0 0 5px rgba(7, 11, 14, 0.38),
+    0 10px 28px rgba(0, 0, 0, 0.52);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .atlas-marker {
-  position: relative;
+  --marker-avatar-size: 38px;
+
+  /* MapLibre markers must remain out of document flow. `position: relative`
+     here overrides MapLibre's marker rule and adds one card-height of drift
+     for every preceding marker. */
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.atlas-marker-card {
   display: flex;
   align-items: center;
   gap: 0.55rem;
@@ -513,72 +899,114 @@ export default {
   padding: 0.28rem 0.62rem 0.28rem 0.28rem;
   background: rgba(8, 12, 15, 0.84);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
-  color: #fff;
-  white-space: nowrap;
   backdrop-filter: blur(10px);
-  cursor: pointer;
   transition:
     transform 180ms ease,
-    border-color 180ms ease;
+    border-color 180ms ease,
+    opacity 120ms ease;
 }
 
-.atlas-marker[data-stop]::before {
-  position: absolute;
+.atlas-coordinate-pin {
   z-index: 2;
-  top: calc(100% + 2px);
-  left: 24px;
-  display: grid;
-  place-items: center;
-  width: 1.45rem;
-  height: 1.45rem;
+  display: block;
+  width: 10px;
+  height: 10px;
   border: 2px solid #fff;
   border-radius: 50%;
   background: #f6bd60;
   box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4);
   color: #111;
-  content: attr(data-stop);
+  pointer-events: none;
+}
+
+.atlas-coordinate-pin.is-numbered {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
   font-size: 0.65rem;
   font-weight: 900;
-  transform: translate(-50%, -50%);
 }
 
-.atlas-marker::after {
-  position: absolute;
-  bottom: -8px;
-  left: 24px;
-  width: 8px;
-  height: 8px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: #f6bd60;
-  content: "";
-  transform: translateX(-50%);
+.atlas-coordinate-pin.is-selected {
+  box-shadow:
+    0 0 0 5px rgba(246, 189, 96, 0.22),
+    0 5px 14px rgba(0, 0, 0, 0.4);
 }
 
-.atlas-marker[data-stop]::after {
-  display: none;
-}
-
-.atlas-marker:hover,
-.atlas-marker:focus-visible,
-.atlas-marker.selected {
+.atlas-coordinate-pin.is-cluster {
   border-color: #f6bd60;
-  transform: translateY(-4px) scale(1.03);
+  background: #fff;
 }
 
-.atlas-marker img {
-  width: 38px;
-  height: 38px;
+.atlas-marker:hover .atlas-marker-card,
+.atlas-marker:focus-visible .atlas-marker-card,
+.atlas-marker.selected .atlas-marker-card {
+  border-color: #f6bd60;
+  transform: translateY(-3px);
+}
+
+.atlas-marker:focus-visible {
+  outline: none;
+}
+
+.atlas-marker:focus-visible .atlas-marker-card {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.atlas-marker-card img,
+.atlas-marker-placeholder {
+  width: var(--marker-avatar-size);
+  height: var(--marker-avatar-size);
   border-radius: 50%;
+}
+
+.atlas-marker-card img {
   object-fit: cover;
 }
 
-.atlas-marker span {
+.atlas-marker-placeholder {
+  flex: 0 0 auto;
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(246, 189, 96, 0.28),
+      transparent 38%
+    ),
+    #142128;
+}
+
+.atlas-marker-label {
   max-width: 160px;
   overflow: hidden;
   font-size: 0.75rem;
   font-weight: 700;
   text-overflow: ellipsis;
+}
+
+.atlas-marker-cluster .atlas-marker-card {
+  border-color: rgba(246, 189, 96, 0.82);
+  background: rgba(8, 12, 15, 0.94);
+}
+
+.atlas-marker-cluster-count {
+  display: grid;
+  width: var(--marker-avatar-size);
+  height: var(--marker-avatar-size);
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  background: #f6bd60;
+  color: #111;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.atlas-map-shell.is-moving .atlas-marker:not(.selected) .atlas-marker-card {
+  opacity: 0;
+  transform: translateY(6px) scale(0.92);
+  pointer-events: none;
 }
 
 .maplibregl-popup-content {
@@ -642,38 +1070,93 @@ export default {
 
 @media (max-width: 720px) {
   .atlas-route-key {
-    top: 5rem;
+    top: 5.65rem;
     left: 0.7rem;
-    padding: 0.5rem 0.65rem;
+    padding: 0.65rem 0.8rem;
   }
 
-  .atlas-marker span {
-    display: none;
+  .atlas-route-key span {
+    font-size: 0.76rem;
+  }
+
+  .atlas-route-key strong {
+    font-size: 0.86rem;
+  }
+}
+
+/*
+ * CSS pixels are density-independent, so a larger minimum target remains
+ * physically usable on high-DPI phones. Coarse-pointer detection also covers
+ * wide/landscape phones whose viewport no longer matches the width breakpoint.
+ */
+@media (max-width: 720px), (any-pointer: coarse) {
+  .atlas-transport-marker {
+    width: 3.3rem;
+    height: 3.3rem;
+    font-size: 1.45rem;
   }
 
   .atlas-marker {
-    padding: 0.24rem;
+    --marker-avatar-size: 52px;
   }
 
-  .atlas-marker::after {
-    left: 50%;
+  .atlas-marker-card {
+    min-width: 64px;
+    min-height: 64px;
+    gap: 0.5rem;
+    padding: 4px;
+    border-width: 2px;
+  }
+
+  .atlas-coordinate-pin.is-numbered {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-width: 2px;
+    font-size: 0.88rem;
+  }
+
+  .atlas-coordinate-pin:not(.is-numbered) {
+    width: 11px;
+    height: 11px;
+  }
+
+  .atlas-marker-label {
+    display: none;
+  }
+
+  /* Show context without covering the map with every destination label. */
+  .atlas-marker.selected .atlas-marker-label,
+  .atlas-marker:focus-visible .atlas-marker-label {
+    display: block;
+    max-width: min(34vw, 150px);
+    padding-right: 0.45rem;
+    font-size: 0.94rem;
+  }
+
+  .atlas-map .maplibregl-ctrl-group button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .atlas-map .maplibregl-ctrl-group button span {
+    transform: scale(1.12);
   }
 }
 
 @media (orientation: portrait) {
   .atlas-route-key {
-    top: 5rem;
+    top: 5.65rem;
     left: 0.7rem;
-    padding: 0.5rem 0.65rem;
+    padding: 0.65rem 0.8rem;
   }
 
   .atlas-map .maplibregl-ctrl-bottom-left {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    bottom: calc(6.4rem + env(safe-area-inset-bottom));
     left: 0.7rem;
   }
 
   .atlas-map .maplibregl-ctrl-bottom-right {
-    bottom: calc(5.5rem + env(safe-area-inset-bottom));
+    bottom: calc(6.4rem + env(safe-area-inset-bottom));
   }
 }
 

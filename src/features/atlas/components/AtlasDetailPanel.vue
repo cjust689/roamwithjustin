@@ -3,7 +3,12 @@
   <div class="atlas-detail-root">
     <aside
       class="atlas-detail"
-      :class="{ 'is-expanded': mobileExpanded }"
+      :class="{
+        'is-expanded': mobileExpanded,
+        'is-guided': guidedPresentation,
+        'has-expanded-guide': guidedControlsExpanded,
+      }"
+      :style="guidedClearanceStyle"
       :aria-label="`${node.title} details`"
     >
       <div
@@ -25,9 +30,10 @@
           type="button"
           :aria-expanded="String(mobileExpanded)"
           aria-controls="atlas-detail-content"
-          @click="mobileExpanded = !mobileExpanded"
+          @click="toggleMobileDrawer"
         >
-          <img :src="node.image" alt="" />
+          <img v-if="node.image" :src="node.image" alt="" />
+          <span v-else class="atlas-dock-placeholder" aria-hidden="true"></span>
           <span>
             <small>{{ node.eyebrow }}</small>
             <strong>{{ node.title }}</strong>
@@ -52,17 +58,33 @@
         </button>
       </div>
 
-      <div id="atlas-detail-content" class="atlas-detail-scroll">
+      <div
+        id="atlas-detail-content"
+        ref="detailScroll"
+        class="atlas-detail-scroll"
+        @scroll.passive="handleDetailScroll"
+      >
         <div class="atlas-detail-hero">
           <button
+            v-if="guidedHeroMedia.src"
             class="atlas-detail-hero-image"
             type="button"
-            :aria-label="`View ${node.title} photograph full screen`"
-            @click="openGallery(node.image)"
+            :aria-label="guidedHeroLabel"
+            @click="openGallery(guidedHeroMedia)"
           >
-            <img :src="node.image" :alt="node.title" />
-            <span>View full photo</span>
+            <img
+              v-if="guidedHeroImage"
+              :src="guidedHeroImage"
+              :alt="guidedHeroMedia.alt"
+              @load="updateScrollCue"
+            />
+            <span :class="{ 'is-placeholder': !guidedHeroImage }">
+              {{ guidedHeroLabel }}
+            </span>
           </button>
+          <div v-else class="atlas-detail-hero-image is-empty">
+            <span class="is-placeholder">Photography coming soon</span>
+          </div>
           <div class="atlas-detail-shade"></div>
           <button
             class="atlas-detail-close"
@@ -109,7 +131,17 @@
               type="button"
               @click="$emit('select', child.id)"
             >
-              <img :src="child.image" alt="" loading="lazy" />
+              <img
+                v-if="child.image"
+                :src="child.image"
+                alt=""
+                loading="lazy"
+              />
+              <span
+                v-else
+                class="atlas-discovery-placeholder"
+                aria-hidden="true"
+              ></span>
               <span
                 ><small>Stop {{ childIndex + 1 }} · {{ child.eyebrow }}</small
                 >{{ child.title }}</span
@@ -154,6 +186,7 @@
                   :src="media.src"
                   :alt="media.alt"
                   loading="lazy"
+                  @load="updateScrollCue"
                 />
                 <video
                   v-else
@@ -162,6 +195,7 @@
                   preload="metadata"
                   :poster="media.poster"
                   :aria-label="media.alt"
+                  @loadedmetadata="updateScrollCue"
                 >
                   <source :src="media.src" :type="media.mimeType" />
                 </video>
@@ -197,6 +231,17 @@
           </div>
         </div>
       </div>
+
+      <button
+        v-if="detailCanScroll && showScrollCue"
+        class="atlas-scroll-cue"
+        type="button"
+        aria-label="Scroll down for more information about this stop"
+        @click="scrollDetailsForward"
+      >
+        <span>Scroll for story, photos &amp; links</span>
+        <b aria-hidden="true">&#8964;</b>
+      </button>
     </aside>
 
     <div
@@ -278,6 +323,20 @@ export default {
       default: () => [],
     },
     isFavorite: Boolean,
+    expandRequest: {
+      type: Number,
+      default: 0,
+    },
+    collapseRequest: {
+      type: Number,
+      default: 0,
+    },
+    guidedPresentation: Boolean,
+    guidedControlsExpanded: Boolean,
+    guidedControlsClearance: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -285,9 +344,22 @@ export default {
       lightboxOpen: false,
       lightboxIndex: 0,
       previouslyFocusedElement: null,
+      guidedHeroIndex: 0,
+      guidedHeroTimer: null,
+      detailCanScroll: false,
+      showScrollCue: false,
+      detailResizeObserver: null,
     }
   },
   computed: {
+    guidedClearanceStyle() {
+      if (!this.guidedControlsExpanded || !this.guidedControlsClearance) {
+        return null
+      }
+      return {
+        "--atlas-guided-clearance": `${this.guidedControlsClearance}px`,
+      }
+    },
     galleryMedia() {
       const media = [this.node.image, ...this.node.media]
         .map(this.normalizeMedia)
@@ -310,22 +382,168 @@ export default {
     hasVideo() {
       return this.galleryMedia.some(item => item.kind === "video")
     },
+    guidedHeroMedia() {
+      if (!this.guidedPresentation) {
+        return this.galleryMedia[0] || this.normalizeMedia(this.node.image)
+      }
+      return (
+        this.galleryMedia[this.guidedHeroIndex % this.galleryMedia.length] ||
+        this.normalizeMedia(this.node.image)
+      )
+    },
+    guidedHeroImage() {
+      return this.guidedHeroMedia.kind === "video"
+        ? this.guidedHeroMedia.poster || this.node.image
+        : this.guidedHeroMedia.src
+    },
+    guidedHeroLabel() {
+      if (!this.guidedHeroMedia.src) return "Photography coming soon"
+      if (!this.guidedPresentation) {
+        return this.guidedHeroMedia.kind === "video"
+          ? "Play video"
+          : "View full photo"
+      }
+      const mediaType =
+        this.guidedHeroMedia.kind === "video" ? "Play video" : "View photo"
+      return `${mediaType} ${this.guidedHeroIndex + 1} of ${this.galleryMedia.length}`
+    },
   },
   watch: {
     node() {
       this.mobileExpanded = false
+      this.guidedHeroIndex = 0
       this.closeGallery(false)
+      this.scrollDetailsToTop()
+    },
+    expandRequest() {
+      // Match the same condition that turns this panel into a bottom drawer.
+      // Desktop/sidebar navigation should remain compact and unchanged.
+      if (window.matchMedia("(orientation: portrait)").matches) {
+        this.mobileExpanded = true
+      }
+      this.scrollDetailsToTop()
+      this.startGuidedHeroCycle()
+    },
+    collapseRequest() {
+      this.mobileExpanded = false
+      this.stopGuidedHeroCycle()
+      this.closeGallery(false)
+    },
+    guidedPresentation(isPresenting) {
+      this.guidedHeroIndex = 0
+      if (isPresenting) this.startGuidedHeroCycle()
+      else this.stopGuidedHeroCycle()
     },
   },
   mounted() {
     window.addEventListener("keydown", this.handleGalleryKeydown)
+    window.addEventListener("resize", this.updateScrollCue)
+    document.addEventListener("visibilitychange", this.handleVisibilityChange)
+    this.$nextTick(this.observeDetailSize)
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.stopGuidedHeroCycle()
+    this.detailResizeObserver?.disconnect()
     window.removeEventListener("keydown", this.handleGalleryKeydown)
+    window.removeEventListener("resize", this.updateScrollCue)
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange
+    )
   },
   methods: {
+    toggleMobileDrawer() {
+      this.mobileExpanded = !this.mobileExpanded
+      if (this.mobileExpanded) {
+        this.startGuidedHeroCycle()
+        this.$nextTick(this.updateScrollCue)
+      } else {
+        this.stopGuidedHeroCycle()
+      }
+    },
+    startGuidedHeroCycle() {
+      this.stopGuidedHeroCycle()
+      if (
+        !this.guidedPresentation ||
+        this.galleryMedia.length < 2 ||
+        document.hidden ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        return
+      }
+
+      this.guidedHeroTimer = window.setInterval(() => {
+        if (
+          window.matchMedia("(orientation: portrait)").matches &&
+          !this.mobileExpanded
+        ) {
+          return
+        }
+        this.guidedHeroIndex =
+          (this.guidedHeroIndex + 1) % this.galleryMedia.length
+      }, 4500)
+    },
+    stopGuidedHeroCycle() {
+      if (this.guidedHeroTimer != null) {
+        window.clearInterval(this.guidedHeroTimer)
+        this.guidedHeroTimer = null
+      }
+    },
+    handleVisibilityChange() {
+      if (document.hidden) this.stopGuidedHeroCycle()
+      else this.startGuidedHeroCycle()
+    },
+    scrollDetailsToTop() {
+      this.$nextTick(() => {
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches
+          ? "auto"
+          : "smooth"
+        this.$refs.detailScroll?.scrollTo({ top: 0, behavior })
+        this.updateScrollCue()
+      })
+    },
+    observeDetailSize() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      this.detailResizeObserver?.disconnect()
+      if (typeof ResizeObserver !== "undefined") {
+        this.detailResizeObserver = new ResizeObserver(this.updateScrollCue)
+        this.detailResizeObserver.observe(scroller)
+        if (scroller.firstElementChild) {
+          this.detailResizeObserver.observe(scroller.firstElementChild)
+        }
+      }
+      this.updateScrollCue()
+    },
+    updateScrollCue() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      const remaining =
+        scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
+      this.detailCanScroll = scroller.scrollHeight - scroller.clientHeight > 24
+      this.showScrollCue = this.detailCanScroll && remaining > 28
+    },
+    handleDetailScroll() {
+      this.updateScrollCue()
+    },
+    scrollDetailsForward() {
+      const scroller = this.$refs.detailScroll
+      if (!scroller) return
+
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "auto"
+        : "smooth"
+      scroller.scrollBy({
+        top: Math.max(220, scroller.clientHeight * 0.68),
+        behavior,
+      })
+    },
     normalizeMedia(entry) {
       const media = typeof entry === "string" ? { src: entry } : entry || {}
       const src = media.src || media.url || ""
@@ -427,6 +645,81 @@ export default {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-color: #f6bd60 rgba(255, 255, 255, 0.08);
+  scrollbar-width: thin;
+}
+
+.atlas-detail-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.atlas-detail-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.atlas-detail-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #f6bd60;
+}
+
+.atlas-scroll-cue {
+  position: absolute;
+  z-index: 5;
+  right: 1rem;
+  bottom: 0.85rem;
+  left: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3rem;
+  border: 1px solid rgba(246, 189, 96, 0.5);
+  border-radius: 999px;
+  padding: 0.65rem 1rem;
+  background: rgba(7, 11, 14, 0.92);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 -24px 32px 14px rgba(9, 14, 17, 0.76);
+  color: #fff;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+
+.atlas-scroll-cue b {
+  display: inline-grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 50%;
+  background: #f6bd60;
+  color: #111719;
+  font-size: 1rem;
+  line-height: 1;
+  animation: atlas-scroll-nudge 1.8s ease-in-out infinite;
+}
+
+.atlas-scroll-cue:hover,
+.atlas-scroll-cue:focus-visible {
+  border-color: #f6bd60;
+  background: rgba(17, 25, 29, 0.98);
+}
+
+.atlas-scroll-cue:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes atlas-scroll-nudge {
+  0%,
+  100% {
+    transform: translateY(-1px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
 }
 
 .atlas-detail-hero {
@@ -451,6 +744,17 @@ export default {
   cursor: zoom-in;
 }
 
+.atlas-detail-hero-image.is-empty {
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      rgba(246, 189, 96, 0.2),
+      transparent 34%
+    ),
+    linear-gradient(145deg, #17272e, #091014);
+  cursor: default;
+}
+
 .atlas-detail-hero-image img {
   width: 100%;
   height: 100%;
@@ -471,6 +775,14 @@ export default {
   font-weight: 700;
   transform: translateX(-50%);
   backdrop-filter: blur(10px);
+}
+
+.atlas-detail-hero-image span.is-placeholder {
+  top: 50%;
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
 }
 
 .atlas-detail-shade {
@@ -598,11 +910,26 @@ export default {
   cursor: pointer;
 }
 
-.atlas-discoveries img {
+.atlas-discoveries img,
+.atlas-discovery-placeholder {
   width: 66px;
   height: 54px;
   border-radius: 9px;
+}
+
+.atlas-discoveries img {
   object-fit: cover;
+}
+
+.atlas-discovery-placeholder,
+.atlas-dock-placeholder {
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(246, 189, 96, 0.2),
+      transparent 38%
+    ),
+    #142128;
 }
 
 .atlas-discoveries button > span:nth-child(2) {
@@ -799,7 +1126,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-height: 78dvh;
+    max-height: 82dvh;
     border-right: 0;
     border-bottom: 0;
     border-left: 0;
@@ -812,8 +1139,36 @@ export default {
     background: rgba(7, 11, 14, 0.9);
   }
 
+  /* Leave the journey controls and a useful slice of the map visible while a
+     stop is presenting media. The detail content remains independently
+     scrollable, so the smaller guided drawer does not hide any story fields. */
+  .atlas-detail.is-guided {
+    max-height: min(62dvh, calc(100dvh - 18rem));
+  }
+
+  /* The journey player reports its live bottom edge, including a map gutter.
+     This remains accurate when copy wraps or the mobile viewport changes. */
+  .atlas-detail.is-expanded.has-expanded-guide {
+    max-height: min(
+      54dvh,
+      calc(100dvh - var(--atlas-guided-clearance, 22.5rem))
+    );
+  }
+
   .atlas-detail:not(.is-expanded) .atlas-detail-scroll {
     display: none;
+  }
+
+  .atlas-detail:not(.is-expanded) .atlas-scroll-cue {
+    display: none;
+  }
+
+  .atlas-scroll-cue {
+    right: 0.85rem;
+    bottom: calc(5.75rem + env(safe-area-inset-bottom) + 0.7rem);
+    left: 0.85rem;
+    min-height: 3.15rem;
+    font-size: 0.82rem;
   }
 
   .atlas-detail-scroll {
@@ -824,9 +1179,9 @@ export default {
   .atlas-detail-dock {
     order: 2;
     display: grid;
-    grid-template-columns: 4.25rem minmax(0, 1fr) 4.25rem;
+    grid-template-columns: 5rem minmax(0, 1fr) 5rem;
     align-items: stretch;
-    min-height: 4.85rem;
+    min-height: 5.75rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(7, 11, 14, 0.96);
   }
@@ -850,13 +1205,13 @@ export default {
     justify-content: center;
     gap: 0.18rem;
     color: rgba(255, 255, 255, 0.7) !important;
-    font-size: 0.58rem !important;
+    font-size: 0.76rem !important;
     font-weight: 700 !important;
   }
 
   .atlas-dock-action > span {
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.35rem;
   }
 
   .atlas-dock-action.active,
@@ -866,18 +1221,22 @@ export default {
 
   .atlas-dock-place {
     display: grid;
-    grid-template-columns: 3.25rem minmax(0, 1fr) auto;
+    grid-template-columns: 3.75rem minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.7rem;
     min-width: 0;
-    padding: 0.55rem 0.45rem;
+    padding: 0.65rem 0.5rem;
     text-align: left;
   }
 
-  .atlas-dock-place img {
-    width: 3.25rem;
-    height: 3.25rem;
+  .atlas-dock-place img,
+  .atlas-dock-placeholder {
+    width: 3.75rem;
+    height: 3.75rem;
     border-radius: 12px;
+  }
+
+  .atlas-dock-place img {
     object-fit: cover;
   }
 
@@ -891,7 +1250,7 @@ export default {
   .atlas-dock-place small {
     overflow: hidden;
     color: #f6bd60;
-    font-size: 0.57rem;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.13em;
     text-overflow: ellipsis;
@@ -901,7 +1260,7 @@ export default {
 
   .atlas-dock-place strong {
     overflow: hidden;
-    font-size: 0.82rem;
+    font-size: 1rem;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -915,13 +1274,13 @@ export default {
   }
 
   .atlas-dock-toggle > span {
-    font-size: 1.05rem;
+    font-size: 1.3rem;
     line-height: 0.8;
   }
 
   .atlas-dock-toggle > small {
     color: rgba(255, 255, 255, 0.62);
-    font-size: 0.5rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0;
     text-transform: none;
@@ -933,7 +1292,73 @@ export default {
   }
 
   .atlas-detail-hero {
-    min-height: 230px;
+    min-height: 250px;
+  }
+
+  .atlas-detail-hero-image span {
+    font-size: 0.8rem;
+  }
+
+  .atlas-detail-title span,
+  .atlas-note span,
+  .atlas-section-heading span {
+    font-size: 0.8rem;
+  }
+
+  .atlas-detail-title h1 {
+    font-size: clamp(2.25rem, 10vw, 3rem);
+  }
+
+  .atlas-detail-title p,
+  .atlas-note p {
+    font-size: 1rem;
+  }
+
+  .atlas-detail-content {
+    padding: 1.4rem;
+  }
+
+  .atlas-summary {
+    font-size: 1.08rem;
+  }
+
+  .atlas-section-heading strong {
+    font-size: 0.82rem;
+  }
+
+  .atlas-discoveries > button {
+    grid-template-columns: 72px minmax(0, 1fr) auto;
+    min-height: 5rem;
+    padding: 0.85rem 0;
+    font: inherit;
+    font-size: 1rem;
+  }
+
+  .atlas-discoveries img,
+  .atlas-discovery-placeholder {
+    width: 72px;
+    height: 60px;
+  }
+
+  .atlas-discoveries small {
+    font-size: 0.76rem;
+  }
+
+  .atlas-related button {
+    min-height: 2.75rem;
+    font: inherit;
+    font-size: 0.9rem;
+  }
+
+  .atlas-actions a {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .atlas-media-badge {
+    min-width: 2rem;
+    height: 2rem;
+    font-size: 0.78rem;
   }
 
   .atlas-lightbox {
@@ -949,8 +1374,14 @@ export default {
 
   .atlas-lightbox-previous,
   .atlas-lightbox-next {
-    width: 2.6rem;
-    height: 2.6rem;
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-scroll-cue b {
+    animation: none;
   }
 }
 </style>

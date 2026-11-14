@@ -1,14 +1,37 @@
+---
+id: atlas-feature
+title: Travel Atlas Feature
+kind: architecture
+status: implemented
+implementation_state: complete
+updated: 2026-11-14
+related:
+  - content-model
+supersedes: []
+superseded_by: []
+code_paths:
+  - src/features/atlas
+  - src/content/atlas
+  - src/content/selectors/atlas.js
+verification:
+  state: verified
+  evidence:
+    - npm run content:validate
+    - npm run build
+---
+
 # Travel Atlas feature
 
-This directory is a self-contained, lazy-loaded vertical slice of the
-interactive travel atlas. Its destination chapters use the repository's
-existing Utah and Puerto Rico trip photography and stories.
+This directory contains the lazy-loaded interactive Atlas UI, route, map
+configuration, and browser persistence. Its content is projected from the
+canonical records under `src/content/` rather than owned by this feature.
 
 ## Isolation boundary
 
-The feature owns its routes, map configuration, content, persistence,
-components, and styles under `src/features/atlas/`. Existing trip components
-and `src/data/trips.js` are not imported or modified.
+The feature owns its route, map configuration, persistence, components, and
+styles under `src/features/atlas/`. Canonical Media, Places, Journeys, and
+Atlas presentation live under `src/content/`; `src/content/selectors/atlas.js`
+builds the UI-facing Atlas records.
 
 The only application-level integration points are:
 
@@ -21,16 +44,16 @@ The only application-level integration points are:
 4. The Pages workflow exposes the optional `MAPTILER_API_KEY` repository secret
    as `VUE_APP_MAPTILER_KEY` during the build.
 
-Removing those integration lines and deleting this directory completely
-removes the atlas without changing the existing routes or content.
+Canonical content is also consumed by trip views, so deleting this feature
+would remove the Atlas UI but must not delete `src/content/` records.
 
 ## Routes
 
 - `/atlas` opens the atlas landing view.
-- `/atlas/utah` opens the Utah destination directly.
-- `/atlas/puerto-rico` opens the Puerto Rico destination directly.
-- `/atlas/moab`, `/atlas/old-san-juan`, and the other location IDs in
-  `data/atlasData.js` are shareable deep links.
+- `/atlas/utah`, `/atlas/puerto-rico`, and `/atlas/st-john` open registered
+  destination roots directly.
+- `/atlas/moab`, `/atlas/old-san-juan`, and other IDs registered in
+  `src/content/atlas/presentation.mjs` are shareable deep links.
 
 The route is lazy-loaded, so MapLibre and atlas code are not downloaded by
 visitors who only use the existing site.
@@ -44,6 +67,28 @@ component uses `setWorkerUrl(new URL(..., import.meta.url))`, which makes Vue
 CLI emit the worker as a JavaScript asset. Do not remove that setup: otherwise
 the worker URL resolves against the current `/atlas/...` route and receives the
 SPA HTML fallback instead of executable JavaScript.
+
+## Marker behavior
+
+Each marker is rendered as two synchronized MapLibre markers. Its numbered
+coordinate point uses map pitch/rotation alignment and subpixel positioning,
+so it remains attached to the canonical Place coordinate and Journey route
+while the map turns. Its card stays viewport-aligned so the title remains
+readable. During camera movement, non-selected cards fade temporarily while
+their coordinate points remain visible. After movement ends, marker DOM is
+rebuilt on the second paint frame so every card returns at its final projected
+coordinate. Atlas marker elements must remain absolutely positioned; putting
+them back into document flow causes each card to inherit cumulative vertical
+drift from the markers before it.
+
+Below zoom `12.25`, nearby unselected stops are grouped by projected screen
+distance so fixed-size labels do not stack over one another. A cluster is a
+display-only map affordance: it does not create or alter a Place. Selecting a
+cluster fits its member coordinates and expands back to individual markers.
+Selecting an individual leaf pin centers its canonical coordinate at a minimum
+zoom of `15.5`; destination/root selections retain their broader configured
+camera. The pure clustering and focus-camera rules live in
+`config/markerLayout.mjs` and are covered by `npm run atlas:test`.
 
 ## Map configuration
 
@@ -71,16 +116,17 @@ VUE_APP_MAPTILER_STYLE_URL=https://api.maptiler.com/maps/your-style/style.json?k
 
 ## Adding content
 
-Add a node to `data/atlasData.js` with a unique ID, verified coordinates,
-camera settings, existing media URLs, and optional actions. Connect it using
-`parentId`, `childIds`, and `relatedIds`. The order of `childIds` is also the
-displayed journey sequence: the map numbers those stops and connects them with
-an approximate path. It communicates visit order, not turn-by-turn directions.
+Add factual identity and coordinates to the appropriate canonical Place,
+Journey/Visit, and Media modules. Add only Atlas-specific grouping/camera
+choices to `src/content/atlas/presentation.mjs`, then register a destination
+root in `src/content/atlas/roots.mjs` when needed. Child relationships are
+derived from `parentId`; guided order comes from Journey visit order rather
+than a hand-maintained `childIds` array.
 
 Do not add unverified business information. Only include website, directions,
-phone, or booking actions when the source has been confirmed. The `actions`
-array is deliberately separate from map rendering so future commercial or
-affiliate behavior does not enter the map engine.
+phone, or booking actions when the source has been confirmed. External actions
+are derived from canonical Place/Journey links and remain separate from map
+rendering so commercial or affiliate behavior does not enter the map engine.
 
 ## Persistence
 

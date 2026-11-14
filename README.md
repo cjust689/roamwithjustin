@@ -25,6 +25,19 @@ push main -> GitHub Actions -> npm ci -> npm run build -> dist/ artifact -> GitH
 Make application changes only on `main`. Once the Actions deployment has been
 enabled and verified, the `pages` branch is no longer needed.
 
+## Documentation
+
+Start with [`docs/README.md`](docs/README.md). It separates verified as-built
+architecture from active implementation work, future proposals, references,
+audits, and archived briefs. Source code and tests remain authoritative for
+what is implemented.
+
+After managed documentation changes, run:
+
+```bash
+npm run docs:audit
+```
+
 ## Local development
 
 ### Requirements
@@ -145,7 +158,7 @@ The project uses [Sharp](https://sharp.pixelplumbing.com/) as a development
 dependency for deterministic image processing. This re-encodes the existing
 pixels; it does not use generative AI or recreate the photographs.
 
-The agreed optimization policy is:
+The default in-place optimization policy is:
 
 - resize photographs to a maximum width or height of 2560 pixels without
   enlarging smaller images;
@@ -178,6 +191,100 @@ safe from repeated lossy JPEG encoding. An oversized file is also left
 unchanged when the optimized output would be larger than its current file.
 Run the production build after an optimization pass and visually review the
 main galleries before committing the binary changes.
+
+### Create compressed, numbered copies in a source directory
+
+The optimizer also has a copy mode for preparing a directory of new images.
+Pass the source directory and a filename tag at run time:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico"
+```
+
+This reads the JPEG and PNG files directly inside the source directory in
+alphabetical order and writes the compressed copies back to that same
+directory as `puerto-rico-1.jpg`, `puerto-rico-2.png`, and so on. It does not
+scan subdirectories, and the original files are left unchanged. Images are
+auto-oriented, reduced to a maximum width or height of 2560 pixels, and
+re-encoded using the same settings as the in-place optimizer. If re-encoding
+would make an image larger, the numbered output is instead a byte-for-byte
+copy of the original.
+
+When `--tag` is supplied, the tool compares it with the repository's canonical
+Journey IDs, public journey slugs and titles, plus the IDs, names and aliases
+of Places visited on each journey. It reports the closest match with a
+heuristic confidence score and suggests a canonical filename label. For
+example, `usvi` resolves to the St. John journey, while `trunk bay` suggests
+`usvi-trunk-bay`. The score measures deterministic text similarity; it is not
+proof that the photographs actually depict the matched place.
+
+Suggestions are advisory by default: the exact label supplied to `--tag` is
+still used. Add `--use-suggested-tag` to adopt a medium- or high-confidence,
+unambiguous suggestion:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "trunk bay" --use-suggested-tag
+```
+
+The command stops without writing files when `--use-suggested-tag` is requested
+but the match is weak or ambiguous. A more specific tag, such as a complete
+journey or place name, produces safer results.
+
+Preview the filenames and savings without keeping any output files by adding
+`--dry-run`:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico" --dry-run
+```
+
+Copy mode refuses to overwrite an existing numbered output. Choose a new tag
+or move the existing output files before running it again.
+
+Filename matching in numbered-copy mode does not register or publish an asset.
+For a complete, validated workflow, use the separate Journey package and
+publication ingestor documented in
+[the Journey media ingestion guide](docs/implementation/journey-media-ingestion.md).
+It prepares a manifest, uploads only its listed local images through the
+authenticated R2 Worker, verifies stored checksums, adds generated canonical
+Media records idempotently, and places them in a Journey's additive **All
+photography** collection without overwriting curated hero or gallery content.
+A Place/Visit package supplies that stop's default card and Atlas image only
+when no curated hero exists; stops without verified photography remain empty
+instead of borrowing the Journey cover.
+Worker deployment and credential setup are documented in
+[the R2 Worker upload runbook](docs/implementation/r2-worker-media-upload.md).
+
+### Command-line help
+
+The script contains its complete command reference. Display it with any of
+these help flags:
+
+```bash
+node scripts/optimize-images.js --help
+node scripts/optimize-images.js --h
+node scripts/optimize-images.js -h
+```
+
+The same help is available through npm:
+
+```bash
+npm run images:optimize -- --help
+```
+
+## Gear ingestion
+
+Canonical Gear and journey usage can be added from constrained Markdown or
+strict JSON without editing Journey modules. Start with a dry run:
+
+```bash
+npm run gear:journeys
+npm run gear:list
+npm run gear:ingest -- --journey usvi-st-john-2025 --source ./gear-inbox/usvi.md --dry-run
+```
+
+See [the Gear ingestion CLI guide](docs/reference/gear-ingestion-cli.md) for the
+input contract, publication safeguards, selectors, examples, and complete
+operating workflow.
 
 ## How production works
 
