@@ -25,7 +25,7 @@ function usage() {
   return `Journey media ingestion
 
 Usage:
-  npm run media:ingest -- --manifest <file> --verification-receipt <file> [--dry-run] [--build]
+  npm run media:ingest -- --manifest <file> --verification-receipt <file> [--reassociate-existing] [--dry-run] [--build]
   npm run media:ingest -- --manifest <file> --verify-public --accept-head-only [--dry-run] [--build]
   npm run media:journeys
   npm run media:places -- [--journey <id>]
@@ -42,6 +42,8 @@ Options:
   --base-url <url>               Public media base URL (default: https://media.roamwithjustin.com)
   --dry-run                      Validate and print the plan without writing
   --build                        Run the production build after a successful apply
+  --reassociate-existing         Correct identical Journey-only assets into the
+                                 manifest's explicit Place/Visit scope
   --journeys                     List canonical Journey IDs
   --places                       List canonical Place and Visit IDs by Journey
   --journey <id>                 Limit --places to one canonical Journey
@@ -52,7 +54,8 @@ Safety:
   path because it verifies SHA-256; public HEAD is allowed only with the
   explicit --accept-head-only acknowledgement. The command writes only the
   generated Media shard, rolls back failed content validation, and never
-  changes curated Journey hero/gallery data.`
+  changes curated Journey hero/gallery data. Reassociation additionally
+  requires a checksum receipt and a fully Place/Visit-scoped manifest.`
 }
 
 function readValue(args, index, option) {
@@ -74,6 +77,7 @@ function parseArguments(args) {
     journeys: false,
     manifest: null,
     places: false,
+    reassociateExisting: false,
     receipt: null,
     verifyPublic: false,
   }
@@ -85,6 +89,9 @@ function parseArguments(args) {
     else if (argument === "--dry-run") options.dryRun = true
     else if (argument === "--journeys") options.journeys = true
     else if (argument === "--places") options.places = true
+    else if (argument === "--reassociate-existing") {
+      options.reassociateExisting = true
+    }
     else if (argument === "--verify-public") options.verifyPublic = true
     else if (["--help", "--h", "-h"].includes(argument)) options.help = true
     else if (argument === "--manifest") {
@@ -127,7 +134,8 @@ function parseArguments(args) {
       options.acceptHeadOnly ||
       options.baseUrl !== "https://media.roamwithjustin.com" ||
       options.dryRun ||
-      options.build
+      options.build ||
+      options.reassociateExisting
     ) {
       throw new Error("--journeys cannot be combined with ingestion options")
     }
@@ -150,6 +158,11 @@ function parseArguments(args) {
   if (options.verifyPublic && !options.acceptHeadOnly) {
     throw new Error(
       "Public HEAD cannot prove checksums; add --accept-head-only or use a verification receipt"
+    )
+  }
+  if (options.reassociateExisting && !options.receipt) {
+    throw new Error(
+      "--reassociate-existing requires --verification-receipt so identical R2 bytes are checksum-verified"
     )
   }
   if (!options.dryRun && !options.receipt && !options.verifyPublic) {
@@ -426,6 +439,7 @@ async function main() {
     allowUnverifiedPlan:
       options.dryRun && !options.receipt && !options.verifyPublic,
     manifestSha256: sha256(manifestInput.contents),
+    reassociateExisting: options.reassociateExisting,
     staticMedia,
     verification,
   })

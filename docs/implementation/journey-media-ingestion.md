@@ -271,6 +271,44 @@ Add `--build` to run the production build after a successful apply. The apply
 updates only `src/content/media/generated/records.json`, then runs full content
 validation. A failed validation restores the prior generated file.
 
+### Correct a previously Journey-only batch
+
+If images were first prepared without `--place`, they are published as
+Journey-only placements. Preparing the same source later with the correct
+Place creates the same deterministic Media IDs, so ordinary ingestion rejects
+the collision instead of silently moving existing content.
+
+After preparing and uploading the corrected Place package, use the explicit
+reassociation mode. Always dry-run first. For the Red Hook correction in Git
+Bash:
+
+```bash
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-red-hook-ferry-terminal/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-red-hook-ferry-terminal/r2-verification.json" --reassociate-existing --dry-run
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-red-hook-ferry-terminal/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-red-hook-ferry-terminal/r2-verification.json" --reassociate-existing --build
+```
+
+This is a narrow metadata and rendition-path correction, not a general move
+command. It succeeds only when all of the following are true:
+
+- the corrected manifest explicitly declares one valid Place and Visit;
+- every manifest asset has null `assetId` and `revision`, as emitted by a new
+  `media:prepare` package;
+- every deterministic Media ID already exists with exactly matching SHA-256,
+  byte size, dimensions, MIME type, and rights;
+- every matched asset has exactly one placement and that placement is generic
+  Journey-only state in the same Journey;
+- the corrected objects use new Place-scoped keys and have a matching
+  checksum-capable `r2-verification.json` receipt.
+
+On success, canonical Media IDs stay stable, each asset revision advances, the
+new Place-scoped object key becomes current, the Journey-only placement is
+replaced by the manifest's Place/Visit placement, and the corrected batch is
+recorded. All Photography still includes the images because Place placements
+also retain their Journey association. Previously uploaded generic objects are
+not deleted from R2; the upload-only Worker intentionally has no delete API.
+Mixed batches, partial matches, public-HEAD-only verification, explicit
+republish manifests, and assets already associated with a Place are rejected.
+
 After a normal site deployment, all published placements appear in the
 Journey page's lazy-loaded **All photography** / **Latest images** section.
 A Place/Visit placement also appears in that Visit's location gallery and in
@@ -298,6 +336,9 @@ than filesystem dates or upload timestamps.
   ID and existing placement/editorial state while advancing the rendition.
   Unknown IDs, skipped/stale revisions, unchanged rendition bytes, and curated
   asset IDs are rejected.
+- `--reassociate-existing` is the only supported way to replace a mistaken
+  Journey-only placement using a newly prepared, checksum-verified Place/Visit
+  package. Normal republishing continues to preserve placement scope.
 - Omitted records are never deleted.
 
 ## Manifest boundary and current scope

@@ -69,6 +69,15 @@ preserves existing placement state on republish, and atomically updates only
 `src/content/media/generated/records.json`. Failed canonical validation rolls
 the generated file back.
 
+An explicit `--reassociate-existing` correction path handles images that were
+first published at Journey scope and later prepared and uploaded with the
+correct Place/Visit scope. It accepts only a checksum-verified, newly prepared
+Place package whose complete asset set resolves to identical existing
+Journey-only assets. The planner preserves canonical Media IDs, adopts the new
+Place-scoped object keys, advances revisions, replaces the single generic
+placement for each asset, and records the corrected batch atomically. It does
+not infer scope, alter curated media, or move already-specific placements.
+
 Curated `.mjs` Media records and generated JSON assets are composed by
 `src/content/media/index.mjs`. `getJourneyPublishedMedia()` includes all
 published placements for a Journey in the root Journey page's lazy-loaded

@@ -364,11 +364,49 @@ function upsertById(records, value) {
   else records.push(value)
 }
 
+function reassociationMetadataMatches(existing, asset) {
+  return (
+    existing.publication.sha256 === asset.output.sha256 &&
+    existing.publication.byteSize === asset.output.byteSize &&
+    existing.intrinsic.mimeType === asset.output.mimeType &&
+    existing.intrinsic.width === asset.output.width &&
+    existing.intrinsic.height === asset.output.height &&
+    existing.rights.owner === asset.rights.owner &&
+    existing.rights.status === asset.rights.status
+  )
+}
+
 function planMediaIngestion(manifest, currentRecords, context) {
   const manifestValidation = validateManifest(manifest, context)
   const currentValidation = validateGeneratedRecords(currentRecords, context)
   const errors = [...manifestValidation.errors, ...currentValidation.errors]
   if (errors.length) return { errors, changed: false, records: currentRecords }
+
+  const reassociateExisting = Boolean(context.reassociateExisting)
+  if (reassociateExisting) {
+    if (!manifest.placeId || !manifest.visitId) {
+      errors.push(
+        "--reassociate-existing requires a manifest with an explicit Place and Visit"
+      )
+    }
+    if (context.verification?.method !== "receipt-sha256") {
+      errors.push(
+        "--reassociate-existing requires checksum verification from a receipt"
+      )
+    }
+    if (
+      manifest.assets.some(
+        asset => asset.assetId !== null || asset.revision !== null
+      )
+    ) {
+      errors.push(
+        "--reassociate-existing accepts only a newly prepared manifest with null assetId and revision fields"
+      )
+    }
+    if (errors.length) {
+      return { errors, changed: false, records: currentRecords }
+    }
+  }
 
   const manifestSha256 = context.manifestSha256
   if (!checksumPattern.test(manifestSha256 || "")) {
@@ -420,13 +458,19 @@ function planMediaIngestion(manifest, currentRecords, context) {
       canonicalAssetId(manifestValidation.journey, asset, index)
     const existing = next.assets.find(record => record.id === assetId)
 
+    if (reassociateExisting && !existing) {
+      errors.push(
+        `Manifest asset ${index + 1} does not match an existing generated Journey-only asset "${assetId}"`
+      )
+      return
+    }
     if (asset.assetId && !existing) {
       errors.push(
         `Manifest asset ${index + 1} requests unknown generated assetId "${asset.assetId}"`
       )
       return
     }
-    if (existing && !asset.assetId) {
+    if (existing && !asset.assetId && !reassociateExisting) {
       errors.push(
         `Manifest asset ${index + 1} collides with generated ID "${assetId}" but has no reconciled assetId; treat it as a new source or explicitly republish the known asset`
       )
@@ -439,6 +483,15 @@ function planMediaIngestion(manifest, currentRecords, context) {
     ) {
       errors.push(
         `Manifest asset ${index + 1} revision ${asset.revision} must follow current revision ${existing.publication.revision} for "${assetId}"`
+      )
+      return
+    }
+    if (
+      reassociateExisting &&
+      !reassociationMetadataMatches(existing, asset)
+    ) {
+      errors.push(
+        `Manifest asset ${index + 1} does not exactly match the existing bytes, dimensions, MIME type, and rights for "${assetId}"`
       )
       return
     }
@@ -477,7 +530,20 @@ function planMediaIngestion(manifest, currentRecords, context) {
       )
       return
     }
-    const revision = existing && asset.assetId ? asset.revision : 1
+    if (
+      reassociateExisting &&
+      existing.source.objectKey === asset.output.objectKey
+    ) {
+      errors.push(
+        `Manifest asset ${index + 1} must use a new Place-scoped object key for "${assetId}"`
+      )
+      return
+    }
+    const revision = reassociateExisting
+      ? existing.publication.revision + 1
+      : existing && asset.assetId
+        ? asset.revision
+        : 1
     const mediaRecord = {
       id: assetId,
       kind: "image",
@@ -494,13 +560,17 @@ function planMediaIngestion(manifest, currentRecords, context) {
         owner: asset.rights.owner,
         status: asset.rights.status,
       },
-      capture: {
-        placeId: asset.capture?.placeId || null,
-        capturedAt: asset.capture?.capturedAt || null,
-        cameraModelRaw: asset.capture?.cameraModelRaw || null,
-        lensModelRaw: asset.capture?.lensModelRaw || null,
-      },
-      defaultAlt: `${manifestValidation.journey.title} journey photograph ${index + 1}`,
+      capture: reassociateExisting
+        ? { ...existing.capture }
+        : {
+            placeId: asset.capture?.placeId || null,
+            capturedAt: asset.capture?.capturedAt || null,
+            cameraModelRaw: asset.capture?.cameraModelRaw || null,
+            lensModelRaw: asset.capture?.lensModelRaw || null,
+          },
+      defaultAlt: reassociateExisting
+        ? existing.defaultAlt
+        : `${manifestValidation.journey.title} journey photograph ${index + 1}`,
       publication: {
         revision,
         sha256: asset.output.sha256,
@@ -508,19 +578,50 @@ function planMediaIngestion(manifest, currentRecords, context) {
         batchId: manifest.batchId,
       },
     }
-    upsertById(next.assets, mediaRecord)
-
     const association = asset.associations || {}
     const placementScope = association.visitId || "journey"
     const placementId = `placement-${manifest.journeyId}-${placementScope}-${assetId}`
     const existingPlacement = next.placements.find(
       placement => placement.id === placementId
     )
-    if (existing && asset.assetId && !existingPlacement) {
+    let priorJourneyPlacement = null
+    if (reassociateExisting) {
+      const assetPlacements = next.placements.filter(
+        placement => placement.assetId === assetId
+      )
+      priorJourneyPlacement = assetPlacements[0] || null
+      if (
+        assetPlacements.length !== 1 ||
+        priorJourneyPlacement.journeyId !== manifest.journeyId ||
+        priorJourneyPlacement.visitId !== null ||
+        priorJourneyPlacement.placeId !== null ||
+        priorJourneyPlacement.experienceId !== null
+      ) {
+        errors.push(
+          `Manifest asset ${index + 1} must have exactly one Journey-only placement before reassociation for "${assetId}"`
+        )
+        return
+      }
+      if (existingPlacement) {
+        errors.push(
+          `Manifest asset ${index + 1} already has the requested Place/Visit placement for "${assetId}"`
+        )
+        return
+      }
+    } else if (existing && asset.assetId && !existingPlacement) {
       errors.push(
         `Manifest asset ${index + 1} cannot change the existing placement association for "${assetId}" during republish`
       )
       return
+    }
+    upsertById(next.assets, mediaRecord)
+    if (priorJourneyPlacement) {
+      next.placements.splice(
+        next.placements.findIndex(
+          placement => placement.id === priorJourneyPlacement.id
+        ),
+        1
+      )
     }
     if (!existingPlacement) {
       next.placements.push({
@@ -564,7 +665,9 @@ function planMediaIngestion(manifest, currentRecords, context) {
     changed: JSON.stringify(next) !== JSON.stringify(currentRecords),
     records: next,
     assetIds,
-    message: `Prepared ${assetIds.length} Media asset(s) and publication placement(s).`,
+    message: reassociateExisting
+      ? `Reassociated ${assetIds.length} existing Media asset(s) from Journey-only placement to ${manifest.placeId} / ${manifest.visitId}.`
+      : `Prepared ${assetIds.length} Media asset(s) and publication placement(s).`,
   }
 }
 

@@ -270,6 +270,140 @@ async function main() {
       "usvi-st-john-2025-waterlemon-cay"
     )
 
+    const collisionPlan = planMediaIngestion(
+      placeManifest,
+      firstPlan.records,
+      {
+        ...context,
+        manifestSha256: sha256(placeManifestContents),
+      }
+    )
+    assert.match(
+      collisionPlan.errors.join("\n"),
+      /collides with generated ID/
+    )
+
+    const reassociationContext = {
+      ...context,
+      manifestSha256: sha256(placeManifestContents),
+      reassociateExisting: true,
+    }
+    const reassociationPlan = planMediaIngestion(
+      placeManifest,
+      firstPlan.records,
+      reassociationContext
+    )
+    assert.deepStrictEqual(reassociationPlan.errors, [])
+    assert.strictEqual(reassociationPlan.changed, true)
+    assert.strictEqual(reassociationPlan.records.assets.length, 1)
+    assert.strictEqual(reassociationPlan.records.placements.length, 1)
+    assert.strictEqual(reassociationPlan.records.batches.length, 2)
+    assert.strictEqual(
+      reassociationPlan.records.assets[0].id,
+      firstPlan.assetIds[0]
+    )
+    assert.strictEqual(
+      reassociationPlan.records.assets[0].source.objectKey,
+      placeManifest.assets[0].output.objectKey
+    )
+    assert.strictEqual(
+      reassociationPlan.records.assets[0].publication.revision,
+      2
+    )
+    assert.strictEqual(
+      reassociationPlan.records.assets[0].publication.batchId,
+      placeManifest.batchId
+    )
+    assert.strictEqual(
+      reassociationPlan.records.placements[0].placeId,
+      "waterlemon-cay"
+    )
+    assert.strictEqual(
+      reassociationPlan.records.placements[0].visitId,
+      "usvi-st-john-2025-waterlemon-cay"
+    )
+    assert.strictEqual(
+      reassociationPlan.records.placements[0].batchId,
+      placeManifest.batchId
+    )
+    assert.match(reassociationPlan.message, /Reassociated 1 existing Media/)
+
+    const repeatedReassociation = planMediaIngestion(
+      placeManifest,
+      reassociationPlan.records,
+      reassociationContext
+    )
+    assert.deepStrictEqual(repeatedReassociation.errors, [])
+    assert.strictEqual(repeatedReassociation.changed, false)
+
+    const weakVerificationPlan = planMediaIngestion(
+      placeManifest,
+      firstPlan.records,
+      {
+        ...reassociationContext,
+        verification: { method: "public-head-size-and-mime" },
+      }
+    )
+    assert.match(
+      weakVerificationPlan.errors.join("\n"),
+      /requires checksum verification from a receipt/
+    )
+
+    const alreadyScopedManifest = JSON.parse(JSON.stringify(placeManifest))
+    alreadyScopedManifest.batchId = "media-usvi-already-scoped"
+    alreadyScopedManifest.r2Prefix =
+      "images/usvi/waterlemon-cay/media-usvi-already-scoped/"
+    alreadyScopedManifest.assets[0].output.objectKey =
+      `${alreadyScopedManifest.r2Prefix}${alreadyScopedManifest.assets[0].output.relativePath}`
+    const alreadyScopedPlan = planMediaIngestion(
+      alreadyScopedManifest,
+      reassociationPlan.records,
+      {
+        ...reassociationContext,
+        manifestSha256: sha256(JSON.stringify(alreadyScopedManifest)),
+      }
+    )
+    assert.match(
+      alreadyScopedPlan.errors.join("\n"),
+      /must have exactly one Journey-only placement/
+    )
+
+    const explicitRevisionManifest = JSON.parse(JSON.stringify(placeManifest))
+    explicitRevisionManifest.batchId = "media-usvi-explicit-reassociation"
+    explicitRevisionManifest.r2Prefix =
+      "images/usvi/waterlemon-cay/media-usvi-explicit-reassociation/"
+    explicitRevisionManifest.assets[0].assetId = firstPlan.assetIds[0]
+    explicitRevisionManifest.assets[0].revision = 2
+    explicitRevisionManifest.assets[0].output.objectKey =
+      `${explicitRevisionManifest.r2Prefix}${explicitRevisionManifest.assets[0].output.relativePath}`
+    const explicitRevisionPlan = planMediaIngestion(
+      explicitRevisionManifest,
+      firstPlan.records,
+      {
+        ...reassociationContext,
+        manifestSha256: sha256(JSON.stringify(explicitRevisionManifest)),
+      }
+    )
+    assert.match(
+      explicitRevisionPlan.errors.join("\n"),
+      /accepts only a newly prepared manifest/
+    )
+
+    const reassociationWithoutReceipt = runNode(
+      [
+        "scripts/ingest-media.js",
+        "--manifest",
+        path.join(placePackageDirectory, "publication-manifest.json"),
+        "--reassociate-existing",
+        "--dry-run",
+      ],
+      1
+    )
+    assert.match(
+      reassociationWithoutReceipt.stderr,
+      /requires --verification-receipt/
+    )
+
     runNode(prepareArgs, 1)
     runNode(
       [

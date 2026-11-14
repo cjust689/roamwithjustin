@@ -1146,7 +1146,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-001.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-001.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1165,10 +1165,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 1",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "e4c381fa292b000a68cb0dd48418a0d68df7d27af48a04712fb64c69dac9f224",
         "byteSize": 233137,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1176,7 +1176,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-002.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-002.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1195,10 +1195,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 2",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "0497e9e1b43b1e6de90e72dbed046718e94ad6f2c4f11fffa74a72122a5ecc92",
         "byteSize": 198302,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1206,7 +1206,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-003.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-003.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1225,10 +1225,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 3",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "8562a2c3a5e34b08a514a48456db278b843120d557a571765458c02b09cb4a3b",
         "byteSize": 179259,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1236,7 +1236,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-004.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-004.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1255,10 +1255,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 4",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "a4accfb6df47db8d6e41c50ee97583f666fe5f7b6f348ca05534f9e13b130c4c",
         "byteSize": 177891,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1266,7 +1266,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-005.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-005.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1285,10 +1285,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 5",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "547fbdbbd8fb6959e2fb06585e4f78a4f8881346505d68eb03a6c65aae42ce6e",
         "byteSize": 109334,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1296,7 +1296,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-006.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-006.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1315,10 +1315,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 6",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "c9077484750282f87ca24a9e7ea1d84ea987d4a776d739495c8e72bac36040c3",
         "byteSize": 331846,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -1326,7 +1326,7 @@
       "kind": "image",
       "source": {
         "provider": "r2",
-        "objectKey": "images/usvi/media-usvi-842b85a59b6c4b60/usvi-007.jpg"
+        "objectKey": "images/usvi/red-hook-ferry-terminal/media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44/red-hook-ferry-terminal-007.jpg"
       },
       "intrinsic": {
         "mimeType": "image/jpeg",
@@ -1345,10 +1345,10 @@
       },
       "defaultAlt": "St. John, USVI journey photograph 7",
       "publication": {
-        "revision": 1,
+        "revision": 2,
         "sha256": "0d4f1c0c43c15fc750d84f43fbdb879bd808b38a6a33e8b04bc14df27b24418f",
         "byteSize": 847501,
-        "batchId": "media-usvi-842b85a59b6c4b60"
+        "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
       }
     },
     {
@@ -2028,97 +2028,6 @@
       "batchId": "media-usvi-028eb53149d731bf"
     },
     {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-e4c381fa292b-001",
-      "assetId": "image-usvi-e4c381fa292b-001",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 1,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-0497e9e1b43b-002",
-      "assetId": "image-usvi-0497e9e1b43b-002",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 2,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-8562a2c3a5e3-003",
-      "assetId": "image-usvi-8562a2c3a5e3-003",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 3,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-a4accfb6df47-004",
-      "assetId": "image-usvi-a4accfb6df47-004",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 4,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-547fbdbbd8fb-005",
-      "assetId": "image-usvi-547fbdbbd8fb-005",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 5,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-c90774847502-006",
-      "assetId": "image-usvi-c90774847502-006",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 6,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
-      "id": "placement-usvi-st-john-2025-journey-image-usvi-0d4f1c0c43c1-007",
-      "assetId": "image-usvi-0d4f1c0c43c1-007",
-      "journeyId": "usvi-st-john-2025",
-      "visitId": null,
-      "placeId": null,
-      "experienceId": null,
-      "role": "gallery",
-      "visibility": "published",
-      "sortOrder": 7,
-      "publicationSequence": 9,
-      "batchId": "media-usvi-842b85a59b6c4b60"
-    },
-    {
       "id": "placement-usvi-st-john-2025-usvi-st-john-2025-hermit-crab-island-image-usvi-8db684083864-001",
       "assetId": "image-usvi-8db684083864-001",
       "journeyId": "usvi-st-john-2025",
@@ -2195,6 +2104,97 @@
       "sortOrder": 6,
       "publicationSequence": 10,
       "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-e4c381fa292b-001",
+      "assetId": "image-usvi-e4c381fa292b-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-0497e9e1b43b-002",
+      "assetId": "image-usvi-0497e9e1b43b-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-8562a2c3a5e3-003",
+      "assetId": "image-usvi-8562a2c3a5e3-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-a4accfb6df47-004",
+      "assetId": "image-usvi-a4accfb6df47-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-547fbdbbd8fb-005",
+      "assetId": "image-usvi-547fbdbbd8fb-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-c90774847502-006",
+      "assetId": "image-usvi-c90774847502-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-red-hook-ferry-terminal-image-usvi-0d4f1c0c43c1-007",
+      "assetId": "image-usvi-0d4f1c0c43c1-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-red-hook-ferry-terminal",
+      "placeId": "red-hook-ferry-terminal",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 11,
+      "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
     }
   ],
   "batches": [
@@ -2367,6 +2367,25 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "a82e24e823ed7ff93b1522814c9f0403668b75ebb94f42d1f306df9d6bbf2c90"
+      }
+    },
+    {
+      "id": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44",
+      "sequence": 11,
+      "manifestSha256": "612069b801ac72b9c17881f04f6bc136bfda364e53bfb7ea9a5791593cdceef3",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-e4c381fa292b-001",
+        "image-usvi-0497e9e1b43b-002",
+        "image-usvi-8562a2c3a5e3-003",
+        "image-usvi-a4accfb6df47-004",
+        "image-usvi-547fbdbbd8fb-005",
+        "image-usvi-c90774847502-006",
+        "image-usvi-0d4f1c0c43c1-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "840cfa257c9c9496fd4f7fc3d3fb4c4ea0b5d6b0236a6a465425a3f695316ad3"
       }
     }
   ]
