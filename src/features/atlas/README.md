@@ -68,6 +68,24 @@ CLI emit the worker as a JavaScript asset. Do not remove that setup: otherwise
 the worker URL resolves against the current `/atlas/...` route and receives the
 SPA HTML fallback instead of executable JavaScript.
 
+## Marker behavior
+
+Each marker is rendered as two synchronized MapLibre markers. Its numbered
+coordinate point uses map pitch/rotation alignment and subpixel positioning,
+so it remains attached to the canonical Place coordinate and Journey route
+while the map turns. Its card stays viewport-aligned so the title remains
+readable. During camera movement, non-selected cards fade temporarily while
+their coordinate points remain visible; cards return when movement ends.
+
+Below zoom `12.25`, nearby unselected stops are grouped by projected screen
+distance so fixed-size labels do not stack over one another. A cluster is a
+display-only map affordance: it does not create or alter a Place. Selecting a
+cluster fits its member coordinates and expands back to individual markers.
+Selecting an individual leaf pin centers its canonical coordinate at a minimum
+zoom of `15.5`; destination/root selections retain their broader configured
+camera. The pure clustering and focus-camera rules live in
+`config/markerLayout.mjs` and are covered by `npm run atlas:test`.
+
 ## Map configuration
 
 Without configuration, the atlas uses the MapLibre demonstration basemap and

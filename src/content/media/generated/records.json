@@ -780,6 +780,96 @@
         "byteSize": 574735,
         "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
       }
+    },
+    {
+      "id": "image-usvi-cb2d2d6958ba-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "cb2d2d6958baf0d2c3a22c469f40e7eeed8523280b54da24f0e5c20db5848793",
+        "byteSize": 327888,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
+    },
+    {
+      "id": "image-usvi-947d03fffff4-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "947d03fffff4aaf0c6b72c6bf43cda2a756953ee2f2ec5cdcd52828c47a31736",
+        "byteSize": 210963,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
+    },
+    {
+      "id": "image-usvi-6b6ef0214420-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/lovango-cay/media-usvi-lovango-cay-09628b5dc993a5e5/lovango-cay-003.png"
+      },
+      "intrinsic": {
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 1536
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "6b6ef0214420e99c9002165783873f1b093fa8b3eb96b3b67b8cddcf4f1ebf3c",
+        "byteSize": 1790788,
+        "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+      }
     }
   ],
   "placements": [
@@ -1120,6 +1210,45 @@
       "sortOrder": 9,
       "publicationSequence": 5,
       "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-cb2d2d6958ba-001",
+      "assetId": "image-usvi-cb2d2d6958ba-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-947d03fffff4-002",
+      "assetId": "image-usvi-947d03fffff4-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-image-usvi-6b6ef0214420-003",
+      "assetId": "image-usvi-6b6ef0214420-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 6,
+      "batchId": "media-usvi-lovango-cay-09628b5dc993a5e5"
     }
   ],
   "batches": [
@@ -1207,6 +1336,21 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "239249efee2f8d628a4d5a76670b445c3ef35f07e17e9c86b26ee59dc106f8b7"
+      }
+    },
+    {
+      "id": "media-usvi-lovango-cay-09628b5dc993a5e5",
+      "sequence": 6,
+      "manifestSha256": "38d99c5f305b3a83eed59b518c7e3190c6b87d443b6c24e987bff1cb4a2f3dad",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-cb2d2d6958ba-001",
+        "image-usvi-947d03fffff4-002",
+        "image-usvi-6b6ef0214420-003"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "388ecaaf1ce71e96f79d53648baa4866b4c75277c9631de4a3eee7800d972ae2"
       }
     }
   ]

@@ -180,6 +180,7 @@ import AtlasJourneyPlayer from "../components/AtlasJourneyPlayer.vue"
 import AtlasMap from "../components/AtlasMap.vue"
 import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
 import { hasMapTilerKey } from "../config/mapConfig"
+import { getAtlasPinFocusCamera } from "../config/markerLayout.mjs"
 import {
   atlasRootIds,
   getAtlasJourneyNodes,
@@ -312,7 +313,7 @@ export default {
     activeCamera() {
       if (!this.currentNode) return worldCamera
       if (this.guidedIsActive && this.guidedStop?.id === this.currentNode.id) {
-        return this.guidedStop.camera
+        return this.cameras[this.currentNode.id] || this.guidedStop.camera
       }
       return this.cameras[this.currentNode.id] || this.currentNode.camera
     },
@@ -438,6 +439,12 @@ export default {
         } else {
           this.exitGuidedJourney(false)
         }
+      }
+
+      const selectedNode = getAtlasNode(nodeId)
+      const focusCamera = getAtlasPinFocusCamera(selectedNode)
+      if (focusCamera) {
+        this.$set(this.cameras, nodeId, focusCamera)
       }
 
       if ((nodeId || "") === (this.nodeId || "")) {

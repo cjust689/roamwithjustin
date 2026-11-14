@@ -10,6 +10,7 @@
     "server": "node scripts/serve.js",
     "content:validate": "node scripts/validate-content.js",
     "docs:audit": "node scripts/docs-audit.mjs",
+    "atlas:test": "node scripts/test-atlas-marker-layout.mjs",
     "gear:ingest": "node scripts/ingest-gear.js",
     "gear:journeys": "node scripts/ingest-gear.js --journeys",
     "gear:list": "node scripts/ingest-gear.js --list",
