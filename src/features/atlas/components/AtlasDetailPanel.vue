@@ -243,8 +243,8 @@
         <figcaption>
           <strong>{{ node.title }}</strong>
           <span>
+            {{ lightboxIndex + 1 }} of {{ galleryMedia.length }} media &middot;
             {{ activeMedia.kind === "video" ? "Video" : "Photo" }}
-            {{ activeMediaTypePosition }} of {{ activeMediaTypeTotal }}
           </span>
         </figcaption>
       </figure>
@@ -309,20 +309,6 @@ export default {
     },
     hasVideo() {
       return this.galleryMedia.some(item => item.kind === "video")
-    },
-    activeMediaTypeItems() {
-      return this.galleryMedia.filter(
-        item => item.kind === this.activeMedia.kind
-      )
-    },
-    activeMediaTypePosition() {
-      const activeIndex = this.activeMediaTypeItems.findIndex(
-        item => item.key === this.activeMedia.key
-      )
-      return activeIndex + 1
-    },
-    activeMediaTypeTotal() {
-      return this.activeMediaTypeItems.length
     },
   },
   watch: {
