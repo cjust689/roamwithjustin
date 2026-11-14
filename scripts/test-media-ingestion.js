@@ -341,41 +341,48 @@ async function main() {
     const { buildAtlasNodeView, buildTripLocationView } = await import(
       "../src/content/selectors/projections.mjs"
     )
+    const { getVisitPublishedMedia } = await import(
+      "../src/content/selectors/media.mjs"
+    )
     const canonicalJourney = getCanonicalJourney("usvi-st-john-2025")
-    const publishedPlaceIds = [
-      "waterlemon-cay",
-      "cinnamon-bay",
-      "cruz-bay",
-      "great-cruz-bay",
-    ]
+    const journeyCover = "/img/locations/usvi/usvi-full.jpg"
+    const childPresentations = atlasPresentation.filter(
+      item =>
+        item.journeyId === canonicalJourney.id && item.id !== "st-john"
+    )
 
-    publishedPlaceIds.forEach(placeId => {
+    childPresentations.forEach(presentation => {
+      const placeId = presentation.placeId
       const canonicalVisit = getJourneyVisit(canonicalJourney.id, placeId)
       const tripLocation = buildTripLocationView(
         canonicalJourney,
         canonicalVisit
       )
-      const atlasNode = buildAtlasNodeView(
-        atlasPresentation.find(item => item.id === placeId)
-      )
-      const expectedPath = `/images/usvi/${placeId}/`
+      const atlasNode = buildAtlasNodeView(presentation)
+      const publishedImages = getVisitPublishedMedia(
+        canonicalJourney.id,
+        canonicalVisit.id
+      ).filter(media => media.kind === "image")
 
-      assert.match(tripLocation.image, new RegExp(expectedPath))
-      assert.match(atlasNode.image, new RegExp(expectedPath))
-      assert.strictEqual(tripLocation.mediaPending, false)
+      assert.notStrictEqual(tripLocation.image, journeyCover)
+      assert.notStrictEqual(atlasNode.image, journeyCover)
+
+      if (publishedImages.length) {
+        assert.strictEqual(tripLocation.image, publishedImages[0].src)
+        assert.strictEqual(atlasNode.image, publishedImages[0].src)
+        assert.strictEqual(tripLocation.mediaPending, false)
+        return
+      }
+
+      assert.strictEqual(tripLocation.image, "")
+      assert.strictEqual(atlasNode.image, "")
+      assert.strictEqual(tripLocation.mediaPending, true)
     })
 
-    const pendingVisit = getJourneyVisit(canonicalJourney.id, "maho-bay")
-    const pendingLocation = buildTripLocationView(
-      canonicalJourney,
-      pendingVisit
+    const rootNode = buildAtlasNodeView(
+      atlasPresentation.find(item => item.id === "st-john")
     )
-    const pendingAtlasNode = buildAtlasNodeView(
-      atlasPresentation.find(item => item.id === "maho-bay")
-    )
-    assert.strictEqual(pendingLocation.image, "")
-    assert.strictEqual(pendingAtlasNode.image, "")
-    assert.strictEqual(pendingLocation.mediaPending, true)
+    assert.strictEqual(rootNode.image, journeyCover)
 
     console.log("Media ingestion tests passed.")
   } finally {
