@@ -11,7 +11,7 @@ export const utahPlaces = Object.freeze([
     category: "region",
     evidenceStatus: "confirmed",
     description:
-      "A cinematic road trip through salt flats, high desert, red-rock parks, and mountain towns.",
+      "A west-to-east run from wet salt before sunrise to weather-darkened red rock, followed by a final shift into Park City snow.",
     externalLinks: {
       official: "https://www.visitutah.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=Utah",
@@ -27,7 +27,7 @@ export const utahPlaces = Object.freeze([
     category: "national-park",
     evidenceStatus: "confirmed",
     description:
-      "Iconic red-rock formations, accessible overlooks, and warm evening light across the fins and arches.",
+      "Red fins and arches that can be reached on short, well-marked walks, especially striking when the evening light begins warming the rock.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.722618%2C-109.586367",
       official: "https://www.nps.gov/arch/index.htm",
@@ -44,7 +44,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "park",
     description:
-      "Layered canyons and immense overlooks where fast-changing weather can completely transform the scene.",
+      "Layered canyon country where sun, wind, rain, and snow can reveal four different landscapes within the same visit.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.24555783%2C-109.8801624",
       official: "https://www.nps.gov/cany/index.htm",
@@ -62,7 +62,7 @@ export const utahPlaces = Object.freeze([
     category: "state-park",
     evidenceStatus: "confirmed",
     description:
-      "A dramatic Colorado River overlook with quick access to expansive canyon views.",
+      "A short walk to a broad canyon overlook where passing snow can hide entire mesas and uncover them again minutes later.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.5058162%2C-109.7331732",
       official: "https://stateparks.utah.gov/parks/dead-horse-point/",
@@ -78,7 +78,7 @@ export const utahPlaces = Object.freeze([
     category: "desert-landscapes",
     evidenceStatus: "confirmed",
     description:
-      "A base for red-rock drives, family-friendly hikes, canyon overlooks, and national-park photography.",
+      "The practical center of the red-rock leg, with dinosaur stops, canyon roads, overlooks, and national-park walks radiating out from town.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.57447%2C-109.54583",
       official: "https://www.discovermoab.com/",
@@ -95,7 +95,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "public-access",
     description:
-      "Open, alien, and cinematic — we shot sunrise drone footage here.",
+      "Wet salt, hard wind, and almost no foreground give sunrise room to arrive one thin line at a time beneath the mountains.",
     externalLinks: {
       official: "https://www.blm.gov/visit/bonneville-salt-flats",
       maps: "https://www.google.com/maps/search/?api=1&query=40.762583%2C-113.896194",
@@ -114,7 +114,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "route-anchor",
     description:
-      "Drove Potash Road for stunning desert and canyon views at sunset.",
+      "A river-and-cliff drive where late light reduces people to tiny figures beneath the canyon and aerial views turn the ponds into pure geometry.",
     externalLinks: {
       official:
         "https://www.discovermoab.com/trail/potash-lower-colorado-river-scenic-byway-%28u-279%29/681e961cc610f14d9362aa64/",
@@ -134,7 +134,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "venue",
     description:
-      "A dinosaur-themed park with life-sized models and a small museum. Great stop for kids and families before heading deeper into Moab.",
+      "Life-sized dinosaurs and hands-on exhibits turn a road-trip break into a new way for kids to imagine the desert outside.",
     externalLinks: {
       official: "https://www.moabgiants.com",
       maps: "https://www.google.com/maps/search/?api=1&query=38.543939%2C-109.761166",
@@ -153,7 +153,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "resort-base",
     description:
-      "Skiing and snowboarding in the morning, then exploring the charming streets of Park City in the afternoon.",
+      "A mountain day that can move from ski school and independent runs to an easy afternoon regrouping in downtown Park City.",
     externalLinks: {
       official: "https://www.visitparkcity.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.651887%2C-111.506627",
@@ -172,7 +172,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "venue",
     description:
-      "the famous Woodward Park City, a year-round action sports facility. We spent the day skiing and snowboarding, and our son had a blast at the indoor skatepark/trampoline park.",
+      "BMX riders rotate above the foam pit while young skateboarders launch across indoor transitions; outside, the same campus continues with skiing, snowboarding, and tubing.",
     externalLinks: {
       official: "https://www.woodwardparkcity.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.754775%2C-111.585887",
@@ -191,7 +191,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "activity-area",
     description:
-      "Cross-country skiing in the Uintas and a dog-sled ride on private ranch trails near Park City made this a full day in Utah's winter landscape.",
+      "A winter day that begins at cross-country pace, then changes energy when the guide clips in the dog team for a sled ride on private ranch trails.",
     externalLinks: {
       official:
         "https://wasatchadventureguides.com/winter-adventures-park-city/dog-sledding/",
@@ -211,7 +211,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "airport",
     description:
-      "The arrival and departure point that bookends the Utah road trip.",
+      "The ordinary bookend to a week of salt, sandstone, and snow: rental keys on arrival and ski-season security lines on departure.",
     externalLinks: {
       official: "https://slcairport.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.788393%2C-111.977773",

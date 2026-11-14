@@ -48,7 +48,7 @@ export const utahWinter2025Journey = Object.freeze({
     },
   ],
   description:
-    "A 7-day cinematic road trip through Utah’s contrasting landscapes...",
+    "We leave the airport pointed west, reach the salt before sunrise, and spend the next week moving from empty white flats to red canyons and finally snow. The landscapes are the obvious draw; what stays with me is our four-year-old reaching toward a dinosaur, hiking through a surprise snow squall, and watching kids at Woodward treat being upside down as normal.",
   duration: "7 days",
   audience: "Couples, photographers, drone pilots, solo travelers",
   costLevel: "$$",
@@ -89,7 +89,7 @@ export const utahWinter2025Journey = Object.freeze({
   ],
   travelNotes: [
     "Flew into Salt Lake City International Airport (SLC)",
-    "Rented a JEEP 4x4 —, as some roads are rough and unpaved though any suv with 4x4 or AWD would be fine for the specific locations we visited.",
+    "Rented a Jeep 4x4 because some roads are rough and unpaved, though any SUV with 4x4 or AWD would be fine for the specific locations we visited.",
     "Used Moab as a base for Arches and Canyonlands",
     "Stayed in Park City for final night before flying out",
   ],
@@ -97,7 +97,7 @@ export const utahWinter2025Journey = Object.freeze({
     "Drone use is prohibited in all U.S. national parks...",
     "Bring layers. We had snow in Park City and desert heat near Moab...",
     "Don’t underestimate how far apart locations are...",
-    "Salt Flats are windy —",
+    "The Salt Flats can be windy.",
   ],
   lodging: [
     {
@@ -128,7 +128,7 @@ export const utahWinter2025Journey = Object.freeze({
       location: "Park City, UT",
       nights: 2,
       blurb:
-        "amazing hotel right on the slopes. Great for skiing and snowboarding...",
+        "Slope-side hotel that kept the Park City ski and snowboard days logistically simple.",
       image: {
         provider: "external",
         url: "https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2014/09/21/1639/SLCPC-P085-Aerial.jpg/SLCPC-P085-Aerial.16x9.jpg",
@@ -136,6 +136,7 @@ export const utahWinter2025Journey = Object.freeze({
       link: "https://www.hyatt.com/en-US/hotel/utah/hyatt-centric-park-city/parkc",
     },
   ],
+  // Visit descriptions hold the lived scene; summaries provide a compact personal beat for cards and Atlas stops.
   visits: [
     {
       id: "utah-winter-2025-bonneville-salt-flats",
@@ -146,6 +147,10 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "landscape",
       droneAllowed: true,
+      description:
+        "It is still dark when we step onto the wet flats, waterproof shoes on and wind already moving across all that open ground. Then the mountains become a black cutout and the first light begins to spread across the salt. With almost nothing in the foreground, every ridge, puddle, and footprint suddenly feels enormous.",
+      summary:
+        "We arrive before 6:00 a.m. and watch the wet salt pull the first light out of the sky.",
       notes: [
         "Arrived before 6:00am for sunrise shots",
         "Can easily drive out on to the flats",
@@ -186,8 +191,12 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "attraction",
       droneAllowed: false,
+      description:
+        "On paper, Moab Giants is the kid stop. In the photos, our son stands under a roaring dinosaur throwing up two peace signs, then reaches toward another one as if they are meeting face-to-face. By the time we get back in the car, the desert outside is no longer just geology to him; it is dinosaur country.",
+      summary:
+        "One roadside stop changes the rest of the drive: every canyon becomes somewhere a dinosaur might still be hiding.",
       notes: [
-        "Perfect for kids – life-sized dinosaur replicas and educational exhibits.",
+        "Life-sized dinosaur replicas and educational exhibits held our son's attention.",
         "Helped spark our son's imagination for the rest of the trip.",
         "Fun mix of outdoor walking and indoor learning.",
       ],
@@ -225,6 +234,10 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "drive",
       droneAllowed: true,
+      description:
+        "We reach Potash Road as the low light starts warming the canyon walls. In one frame, our family is barely more than a few dark shapes beneath the rock; the scale is the whole story. The road keeps bending between river and cliff, and every pullout asks for another five minutes.",
+      summary:
+        "Late light turns the canyon orange while our family becomes a tiny measure of how large the walls really are.",
       notes: [
         "Shot canyon pull-offs at golden hour",
         "Used handheld gimbal on tight rock edges",
@@ -263,14 +276,14 @@ export const utahWinter2025Journey = Object.freeze({
       type: "hike",
       droneAllowed: false,
       description:
-        "Expansive desert vistas and geological drama. We saw sun, snow, and rain in one visit.",
+        "The weather never lets the view settle. Sun, rain, wind, and snow move through within two hours, alternately revealing the canyon and pulling it back into cloud. Our four-year-old keeps hiking through it, holding up peace signs against red rock patched with snow as if this is a completely normal family day out.",
       summary:
-        "Sunshine, rain, wind, and unexpected snow transformed the canyon landscape during the visit.",
+        "Every time the canyon begins to make sense, the weather changes it again. Our four-year-old keeps moving.",
       verificationNotes:
         "The park visit and media are confirmed. Keep the date and exact district or viewpoint unset until checked against the trip journal or media metadata.",
       notes: [
-        "Weather changed dramatically - sun, snow, and rain in a two-hour span.",
-        "Ideal for family hikes and grand vista filming without a drone.",
+        "Weather shifted through sun, snow, and rain in a two-hour span.",
+        "We completed the family hikes with our four-year-old and filmed the overlooks without a drone.",
       ],
       hero: {
         assetId: "utah-canyonlands-hero-001",
@@ -313,9 +326,13 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "viewpoint",
       droneAllowed: false,
+      description:
+        "The overlook is only a few minutes from the parking lot, but the weather makes it feel much farther from anything familiar. Snow moves across the canyon in sheets, hiding whole layers and then giving them back. For a moment, the brightest thing below us is the pale geometry of the potash ponds.",
+      summary:
+        "A five-minute walk ends at a canyon being erased and redrawn by a fast snowstorm.",
       notes: [
         "Canyon edge views just a few minutes walk from parking.",
-        "Caught in a freak snowstorm for dramatic scenery.",
+        "A fast snowstorm repeatedly hid and revealed the canyon layers.",
       ],
       hero: {
         assetId: "image-utah-locations-utah-deadhorse",
@@ -351,9 +368,13 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "hike",
       droneAllowed: false,
+      description:
+        "We enter around 4:00 p.m., late enough for the rock to start holding the evening light. The famous formations are here, but the photograph I keep returning to is the three of us bundled together above the red fins, our son lifted between us and still flashing a peace sign. The short, well-marked walks make it possible to keep exploring without turning the day into an endurance test.",
+      summary:
+        "Golden light, short walks, and one family frame that makes the enormous landscape feel personal.",
       notes: [
         "Arrived at 4:00pm to catch golden hour",
-        "amazing landscapes and rock formations, don't leave the camera in the car",
+        "The formations and changing light kept the camera in use throughout the drive",
         "Decent amount of walking between arches, but trails are well marked and easy, no major surprises or climbs.",
       ],
       hero: {
@@ -390,6 +411,10 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "drive",
       droneAllowed: true,
+      description:
+        "I return to Potash Road alone while the family stays in Moab. Without the family pace, my attention shifts from people against rock to the abstract lines of the ponds from above. It becomes a morning of working one landscape carefully instead of collecting another stop.",
+      summary:
+        "A solo return changes the frame from canyon scale to the symmetry of the ponds below.",
       notes: [
         "Shot canyon pull-offs at golden hour",
         "Used handheld gimbal on tight rock edges",
@@ -428,6 +453,10 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "attraction",
       droneAllowed: false,
+      description:
+        "Our son heads to ski school while we take a few runs of our own. By afternoon, the trip changes speed again: the lifts and open slopes give way to a walk through downtown Park City. It is less a grand finale than a welcome reset between two very different kinds of winter play.",
+      summary:
+        "Ski school buys everyone a little independence before we regroup and slow down downtown.",
       notes: [
         "Ski/Snowboard",
         "Walked Park City downtown area in the afternoon.",
@@ -466,9 +495,13 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "attraction",
       droneAllowed: false,
+      description:
+        "We walk inside and a kid is already completely inverted on a BMX bike above the foam pit. A young skateboarder launches across a transition while bikes move through the same room, and nobody watching acts like any of this is unusual. Our son comes to play; I keep staring at how casually these kids rewrite the limits of what a body and a board can do. They are built different.",
+      summary:
+        "Bikes, boards, skis, and trampolines. Then a kid rotates upside down and makes the impossible look routine.",
       notes: [
-        "Ski/Snowboard/Sakte/Bike/Trampoine",
-        "Accomodates all ages, prices are reasonable. Adult area aka BAR!!!",
+        "Skiing, snowboarding, skating, biking, trampolines, and snow tubing",
+        "Accommodates a wide range of ages; an adult bar area overlooks the action",
       ],
       hero: {
         assetId: "image-utah-locations-utah-woodward",
@@ -504,9 +537,13 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "attraction",
       droneAllowed: true,
+      description:
+        "Before the sled moves, the guide works through the harnesses while the dogs crowd the line, already focused on what comes next. Later, our son settles into the sled behind oversized orange goggles, bundled so completely that the goggles nearly become his whole face. After three to four hours of cross-country skiing, the two-hour dog-sled outing gives the day a different rhythm. It is clearly his part of the story.",
+      summary:
+        "Harnesses click into place, the dogs lean forward, and our son disappears happily behind a pair of enormous goggles.",
       notes: [
-        "Used Wasatch Adventure Guides to organized the dog sledding tour and cross-country skiing.",
-        "Accomodates all ages, prices are reasonable.",
+        "Wasatch Adventure Guides organized the dog-sledding tour and cross-country skiing",
+        "The activities accommodated our family, including our young son",
       ],
       hero: {
         assetId: "image-utah-locations-utah-uintas",
@@ -547,6 +584,10 @@ export const utahWinter2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "drive",
       droneAllowed: false,
+      description:
+        "The route closes with the one-hour ride back to SLC and a flight around 1:00 p.m. After a week of salt, sandstone, and snow, the airport is ordinary in exactly the way endings usually are: bags, lines, and one last look back through the camera roll.",
+      summary:
+        "One quiet hour back to SLC closes a trip that crossed three completely different versions of Utah.",
       notes: [],
       hero: {
         assetId: "image-utah-locations-utah-airport",
@@ -561,7 +602,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Arrival Day – SLC to Wendover",
       summary:
-        "Landed in Salt Lake City around 4–5pm, drove scenic route west to Wendover for the night.",
+        "We land in Salt Lake City around 4:00–5:00 p.m., collect the Jeep, and point west before the trip has really had time to announce itself. The two-hour drive to Wendover is mostly a positioning move, but it puts us close enough to meet the salt before sunrise.",
       visits: [],
       routes: [
         {
@@ -574,22 +615,22 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 1 – Sunrise at Salt Flats, Drive to Moab",
       summary:
-        "Left Wendover early before sunrise to reach Bonneville, then drove scenic route to Moab with sunset drive along Potash Road.",
+        "We leave Wendover in the dark and step onto wet salt before 6:00 a.m. By the time we reach Moab, our son has met life-sized dinosaurs and decided the surrounding canyons might still belong to them. We finish on Potash Road, where the last light makes our family look tiny against the canyon walls.",
       visits: [
         {
           visitId: "utah-winter-2025-bonneville-salt-flats",
           notes:
-            "Arrived before dawn to catch golden hour shimmering off the wet salt flats. The surreal reflections made it feel like we were floating in the sky — a drone pilot’s dream and easily one of the most cinematic locations we've ever shot.",
+            "We arrive before dawn in waterproof shoes, with wind moving across puddles on the flats. First the mountains separate from the dark; then the wet salt begins reflecting the sky. The place does not need a grand claim. The near-empty frame and slow arrival of light do the work.",
         },
         {
           visitId: "utah-winter-2025-moab-giants",
           notes:
-            "We stopped here on the way into Moab and it set the tone for the whole trip. Life-sized dinosaurs scattered across the desert sparked our son's imagination — he spent the rest of the drive pretending they still roamed the canyons around us. The interactive exhibits were surprisingly fun for adults too.",
+            "Our son throws two peace signs beneath one roaring dinosaur, then reaches toward another as if introductions are in order. The stop is supposed to break up the drive; instead, it changes how he sees everything beyond the windshield for the rest of the way into Moab.",
         },
         {
           visitId: "utah-winter-2025-potash-road",
           notes:
-            "We hit Potash Road just before sunset — the low light lit the cliffs in a burnt orange glow. The winding drive hugged the canyon edge, with each turn revealing a new dramatic vista. Quiet, cinematic, and wildly underrated — we shot some of our favorite footage here. Lots of rock climbing along the roadside, very cool to watch",
+            "The road bends between river and cliff while late light warms the rock. We stop often enough to notice climbers working the roadside walls, but the frame that holds me is simpler: a few family figures nearly swallowed by the scale of the canyon.",
         },
       ],
       routes: [
@@ -613,7 +654,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 2 – Canyonlands, Dead Horse Point, Sunset at Arches",
       summary:
-        "A full day exploring epic Utah landscapes. Started in Canyonlands and Dead Horse Point under shifting skies, ended with a glowing sunset in Arches. One of our most unforgettable days. Hikes listed here were all done with a 4 year old in tow",
+        "The forecast never gets the final word. Sun, wind, rain, and snow trade places over Canyonlands and Dead Horse Point, sometimes hiding the same formations we were photographing minutes earlier. Our four-year-old keeps hiking through all of it. By 4:00 p.m. we are inside Arches, where the storm light finally gives way to warmer rock and a family photograph above the red fins.",
       visits: [
         {
           visitId: "utah-winter-2025-canyonlands",
@@ -621,12 +662,12 @@ export const utahWinter2025Journey = Object.freeze({
         {
           visitId: "utah-winter-2025-dead-horse-point",
           notes:
-            "Overlook with dramatic canyon views. Weather shift made it surreal. Don't miss the short walk to the viewpoint. It’s a quick 5-minute stroll from the parking lot, and the views are breathtaking. We were caught in a freak snowstorm that made it even more dramatic.",
+            "A five-minute walk from the parking lot puts us at the edge just as a fast snowstorm moves through. Whole canyon layers disappear into white, then return. The accessibility is practical; the weather is what turns the stop into a scene.",
         },
         {
           visitId: "utah-winter-2025-arches",
           notes:
-            "Returned in the evening for sunset light over iconic formations. The drive in and through arches is stunning, and manyof the iconic arches are very accessible with short hikes (15-20 mins from parking). ",
+            "We arrive for evening light and use the shorter, well-marked walks. Many are about 15–20 minutes from parking, which keeps the day workable with our son. The formations provide the scale, but the three of us bundled together above the red rock gives the landscape its meaning.",
         },
       ],
       routes: [
@@ -650,12 +691,12 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 3 – Solo Filming on Potash Road",
       summary:
-        "Morning solo mission back down Potash Road to capture drone footage over the potash ponds while the family enjoyed Moab. Returned to the hotel for lunch and then drove to SLC where we dropped off the car and caught an Uber to Park City for our final few days.",
+        "I return to Potash Road alone while the family stays in Moab. Without anyone waiting at the pullout, I can slow down and build the aerial sequence around the ponds' geometry. After lunch together, we trade the canyon country for a five-hour drive to SLC, return the car, and catch an Uber into Park City.",
       visits: [
         {
           visitId: "utah-winter-2025-potash-road-solo",
           notes:
-            "Focused on flying over potash ponds and capturing aerial symmetry.",
+            "The family version of Potash Road is about people dwarfed by cliffs. This solo return is about the opposite view: climbing above the terrain until the ponds flatten into color, line, and symmetry.",
         },
       ],
       routes: [
@@ -679,12 +720,12 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 4 – Park City Skiing and Exploring",
       summary:
-        "Hit the slopes in the AM, then explored Park City in the afternoon. We had a great time skiing and snowboarding at Park City Mountain Resort. The slopes were perfect for our family, and the views were stunning. In the afternoon, we strolled through the charming streets of Park City, enjoying the shops and restaurants.",
+        "Our son goes to ski school, giving him his own mountain story while we ski and snowboard. We regroup in the afternoon and walk downtown Park City. After several days organized around long drives and giant landscapes, the simple rhythm of slopes first and streets second feels almost domestic.",
       visits: [
         {
           visitId: "utah-winter-2025-park-city",
           notes:
-            "Little guy did ski school while we hit the slopes. Park City is a great family-friendly ski resort with a variety of runs for all skill levels. We had a blast skiing and snowboarding together, and the views from the top were breathtaking.",
+            "Ski school lets our son learn at his pace while we take a few runs at ours. The afternoon downtown gives us somewhere to come back together without asking anyone for one more big adventure.",
         },
       ],
       routes: [],
@@ -692,7 +733,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 5 – Park City Woodward",
       summary:
-        "Woodward Park City for the little guy. Ramps, trampolines, and skateboarding, bikes, ski, snowboard, snow tube. We spent the day at Woodward Park City, a year-round action sports facility. Our son had a blast at the indoor skatepark/trampoline park, while we enjoyed some skiing and snowboarding.",
+        "The first thing that resets my sense of normal is a kid fully inverted on a BMX bike above the foam pit. Then a young skateboarder lifts cleanly over a transition while bikes move through the room behind him. Woodward gives our son ramps, trampolines, boards, bikes, skis, and snow tubing; it gives me an afternoon of watching kids treat fear and gravity like problems they already solved. These kids are built different.",
       visits: [
         {
           visitId: "utah-winter-2025-woodward",
@@ -703,12 +744,12 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 6 – Uintas Cross Country Skiing + Dog Sledding",
       summary:
-        "We spent part of the day cross-country skiing in the Uintas. The snow was perfect, and the scenery was breathtaking. We rented gear from a local shop and hit the trails. It was a great way to experience the winter wonderland of Utah. We also went dog sledding, which was an unforgettable experience. The dogs were so excited to pull the sled, and it was a unique way to explore the snowy landscape.",
+        "Cross-country skiing slows us down for three to four hours before the day changes energy completely. A guide checks chains and harnesses, the dogs line up, and our son settles into the sled behind mirrored orange goggles. The dog-sled outing lasts about two hours; judging by the kid tucked into that sled, it is the part he would have happily stretched longer.",
       visits: [
         {
           visitId: "utah-winter-2025-uintas",
           notes:
-            "We rented cross-country ski gear from a local shop and hit the trails. The snow was perfect, and the scenery was breathtaking. It was a great way to experience the winter wonderland of Utah. Son loved it, especially the dog sledding. dog Sleeding lasted about 2 hrs total. the Cross country skiing was about 3-4 hrs total",
+            "We rent cross-country gear locally and spend about three to four hours skiing. Wasatch Adventure Guides organizes the dog-sled portion, which lasts about two hours. Our son loves the sledding most. The photographs of him bundled behind oversized goggles make that verdict easy to read.",
         },
       ],
       routes: [],
@@ -716,7 +757,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 7 – Departure Day",
       summary:
-        "1 hr ride to the airport. Flew out of SLC around 1pm. We had a great time in Utah and can't wait to come back! Lines at the airport can really vary especially during peak season for skiing",
+        "The final leg is a one-hour ride back to SLC for a flight around 1:00 p.m. Airport lines can vary during ski season, so this is not the morning to squeeze in one more stop. The trip ends plainly with bags, security, and a camera roll moving from white salt to red rock to snow.",
       visits: [
         {
           visitId: "utah-winter-2025-slc",
@@ -737,35 +778,36 @@ export const utahWinter2025Journey = Object.freeze({
       assetId: "image-utah-featured-utah-sunset-arches",
       role: "featured",
       caption:
-        "Golden hour breaking through the arches — handheld with a 75mm...",
+        "Golden hour breaking through the arches, handheld with a 75mm lens.",
     },
     {
       assetId: "image-utah-featured-utah-drone-salt",
       role: "featured",
-      caption:
-        "Top-down symmetry over the Salt Flats — flown at golden hour...",
+      caption: "Top-down symmetry over the Salt Flats, flown at golden hour.",
     },
   ],
   atlasNotes: {
-    utah: "This atlas slice uses photography and notes from the existing seven-day Utah trip story.",
+    utah: "We cross Utah from wet salt before sunrise to red-rock weather and finally snow, with our four-year-old setting the pace and changing what we notice.",
     "bonneville-salt-flats":
-      "We arrived before dawn and watched the wet salt catch the first light. The reflections made the landscape feel almost weightless.",
-    moab: "We used Moab as our base while exploring Arches, Canyonlands, Dead Horse Point, and Potash Road.",
+      "We step onto the flats in the dark and wait until the mountains separate from the sky and wet salt begins reflecting the first light.",
+    moab: "Moab becomes our base, but it never feels like a pause: dinosaurs, canyon roads, national parks, and constantly changing weather radiate out from town.",
     "moab-giants":
-      "The life-sized dinosaurs turned a road-trip stop into fuel for our son's imagination all the way into Moab.",
+      "Our son throws peace signs beneath one dinosaur and reaches toward another; after that, every canyon on the drive becomes dinosaur country.",
     "potash-road":
-      "We followed the canyon beside the Colorado River near sunset, then returned for a quieter solo filming run over the potash ponds.",
+      "We first follow the canyon in late light as a family, then I return alone to trade human scale for the aerial geometry of the ponds.",
+    "canyonlands-national-park":
+      "Sun, wind, rain, and snow redraw the canyon within two hours while our four-year-old keeps hiking through every version of it.",
     "arches-national-park":
-      "We arrived in the afternoon and stayed for sunset. The drive and shorter walks made this stop work well with a young child.",
+      "We arrive at 4:00 p.m. for warmer light, short walks, and a family frame that makes the enormous red-rock landscape feel personal.",
     "dead-horse-point":
-      "A sudden snowstorm changed the light and made an already dramatic overlook feel surreal.",
+      "A five-minute walk ends at an overlook where fast snow hides whole canyon layers and then gives them back.",
     "park-city":
-      "We spent the morning skiing and snowboarding, then traded the slopes for an afternoon walking through Park City.",
+      "Our son takes ski school while we find our own runs, then we regroup and let an afternoon downtown slow the day down.",
     "woodward-park-city":
-      "Woodward gave the whole family room to play, from the snow to the indoor ramps, trampolines, bikes, and boards.",
+      "A kid rotates upside down on a BMX bike while a young skateboarder launches nearby, and everyone treats it as another ordinary afternoon. Built different.",
     uintas:
-      "Cross-country skiing slowed the day down before the dogs pulled us into a completely different kind of winter adventure.",
+      "After three to four hours on cross-country skis, the guide clips in the dogs and our son settles behind goggles almost as large as his face.",
     "salt-lake-city-airport":
-      "SLC was both the starting line and the final stop of the seven-day drive across Utah.",
+      "SLC is the plain bookend to a week of salt, sandstone, and snow: rental keys on arrival, bags and security on the way home.",
   },
 })

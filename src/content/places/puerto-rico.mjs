@@ -10,7 +10,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "territory",
     evidenceStatus: "confirmed",
     description:
-      "A seven-day road trip through colonial streets, Atlantic cliffs, jungle waterfalls, and the beaches of the northwest coast.",
+      "A road trip that begins after dark in San Juan, follows the north coast west, and slows down among mountain views, waterfalls, and Aguadilla beaches.",
     externalLinks: {
       official: "https://www.discoverpuertorico.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=Puerto+Rico",
@@ -26,7 +26,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "waterfall",
     evidenceStatus: "confirmed",
     description:
-      "A two-tier waterfall in the hills of San Sebastián with swimming pools, misty jungle light, and an upper-falls trail.",
+      "A main swimming pool beneath dark rock and filtered light, with an upper fall another 10–15 minutes along the trail.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=18.36093%2C-66.9831",
     },
@@ -41,7 +41,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "architecture-and-street-photography",
     evidenceStatus: "confirmed",
     description:
-      "Colorful colonial streets, historic fortifications, ocean views, and a city made for slow walks with a camera.",
+      "Fort walls open onto the coast, then bright facades, cobblestones, and small plazas pull the walk back into the city one detail at a time.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=18.46639%2C-66.11028",
     },
@@ -56,7 +56,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "cliffs-and-sea-caves",
     evidenceStatus: "confirmed",
     description:
-      "A rugged stretch of limestone cliffs, sea caves, petroglyphs, and wide Atlantic views near Arecibo.",
+      "A short walk from the road opens abruptly onto limestone arches and rough Atlantic water moving through the rock below.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=18.49269%2C-66.641578",
     },
@@ -71,7 +71,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "beach-and-snorkeling",
     evidenceStatus: "confirmed",
     description:
-      "Clear water, colorful piers, snorkeling, and a lively local beach atmosphere on Aguadilla's northwest coast.",
+      "Piers, clear water, underwater frames, and a lively local crowd keep this Aguadilla beach moving through golden hour.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=18.45972%2C-67.16525",
     },
@@ -87,7 +87,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Colorful colonial streets, historic forts, and vibrant energy & food. Great for photography and slow walks.",
+      "A city that can move from narrow nighttime streets and tacos to fort walls, rooftop pools, and music spilling from the next block.",
     externalLinks: {
       official:
         "https://www.discoverpuertorico.com/article/things-to-do-san-juan",
@@ -107,7 +107,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Classy beachfront resort clubbing — upscale nightlife, food, drinks and atmosphere.",
+      "A polished beachfront night stop where dressed-up calm provides a counterpoint to San Juan's busier bar strips.",
     externalLinks: {
       official:
         "https://www.fairmont.com/en/hotels/puerto-rico/fairmont-el-san-juan-hotel/dining/the-lobby.restaurant.html",
@@ -127,7 +127,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
+      "A giant and controversial Columbus statue that appears from the highway and turns a brief pull-off into a complicated pause.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Estatua+de+Colon%2C+Arecibo%2C+Puerto+Rico",
     },
@@ -141,11 +141,11 @@ export const puertoRicoPlaces = Object.freeze([
     parentPlaceId: "puerto-rico",
     countryCode: "PR",
     regionCode: "PR",
-    category: "attraction",
+    category: "nightlife",
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
+      "A busy nightlife strip where salsa, reggaetón, hip-hop, dance, and electronic music offer a different room every few doors.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Calle+C.+Canals%2C+San+Juan%2C+Puerto+Rico",
     },
@@ -163,7 +163,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A scenic beach on the northwest coast of Puerto Rico, known for turquoise waters, offshore coral reefs, snorkeling, and kite surfing.",
+      "Clear near-shore water and an offshore reef define this quiet northwest-coast stop, with stronger currents farther out and no formal facilities.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Shacks+Beach%2C+Isabela%2C+Puerto+Rico",
     },
@@ -181,7 +181,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A small, picturesque cove in Aguadilla with calm water and rocky outcrops, ideal for swimming, relaxing, and photography.",
+      "A small Aguadilla cove where calmer water and rocky edges create a quiet middle between larger beach stops.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Playa+Pena+Blanca%2C+Aguadilla%2C+Puerto+Rico",
     },
@@ -199,7 +199,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Small, protected beach cove with calm turquoise water and surrounding rock walls — popular for relaxing or swimming.",
+      "Rock walls hold a compact pocket of calmer water inside the open Atlantic coast, making the cove easy to understand at a glance.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Mar+Chiquita%2C+Manati%2C+Puerto+Rico",
     },
@@ -217,7 +217,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Remote, undeveloped beach near Coto with dramatic rock formations and rough surf — peaceful and photogenic.",
+      "Rough surf, an undeveloped shoreline, and a cave about a mile from the main access give this beach a quieter, moodier character.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Playa+Pastillo%2C+Isabela%2C+Puerto+Rico",
     },
@@ -235,7 +235,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Iconic roadside rock carving of a Taíno chief’s face overlooking the coast near Isabela. A quick cultural and historical stop along the north coast drive.",
+      "A Taíno chief's face carved into roadside rock near Isabela, brief enough to remain part of the north-coast drive rather than interrupt it.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=La+Cara+del+Indio%2C+Isabela%2C+Puerto+Rico",
     },
@@ -254,7 +254,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "exact",
     description:
-      "Modern luxury retreat built from upcycled shipping containers, perched in the foothills of Moca with sweeping mountain views and serene seclusion.",
+      "Shipping-container architecture, a long pool, and open mountain views turn this Moca Airbnb from a practical base into one of the trip's real locations.",
     externalLinks: {
       maps: "https://www.google.com/maps?q=18.3882008,-67.0752792",
     },
@@ -272,7 +272,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Family-friendly equestrian center near Aguadilla offering private horseback tours across coastal meadows, jungle trails, beaches and historic ruins.",
+      "A private Paso Fino ride through fields and tropical growth toward palm-framed coastal trails, made personal by an energetic guide who sings along the way.",
     externalLinks: {
       official:
         "https://www.discoverpuertorico.com/es/profile/playuelas-horse-rides/12105",
@@ -292,7 +292,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Chic rooftop restaurant and bar in downtown Aguadilla with oceanfront sunset views over Aguadilla Bay, creative Criollo‑inspired cuisine, and tropical cocktails.",
+      "A rooftop above Aguadilla Bay where dinner, tropical drinks, and the last light give a long coastal day somewhere to settle.",
     externalLinks: {
       official: "https://aguadillarooftop.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=ARTe+Aguadilla+Rooftop+Experience%2C+Puerto+Rico",
