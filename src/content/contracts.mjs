@@ -24,6 +24,18 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {{placeId?: string|null, capturedAt?: string|null}} capture
  * @property {string} [posterAssetId]
  * @property {string} [defaultAlt]
+ * @property {{revision: number, sha256: string, byteSize: number, batchId: string}} [publication]
+ *
+ * @typedef {Object} MediaPlacement
+ * @property {string} id
+ * @property {string} assetId
+ * @property {string} journeyId
+ * @property {string|null} [visitId]
+ * @property {string|null} [placeId]
+ * @property {string|null} [experienceId]
+ * @property {"gallery"|string} role
+ * @property {"published"|"draft"} visibility
+ * @property {number|null} sortOrder
  *
  * @typedef {Object} Place
  * @property {string} id Canonical geographic identity; never a trip stop ID.
