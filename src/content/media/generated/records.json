@@ -1,6 +1,385 @@
 {
   "schemaVersion": 1,
-  "assets": [],
-  "placements": [],
-  "batches": []
+  "assets": [
+    {
+      "id": "image-usvi-380d1e6f91eb-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "380d1e6f91eb630d9e216756da93807f540c39f64f2681127e5d8a5f6f4b1096",
+        "byteSize": 274908,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-c03c19c1aa55-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "c03c19c1aa555f6b5e626c7a00a23f4bafc3fa5371de8d73d183b39f51203c7d",
+        "byteSize": 851477,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-a7860d27aa67-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "a7860d27aa672cc4e26a337b7b5d1ba28c8c812cdc13e80590eeefe277a14e34",
+        "byteSize": 707895,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-a1fa6a303fcb-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1920,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "a1fa6a303fcb8b76dbd752091319d0bbbda5b888f3e1db9a189ea235a31f1978",
+        "byteSize": 377814,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-f58f06c4c9a5-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "f58f06c4c9a58de0bd5eac19612a3fe5ebbfaaf035a199b52f6f3a48c422ed71",
+        "byteSize": 299821,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-be51bc25d104-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "be51bc25d1044109ed8a73bfdf856c5bdc875e05792e5dd7280857a4cc816d68",
+        "byteSize": 612463,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-2961bd7d7b92-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-21ba50d7fcd0ca44/waterlemon-cay-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "2961bd7d7b92b82004b42ebfea3294cf26344ef95859fee00b615fe1e7cc5d82",
+        "byteSize": 589649,
+        "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+      }
+    },
+    {
+      "id": "image-usvi-0519339867a0-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cinnamon-bay/media-usvi-cinnamon-bay-d1296a8f2621eb82/cinnamon-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "0519339867a03162828d6c1e690a1dcaae9a31b2b07efc090d5a7281ccc2645d",
+        "byteSize": 323102,
+        "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
+      }
+    }
+  ],
+  "placements": [
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-380d1e6f91eb-001",
+      "assetId": "image-usvi-380d1e6f91eb-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-c03c19c1aa55-002",
+      "assetId": "image-usvi-c03c19c1aa55-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-a7860d27aa67-003",
+      "assetId": "image-usvi-a7860d27aa67-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-a1fa6a303fcb-004",
+      "assetId": "image-usvi-a1fa6a303fcb-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-f58f06c4c9a5-005",
+      "assetId": "image-usvi-f58f06c4c9a5-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-be51bc25d104-006",
+      "assetId": "image-usvi-be51bc25d104-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-waterlemon-cay-image-usvi-2961bd7d7b92-007",
+      "assetId": "image-usvi-2961bd7d7b92-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-waterlemon-cay",
+      "placeId": "waterlemon-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 1,
+      "batchId": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cinnamon-bay-image-usvi-0519339867a0-001",
+      "assetId": "image-usvi-0519339867a0-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cinnamon-bay",
+      "placeId": "cinnamon-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 2,
+      "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
+    }
+  ],
+  "batches": [
+    {
+      "id": "media-usvi-waterlemon-cay-21ba50d7fcd0ca44",
+      "sequence": 1,
+      "manifestSha256": "7abc9d08d42cd3fb15a2044008fca33851806ccff07d73b4d8188fd535b8e395",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-380d1e6f91eb-001",
+        "image-usvi-c03c19c1aa55-002",
+        "image-usvi-a7860d27aa67-003",
+        "image-usvi-a1fa6a303fcb-004",
+        "image-usvi-f58f06c4c9a5-005",
+        "image-usvi-be51bc25d104-006",
+        "image-usvi-2961bd7d7b92-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "4c49603c255aa88661eda5f0a2fffe897c68f3f42131f944ffa1d277058cbd1f"
+      }
+    },
+    {
+      "id": "media-usvi-cinnamon-bay-d1296a8f2621eb82",
+      "sequence": 2,
+      "manifestSha256": "e131bbe07452674999f16ed0ec163fc2a70384a5f30ec6e475bf6be2f4e55302",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-0519339867a0-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "b14a29f013e56ec030a8497fd9b944c050d3659977fa26d20bbcd5d1022b4b17"
+      }
+    }
+  ]
 }
