@@ -19,6 +19,11 @@
     "images:optimize": "node scripts/optimize-images.js",
     "images:optimize:copies": "node scripts/optimize-images.js --copy",
     "images:optimize:dry": "node scripts/optimize-images.js --dry-run",
+    "media:prepare": "node scripts/optimize-images.js --package",
+    "media:ingest": "node scripts/ingest-media.js",
+    "media:journeys": "node scripts/ingest-media.js --journeys",
+    "media:test": "node scripts/test-media-ingestion.js",
+    "media:validate": "node scripts/validate-content.js",
     "lint": "vue-cli-service lint",
     "start": "node server server.js"
   },

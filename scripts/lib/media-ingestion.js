@@ -4,18 +4,13 @@ const mediaContract = require("../../src/content/media/contract.js")
 
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const checksumPattern = /^[a-f0-9]{64}$/
+const committedVerificationMethods = new Set([
+  "receipt-sha256",
+  "public-head-size-and-mime",
+])
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex")
-}
-
-function slugify(value) {
-  return String(value || "")
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
 }
 
 function isSafeRelativePath(value) {
@@ -75,11 +70,26 @@ function validateManifest(manifest, context) {
     if (!idPattern.test(asset?.provisionalId || "")) {
       errors.push(`${assetOwner} has an invalid provisionalId`)
     } else if (provisionalIds.has(asset.provisionalId)) {
-      errors.push(`${assetOwner} duplicates provisionalId "${asset.provisionalId}"`)
+      errors.push(
+        `${assetOwner} duplicates provisionalId "${asset.provisionalId}"`
+      )
     } else provisionalIds.add(asset.provisionalId)
 
     if (asset?.assetId !== null && !idPattern.test(asset?.assetId || "")) {
       errors.push(`${assetOwner} assetId must be null or a valid canonical ID`)
+    }
+    if (asset?.assetId === null && asset?.revision !== null) {
+      errors.push(
+        `${assetOwner} revision must be null for a new unresolved asset`
+      )
+    }
+    if (
+      asset?.assetId !== null &&
+      (!Number.isInteger(asset?.revision) || asset.revision < 2)
+    ) {
+      errors.push(
+        `${assetOwner} must declare a monotonic revision when assetId is supplied`
+      )
     }
     if (
       !isSafeRelativePath(output.relativePath) ||
@@ -97,7 +107,9 @@ function validateManifest(manifest, context) {
     } else objectKeys.add(output.objectKey)
 
     if (!["image/jpeg", "image/png"].includes(output.mimeType)) {
-      errors.push(`${assetOwner} has unsupported MIME type "${output.mimeType}"`)
+      errors.push(
+        `${assetOwner} has unsupported MIME type "${output.mimeType}"`
+      )
     }
     if (!Number.isInteger(output.width) || output.width <= 0) {
       errors.push(`${assetOwner} has invalid width`)
@@ -146,7 +158,14 @@ function validateManifest(manifest, context) {
 function validateGeneratedRecords(records, context) {
   const errors = []
   const journeys = new Set((context.journeys || []).map(record => record.id))
-  const staticMediaIds = new Set((context.staticMedia || []).map(record => record.id))
+  const staticMediaIds = new Set(
+    (context.staticMedia || []).map(record => record.id)
+  )
+  const staticObjectKeys = new Set(
+    (context.staticMedia || [])
+      .map(record => record.source?.objectKey)
+      .filter(Boolean)
+  )
   const assetIds = new Set()
   const placementIds = new Set()
   const objectKeys = new Set()
@@ -176,7 +195,10 @@ function validateGeneratedRecords(records, context) {
     }
     if (!isSafeRelativePath(asset.source?.objectKey)) {
       errors.push(`${owner} has invalid objectKey`)
-    } else if (objectKeys.has(asset.source.objectKey)) {
+    } else if (
+      objectKeys.has(asset.source.objectKey) ||
+      staticObjectKeys.has(asset.source.objectKey)
+    ) {
       errors.push(`${owner} duplicates an R2 objectKey`)
     } else objectKeys.add(asset.source.objectKey)
     if (
@@ -201,14 +223,19 @@ function validateGeneratedRecords(records, context) {
 
   records.placements.forEach(placement => {
     const owner = `Media placement "${placement?.id || "unknown"}"`
-    if (!idPattern.test(placement?.id || "")) errors.push(`${owner} has invalid ID`)
+    if (!idPattern.test(placement?.id || ""))
+      errors.push(`${owner} has invalid ID`)
     if (placementIds.has(placement.id)) errors.push(`${owner} is duplicated`)
     placementIds.add(placement.id)
     if (!assetIds.has(placement.assetId)) {
-      errors.push(`${owner} references unknown generated asset "${placement.assetId}"`)
+      errors.push(
+        `${owner} references unknown generated asset "${placement.assetId}"`
+      )
     }
     if (!journeys.has(placement.journeyId)) {
-      errors.push(`${owner} references unknown Journey "${placement.journeyId}"`)
+      errors.push(
+        `${owner} references unknown Journey "${placement.journeyId}"`
+      )
     }
     if (placement.visitId || placement.placeId || placement.experienceId) {
       errors.push(`${owner} must remain Journey-only`)
@@ -218,6 +245,18 @@ function validateGeneratedRecords(records, context) {
     }
     if (!mediaContract.visibilities.includes(placement.visibility)) {
       errors.push(`${owner} has unsupported visibility`)
+    }
+    if (
+      placement.sortOrder !== null &&
+      (!Number.isInteger(placement.sortOrder) || placement.sortOrder < 0)
+    ) {
+      errors.push(`${owner} has invalid sortOrder`)
+    }
+    if (
+      !Number.isInteger(placement.publicationSequence) ||
+      placement.publicationSequence < 1
+    ) {
+      errors.push(`${owner} has invalid publicationSequence`)
     }
   })
 
@@ -232,7 +271,42 @@ function validateGeneratedRecords(records, context) {
     if (!journeys.has(batch.journeyId)) {
       errors.push(`${owner} references unknown Journey`)
     }
-    if (!Array.isArray(batch.assetIds)) errors.push(`${owner} has invalid assetIds`)
+    if (!Number.isInteger(batch.sequence) || batch.sequence < 1) {
+      errors.push(`${owner} has invalid sequence`)
+    }
+    if (!Array.isArray(batch.assetIds)) {
+      errors.push(`${owner} has invalid assetIds`)
+    } else {
+      batch.assetIds.forEach(assetId => {
+        if (!assetIds.has(assetId)) {
+          errors.push(`${owner} references unknown asset "${assetId}"`)
+        }
+      })
+    }
+    if (
+      !committedVerificationMethods.has(batch.verification?.method) &&
+      !(
+        context.allowUnverifiedPlan &&
+        batch.verification?.method === "not-verified-dry-run"
+      )
+    ) {
+      errors.push(`${owner} is missing committed R2 verification evidence`)
+    }
+  })
+
+  records.assets.forEach(asset => {
+    if (!batchIds.has(asset.publication?.batchId)) {
+      errors.push(
+        `Generated media "${asset.id}" references unknown publication batch`
+      )
+    }
+  })
+  records.placements.forEach(placement => {
+    if (!batchIds.has(placement.batchId)) {
+      errors.push(
+        `Media placement "${placement.id}" references unknown publication batch`
+      )
+    }
   })
 
   return { errors }
@@ -288,11 +362,22 @@ function planMediaIngestion(manifest, currentRecords, context) {
 
   const next = JSON.parse(JSON.stringify(currentRecords))
   const staticIds = new Set((context.staticMedia || []).map(asset => asset.id))
+  const staticObjectKeys = new Set(
+    (context.staticMedia || [])
+      .map(asset => asset.source?.objectKey)
+      .filter(Boolean)
+  )
   const assetIds = []
+  const batchSequence =
+    next.batches.reduce(
+      (maximum, batch) => Math.max(maximum, batch.sequence || 0),
+      0
+    ) + 1
 
   manifest.assets.forEach((asset, index) => {
     const assetId =
-      asset.assetId || canonicalAssetId(manifestValidation.journey, asset, index)
+      asset.assetId ||
+      canonicalAssetId(manifestValidation.journey, asset, index)
     const existing = next.assets.find(record => record.id === assetId)
 
     if (asset.assetId && !existing) {
@@ -301,13 +386,38 @@ function planMediaIngestion(manifest, currentRecords, context) {
       )
       return
     }
+    if (existing && !asset.assetId) {
+      errors.push(
+        `Manifest asset ${index + 1} collides with generated ID "${assetId}" but has no reconciled assetId; treat it as a new source or explicitly republish the known asset`
+      )
+      return
+    }
+    if (
+      existing &&
+      asset.assetId &&
+      asset.revision !== existing.publication.revision + 1
+    ) {
+      errors.push(
+        `Manifest asset ${index + 1} revision ${asset.revision} must follow current revision ${existing.publication.revision} for "${assetId}"`
+      )
+      return
+    }
     if (!existing && staticIds.has(assetId)) {
-      errors.push(`Generated asset ID "${assetId}" conflicts with curated Media`)
+      errors.push(
+        `Generated asset ID "${assetId}" conflicts with curated Media`
+      )
+      return
+    }
+    if (staticObjectKeys.has(asset.output.objectKey)) {
+      errors.push(
+        `R2 object key "${asset.output.objectKey}" is already owned by curated Media`
+      )
       return
     }
     const objectKeyOwner = next.assets.find(
       record =>
-        record.source?.objectKey === asset.output.objectKey && record.id !== assetId
+        record.source?.objectKey === asset.output.objectKey &&
+        record.id !== assetId
     )
     if (objectKeyOwner) {
       errors.push(
@@ -316,17 +426,18 @@ function planMediaIngestion(manifest, currentRecords, context) {
       return
     }
 
-    const sameRevision = Boolean(
+    if (
       existing &&
-        existing.source.objectKey === asset.output.objectKey &&
-        existing.publication.sha256 === asset.output.sha256 &&
-        existing.publication.byteSize === asset.output.byteSize
-    )
-    const revision = existing
-      ? sameRevision
-        ? existing.publication.revision
-        : existing.publication.revision + 1
-      : 1
+      asset.assetId &&
+      existing.source.objectKey === asset.output.objectKey &&
+      existing.publication.sha256 === asset.output.sha256
+    ) {
+      errors.push(
+        `Manifest asset ${index + 1} declares a new revision without new rendition bytes or key`
+      )
+      return
+    }
+    const revision = existing && asset.assetId ? asset.revision : 1
     const mediaRecord = {
       id: assetId,
       kind: "image",
@@ -359,19 +470,25 @@ function planMediaIngestion(manifest, currentRecords, context) {
     }
     upsertById(next.assets, mediaRecord)
 
-    const placement = {
-      id: `placement-${manifest.journeyId}-${assetId}`,
-      assetId,
-      journeyId: manifest.journeyId,
-      visitId: null,
-      placeId: null,
-      experienceId: null,
-      role: asset.placement.role,
-      visibility: asset.placement.visibility,
-      sortOrder: asset.placement.sortOrder,
-      batchId: manifest.batchId,
+    const placementId = `placement-${manifest.journeyId}-${assetId}`
+    const existingPlacement = next.placements.find(
+      placement => placement.id === placementId
+    )
+    if (!existingPlacement) {
+      next.placements.push({
+        id: placementId,
+        assetId,
+        journeyId: manifest.journeyId,
+        visitId: null,
+        placeId: null,
+        experienceId: null,
+        role: asset.placement.role,
+        visibility: asset.placement.visibility,
+        sortOrder: asset.placement.sortOrder,
+        publicationSequence: batchSequence,
+        batchId: manifest.batchId,
+      })
     }
-    upsertById(next.placements, placement)
     assetIds.push(assetId)
   })
 
@@ -379,6 +496,7 @@ function planMediaIngestion(manifest, currentRecords, context) {
 
   next.batches.push({
     id: manifest.batchId,
+    sequence: batchSequence,
     manifestSha256,
     journeyId: manifest.journeyId,
     assetIds,
@@ -386,7 +504,11 @@ function planMediaIngestion(manifest, currentRecords, context) {
   })
   const nextValidation = validateGeneratedRecords(next, context)
   if (nextValidation.errors.length) {
-    return { errors: nextValidation.errors, changed: false, records: currentRecords }
+    return {
+      errors: nextValidation.errors,
+      changed: false,
+      records: currentRecords,
+    }
   }
 
   return {

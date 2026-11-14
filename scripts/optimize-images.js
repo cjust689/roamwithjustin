@@ -210,11 +210,16 @@ function parseArguments(args) {
 
 function validateR2Prefix(value) {
   const prefix = String(value || "").replace(/^\/+|\/+$/g, "")
-  if (!prefix || prefix.split("/").some(part => !part || part === "." || part === "..")) {
+  if (
+    !prefix ||
+    prefix.split("/").some(part => !part || part === "." || part === "..")
+  ) {
     throw new Error("--r2-prefix must be a safe relative object-key prefix")
   }
   if (/\\|[\u0000-\u001f]/.test(prefix)) {
-    throw new Error("--r2-prefix cannot contain backslashes or control characters")
+    throw new Error(
+      "--r2-prefix cannot contain backslashes or control characters"
+    )
   }
 }
 
@@ -757,12 +762,14 @@ async function createPackageAsset(source, filename, index, context) {
     resolveWithObject: true,
   })
   const checksum = sha256(data)
-  const objectKey = `${context.r2Prefix}/${filename}`
-
   if (!context.dryRun) {
-    await fs.promises.writeFile(path.join(context.stagingDirectory, filename), data, {
-      flag: "wx",
-    })
+    await fs.promises.writeFile(
+      path.join(context.stagingDirectory, filename),
+      data,
+      {
+        flag: "wx",
+      }
+    )
   }
 
   console.log(
@@ -772,12 +779,13 @@ async function createPackageAsset(source, filename, index, context) {
   return {
     provisionalId: `local-${context.journey.slug}-${String(index + 1).padStart(3, "0")}-${checksum.slice(0, 12)}`,
     assetId: null,
+    revision: null,
     source: {
       originalFilename: path.basename(source),
     },
     output: {
       relativePath: filename,
-      objectKey,
+      objectKey: null,
       mimeType: mimeTypeForExtension(extension),
       width: info.width,
       height: info.height,
@@ -830,11 +838,13 @@ async function runPackageMode(options) {
     `Journey match: "${options.tag}" -> ${journey.title} [${journey.id}] (${resolution.explicit ? "explicit" : `${percentage}% confidence`}).`
   )
 
-  const images = (await findImages(sourceDirectory, false)).sort((left, right) =>
-    left.localeCompare(right)
+  const images = (await findImages(sourceDirectory, false)).sort(
+    (left, right) => left.localeCompare(right)
   )
   if (!images.length) {
-    throw new Error(`No JPEG/PNG images found directly inside ${sourceDirectory}`)
+    throw new Error(
+      `No JPEG/PNG images found directly inside ${sourceDirectory}`
+    )
   }
 
   const packageDirectory = path.join(outputDirectory, journey.slug)
@@ -845,7 +855,6 @@ async function runPackageMode(options) {
   }
 
   const normalizedPrefix = options.r2Prefix.replace(/^\/+|\/+$/g, "")
-  const r2Prefix = `${normalizedPrefix}/${journey.slug}`
   const stagingDirectory = path.join(
     outputDirectory,
     `.${journey.slug}-prepare-${process.pid}-${Date.now()}`
@@ -853,7 +862,6 @@ async function runPackageMode(options) {
   const context = {
     dryRun: options.dryRun,
     journey,
-    r2Prefix,
     rightsOwner: options.rightsOwner,
     rightsStatus: options.rightsStatus,
     stagingDirectory,
@@ -875,17 +883,23 @@ async function runPackageMode(options) {
     }
 
     const batchSeed = JSON.stringify({
+      schemaVersion: 1,
+      manifestType: "journey-media-publication",
       journeyId: journey.id,
-      r2Prefix,
-      assets: assets.map(asset => ({
-        objectKey: asset.output.objectKey,
-        sha256: asset.output.sha256,
-      })),
+      journeySlug: journey.slug,
+      inputTag: options.tag,
+      parentR2Prefix: `${normalizedPrefix}/${journey.slug}/`,
+      assets,
+    })
+    const batchId = `media-${journey.slug}-${sha256(batchSeed).slice(0, 16)}`
+    const r2Prefix = `${normalizedPrefix}/${journey.slug}/${batchId}`
+    assets.forEach(asset => {
+      asset.output.objectKey = `${r2Prefix}/${asset.output.relativePath}`
     })
     const manifest = {
       schemaVersion: 1,
       manifestType: "journey-media-publication",
-      batchId: `media-${journey.slug}-${sha256(batchSeed).slice(0, 16)}`,
+      batchId,
       journeyId: journey.id,
       journeySlug: journey.slug,
       inputTag: options.tag,

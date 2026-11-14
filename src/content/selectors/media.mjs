@@ -146,6 +146,9 @@ export function getJourneyPublishedMedia(journeyId) {
         !placement.experienceId
     )
     .sort((left, right) => {
+      const sequenceDifference =
+        (right.publicationSequence || 0) - (left.publicationSequence || 0)
+      if (sequenceDifference) return sequenceDifference
       const leftOrder = Number.isFinite(left.sortOrder)
         ? left.sortOrder
         : Number.MAX_SAFE_INTEGER

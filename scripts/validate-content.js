@@ -3,6 +3,8 @@ const path = require("path")
 const sharp = require("sharp")
 const { pathToFileURL } = require("url")
 const { validateGearRecords } = require("./lib/gear-ingestion.js")
+const { validateGeneratedRecords } = require("./lib/media-ingestion.js")
+const generatedMediaRecords = require("../src/content/media/generated/records.json")
 
 const projectRoot = path.resolve(__dirname, "..")
 const errors = []
@@ -236,6 +238,27 @@ async function main() {
     console.warn("Gear validation warning: " + warning)
   )
 
+  const generatedMediaValidation = validateGeneratedRecords(
+    generatedMediaRecords,
+    {
+      journeys: journeyModule.journeyRecords,
+      staticMedia: mediaModule.mediaRecords.filter(asset => !asset.publication),
+    }
+  )
+  generatedMediaValidation.errors.forEach(report)
+
+  mediaModule.mediaPlacementRecords.forEach(placement => {
+    const owner = 'Media placement "' + placement.id + '"'
+    if (!mediaModule.getMediaAsset(placement.assetId)) {
+      report(owner + ' references unknown Media "' + placement.assetId + '"')
+    }
+    if (!journeyModule.getJourney(placement.journeyId)) {
+      report(
+        owner + ' references unknown Journey "' + placement.journeyId + '"'
+      )
+    }
+  })
+
   journeyModule.journeyRecords.forEach(journey => {
     gearSelectors.getJourneyGear(journey.id).forEach(item => {
       if (!item.id || !item.name || !item.category) {
@@ -440,6 +463,9 @@ async function main() {
     if (!trip.cover) report(owner + " has no resolved cover")
     if (!trip.description) report(owner + " has no public description")
     if (!trip.id || !trip.name) report(owner + " has no public route identity")
+    if (!Array.isArray(trip.allPhotography)) {
+      report(owner + " has no All Photography projection")
+    }
     if (trip.comingSoon && trip.registeredMediaCount < 1) {
       report(owner + " has no media for its journey preview")
     }
@@ -771,6 +797,8 @@ async function main() {
       " gear, " +
       gearModule.gearUsageRecords.length +
       " gear usages, " +
+      mediaModule.mediaPlacementRecords.length +
+      " media placements, " +
       placeModule.placeRecords.length +
       " places, " +
       journeyModule.journeyRecords.length +

@@ -227,13 +227,13 @@ npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico" 
 Copy mode refuses to overwrite an existing numbered output. Choose a new tag
 or move the existing output files before running it again.
 
-Filename matching does not register or publish an asset. Uploading one of these
-files to R2 by itself will not make it appear in the site: the canonical Media
-registry still needs the R2 object key, intrinsic metadata and rights, and the
-Journey must reference that Media ID in the correct visit or gallery. Those
-relationships should eventually be created by a separate validated,
-idempotent publication-manifest ingestor—not inferred from a filename or
-silently added by the image compressor.
+Filename matching in numbered-copy mode does not register or publish an asset.
+For a complete, validated workflow, use the separate Journey package and
+publication ingestor documented in
+[MEDIA_INGESTION.md](./MEDIA_INGESTION.md). It prepares a manifest, verifies
+uploaded R2 objects, adds generated canonical Media records idempotently, and
+places them in a Journey's additive **All photography** collection without
+changing curated hero or gallery content.
 
 ### Command-line help
 

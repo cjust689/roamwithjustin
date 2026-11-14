@@ -36,6 +36,7 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {"gallery"|string} role
  * @property {"published"|"draft"} visibility
  * @property {number|null} sortOrder
+ * @property {number} publicationSequence Monotonic ingestion batch order.
  *
  * @typedef {Object} Place
  * @property {string} id Canonical geographic identity; never a trip stop ID.
