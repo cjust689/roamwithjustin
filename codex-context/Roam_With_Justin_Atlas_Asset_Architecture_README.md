@@ -1,12 +1,12 @@
 # Roam With Justin Atlas - Content and Media Architecture
 
-**Status:** Foundation and Canyonlands vertical slice implemented; broader migration remains incremental
+**Status:** All existing Trip and Atlas content migrated to canonical Media, Places and Journeys
 **Application:** Vue 2, static GitHub Pages deployment, Cloudflare R2 media delivery
-**Immediate objective:** Use the Canyonlands pattern to migrate future content without restoring duplicate authority
+**Immediate objective:** Add future content directly to canonical modules without restoring legacy authorities
 
 ## Executive decision
 
-Roam With Justin will begin with three authoritative content domains:
+Roam With Justin uses three authoritative content domains:
 
 | Domain   | Owns                                                                                                            | Does not own                                           |
 | -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
@@ -39,11 +39,11 @@ This README owns the content boundaries and migration architecture. The other fi
 
 When documents overlap, use this order of authority: verified first-party travel evidence for facts, this architecture for data ownership, then delivery or publishing documents for presentation and workflow. Never promote a plausible detail to a confirmed fact merely because a UI requires a value.
 
-## Why the architecture must change
+## Why the architecture changed
 
-The repository currently describes overlapping content independently in src/data/trips.js and src/features/atlas/data/atlasData.js.
+Before migration, the repository described overlapping content independently in `src/data/trips.js` and `src/features/atlas/data/atlasData.js`. Both legacy files have now been removed.
 
-Observed repository facts:
+Pre-migration audit facts:
 
 - trips.js contains 92 unique local image references.
 - atlasData.js contains 28 unique local image references.
@@ -433,7 +433,7 @@ A resolved media view should be consistent:
 
 AtlasDetailPanel, AtlasMap, HeroCarousel and LocationModal should eventually consume this shared shape rather than implement their own normalization.
 
-### Compatibility during migration
+### Compatibility after migration
 
 The resolver may temporarily accept:
 
@@ -444,34 +444,37 @@ The resolver may temporarily accept:
 
 Compatibility logic belongs in selectors and resolvers, not individual components.
 
-During transition:
+All existing content is canonical:
 
-- Unmigrated trips may remain in src/data/trips.js.
-- Unmigrated Atlas nodes may remain in atlasData.js.
-- Migrated content is authoritative only in the new content modules.
-- Compatibility selectors reproduce the existing component shapes.
-- Do not edit a migrated entity in both the canonical and legacy files.
-
-The long-term goal is for trips.js and atlasData.js to become compatibility exports or disappear after all consumers use selectors.
+- `src/data/trips.js` and `src/features/atlas/data/atlasData.js` no longer exist.
+- Trip selectors project all five current cards and both published trip pages from Journeys, Places and Media.
+- Atlas selectors project all ten nodes from canonical facts plus Atlas-only presentation settings.
+- Compatibility selectors preserve current Vue prop shapes without owning content.
+- New content must not reintroduce raw local media paths in Journey or Atlas records.
 
 ## Proposed file layout
 
     src/
       content/
         media/
-          shared.mjs
           utah.mjs
           puerto-rico.mjs
+          upcoming.mjs
           index.mjs
         places/
           utah.mjs
           puerto-rico.mjs
+          upcoming.mjs
           index.mjs
           aliases.mjs
         journeys/
           utah-winter-2025.mjs
           puerto-rico-2024.mjs
+          upcoming.mjs
           index.mjs
+        atlas/
+          presentation.mjs
+          roots.mjs
         experiences/
           README.md
         partners/
@@ -483,12 +486,6 @@ The long-term goal is for trips.js and atlasData.js to become compatibility expo
           trips.js
           atlas.js
         contracts.mjs
-      data/
-        trips.js
-      features/
-        atlas/
-          data/
-            atlasData.js
     scripts/
       validate-content.js
 
@@ -501,7 +498,7 @@ Use this sequence for each newly migrated place. It is intentionally explicit so
 1. Add or confirm one canonical Place. Put coordinates and geographic parentage there; record evidence status and verification notes when precision is limited.
 2. Add each controlled file once to Media. Record the local path or R2 object key, MIME type, dimensions or duration when known, rights, capture place and poster relationship.
 3. Add a Journey visit that references the Place and Media IDs. Put dates, visit status, personal observations, captions, focal points and ordered route position there.
-4. Keep only join keys and truly view-specific settings in the old Trip or Atlas record. Set `migrated: true` only after both projections are complete.
+4. Add truly view-specific Atlas camera, hierarchy and media-usage settings to `content/atlas/presentation.mjs`. Do not create another Trip or Atlas content record.
 5. Extend selectors only when a new reusable output field is needed. Do not assemble R2 URLs, resolve aliases or infer media kinds in Vue components.
 6. Extend `scripts/validate-content.js` whenever a new relationship or required field is introduced. A record is not part of the architecture until invalid forms fail the build.
 7. Compare the Atlas and Trip presentations at desktop and portrait/mobile sizes. For video, confirm poster display, controls, `playsinline`, metadata preload and playback through the public R2 domain.
@@ -637,7 +634,7 @@ Definition of success:
 
 Changing the canonical Canyonlands Place, media record or visit updates both the Atlas and Trip presentations without editing duplicate records.
 
-### Phase 3 - Utah
+### Phase 3 - Utah - complete
 
 - Migrate remaining Utah Places and media.
 - Move itinerary order into the Utah Journey.
@@ -645,7 +642,7 @@ Changing the canonical Canyonlands Place, media record or visit updates both the
 - Remove migrated Utah duplicates from legacy authority.
 - Compare rendered pages before and after.
 
-### Phase 4 - Puerto Rico
+### Phase 4 - Puerto Rico - complete
 
 - Migrate Puerto Rico Places and owned media.
 - Resolve ID differences such as gozalandia and gozalandia-falls.
@@ -679,9 +676,9 @@ A future social publishing flow may:
 
 Implement this only after the foundational content model is stable.
 
-## Canyonlands implementation boundary
+## Canyonlands implementation boundary - completed pilot
 
-The first implementation should be deliberately narrow.
+The first implementation was deliberately narrow. It proved the selector and validation contracts before the remaining Utah, Puerto Rico and coming-soon records were migrated.
 
 In scope:
 
@@ -693,9 +690,8 @@ In scope:
 - compatibility with legacy strings,
 - tests and playback verification.
 
-Out of scope:
+Still out of scope:
 
-- bulk migration,
 - database or API work,
 - CMS integration,
 - generic entity repositories,
@@ -716,12 +712,16 @@ Out of scope:
 - Unknown media, Place and Journey references fail validation.
 - Missing local files fail validation.
 - Route order is not inferred from geographic hierarchy.
+- All 92 controlled assets are registered once in Media.
+- All five existing trip cards and 27 detailed visits are Journey projections.
+- All ten Atlas nodes are canonical projections; no `atlasData.js` authority remains.
+- Missing or unverified coordinates remain `null` outside map-visible Atlas nodes.
 - The build contains no R2 write credentials.
 - No database, backend or generalized content framework has been introduced.
 
 ## Deferred documents and work
 
-Do not implement an R2 Video architecture or Content Strategy architecture as independent systems before this foundation exists.
+Do not implement R2 video, EXIF, gear or Content Strategy work as independent systems beside this foundation.
 
 Those documents may be drafted, but their implementation must build on:
 
@@ -739,4 +739,4 @@ Media defines controlled assets. Places define geography. Journeys define travel
 
 The Atlas and Trip pages are derived presentations of that content.
 
-The immediate next implementation is not a bulk migration or upload pipeline. It is the Foundation phase followed by one complete Canyonlands vertical slice. That slice must prove that a single content change can update both the Atlas and Trip experiences without duplicating place identity, file delivery details or visit-specific narrative.
+All content that previously lived in `trips.js` and `atlasData.js` has been migrated. Future work should extend the canonical registries, selectors and validation contract directly. The next architecture phase may add a controlled publishing pipeline or Experiences, but neither should create a parallel media, place, journey or gear catalog.
