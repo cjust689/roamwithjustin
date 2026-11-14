@@ -278,6 +278,10 @@ export default {
       default: () => [],
     },
     isFavorite: Boolean,
+    expandRequest: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -315,6 +319,13 @@ export default {
     node() {
       this.mobileExpanded = false
       this.closeGallery(false)
+    },
+    expandRequest() {
+      // Match the same condition that turns this panel into a bottom drawer.
+      // Desktop/sidebar navigation should remain compact and unchanged.
+      if (window.matchMedia("(orientation: portrait)").matches) {
+        this.mobileExpanded = true
+      }
     },
   },
   mounted() {

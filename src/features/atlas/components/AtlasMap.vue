@@ -37,9 +37,14 @@ import { mapStyleUrl, terrainSource } from "../config/mapConfig"
 const journeySourceId = "atlas-journey-route"
 const journeyShadowLayerId = "atlas-journey-shadow"
 const journeyLineLayerId = "atlas-journey-line"
-// The visible pin dot sits 24px from the pill's left edge and 2px below it.
-// Anchor the geographic coordinate there so route endpoints and pins coincide.
-const markerPinOffset = [-24, -2]
+// CSS enlarges markers for narrow screens and coarse pointers. Keep MapLibre's
+// geographic anchor synchronized with the corresponding --marker-pin-x value
+// so route endpoints continue to meet the center of each numbered pin.
+const compactMarkerQuery = "(max-width: 720px), (any-pointer: coarse)"
+const markerPinOffsets = {
+  default: [-24, -2],
+  compact: [-29, -2],
+}
 
 maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
@@ -108,16 +113,42 @@ export default {
     },
   },
   mounted() {
+    this.compactMarkerMedia = window.matchMedia(compactMarkerQuery)
+    if (this.compactMarkerMedia.addEventListener) {
+      this.compactMarkerMedia.addEventListener(
+        "change",
+        this.handleMarkerMediaChange
+      )
+    } else {
+      // Safari versions before 14 use the legacy MediaQueryList API.
+      this.compactMarkerMedia.addListener(this.handleMarkerMediaChange)
+    }
     this.initializeMap()
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    if (this.compactMarkerMedia?.removeEventListener) {
+      this.compactMarkerMedia.removeEventListener(
+        "change",
+        this.handleMarkerMediaChange
+      )
+    } else if (this.compactMarkerMedia) {
+      this.compactMarkerMedia.removeListener(this.handleMarkerMediaChange)
+    }
     this.clearMarkers()
     if (this.popup) this.popup.remove()
     if (this.map) this.map.remove()
   },
   methods: {
+    handleMarkerMediaChange() {
+      this.renderMarkers()
+    },
+    getMarkerPinOffset() {
+      return this.compactMarkerMedia?.matches
+        ? markerPinOffsets.compact
+        : markerPinOffsets.default
+    },
     initializeMap() {
       if (!supportsWebGL2()) {
         this.error = "WebGL 2 is unavailable"
@@ -324,7 +355,7 @@ export default {
         const marker = new maplibregl.Marker({
           element,
           anchor: "bottom-left",
-          offset: markerPinOffset,
+          offset: this.getMarkerPinOffset(),
         })
           .setLngLat(node.coordinates)
           .addTo(this.map)
@@ -504,6 +535,9 @@ export default {
 }
 
 .atlas-marker {
+  --marker-avatar-size: 38px;
+  --marker-pin-x: 24px;
+
   position: relative;
   display: flex;
   align-items: center;
@@ -526,7 +560,7 @@ export default {
   position: absolute;
   z-index: 2;
   top: calc(100% + 2px);
-  left: 24px;
+  left: var(--marker-pin-x);
   display: grid;
   place-items: center;
   width: 1.45rem;
@@ -545,7 +579,7 @@ export default {
 .atlas-marker::after {
   position: absolute;
   bottom: -8px;
-  left: 24px;
+  left: var(--marker-pin-x);
   width: 8px;
   height: 8px;
   border: 2px solid #fff;
@@ -567,8 +601,8 @@ export default {
 }
 
 .atlas-marker img {
-  width: 38px;
-  height: 38px;
+  width: var(--marker-avatar-size);
+  height: var(--marker-avatar-size);
   border-radius: 50%;
   object-fit: cover;
 }
@@ -646,17 +680,49 @@ export default {
     left: 0.7rem;
     padding: 0.5rem 0.65rem;
   }
+}
+
+/*
+ * CSS pixels are density-independent, so a larger minimum target remains
+ * physically usable on high-DPI phones. Coarse-pointer detection also covers
+ * wide/landscape phones whose viewport no longer matches the width breakpoint.
+ */
+@media (max-width: 720px), (any-pointer: coarse) {
+  .atlas-marker {
+    --marker-avatar-size: 48px;
+    --marker-pin-x: 29px;
+
+    min-width: 58px;
+    min-height: 58px;
+    gap: 0.5rem;
+    padding: 4px;
+    border-width: 2px;
+  }
+
+  .atlas-marker[data-stop]::before {
+    width: 2rem;
+    height: 2rem;
+    border-width: 2px;
+    font-size: 0.78rem;
+  }
+
+  .atlas-marker::after {
+    bottom: -9px;
+    width: 11px;
+    height: 11px;
+  }
 
   .atlas-marker span {
     display: none;
   }
 
-  .atlas-marker {
-    padding: 0.24rem;
-  }
-
-  .atlas-marker::after {
-    left: 50%;
+  /* Show context without covering the map with every destination label. */
+  .atlas-marker.selected span,
+  .atlas-marker:focus-visible span {
+    display: block;
+    max-width: min(34vw, 150px);
+    padding-right: 0.45rem;
+    font-size: 0.82rem;
   }
 }
 

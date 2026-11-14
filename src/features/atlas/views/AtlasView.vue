@@ -5,7 +5,7 @@
       :journey-nodes="journeyNodes"
       :selected-node="currentNode"
       :camera="activeCamera"
-      @select="selectNode"
+      @select="selectNodeFromMap"
       @camera-change="rememberCamera"
     />
 
@@ -56,6 +56,7 @@
       :children="childNodes"
       :related="relatedNodes"
       :is-favorite="favorites.includes(currentNode.id)"
+      :expand-request="mapPinExpandRequest"
       @close="goToParent"
       @select="selectNode"
       @toggle-favorite="toggleFavorite"
@@ -124,6 +125,8 @@ export default {
       announcement: "",
       previousTitle: "",
       stateLoaded: false,
+      mapPinExpandRequest: 0,
+      pendingMapPinNodeId: null,
     }
   },
   computed: {
@@ -189,6 +192,10 @@ export default {
   watch: {
     nodeId(nodeId) {
       if (this.stateLoaded) this.handleRoute(nodeId)
+      if (this.pendingMapPinNodeId === nodeId) {
+        this.pendingMapPinNodeId = null
+        this.requestMapPinExpansion()
+      }
     },
   },
   mounted() {
@@ -247,6 +254,22 @@ export default {
 
       if ((nodeId || "") === (this.nodeId || "")) return
       this.$router.push(target)
+    },
+    selectNodeFromMap(nodeId) {
+      if ((nodeId || "") === (this.nodeId || "")) {
+        this.requestMapPinExpansion()
+        return
+      }
+
+      this.pendingMapPinNodeId = nodeId
+      this.selectNode(nodeId)
+    },
+    requestMapPinExpansion() {
+      // AtlasDetailPanel resets when its node changes. Issue the expansion on
+      // the following render so that reset happens before the mobile request.
+      this.$nextTick(() => {
+        this.mapPinExpandRequest += 1
+      })
     },
     selectFromSaved(nodeId) {
       this.selectNode(nodeId)
