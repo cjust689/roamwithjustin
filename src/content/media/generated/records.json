@@ -240,6 +240,276 @@
         "byteSize": 323102,
         "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
       }
+    },
+    {
+      "id": "image-usvi-c51002a482c9-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "c51002a482c90a612e159f72652387068dcdb9b5583419aeb1abfd6356f28494",
+        "byteSize": 818751,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-1b58d938875c-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1064
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "1b58d938875c687a0c5b1a1a563fded6d1ca6fab50928423567f17ae3c3a13a7",
+        "byteSize": 558822,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-e39fe0f94b2b-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "e39fe0f94b2b3c0f45ba88c1ee684c3c82a30b386a703c7ef60e9f6af8749761",
+        "byteSize": 591272,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-60f355c6f25a-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/cruz-bay/media-usvi-cruz-bay-ca586690c6aecd4e/cruz-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "60f355c6f25a22ba6a5670ba36601b325fc5f9593faf44e418165138ca8b767f",
+        "byteSize": 315163,
+        "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+      }
+    },
+    {
+      "id": "image-usvi-fce917462f0d-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "fce917462f0db2f5fbf484102f1b455deee697f2474b828b0544b595c97ce699",
+        "byteSize": 810513,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-983fc18624b6-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1439,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "983fc18624b662ccbe371cf8ec0bb58794475974e029cb4e790aa78eb3725129",
+        "byteSize": 399237,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-efaec5a67f91-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "efaec5a67f9191ea21f4fc75c75a859bb12a5a8a658c8a4c229dfabce751394b",
+        "byteSize": 378251,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-55234f4de095-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "55234f4de09554e604d7ee3d5ad295db1b78337606fd04b02b9a75e686e2e919",
+        "byteSize": 818420,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
+    },
+    {
+      "id": "image-usvi-0fdd28a2b459-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/great-cruz-bay/media-usvi-great-cruz-bay-48a482b493966122/great-cruz-bay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "0fdd28a2b4595312466dae675cc30c9d54d716c5af1d0b5cb4cca7240032b74b",
+        "byteSize": 162908,
+        "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+      }
     }
   ],
   "placements": [
@@ -346,6 +616,123 @@
       "sortOrder": 1,
       "publicationSequence": 2,
       "batchId": "media-usvi-cinnamon-bay-d1296a8f2621eb82"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-c51002a482c9-001",
+      "assetId": "image-usvi-c51002a482c9-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-1b58d938875c-002",
+      "assetId": "image-usvi-1b58d938875c-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-e39fe0f94b2b-003",
+      "assetId": "image-usvi-e39fe0f94b2b-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cruz-bay-image-usvi-60f355c6f25a-004",
+      "assetId": "image-usvi-60f355c6f25a-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cruz-bay",
+      "placeId": "cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 3,
+      "batchId": "media-usvi-cruz-bay-ca586690c6aecd4e"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-fce917462f0d-001",
+      "assetId": "image-usvi-fce917462f0d-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-983fc18624b6-002",
+      "assetId": "image-usvi-983fc18624b6-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-efaec5a67f91-003",
+      "assetId": "image-usvi-efaec5a67f91-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-55234f4de095-004",
+      "assetId": "image-usvi-55234f4de095-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-image-usvi-0fdd28a2b459-005",
+      "assetId": "image-usvi-0fdd28a2b459-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 4,
+      "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
     }
   ],
   "batches": [
@@ -379,6 +766,39 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "b14a29f013e56ec030a8497fd9b944c050d3659977fa26d20bbcd5d1022b4b17"
+      }
+    },
+    {
+      "id": "media-usvi-cruz-bay-ca586690c6aecd4e",
+      "sequence": 3,
+      "manifestSha256": "a974e0b24bc122c3d38be6dfb50447cad565a8c5329aadf8a2cb8d6f5063e0f5",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-c51002a482c9-001",
+        "image-usvi-1b58d938875c-002",
+        "image-usvi-e39fe0f94b2b-003",
+        "image-usvi-60f355c6f25a-004"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "d696bcb53e863ed5aaa16ea551e57e4ab33785a8fc122c8d8098f6621136259b"
+      }
+    },
+    {
+      "id": "media-usvi-great-cruz-bay-48a482b493966122",
+      "sequence": 4,
+      "manifestSha256": "2d1e63af2f8657f2abe0ed1398f9b504075689063ef4c38a66cdc928b0ce38b0",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-fce917462f0d-001",
+        "image-usvi-983fc18624b6-002",
+        "image-usvi-efaec5a67f91-003",
+        "image-usvi-55234f4de095-004",
+        "image-usvi-0fdd28a2b459-005"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "52d25952c7431b0425d821f5e4e7f0d2d82fef3982dcd666c0290ae9c2a59076"
       }
     }
   ]

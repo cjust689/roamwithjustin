@@ -12,7 +12,7 @@ export const usviStJohn2025Journey = Object.freeze({
     label: "2025",
   },
   hero: {
-    assetId: "image-usvi-usvi",
+    assetId: "image-usvi-usvi-full",
     role: "hero",
     alt: "St. John journey cover photograph",
   },

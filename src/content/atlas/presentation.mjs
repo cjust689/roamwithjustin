@@ -645,13 +645,13 @@ export const atlasPresentation = Object.freeze([
       bearing: -10,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey cover photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey cover photograph",
       },
@@ -672,13 +672,13 @@ export const atlasPresentation = Object.freeze([
       bearing: -18,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "St. Thomas arrival photography will be added after review.",
@@ -700,13 +700,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 24,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Red Hook ferry photography will be added after review.",
@@ -728,13 +728,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 20,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Cruz Bay photography will be added in the next media pass.",
@@ -761,13 +761,13 @@ export const atlasPresentation = Object.freeze([
       bearing: -24,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Maho photography will be added in the next media pass.",
@@ -789,13 +789,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 16,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Oceana Villa photography will be added after review.",
@@ -817,13 +817,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 26,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Lovango charter photography will be added after review.",
@@ -851,13 +851,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 18,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Trunk Bay photography will be added in the next media pass.",
@@ -879,13 +879,13 @@ export const atlasPresentation = Object.freeze([
       bearing: -18,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption:
@@ -908,13 +908,13 @@ export const atlasPresentation = Object.freeze([
       bearing: 22,
     },
     hero: {
-      assetId: "image-usvi-usvi",
+      assetId: "image-usvi-usvi-full",
       role: "hero",
       alt: "St. John journey photograph",
     },
     media: [
       {
-        assetId: "image-usvi-usvi",
+        assetId: "image-usvi-usvi-full",
         role: "gallery",
         alt: "St. John journey photograph",
         caption:
