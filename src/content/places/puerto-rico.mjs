@@ -220,18 +220,21 @@ export const puertoRicoPlaces = Object.freeze([
   {
     id: "hacienda-florecer",
     name: "Hacienda Florecer",
-    coordinates: null,
+    // Creator-supplied GPS is stored longitude-first by the Place contract.
+    coordinates: [-67.0752792, 18.3882008],
     parentPlaceId: "puerto-rico",
     countryCode: "PR",
     regionCode: "PR",
-    category: "attraction",
+    category: "lodging",
     evidenceStatus: "confirmed",
-    coordinatePrecision: "unknown",
+    coordinatePrecision: "exact",
     description:
       "Modern luxury retreat built from upcycled shipping containers, perched in the foothills of Moca with sweeping mountain views and serene seclusion.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps?q=18.3882008,-67.0752792",
+    },
     verificationNotes:
-      "Coordinates remain unset until verified from the trip journal or media metadata.",
+      "GPS supplied by the creator for the public Atlas pin on November 13, 2026.",
   },
   {
     id: "playuelas-horse-rides",

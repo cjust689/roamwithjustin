@@ -314,7 +314,7 @@ export const puertoRico2024Journey = Object.freeze({
       date: null,
       visitStatus: "visited",
       evidenceStatus: "confirmed",
-      type: "attraction",
+      type: "lodging",
       droneAllowed: true,
       notes: [
         "Three bedrooms, three bathrooms in a modern container‑based villa with industrial‑chic design.",
@@ -350,6 +350,26 @@ export const puertoRico2024Journey = Object.freeze({
           assetId: "image-puerto-rico-puerto-rico-hacienda",
           role: "gallery",
           alt: "Hacienda Florecer photo 4",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-pxl-20240804-205303943",
+          role: "gallery",
+          alt: "Infinity pool overlooking the mountains near Moca",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-pxl-20240804-205311759",
+          role: "gallery",
+          alt: "Pool deck and mountain view at Hacienda Florecer",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-pxl-20240804-205323274",
+          role: "gallery",
+          alt: "Sunlit pool terrace at Hacienda Florecer",
+        },
+        {
+          assetId: "image-puerto-rico-hacienda-pxl-20240804-222415613",
+          role: "gallery",
+          alt: "Traveler overlooking the mountain pool at Hacienda Florecer",
         },
       ],
       socialLinks: [],
@@ -819,6 +839,8 @@ export const puertoRico2024Journey = Object.freeze({
       "We started early at Castillo San Cristóbal, then wandered the old city before the afternoon heat and crowds arrived.",
     "cueva-del-indio":
       "The short walk opens onto dramatic cliff edges and textured rock formations that worked especially well for wide-angle and aerial footage.",
+    "hacienda-florecer":
+      "This mountain Airbnb became our western base, with quiet pool time and wide views across the hills near Moca.",
     "gozalandia-falls":
       "Arriving at opening gave us a quiet first swim and time to reach the upper falls before the busiest part of the day.",
     "crash-boat-beach":

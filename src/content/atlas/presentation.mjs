@@ -306,6 +306,52 @@ export const atlasPresentation = Object.freeze([
     relatedIds: ["old-san-juan", "crash-boat-beach"],
   },
   {
+    id: "hacienda-florecer",
+    placeId: "hacienda-florecer",
+    journeyId: "puerto-rico-2024",
+    parentId: "puerto-rico",
+    eyebrow: "Moca mountain stay",
+    category: "Airbnb retreat",
+    camera: {
+      center: [-67.0752792, 18.3882008],
+      zoom: 13.8,
+      pitch: 62,
+      bearing: 18,
+    },
+    hero: {
+      assetId: "image-puerto-rico-hacienda-pxl-20240804-205303943",
+      role: "hero",
+      alt: "Infinity pool overlooking the mountains near Moca",
+      focalPoint: {
+        x: 0.5,
+        y: 0.72,
+      },
+    },
+    media: [
+      {
+        assetId: "image-puerto-rico-hacienda-pxl-20240804-205303943",
+        role: "gallery",
+        alt: "Infinity pool overlooking the mountains near Moca",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-pxl-20240804-222415613",
+        role: "gallery",
+        alt: "Traveler overlooking the mountain pool at Hacienda Florecer",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-pxl-20240804-205311759",
+        role: "gallery",
+        alt: "Pool deck and mountain view at Hacienda Florecer",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-pxl-20240804-205323274",
+        role: "gallery",
+        alt: "Sunlit pool terrace at Hacienda Florecer",
+      },
+    ],
+    relatedIds: ["cueva-del-indio", "crash-boat-beach", "gozalandia-falls"],
+  },
+  {
     id: "gozalandia-falls",
     placeId: "gozalandia-falls",
     journeyId: "puerto-rico-2024",

@@ -45,6 +45,94 @@ export const puertoRicoMedia = Object.freeze([
     defaultAlt: "San Juan travel photograph",
   },
   {
+    id: "image-puerto-rico-hacienda-pxl-20240804-205303943",
+    kind: "image",
+    source: {
+      provider: "local",
+      path: "/img/locations/puerto-rico/PXL_20240804_205303943.RAW-02.ORIGINAL.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 2384,
+      height: 3171,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Infinity pool overlooking the mountains near Moca",
+  },
+  {
+    id: "image-puerto-rico-hacienda-pxl-20240804-205311759",
+    kind: "image",
+    source: {
+      provider: "local",
+      path: "/img/locations/puerto-rico/PXL_20240804_205311759.RAW-02.ORIGINAL.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 2820,
+      height: 3751,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Pool deck and mountain view at Hacienda Florecer",
+  },
+  {
+    id: "image-puerto-rico-hacienda-pxl-20240804-205323274",
+    kind: "image",
+    source: {
+      provider: "local",
+      path: "/img/locations/puerto-rico/PXL_20240804_205323274.RAW-02.ORIGINAL.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 3056,
+      height: 4064,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Sunlit pool terrace at Hacienda Florecer",
+  },
+  {
+    id: "image-puerto-rico-hacienda-pxl-20240804-222415613",
+    kind: "image",
+    source: {
+      provider: "local",
+      path: "/img/locations/puerto-rico/PXL_20240804_222415613.PORTRAIT.jpg",
+    },
+    intrinsic: {
+      mimeType: "image/jpeg",
+      width: 2939,
+      height: 3903,
+    },
+    rights: {
+      owner: "roam-with-justin",
+      status: "owned",
+    },
+    capture: {
+      placeId: "hacienda-florecer",
+      capturedAt: null,
+    },
+    defaultAlt: "Traveler overlooking the mountain pool at Hacienda Florecer",
+  },
+  {
     id: "image-puerto-rico-still001",
     kind: "image",
     source: {

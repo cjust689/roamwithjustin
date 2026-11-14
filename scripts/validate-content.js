@@ -490,6 +490,7 @@ async function main() {
   const expectedPuertoRicoOrder = [
     "old-san-juan",
     "cueva-del-indio",
+    "hacienda-florecer",
     "crash-boat-beach",
     "gozalandia-falls",
   ]
