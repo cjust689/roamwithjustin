@@ -5,12 +5,16 @@
         <span>Roam With Justin</span>
         <p>{{ quote }}</p>
       </div>
-      <nav aria-label="Footer navigation">
+      <div
+        class="footer-links"
+        role="navigation"
+        aria-label="Footer navigation"
+      >
         <router-link to="/trips">Stories</router-link>
         <router-link to="/atlas">Travel Atlas</router-link>
         <router-link to="/gear">Gear</router-link>
         <router-link to="/about">About</router-link>
-      </nav>
+      </div>
     </div>
     <div class="footer-meta">
       <span>&copy; {{ new Date().getFullYear() }} Roam With Justin</span>
@@ -72,13 +76,13 @@ export default {
   line-height: 1.18;
 }
 
-.footer-inner nav {
+.footer-links {
   display: grid;
   align-content: start;
   gap: 0.2rem;
 }
 
-.footer-inner nav a {
+.footer-links a {
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
   padding: 0.7rem 0;
   color: rgba(255, 255, 255, 0.68);
@@ -87,8 +91,8 @@ export default {
   text-decoration: none;
 }
 
-.footer-inner nav a:hover,
-.footer-inner nav a:focus-visible,
+.footer-links a:hover,
+.footer-links a:focus-visible,
 .footer-meta a:hover,
 .footer-meta a:focus-visible {
   color: #f6bd60;

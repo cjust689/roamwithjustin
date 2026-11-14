@@ -9,9 +9,9 @@
       <div id="main-content">
         <!-- Only show banner if not on root or about -->
         <Banner v-if="showBanner" />
-        <transition name="fade" mode="out-in">
-          <router-view />
-        </transition>
+        <!-- Keep the route mounted directly so the footer does not jump while
+             lazy route chunks exchange during navigation. -->
+        <router-view />
       </div>
       <VueFooter />
     </template>
@@ -19,17 +19,14 @@
 </template>
 
 <script>
-import M from "./js/materialize"
-const RoamHeader = () => import("./components/RoamHeader.vue")
-const VueFooter = () => import("./components/Footer")
-const PP = () => import("./components/ParallaxProjector")
-const Banner = () => import("./components/Banner.vue")
+import Banner from "./components/Banner.vue"
+import VueFooter from "./components/Footer.vue"
+import RoamHeader from "./components/RoamHeader.vue"
 export default {
   name: "App",
   components: {
     Banner,
     VueFooter,
-    PP,
     RoamHeader,
   },
   computed: {
@@ -44,10 +41,6 @@ export default {
       )
     },
   },
-  mounted() {
-    M.AutoInit()
-  },
-  methods: {},
 }
 </script>
 <style>
@@ -56,23 +49,33 @@ export default {
 @import url("https://fonts.googleapis.com/css2?family=Russo+One&display=swap");
 html,
 body,
+#app,
 #app-container {
-  height: 100%;
+  width: 100%;
+  min-height: 100%;
   margin: 0;
 }
 
 #app-container {
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
 }
 
 #main-content {
-  flex: 1;
+  position: relative;
+  flex: 1 0 auto;
   display: flex;
+  min-width: 0;
+  width: 100%;
   flex-direction: column;
-  min-height: 70vh;
+  min-height: 100dvh;
+  overflow-x: clip;
   padding-top: 72px;
   background: #0b1114;
+  color: #fff;
+  isolation: isolate;
 }
 </style>

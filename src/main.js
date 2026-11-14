@@ -4,8 +4,6 @@ import App from "./App.vue"
 import router from "./router"
 import "@/styles/materialize.min.css"
 import "@/styles/style.css"
-import M from "./js/materialize.js"
-let x = 0
 Vue.config.productionTip = false
 // 🧠 Detect current domain
 const hostname = window.location.hostname
@@ -15,20 +13,7 @@ const isWebworks = hostname.includes("webworksmedia.club")
 // 🌐 Make available to all components via prototype
 Vue.prototype.$isRoam = isRoam
 Vue.prototype.$isWebworks = isWebworks
-// if (isRoam && window.location.pathname === "/") {
-//   window.location.href = "/roam"
-// }
-//router.onReady(() => {
-  new Vue({
-    router,
-    render: h => h(App),
-    data: {
-      nav: "",
-      sideNav: "",
-      homeImage: '<img src="img/background.png">',
-    },
-    mounted: function () {
-      M.AutoInit()
-    },
-  }).$mount("#app")
-//})
+new Vue({
+  router,
+  render: h => h(App),
+}).$mount("#app")

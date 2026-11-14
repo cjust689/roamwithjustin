@@ -8,8 +8,8 @@
         <p class="home-brand">Roam With Justin</p>
         <h1 id="home-title">Choose how the journey unfolds.</h1>
         <p class="home-lede">
-          Adventure meets intention&mdash;told through visual stories,
-          hard-earned field notes, and journeys that leave a mark.
+          Adventure meets intention&mdash;told through visual stories, hard
+          earned field notes, and journeys that leave a mark.
         </p>
       </section>
 
