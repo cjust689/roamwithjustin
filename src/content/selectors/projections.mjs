@@ -208,3 +208,50 @@ export function orderAtlasNodesByJourney(nodes = []) {
     return leftOrder - rightOrder
   })
 }
+
+// Guided playback is a derived Journey view. It deliberately includes only
+// map-visible leaf nodes, while visit order and optional transition facts stay
+// owned by the canonical Journey record.
+export function buildGuidedJourneyViewModel(journey, atlasNodes = []) {
+  if (!journey) return null
+
+  const firstVisitByPlaceId = new Map()
+  const visitOrder = new Map()
+  journey.visits.forEach((visit, index) => {
+    if (!firstVisitByPlaceId.has(visit.placeId)) {
+      firstVisitByPlaceId.set(visit.placeId, visit)
+      visitOrder.set(visit.placeId, index)
+    }
+  })
+
+  const candidates = atlasNodes.filter(
+    node =>
+      node.journeyId === journey.id &&
+      node.childIds?.length === 0 &&
+      Array.isArray(node.coordinates)
+  )
+  const orderedNodes = [...candidates].sort(
+    (left, right) =>
+      (visitOrder.get(left.placeId) ?? Number.MAX_SAFE_INTEGER) -
+      (visitOrder.get(right.placeId) ?? Number.MAX_SAFE_INTEGER)
+  )
+
+  if (orderedNodes.length < 2) return null
+
+  const stops = orderedNodes.map((node, index) => {
+    const visit = firstVisitByPlaceId.get(node.placeId)
+    return Object.freeze({
+      ...node,
+      position: index + 1,
+      transitionToNext: visit?.transitionToNext || null,
+    })
+  })
+
+  return Object.freeze({
+    id: journey.id,
+    title: journey.title,
+    description: journey.description,
+    stopCount: stops.length,
+    stops: Object.freeze(stops),
+  })
+}

@@ -1,12 +1,16 @@
 <template>
   <main class="atlas-page">
     <AtlasMap
+      ref="atlasMap"
       :nodes="visibleNodes"
       :journey-nodes="journeyNodes"
       :selected-node="currentNode"
       :camera="activeCamera"
+      :guided-controls-visible="Boolean(guidedJourney)"
+      :journey-travel="guidedTravel"
       @select="selectNodeFromMap"
       @camera-change="rememberCamera"
+      @manual-interaction="pauseGuidedJourney('map')"
     />
 
     <header class="atlas-toolbar">
@@ -22,6 +26,22 @@
         </button>
       </div>
     </header>
+
+    <AtlasJourneyPlayer
+      v-if="guidedJourney"
+      :journey="guidedJourney"
+      :status="guidedStatus"
+      :current-index="guidedIndex"
+      :transition-label="guidedTransitionLabel"
+      @start="startGuidedJourney"
+      @previous="goToPreviousGuidedStop"
+      @next="goToNextGuidedStop"
+      @pause="pauseGuidedJourney('control')"
+      @resume="resumeGuidedJourney"
+      @finish="finishGuidedJourney"
+      @replay="startGuidedJourney"
+      @exit="exitGuidedJourney"
+    />
 
     <section v-if="!currentNode" class="atlas-welcome">
       <span>Explore through a photographer's eyes</span>
@@ -57,6 +77,10 @@
       :related="relatedNodes"
       :is-favorite="favorites.includes(currentNode.id)"
       :expand-request="mapPinExpandRequest"
+      :collapse-request="detailCollapseRequest"
+      :guided-presentation="
+        guidedStatus === 'at-stop' || guidedStatus === 'complete'
+      "
       @close="goToParent"
       @select="selectNode"
       @toggle-favorite="toggleFavorite"
@@ -81,6 +105,7 @@
 <script>
 import AtlasBreadcrumbs from "../components/AtlasBreadcrumbs.vue"
 import AtlasDetailPanel from "../components/AtlasDetailPanel.vue"
+import AtlasJourneyPlayer from "../components/AtlasJourneyPlayer.vue"
 import AtlasMap from "../components/AtlasMap.vue"
 import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
 import { hasMapTilerKey } from "../config/mapConfig"
@@ -91,6 +116,7 @@ import {
   getAtlasLineage,
   getAtlasNode,
   getAtlasNodes,
+  getGuidedJourneyViewModel,
 } from "@/content/selectors/atlas"
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
 
@@ -106,6 +132,7 @@ export default {
   components: {
     AtlasBreadcrumbs,
     AtlasDetailPanel,
+    AtlasJourneyPlayer,
     AtlasMap,
     AtlasSavedDrawer,
   },
@@ -127,6 +154,14 @@ export default {
       stateLoaded: false,
       mapPinExpandRequest: 0,
       pendingMapPinNodeId: null,
+      detailCollapseRequest: 0,
+      guidedStatus: "idle",
+      guidedIndex: -1,
+      guidedTravel: null,
+      guidedTravelSerial: 0,
+      guidedArrivalTimer: null,
+      guidedArrivalDeadline: 0,
+      guidedRemainingMs: 0,
     }
   },
   computed: {
@@ -135,6 +170,23 @@ export default {
     },
     currentNode() {
       return getAtlasNode(this.nodeId)
+    },
+    guidedJourney() {
+      return getGuidedJourneyViewModel(this.currentNode?.journeyId)
+    },
+    guidedIsActive() {
+      return this.guidedStatus !== "idle"
+    },
+    guidedStop() {
+      return this.guidedJourney?.stops?.[this.guidedIndex] || null
+    },
+    guidedTransitionLabel() {
+      if (this.guidedStatus !== "traveling" || !this.guidedStop) return ""
+
+      const mode = this.guidedTravel?.mode
+      return mode
+        ? `Traveling by ${mode} to ${this.guidedStop.title}`
+        : `Following the route to ${this.guidedStop.title}`
     },
     childNodes() {
       return getAtlasJourneyNodes(this.currentNode)
@@ -177,6 +229,9 @@ export default {
     },
     activeCamera() {
       if (!this.currentNode) return worldCamera
+      if (this.guidedIsActive && this.guidedStop?.id === this.currentNode.id) {
+        return this.guidedStop.camera
+      }
       return this.cameras[this.currentNode.id] || this.currentNode.camera
     },
     favoriteNodes() {
@@ -195,6 +250,15 @@ export default {
       if (this.pendingMapPinNodeId === nodeId) {
         this.pendingMapPinNodeId = null
         this.requestMapPinExpansion()
+      }
+    },
+    guidedJourney(nextJourney, previousJourney) {
+      if (
+        this.guidedIsActive &&
+        previousJourney?.id &&
+        nextJourney?.id !== previousJourney.id
+      ) {
+        this.exitGuidedJourney(false)
       }
     },
   },
@@ -216,10 +280,16 @@ export default {
 
     this.stateLoaded = true
     this.handleRoute(this.nodeId)
+    document.addEventListener("visibilitychange", this.handleVisibilityChange)
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.clearGuidedArrivalTimer()
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange
+    )
     document.title = this.previousTitle
   },
   methods: {
@@ -246,7 +316,10 @@ export default {
       this.persist()
       this.updateDocumentTitle()
     },
-    selectNode(nodeId) {
+    selectNode(nodeId, options = {}) {
+      if (this.guidedIsActive && !options.preserveGuided) {
+        this.exitGuidedJourney(false)
+      }
       this.savedOpen = false
       const target = nodeId
         ? { name: "TravelAtlas", params: { nodeId } }
@@ -256,13 +329,32 @@ export default {
       this.$router.push(target)
     },
     selectNodeFromMap(nodeId) {
+      let preserveGuided = false
+      if (this.guidedIsActive) {
+        this.clearGuidedArrivalTimer()
+        this.$refs.atlasMap?.pauseJourneyTravel()
+        this.guidedTravel = null
+
+        const guidedIndex = this.guidedJourney?.stops.findIndex(
+          stop => stop.id === nodeId
+        )
+        if (guidedIndex >= 0) {
+          this.guidedIndex = guidedIndex
+          this.guidedStatus = "at-stop"
+          preserveGuided = true
+          this.announcement = `${this.guidedJourney.stops[guidedIndex].title}, stop ${guidedIndex + 1} of ${this.guidedJourney.stopCount}`
+        } else {
+          this.exitGuidedJourney(false)
+        }
+      }
+
       if ((nodeId || "") === (this.nodeId || "")) {
         this.requestMapPinExpansion()
         return
       }
 
       this.pendingMapPinNodeId = nodeId
-      this.selectNode(nodeId)
+      this.selectNode(nodeId, { preserveGuided })
     },
     requestMapPinExpansion() {
       // AtlasDetailPanel resets when its node changes. Issue the expansion on
@@ -270,6 +362,132 @@ export default {
       this.$nextTick(() => {
         this.mapPinExpandRequest += 1
       })
+    },
+    startGuidedJourney() {
+      if (!this.guidedJourney) return
+
+      this.clearGuidedArrivalTimer()
+      this.$refs.atlasMap?.cancelJourneyTravel()
+      this.guidedStatus = "idle"
+      this.guidedIndex = -1
+      this.guidedTravel = null
+      this.goToGuidedStop(0)
+    },
+    goToGuidedStop(index) {
+      const target = this.guidedJourney?.stops?.[index]
+      if (!target) return
+
+      const previousIndex = this.guidedIndex
+      const previousStop = this.guidedJourney.stops[previousIndex] || null
+      const transitionSource =
+        index > previousIndex
+          ? previousStop
+          : this.guidedJourney.stops[index] || null
+      const mode = transitionSource?.transitionToNext?.mode || null
+      const duration = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? 80
+        : 1800
+
+      this.clearGuidedArrivalTimer()
+      this.guidedIndex = index
+      this.guidedStatus = "traveling"
+      this.guidedRemainingMs = duration
+      this.guidedArrivalDeadline = Date.now() + duration
+      this.detailCollapseRequest += 1
+      this.guidedTravelSerial += 1
+      this.guidedTravel = {
+        id: this.guidedTravelSerial,
+        fromCoordinates: previousStop?.coordinates || null,
+        toCoordinates: target.coordinates,
+        mode,
+        duration,
+      }
+
+      this.selectNode(target.id, { preserveGuided: true })
+      this.scheduleGuidedArrival(duration)
+      this.announcement = `Traveling to ${target.title}, stop ${index + 1} of ${this.guidedJourney.stopCount}`
+    },
+    scheduleGuidedArrival(duration) {
+      this.guidedArrivalTimer = window.setTimeout(
+        this.arriveAtGuidedStop,
+        Math.max(1, duration)
+      )
+    },
+    arriveAtGuidedStop() {
+      this.clearGuidedArrivalTimer()
+      this.guidedTravel = null
+      this.guidedRemainingMs = 0
+      this.guidedStatus = "at-stop"
+      this.requestMapPinExpansion()
+
+      if (this.guidedStop) {
+        this.announcement = `${this.guidedStop.title}, stop ${this.guidedIndex + 1} of ${this.guidedJourney.stopCount}. Journey paused.`
+      }
+    },
+    pauseGuidedJourney(source = "control") {
+      if (this.guidedStatus !== "traveling") return
+
+      this.guidedRemainingMs = Math.max(
+        100,
+        this.guidedArrivalDeadline - Date.now()
+      )
+      this.clearGuidedArrivalTimer()
+      this.$refs.atlasMap?.pauseJourneyTravel()
+      this.guidedStatus = "paused-travel"
+      this.announcement =
+        source === "map"
+          ? "Guided journey paused because you took control of the map"
+          : "Guided journey paused"
+    },
+    resumeGuidedJourney() {
+      if (this.guidedStatus !== "paused-travel" || !this.guidedStop) return
+
+      const duration = Math.max(100, this.guidedRemainingMs || 800)
+      this.guidedStatus = "traveling"
+      this.guidedArrivalDeadline = Date.now() + duration
+      this.$refs.atlasMap?.resumeJourneyTravel(this.guidedStop.camera, duration)
+      this.scheduleGuidedArrival(duration)
+      this.announcement = `Guided journey resumed toward ${this.guidedStop.title}`
+    },
+    goToPreviousGuidedStop() {
+      if (this.guidedIndex <= 0) return
+      this.goToGuidedStop(this.guidedIndex - 1)
+    },
+    goToNextGuidedStop() {
+      if (!this.guidedJourney) return
+      if (this.guidedIndex >= this.guidedJourney.stopCount - 1) {
+        this.finishGuidedJourney()
+        return
+      }
+      this.goToGuidedStop(this.guidedIndex + 1)
+    },
+    finishGuidedJourney() {
+      this.clearGuidedArrivalTimer()
+      this.$refs.atlasMap?.cancelJourneyTravel()
+      this.guidedTravel = null
+      this.guidedStatus = "complete"
+      this.announcement = `${this.guidedJourney?.title || "Guided journey"} complete`
+    },
+    exitGuidedJourney(announce = true) {
+      const wasActive = this.guidedIsActive
+      this.clearGuidedArrivalTimer()
+      this.$refs.atlasMap?.cancelJourneyTravel()
+      this.guidedStatus = "idle"
+      this.guidedIndex = -1
+      this.guidedTravel = null
+      this.guidedRemainingMs = 0
+      if (wasActive) this.detailCollapseRequest += 1
+      if (announce) this.announcement = "Guided journey closed"
+    },
+    clearGuidedArrivalTimer() {
+      if (this.guidedArrivalTimer != null) {
+        window.clearTimeout(this.guidedArrivalTimer)
+        this.guidedArrivalTimer = null
+      }
+    },
+    handleVisibilityChange() {
+      if (document.hidden) this.pauseGuidedJourney("visibility")
     },
     selectFromSaved(nodeId) {
       this.selectNode(nodeId)

@@ -456,6 +456,35 @@ async function main() {
     report("Puerto Rico Atlas route does not follow Journey visit order")
   }
 
+  const guidedJourneys = [
+    {
+      journeyId: "utah-winter-2025",
+      expectedStops: expectedMoabOrder,
+    },
+    {
+      journeyId: "puerto-rico-2024",
+      expectedStops: expectedPuertoRicoOrder,
+    },
+  ].map(({ journeyId, expectedStops }) => {
+    const guidedJourney = projections.buildGuidedJourneyViewModel(
+      journeyModule.getJourney(journeyId),
+      completeAtlasViews
+    )
+    const actualStops = guidedJourney?.stops.map(stop => stop.id) || []
+    if (actualStops.join("|") !== expectedStops.join("|")) {
+      report(
+        'Guided Journey "' + journeyId + '" does not follow Atlas visit order'
+      )
+    }
+    ;(guidedJourney?.stops || []).forEach((stop, index) => {
+      if (stop.position !== index + 1) {
+        report('Guided Journey "' + journeyId + '" has invalid stop positions')
+      }
+      validateAtlasView(stop, contracts)
+    })
+    return guidedJourney
+  })
+
   ;["src/data/trips.js", "src/features/atlas/data/atlasData.js"].forEach(
     relativePath => {
       if (fs.existsSync(path.join(projectRoot, relativePath))) {
@@ -486,7 +515,9 @@ async function main() {
       tripViews.length +
       " trip views, " +
       completeAtlasViews.length +
-      " Atlas nodes."
+      " Atlas nodes, " +
+      guidedJourneys.filter(Boolean).length +
+      " guided journeys."
   )
 }
 

@@ -3,7 +3,10 @@
   <div class="atlas-detail-root">
     <aside
       class="atlas-detail"
-      :class="{ 'is-expanded': mobileExpanded }"
+      :class="{
+        'is-expanded': mobileExpanded,
+        'is-guided': guidedPresentation,
+      }"
       :aria-label="`${node.title} details`"
     >
       <div
@@ -25,7 +28,7 @@
           type="button"
           :aria-expanded="String(mobileExpanded)"
           aria-controls="atlas-detail-content"
-          @click="mobileExpanded = !mobileExpanded"
+          @click="toggleMobileDrawer"
         >
           <img :src="node.image" alt="" />
           <span>
@@ -52,16 +55,20 @@
         </button>
       </div>
 
-      <div id="atlas-detail-content" class="atlas-detail-scroll">
+      <div
+        id="atlas-detail-content"
+        ref="detailScroll"
+        class="atlas-detail-scroll"
+      >
         <div class="atlas-detail-hero">
           <button
             class="atlas-detail-hero-image"
             type="button"
-            :aria-label="`View ${node.title} photograph full screen`"
-            @click="openGallery(node.image)"
+            :aria-label="`View ${guidedHeroMedia.alt} full screen`"
+            @click="openGallery(guidedHeroMedia)"
           >
-            <img :src="node.image" :alt="node.title" />
-            <span>View full photo</span>
+            <img :src="guidedHeroImage" :alt="guidedHeroMedia.alt" />
+            <span>{{ guidedHeroLabel }}</span>
           </button>
           <div class="atlas-detail-shade"></div>
           <button
@@ -282,6 +289,11 @@ export default {
       type: Number,
       default: 0,
     },
+    collapseRequest: {
+      type: Number,
+      default: 0,
+    },
+    guidedPresentation: Boolean,
   },
   data() {
     return {
@@ -289,6 +301,8 @@ export default {
       lightboxOpen: false,
       lightboxIndex: 0,
       previouslyFocusedElement: null,
+      guidedHeroIndex: 0,
+      guidedHeroTimer: null,
     }
   },
   computed: {
@@ -314,10 +328,29 @@ export default {
     hasVideo() {
       return this.galleryMedia.some(item => item.kind === "video")
     },
+    guidedHeroMedia() {
+      if (!this.guidedPresentation) return this.normalizeMedia(this.node.image)
+      return (
+        this.galleryMedia[this.guidedHeroIndex % this.galleryMedia.length] ||
+        this.normalizeMedia(this.node.image)
+      )
+    },
+    guidedHeroImage() {
+      return this.guidedHeroMedia.kind === "video"
+        ? this.guidedHeroMedia.poster || this.node.image
+        : this.guidedHeroMedia.src
+    },
+    guidedHeroLabel() {
+      if (!this.guidedPresentation) return "View full photo"
+      const mediaType =
+        this.guidedHeroMedia.kind === "video" ? "Play video" : "View photo"
+      return `${mediaType} ${this.guidedHeroIndex + 1} of ${this.galleryMedia.length}`
+    },
   },
   watch: {
     node() {
       this.mobileExpanded = false
+      this.guidedHeroIndex = 0
       this.closeGallery(false)
     },
     expandRequest() {
@@ -326,17 +359,81 @@ export default {
       if (window.matchMedia("(orientation: portrait)").matches) {
         this.mobileExpanded = true
       }
+      this.scrollDetailsToTop()
+      this.startGuidedHeroCycle()
+    },
+    collapseRequest() {
+      this.mobileExpanded = false
+      this.stopGuidedHeroCycle()
+      this.closeGallery(false)
+    },
+    guidedPresentation(isPresenting) {
+      this.guidedHeroIndex = 0
+      if (isPresenting) this.startGuidedHeroCycle()
+      else this.stopGuidedHeroCycle()
     },
   },
   mounted() {
     window.addEventListener("keydown", this.handleGalleryKeydown)
+    document.addEventListener("visibilitychange", this.handleVisibilityChange)
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.stopGuidedHeroCycle()
     window.removeEventListener("keydown", this.handleGalleryKeydown)
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange
+    )
   },
   methods: {
+    toggleMobileDrawer() {
+      this.mobileExpanded = !this.mobileExpanded
+      if (this.mobileExpanded) this.startGuidedHeroCycle()
+      else this.stopGuidedHeroCycle()
+    },
+    startGuidedHeroCycle() {
+      this.stopGuidedHeroCycle()
+      if (
+        !this.guidedPresentation ||
+        this.galleryMedia.length < 2 ||
+        document.hidden ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        return
+      }
+
+      this.guidedHeroTimer = window.setInterval(() => {
+        if (
+          window.matchMedia("(orientation: portrait)").matches &&
+          !this.mobileExpanded
+        ) {
+          return
+        }
+        this.guidedHeroIndex =
+          (this.guidedHeroIndex + 1) % this.galleryMedia.length
+      }, 4500)
+    },
+    stopGuidedHeroCycle() {
+      if (this.guidedHeroTimer != null) {
+        window.clearInterval(this.guidedHeroTimer)
+        this.guidedHeroTimer = null
+      }
+    },
+    handleVisibilityChange() {
+      if (document.hidden) this.stopGuidedHeroCycle()
+      else this.startGuidedHeroCycle()
+    },
+    scrollDetailsToTop() {
+      this.$nextTick(() => {
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches
+          ? "auto"
+          : "smooth"
+        this.$refs.detailScroll?.scrollTo({ top: 0, behavior })
+      })
+    },
     normalizeMedia(entry) {
       const media = typeof entry === "string" ? { src: entry } : entry || {}
       const src = media.src || media.url || ""
@@ -821,6 +918,13 @@ export default {
   .atlas-detail:not(.is-expanded) {
     border-top-color: rgba(255, 255, 255, 0.18);
     background: rgba(7, 11, 14, 0.9);
+  }
+
+  /* Leave the journey controls and a useful slice of the map visible while a
+     stop is presenting media. The detail content remains independently
+     scrollable, so the smaller guided drawer does not hide any story fields. */
+  .atlas-detail.is-guided {
+    max-height: min(62dvh, calc(100dvh - 18rem));
   }
 
   .atlas-detail:not(.is-expanded) .atlas-detail-scroll {

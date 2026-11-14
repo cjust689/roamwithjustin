@@ -1,6 +1,11 @@
 import { atlasPresentation } from "../atlas/presentation.mjs"
 import { atlasRootPlaceIds } from "../atlas/roots.mjs"
-import { buildAtlasNodeView, orderAtlasNodesByJourney } from "./projections.mjs"
+import { getJourney } from "../journeys/index.mjs"
+import {
+  buildAtlasNodeView,
+  buildGuidedJourneyViewModel,
+  orderAtlasNodesByJourney,
+} from "./projections.mjs"
 
 const projectedNodes = atlasPresentation.map(buildAtlasNodeView).filter(Boolean)
 const childIdsByParent = projectedNodes.reduce((result, node) => {
@@ -50,4 +55,11 @@ export function getAtlasLeaves() {
 
 export function getAtlasJourneyNodes(parentNode) {
   return orderAtlasNodesByJourney(getAtlasNodes(parentNode?.childIds || []))
+}
+
+export function getGuidedJourneyViewModel(journeyId) {
+  return buildGuidedJourneyViewModel(
+    getJourney(journeyId),
+    Object.values(atlasNodes)
+  )
 }

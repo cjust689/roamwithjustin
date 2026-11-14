@@ -21,7 +21,10 @@
         </p>
       </article>
     </div>
-    <div v-if="journeyNodes.length > 1" class="atlas-route-key">
+    <div
+      v-if="journeyNodes.length > 1 && !guidedControlsVisible"
+      class="atlas-route-key"
+    >
       <span>Journey path</span>
       <strong>{{ journeyNodes.length }} stops in visit order</strong>
     </div>
@@ -44,6 +47,19 @@ const compactMarkerQuery = "(max-width: 720px), (any-pointer: coarse)"
 const markerPinOffsets = {
   default: [-24, -2],
   compact: [-31, -2],
+}
+const transportIcons = {
+  drive: "🚗",
+  car: "🚗",
+  walk: "🥾",
+  hike: "🥾",
+  bike: "🚲",
+  bicycle: "🚲",
+  ferry: "⛴",
+  boat: "⛴",
+  train: "🚆",
+  flight: "✈",
+  plane: "✈",
 }
 
 maplibregl.setWorkerUrl(
@@ -78,6 +94,11 @@ export default {
       type: Object,
       required: true,
     },
+    guidedControlsVisible: Boolean,
+    journeyTravel: {
+      type: Object,
+      default: null,
+    },
   },
   data() {
     return {
@@ -111,6 +132,16 @@ export default {
         this.moveCamera(camera)
       },
     },
+    journeyTravel: {
+      deep: true,
+      handler(travel) {
+        if (!travel) {
+          this.cancelJourneyTravel()
+          return
+        }
+        this.startJourneyTravel(travel)
+      },
+    },
   },
   mounted() {
     this.compactMarkerMedia = window.matchMedia(compactMarkerQuery)
@@ -137,6 +168,7 @@ export default {
       this.compactMarkerMedia.removeListener(this.handleMarkerMediaChange)
     }
     this.clearMarkers()
+    this.cancelJourneyTravel()
     if (this.popup) this.popup.remove()
     if (this.map) this.map.remove()
   },
@@ -148,6 +180,106 @@ export default {
       return this.compactMarkerMedia?.matches
         ? markerPinOffsets.compact
         : markerPinOffsets.default
+    },
+    startJourneyTravel(travel) {
+      if (!this.map || !this.ready || !travel) return
+      if (this.activeJourneyTravelId === travel.id) return
+
+      this.cancelJourneyTravel()
+      this.activeJourneyTravelId = travel.id
+      this.activeJourneyTravel = travel
+      this.transportProgress = 0
+
+      if (!travel.fromCoordinates || !travel.toCoordinates) return
+      // Reduced-motion playback still changes stops, but it must not introduce
+      // a moving decorative marker between the direct camera cuts.
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+
+      const element = document.createElement("div")
+      const mode = (travel.mode || "").toLowerCase()
+      element.className = "atlas-transport-marker"
+      element.setAttribute("role", "img")
+      element.setAttribute(
+        "aria-label",
+        mode ? `${mode} journey progress` : "Journey progress"
+      )
+      element.textContent = transportIcons[mode] || "✦"
+
+      this.transportMarker = new maplibregl.Marker({
+        element,
+        anchor: "center",
+      })
+        .setLngLat(travel.fromCoordinates)
+        .addTo(this.map)
+
+      this.animateJourneyTransport(0, travel.duration)
+    },
+    animateJourneyTransport(startProgress, duration) {
+      if (!this.transportMarker || !this.activeJourneyTravel) return
+
+      const travel = this.activeJourneyTravel
+      const startedAt = performance.now()
+      const safeDuration = Math.max(1, duration || 1)
+
+      const step = now => {
+        const elapsedRatio = Math.min(1, (now - startedAt) / safeDuration)
+        const progress = startProgress + (1 - startProgress) * elapsedRatio
+        const easedProgress = 1 - Math.pow(1 - progress, 2)
+        const longitude =
+          travel.fromCoordinates[0] +
+          (travel.toCoordinates[0] - travel.fromCoordinates[0]) * easedProgress
+        const latitude =
+          travel.fromCoordinates[1] +
+          (travel.toCoordinates[1] - travel.fromCoordinates[1]) * easedProgress
+
+        this.transportProgress = progress
+        this.transportMarker.setLngLat([longitude, latitude])
+        if (elapsedRatio < 1) {
+          this.transportAnimationFrame = requestAnimationFrame(step)
+        } else {
+          this.transportAnimationFrame = null
+        }
+      }
+
+      this.transportAnimationFrame = requestAnimationFrame(step)
+    },
+    pauseJourneyTravel() {
+      if (this.map) this.map.stop()
+      if (this.transportAnimationFrame) {
+        cancelAnimationFrame(this.transportAnimationFrame)
+        this.transportAnimationFrame = null
+      }
+    },
+    resumeJourneyTravel(camera, duration) {
+      if (!this.map || !this.ready || !camera) return
+
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      const options = {
+        center: camera.center,
+        zoom: camera.zoom,
+        pitch: camera.pitch,
+        bearing: camera.bearing,
+      }
+
+      if (prefersReducedMotion) this.map.jumpTo(options)
+      else this.map.flyTo({ ...options, duration, essential: false })
+
+      this.animateJourneyTransport(this.transportProgress || 0, duration)
+    },
+    cancelJourneyTravel() {
+      if (this.transportAnimationFrame) {
+        cancelAnimationFrame(this.transportAnimationFrame)
+        this.transportAnimationFrame = null
+      }
+      if (this.transportMarker) {
+        this.transportMarker.remove()
+        this.transportMarker = null
+      }
+      this.activeJourneyTravel = null
+      this.activeJourneyTravelId = null
+      this.transportProgress = 0
     },
     initializeMap() {
       if (!supportsWebGL2()) {
@@ -193,6 +325,11 @@ export default {
 
           this.renderJourney()
           this.renderMarkers()
+          if (this.journeyTravel) this.startJourneyTravel(this.journeyTravel)
+        })
+
+        this.map.on("movestart", event => {
+          if (event.originalEvent) this.$emit("manual-interaction")
         })
 
         this.map.on("moveend", () => {
@@ -534,6 +671,23 @@ export default {
   line-height: 1.6;
 }
 
+.atlas-transport-marker {
+  display: grid;
+  place-items: center;
+  width: 2.9rem;
+  height: 2.9rem;
+  border: 3px solid #f6bd60;
+  border-radius: 50%;
+  background: rgba(7, 11, 14, 0.94);
+  box-shadow:
+    0 0 0 5px rgba(7, 11, 14, 0.38),
+    0 10px 28px rgba(0, 0, 0, 0.52);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .atlas-marker {
   --marker-avatar-size: 38px;
   --marker-pin-x: 24px;
@@ -696,6 +850,12 @@ export default {
  * wide/landscape phones whose viewport no longer matches the width breakpoint.
  */
 @media (max-width: 720px), (any-pointer: coarse) {
+  .atlas-transport-marker {
+    width: 3.3rem;
+    height: 3.3rem;
+    font-size: 1.45rem;
+  }
+
   .atlas-marker {
     --marker-avatar-size: 52px;
     --marker-pin-x: 31px;

@@ -434,19 +434,19 @@ A resolved media view should be consistent:
 
 AtlasDetailPanel, AtlasMap, HeroCarousel and LocationModal should eventually consume this shared shape rather than implement their own normalization.
 
-### Guided Journey playback - future projection
+### Guided Journey playback - implemented foundation
 
-A guided or "autopilot" tour should be a playback projection of an existing Journey, not a new content authority. It reads the Journey's ordered visits, resolves each visit's Place, camera and curated Media usages, and produces a sequence the Atlas can play without copying coordinates, route order, stories or assets.
+The guided or "autopilot" tour is implemented as a playback projection of an existing Journey, not a new content authority. `buildGuidedJourneyViewModel` reads the Journey's ordered visits, resolves each visit's Place, camera and Atlas node, and produces a sequence the Atlas can play without copying coordinates, route order, stories or assets. `AtlasView` owns the temporary playback state, `AtlasJourneyPlayer` renders the controls, `AtlasMap` performs camera and transition animation, and `AtlasDetailPanel` presents each stop's canonical media.
 
-Recommended interaction:
+Implemented interaction:
 
 1. The visitor explicitly starts the journey.
-2. The map animates toward the next ordered visit; an optional transport icon moves along the route only when the Journey contains a confirmed transport mode.
+2. The map animates toward the next ordered visit. A neutral transition marker follows the route today; the supported transport icon replaces it only when the Journey contains a confirmed transport mode.
 3. Playback pauses automatically at the stop, opens its detail drawer and presents the curated photos or video.
 4. The visitor chooses Next, Previous, Resume or Exit. A separate opt-in may auto-advance after a readable dwell time, but auto-pause should remain the default.
 5. Manual map interaction pauses playback instead of fighting the visitor for camera control.
 
-The player should use an explicit state machine such as `idle -> traveling -> pausedAtStop -> presentingMedia -> complete`. Playback position, mute state and current media index are temporary UI state; they do not belong in Media, Places or Journeys. Optional transition facts such as `mode`, a confirmed duration or a public route geometry belong to the Journey visit-to-visit relationship, never to the Place hierarchy.
+The player uses explicit `idle`, `traveling`, `paused-travel`, `at-stop` and `complete` states. Playback position, the travel timer and current media index are temporary UI state; they do not belong in Media, Places or Journeys. Optional transition facts such as `mode`, a confirmed duration or a public route geometry belong to the Journey visit-to-visit relationship, never to the Place hierarchy. The current published Journeys do not yet assert those transition facts, so the UI deliberately does not invent car, plane or walking modes.
 
 Accessibility and delivery constraints:
 
@@ -455,6 +455,13 @@ Accessibility and delivery constraints:
 - Never start audible video without a visitor gesture; retain native controls, captions when available and poster-first loading.
 - Announce the current stop and sequence position, preserve keyboard operation, and keep every stop available through its direct Atlas URL.
 - Suspend timers and media when the page is hidden, the drawer is manually closed or the visitor takes control of the map.
+
+Current delivery notes:
+
+- Guided playback is available for every Journey that resolves to at least two map-visible leaf stops; the current Utah and Puerto Rico Journeys qualify.
+- Stop media advances poster-first without starting audible video. Opening a video remains an explicit visitor action and uses the existing native-control lightbox.
+- Reduced-motion visitors receive near-instant camera changes and no automatic media cycling.
+- Confirmed per-transition modes and public road-following route geometry remain content-model extensions; the player and transport marker are ready to consume them without moving those facts into Places.
 
 ### Compatibility after migration
 
