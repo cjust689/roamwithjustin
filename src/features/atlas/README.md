@@ -75,7 +75,11 @@ coordinate point uses map pitch/rotation alignment and subpixel positioning,
 so it remains attached to the canonical Place coordinate and Journey route
 while the map turns. Its card stays viewport-aligned so the title remains
 readable. During camera movement, non-selected cards fade temporarily while
-their coordinate points remain visible; cards return when movement ends.
+their coordinate points remain visible. After movement ends, marker DOM is
+rebuilt on the second paint frame so every card returns at its final projected
+coordinate. Atlas marker elements must remain absolutely positioned; putting
+them back into document flow causes each card to inherit cumulative vertical
+drift from the markers before it.
 
 Below zoom `12.25`, nearby unselected stops are grouped by projected screen
 distance so fixed-size labels do not stack over one another. A cluster is a

@@ -111,6 +111,7 @@ export default {
       error: "",
       previewCounts: {},
       mapMoving: false,
+      markerRefreshFrame: null,
     }
   },
   computed: {
@@ -162,6 +163,7 @@ export default {
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.cancelScheduledMarkerRefresh()
     if (this.compactMarkerMedia?.removeEventListener) {
       this.compactMarkerMedia.removeEventListener(
         "change",
@@ -348,6 +350,7 @@ export default {
         })
 
         this.map.on("movestart", event => {
+          this.cancelScheduledMarkerRefresh()
           this.mapMoving = true
           if (event.originalEvent) this.$emit("manual-interaction")
         })
@@ -361,7 +364,7 @@ export default {
             pitch: this.map.getPitch(),
             bearing: this.map.getBearing(),
           })
-          this.renderMarkers()
+          this.scheduleMarkerRefresh()
         })
 
         this.map.on("error", event => {
@@ -410,6 +413,25 @@ export default {
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
+    },
+    cancelScheduledMarkerRefresh() {
+      if (this.markerRefreshFrame === null) return
+      window.cancelAnimationFrame(this.markerRefreshFrame)
+      this.markerRefreshFrame = null
+    },
+    scheduleMarkerRefresh() {
+      this.cancelScheduledMarkerRefresh()
+      // MapLibre can emit moveend before its final DOM marker transforms have
+      // painted. Recreate the markers after two paint frames so releasing a
+      // drag/rotation always snaps cards back to the final projected points.
+      this.markerRefreshFrame = window.requestAnimationFrame(() => {
+        this.markerRefreshFrame = window.requestAnimationFrame(() => {
+          this.markerRefreshFrame = null
+          if (!this.map || !this.ready || this.mapMoving) return
+          this.renderMarkers()
+          this.map.triggerRepaint()
+        })
+      })
     },
     renderJourney() {
       if (!this.map || !this.ready) return
@@ -852,7 +874,10 @@ export default {
 .atlas-marker {
   --marker-avatar-size: 38px;
 
-  position: relative;
+  /* MapLibre markers must remain out of document flow. `position: relative`
+     here overrides MapLibre's marker rule and adds one card-height of drift
+     for every preceding marker. */
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
