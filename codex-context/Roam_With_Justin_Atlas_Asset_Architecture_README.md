@@ -488,7 +488,7 @@ All existing content is canonical:
 
 - `src/data/trips.js` and `src/features/atlas/data/atlasData.js` no longer exist.
 - Trip selectors project all five current cards and all five routable Journey pages from Journeys, Places and Media. Utah and Puerto Rico expose their verified itineraries; USVI, North Georgia and Hungary expose evidence-aware previews until stop, route and coordinate facts are ready.
-- Atlas selectors project all ten nodes from canonical facts plus Atlas-only presentation settings.
+- Atlas selectors project eleven nodes from canonical facts plus Atlas-only presentation settings.
 - Compatibility selectors preserve current Vue prop shapes without owning content.
 - New content must not reintroduce raw local media paths in Journey or Atlas records.
 
@@ -754,7 +754,7 @@ Still out of scope:
 - Route order is not inferred from geographic hierarchy.
 - All 92 controlled assets are registered once in Media.
 - All five existing trip cards and 27 detailed visits are Journey projections.
-- All ten Atlas nodes are canonical projections; no `atlasData.js` authority remains.
+- All eleven Atlas nodes are canonical projections; no `atlasData.js` authority remains.
 - Missing or unverified coordinates remain `null` outside map-visible Atlas nodes.
 - The build contains no R2 write credentials.
 - No database, backend or generalized content framework has been introduced.
