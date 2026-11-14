@@ -888,7 +888,11 @@ export default {
   height: 220px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 28% 22%, rgba(246, 189, 96, 0.18), transparent 35%),
+    radial-gradient(
+      circle at 28% 22%,
+      rgba(246, 189, 96, 0.18),
+      transparent 35%
+    ),
     linear-gradient(145deg, #15242a, #091014);
 }
 

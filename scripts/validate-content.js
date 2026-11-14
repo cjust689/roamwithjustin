@@ -86,13 +86,21 @@ function validateMediaUsage(usage, owner, mediaModule) {
 
 function validateAtlasView(node, contracts) {
   const owner = 'Atlas node "' + (node?.id || "unknown") + '"'
-  const requiredStrings = ["id", "title", "summary", "image"]
+  const requiredStrings = ["id", "title", "summary"]
 
   requiredStrings.forEach(field => {
     if (typeof node?.[field] !== "string" || !node[field]) {
       report(owner + ' is missing string field "' + field + '"')
     }
   })
+  if (typeof node?.image !== "string") {
+    report(owner + ' has invalid optional string field "image"')
+  } else if (
+    !node.image &&
+    node.media?.some(media => media?.kind === "image" && media.src)
+  ) {
+    report(owner + " has image media but no projected display image")
+  }
   if (!contracts.isCoordinatePair(node?.coordinates)) {
     report(owner + " has invalid coordinates")
   }

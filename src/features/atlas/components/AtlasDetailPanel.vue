@@ -32,7 +32,8 @@
           aria-controls="atlas-detail-content"
           @click="toggleMobileDrawer"
         >
-          <img :src="node.image" alt="" />
+          <img v-if="node.image" :src="node.image" alt="" />
+          <span v-else class="atlas-dock-placeholder" aria-hidden="true"></span>
           <span>
             <small>{{ node.eyebrow }}</small>
             <strong>{{ node.title }}</strong>
@@ -65,18 +66,25 @@
       >
         <div class="atlas-detail-hero">
           <button
+            v-if="guidedHeroMedia.src"
             class="atlas-detail-hero-image"
             type="button"
-            :aria-label="`View ${guidedHeroMedia.alt} full screen`"
+            :aria-label="guidedHeroLabel"
             @click="openGallery(guidedHeroMedia)"
           >
             <img
+              v-if="guidedHeroImage"
               :src="guidedHeroImage"
               :alt="guidedHeroMedia.alt"
               @load="updateScrollCue"
             />
-            <span>{{ guidedHeroLabel }}</span>
+            <span :class="{ 'is-placeholder': !guidedHeroImage }">
+              {{ guidedHeroLabel }}
+            </span>
           </button>
+          <div v-else class="atlas-detail-hero-image is-empty">
+            <span class="is-placeholder">Photography coming soon</span>
+          </div>
           <div class="atlas-detail-shade"></div>
           <button
             class="atlas-detail-close"
@@ -123,7 +131,17 @@
               type="button"
               @click="$emit('select', child.id)"
             >
-              <img :src="child.image" alt="" loading="lazy" />
+              <img
+                v-if="child.image"
+                :src="child.image"
+                alt=""
+                loading="lazy"
+              />
+              <span
+                v-else
+                class="atlas-discovery-placeholder"
+                aria-hidden="true"
+              ></span>
               <span
                 ><small>Stop {{ childIndex + 1 }} · {{ child.eyebrow }}</small
                 >{{ child.title }}</span
@@ -365,7 +383,9 @@ export default {
       return this.galleryMedia.some(item => item.kind === "video")
     },
     guidedHeroMedia() {
-      if (!this.guidedPresentation) return this.normalizeMedia(this.node.image)
+      if (!this.guidedPresentation) {
+        return this.galleryMedia[0] || this.normalizeMedia(this.node.image)
+      }
       return (
         this.galleryMedia[this.guidedHeroIndex % this.galleryMedia.length] ||
         this.normalizeMedia(this.node.image)
@@ -377,7 +397,12 @@ export default {
         : this.guidedHeroMedia.src
     },
     guidedHeroLabel() {
-      if (!this.guidedPresentation) return "View full photo"
+      if (!this.guidedHeroMedia.src) return "Photography coming soon"
+      if (!this.guidedPresentation) {
+        return this.guidedHeroMedia.kind === "video"
+          ? "Play video"
+          : "View full photo"
+      }
       const mediaType =
         this.guidedHeroMedia.kind === "video" ? "Play video" : "View photo"
       return `${mediaType} ${this.guidedHeroIndex + 1} of ${this.galleryMedia.length}`
@@ -719,6 +744,17 @@ export default {
   cursor: zoom-in;
 }
 
+.atlas-detail-hero-image.is-empty {
+  background:
+    radial-gradient(
+      circle at 30% 24%,
+      rgba(246, 189, 96, 0.2),
+      transparent 34%
+    ),
+    linear-gradient(145deg, #17272e, #091014);
+  cursor: default;
+}
+
 .atlas-detail-hero-image img {
   width: 100%;
   height: 100%;
@@ -739,6 +775,14 @@ export default {
   font-weight: 700;
   transform: translateX(-50%);
   backdrop-filter: blur(10px);
+}
+
+.atlas-detail-hero-image span.is-placeholder {
+  top: 50%;
+  color: rgba(255, 255, 255, 0.68);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
 }
 
 .atlas-detail-shade {
@@ -866,11 +910,26 @@ export default {
   cursor: pointer;
 }
 
-.atlas-discoveries img {
+.atlas-discoveries img,
+.atlas-discovery-placeholder {
   width: 66px;
   height: 54px;
   border-radius: 9px;
+}
+
+.atlas-discoveries img {
   object-fit: cover;
+}
+
+.atlas-discovery-placeholder,
+.atlas-dock-placeholder {
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(246, 189, 96, 0.2),
+      transparent 38%
+    ),
+    #142128;
 }
 
 .atlas-discoveries button > span:nth-child(2) {
@@ -1170,10 +1229,14 @@ export default {
     text-align: left;
   }
 
-  .atlas-dock-place img {
+  .atlas-dock-place img,
+  .atlas-dock-placeholder {
     width: 3.75rem;
     height: 3.75rem;
     border-radius: 12px;
+  }
+
+  .atlas-dock-place img {
     object-fit: cover;
   }
 
@@ -1271,7 +1334,8 @@ export default {
     font-size: 1rem;
   }
 
-  .atlas-discoveries img {
+  .atlas-discoveries img,
+  .atlas-discovery-placeholder {
     width: 72px;
     height: 60px;
   }

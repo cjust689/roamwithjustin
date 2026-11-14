@@ -329,6 +329,54 @@ async function main() {
       1
     )
 
+    // Published Place/Visit media should become the default visual only when
+    // no curated hero exists. A Journey cover must never leak across every
+    // stop merely to fill an empty image slot.
+    const { atlasPresentation } = await import(
+      "../src/content/atlas/presentation.mjs"
+    )
+    const { getJourney: getCanonicalJourney, getJourneyVisit } = await import(
+      "../src/content/journeys/index.mjs"
+    )
+    const { buildAtlasNodeView, buildTripLocationView } = await import(
+      "../src/content/selectors/projections.mjs"
+    )
+    const canonicalJourney = getCanonicalJourney("usvi-st-john-2025")
+    const publishedPlaceIds = [
+      "waterlemon-cay",
+      "cinnamon-bay",
+      "cruz-bay",
+      "great-cruz-bay",
+    ]
+
+    publishedPlaceIds.forEach(placeId => {
+      const canonicalVisit = getJourneyVisit(canonicalJourney.id, placeId)
+      const tripLocation = buildTripLocationView(
+        canonicalJourney,
+        canonicalVisit
+      )
+      const atlasNode = buildAtlasNodeView(
+        atlasPresentation.find(item => item.id === placeId)
+      )
+      const expectedPath = `/images/usvi/${placeId}/`
+
+      assert.match(tripLocation.image, new RegExp(expectedPath))
+      assert.match(atlasNode.image, new RegExp(expectedPath))
+      assert.strictEqual(tripLocation.mediaPending, false)
+    })
+
+    const pendingVisit = getJourneyVisit(canonicalJourney.id, "maho-bay")
+    const pendingLocation = buildTripLocationView(
+      canonicalJourney,
+      pendingVisit
+    )
+    const pendingAtlasNode = buildAtlasNodeView(
+      atlasPresentation.find(item => item.id === "maho-bay")
+    )
+    assert.strictEqual(pendingLocation.image, "")
+    assert.strictEqual(pendingAtlasNode.image, "")
+    assert.strictEqual(pendingLocation.mediaPending, true)
+
     console.log("Media ingestion tests passed.")
   } finally {
     fs.rmSync(testRoot, { recursive: true, force: true })

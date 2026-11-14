@@ -510,6 +510,276 @@
         "byteSize": 162908,
         "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
       }
+    },
+    {
+      "id": "image-usvi-77110d58c7db-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "77110d58c7db4710eaac3775b49c246e8e492d7e30800b58b55ee85e9e61f8ca",
+        "byteSize": 240321,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-b625fcaf6766-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "b625fcaf67668acf8eda06ab627d3a0db541d8d1dc12d63f46a4cdbc489dd683",
+        "byteSize": 349766,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-3d711ac74d6e-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "3d711ac74d6e23b2aab444216c5ac463670587ce2440ef94b66f47f9838affd6",
+        "byteSize": 840408,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-8c4703549399-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "8c4703549399e38999dcee44421bc9b869324aea5203e9a01849a8f4bd4157d8",
+        "byteSize": 992461,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-d37c2d94428e-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "d37c2d94428ee12e791458059247204df31804541f64869abcd631a48c24cebe",
+        "byteSize": 357111,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-3d0544c055d7-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "3d0544c055d7afe33b27265d223541363811a488784a0023bf993f1e2a9ada59",
+        "byteSize": 841398,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-b05191dafca1-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "b05191dafca1e00ad971f0d3f044f7d306cead6078886fd9b87bc1743d42b7b3",
+        "byteSize": 491564,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-55134d613eb7-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "55134d613eb799fbc8e41d775524738c2affcf74c9ec5577d244925b0d839320",
+        "byteSize": 565608,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
+    },
+    {
+      "id": "image-usvi-2fbb84382558-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/usvi/maho-bay/media-usvi-maho-bay-ccc0c4184d9caf77/maho-bay-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "2fbb84382558f8ee9c6573afb0bee93051341f2ab6d9d4089bfaf1bb30345d6b",
+        "byteSize": 574735,
+        "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+      }
     }
   ],
   "placements": [
@@ -733,6 +1003,123 @@
       "sortOrder": 5,
       "publicationSequence": 4,
       "batchId": "media-usvi-great-cruz-bay-48a482b493966122"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-77110d58c7db-001",
+      "assetId": "image-usvi-77110d58c7db-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-b625fcaf6766-002",
+      "assetId": "image-usvi-b625fcaf6766-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-3d711ac74d6e-003",
+      "assetId": "image-usvi-3d711ac74d6e-003",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-8c4703549399-004",
+      "assetId": "image-usvi-8c4703549399-004",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-d37c2d94428e-005",
+      "assetId": "image-usvi-d37c2d94428e-005",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-3d0544c055d7-006",
+      "assetId": "image-usvi-3d0544c055d7-006",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-b05191dafca1-007",
+      "assetId": "image-usvi-b05191dafca1-007",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-55134d613eb7-008",
+      "assetId": "image-usvi-55134d613eb7-008",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-maho-bay-image-usvi-2fbb84382558-009",
+      "assetId": "image-usvi-2fbb84382558-009",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-maho-bay",
+      "placeId": "maho-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 5,
+      "batchId": "media-usvi-maho-bay-ccc0c4184d9caf77"
     }
   ],
   "batches": [
@@ -799,6 +1186,27 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "52d25952c7431b0425d821f5e4e7f0d2d82fef3982dcd666c0290ae9c2a59076"
+      }
+    },
+    {
+      "id": "media-usvi-maho-bay-ccc0c4184d9caf77",
+      "sequence": 5,
+      "manifestSha256": "9634a1afbbb6d3a84964a84f63a95cd7b73bdb77fc77dfba72398898902a771b",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "image-usvi-77110d58c7db-001",
+        "image-usvi-b625fcaf6766-002",
+        "image-usvi-3d711ac74d6e-003",
+        "image-usvi-8c4703549399-004",
+        "image-usvi-d37c2d94428e-005",
+        "image-usvi-3d0544c055d7-006",
+        "image-usvi-b05191dafca1-007",
+        "image-usvi-55134d613eb7-008",
+        "image-usvi-2fbb84382558-009"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "239249efee2f8d628a4d5a76670b445c3ef35f07e17e9c86b26ee59dc106f8b7"
       }
     }
   ]

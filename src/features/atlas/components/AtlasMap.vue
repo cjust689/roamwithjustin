@@ -477,7 +477,7 @@ export default {
 
       this.nodes.forEach(node => {
         const element = document.createElement("button")
-        const image = document.createElement("img")
+        const avatar = document.createElement(node.image ? "img" : "div")
         const label = document.createElement("span")
         const selected = this.selectedNode?.id === node.id
         const journeyIndex = this.journeyNodes.findIndex(
@@ -495,10 +495,15 @@ export default {
             ? `Stop ${journeyIndex + 1}: Explore ${node.title}`
             : `Explore ${node.title}`
         )
-        image.src = node.image
-        image.alt = ""
+        if (node.image) {
+          avatar.src = node.image
+          avatar.alt = ""
+        } else {
+          avatar.className = "atlas-marker-placeholder"
+          avatar.setAttribute("aria-hidden", "true")
+        }
         label.textContent = node.title
-        element.append(image, label)
+        element.append(avatar, label)
 
         element.addEventListener("mouseenter", () => this.showPreview(node))
         element.addEventListener("mouseleave", () => this.hidePreview())
@@ -533,21 +538,26 @@ export default {
         .filter(Boolean)
       const index = this.previewCounts[node.id] || 0
       const card = document.createElement("article")
-      const image = document.createElement("img")
       const content = document.createElement("div")
       const eyebrow = document.createElement("span")
       const title = document.createElement("strong")
       const summary = document.createElement("p")
 
-      this.previewCounts[node.id] = (index + 1) % media.length
       card.className = "atlas-map-preview"
-      image.src = media[index % media.length]
-      image.alt = ""
+      if (media.length) {
+        const image = document.createElement("img")
+        this.previewCounts[node.id] = (index + 1) % media.length
+        image.src = media[index % media.length]
+        image.alt = ""
+        card.append(image)
+      } else {
+        this.previewCounts[node.id] = 0
+      }
       eyebrow.textContent = node.eyebrow
       title.textContent = node.title
       summary.textContent = node.summary
       content.append(eyebrow, title, summary)
-      card.append(image, content)
+      card.append(content)
 
       this.popup = new maplibregl.Popup({
         closeButton: false,
@@ -775,11 +785,26 @@ export default {
   transform: translateY(-4px) scale(1.03);
 }
 
-.atlas-marker img {
+.atlas-marker img,
+.atlas-marker-placeholder {
   width: var(--marker-avatar-size);
   height: var(--marker-avatar-size);
   border-radius: 50%;
+}
+
+.atlas-marker img {
   object-fit: cover;
+}
+
+.atlas-marker-placeholder {
+  flex: 0 0 auto;
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(246, 189, 96, 0.28),
+      transparent 38%
+    ),
+    #142128;
 }
 
 .atlas-marker span {

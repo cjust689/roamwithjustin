@@ -164,9 +164,9 @@ function getPublishedPlacementMedia(predicate) {
     .filter(Boolean)
 }
 
-// Generated publication placements are additive. Journey projection includes
-// both Journey-only and narrower Place/Visit placements without mutating any
-// curated hero or gallery array.
+// Generated publication placements are additive canonical associations.
+// Projection may use the first published Place/Visit image as a display
+// default when no curated hero exists, but never mutates editorial arrays.
 export function getJourneyPublishedMedia(journeyId) {
   return getPublishedPlacementMedia(
     placement => placement.journeyId === journeyId
@@ -175,7 +175,7 @@ export function getJourneyPublishedMedia(journeyId) {
 
 // A Place-scoped package is resolved through its canonical Visit. Consumers
 // may add these images to an existing location or Atlas presentation, but this
-// selector never creates a Place, Visit, hero, or Atlas pin.
+// selector never creates a Place, Visit, curated hero, or Atlas pin.
 export function getVisitPublishedMedia(journeyId, visitId) {
   return getPublishedPlacementMedia(
     placement =>

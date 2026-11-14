@@ -1,5 +1,5 @@
-// Controlled USVI assets. The three R2 videos are creator-confirmed Journey
-// media; location-specific Lightroom photographs will be added separately.
+// Hand-curated USVI assets. Place-specific published photographs are composed
+// separately from the generated media registry.
 export const usviMedia = Object.freeze([
   {
     id: "image-usvi-usvi-full",

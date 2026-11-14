@@ -31,8 +31,13 @@
           type="button"
           @click="$emit('select', node.id)"
         >
-          <img :src="node.image" alt="" loading="lazy" />
+          <img v-if="node.image" :src="node.image" alt="" loading="lazy" />
           <span
+            v-else
+            class="atlas-saved-placeholder"
+            aria-hidden="true"
+          ></span>
+          <span class="atlas-saved-copy"
             ><small>{{ node.eyebrow }}</small
             >{{ node.title }}</span
           >
@@ -182,14 +187,29 @@ export default {
   background: rgba(255, 255, 255, 0.07);
 }
 
-.atlas-saved-card img {
+.atlas-saved-card img,
+.atlas-saved-placeholder {
   width: 72px;
   height: 58px;
   border-radius: 10px;
+}
+
+.atlas-saved-card img {
   object-fit: cover;
 }
 
-.atlas-saved-card > span {
+.atlas-saved-placeholder {
+  flex: 0 0 auto;
+  background:
+    radial-gradient(
+      circle at 30% 25%,
+      rgba(246, 189, 96, 0.2),
+      transparent 38%
+    ),
+    #142128;
+}
+
+.atlas-saved-copy {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
@@ -234,7 +254,7 @@ export default {
   }
 
   .atlas-saved-empty,
-  .atlas-saved-card > span,
+  .atlas-saved-copy,
   .atlas-recent {
     font-size: 1rem;
   }
@@ -244,7 +264,8 @@ export default {
     padding: 0.65rem;
   }
 
-  .atlas-saved-card img {
+  .atlas-saved-card img,
+  .atlas-saved-placeholder {
     width: 88px;
     height: 68px;
   }
