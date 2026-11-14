@@ -1,6 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
+const crypto = require("crypto")
 const { pathToFileURL } = require("url")
 
 const projectRoot = path.resolve(__dirname, "..")
@@ -18,10 +19,12 @@ Usage:
   npm run images:optimize
   npm run images:optimize:dry
   npm run images:optimize:copies -- --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
+  npm run media:prepare -- --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status>
 
 Direct script usage:
   node scripts/optimize-images.js [--dry-run]
   node scripts/optimize-images.js --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
+  node scripts/optimize-images.js --package --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status>
 
 Modes:
   Default
@@ -37,9 +40,25 @@ Modes:
     The label is compared with canonical Journeys and visited Places. A close
     match prints a confidence-ranked filename suggestion before processing.
 
+  Journey publication package (--package)
+    Resolves --tag (or --journey) to exactly one canonical Journey, writes
+    optimized numbered files to <output>/<journey-slug>/, and creates a
+    publication-manifest.json beside them. The package can be uploaded under
+    the manifest's R2 prefix and then applied with npm run media:ingest.
+
+    This mode requires explicit rights metadata. It never uploads files,
+    publishes content, overwrites an existing package, or changes curated
+    Journey hero/gallery fields.
+
 Options:
   --source <directory>  Directory containing images to copy and compress
   --tag <label>         Filename label for the numbered copies
+  --package             Build a Journey publication package and manifest
+  --output <directory>  Parent directory for a Journey package
+  --journey <id>        Explicit canonical Journey ID (optional tag override)
+  --r2-prefix <prefix>  R2 parent prefix (default: images)
+  --rights-owner <id>   Explicit rights owner stored in the manifest
+  --rights-status <id>  Explicit rights status, such as owned or licensed
   --copy                Explicitly select copy mode (optional with --source/--tag)
   --use-suggested-tag   Use a confident, unambiguous canonical tag suggestion
   --dry-run             Report changes without keeping any output files
@@ -49,7 +68,8 @@ Examples:
   node scripts/optimize-images.js --dry-run
   node scripts/optimize-images.js --source "C:\\photos\\trip" --tag "utah"
   node scripts/optimize-images.js --source ./photos --tag "trunk bay" --use-suggested-tag
-  node scripts/optimize-images.js --source ./photos --tag utah --dry-run`
+  node scripts/optimize-images.js --source ./photos --tag utah --dry-run
+  node scripts/optimize-images.js --package --source ./exports --output ./ready --tag usvi --rights-owner roam-with-justin --rights-status owned`
 }
 
 function readOptionValue(args, index, option) {
@@ -67,6 +87,12 @@ function parseArguments(args) {
     copyMode: false,
     dryRun: false,
     help: false,
+    journey: null,
+    output: null,
+    packageMode: false,
+    r2Prefix: "images",
+    rightsOwner: null,
+    rightsStatus: null,
     source: null,
     tag: null,
     useSuggestedTag: false,
@@ -77,6 +103,8 @@ function parseArguments(args) {
 
     if (argument === "--copy") {
       options.copyMode = true
+    } else if (argument === "--package") {
+      options.packageMode = true
     } else if (argument === "--use-suggested-tag") {
       options.useSuggestedTag = true
     } else if (argument === "--dry-run") {
@@ -92,6 +120,31 @@ function parseArguments(args) {
       index += 1
     } else if (argument.startsWith("--source=")) {
       options.source = argument.slice("--source=".length)
+    } else if (argument === "--output") {
+      options.output = readOptionValue(args, index, "--output")
+      index += 1
+    } else if (argument.startsWith("--output=")) {
+      options.output = argument.slice("--output=".length)
+    } else if (argument === "--journey") {
+      options.journey = readOptionValue(args, index, "--journey")
+      index += 1
+    } else if (argument.startsWith("--journey=")) {
+      options.journey = argument.slice("--journey=".length)
+    } else if (argument === "--r2-prefix") {
+      options.r2Prefix = readOptionValue(args, index, "--r2-prefix")
+      index += 1
+    } else if (argument.startsWith("--r2-prefix=")) {
+      options.r2Prefix = argument.slice("--r2-prefix=".length)
+    } else if (argument === "--rights-owner") {
+      options.rightsOwner = readOptionValue(args, index, "--rights-owner")
+      index += 1
+    } else if (argument.startsWith("--rights-owner=")) {
+      options.rightsOwner = argument.slice("--rights-owner=".length)
+    } else if (argument === "--rights-status") {
+      options.rightsStatus = readOptionValue(args, index, "--rights-status")
+      index += 1
+    } else if (argument.startsWith("--rights-status=")) {
+      options.rightsStatus = argument.slice("--rights-status=".length)
     } else if (argument === "--tag") {
       options.tag = readOptionValue(args, index, "--tag")
       index += 1
@@ -104,8 +157,41 @@ function parseArguments(args) {
 
   if (options.help) return options
 
+  if (options.packageMode) {
+    if (options.copyMode || options.useSuggestedTag) {
+      throw new Error(
+        `--package cannot be combined with --copy or --use-suggested-tag\n\n${usage()}`
+      )
+    }
+    if (!options.source || !options.output || !options.tag) {
+      throw new Error(
+        `Package mode requires --source, --output, and --tag\n\n${usage()}`
+      )
+    }
+    if (!options.rightsOwner || !options.rightsStatus) {
+      throw new Error(
+        `Package mode requires --rights-owner and --rights-status; rights are never inferred\n\n${usage()}`
+      )
+    }
+    validateTag(options.tag)
+    validateR2Prefix(options.r2Prefix)
+    return options
+  }
+
   options.copyMode =
     options.copyMode || options.source !== null || options.tag !== null
+
+  if (
+    options.output ||
+    options.journey ||
+    options.rightsOwner ||
+    options.rightsStatus ||
+    options.r2Prefix !== "images"
+  ) {
+    throw new Error(
+      `--output, --journey, --r2-prefix, and rights options require --package\n\n${usage()}`
+    )
+  }
 
   if (options.copyMode && (!options.source || !options.tag)) {
     throw new Error(`Copy mode requires both --source and --tag\n\n${usage()}`)
@@ -120,6 +206,16 @@ function parseArguments(args) {
   if (options.tag) validateTag(options.tag)
 
   return options
+}
+
+function validateR2Prefix(value) {
+  const prefix = String(value || "").replace(/^\/+|\/+$/g, "")
+  if (!prefix || prefix.split("/").some(part => !part || part === "." || part === "..")) {
+    throw new Error("--r2-prefix must be a safe relative object-key prefix")
+  }
+  if (/\\|[\u0000-\u001f]/.test(prefix)) {
+    throw new Error("--r2-prefix cannot contain backslashes or control characters")
+  }
 }
 
 function validateTag(tag) {
@@ -332,6 +428,66 @@ async function matchCanonicalTag(tag) {
     ambiguous,
     confident,
   }
+}
+
+async function resolvePackageJourney(tag, journeyId) {
+  const journeyModule = await import(
+    pathToFileURL(
+      path.join(projectRoot, "src", "content", "journeys", "index.mjs")
+    ).href
+  )
+
+  if (journeyId) {
+    const journey = journeyModule.getJourney(journeyId)
+    if (!journey) {
+      throw new Error(
+        `Unknown canonical Journey "${journeyId}". Run npm run media:journeys to list valid IDs.`
+      )
+    }
+    return { journey, score: 1, explicit: true }
+  }
+
+  const candidates = journeyModule.journeyRecords
+    .map(journey => ({
+      journey,
+      score: Math.max(
+        ...uniqueNonEmpty([
+          journey.id,
+          journey.id.replace(/-\d{4}$/, ""),
+          journey.slug,
+          journey.title,
+          ...journey.title.split(","),
+        ]).map(term => scoreMatch(tag, term))
+      ),
+    }))
+    .sort((left, right) => right.score - left.score)
+  const best = candidates[0]
+  const runnerUp = candidates[1]
+  const ambiguous = Boolean(
+    best &&
+      runnerUp &&
+      best.score >= 0.6 &&
+      runnerUp.score >= 0.6 &&
+      best.score - runnerUp.score < 0.08
+  )
+
+  if (!best || best.score < 0.75 || ambiguous) {
+    const suggestions = candidates
+      .slice(0, 3)
+      .filter(candidate => candidate.score >= 0.5)
+      .map(
+        candidate =>
+          `${candidate.journey.id} (${Math.round(candidate.score * 100)}%)`
+      )
+      .join(", ")
+    throw new Error(
+      `Cannot confidently resolve --tag "${tag}" to one Journey.${
+        suggestions ? ` Candidates: ${suggestions}.` : ""
+      } Use a more specific tag or pass --journey <canonical-id>.`
+    )
+  }
+
+  return { journey: best.journey, score: best.score, explicit: false }
 }
 
 function reportTagMatch(tag, match) {
@@ -584,6 +740,190 @@ async function createCompressedCopy(source, target, dryRun) {
   }
 }
 
+function mimeTypeForExtension(extension) {
+  if (extension === ".jpg" || extension === ".jpeg") return "image/jpeg"
+  if (extension === ".png") return "image/png"
+  throw new Error(`Unsupported image extension: ${extension}`)
+}
+
+function sha256(value) {
+  return crypto.createHash("sha256").update(value).digest("hex")
+}
+
+async function createPackageAsset(source, filename, index, context) {
+  const extension = path.extname(source).toLowerCase()
+  const input = await fs.promises.readFile(source)
+  const { data, info } = await compressedPipeline(input, extension).toBuffer({
+    resolveWithObject: true,
+  })
+  const checksum = sha256(data)
+  const objectKey = `${context.r2Prefix}/${filename}`
+
+  if (!context.dryRun) {
+    await fs.promises.writeFile(path.join(context.stagingDirectory, filename), data, {
+      flag: "wx",
+    })
+  }
+
+  console.log(
+    `${context.dryRun ? "WOULD PACKAGE" : "PACKAGED"} ${filename} from ${path.basename(source)}: ${formatBytes(data.length)}, ${info.width}x${info.height}`
+  )
+
+  return {
+    provisionalId: `local-${context.journey.slug}-${String(index + 1).padStart(3, "0")}-${checksum.slice(0, 12)}`,
+    assetId: null,
+    source: {
+      originalFilename: path.basename(source),
+    },
+    output: {
+      relativePath: filename,
+      objectKey,
+      mimeType: mimeTypeForExtension(extension),
+      width: info.width,
+      height: info.height,
+      byteSize: data.length,
+      sha256: checksum,
+    },
+    capture: {
+      placeId: null,
+      capturedAt: null,
+      cameraModelRaw: null,
+      lensModelRaw: null,
+    },
+    associations: {
+      journeyId: context.journey.id,
+      visitId: null,
+      placeId: null,
+      experienceId: null,
+    },
+    placement: {
+      role: "gallery",
+      visibility: "published",
+      sortOrder: index + 1,
+    },
+    rights: {
+      owner: context.rightsOwner,
+      status: context.rightsStatus,
+    },
+  }
+}
+
+async function pathExists(target) {
+  try {
+    await fs.promises.access(target)
+    return true
+  } catch (error) {
+    if (error.code === "ENOENT") return false
+    throw error
+  }
+}
+
+async function runPackageMode(options) {
+  const sourceDirectory = path.resolve(process.cwd(), options.source)
+  const outputDirectory = path.resolve(process.cwd(), options.output)
+  await requireDirectory(sourceDirectory)
+
+  const resolution = await resolvePackageJourney(options.tag, options.journey)
+  const journey = resolution.journey
+  const percentage = Math.round(resolution.score * 100)
+  console.log(
+    `Journey match: "${options.tag}" -> ${journey.title} [${journey.id}] (${resolution.explicit ? "explicit" : `${percentage}% confidence`}).`
+  )
+
+  const images = (await findImages(sourceDirectory, false)).sort((left, right) =>
+    left.localeCompare(right)
+  )
+  if (!images.length) {
+    throw new Error(`No JPEG/PNG images found directly inside ${sourceDirectory}`)
+  }
+
+  const packageDirectory = path.join(outputDirectory, journey.slug)
+  if (await pathExists(packageDirectory)) {
+    throw new Error(
+      `Refusing to overwrite existing Journey package: ${packageDirectory}`
+    )
+  }
+
+  const normalizedPrefix = options.r2Prefix.replace(/^\/+|\/+$/g, "")
+  const r2Prefix = `${normalizedPrefix}/${journey.slug}`
+  const stagingDirectory = path.join(
+    outputDirectory,
+    `.${journey.slug}-prepare-${process.pid}-${Date.now()}`
+  )
+  const context = {
+    dryRun: options.dryRun,
+    journey,
+    r2Prefix,
+    rightsOwner: options.rightsOwner,
+    rightsStatus: options.rightsStatus,
+    stagingDirectory,
+  }
+
+  if (!options.dryRun) {
+    await fs.promises.mkdir(outputDirectory, { recursive: true })
+    await fs.promises.mkdir(stagingDirectory, { recursive: false })
+  }
+
+  try {
+    const assets = []
+    for (let index = 0; index < images.length; index += 1) {
+      const extension = path.extname(images[index]).toLowerCase()
+      const filename = `${journey.slug}-${String(index + 1).padStart(3, "0")}${extension}`
+      assets.push(
+        await createPackageAsset(images[index], filename, index, context)
+      )
+    }
+
+    const batchSeed = JSON.stringify({
+      journeyId: journey.id,
+      r2Prefix,
+      assets: assets.map(asset => ({
+        objectKey: asset.output.objectKey,
+        sha256: asset.output.sha256,
+      })),
+    })
+    const manifest = {
+      schemaVersion: 1,
+      manifestType: "journey-media-publication",
+      batchId: `media-${journey.slug}-${sha256(batchSeed).slice(0, 16)}`,
+      journeyId: journey.id,
+      journeySlug: journey.slug,
+      inputTag: options.tag,
+      r2Prefix: `${r2Prefix}/`,
+      assets,
+    }
+
+    if (!options.dryRun) {
+      await fs.promises.writeFile(
+        path.join(stagingDirectory, "publication-manifest.json"),
+        `${JSON.stringify(manifest, null, 2)}\n`,
+        { flag: "wx" }
+      )
+      await fs.promises.rename(stagingDirectory, packageDirectory)
+    }
+
+    console.log("")
+    console.log(
+      `${options.dryRun ? "Would create" : "Created"} Journey package with ${assets.length} image(s).`
+    )
+    console.log(`Canonical Journey: ${journey.id}`)
+    console.log(`R2 prefix: ${manifest.r2Prefix}`)
+    console.log(
+      `Manifest: ${path.join(packageDirectory, "publication-manifest.json")}`
+    )
+    if (!options.dryRun) {
+      console.log(
+        "Upload every packaged image at its manifest objectKey, then run npm run media:ingest with a verification receipt."
+      )
+    }
+  } catch (error) {
+    if (!options.dryRun && (await pathExists(stagingDirectory))) {
+      await fs.promises.rm(stagingDirectory, { recursive: true, force: true })
+    }
+    throw error
+  }
+}
+
 function createSummary(scanned) {
   return {
     scanned,
@@ -734,7 +1074,9 @@ async function main() {
     return
   }
 
-  if (options.copyMode) {
+  if (options.packageMode) {
+    await runPackageMode(options)
+  } else if (options.copyMode) {
     await runCopyMode(options)
   } else {
     await runInPlaceMode(options)
