@@ -23,6 +23,7 @@
     "media:prepare": "node scripts/optimize-images.js --package",
     "media:ingest": "node scripts/ingest-media.js",
     "media:journeys": "node scripts/ingest-media.js --journeys",
+    "media:places": "node scripts/ingest-media.js --places",
     "media:test": "node scripts/test-media-ingestion.js",
     "media:validate": "node scripts/validate-content.js",
     "lint": "vue-cli-service lint",

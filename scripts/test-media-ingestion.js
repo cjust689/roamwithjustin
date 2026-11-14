@@ -52,6 +52,17 @@ async function main() {
       .jpeg({ quality: 94 })
       .toFile(path.join(sourceDirectory, "IMG_0001.jpg"))
 
+    const listedPlaces = runNode([
+      "scripts/ingest-media.js",
+      "--places",
+      "--journey",
+      "usvi-st-john-2025",
+    ])
+    assert.match(
+      listedPlaces.stdout,
+      /usvi-st-john-2025\twaterlemon-cay\tusvi-st-john-2025-waterlemon-cay\tWaterlemon Cay/
+    )
+
     const prepareArgs = [
       "scripts/optimize-images.js",
       "--package",

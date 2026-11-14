@@ -24,7 +24,7 @@ Usage:
 Direct script usage:
   node scripts/optimize-images.js [--dry-run]
   node scripts/optimize-images.js --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
-  node scripts/optimize-images.js --package --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status>
+  node scripts/optimize-images.js --package --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status> [--journey <id> --place <id>]
 
 Modes:
   Default

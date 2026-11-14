@@ -3,7 +3,7 @@ id: r2-worker-media-upload
 title: R2 Worker Upload for Prepared Media
 kind: proposal
 status: proposed
-implementation_state: not-started
+implementation_state: none
 created: 2026-11-14
 updated: 2026-11-14
 related:
@@ -18,7 +18,7 @@ code_paths:
   - scripts/lib/media-ingestion.js
   - src/content/media/generated/records.json
 verification:
-  state: not-verified
+  state: unverified
   evidence: []
 ---
 
@@ -30,9 +30,9 @@ verification:
 
 The existing pipeline already does the difficult content preparation:
 
-- `media:prepare` resolves a **canonical Journey**, creates a collision-safe local package, optimizes and numbers images, assigns versioned **R2 object keys**, and writes a measured `publication-manifest.json` with explicit rights.
+- `media:prepare` resolves a **canonical Journey** and can explicitly validate a canonical **Place/Visit** scope, creates a collision-safe local package, optimizes and numbers images, assigns versioned **R2 object keys**, and writes a measured `publication-manifest.json` with explicit rights.
 - `media:ingest` validates the local files and publication manifest, accepts a checksum receipt or acknowledged public-HEAD policy, plans idempotent media assets/placements, and atomically updates `src/content/media/generated/records.json` only after validation.
-- The application's `getJourneyPublishedMedia()` selector renders published Journey-level media inside the root Journey's **All photography** section, without replacing curated heroes or galleries.
+- The application's selectors render every published placement inside the root Journey's **All photography** section and render explicitly validated Place/Visit placements in location media and existing Atlas presentations, without replacing curated heroes or galleries or creating pins.
 
 **Missing step:** The operator currently must upload `media:prepare` output to R2 manually. The intended experience is to run a command that uploads the *exact prepared objects*, validates remote integrity, produces a receipt already understood by (or deliberately integrated into) `media:ingest`, and then optionally invokes ingestion.
 
@@ -57,10 +57,10 @@ npm run media:upload -- --manifest <path> [--dry-run]
  signed/verified upload receipt (local; not public)
               |
               v
-npm run media:ingest -- --manifest <path> --receipt <path>
+npm run media:ingest -- --manifest <path> --verification-receipt <path>
               |
               v
- canonical registry + Journey-level All photography
+ canonical registry + Journey All photography + optional Place/Visit media
 ```
 
 These are conceptual command forms; derive final syntax from existing code and document the exact operator commands. **The Worker uploads; it does not independently publish Media records, alter a Journey, or trigger an unaudited Git push.**
@@ -89,8 +89,8 @@ These are conceptual command forms; derive final syntax from existing code and d
 | Local `media:upload` | Read/validate manifest, authenticate to Worker, upload exact bytes, verify results, save durable receipt, resume/retry safely | Guess journey from filenames, silently reassign IDs, publish editorial placements |
 | Upload Worker | Authenticate uploader, constrain R2 keys/content, write and stat objects, return trusted object facts | Accept arbitrary public writes, modify repo/Git, grant anonymous list/delete |
 | R2 | Store versioned objects by manifest key | Act as source of truth for which Journey/Place an object belongs to |
-| `media:ingest` | Validate manifest + uploaded-object evidence; idempotently register Media and Journey placement; preserve curation | Upload or regenerate images |
-| Atlas | Resolve canonical records and render Journey-level All photography | Scan bucket prefixes to discover unpublished photos |
+| `media:ingest` | Validate manifest + uploaded-object evidence; idempotently register Media and publication placement; preserve curation | Upload or regenerate images |
+| Atlas | Resolve canonical records and render Journey and validated Place/Visit media | Scan bucket prefixes to discover unpublished photos or create pins |
 
 **Authoritative information:** Use manifest's `journeyId`, stable asset identity/revision, R2 key, expected byte length, checksum, MIME type, rights, and local path as defined by the actual code. Preserve existing receipt schema if possible. Never assume that the human-readable file name is the asset ID.
 
@@ -176,7 +176,7 @@ The uploaded `media-pipeline.md` states that `media:ingest` **already requires a
 - Verify that the bytes stored in R2 correspond to the manifest's local content. A successful PUT, a file-size match, a custom metadata digest copied from the request, and an ETag alone are **not equivalent** to independent checksum verification.
 - Prefer supported R2 checksums or server-computed digest where feasible; if not feasible with streaming Worker constraints, specify a trusted alternative (e.g. direct R2 metadata verification plus checksum-authenticated upload protocol), label assurance honestly, and do not silently call it checksum-verified.
 - Never publish an incomplete batch. Ensure `media:ingest` remains atomic and that a failure leaves generated registry unchanged.
-- No automatic Place, visit, gallery, capture-gear, or visible-gear associations. Journey-level **All photography** is the minimal useful publication surface.
+- No inferred Place, Visit, capture-gear, or visible-gear associations. Upload preserves an explicitly validated Place/Visit association already present in the manifest; it does not invent or widen one.
 - Re-running the same batch is idempotent. Reprocessing a changed image uses the **next valid revision/key** per existing monotonic revision rules; do not overwrite previous revisions in place.
 
 ## 9. Security and operational boundaries
@@ -225,7 +225,7 @@ Build tests with mocked R2 bucket / Worker bindings and local test manifests; do
 | Missing rights / unknown Journey / bad schema | Reject using existing preparation/ingestion validation |
 | `--dry-run` | No R2 mutations, no receipt, no registry mutation |
 | `media:ingest` validation fails | Generated registry remains unchanged |
-| Curated hero/gallery exists | New journey All photography updates without replacing editorial curation |
+| Curated hero/gallery exists | Journey All photography and optional Place/Visit media update without replacing editorial curation |
 
 Run the repo's actual checks, including `npm run media:test`, `npm run content:validate`, and `npm run build` (as applicable), plus new Worker/CLI tests. Report results separately from any untested production upload.
 
@@ -249,7 +249,7 @@ Run the repo's actual checks, including `npm run media:test`, `npm run content:v
 1. Prepare a small real Journey batch (e.g. canonical USVI journey, after ID confirmed).
 2. Upload via Worker and inspect R2 keys and returned metadata.
 3. Run `media:ingest` with verified receipt, then content validation and build.
-4. Confirm images appear under the right Journey's **All photography**; verify no Place claim or curated-gallery mutation.
+4. Confirm images appear under the right Journey's **All photography** and, when explicitly scoped, the existing Place/Visit presentation; verify no new Place/pin or curated-gallery mutation.
 5. Document exact CLI invocations, environment configuration, rollback/retry steps, and observed results.
 
 ### Phase D — optional conveniences (later)
@@ -269,7 +269,7 @@ Return:
 7. Regression tests, failure scenarios and clear operator recovery steps.
 8. Update `docs/architecture/media-pipeline.md` with verified behavior **only after implementation**; update `docs/README.md` and this proposal's status; move/mark proposal completed according to the established lifecycle, preserving history.
 
-**Definition of done:** A prepared batch can be uploaded to R2 with one local command; uploaded objects have the exact manifest keys and verified contents; the resulting receipt passes the existing `media:ingest` validation without weakening security; repeating/resuming the upload does not cause duplicates; after ingestion images appear in the matched Journey's All photography collection while manual editorial curation remains untouched.
+**Definition of done:** A prepared batch can be uploaded to R2 with one local command; uploaded objects have the exact manifest keys and verified contents; the resulting receipt passes the existing `media:ingest` validation without weakening security; repeating/resuming the upload does not cause duplicates; after ingestion images appear in the matched Journey's All photography collection and any explicit validated Place/Visit projection while manual editorial curation remains untouched.
 
 ## 14. Official references (recheck at implementation time)
 
@@ -281,4 +281,4 @@ Return:
 
 ## 15. One-paragraph instruction for Codex
 
-> Audit the existing `media:prepare` manifest, `media:ingest` receipt validation, canonical Media/Journey model and Cloudflare setup. Add a secure upload-only Cloudflare Worker with an R2 binding and a local `media:upload` command. The CLI must accept an existing prepared package, preserve every R2 key and stable asset identity, validate local bytes, upload with bounded concurrency/retries, reject conflicting overwrites, remotely verify uploaded objects and atomically create an ingestion-compatible receipt. Do not publish assets from filenames or R2 scans. Preserve `media:ingest`'s idempotency, explicit revision monotonicity and rollback, and keep Journey All photography automatic without disrupting curated galleries. Add tests, an operator runbook, Cloudflare setup instructions, and update the documentation index and architecture only when the behavior is verified. Explain if direct S3 upload is materially simpler for this single trusted publishing machine before finalizing the Worker approach.
+> Audit the existing `media:prepare` manifest, `media:ingest` receipt validation, canonical Media/Journey/Place/Visit model and Cloudflare setup. Add a secure upload-only Cloudflare Worker with an R2 binding and a local `media:upload` command. The CLI must accept an existing prepared package, preserve every R2 key, stable asset identity, and validated association, validate local bytes, upload with bounded concurrency/retries, reject conflicting overwrites, remotely verify uploaded objects and atomically create an ingestion-compatible receipt. Do not publish assets or infer associations from filenames or R2 scans. Preserve `media:ingest`'s idempotency, explicit revision monotonicity and rollback, and keep Journey All photography plus explicit Place/Visit projection automatic without disrupting curated galleries or creating Atlas pins. Add tests, an operator runbook, Cloudflare setup instructions, and update the documentation index and architecture only when the behavior is verified. Explain if direct S3 upload is materially simpler for this single trusted publishing machine before finalizing the Worker approach.

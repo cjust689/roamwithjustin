@@ -21,6 +21,7 @@ code_paths:
   - src/content/media/index.mjs
   - src/content/media/generated/records.json
   - src/content/selectors/media.mjs
+  - src/content/selectors/projections.mjs
   - src/views/roam/RoamTripOverview.vue
 verification:
   state: verified
@@ -41,9 +42,11 @@ The repository supports three image-processing modes:
 2. `images:optimize:copies` makes same-directory numbered copies from a
    user-supplied tag. Canonical tag matching is advisory unless explicitly
    adopted.
-3. `media:prepare` resolves one canonical Journey and creates a collision-safe
-   package folder, optimized numbered images, versioned R2 object keys, and a
-   measured `publication-manifest.json` with explicit rights.
+3. `media:prepare` resolves one canonical Journey and can optionally validate
+   one explicitly named canonical Place and its single Visit in that Journey.
+   It creates a collision-safe package folder, optimized numbered images,
+   versioned R2 object keys, and a measured `publication-manifest.json` with
+   explicit rights and the validated publication scope.
 
 The full operator workflow and flags are in
 [Journey media ingestion](../implementation/journey-media-ingestion.md).
@@ -58,10 +61,13 @@ preserves existing placement state on republish, and atomically updates only
 the generated file back.
 
 Curated `.mjs` Media records and generated JSON assets are composed by
-`src/content/media/index.mjs`. Published Journey-only placements are resolved
-through `getJourneyPublishedMedia()` and appear in the root Journey page's
-lazy-loaded **All photography** collection. They do not replace curated heroes
-or galleries and do not create Place/Atlas claims.
+`src/content/media/index.mjs`. `getJourneyPublishedMedia()` includes all
+published placements for a Journey in the root Journey page's lazy-loaded
+**All photography** collection. `getVisitPublishedMedia()` additionally
+projects a validated Place/Visit placement into that Journey location's media
+and into an existing Atlas presentation for the Visit. It never creates a
+Place, Visit, or Atlas pin. Generated images do not replace curated heroes or
+curated story galleries.
 
 The generated registry currently contains no assets, placements, or batches.
 The pipeline is implemented and tested, but a real production R2-backed batch
@@ -80,4 +86,5 @@ under the selected image prefix.
 - Lightroom Classic plug-in or durable publisher outbox
 - EXIF extraction, privacy filtering, or capture-Gear matching
 - Multiple photo renditions (thumbnail/gallery/full) per generated asset
+- Experience-scoped media preparation and placement
 - Automated Git commit/push/deployment reporting after ingestion

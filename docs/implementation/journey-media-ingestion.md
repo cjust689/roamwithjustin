@@ -18,6 +18,7 @@ code_paths:
   - scripts/test-media-ingestion.js
   - src/content/media/generated/records.json
   - src/content/selectors/media.mjs
+  - src/content/selectors/projections.mjs
   - src/views/roam/RoamTripOverview.vue
 verification:
   state: verified
@@ -46,6 +47,7 @@ Journey cover, hero, story gallery, Visit, Place, or Atlas pin.
 npm run media:prepare -- --help
 npm run media:ingest -- --help
 npm run media:journeys
+npm run media:places -- --journey usvi-st-john-2025
 npm run media:test
 npm run media:validate
 ```
@@ -81,8 +83,11 @@ npm run media:prepare -- \
   --rights-status owned
 ```
 
-List accepted IDs with `npm run media:journeys`. Unknown, weak, or ambiguous
-matches fail closed; the tool does not guess a publication association.
+List accepted Journey IDs with `npm run media:journeys`. List canonical Place
+and Visit IDs with
+`npm run media:places -- --journey usvi-st-john-2025`. Unknown, weak, or
+ambiguous matches fail closed; the tool does not guess a publication
+association.
 
 `media:prepare` already performs compression. Do not run
 `images:optimize:copies` first unless you separately want same-directory copies
@@ -230,14 +235,23 @@ npm run media:ingest -- \
   --verification-receipt "D:\R2 Ready\usvi\r2-verification.json"
 ```
 
+For the Waterlemon Place package in Git Bash, the copy/paste commands are:
+
+```bash
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/r2-verification.json" --dry-run
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/r2-verification.json"
+```
+
 Add `--build` to run the production build after a successful apply. The apply
 updates only `src/content/media/generated/records.json`, then runs full content
 validation. A failed validation restores the prior generated file.
 
-After a normal site deployment, published Journey-only placements appear in
-the Journey page's lazy-loaded **All photography** / **Latest images** section.
-They do not automatically become a hero, curated story gallery image,
-location modal image, or Atlas media item.
+After a normal site deployment, all published placements appear in the
+Journey page's lazy-loaded **All photography** / **Latest images** section.
+A Place/Visit placement also appears in that Visit's location gallery and in
+the media for an Atlas pin that already presents the Visit. It does not create
+a pin when none exists and does not become a Journey, Visit, or Atlas hero or
+a curated story-gallery image.
 
 The collection displays newer ingested batches first while retaining each
 batch's manifest order. This ordering uses a stored monotonic sequence rather
@@ -245,7 +259,8 @@ than filesystem dates or upload timestamps.
 
 ## Identity, retries, and revisions
 
-- A manifest batch ID is derived from its Journey, keys, and output hashes.
+- A manifest batch ID is derived from its Journey, optional Place/Visit scope,
+  keys, and output hashes.
 - Re-running an already applied identical batch is a no-op.
 - Reusing a batch ID with different manifest bytes is rejected.
 - New manifest entries with `assetId: null` receive deterministic generated
@@ -260,15 +275,19 @@ than filesystem dates or upload timestamps.
 ## Manifest boundary and current scope
 
 Schema version 1 accepts JPEG and PNG assets, explicit rights, one canonical
-Journey association, and `gallery` placements with `published` or `draft`
-visibility. Paths must be safe and relative; R2 keys must remain inside the
-declared prefix. Width, height, size, and checksum must match the local output.
+Journey association, an optional validated Place/Visit pair, and `gallery`
+placements with `published` or `draft` visibility. Place and Visit must appear
+together and the Visit must belong to both the manifest Journey and Place.
+Paths must be safe and relative; R2 keys must remain inside the declared
+prefix. Width, height, size, and checksum must match the local output.
 
 The architecture leaves nullable capture fields for future Lightroom/EXIF
 imports, but version 1 does not infer camera, lens, date, Place, Visit, or
-Experience from filenames or folder names. Direct R2 upload, authenticated R2
-listing, location review tooling, renditions, and gear inference remain future
-integrations rather than hidden behavior in the compressor.
+Experience from filenames, tags, or folder names. Place/Visit publication
+scope is accepted only through explicit validated flags. Experience scope,
+direct R2 upload, authenticated R2 listing, location review tooling,
+renditions, and gear inference remain future integrations rather than hidden
+behavior in the compressor.
 
 ### Lightroom publication-event compatibility
 
@@ -285,6 +304,10 @@ events. Private catalog/source references and event history must remain
 outside the public generated snapshot.
 
 ## Repository map
+
+Place/Visit projection is implemented in
+`src/content/selectors/projections.mjs`; the shared media selector exposes both
+Journey-wide and Visit-specific generated placement views.
 
 - `scripts/optimize-images.js` — existing optimizer plus package preparation
 - `scripts/ingest-media.js` — verification and transactional apply CLI

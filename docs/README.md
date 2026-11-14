@@ -74,6 +74,7 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 These documents describe future behavior, not available features:
 
 - [Lightroom publishing](proposals/lightroom-publishing.md)
+- [R2 Worker media upload](<proposals/R2 Worker Media Upload - proposal.md>)
 - [Photo EXIF and capture gear](proposals/photo-exif-gear.md)
 - [Video metadata pipeline](proposals/video-metadata-pipeline.md)
 

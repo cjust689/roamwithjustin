@@ -28,6 +28,7 @@ Usage:
   npm run media:ingest -- --manifest <file> --verification-receipt <file> [--dry-run] [--build]
   npm run media:ingest -- --manifest <file> --verify-public --accept-head-only [--dry-run] [--build]
   npm run media:journeys
+  npm run media:places -- [--journey <id>]
 
 Direct usage:
   node scripts/ingest-media.js --manifest <file> --verification-receipt <file>
@@ -42,6 +43,8 @@ Options:
   --dry-run                      Validate and print the plan without writing
   --build                        Run the production build after a successful apply
   --journeys                     List canonical Journey IDs
+  --places                       List canonical Place and Visit IDs by Journey
+  --journey <id>                 Limit --places to one canonical Journey
   --help, --h, -h                Show this help
 
 Safety:
@@ -67,8 +70,10 @@ function parseArguments(args) {
     build: false,
     dryRun: false,
     help: false,
+    journey: null,
     journeys: false,
     manifest: null,
+    places: false,
     receipt: null,
     verifyPublic: false,
   }
@@ -79,6 +84,7 @@ function parseArguments(args) {
     else if (argument === "--build") options.build = true
     else if (argument === "--dry-run") options.dryRun = true
     else if (argument === "--journeys") options.journeys = true
+    else if (argument === "--places") options.places = true
     else if (argument === "--verify-public") options.verifyPublic = true
     else if (["--help", "--h", "-h"].includes(argument)) options.help = true
     else if (argument === "--manifest") {
@@ -86,6 +92,11 @@ function parseArguments(args) {
       index += 1
     } else if (argument.startsWith("--manifest=")) {
       options.manifest = argument.slice("--manifest=".length)
+    } else if (argument === "--journey") {
+      options.journey = readValue(args, index, "--journey")
+      index += 1
+    } else if (argument.startsWith("--journey=")) {
+      options.journey = argument.slice("--journey=".length)
     } else if (argument === "--verification-receipt") {
       options.receipt = readValue(args, index, "--verification-receipt")
       index += 1
@@ -102,17 +113,28 @@ function parseArguments(args) {
   }
 
   if (options.help) return options
-  if (options.journeys) {
+  if (options.journeys || options.places) {
+    if (options.journeys && options.places) {
+      throw new Error("Choose either --journeys or --places")
+    }
+    if (options.journey && !options.places) {
+      throw new Error("--journey can only limit --places")
+    }
     if (
       options.manifest ||
       options.receipt ||
       options.verifyPublic ||
+      options.acceptHeadOnly ||
+      options.baseUrl !== "https://media.roamwithjustin.com" ||
       options.dryRun ||
       options.build
     ) {
       throw new Error("--journeys cannot be combined with ingestion options")
     }
     return options
+  }
+  if (options.journey) {
+    throw new Error("--journey requires --places")
   }
   if (!options.manifest) {
     throw new Error(`Ingestion requires --manifest\n\n${usage()}`)
@@ -336,14 +358,34 @@ async function main() {
     return
   }
 
-  const [journeyModule, mediaModule] = await Promise.all([
+  const [journeyModule, mediaModule, placeModule] = await Promise.all([
     importContent("src/content/journeys/index.mjs"),
     importContent("src/content/media/index.mjs"),
+    importContent("src/content/places/index.mjs"),
   ])
   if (options.journeys) {
     journeyModule.journeyRecords.forEach(journey =>
       console.log(`${journey.id}\t${journey.slug}\t${journey.title}`)
     )
+    return
+  }
+  if (options.places) {
+    const journeys = options.journey
+      ? journeyModule.journeyRecords.filter(
+          journey => journey.id === options.journey
+        )
+      : journeyModule.journeyRecords
+    if (!journeys.length) {
+      throw new Error(`Unknown canonical Journey "${options.journey}"`)
+    }
+    journeys.forEach(journey => {
+      journey.visits.forEach(visit => {
+        const place = placeModule.getPlace(visit.placeId)
+        console.log(
+          `${journey.id}\t${visit.placeId}\t${visit.id}\t${place?.name || "(unknown Place)"}`
+        )
+      })
+    })
     return
   }
 
