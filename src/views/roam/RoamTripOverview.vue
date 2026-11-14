@@ -14,36 +14,112 @@
           &larr; All travel stories
         </router-link>
         <div class="story-hero-copy">
-          <span class="story-eyebrow">Travel story / {{ trip.dates }}</span>
+          <span class="story-eyebrow">
+            {{ trip.comingSoon ? "Journey preview" : "Travel story" }} /
+            {{ trip.dates }}
+          </span>
           <h1 :id="`story-title-${trip.id}`">{{ trip.name }}</h1>
           <p>{{ trip.description }}</p>
           <div class="story-hero-actions">
             <router-link v-if="trip.atlasHref" :to="trip.atlasHref">
               Explore this trip in Atlas
             </router-link>
-            <a href="#itinerary">Read the itinerary</a>
+            <a v-if="trip.hasItinerary" href="#itinerary">
+              Read the itinerary
+            </a>
+            <a v-else-if="trip.comingSoon" href="#journey-preview">
+              See what is ready
+            </a>
           </div>
         </div>
 
         <dl class="story-facts">
-          <div>
-            <dt>Duration</dt>
-            <dd>{{ trip.duration }}</dd>
-          </div>
-          <div>
-            <dt>Best time</dt>
-            <dd>{{ trip.bestTimeToGo }}</dd>
-          </div>
-          <div>
-            <dt>Made for</dt>
-            <dd>{{ trip.who }}</dd>
-          </div>
+          <template v-if="trip.comingSoon">
+            <div>
+              <dt>Status</dt>
+              <dd>{{ trip.previewStatus }}</dd>
+            </div>
+            <div>
+              <dt>Period</dt>
+              <dd>{{ trip.dates }}</dd>
+            </div>
+            <div>
+              <dt>Media ready</dt>
+              <dd>
+                {{ trip.registeredMediaCount }}
+                {{ trip.registeredMediaCount === 1 ? "image" : "images" }}
+              </dd>
+            </div>
+          </template>
+          <template v-else>
+            <div>
+              <dt>Duration</dt>
+              <dd>{{ trip.duration }}</dd>
+            </div>
+            <div>
+              <dt>Best time</dt>
+              <dd>{{ trip.bestTimeToGo }}</dd>
+            </div>
+            <div>
+              <dt>Made for</dt>
+              <dd>{{ trip.who }}</dd>
+            </div>
+          </template>
         </dl>
       </div>
     </section>
 
     <div class="story-body">
-      <section id="itinerary" class="story-shell itinerary-section">
+      <section
+        v-if="trip.comingSoon"
+        id="journey-preview"
+        class="story-shell journey-preview"
+      >
+        <header class="section-intro">
+          <div>
+            <span class="story-eyebrow">Registered journey</span>
+            <h2>A first look, without filling in the blanks.</h2>
+          </div>
+          <p>{{ trip.description }}</p>
+        </header>
+
+        <div class="preview-grid">
+          <article>
+            <span class="preview-number">01</span>
+            <div>
+              <span class="story-eyebrow">Ready now</span>
+              <h3>The journey has a stable home.</h3>
+              <p>
+                Its canonical record, public URL, and available photography are
+                connected. This preview will grow in place as verified material
+                is published.
+              </p>
+            </div>
+          </article>
+          <article>
+            <span class="preview-number">02</span>
+            <div>
+              <span class="story-eyebrow">Still to come</span>
+              <h3>Stops, route, and field notes.</h3>
+              <p>
+                The itinerary and Atlas path stay hidden until their places,
+                order, and coordinates are confirmed—so a polished preview never
+                becomes a made-up trip.
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <router-link class="preview-atlas-link" to="/atlas">
+          Explore journeys already mapped in Atlas &rarr;
+        </router-link>
+      </section>
+
+      <section
+        v-if="trip.hasItinerary"
+        id="itinerary"
+        class="story-shell itinerary-section"
+      >
         <header class="section-intro">
           <span class="story-eyebrow">The route, day by day</span>
           <h2>Inside the journey</h2>
@@ -147,8 +223,8 @@
         </div>
       </section>
 
-      <section class="story-shell story-details-grid">
-        <article class="story-detail-card">
+      <section v-if="trip.hasFieldNotes" class="story-shell story-details-grid">
+        <article v-if="trip.gearHighlights.length" class="story-detail-card">
           <span class="story-eyebrow">Field kit</span>
           <h2>Gear highlights</h2>
           <div class="gear-list">
@@ -167,7 +243,10 @@
           </div>
         </article>
 
-        <article class="story-detail-card">
+        <article
+          v-if="trip.tips.length || trip.travelNotes.length"
+          class="story-detail-card"
+        >
           <span class="story-eyebrow">Before you go</span>
           <h2>Tips and notes</h2>
           <div class="notes-grid">
@@ -189,7 +268,7 @@
         </article>
       </section>
 
-      <section class="story-shell atlas-handoff">
+      <section v-if="trip.atlasHref" class="story-shell atlas-handoff">
         <div>
           <span class="story-eyebrow">Change perspective</span>
           <h2>See how the story moves across the map.</h2>
@@ -415,6 +494,77 @@ export default {
       transparent 28%
     ),
     #0b1114;
+}
+
+.journey-preview {
+  border: 1px solid rgba(246, 189, 96, 0.22);
+  border-radius: 28px;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  background:
+    radial-gradient(
+      circle at 92% 4%,
+      rgba(246, 189, 96, 0.12),
+      transparent 32%
+    ),
+    #11191d;
+}
+
+.journey-preview .section-intro {
+  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.preview-grid article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  padding: 1.5rem 0 0;
+}
+
+.preview-number {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 1px solid rgba(246, 189, 96, 0.42);
+  border-radius: 50%;
+  color: #f8d79f;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.preview-grid h3 {
+  margin: 0.45rem 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.preview-grid p {
+  max-width: 520px;
+  margin: 0.75rem 0 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.82rem !important;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.preview-atlas-link {
+  display: inline-block;
+  margin-top: 2rem;
+  border-bottom: 1px solid rgba(246, 189, 96, 0.54);
+  color: #f8d79f;
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: uppercase;
 }
 
 .section-intro {
@@ -798,7 +948,8 @@ export default {
   .section-intro,
   .story-day,
   .story-details-grid,
-  .atlas-handoff {
+  .atlas-handoff,
+  .preview-grid {
     grid-template-columns: 1fr;
   }
 
@@ -871,6 +1022,11 @@ export default {
   .lodging-card > img {
     height: 240px;
     min-height: 0;
+  }
+
+  .journey-preview {
+    width: min(100% - 1rem, 1180px);
+    border-radius: 22px;
   }
 }
 

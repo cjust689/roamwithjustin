@@ -22,7 +22,8 @@ export const upcomingJourneys = Object.freeze([
       alt: "US Virgin Islands destination photograph",
     },
     gallery: [],
-    description: "",
+    description:
+      "A non-chronological St. John photo journey through quiet tropical moments, clear water, snorkeling, beaches, and island perspectives.",
     duration: "",
     audience: "",
     costLevel: "",
@@ -62,7 +63,8 @@ export const upcomingJourneys = Object.freeze([
       alt: "North Georgia, USA destination photograph",
     },
     gallery: [],
-    description: "",
+    description:
+      "A quiet family getaway near Mineral Bluff, shaped by cabin evenings, woodland atmosphere, mountain scenery, and aerial photography.",
     duration: "",
     audience: "",
     costLevel: "",

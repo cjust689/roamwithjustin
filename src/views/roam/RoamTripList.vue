@@ -36,14 +36,10 @@
           <p>{{ trip.description }}</p>
 
           <div class="story-actions">
-            <router-link
-              v-if="!trip.comingSoon"
-              class="story-primary"
-              :to="`/trips/${trip.id}`"
-            >
-              Read the story <b aria-hidden="true">&rarr;</b>
+            <router-link class="story-primary" :to="`/trips/${trip.id}`">
+              {{ trip.comingSoon ? "Preview the journey" : "Read the story" }}
+              <b aria-hidden="true">&rarr;</b>
             </router-link>
-            <span v-else class="story-unavailable">Story in progress</span>
             <router-link
               v-if="trip.atlasHref"
               class="story-atlas"
@@ -258,14 +254,9 @@ export default {
   color: #f8d79f;
 }
 
-.story-unavailable {
-  color: rgba(255, 255, 255, 0.42);
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 .story-card.is-coming-soon {
-  opacity: 0.78;
+  background:
+    linear-gradient(145deg, rgba(246, 189, 96, 0.045), transparent 45%), #11191d;
 }
 
 @media (max-width: 760px) {

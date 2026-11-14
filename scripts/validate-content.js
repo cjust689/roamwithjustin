@@ -341,6 +341,11 @@ async function main() {
   tripViews.forEach(trip => {
     const owner = 'Trip view "' + trip.id + '"'
     if (!trip.cover) report(owner + " has no resolved cover")
+    if (!trip.description) report(owner + " has no public description")
+    if (!trip.id || !trip.name) report(owner + " has no public route identity")
+    if (trip.comingSoon && trip.registeredMediaCount < 1) {
+      report(owner + " has no media for its journey preview")
+    }
     if (trip.comingSoon) return
     const locationIds = new Set(trip.locations.map(location => location.id))
     if (!trip.locations.length) report(owner + " has no locations")

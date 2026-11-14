@@ -52,8 +52,9 @@
       <span>Explore through a photographer's eyes</span>
       <h1>The journey starts with a place.</h1>
       <p>
-        Move through destinations, stories, and photographic locations. This
-        atlas follows the existing Utah and Puerto Rico road trips.
+        Utah and Puerto Rico are fully mapped today. Three more registered
+        journeys are available as story previews while their public routes and
+        coordinates are verified.
       </p>
       <div>
         <button type="button" @click="selectNode('utah')">Explore Utah</button>
@@ -72,6 +73,9 @@
         >
           Resume {{ resumeNode.title }}
         </button>
+        <router-link class="atlas-journey-library" to="/trips">
+          Browse all journeys
+        </router-link>
       </div>
     </section>
 
@@ -618,7 +622,8 @@ export default {
 
 .atlas-tools button,
 .atlas-tools a,
-.atlas-welcome button {
+.atlas-welcome button,
+.atlas-welcome a {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   padding: 0.68rem 0.9rem;
@@ -710,6 +715,16 @@ export default {
   color: #fff;
 }
 
+.atlas-welcome .atlas-journey-library {
+  display: inline-flex;
+  align-items: center;
+  border-color: rgba(255, 255, 255, 0.3);
+  padding: 0.85rem 1.2rem;
+  background: rgba(7, 11, 14, 0.62);
+  color: #fff;
+  text-shadow: none;
+}
+
 .atlas-provider-note {
   position: absolute;
   z-index: 7;
@@ -784,7 +799,8 @@ export default {
     font-size: 1.02rem;
   }
 
-  .atlas-welcome button {
+  .atlas-welcome button,
+  .atlas-welcome a {
     min-height: 3rem;
     font-size: 0.92rem;
   }

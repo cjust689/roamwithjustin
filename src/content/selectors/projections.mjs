@@ -35,6 +35,20 @@ function resolveLodgingImage(reference) {
   return reference.url || reference.src || ""
 }
 
+function journeyPreviewCopy(journey) {
+  if (journey.publicationStatus !== "coming-soon") return journey.description
+  if (journey.description) return journey.description
+
+  // Preview copy is deliberately derived from publication/evidence state. It
+  // makes every registered Journey routable without turning missing dates,
+  // stops, or research notes into public travel facts.
+  if (journey.evidenceStatus === "confirmed") {
+    return "Verified photography anchors this journey. Its public route, stop-level notes, and itinerary will appear as those details are confirmed."
+  }
+
+  return "This destination is registered as a future story. Dates, stops, and route details remain unpublished until they can be verified."
+}
+
 export function buildTripLocationView(journey, visit) {
   const place = getPlace(visit.placeId)
   if (!place) return null
@@ -70,6 +84,12 @@ export function buildTripLocationView(journey, visit) {
 export function buildTripViewModel(journey) {
   if (!journey) return null
 
+  const comingSoon = journey.publicationStatus === "coming-soon"
+  const cover = resolvedSource(journey.hero)
+  const fullImage = resolvedSource(journey.fullImage)
+  const resolvedGallery = resolveMediaList(journey.gallery).map(
+    item => item.src
+  )
   const locations = journey.visits
     .map(visit => buildTripLocationView(journey, visit))
     .filter(Boolean)
@@ -81,12 +101,23 @@ export function buildTripViewModel(journey) {
     id: journey.slug,
     journeyId: journey.id,
     name: journey.title,
-    comingSoon: journey.publicationStatus === "coming-soon",
-    cover: resolvedSource(journey.hero),
-    fullImage: resolvedSource(journey.fullImage),
-    gallery: resolveMediaList(journey.gallery).map(item => item.src),
-    description: journey.description,
-    dates: journey.dateRange?.label || "",
+    comingSoon,
+    publicationStatus: journey.publicationStatus,
+    evidenceStatus: journey.evidenceStatus,
+    previewStatus:
+      journey.evidenceStatus === "confirmed"
+        ? "Photography confirmed"
+        : "Awaiting verification",
+    cover,
+    fullImage,
+    // A coming-soon record already owns two intentional image usages. Showing
+    // both gives its preview page a real gallery without claiming new stops.
+    gallery:
+      comingSoon && fullImage && !resolvedGallery.includes(fullImage)
+        ? [fullImage, ...resolvedGallery]
+        : resolvedGallery,
+    description: journeyPreviewCopy(journey),
+    dates: journey.dateRange?.label || "Date to be confirmed",
     duration: journey.duration,
     who: journey.audience,
     costLevel: journey.costLevel,
@@ -113,6 +144,15 @@ export function buildTripViewModel(journey) {
       img: media.src,
       caption: media.caption || "",
     })),
+    registeredMediaCount: new Set(
+      [cover, fullImage, ...resolvedGallery].filter(Boolean)
+    ).size,
+    hasItinerary: Boolean(journey.days?.length && locations.length),
+    hasFieldNotes: Boolean(
+      journey.gearHighlights?.length ||
+        journey.travelNotes?.length ||
+        journey.tips?.length
+    ),
   }
 }
 
