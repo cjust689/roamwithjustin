@@ -458,7 +458,7 @@ Accessibility and delivery constraints:
 
 Current delivery notes:
 
-- Guided playback is available for every Journey that resolves to at least two map-visible leaf stops; the current Utah and Puerto Rico Journeys qualify.
+- Guided playback is available for every Journey that resolves to at least two map-visible leaf stops; the current Utah, Puerto Rico and St. John Journeys qualify.
 - Stop media advances poster-first without starting audible video. Opening a video remains an explicit visitor action and uses the existing native-control lightbox.
 - Reduced-motion visitors receive near-instant camera changes and no automatic media cycling.
 - Confirmed per-transition modes and public road-following route geometry remain content-model extensions; the player and transport marker are ready to consume them without moving those facts into Places.
@@ -487,8 +487,8 @@ Compatibility logic belongs in selectors and resolvers, not individual component
 All existing content is canonical:
 
 - `src/data/trips.js` and `src/features/atlas/data/atlasData.js` no longer exist.
-- Trip selectors project all five current cards and all five routable Journey pages from Journeys, Places and Media. Utah and Puerto Rico expose their verified itineraries; USVI, North Georgia and Hungary expose evidence-aware previews until stop, route and coordinate facts are ready.
-- Atlas selectors project eleven nodes from canonical facts plus Atlas-only presentation settings.
+- Trip selectors project all five current cards and all five routable Journey pages from Journeys, Places and Media. Utah, Puerto Rico and St. John expose their verified itineraries; North Georgia and Hungary retain evidence-aware previews until stop, route and coordinate facts are ready.
+- Atlas selectors project nineteen nodes from canonical facts plus Atlas-only presentation settings.
 - Compatibility selectors preserve current Vue prop shapes without owning content.
 - New content must not reintroduce raw local media paths in Journey or Atlas records.
 
@@ -753,8 +753,8 @@ Still out of scope:
 - Missing local files fail validation.
 - Route order is not inferred from geographic hierarchy.
 - All 92 controlled assets are registered once in Media.
-- All five existing trip cards and 27 detailed visits are Journey projections.
-- All eleven Atlas nodes are canonical projections; no `atlasData.js` authority remains.
+- All five existing trip cards and 35 detailed visits are Journey projections.
+- All nineteen Atlas nodes are canonical projections; no `atlasData.js` authority remains.
 - Missing or unverified coordinates remain `null` outside map-visible Atlas nodes.
 - The build contains no R2 write credentials.
 - No database, backend or generalized content framework has been introduced.
