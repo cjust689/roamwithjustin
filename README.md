@@ -25,6 +25,19 @@ push main -> GitHub Actions -> npm ci -> npm run build -> dist/ artifact -> GitH
 Make application changes only on `main`. Once the Actions deployment has been
 enabled and verified, the `pages` branch is no longer needed.
 
+## Documentation
+
+Start with [`docs/README.md`](docs/README.md). It separates verified as-built
+architecture from active implementation work, future proposals, references,
+audits, and archived briefs. Source code and tests remain authoritative for
+what is implemented.
+
+After managed documentation changes, run:
+
+```bash
+npm run docs:audit
+```
+
 ## Local development
 
 ### Requirements
@@ -39,7 +52,7 @@ Install the exact dependencies recorded in `package-lock.json`:
 npm ci
 ```
 
-Start the Vue development server:
+Start the Vue development server for this computer only:
 
 ```bash
 npm run serve
@@ -49,12 +62,29 @@ Open <http://localhost:8080>. The development server includes SPA history
 fallback, so routes such as `/trips` and `/gear` should work when opened
 directly.
 
+To test from another phone or computer on the same local network, bind the
+development server to the primary private LAN address:
+
+```bash
+npm run serve --network
+```
+
+The launcher prefers a physical Ethernet or Wi-Fi adapter over common VPN and
+virtual adapters, then prints the selected interface and address. Open the
+`Network` URL printed by Vue, such as `http://192.168.1.25:8080`. Allow Node.js
+through the Windows administrator prompt. On Windows, the launcher temporarily
+allows the Node.js process on TCP port 8080 for Private networks and devices on
+the local subnet only. Press `Ctrl+C` in the elevated server window to stop the
+server and remove that firewall rule. The local network origin must also be
+included in the MapTiler key's allowed HTTP origins for the Atlas map to load.
+
 On Windows PowerShell, use `npm.cmd` and `npx.cmd` if the PowerShell execution
 policy blocks `npm.ps1`:
 
 ```powershell
 npm.cmd ci
 npm.cmd run serve
+npm.cmd run serve --network
 ```
 
 If `vue-cli-service` is reported as missing, the dependencies are not installed
@@ -105,6 +135,18 @@ npx serve -s dist -l 5000
 
 Then open <http://localhost:5000>.
 
+## Interactive Travel Atlas
+
+The experimental atlas is isolated at `/atlas` and is lazy-loaded separately
+from the existing site. Its components, data, persistence, map configuration,
+environment setup, content instructions, and removal checklist are documented
+in [`src/features/atlas/README.md`](src/features/atlas/README.md).
+
+The atlas works locally with a basic preview map. Satellite imagery and 3D
+terrain require `VUE_APP_MAPTILER_KEY`; copy `.env.example` to an uncommitted
+`.env.local` and add a MapTiler browser key. Production reads the key from the
+GitHub Actions secret `MAPTILER_API_KEY`.
+
 ## Image optimization
 
 GitHub Pages serves the files in `public/` without resizing or recompressing
@@ -116,7 +158,7 @@ The project uses [Sharp](https://sharp.pixelplumbing.com/) as a development
 dependency for deterministic image processing. This re-encodes the existing
 pixels; it does not use generative AI or recreate the photographs.
 
-The agreed optimization policy is:
+The default in-place optimization policy is:
 
 - resize photographs to a maximum width or height of 2560 pixels without
   enlarging smaller images;
@@ -149,6 +191,100 @@ safe from repeated lossy JPEG encoding. An oversized file is also left
 unchanged when the optimized output would be larger than its current file.
 Run the production build after an optimization pass and visually review the
 main galleries before committing the binary changes.
+
+### Create compressed, numbered copies in a source directory
+
+The optimizer also has a copy mode for preparing a directory of new images.
+Pass the source directory and a filename tag at run time:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico"
+```
+
+This reads the JPEG and PNG files directly inside the source directory in
+alphabetical order and writes the compressed copies back to that same
+directory as `puerto-rico-1.jpg`, `puerto-rico-2.png`, and so on. It does not
+scan subdirectories, and the original files are left unchanged. Images are
+auto-oriented, reduced to a maximum width or height of 2560 pixels, and
+re-encoded using the same settings as the in-place optimizer. If re-encoding
+would make an image larger, the numbered output is instead a byte-for-byte
+copy of the original.
+
+When `--tag` is supplied, the tool compares it with the repository's canonical
+Journey IDs, public journey slugs and titles, plus the IDs, names and aliases
+of Places visited on each journey. It reports the closest match with a
+heuristic confidence score and suggests a canonical filename label. For
+example, `usvi` resolves to the St. John journey, while `trunk bay` suggests
+`usvi-trunk-bay`. The score measures deterministic text similarity; it is not
+proof that the photographs actually depict the matched place.
+
+Suggestions are advisory by default: the exact label supplied to `--tag` is
+still used. Add `--use-suggested-tag` to adopt a medium- or high-confidence,
+unambiguous suggestion:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "trunk bay" --use-suggested-tag
+```
+
+The command stops without writing files when `--use-suggested-tag` is requested
+but the match is weak or ambiguous. A more specific tag, such as a complete
+journey or place name, produces safer results.
+
+Preview the filenames and savings without keeping any output files by adding
+`--dry-run`:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico" --dry-run
+```
+
+Copy mode refuses to overwrite an existing numbered output. Choose a new tag
+or move the existing output files before running it again.
+
+Filename matching in numbered-copy mode does not register or publish an asset.
+For a complete, validated workflow, use the separate Journey package and
+publication ingestor documented in
+[the Journey media ingestion guide](docs/implementation/journey-media-ingestion.md).
+It prepares a manifest, uploads only its listed local images through the
+authenticated R2 Worker, verifies stored checksums, adds generated canonical
+Media records idempotently, and places them in a Journey's additive **All
+photography** collection without overwriting curated hero or gallery content.
+A Place/Visit package supplies that stop's default card and Atlas image only
+when no curated hero exists; stops without verified photography remain empty
+instead of borrowing the Journey cover.
+Worker deployment and credential setup are documented in
+[the R2 Worker upload runbook](docs/implementation/r2-worker-media-upload.md).
+
+### Command-line help
+
+The script contains its complete command reference. Display it with any of
+these help flags:
+
+```bash
+node scripts/optimize-images.js --help
+node scripts/optimize-images.js --h
+node scripts/optimize-images.js -h
+```
+
+The same help is available through npm:
+
+```bash
+npm run images:optimize -- --help
+```
+
+## Gear ingestion
+
+Canonical Gear and journey usage can be added from constrained Markdown or
+strict JSON without editing Journey modules. Start with a dry run:
+
+```bash
+npm run gear:journeys
+npm run gear:list
+npm run gear:ingest -- --journey usvi-st-john-2025 --source ./gear-inbox/usvi.md --dry-run
+```
+
+See [the Gear ingestion CLI guide](docs/reference/gear-ingestion-cli.md) for the
+input contract, publication safeguards, selectors, examples, and complete
+operating workflow.
 
 ## How production works
 
@@ -230,3 +366,43 @@ the rollback path for the currently published site.
 The branches do not need to be merged. The target state is one maintained
 source branch plus an automated Pages artifact that can be recreated at any
 time.
+
+New-NetFirewallRule -Name "VueDevServer80" -DisplayName "Vue Dev Server 80" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+New-NetFirewallRule -Name "VueDevServer8080" -DisplayName "Vue Dev Server 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+Remove-NetFirewallRule -Name "VueDevServer80"
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallPortFilter | Format-List Protocol,LocalPort
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallAddressFilter | Format-List RemoteAddress
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List Enabled,Profile,EnforcementStatus
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List Enabled,AllowInboundRules,AllowLocalFirewallRules,DefaultInboundAction
+
+Set-NetFirewallProfile -Name Private -AllowInboundRules True
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List EnforcementStatus
+
+Get-CimInstance -Namespace root/SecurityCenter2 -ClassName FirewallProduct | Format-Table displayName,productState -AutoSize
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List DisabledInterfaceAliases
+
+ping -n 1 192.168.86.247 arp -a | findstr 192.168.86.247
+
+Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Get-NetFirewallApplicationFilter | Select-Object Program
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Select-Object Name, Enabled, Direction, Action, Profile
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-\*" | Remove-NetFirewallRule
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-26220" | Get-NetFirewallAddressFilter | Format-List
+
+New-NetFirewallRule `    -DisplayName "Node 8080 Diagnostic"`
+-Direction Inbound `    -Protocol TCP`
+-LocalPort 8080 `    -Action Allow`
+-Profile Private `
+-RemoteAddress Any

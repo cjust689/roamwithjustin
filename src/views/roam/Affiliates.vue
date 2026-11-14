@@ -61,13 +61,30 @@ export default {
 
 <style scoped>
 .affiliate-page {
-  padding: 2rem;
+  width: min(1180px, calc(100% - 2rem));
+  min-height: calc(100dvh - 72px);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 7rem) 0;
+  background: #0b1114;
+  color: #fff;
   font-family: "Poppins", sans-serif;
 }
+
+.affiliate-page h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 7vw, 6rem);
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
 .intro {
+  max-width: 720px;
+  margin: 1rem 0 3rem;
+  color: rgba(255, 255, 255, 0.66);
   font-size: 1rem;
-  color: #555;
-  margin-bottom: 2rem;
+  line-height: 1.7;
 }
 .affiliate-cards {
   display: grid;
@@ -78,7 +95,8 @@ export default {
 .affiliate-card {
   height: 200px;
   position: relative;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
   overflow: hidden;
   background-size: cover;
   background-position: center;
@@ -88,7 +106,7 @@ export default {
   justify-content: center;
 }
 .affiliate-card:hover {
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
 }
 .affiliate-logo {
   height: 60px;
@@ -103,8 +121,9 @@ export default {
   gap: 0.75rem;
 }
 .gear-pill {
-  background-color: #e0f3ff;
-  color: #0077cc;
+  border: 1px solid rgba(246, 189, 96, 0.34);
+  background: rgba(246, 189, 96, 0.08);
+  color: #f8d79f;
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -119,7 +138,7 @@ export default {
   margin-right: 0.5rem;
 }
 .gear-pill:hover {
-  background-color: #d0eaff;
+  background: rgba(246, 189, 96, 0.14);
 }
 .card-background {
   display: block;
@@ -127,7 +146,7 @@ export default {
   width: 100%;
   background-size: cover;
   background-position: center;
-  border-radius: 8px;
+  border-radius: 18px;
   position: relative;
   text-decoration: none;
 }

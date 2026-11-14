@@ -6,11 +6,33 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "serve": "node scripts/serve.js",
+    "server": "node scripts/serve.js",
+    "content:validate": "node scripts/validate-content.js",
+    "docs:audit": "node scripts/docs-audit.mjs",
+    "atlas:test": "node scripts/test-atlas-marker-layout.mjs",
+    "gear:ingest": "node scripts/ingest-gear.js",
+    "gear:journeys": "node scripts/ingest-gear.js --journeys",
+    "gear:list": "node scripts/ingest-gear.js --list",
+    "gear:test": "node scripts/test-gear-ingestion.js",
+    "gear:validate": "node scripts/validate-content.js",
+    "build": "npm run docs:audit && npm run content:validate && vue-cli-service build",
     "postbuild": "node scripts/prepare-pages.js",
     "images:optimize": "node scripts/optimize-images.js",
+    "images:optimize:copies": "node scripts/optimize-images.js --copy",
     "images:optimize:dry": "node scripts/optimize-images.js --dry-run",
+    "media:prepare": "node scripts/optimize-images.js --package",
+    "media:ingest": "node scripts/ingest-media.js",
+    "media:journeys": "node scripts/ingest-media.js --journeys",
+    "media:places": "node scripts/ingest-media.js --places",
+    "media:test": "node scripts/test-media-ingestion.js && node scripts/test-media-upload.js",
+    "media:upload": "node scripts/upload-media.js",
+    "media:upload:test": "node scripts/test-media-upload.js",
+    "media:validate": "node scripts/validate-content.js",
+    "media:worker:dev": "wrangler dev --config workers/media-upload/wrangler.jsonc",
+    "media:worker:check": "wrangler deploy --dry-run --config workers/media-upload/wrangler.jsonc",
+    "media:worker:deploy": "wrangler deploy --config workers/media-upload/wrangler.jsonc",
+    "media:worker:secret": "wrangler secret put MEDIA_UPLOAD_TOKEN --config workers/media-upload/wrangler.jsonc",
     "lint": "vue-cli-service lint",
     "start": "node server server.js"
   },
@@ -18,8 +40,12 @@
     "core-js": "^3.6.5",
     "express": "^4.17.1",
     "jquery": "^3.6.0",
+    "maplibre-gl": "^6.18.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
+  },
+  "overrides": {
+    "@mapbox/jsonlint-lines-primitives": "2.0.2"
   },
   "devDependencies": {
     "@vue/babel-preset-app": "^4.5.13",
@@ -35,7 +61,8 @@
     "eslint-plugin-vue": "^9.33.0",
     "prettier": "^3.5.3",
     "sharp": "^0.35.5",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.11",
+    "wrangler": "4.162.0"
   },
   "eslintConfig": {
     "root": true,

@@ -1,10 +1,12 @@
 /* eslint-disable */
 import Vue from "vue"
 import VueRouter from "vue-router"
+import { atlasRoutes } from "../features/atlas/routes"
 
 Vue.use(VueRouter)
 
 const routes = [
+  ...atlasRoutes,
   {
     path: "/about",
     name: "About",

@@ -1,44 +1,58 @@
 <template>
-  <div class="banner-wrapper yellow darken-2 center-align">
-    <router-link class="banner-link black-text pulsate" to="/affiliates">
-      Affiliate Links
-    </router-link>
-    <div class="affiliate-disclaimer">
-      💡 Some links are affiliate links — if you buy through them, it supports
-      my work at no extra cost to you.
-    </div>
-  </div>
+  <aside class="support-note" aria-label="Affiliate disclosure">
+    <span>Independent field notes</span>
+    <p>
+      Some gear links are affiliate links. They support the work at no extra
+      cost to you.
+    </p>
+    <router-link to="/affiliates">Learn more</router-link>
+  </aside>
 </template>
 
 <script>
-import M from "../js/materialize"
 export default {
   name: "Banner",
-  mounted() {
-    M.AutoInit()
-  },
 }
 </script>
 
 <style scoped>
-.banner-wrapper {
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin-top: 64px; /* adjust to match header height */
+.support-note {
+  display: flex;
   z-index: 2;
-  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #10181c;
+  color: rgba(255, 255, 255, 0.62);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
 }
 
-.banner-link {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  font-size: 1.1rem;
+.support-note span {
+  color: #f6bd60;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.affiliate-disclaimer {
-  font-size: 0.9rem;
-  color: #333;
+.support-note p {
+  margin: 0;
+  font-size: inherit !important;
+  font-weight: 400;
+}
+
+.support-note a {
+  color: #fff;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .support-note {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
 }
 </style>

@@ -43,35 +43,48 @@
           helps keep the wheels turning.
         </p>
       </div>
-      <div class="parallax" v-html="randomRoamImage('default')"></div>
+      <div class="parallax">
+        <img :src="aboutImage" alt="Roam With Justin travel photography" />
+      </div>
     </div>
   </div>
 </template>
 <script>
-import { getRandom, randomRoamImage } from "../../js/functions"
 import M from "../../js/materialize"
+
+const aboutImages = [
+  "/img/roam/default/1.jpg",
+  "/img/roam/default/4.jpg",
+  "/img/roam/default/5.jpg",
+  "/img/roam/default/6.jpg",
+]
 
 export default {
   name: "About",
-  components: {},
+  data() {
+    return {
+      aboutImage: aboutImages[Math.floor(Math.random() * aboutImages.length)],
+    }
+  },
   mounted() {
     M.AutoInit()
-  },
-  methods: {
-    getRandom,
-    randomRoamImage,
   },
 }
 </script>
 <style scoped>
 .home {
   display: flex;
+  width: 100%;
+  min-height: calc(100dvh - 72px);
   flex-direction: column;
   justify-content: flex-start;
+  overflow: hidden;
+  background: #0b1114;
   color: white;
 }
 .parallax-container {
-  min-height: 100vh; /* or adjust as needed */
+  width: 100%;
+  min-height: calc(100dvh - 72px);
   height: auto;
   overflow: hidden;
   z-index: 1;
@@ -80,8 +93,8 @@ export default {
 .parallax img {
   object-fit: cover;
   width: 100%;
-  height: auto;
-  max-height: unset;
+  height: 100%;
+  max-height: none;
 }
 .parallax-container::before {
   content: "";
@@ -96,6 +109,23 @@ export default {
 .parallax-container .container,
 .parallax-container .row {
   position: relative;
-  z-index: 2; /* place text above the dark overlay */
+  z-index: 2;
+}
+
+.parallax-container .container {
+  padding-top: clamp(3rem, 8vw, 7rem);
+  padding-bottom: clamp(3rem, 8vw, 7rem);
+}
+
+.parallax-container p {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.parallax-container h4,
+.parallax-container h5 {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.2;
 }
 </style>
