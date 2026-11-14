@@ -116,6 +116,32 @@ export function buildTripViewModel(journey) {
   }
 }
 
+export function addTripAtlasNavigation(trip, atlasNodes = []) {
+  const journeyNodes = atlasNodes.filter(
+    node => node.journeyId === trip.journeyId
+  )
+  const rootNode = journeyNodes.find(node => !node.parentId) || null
+  const atlasHref = rootNode ? `/atlas/${rootNode.id}` : ""
+
+  return {
+    ...trip,
+    atlasHref,
+    // Exact Place-to-node matches let a story card open the corresponding
+    // pin. Visits without a public pin intentionally fall back to the trip's
+    // Atlas root instead of inventing map presentation data here.
+    locations: trip.locations.map(location => {
+      const exactNode = journeyNodes.find(
+        node => node.placeId === location.canonicalId
+      )
+      return {
+        ...location,
+        atlasExact: Boolean(exactNode),
+        atlasHref: exactNode ? `/atlas/${exactNode.id}` : atlasHref,
+      }
+    }),
+  }
+}
+
 function atlasActions(place, journey) {
   const actions = []
 

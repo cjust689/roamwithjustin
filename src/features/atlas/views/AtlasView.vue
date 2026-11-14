@@ -20,7 +20,12 @@
       </a>
       <AtlasBreadcrumbs :crumbs="breadcrumbs" @select="selectNode" />
       <div class="atlas-tools">
-        <button type="button" @click="surpriseMe">Surprise me</button>
+        <router-link v-if="storyHref" class="atlas-story-link" :to="storyHref">
+          Story
+        </router-link>
+        <button class="atlas-surprise" type="button" @click="surpriseMe">
+          Surprise me
+        </button>
         <button type="button" @click="savedOpen = true">
           Saved <span>{{ favoriteNodes.length }}</span>
         </button>
@@ -173,6 +178,12 @@ export default {
     },
     guidedJourney() {
       return getGuidedJourneyViewModel(this.currentNode?.journeyId)
+    },
+    storyHref() {
+      return (
+        this.currentNode?.actions.find(action => action.type === "internal")
+          ?.href || ""
+      )
     },
     guidedIsActive() {
       return this.guidedStatus !== "idle"
@@ -606,6 +617,7 @@ export default {
 }
 
 .atlas-tools button,
+.atlas-tools a,
 .atlas-welcome button {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
@@ -616,11 +628,19 @@ export default {
   font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .atlas-tools button:hover,
-.atlas-tools button:focus-visible {
+.atlas-tools button:focus-visible,
+.atlas-tools a:hover,
+.atlas-tools a:focus-visible {
   border-color: #f6bd60;
+}
+
+.atlas-tools .atlas-story-link {
+  border-color: rgba(246, 189, 96, 0.48);
+  color: #f8d79f;
 }
 
 .atlas-tools button span {
@@ -730,11 +750,12 @@ export default {
   }
 
   .atlas-brand strong,
-  .atlas-tools button:first-child {
+  .atlas-tools .atlas-surprise {
     display: none;
   }
 
-  .atlas-tools button {
+  .atlas-tools button,
+  .atlas-tools a {
     min-height: 2.75rem;
     padding: 0.6rem 0.78rem;
     font-size: 0.88rem;
