@@ -247,7 +247,10 @@ publication ingestor documented in
 It prepares a manifest, uploads only its listed local images through the
 authenticated R2 Worker, verifies stored checksums, adds generated canonical
 Media records idempotently, and places them in a Journey's additive **All
-photography** collection without changing curated hero or gallery content.
+photography** collection without overwriting curated hero or gallery content.
+A Place/Visit package supplies that stop's default card and Atlas image only
+when no curated hero exists; stops without verified photography remain empty
+instead of borrowing the Journey cover.
 Worker deployment and credential setup are documented in
 [the R2 Worker upload runbook](docs/implementation/r2-worker-media-upload.md).
 

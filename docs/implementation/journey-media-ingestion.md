@@ -274,9 +274,12 @@ validation. A failed validation restores the prior generated file.
 After a normal site deployment, all published placements appear in the
 Journey page's lazy-loaded **All photography** / **Latest images** section.
 A Place/Visit placement also appears in that Visit's location gallery and in
-the media for an Atlas pin that already presents the Visit. It does not create
-a pin when none exists and does not become a Journey, Visit, or Atlas hero or
-a curated story-gallery image.
+the media for an Atlas pin that already presents the Visit. If the Visit has
+no curated hero, the first published image becomes its derived Trip-card and
+Atlas display image. This does not write or overwrite curated hero state. A
+Visit without verified photography has an intentional pending placeholder;
+the Journey cover is not reused as if it were location-specific. Ingestion
+still does not create a pin, Visit, Place, or curated story-gallery entry.
 
 The collection displays newer ingested batches first while retaining each
 batch's manifest order. This ordering uses a stored monotonic sequence rather

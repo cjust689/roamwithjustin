@@ -33,7 +33,7 @@ verification:
 **Proposed canonical journey ID:** `usvi-st-john-2025` (confirm against the existing canonical registry before adding)  
 **Destination:** St. John, U.S. Virgin Islands  
 **Duration:** Seven day-labeled entries in the creator's provided outline; exact calendar dates not supplied  
-**Media:** Three R2-hosted videos are inventoried and linked; location-specific photographs will follow  
+**Media:** Three R2-hosted videos plus published Place/Visit image batches for Waterlemon Cay, Cinnamon Bay, Cruz Bay, and Great Cruz Bay  
 **Evidence:** Creator's direct trip outline and impressions, supplemented by explicitly identified prior firsthand discussion
 
 ## Implementation checkpoint — November 14, 2026
@@ -46,7 +46,7 @@ The implementation preserves the open evidence boundaries from this brief:
 - Hermit Crab Island is a Journey visit with no coordinates or Atlas pin until its formal geographic identity is resolved;
 - the Great Cruz Bay map point is broad lodging context and does not expose the villa's address;
 - the charter's exact within-day stop order and the specific Lovango lunch venue remain unverified;
-- the existing journey cover is an explicit temporary visual placeholder, while location-specific photographs remain pending review.
+- the Journey cover is limited to Journey/root presentation; it is not reused for individual stops, which use verified Place/Visit publications or an explicit photography-pending state.
 
 Application data remains authoritative in `src/content/`; this document continues to be a human-readable evidence and ingestion handoff rather than a second database.
 
@@ -70,7 +70,7 @@ The creator confirmed the trip year as **2025** and supplied three owned MP4 obj
 - `NatesCharters_Edit-30k.mp4` — the multi-stop Nate's Custom Charters day; attached to Lovango as the mapped representative for that chapter without claiming the entire film was captured at Lovango;
 - `roam_waterlemon_1.mp4` — attached to the Waterlemon Cay chapter.
 
-The canonical Media records retain the exact R2 keys, while the public URL resolver percent-encodes spaces. All three temporarily use the general St. John cover as a poster until location-specific photographs arrive. Their presence does not clear the UI's “location photos coming soon” state.
+The canonical Media records retain the exact R2 keys, while the public URL resolver percent-encodes spaces. The general St. John cover is not used as a video poster. A video's presence alone does not clear the UI's “location photos coming soon” state; a curated or published Place/Visit image does.
 
 ## Latest confirmed update — Day 3 charter excursion
 

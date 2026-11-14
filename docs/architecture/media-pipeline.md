@@ -75,12 +75,15 @@ published placements for a Journey in the root Journey page's lazy-loaded
 **All photography** collection. `getVisitPublishedMedia()` additionally
 projects a validated Place/Visit placement into that Journey location's media
 and into an existing Atlas presentation for the Visit. It never creates a
-Place, Visit, or Atlas pin. Generated images do not replace curated heroes or
-curated story galleries.
+Place, Visit, or Atlas pin. Generated images do not overwrite curated heroes
+or curated story galleries. When a Visit has no curated hero, its first
+published image becomes the derived display image for the Trip card and Atlas
+node. A Visit with no verified image stays image-free; selectors never use the
+Journey cover as a location-specific fallback.
 
-The generated registry currently contains no assets, placements, or batches.
-The pipeline is implemented and tested, but a real production R2-backed batch
-has not been recorded in source.
+The generated registry is live production state and currently includes
+R2-backed USVI Place/Visit batches. Its checked-in records, rather than this
+document, determine which assets and placements exist.
 
 ## Delivery
 
