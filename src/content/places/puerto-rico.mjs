@@ -11,7 +11,10 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     description:
       "A seven-day road trip through colonial streets, Atlantic cliffs, jungle waterfalls, and the beaches of the northwest coast.",
-    externalLinks: {},
+    externalLinks: {
+      official: "https://www.discoverpuertorico.com/",
+      maps: "https://www.google.com/maps/search/?api=1&query=Puerto+Rico",
+    },
   },
   {
     id: "gozalandia-falls",
@@ -85,7 +88,11 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Colorful colonial streets, historic forts, and vibrant energy & food. Great for photography and slow walks.",
-    externalLinks: {},
+    externalLinks: {
+      official:
+        "https://www.discoverpuertorico.com/article/things-to-do-san-juan",
+      maps: "https://www.google.com/maps/search/?api=1&query=San+Juan%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -101,7 +108,11 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Classy beachfront resort clubbing — upscale nightlife, food, drinks and atmosphere.",
-    externalLinks: {},
+    externalLinks: {
+      official:
+        "https://www.fairmont.com/en/hotels/puerto-rico/fairmont-el-san-juan-hotel/dining/the-lobby.restaurant.html",
+      maps: "https://www.google.com/maps/search/?api=1&query=Fairmont+El+San+Juan+Hotel",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -117,7 +128,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Estatua+de+Colon%2C+Arecibo%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -133,7 +146,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Massive and controversial statue of Christopher Columbus overlooking the Arecibo coast — quick photo stop.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Calle+C.+Canals%2C+San+Juan%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -149,7 +164,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "A scenic beach on the northwest coast of Puerto Rico, known for turquoise waters, offshore coral reefs, snorkeling, and kite surfing.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Shacks+Beach%2C+Isabela%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -165,7 +182,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "A small, picturesque cove in Aguadilla with calm water and rocky outcrops, ideal for swimming, relaxing, and photography.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Playa+Pena+Blanca%2C+Aguadilla%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -181,7 +200,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Small, protected beach cove with calm turquoise water and surrounding rock walls — popular for relaxing or swimming.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Mar+Chiquita%2C+Manati%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -197,7 +218,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Remote, undeveloped beach near Coto with dramatic rock formations and rough surf — peaceful and photogenic.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=Playa+Pastillo%2C+Isabela%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -213,7 +236,9 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Iconic roadside rock carving of a Taíno chief’s face overlooking the coast near Isabela. A quick cultural and historical stop along the north coast drive.",
-    externalLinks: {},
+    externalLinks: {
+      maps: "https://www.google.com/maps/search/?api=1&query=La+Cara+del+Indio%2C+Isabela%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -248,7 +273,11 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Family-friendly equestrian center near Aguadilla offering private horseback tours across coastal meadows, jungle trails, beaches and historic ruins.",
-    externalLinks: {},
+    externalLinks: {
+      official:
+        "https://www.discoverpuertorico.com/es/profile/playuelas-horse-rides/12105",
+      maps: "https://www.google.com/maps/search/?api=1&query=Playuelas+Horse+Rides%2C+Aguadilla%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },
@@ -264,7 +293,10 @@ export const puertoRicoPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "Chic rooftop restaurant and bar in downtown Aguadilla with oceanfront sunset views over Aguadilla Bay, creative Criollo‑inspired cuisine, and tropical cocktails.",
-    externalLinks: {},
+    externalLinks: {
+      official: "https://aguadillarooftop.com/",
+      maps: "https://www.google.com/maps/search/?api=1&query=ARTe+Aguadilla+Rooftop+Experience%2C+Puerto+Rico",
+    },
     verificationNotes:
       "Coordinates remain unset until verified from the trip journal or media metadata.",
   },

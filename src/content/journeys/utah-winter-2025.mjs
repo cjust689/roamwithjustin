@@ -121,7 +121,7 @@ export const utahWinter2025Journey = Object.freeze({
         provider: "external",
         url: "https://images.trvl-media.com/lodging/25000000/24420000/24413400/24413369/5bc5ea10.jpg?impolicy=resizecrop&rw=1200&ra=fit",
       },
-      link: "https://www.expedia.com/Moab-Hotels-Hyatt-Place-Moab.h24413369.Hotel-Information?chkin=2025-05-21&chkout=2025-05-22&x_pwa=1&rfrr=HSR&pwa_ts=1747753945737&referrerUrl=aHR0cHM6Ly93d3cuZXhwZWRpYS5jb20vSG90ZWwtU2VhcmNo&useRewards=false&rm1=a2&regionId=6176216&destination=Moab%2C+Utah%2C+United+States+of+America&destType=MARKET&selected=24413369&latLong=33.8714%2C-84.4998&sort=RECOMMENDED&top_dp=249&top_cur=USD&gclid=Cj0KCQjw0LDBBhCnARIsAMpYlAq94E1v_iDjN3g777mvYz3ITeTq7iqLjQFrP7TW8FuMmDvrRMO8QwcaAl3ZEALw_wcB&mctc=10&userIntent=&selectedRoomType=220212969&selectedRatePlan=397428255&searchId=a8267973-3176-4c88-ba05-2d5eedc7cdf5",
+      link: "https://www.hyatt.com/hyatt-place/en-US/slczm-hyatt-place-moab",
     },
     {
       name: "Hyatt Centric Park City",

@@ -114,7 +114,7 @@ export const puertoRico2024Journey = Object.freeze({
         assetId: "image-puerto-rico-puerto-rico-hacienda",
         role: "lodging",
       },
-      link: "https://www.airbnb.com/rooms/907364972249282822",
+      link: "https://www.google.com/maps?q=18.3882008,-67.0752792",
     },
   ],
   visits: [
@@ -705,6 +705,7 @@ export const puertoRico2024Journey = Object.freeze({
             "Calle C. Canals nightlife: bar-hopping along a packed and energetic strip with music ranging from salsa and reggaetón to hip-hop, dance, and electronic. The crowds were big and mixed — ages ranged from early 20s to 60s. There’s likely a bar or club here that fits your vibe. Very busy, but worth a visit if you want a lively night out.",
         },
       ],
+      partnerIds: ["mercado-la-carreta"],
       routes: [],
     },
     {

@@ -36,6 +36,20 @@ function resolveLodgingImage(reference) {
   return reference.url || reference.src || ""
 }
 
+function preferredExternalLink(externalLinks = {}) {
+  if (externalLinks.official) {
+    return { href: externalLinks.official, kind: "official" }
+  }
+  if (externalLinks.platform) {
+    return { href: externalLinks.platform, kind: "platform" }
+  }
+  if (externalLinks.maps) {
+    return { href: externalLinks.maps, kind: "maps" }
+  }
+
+  return { href: "", kind: "" }
+}
+
 function journeyPreviewCopy(journey) {
   if (journey.publicationStatus !== "coming-soon") return journey.description
   if (journey.description) return journey.description
@@ -65,6 +79,7 @@ export function buildTripLocationView(journey, visit) {
   const gallery = media
     .filter(item => item.kind === "image")
     .map(item => item.src)
+  const externalLink = preferredExternalLink(place.externalLinks)
 
   return {
     id: visit.legacyId || visit.id,
@@ -83,7 +98,13 @@ export function buildTripLocationView(journey, visit) {
     media,
     notes: [...(visit.notes || [])],
     video: firstSocialLink(visit, "instagram"),
-    link: place.externalLinks?.official || "",
+    link: externalLink.href,
+    linkLabel:
+      externalLink.kind === "official"
+        ? "Official website"
+        : externalLink.kind === "maps"
+          ? "Open in maps"
+          : "Visitor information",
     evidenceStatus: visit.evidenceStatus,
     visitStatus: visit.visitStatus,
   }
@@ -148,12 +169,16 @@ export function buildTripViewModel(journey) {
       partners: (day.partnerIds || [])
         .map(getPartner)
         .filter(Boolean)
-        .map(partner => ({
-          id: partner.id,
-          name: partner.name,
-          href: partner.officialUrl,
-          disclosure: partner.disclosure,
-        })),
+        .map(partner => {
+          const externalLink = preferredExternalLink(partner.externalLinks)
+          return {
+            id: partner.id,
+            name: partner.name,
+            label: partner.label,
+            href: externalLink.href,
+            disclosure: partner.disclosure,
+          }
+        }),
       routes: [...(day.routes || [])],
     })),
     reel: firstSocialLink(journey, "instagram"),

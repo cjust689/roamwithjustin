@@ -13,7 +13,10 @@ export const usviPlaces = Object.freeze([
     coordinatePrecision: "unknown",
     description:
       "A Caribbean territory whose islands include St. John, St. Thomas, and St. Croix.",
-    externalLinks: {},
+    externalLinks: {
+      official: "https://www.visitusvi.com/",
+      maps: "https://www.google.com/maps?q=U.S.+Virgin+Islands",
+    },
     verificationNotes:
       "This territory record groups the Journey geography; the Atlas opens on St. John rather than an arbitrary territory-wide centerpoint.",
   },
@@ -30,6 +33,7 @@ export const usviPlaces = Object.freeze([
     description:
       "The arrival island for the St. John journey, connecting the airport, Charlotte Amalie harbor views, and the ferry departure from Red Hook.",
     externalLinks: {
+      official: "https://www.visitusvi.com/",
       maps: "https://www.google.com/maps?q=St.+Thomas,+USVI",
     },
     verificationNotes:

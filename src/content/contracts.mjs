@@ -43,7 +43,8 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {string} id Stable provider or partner identity.
  * @property {string} name
  * @property {"operator"|string} kind
- * @property {string} officialUrl
+ * @property {string} label Short public label such as Restaurant or Charter operator.
+ * @property {{official?: string, platform?: string, maps?: string}} externalLinks
  * @property {string} relationship Describes the real Journey relationship.
  * @property {string} disclosure Prevents a provider link from implying sponsorship or affiliation.
  *

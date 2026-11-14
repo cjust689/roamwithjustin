@@ -36,7 +36,7 @@
             target="_blank"
             rel="noopener noreferrer"
           >
-            Official website &nearr;
+            {{ location.linkLabel || "External link" }} &nearr;
           </a>
         </div>
         <div class="location-meta">

@@ -6,6 +6,10 @@ const { pathToFileURL } = require("url")
 const projectRoot = path.resolve(__dirname, "..")
 const errors = []
 
+// This creator nickname is intentionally unresolved. Giving it a map or
+// tourism link would falsely assert a formal geographic identity.
+const externalLinkExemptPlaceIds = new Set(["hermit-crab-island"])
+
 function report(message) {
   errors.push(message)
 }
@@ -213,6 +217,18 @@ async function main() {
 
   placeModule.placeRecords.forEach(place => {
     const owner = 'Place "' + place.id + '"'
+    const externalLinks = Object.values(place.externalLinks || {}).filter(
+      Boolean
+    )
+
+    if (!externalLinks.length && !externalLinkExemptPlaceIds.has(place.id)) {
+      report(owner + " must expose an official, platform, or maps link")
+    }
+    externalLinks.forEach(link => {
+      if (!/^https:\/\//i.test(link)) {
+        report(owner + ' contains an invalid external link "' + link + '"')
+      }
+    })
     if (
       place.coordinates !== null &&
       !contracts.isCoordinatePair(place.coordinates)
@@ -255,12 +271,25 @@ async function main() {
 
   partnerModule.partnerRecords.forEach(partner => {
     const owner = 'Partner "' + partner.id + '"'
-    if (!partner.name || !partner.kind || !partner.relationship) {
+    if (
+      !partner.name ||
+      !partner.kind ||
+      !partner.label ||
+      !partner.relationship
+    ) {
       report(owner + " is missing identity or relationship metadata")
     }
-    if (!/^https:\/\//i.test(partner.officialUrl || "")) {
-      report(owner + " has an invalid official URL")
+    const externalLinks = Object.values(partner.externalLinks || {}).filter(
+      Boolean
+    )
+    if (!externalLinks.length) {
+      report(owner + " is missing an external link")
     }
+    externalLinks.forEach(link => {
+      if (!/^https:\/\//i.test(link)) {
+        report(owner + ' contains an invalid external link "' + link + '"')
+      }
+    })
     if (!partner.disclosure) {
       report(owner + " is missing its relationship disclosure")
     }
@@ -285,6 +314,9 @@ async function main() {
       usage => validateMediaUsage(usage, owner, mediaModule)
     )
     ;(journey.lodging || []).forEach(stay => {
+      if (!/^https:\/\//i.test(stay.link || "")) {
+        report(owner + ' lodging "' + stay.name + '" is missing a valid link')
+      }
       if (stay.image?.assetId) {
         validateMediaUsage(
           stay.image,

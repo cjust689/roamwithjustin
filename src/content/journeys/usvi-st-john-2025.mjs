@@ -49,9 +49,9 @@ export const usviStJohn2025Journey = Object.freeze({
       blurb:
         "Our vacation-rental home base overlooking Great Cruz Bay. The roosters, breakfasts on the patio, steady breeze, and broad water view gave the mornings their own rhythm before we went anywhere.",
       image: null,
-      link: "",
+      link: "https://oceanastjohn.com/",
       verificationNotes:
-        "The newest creator-supplied spelling is Oceana. No current listing link, availability claim, accessibility claim, or sponsorship is asserted.",
+        "The creator-supplied spelling and Great Cruz Bay description match the current Oceana Villa site. No availability, accessibility, or sponsorship claim is asserted.",
     },
   ],
   // Visit order follows the creator's seven-chapter outline. Hermit Crab
@@ -293,6 +293,7 @@ export const usviStJohn2025Journey = Object.freeze({
         { visitId: "usvi-st-john-2025-red-hook-ferry-terminal" },
         { visitId: "usvi-st-john-2025-cruz-bay" },
       ],
+      partnerIds: ["high-tide-st-john"],
       routes: [
         {
           label: "Red Hook to Cruz Bay passenger ferry",
@@ -309,6 +310,7 @@ export const usviStJohn2025Journey = Object.freeze({
         { visitId: "usvi-st-john-2025-maho-bay" },
         { visitId: "usvi-st-john-2025-great-cruz-bay" },
       ],
+      partnerIds: ["reef2peak"],
       routes: [],
     },
     {

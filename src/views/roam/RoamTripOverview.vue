@@ -155,7 +155,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span>Experience operator</span>
+              <span>{{ partner.label || "Trip resource" }}</span>
               <strong>{{ partner.name }}</strong>
               <small>{{ partner.disclosure }}</small>
             </a>
@@ -251,7 +251,7 @@
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                View hotel &nearr;
+                View stay &nearr;
               </a>
             </div>
           </article>

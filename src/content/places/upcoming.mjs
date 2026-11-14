@@ -11,7 +11,10 @@ export const upcomingPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description: "",
-    externalLinks: {},
+    externalLinks: {
+      official: "https://www.exploregeorgia.org/",
+      maps: "https://www.google.com/maps/search/?api=1&query=North+Georgia+Mountains",
+    },
     verificationNotes:
       "The Mineral Bluff stay and photography are confirmed; exact lodging and researched trails remain private or unverified.",
   },
@@ -26,7 +29,10 @@ export const upcomingPlaces = Object.freeze([
     evidenceStatus: "unverified",
     coordinatePrecision: "unknown",
     description: "",
-    externalLinks: {},
+    externalLinks: {
+      official: "https://visithungary.com/",
+      maps: "https://www.google.com/maps/search/?api=1&query=Hungary",
+    },
     verificationNotes:
       "The existing coming-soon card is preserved without asserting dates, route, or visited places.",
   },
