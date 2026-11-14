@@ -91,8 +91,8 @@
               <h3>The journey has a stable home.</h3>
               <p>
                 Its canonical record, public URL, and available photography are
-                connected. This preview will grow in place as verified material
-                is published.
+                already connected. Verified material can expand this preview in
+                place without changing its address.
               </p>
             </div>
           </article>
@@ -102,9 +102,9 @@
               <span class="story-eyebrow">Still to come</span>
               <h3>Stops, route, and field notes.</h3>
               <p>
-                The itinerary and Atlas path stay hidden until their places,
-                order, and coordinates are confirmed—so a polished preview never
-                becomes a made-up trip.
+                The itinerary and Atlas path remain hidden until the places,
+                route order, and coordinates are confirmed. That keeps a
+                polished preview from becoming a made-up trip.
               </p>
             </div>
           </article>
