@@ -244,9 +244,12 @@ Filename matching in numbered-copy mode does not register or publish an asset.
 For a complete, validated workflow, use the separate Journey package and
 publication ingestor documented in
 [the Journey media ingestion guide](docs/implementation/journey-media-ingestion.md).
-It prepares a manifest, verifies uploaded R2 objects, adds generated canonical
+It prepares a manifest, uploads only its listed local images through the
+authenticated R2 Worker, verifies stored checksums, adds generated canonical
 Media records idempotently, and places them in a Journey's additive **All
 photography** collection without changing curated hero or gallery content.
+Worker deployment and credential setup are documented in
+[the R2 Worker upload runbook](docs/implementation/r2-worker-media-upload.md).
 
 ### Command-line help
 

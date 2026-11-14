@@ -15,7 +15,11 @@ code_paths:
   - scripts/optimize-images.js
   - scripts/ingest-media.js
   - scripts/lib/media-ingestion.js
+  - scripts/upload-media.js
   - scripts/test-media-ingestion.js
+  - scripts/test-media-upload.js
+  - workers/media-upload/src/index.mjs
+  - workers/media-upload/wrangler.jsonc
   - src/content/media/generated/records.json
   - src/content/selectors/media.mjs
   - src/content/selectors/projections.mjs
@@ -24,18 +28,21 @@ verification:
   state: verified
   evidence:
     - npm run media:test
+    - npm run media:worker:check
     - npm run content:validate
     - npm run build
 ---
 
 # Journey media preparation and ingestion
 
-The media workflow has two deliberately separate stages:
+The media workflow has three deliberately separate stages:
 
 1. `media:prepare` optimizes local exports, gives them deterministic names,
    validates a Journey or optional Place/Visit scope, and writes a provisional
    publication manifest.
-2. `media:ingest` verifies both the local package and the uploaded R2 objects,
+2. `media:upload` revalidates the package, uploads its exact manifest-listed
+   objects through the private Worker, and writes a verification receipt.
+3. `media:ingest` verifies both the local package and the uploaded R2 objects,
    then adds generated canonical Media assets and publication placements.
 
 Uploading files alone never publishes them. Ingestion never edits a curated
@@ -45,10 +52,12 @@ Journey cover, hero, story gallery, Visit, Place, or Atlas pin.
 
 ```bash
 npm run media:prepare -- --help
+npm run media:upload -- --help
 npm run media:ingest -- --help
 npm run media:journeys
 npm run media:places -- --journey usvi-st-john-2025
 npm run media:test
+npm run media:worker:check
 npm run media:validate
 ```
 
@@ -162,8 +171,23 @@ Those modes do not create publication records.
 
 ## 2. Upload exactly what the manifest names
 
-Upload every prepared image to the manifest asset's `output.objectKey` in the
-`roamwithjustin-media` R2 bucket. For example:
+The implemented local uploader sends every prepared image to its manifest
+asset's exact `output.objectKey` through the authenticated Cloudflare Worker.
+It does not scan the directory or upload the manifest, receipt, source exports,
+or unrelated files. Start with a local-only dry run:
+
+```bash
+npm run media:upload -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json" --dry-run
+```
+
+After configuring the private Worker URL and upload token as documented in
+[R2 Worker media upload](r2-worker-media-upload.md), run:
+
+```bash
+npm run media:upload -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json"
+```
+
+For example, the mapping remains:
 
 ```text
 local:      D:\R2 Ready\usvi\usvi-001.jpg
@@ -171,15 +195,16 @@ object key: images/usvi/media-usvi-0123456789abcdef/usvi-001.jpg
 public URL: https://media.roamwithjustin.com/images/usvi/media-usvi-0123456789abcdef/usvi-001.jpg
 ```
 
-The repository does not contain R2 credentials and this command does not
-upload. Keep credentials in the uploader or deployment environment, never in
-the manifest or generated content.
+The repository contains no credential values. `MEDIA_UPLOAD_TOKEN` is read
+only from the private local environment and is never accepted as a command-line
+argument. R2 credentials are not needed locally because the Worker uses its R2
+binding.
 
-## 3. Supply uploaded-object verification
+## 3. Upload verification receipt
 
-The strongest supported verification is a receipt produced from the upload
-or an authenticated R2 inventory. It must contain exactly this batch's
-objects:
+After every object is verified in R2, `media:upload` atomically writes
+`r2-verification.json` beside the manifest. It uses the receipt contract
+already accepted by `media:ingest`:
 
 ```json
 {
@@ -196,9 +221,9 @@ objects:
 ```
 
 The ingestor compares the receipt's batch, complete key set, sizes, and hashes
-with the manifest. A receipt is an evidence contract; it should be emitted by
-the process that actually confirmed R2, not copied from the manifest without
-checking the remote objects.
+with the manifest. The Worker supplies R2-validated SHA-256 results; the local
+uploader does not write a receipt after a partial, failed, conflicting, or
+dry-run upload.
 
 If no checksum-capable inventory is available, the ingestor can send public
 `HEAD` requests and verify availability, byte size, and MIME type:
@@ -285,9 +310,9 @@ The architecture leaves nullable capture fields for future Lightroom/EXIF
 imports, but version 1 does not infer camera, lens, date, Place, Visit, or
 Experience from filenames, tags, or folder names. Place/Visit publication
 scope is accepted only through explicit validated flags. Experience scope,
-direct R2 upload, authenticated R2 listing, location review tooling,
-renditions, and gear inference remain future integrations rather than hidden
-behavior in the compressor.
+direct S3-compatible credential upload, general R2 bucket listing, location
+review tooling, renditions, and gear inference remain future integrations
+rather than hidden behavior in the compressor.
 
 ### Lightroom publication-event compatibility
 
@@ -312,6 +337,9 @@ Journey-wide and Visit-specific generated placement views.
 - `scripts/optimize-images.js` — existing optimizer plus package preparation
 - `scripts/ingest-media.js` — verification and transactional apply CLI
 - `scripts/lib/media-ingestion.js` — schema validation and idempotent planner
+- `scripts/upload-media.js` — local package validation, Worker upload client,
+  retry/resume behavior, and atomic receipt writer
+- `workers/media-upload/` — authenticated upload-only Worker and R2 binding
 - `src/content/media/generated/records.json` — generated assets, placements,
   and applied batch receipts
 - `src/content/media/index.mjs` — canonical curated + generated composition

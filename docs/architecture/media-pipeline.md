@@ -18,6 +18,9 @@ code_paths:
   - scripts/optimize-images.js
   - scripts/ingest-media.js
   - scripts/lib/media-ingestion.js
+  - scripts/upload-media.js
+  - workers/media-upload/src/index.mjs
+  - workers/media-upload/wrangler.jsonc
   - src/content/media/index.mjs
   - src/content/media/generated/records.json
   - src/content/selectors/media.mjs
@@ -27,6 +30,7 @@ verification:
   state: verified
   evidence:
     - npm run media:test
+    - npm run media:worker:check
     - npm run content:validate
     - npm run build
 ---
@@ -35,7 +39,7 @@ verification:
 
 ## Current paths
 
-The repository supports three image-processing modes:
+The repository supports three image-processing modes and one upload boundary:
 
 1. `images:optimize` recursively optimizes oversized JPEG/PNG files under
    `public/img` in place.
@@ -47,9 +51,14 @@ The repository supports three image-processing modes:
    It creates a collision-safe package folder, optimized numbered images,
    versioned R2 object keys, and a measured `publication-manifest.json` with
    explicit rights and the validated publication scope.
+4. `media:upload` revalidates a prepared local package, uploads only its
+   manifest-listed images through an authenticated upload-only Worker, and
+   atomically creates the checksum receipt already accepted by `media:ingest`.
 
 The full operator workflow and flags are in
 [Journey media ingestion](../implementation/journey-media-ingestion.md).
+Worker deployment, credentials, retry behavior, and recovery are in
+[R2 Worker media upload](../implementation/r2-worker-media-upload.md).
 
 ## Publication and generated state
 
@@ -80,9 +89,20 @@ R2 object keys are resolved against `https://media.roamwithjustin.com` unless
 videos retain their current object keys; new package keys are batch-versioned
 under the selected image prefix.
 
+The local uploader owns filesystem access, canonical manifest validation,
+bounded concurrency/retries, and receipt creation. The Worker owns bearer-token
+authentication, the `images/` key boundary, MIME/size checks, atomic
+create-only writes, and stored R2 SHA-256 verification. It exposes no object
+download, delete, list, or canonical-publication API. The upload bearer secret
+is distinct from Wrangler/Cloudflare deployment authentication, and no R2 S3
+access keys are distributed to the local uploader.
+
+The Worker source and bundle are locally verified. Deployment into the
+owner's Cloudflare account and the first production image upload remain
+externally unverified.
+
 ## Not implemented
 
-- Direct R2 upload or authenticated object inventory
 - Lightroom Classic plug-in or durable publisher outbox
 - EXIF extraction, privacy filtering, or capture-Gear matching
 - Multiple photo renditions (thumbnail/gallery/full) per generated asset

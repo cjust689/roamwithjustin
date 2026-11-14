@@ -57,7 +57,7 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 | Subsystem              | As-built authority                                                       | Operational/reference guide                                               | Verified state                                                                                                                                            |
 | ---------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Canonical content      | [Content model](architecture/content-model.md)                           | [Atlas feature guide](../src/features/atlas/README.md)                    | Media, Places, Journeys, Visits, Partners, selectors, and validation exist. Experiences do not.                                                           |
-| Media                  | [Media pipeline](architecture/media-pipeline.md)                         | [Journey media implementation](implementation/journey-media-ingestion.md) | Journey and validated Place/Visit packaging, manifest ingestion, Journey All Photography, location media, and existing-Atlas-pin projection exist. No production generated records are present. |
+| Media                  | [Media pipeline](architecture/media-pipeline.md)                         | [Journey media implementation](implementation/journey-media-ingestion.md) and [R2 Worker upload](implementation/r2-worker-media-upload.md) | Journey and Place/Visit packaging, authenticated manifest-only upload, ingestion, Journey All Photography, location media, and existing-Atlas-pin projection exist. Worker deployment and the first production batch remain unverified. |
 | Gear                   | [Gear system](architecture/gear.md)                                      | [Gear ingestion CLI](reference/gear-ingestion-cli.md)                     | Canonical generated Gear/Usage ingestion and Journey selectors exist. The generated registry is empty.                                                    |
 | Analytics and commerce | [Monetization and analytics](architecture/monetization-and-analytics.md) | [Active monetization plan](implementation/monetization-and-analytics.md)  | GA4 loader and gear-link click tracking exist. AdSense and the proposed canonical referral contract do not.                                               |
 | Deployment             | [Project README](../README.md#how-production-works)                      | [Pages workflow](../.github/workflows/deploy-pages.yml)                   | GitHub Actions builds and deploys the static Vue site to Pages.                                                                                           |
@@ -66,7 +66,8 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 
 | Work                                                                       | Status            | What remains                                                                                                                   |
 | -------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [Journey media ingestion](implementation/journey-media-ingestion.md)       | Partial, verified | Run the first real R2-backed publication batch; automate upload/deploy only after that path is proven.                         |
+| [Journey media ingestion](implementation/journey-media-ingestion.md)       | Partial, verified | Deploy the upload Worker and run the first real R2-backed publication batch; automated Git/deployment remains later work.      |
+| [R2 Worker media upload](implementation/r2-worker-media-upload.md)         | Partial, verified | Deploy to the owner's Cloudflare account, install the upload secret, and verify the first real immutable image batch.          |
 | [Monetization and analytics](implementation/monetization-and-analytics.md) | Partial, verified | Replace hostname-specific event branching with a stable referral contract; verify partner data; AdSense remains unimplemented. |
 
 ## Proposals and backlog
@@ -74,7 +75,6 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 These documents describe future behavior, not available features:
 
 - [Lightroom publishing](proposals/lightroom-publishing.md)
-- [R2 Worker media upload](<proposals/R2 Worker Media Upload - proposal.md>)
 - [Photo EXIF and capture gear](proposals/photo-exif-gear.md)
 - [Video metadata pipeline](proposals/video-metadata-pipeline.md)
 

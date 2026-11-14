@@ -1,9 +1,9 @@
 ---
 id: r2-worker-media-upload
-title: R2 Worker Upload for Prepared Media
-kind: proposal
-status: proposed
-implementation_state: none
+title: Archived R2 Worker Upload Proposal
+kind: historical
+status: archived
+implementation_state: partial
 created: 2026-11-14
 updated: 2026-11-14
 related:
@@ -11,16 +11,23 @@ related:
   - journey-media-ingestion
   - content-model
 supersedes: []
-superseded_by: []
+superseded_by:
+  - r2-worker-media-upload-implementation
 code_paths:
   - scripts/optimize-images.js
   - scripts/ingest-media.js
   - scripts/lib/media-ingestion.js
   - src/content/media/generated/records.json
 verification:
-  state: unverified
+  state: not-applicable
   evidence: []
 ---
+
+> **Archived:** The implemented source and remaining live-deployment work are
+> documented in
+> [R2 Worker media upload](../implementation/r2-worker-media-upload.md). This
+> proposal preserves the original constraints and is no longer active
+> implementation instruction.
 
 # Proposal: Cloudflare R2 Worker + `media:upload` for prepared journey media
 
@@ -73,11 +80,24 @@ These are conceptual command forms; derive final syntax from existing code and d
 - EXIF/Gear enrichment, Lightroom plugin, multi-rendition generation, automatic deploy, or public write credentials.
 - Treating an HTTP 200 from a Worker as sufficient proof that uploaded bytes match the manifest.
 
-## 2. Architectural decision to make *after* code audit
+## 2. Architectural decision
 
-**Preferred proposal:** A small, authenticated **upload-only Cloudflare Worker with an R2 bucket binding**, plus a local Node CLI `media:upload` that reads prepared manifests and sends upload requests. The Worker authorizes keys/prefixes, enforces allowed types/sizes, writes to R2, and reports server-observed object metadata. The local client verifies all uploads and emits the ingestion-compatible receipt.
+Use a small, authenticated **upload-only Cloudflare Worker with an R2 bucket
+binding**, plus a local Node CLI `media:upload` that reads prepared manifests
+and sends one prepared object per upload request. The Worker authorizes exact
+keys/prefixes, enforces allowed types and sizes, writes to R2, independently
+checks stored-object facts, and returns structured verification results. The
+local client validates local bytes, coordinates bounded retries/resume, and
+atomically emits the existing ingestion-compatible receipt only after the
+entire batch is verified.
 
-**Alternative worth evaluating:** The Node CLI uploads straight to R2 via AWS S3-compatible SDK using machine-local, restricted R2 credentials. This may be **simpler** for a single trusted publishing computer and avoids a public HTTP upload endpoint and Worker upload-body limits. Document this tradeoff before implementing. Choose the Worker if centralized auth, future multiple machines, credential isolation, or future Lightroom integration genuinely justify it. The user requests a Worker, so implement that path unless the audit reveals a compelling blocker, and explain any adjustment.
+This split is intentional. A Worker cannot read the operator's local export
+drive, while a browser or public site must never receive upload credentials.
+Keeping R2 credentials behind the Worker also provides a stable boundary for
+future Lightroom or additional trusted publishing machines. Direct upload
+through the S3-compatible SDK would use less infrastructure for one machine,
+but it would distribute R2 credentials and create a second integration to
+replace when publishing expands; it is therefore not the selected path.
 
 **Another option for larger media:** An authenticated Worker issues short-lived **presigned PUT URLs** for direct client-to-R2 upload; a separate server-side verification endpoint confirms the stored object. Presigning requires S3 API signing credentials (an R2 binding alone does not create presigned URLs). This pattern bypasses Worker body limits but increases credential/endpoint complexity. Consider as a later enhancement or if the current image size regime requires it. Never expose signing secrets to the site bundle.
 
@@ -94,21 +114,33 @@ These are conceptual command forms; derive final syntax from existing code and d
 
 **Authoritative information:** Use manifest's `journeyId`, stable asset identity/revision, R2 key, expected byte length, checksum, MIME type, rights, and local path as defined by the actual code. Preserve existing receipt schema if possible. Never assume that the human-readable file name is the asset ID.
 
-## 4. Proposed package and R2 layout
+## 4. Prepared package and R2 layout
 
-**Illustrative only** — inspect real `media:prepare` output before freezing the structure:
+The local layout is owned by the existing `media:prepare` implementation. For
+a Waterlemon Place package it is:
 
 ```text
-prepared/
-  usvi-<batch-id>/
+O:/.../r2-ready/
+  usvi-waterlemon-cay/
     publication-manifest.json
-    images/
-      usvi-001.webp
-      usvi-002.webp
-    upload-receipt.json       # created only after successful remote verification
+    waterlemon-cay-001.jpg
+    waterlemon-cay-002.jpg
+    r2-verification.json      # created only after full remote verification
 ```
 
-R2 object names are exactly those **already specified in the manifest**, e.g. illustrative `images/usvi/<batch-id>/usvi-001.webp`. The uploader must not infer or recompute object names from folder names. The published delivery host continues to be `https://media.roamwithjustin.com` unless the existing `VUE_APP_MEDIA_BASE_URL` override is set at build time; this host is **not** the authenticated upload endpoint.
+The current optimizer emits JPEG or PNG files directly beside the manifest;
+the uploader must not introduce an `images/` subdirectory, convert formats, or
+derive remote paths from this local layout. R2 object names are exactly those
+already specified by each manifest asset's `output.objectKey`, for example:
+
+```text
+images/usvi/waterlemon-cay/media-usvi-waterlemon-cay-<batch-hash>/waterlemon-cay-001.jpg
+```
+
+The published delivery host continues to be
+`https://media.roamwithjustin.com` unless the existing
+`VUE_APP_MEDIA_BASE_URL` override is set at build time; this host is **not**
+the authenticated upload endpoint.
 
 Ensure JSON manifests/receipts are not accidentally uploaded into the public image prefix unless the current storage contract expressly requires it. The content registry stays in Git, not in the R2 directory.
 
