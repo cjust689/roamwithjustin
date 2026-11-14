@@ -252,6 +252,20 @@ The same help is available through npm:
 npm run images:optimize -- --help
 ```
 
+## Gear ingestion
+
+Canonical Gear and journey usage can be added from constrained Markdown or
+strict JSON without editing Journey modules. Start with a dry run:
+
+```bash
+npm run gear:journeys
+npm run gear:list
+npm run gear:ingest -- --journey usvi-st-john-2025 --source ./gear-inbox/usvi.md --dry-run
+```
+
+See [GEAR_INGESTION.md](./GEAR_INGESTION.md) for the input contract,
+publication safeguards, selectors, examples, and complete operating workflow.
+
 ## How production works
 
 Production is a static site; GitHub Pages does not run Node, Express, Docker,
