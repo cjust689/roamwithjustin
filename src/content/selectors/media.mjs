@@ -1,4 +1,8 @@
-import { getMediaAsset, mediaById } from "../media/index.mjs"
+import {
+  getMediaAsset,
+  mediaById,
+  mediaPlacementRecords,
+} from "../media/index.mjs"
 
 const defaultMediaBaseUrl = "https://media.roamwithjustin.com"
 
@@ -125,4 +129,39 @@ export function resolveMediaReference(reference) {
 // rendition policy should be implemented above, not inside gallery components.
 export function resolveMediaList(references = []) {
   return references.map(resolveMediaReference).filter(Boolean)
+}
+
+// Generated publication placements are additive. They deliberately do not
+// mutate curated Journey hero/gallery arrays or create Atlas/Place claims.
+export function getJourneyPublishedMedia(journeyId) {
+  const seenAssetIds = new Set()
+
+  return mediaPlacementRecords
+    .filter(
+      placement =>
+        placement.journeyId === journeyId &&
+        placement.visibility === "published" &&
+        !placement.visitId &&
+        !placement.placeId &&
+        !placement.experienceId
+    )
+    .sort((left, right) => {
+      const leftOrder = Number.isFinite(left.sortOrder)
+        ? left.sortOrder
+        : Number.MAX_SAFE_INTEGER
+      const rightOrder = Number.isFinite(right.sortOrder)
+        ? right.sortOrder
+        : Number.MAX_SAFE_INTEGER
+      return leftOrder - rightOrder || left.id.localeCompare(right.id)
+    })
+    .map(placement => {
+      if (seenAssetIds.has(placement.assetId)) return null
+      seenAssetIds.add(placement.assetId)
+      const media = resolveMediaReference({
+        assetId: placement.assetId,
+        role: placement.role,
+      })
+      return media ? { ...media, placementId: placement.id } : null
+    })
+    .filter(Boolean)
 }

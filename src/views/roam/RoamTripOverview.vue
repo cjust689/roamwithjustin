@@ -219,6 +219,42 @@
       </section>
 
       <section
+        v-if="trip.allPhotography.length"
+        id="all-photography"
+        class="story-shell photography-section"
+      >
+        <header class="section-intro compact">
+          <div>
+            <span class="story-eyebrow">Latest images</span>
+            <h2>All photography</h2>
+          </div>
+          <p>
+            Newly published photographs associated with this journey. More
+            specific locations and field notes are added only when verified.
+          </p>
+        </header>
+
+        <div class="photography-grid">
+          <a
+            v-for="photo in trip.allPhotography"
+            :key="photo.id"
+            :href="photo.src"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              :src="photo.src"
+              :alt="photo.alt"
+              :width="photo.width || null"
+              :height="photo.height || null"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        </div>
+      </section>
+
+      <section
         v-if="trip.lodging.length"
         class="story-shell story-support-section"
       >
@@ -401,6 +437,42 @@ export default {
 .story-shell {
   width: min(1180px, calc(100% - 2rem));
   margin: 0 auto;
+}
+
+.photography-section {
+  padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.photography-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.photography-grid a {
+  display: block;
+  overflow: hidden;
+  border-radius: 1rem;
+  background: #111b20;
+  aspect-ratio: 4 / 3;
+}
+
+.photography-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+.photography-grid a:hover img,
+.photography-grid a:focus-visible img {
+  transform: scale(1.025);
+}
+
+@media (max-width: 760px) {
+  .photography-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .story-hero {

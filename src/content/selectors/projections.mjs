@@ -7,7 +7,11 @@ import {
 import { getPlace } from "../places/index.mjs"
 import { getPartner } from "../partners/index.mjs"
 import { getJourneyGear } from "./gear.mjs"
-import { resolveMediaList, resolveMediaReference } from "./media.mjs"
+import {
+  getJourneyPublishedMedia,
+  resolveMediaList,
+  resolveMediaReference,
+} from "./media.mjs"
 
 function firstSocialLink(record, provider) {
   return (
@@ -144,6 +148,7 @@ export function buildTripViewModel(journey) {
   const resolvedGallery = resolveMediaList(journey.gallery).map(
     item => item.src
   )
+  const publishedMedia = getJourneyPublishedMedia(journey.id)
   const locations = journey.visits
     .map(visit => buildTripLocationView(journey, visit))
     .filter(Boolean)
@@ -172,6 +177,13 @@ export function buildTripViewModel(journey) {
       comingSoon && fullImage && !resolvedGallery.includes(fullImage)
         ? [fullImage, ...resolvedGallery]
         : resolvedGallery,
+    allPhotography: publishedMedia.map(media => ({
+      id: media.id,
+      src: media.src,
+      alt: media.alt,
+      width: media.width,
+      height: media.height,
+    })),
     description: journeyPreviewCopy(journey),
     dates: journey.dateRange?.label || "Date to be confirmed",
     duration: journey.duration,
@@ -215,7 +227,12 @@ export function buildTripViewModel(journey) {
       caption: media.caption || "",
     })),
     registeredMediaCount: new Set(
-      [cover, fullImage, ...resolvedGallery].filter(Boolean)
+      [
+        cover,
+        fullImage,
+        ...resolvedGallery,
+        ...publishedMedia.map(media => media.src),
+      ].filter(Boolean)
     ).size,
     hasItinerary: Boolean(journey.days?.length && locations.length),
     hasFieldNotes: Boolean(
