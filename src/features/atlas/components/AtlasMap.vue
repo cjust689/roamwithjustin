@@ -37,6 +37,9 @@ import { mapStyleUrl, terrainSource } from "../config/mapConfig"
 const journeySourceId = "atlas-journey-route"
 const journeyShadowLayerId = "atlas-journey-shadow"
 const journeyLineLayerId = "atlas-journey-line"
+// The visible pin dot sits 24px from the pill's left edge and 2px below it.
+// Anchor the geographic coordinate there so route endpoints and pins coincide.
+const markerPinOffset = [-24, -2]
 
 maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
@@ -320,7 +323,8 @@ export default {
 
         const marker = new maplibregl.Marker({
           element,
-          anchor: "bottom",
+          anchor: "bottom-left",
+          offset: markerPinOffset,
         })
           .setLngLat(node.coordinates)
           .addTo(this.map)
@@ -521,8 +525,8 @@ export default {
 .atlas-marker[data-stop]::before {
   position: absolute;
   z-index: 2;
-  top: -0.58rem;
-  left: -0.45rem;
+  top: calc(100% + 2px);
+  left: 24px;
   display: grid;
   place-items: center;
   width: 1.45rem;
@@ -535,6 +539,7 @@ export default {
   content: attr(data-stop);
   font-size: 0.65rem;
   font-weight: 900;
+  transform: translate(-50%, -50%);
 }
 
 .atlas-marker::after {
@@ -548,6 +553,10 @@ export default {
   background: #f6bd60;
   content: "";
   transform: translateX(-50%);
+}
+
+.atlas-marker[data-stop]::after {
+  display: none;
 }
 
 .atlas-marker:hover,
