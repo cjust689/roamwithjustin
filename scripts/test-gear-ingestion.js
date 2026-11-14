@@ -16,6 +16,10 @@ const context = {
         },
       ],
     },
+    {
+      id: "puerto-rico-2024",
+      visits: [],
+    },
   ],
   media: [{ id: "image-usvi-usvi", kind: "image" }],
 }
@@ -75,6 +79,33 @@ assert.deepStrictEqual(repeatPlan.errors, [])
 assert.strictEqual(repeatPlan.changed, false)
 assert.deepStrictEqual(repeatPlan.summary.created, [])
 assert.deepStrictEqual(repeatPlan.summary.linked, [])
+
+const secondJourneyDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "puerto-rico-2024",
+    items: [
+      {
+        gearId: "confirmed-test-mask",
+        usageType: "used",
+        evidence: "creator-confirmed",
+        visibility: "published",
+        notes: "A different journey-specific note.",
+      },
+    ],
+  }),
+  "fixture.json"
+)
+const secondJourneyPlan = planGearIngestion({
+  document: secondJourneyDocument,
+  journeyId: "puerto-rico-2024",
+  records: firstPlan.records,
+  context,
+})
+assert.deepStrictEqual(secondJourneyPlan.errors, [])
+assert.strictEqual(secondJourneyPlan.records.items.length, 1)
+assert.strictEqual(secondJourneyPlan.records.usage.length, 2)
+assert.strictEqual(secondJourneyPlan.summary.linked.length, 1)
 
 const conflictingJourney = planGearIngestion({
   document,
@@ -215,6 +246,22 @@ const experiencePlan = planGearIngestion({
 assert(
   experiencePlan.errors.some(error =>
     error.includes("no canonical Experience registry yet")
+  )
+)
+
+const unknownCaptureGear = validateGearRecords(emptyRecords, {
+  ...context,
+  media: [
+    {
+      id: "capture-test-image",
+      kind: "image",
+      capture: { cameraGearId: "not-in-catalog" },
+    },
+  ],
+})
+assert(
+  unknownCaptureGear.errors.some(error =>
+    error.includes('unknown capture gear "not-in-catalog"')
   )
 )
 

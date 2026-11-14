@@ -110,6 +110,12 @@ function parseArguments(args) {
     }
     return options
   }
+  if (options.query) {
+    throw new Error("--query requires --list")
+  }
+  if (options.build && options.dryRun) {
+    throw new Error("--build cannot be combined with --dry-run")
+  }
   if (!options.journey || !options.source) {
     throw new Error(`Ingestion requires --journey and --source\n\n${usage()}`)
   }
