@@ -1,6 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 const sharp = require("sharp")
+const { pathToFileURL } = require("url")
 
 const projectRoot = path.resolve(__dirname, "..")
 const defaultImageDirectory = path.join(projectRoot, "public", "img")
@@ -16,11 +17,11 @@ function usage() {
 Usage:
   npm run images:optimize
   npm run images:optimize:dry
-  npm run images:optimize:copies -- --source <directory> --tag <label> [--dry-run]
+  npm run images:optimize:copies -- --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
 
 Direct script usage:
   node scripts/optimize-images.js [--dry-run]
-  node scripts/optimize-images.js --source <directory> --tag <label> [--dry-run]
+  node scripts/optimize-images.js --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
 
 Modes:
   Default
@@ -33,17 +34,21 @@ Modes:
     <label>-1.ext, <label>-2.ext, <label>-3.ext, and so on.
 
     Originals are preserved. Existing numbered outputs are never overwritten.
+    The label is compared with canonical Journeys and visited Places. A close
+    match prints a confidence-ranked filename suggestion before processing.
 
 Options:
   --source <directory>  Directory containing images to copy and compress
   --tag <label>         Filename label for the numbered copies
   --copy                Explicitly select copy mode (optional with --source/--tag)
+  --use-suggested-tag   Use a confident, unambiguous canonical tag suggestion
   --dry-run             Report changes without keeping any output files
   --help, --h, -h       Show this help
 
 Examples:
   node scripts/optimize-images.js --dry-run
   node scripts/optimize-images.js --source "C:\\photos\\trip" --tag "utah"
+  node scripts/optimize-images.js --source ./photos --tag "trunk bay" --use-suggested-tag
   node scripts/optimize-images.js --source ./photos --tag utah --dry-run`
 }
 
@@ -64,6 +69,7 @@ function parseArguments(args) {
     help: false,
     source: null,
     tag: null,
+    useSuggestedTag: false,
   }
 
   for (let index = 0; index < args.length; index += 1) {
@@ -71,6 +77,8 @@ function parseArguments(args) {
 
     if (argument === "--copy") {
       options.copyMode = true
+    } else if (argument === "--use-suggested-tag") {
+      options.useSuggestedTag = true
     } else if (argument === "--dry-run") {
       options.dryRun = true
     } else if (
@@ -103,6 +111,12 @@ function parseArguments(args) {
     throw new Error(`Copy mode requires both --source and --tag\n\n${usage()}`)
   }
 
+  if (options.useSuggestedTag && !options.copyMode) {
+    throw new Error(
+      `--use-suggested-tag requires copy mode with --source and --tag\n\n${usage()}`
+    )
+  }
+
   if (options.tag) validateTag(options.tag)
 
   return options
@@ -120,6 +134,238 @@ function validateTag(tag) {
   if (/[<>:"/\\|?*]/.test(tag) || hasControlCharacter || /[. ]$/.test(tag)) {
     throw new Error(
       '--tag must be a filename-safe label without < > : " / \\ | ? * or control characters'
+    )
+  }
+}
+
+function normalizeMatchText(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
+
+function levenshteinDistance(left, right) {
+  if (!left.length) return right.length
+  if (!right.length) return left.length
+
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index)
+
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    const current = [leftIndex]
+
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitutionCost =
+        left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1
+
+      current[rightIndex] = Math.min(
+        current[rightIndex - 1] + 1,
+        previous[rightIndex] + 1,
+        previous[rightIndex - 1] + substitutionCost
+      )
+    }
+
+    previous = current
+  }
+
+  return previous[right.length]
+}
+
+function scoreMatch(query, candidate) {
+  const normalizedQuery = normalizeMatchText(query)
+  const normalizedCandidate = normalizeMatchText(candidate)
+
+  if (!normalizedQuery || !normalizedCandidate) return 0
+  if (normalizedQuery === normalizedCandidate) return 1
+
+  const maximumLength = Math.max(
+    normalizedQuery.length,
+    normalizedCandidate.length
+  )
+  const editSimilarity =
+    1 -
+    levenshteinDistance(normalizedQuery, normalizedCandidate) / maximumLength
+  const queryTokens = new Set(normalizedQuery.split("-"))
+  const candidateTokens = new Set(normalizedCandidate.split("-"))
+  const sharedTokens = [...queryTokens].filter(token =>
+    candidateTokens.has(token)
+  ).length
+  const queryCoverage = sharedTokens / queryTokens.size
+  const candidateCoverage = sharedTokens / candidateTokens.size
+  const prefixCoverage =
+    normalizedCandidate.startsWith(normalizedQuery) ||
+    normalizedQuery.startsWith(normalizedCandidate)
+      ? Math.min(normalizedQuery.length, normalizedCandidate.length) /
+        maximumLength
+      : 0
+  const tokenSimilarity =
+    queryCoverage * 0.65 + candidateCoverage * 0.25 + prefixCoverage * 0.1
+
+  return Math.max(editSimilarity, tokenSimilarity)
+}
+
+function uniqueNonEmpty(values) {
+  return [
+    ...new Set(values.map(value => String(value || "").trim()).filter(Boolean)),
+  ]
+}
+
+function buildTagMatchCandidates(journeys, places, placeAliases) {
+  const placeById = new Map(places.map(place => [place.id, place]))
+  const aliasesByPlaceId = new Map()
+
+  Object.entries(placeAliases).forEach(([alias, placeId]) => {
+    const aliases = aliasesByPlaceId.get(placeId) || []
+    aliases.push(alias)
+    aliasesByPlaceId.set(placeId, aliases)
+  })
+
+  return journeys.flatMap(journey => {
+    const visitedPlaceIds = new Set(journey.visits.map(visit => visit.placeId))
+    const ancestorTerms = []
+
+    journey.visits.forEach(visit => {
+      let place = placeById.get(visit.placeId)
+
+      while (place?.parentPlaceId) {
+        place = placeById.get(place.parentPlaceId)
+
+        if (place && !visitedPlaceIds.has(place.id)) {
+          ancestorTerms.push(place.id, place.name)
+        }
+      }
+    })
+
+    const journeyCandidate = {
+      key: `journey:${journey.id}`,
+      type: "journey",
+      journey,
+      place: null,
+      suggestedTag: journey.slug,
+      terms: uniqueNonEmpty([
+        journey.id,
+        journey.id.replace(/-\d{4}$/, ""),
+        journey.slug,
+        journey.title,
+        ...journey.title.split(","),
+        ...ancestorTerms,
+      ]),
+    }
+    const placeCandidates = []
+    const seenPlaces = new Set()
+
+    journey.visits.forEach(visit => {
+      if (seenPlaces.has(visit.placeId)) return
+      seenPlaces.add(visit.placeId)
+
+      const place = placeById.get(visit.placeId)
+      if (!place) return
+
+      placeCandidates.push({
+        key: `place:${journey.id}:${place.id}`,
+        type: "place",
+        journey,
+        place,
+        suggestedTag: `${journey.slug}-${place.id}`,
+        terms: uniqueNonEmpty([
+          place.id,
+          place.name,
+          `${journey.slug}-${place.id}`,
+          `${journey.title} ${place.name}`,
+          ...(aliasesByPlaceId.get(place.id) || []),
+        ]),
+      })
+    })
+
+    return [journeyCandidate, ...placeCandidates]
+  })
+}
+
+function confidenceLevel(score) {
+  if (score >= 0.9) return "high"
+  if (score >= 0.75) return "medium"
+  return "low"
+}
+
+function describeTagCandidate(candidate) {
+  if (candidate.type === "journey") {
+    return `Journey "${candidate.journey.title}" [${candidate.journey.id}]`
+  }
+
+  return `Place "${candidate.place.name}" [${candidate.place.id}] in Journey "${candidate.journey.title}"`
+}
+
+async function matchCanonicalTag(tag) {
+  const contentRoot = path.join(projectRoot, "src", "content")
+  const [journeyModule, placeModule, aliasModule] = await Promise.all([
+    import(pathToFileURL(path.join(contentRoot, "journeys", "index.mjs")).href),
+    import(pathToFileURL(path.join(contentRoot, "places", "index.mjs")).href),
+    import(pathToFileURL(path.join(contentRoot, "places", "aliases.mjs")).href),
+  ])
+  const candidates = buildTagMatchCandidates(
+    journeyModule.journeyRecords,
+    placeModule.placeRecords,
+    aliasModule.placeAliases
+  )
+    .map(candidate => ({
+      ...candidate,
+      score: Math.max(...candidate.terms.map(term => scoreMatch(tag, term))),
+    }))
+    .sort((left, right) => right.score - left.score)
+  const best = candidates[0] || null
+  const runnerUp = candidates[1] || null
+  const ambiguous = Boolean(
+    best &&
+      runnerUp &&
+      best.score >= 0.6 &&
+      runnerUp.score >= 0.6 &&
+      best.score - runnerUp.score < 0.08
+  )
+  const confident = Boolean(best && best.score >= 0.75 && !ambiguous)
+
+  return {
+    best,
+    alternatives: candidates.slice(1, 3),
+    ambiguous,
+    confident,
+  }
+}
+
+function reportTagMatch(tag, match) {
+  if (!match.best || match.best.score < 0.6) {
+    console.log(
+      `Tag match: no likely canonical Journey or visited Place found for "${tag}".`
+    )
+    return
+  }
+
+  if (match.ambiguous) {
+    const candidates = [match.best, ...match.alternatives]
+      .filter(candidate => candidate.score >= 0.6)
+      .map(
+        candidate =>
+          `${describeTagCandidate(candidate)} (${Math.round(candidate.score * 100)}%)`
+      )
+      .join("; ")
+
+    console.log(`Tag match: "${tag}" is ambiguous: ${candidates}`)
+    console.log("Suggested filename label: none; use a more specific --tag.")
+    return
+  }
+
+  const percentage = Math.round(match.best.score * 100)
+  console.log(
+    `Tag match: ${describeTagCandidate(match.best)} (${percentage}% ${confidenceLevel(match.best.score)} confidence).`
+  )
+
+  if (match.confident) {
+    console.log(`Suggested filename label: ${match.best.suggestedTag}`)
+  } else {
+    console.log(
+      `Possible filename label: ${match.best.suggestedTag}; use a more specific --tag before adopting it.`
     )
   }
 }
@@ -396,10 +642,44 @@ async function runCopyMode(options) {
   const sourceDirectory = path.resolve(process.cwd(), options.source)
   await requireDirectory(sourceDirectory)
 
+  let tagMatch = null
+
+  try {
+    tagMatch = await matchCanonicalTag(options.tag)
+    reportTagMatch(options.tag, tagMatch)
+  } catch (error) {
+    if (options.useSuggestedTag) {
+      throw new Error(`Canonical tag matching failed: ${error.message}`)
+    }
+
+    console.warn(`Tag matching unavailable: ${error.message}`)
+  }
+
+  if (options.useSuggestedTag && !tagMatch?.confident) {
+    throw new Error(
+      `Cannot use a suggested tag for "${options.tag}": the canonical match is missing, weak, or ambiguous. Use a more specific --tag.`
+    )
+  }
+
+  const outputTag = options.useSuggestedTag
+    ? tagMatch.best.suggestedTag
+    : options.tag
+
+  if (outputTag !== options.tag) {
+    console.log(`Using suggested filename label: ${outputTag}`)
+  } else if (
+    tagMatch?.confident &&
+    tagMatch.best.suggestedTag !== options.tag
+  ) {
+    console.log(
+      `Using supplied label "${options.tag}". Add --use-suggested-tag to use "${tagMatch.best.suggestedTag}".`
+    )
+  }
+
   const images = (await findImages(sourceDirectory, false)).sort(
     (left, right) => left.localeCompare(right)
   )
-  const items = numberedTargets(images, sourceDirectory, options.tag)
+  const items = numberedTargets(images, sourceDirectory, outputTag)
   const summary = {
     scanned: images.length,
     compressed: 0,
@@ -411,7 +691,7 @@ async function runCopyMode(options) {
   await requireAvailableTargets(items)
 
   console.log(
-    `${options.dryRun ? "Dry run: " : ""}creating numbered copies of ${images.length} JPEG/PNG images in ${sourceDirectory} with tag "${options.tag}"`
+    `${options.dryRun ? "Dry run: " : ""}creating numbered copies of ${images.length} JPEG/PNG images in ${sourceDirectory} with tag "${outputTag}"`
   )
 
   for (const item of items) {

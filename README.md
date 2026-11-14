@@ -197,6 +197,26 @@ re-encoded using the same settings as the in-place optimizer. If re-encoding
 would make an image larger, the numbered output is instead a byte-for-byte
 copy of the original.
 
+When `--tag` is supplied, the tool compares it with the repository's canonical
+Journey IDs, public journey slugs and titles, plus the IDs, names and aliases
+of Places visited on each journey. It reports the closest match with a
+heuristic confidence score and suggests a canonical filename label. For
+example, `usvi` resolves to the St. John journey, while `trunk bay` suggests
+`usvi-trunk-bay`. The score measures deterministic text similarity; it is not
+proof that the photographs actually depict the matched place.
+
+Suggestions are advisory by default: the exact label supplied to `--tag` is
+still used. Add `--use-suggested-tag` to adopt a medium- or high-confidence,
+unambiguous suggestion:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "trunk bay" --use-suggested-tag
+```
+
+The command stops without writing files when `--use-suggested-tag` is requested
+but the match is weak or ambiguous. A more specific tag, such as a complete
+journey or place name, produces safer results.
+
 Preview the filenames and savings without keeping any output files by adding
 `--dry-run`:
 
@@ -206,6 +226,14 @@ npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico" 
 
 Copy mode refuses to overwrite an existing numbered output. Choose a new tag
 or move the existing output files before running it again.
+
+Filename matching does not register or publish an asset. Uploading one of these
+files to R2 by itself will not make it appear in the site: the canonical Media
+registry still needs the R2 object key, intrinsic metadata and rights, and the
+Journey must reference that Media ID in the correct visit or gallery. Those
+relationships should eventually be created by a separate validated,
+idempotent publication-manifest ingestor—not inferred from a filename or
+silently added by the image compressor.
 
 ### Command-line help
 
