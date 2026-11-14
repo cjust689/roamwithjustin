@@ -1,0 +1,83 @@
+---
+id: media-pipeline
+title: Media Pipeline
+kind: architecture
+status: implemented
+implementation_state: partial
+created: 2026-11-14
+updated: 2026-11-14
+related:
+  - content-model
+  - journey-media-ingestion
+  - lightroom-publishing
+supersedes:
+  - atlas-asset-architecture-brief
+  - journey-media-ingestion-architecture-brief
+superseded_by: []
+code_paths:
+  - scripts/optimize-images.js
+  - scripts/ingest-media.js
+  - scripts/lib/media-ingestion.js
+  - src/content/media/index.mjs
+  - src/content/media/generated/records.json
+  - src/content/selectors/media.mjs
+  - src/views/roam/RoamTripOverview.vue
+verification:
+  state: verified
+  evidence:
+    - npm run media:test
+    - npm run content:validate
+    - npm run build
+---
+
+# Media pipeline
+
+## Current paths
+
+The repository supports three image-processing modes:
+
+1. `images:optimize` recursively optimizes oversized JPEG/PNG files under
+   `public/img` in place.
+2. `images:optimize:copies` makes same-directory numbered copies from a
+   user-supplied tag. Canonical tag matching is advisory unless explicitly
+   adopted.
+3. `media:prepare` resolves one canonical Journey and creates a collision-safe
+   package folder, optimized numbered images, versioned R2 object keys, and a
+   measured `publication-manifest.json` with explicit rights.
+
+The full operator workflow and flags are in
+[Journey media ingestion](../implementation/journey-media-ingestion.md).
+
+## Publication and generated state
+
+`media:ingest` validates the manifest and local output bytes, then requires
+either a checksum receipt or an explicitly acknowledged public-HEAD policy.
+It plans idempotent assets/placements, enforces monotonic explicit revisions,
+preserves existing placement state on republish, and atomically updates only
+`src/content/media/generated/records.json`. Failed canonical validation rolls
+the generated file back.
+
+Curated `.mjs` Media records and generated JSON assets are composed by
+`src/content/media/index.mjs`. Published Journey-only placements are resolved
+through `getJourneyPublishedMedia()` and appear in the root Journey page's
+lazy-loaded **All photography** collection. They do not replace curated heroes
+or galleries and do not create Place/Atlas claims.
+
+The generated registry currently contains no assets, placements, or batches.
+The pipeline is implemented and tested, but a real production R2-backed batch
+has not been recorded in source.
+
+## Delivery
+
+R2 object keys are resolved against `https://media.roamwithjustin.com` unless
+`VUE_APP_MEDIA_BASE_URL` overrides it at build time. Existing controlled R2
+videos retain their current object keys; new package keys are batch-versioned
+under the selected image prefix.
+
+## Not implemented
+
+- Direct R2 upload or authenticated object inventory
+- Lightroom Classic plug-in or durable publisher outbox
+- EXIF extraction, privacy filtering, or capture-Gear matching
+- Multiple photo renditions (thumbnail/gallery/full) per generated asset
+- Automated Git commit/push/deployment reporting after ingestion

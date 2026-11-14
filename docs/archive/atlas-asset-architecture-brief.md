@@ -1,3 +1,26 @@
+---
+id: atlas-asset-architecture-brief
+title: Historical Atlas Content and Media Architecture Brief
+kind: historical
+status: archived
+implementation_state: partial
+updated: 2026-11-14
+related: []
+supersedes: []
+superseded_by:
+  - content-model
+  - media-pipeline
+code_paths: []
+verification:
+  state: unverified
+  evidence: []
+---
+
+> **Archived:** This mixed migration/design document is preserved for history.
+> Use [Canonical Content Model](../architecture/content-model.md) and
+> [Media Pipeline](../architecture/media-pipeline.md) for verified current
+> behavior.
+
 # Roam With Justin Atlas - Content and Media Architecture
 
 **Status:** All existing Trip and Atlas content migrated to canonical Media, Places and Journeys

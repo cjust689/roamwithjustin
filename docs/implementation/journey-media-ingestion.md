@@ -1,3 +1,32 @@
+---
+id: journey-media-ingestion
+title: Journey Media Ingestion
+kind: implementation
+status: in-progress
+implementation_state: partial
+updated: 2026-11-14
+related:
+  - media-pipeline
+  - lightroom-publishing
+supersedes:
+  - journey-media-ingestion-architecture-brief
+superseded_by: []
+code_paths:
+  - scripts/optimize-images.js
+  - scripts/ingest-media.js
+  - scripts/lib/media-ingestion.js
+  - scripts/test-media-ingestion.js
+  - src/content/media/generated/records.json
+  - src/content/selectors/media.mjs
+  - src/views/roam/RoamTripOverview.vue
+verification:
+  state: verified
+  evidence:
+    - npm run media:test
+    - npm run content:validate
+    - npm run build
+---
+
 # Journey media preparation and ingestion
 
 The media workflow has two deliberately separate stages:

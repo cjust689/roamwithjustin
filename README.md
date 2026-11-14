@@ -25,6 +25,19 @@ push main -> GitHub Actions -> npm ci -> npm run build -> dist/ artifact -> GitH
 Make application changes only on `main`. Once the Actions deployment has been
 enabled and verified, the `pages` branch is no longer needed.
 
+## Documentation
+
+Start with [`docs/README.md`](docs/README.md). It separates verified as-built
+architecture from active implementation work, future proposals, references,
+audits, and archived briefs. Source code and tests remain authoritative for
+what is implemented.
+
+After managed documentation changes, run:
+
+```bash
+npm run docs:audit
+```
+
 ## Local development
 
 ### Requirements
@@ -230,10 +243,10 @@ or move the existing output files before running it again.
 Filename matching in numbered-copy mode does not register or publish an asset.
 For a complete, validated workflow, use the separate Journey package and
 publication ingestor documented in
-[MEDIA_INGESTION.md](./MEDIA_INGESTION.md). It prepares a manifest, verifies
-uploaded R2 objects, adds generated canonical Media records idempotently, and
-places them in a Journey's additive **All photography** collection without
-changing curated hero or gallery content.
+[the Journey media ingestion guide](docs/implementation/journey-media-ingestion.md).
+It prepares a manifest, verifies uploaded R2 objects, adds generated canonical
+Media records idempotently, and places them in a Journey's additive **All
+photography** collection without changing curated hero or gallery content.
 
 ### Command-line help
 
@@ -263,8 +276,9 @@ npm run gear:list
 npm run gear:ingest -- --journey usvi-st-john-2025 --source ./gear-inbox/usvi.md --dry-run
 ```
 
-See [GEAR_INGESTION.md](./GEAR_INGESTION.md) for the input contract,
-publication safeguards, selectors, examples, and complete operating workflow.
+See [the Gear ingestion CLI guide](docs/reference/gear-ingestion-cli.md) for the
+input contract, publication safeguards, selectors, examples, and complete
+operating workflow.
 
 ## How production works
 

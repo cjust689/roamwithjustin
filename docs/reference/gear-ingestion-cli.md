@@ -1,3 +1,27 @@
+---
+id: gear-ingestion-cli
+title: Gear Ingestion CLI
+kind: reference
+status: implemented
+implementation_state: complete
+updated: 2026-11-14
+related:
+  - gear-system
+supersedes:
+  - gear-ingestion-architecture-brief
+superseded_by: []
+code_paths:
+  - scripts/ingest-gear.js
+  - scripts/lib/gear-ingestion.js
+  - scripts/test-gear-ingestion.js
+  - src/content/gear/generated/records.json
+verification:
+  state: verified
+  evidence:
+    - npm run gear:test
+    - npm run content:validate
+---
+
 # Gear ingestion and journey linking
 
 The Gear ingestor records a product once, links it to a canonical Journey or
