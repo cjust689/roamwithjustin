@@ -633,6 +633,7 @@ async function main() {
     )
     .map(node => node.id)
   const expectedPuertoRicoOrder = [
+    "don-rafa-boutique-hotel",
     "old-san-juan",
     "cueva-del-indio",
     "hacienda-florecer",
