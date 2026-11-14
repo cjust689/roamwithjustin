@@ -45,7 +45,7 @@
             :alt="getLocation(entry.ref).name"
           />
           <h4>{{ getLocation(entry.ref).name }}</h4>
-          <p>{{ entry.notes }}</p>
+          <p>{{ getLocationSummary(entry) }}</p>
           <p class="see-more">See more →</p>
         </div>
       </div>
@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import { trips } from "@/data/trips"
+import { getTripViewModel } from "@/content/selectors/trips"
 import LocationModal from "@/components/LocationModal.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
 
@@ -152,7 +152,7 @@ export default {
   },
   computed: {
     trip() {
-      return trips.find(t => t.id === this.id)
+      return getTripViewModel(this.id)
     },
     gearWithLinks() {
       return this.trip.gearHighlights.filter(item => item.link)
@@ -164,6 +164,9 @@ export default {
   methods: {
     getLocation(ref) {
       return this.trip.locations.find(loc => loc.id === ref) || {}
+    },
+    getLocationSummary(entry) {
+      return entry.notes || this.getLocation(entry.ref).description || ""
     },
     openLocation(ref) {
       this.activeLocation = this.getLocation(ref)

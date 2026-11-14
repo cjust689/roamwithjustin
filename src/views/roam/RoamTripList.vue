@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { trips } from "@/data/trips.js"
+import { trips } from "@/content/selectors/trips"
 import M from "@/js/materialize"
 export default {
   name: "RoamTripList",

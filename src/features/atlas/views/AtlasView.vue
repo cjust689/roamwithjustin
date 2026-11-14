@@ -85,11 +85,12 @@ import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
 import { hasMapTilerKey } from "../config/mapConfig"
 import {
   atlasRootIds,
+  getAtlasJourneyNodes,
   getAtlasLeaves,
   getAtlasLineage,
   getAtlasNode,
   getAtlasNodes,
-} from "../data/atlasData"
+} from "@/content/selectors/atlas"
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
 
 const worldCamera = {
@@ -133,7 +134,7 @@ export default {
       return getAtlasNode(this.nodeId)
     },
     childNodes() {
-      return getAtlasNodes(this.currentNode?.childIds)
+      return getAtlasJourneyNodes(this.currentNode)
     },
     relatedNodes() {
       return getAtlasNodes(this.currentNode?.relatedIds)
@@ -145,7 +146,7 @@ export default {
         ? this.currentNode
         : getAtlasNode(this.currentNode.parentId)
 
-      return getAtlasNodes(journeyParent?.childIds)
+      return getAtlasJourneyNodes(journeyParent)
     },
     visibleNodes() {
       if (!this.currentNode) return getAtlasNodes(atlasRootIds)

@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/require-explicit-emits -- Vue 2 uses implicit component events. -->
 <template>
   <div v-if="open" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content">
@@ -23,16 +24,29 @@
         </span>
       </p>
 
-      <div
-        v-if="location.gallery && location.gallery.length"
-        class="modal-gallery"
-      >
-        <img
-          v-for="(img, i) in location.gallery"
-          :key="i"
-          :src="img"
-          :alt="location.name + ' photo ' + (i + 1)"
-        />
+      <div v-if="displayMedia.length" class="modal-gallery">
+        <figure v-for="(media, index) in displayMedia" :key="media.key">
+          <video
+            v-if="media.kind === 'video'"
+            controls
+            playsinline
+            preload="metadata"
+            :poster="media.poster"
+            :aria-label="media.alt"
+          >
+            <source :src="media.src" :type="media.mimeType" />
+            Your browser does not support HTML video.
+          </video>
+          <img
+            v-else
+            :src="media.src"
+            :alt="media.alt || location.name + ' photo ' + (index + 1)"
+            loading="lazy"
+          />
+          <figcaption v-if="media.caption">
+            {{ media.caption }}
+          </figcaption>
+        </figure>
       </div>
 
       <div v-if="location.notes && location.notes.length">
@@ -62,7 +76,30 @@ export default {
   name: "LocationModal",
   props: {
     open: Boolean,
-    location: Object,
+    location: {
+      type: Object,
+      default: null,
+    },
+  },
+  computed: {
+    displayMedia() {
+      if (!this.location) return []
+
+      if (this.location.media?.length) {
+        return this.location.media.map((media, index) => ({
+          ...media,
+          key: media.id || media.src || String(index),
+        }))
+      }
+
+      return (this.location.gallery || []).map((src, index) => ({
+        key: src || String(index),
+        kind: "image",
+        src,
+        alt: this.location.name + " photo " + (index + 1),
+        caption: null,
+      }))
+    },
   },
 }
 </script>
@@ -105,11 +142,27 @@ export default {
   gap: 1rem;
   margin: 1rem 0;
 }
-.modal-gallery img {
+.modal-gallery figure {
+  flex: 1 1 min(500px, 100%);
+  margin: 0;
+}
+.modal-gallery img,
+.modal-gallery video {
+  display: block;
   width: 500px;
+  max-width: 100%;
   height: 500px;
+  background: #111;
   object-fit: cover;
   border-radius: 4px;
+}
+.modal-gallery video {
+  object-fit: contain;
+}
+.modal-gallery figcaption {
+  margin-top: 0.5rem;
+  color: #555;
+  font-size: 0.9rem;
 }
 .yes {
   color: green;
