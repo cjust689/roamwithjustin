@@ -20,6 +20,39 @@ function isSafeRelativePath(value) {
   return !parts.some(part => !part || part === "." || part === "..")
 }
 
+function validateAssociationScope(scope, journey, owner, errors) {
+  const placeId = scope?.placeId ?? null
+  const visitId = scope?.visitId ?? null
+  const experienceId = scope?.experienceId ?? null
+  const hasPlace = placeId !== null
+  const hasVisit = visitId !== null
+
+  if (experienceId !== null) {
+    errors.push(`${owner} contains an unsupported Experience association`)
+  }
+  if (hasPlace !== hasVisit) {
+    errors.push(`${owner} must declare Place and Visit together`)
+    return null
+  }
+  if (!hasPlace || !journey) return null
+
+  const visit = journey.visits?.find(record => record.id === visitId)
+  if (!visit) {
+    errors.push(
+      `${owner} references Visit "${visitId}" outside Journey "${journey.id}"`
+    )
+    return null
+  }
+  if (visit.placeId !== placeId) {
+    errors.push(
+      `${owner} declares Place "${placeId}" but Visit "${visitId}" belongs to Place "${visit.placeId}"`
+    )
+    return null
+  }
+
+  return visit
+}
+
 function validateManifest(manifest, context) {
   const errors = []
   const journeys = context.journeys || []
@@ -47,6 +80,12 @@ function validateManifest(manifest, context) {
       `${owner} declares Journey slug "${manifest.journeySlug}"; expected "${journey.slug}"`
     )
   }
+  const manifestScope = {
+    placeId: manifest.placeId ?? null,
+    visitId: manifest.visitId ?? null,
+    experienceId: null,
+  }
+  validateAssociationScope(manifestScope, journey, owner, errors)
   if (
     typeof manifest.r2Prefix !== "string" ||
     !manifest.r2Prefix.endsWith("/") ||
@@ -127,14 +166,14 @@ function validateManifest(manifest, context) {
       errors.push(`${assetOwner} must use the manifest Journey association`)
     }
     if (
-      associations.visitId ||
-      associations.placeId ||
-      associations.experienceId
+      (associations.visitId ?? null) !== manifestScope.visitId ||
+      (associations.placeId ?? null) !== manifestScope.placeId
     ) {
       errors.push(
-        `${assetOwner} contains a narrower association; this ingestor currently accepts Journey-only placement`
+        `${assetOwner} must use the manifest Place/Visit association`
       )
     }
+    validateAssociationScope(associations, journey, assetOwner, errors)
     if (!mediaContract.roles.includes(placement.role)) {
       errors.push(`${assetOwner} has unsupported placement role`)
     }
@@ -157,7 +196,9 @@ function validateManifest(manifest, context) {
 
 function validateGeneratedRecords(records, context) {
   const errors = []
-  const journeys = new Set((context.journeys || []).map(record => record.id))
+  const journeys = new Map(
+    (context.journeys || []).map(record => [record.id, record])
+  )
   const staticMediaIds = new Set(
     (context.staticMedia || []).map(record => record.id)
   )
@@ -232,14 +273,13 @@ function validateGeneratedRecords(records, context) {
         `${owner} references unknown generated asset "${placement.assetId}"`
       )
     }
-    if (!journeys.has(placement.journeyId)) {
+    const journey = journeys.get(placement.journeyId)
+    if (!journey) {
       errors.push(
         `${owner} references unknown Journey "${placement.journeyId}"`
       )
     }
-    if (placement.visitId || placement.placeId || placement.experienceId) {
-      errors.push(`${owner} must remain Journey-only`)
-    }
+    validateAssociationScope(placement, journey, owner, errors)
     if (!mediaContract.roles.includes(placement.role)) {
       errors.push(`${owner} has unsupported role`)
     }
@@ -470,17 +510,25 @@ function planMediaIngestion(manifest, currentRecords, context) {
     }
     upsertById(next.assets, mediaRecord)
 
-    const placementId = `placement-${manifest.journeyId}-${assetId}`
+    const association = asset.associations || {}
+    const placementScope = association.visitId || "journey"
+    const placementId = `placement-${manifest.journeyId}-${placementScope}-${assetId}`
     const existingPlacement = next.placements.find(
       placement => placement.id === placementId
     )
+    if (existing && asset.assetId && !existingPlacement) {
+      errors.push(
+        `Manifest asset ${index + 1} cannot change the existing placement association for "${assetId}" during republish`
+      )
+      return
+    }
     if (!existingPlacement) {
       next.placements.push({
         id: placementId,
         assetId,
         journeyId: manifest.journeyId,
-        visitId: null,
-        placeId: null,
+        visitId: association.visitId || null,
+        placeId: association.placeId || null,
         experienceId: null,
         role: asset.placement.role,
         visibility: asset.placement.visibility,
@@ -516,7 +564,7 @@ function planMediaIngestion(manifest, currentRecords, context) {
     changed: JSON.stringify(next) !== JSON.stringify(currentRecords),
     records: next,
     assetIds,
-    message: `Prepared ${assetIds.length} Media asset(s) and Journey placement(s).`,
+    message: `Prepared ${assetIds.length} Media asset(s) and publication placement(s).`,
   }
 }
 

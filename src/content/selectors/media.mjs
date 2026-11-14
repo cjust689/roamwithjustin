@@ -131,19 +131,14 @@ export function resolveMediaList(references = []) {
   return references.map(resolveMediaReference).filter(Boolean)
 }
 
-// Generated publication placements are additive. They deliberately do not
-// mutate curated Journey hero/gallery arrays or create Atlas/Place claims.
-export function getJourneyPublishedMedia(journeyId) {
+function getPublishedPlacementMedia(predicate) {
   const seenAssetIds = new Set()
 
   return mediaPlacementRecords
     .filter(
       placement =>
-        placement.journeyId === journeyId &&
         placement.visibility === "published" &&
-        !placement.visitId &&
-        !placement.placeId &&
-        !placement.experienceId
+        predicate(placement)
     )
     .sort((left, right) => {
       const sequenceDifference =
@@ -167,4 +162,23 @@ export function getJourneyPublishedMedia(journeyId) {
       return media ? { ...media, placementId: placement.id } : null
     })
     .filter(Boolean)
+}
+
+// Generated publication placements are additive. Journey projection includes
+// both Journey-only and narrower Place/Visit placements without mutating any
+// curated hero or gallery array.
+export function getJourneyPublishedMedia(journeyId) {
+  return getPublishedPlacementMedia(
+    placement => placement.journeyId === journeyId
+  )
+}
+
+// A Place-scoped package is resolved through its canonical Visit. Consumers
+// may add these images to an existing location or Atlas presentation, but this
+// selector never creates a Place, Visit, hero, or Atlas pin.
+export function getVisitPublishedMedia(journeyId, visitId) {
+  return getPublishedPlacementMedia(
+    placement =>
+      placement.journeyId === journeyId && placement.visitId === visitId
+  )
 }

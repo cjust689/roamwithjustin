@@ -9,6 +9,7 @@ import { getPartner } from "../partners/index.mjs"
 import { getJourneyGear } from "./gear.mjs"
 import {
   getJourneyPublishedMedia,
+  getVisitPublishedMedia,
   resolveMediaList,
   resolveMediaReference,
 } from "./media.mjs"
@@ -100,7 +101,10 @@ export function buildTripLocationView(journey, visit) {
   // A visit with no verified image intentionally falls back to its Journey
   // cover instead of inventing a location-specific asset association.
   const hero = resolveMediaReference(visit.hero || journey.hero)
-  const media = resolveMediaList(visit.media)
+  const media = uniqueMedia([
+    ...resolveMediaList(visit.media),
+    ...getVisitPublishedMedia(journey.id, visit.id),
+  ])
   // A video makes a stop richer, but it does not make the shared Journey
   // cover a verified location photograph. Keep the photo-pending cue visible
   // until this visit owns either a hero or a location-specific image.
@@ -308,9 +312,12 @@ export function buildAtlasNodeView(presentation) {
 
   const hero = resolveMediaReference(presentation.hero || visit?.hero)
   const media = uniqueMedia(
-    resolveMediaList(
-      presentation.media || [visit?.hero, ...(visit?.media || [])]
-    )
+    [
+      ...resolveMediaList(
+        presentation.media || [visit?.hero, ...(visit?.media || [])]
+      ),
+      ...(visit ? getVisitPublishedMedia(journey.id, visit.id) : []),
+    ]
   )
   const personalNote =
     visit?.summary || visit?.description || journey.atlasNotes?.[place.id] || ""

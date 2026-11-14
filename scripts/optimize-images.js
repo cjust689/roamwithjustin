@@ -19,7 +19,7 @@ Usage:
   npm run images:optimize
   npm run images:optimize:dry
   npm run images:optimize:copies -- --source <directory> --tag <label> [--use-suggested-tag] [--dry-run]
-  npm run media:prepare -- --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status>
+  npm run media:prepare -- --source <directory> --output <directory> --tag <label> --rights-owner <owner> --rights-status <status> [--journey <id> --place <id>]
 
 Direct script usage:
   node scripts/optimize-images.js [--dry-run]
@@ -41,10 +41,15 @@ Modes:
     match prints a confidence-ranked filename suggestion before processing.
 
   Journey publication package (--package)
-    Resolves --tag (or --journey) to exactly one canonical Journey, writes
-    optimized numbered files to <output>/<journey-slug>/, and creates a
-    publication-manifest.json beside them. The package can be uploaded under
-    the manifest's R2 prefix and then applied with npm run media:ingest.
+    Resolves --tag (or --journey) to exactly one canonical Journey. With an
+    explicit --place, it also requires exactly one matching Visit inside that
+    Journey. It writes optimized numbered files and a publication-manifest.json
+    to <output>/<journey-slug>/ or <output>/<journey-slug>-<place-id>/.
+
+    The package can be uploaded under the manifest's R2 prefix and then applied
+    with npm run media:ingest. Place-scoped images remain part of the Journey's
+    All Photography collection and also appear for that Visit and any existing
+    Atlas presentation. This command never creates an Atlas pin.
 
     This mode requires explicit rights metadata. It never uploads files,
     publishes content, overwrites an existing package, or changes curated
@@ -56,6 +61,8 @@ Options:
   --package             Build a Journey publication package and manifest
   --output <directory>  Parent directory for a Journey package
   --journey <id>        Explicit canonical Journey ID (optional tag override)
+  --place <id>          Optional canonical Place ID; requires --journey and one
+                        matching Visit in that Journey
   --r2-prefix <prefix>  R2 parent prefix (default: images)
   --rights-owner <id>   Explicit rights owner stored in the manifest
   --rights-status <id>  Explicit rights status, such as owned or licensed
@@ -69,7 +76,8 @@ Examples:
   node scripts/optimize-images.js --source "C:\\photos\\trip" --tag "utah"
   node scripts/optimize-images.js --source ./photos --tag "trunk bay" --use-suggested-tag
   node scripts/optimize-images.js --source ./photos --tag utah --dry-run
-  node scripts/optimize-images.js --package --source ./exports --output ./ready --tag usvi --rights-owner roam-with-justin --rights-status owned`
+  node scripts/optimize-images.js --package --source ./exports --output ./ready --tag usvi --rights-owner roam-with-justin --rights-status owned
+  node scripts/optimize-images.js --package --source ./exports --output ./ready --tag "waterlemon cay" --journey usvi-st-john-2025 --place waterlemon-cay --rights-owner roam-with-justin --rights-status owned`
 }
 
 function readOptionValue(args, index, option) {
@@ -90,6 +98,7 @@ function parseArguments(args) {
     journey: null,
     output: null,
     packageMode: false,
+    place: null,
     r2Prefix: "images",
     rightsOwner: null,
     rightsStatus: null,
@@ -130,6 +139,11 @@ function parseArguments(args) {
       index += 1
     } else if (argument.startsWith("--journey=")) {
       options.journey = argument.slice("--journey=".length)
+    } else if (argument === "--place") {
+      options.place = readOptionValue(args, index, "--place")
+      index += 1
+    } else if (argument.startsWith("--place=")) {
+      options.place = argument.slice("--place=".length)
     } else if (argument === "--r2-prefix") {
       options.r2Prefix = readOptionValue(args, index, "--r2-prefix")
       index += 1
@@ -173,6 +187,11 @@ function parseArguments(args) {
         `Package mode requires --rights-owner and --rights-status; rights are never inferred\n\n${usage()}`
       )
     }
+    if (options.place && !options.journey) {
+      throw new Error(
+        `--place requires an explicit --journey so a filename label cannot create a geographic association\n\n${usage()}`
+      )
+    }
     validateTag(options.tag)
     validateR2Prefix(options.r2Prefix)
     return options
@@ -184,12 +203,13 @@ function parseArguments(args) {
   if (
     options.output ||
     options.journey ||
+    options.place ||
     options.rightsOwner ||
     options.rightsStatus ||
     options.r2Prefix !== "images"
   ) {
     throw new Error(
-      `--output, --journey, --r2-prefix, and rights options require --package\n\n${usage()}`
+      `--output, --journey, --place, --r2-prefix, and rights options require --package\n\n${usage()}`
     )
   }
 
@@ -495,6 +515,44 @@ async function resolvePackageJourney(tag, journeyId) {
   return { journey: best.journey, score: best.score, explicit: false }
 }
 
+async function resolvePackageScope(tag, journeyId, placeId) {
+  const resolution = await resolvePackageJourney(tag, journeyId)
+  if (!placeId) {
+    return { ...resolution, place: null, visit: null }
+  }
+
+  const placeModule = await import(
+    pathToFileURL(
+      path.join(projectRoot, "src", "content", "places", "index.mjs")
+    ).href
+  )
+  const place = placeModule.placesById[placeId]
+  if (!place) {
+    const resolvedAlias = placeModule.resolvePlaceId(placeId)
+    throw new Error(
+      resolvedAlias && resolvedAlias !== placeId
+        ? `--place must use the canonical Place ID "${resolvedAlias}", not alias "${placeId}".`
+        : `Unknown canonical Place "${placeId}". No geographic association was created.`
+    )
+  }
+
+  const visits = resolution.journey.visits.filter(
+    visit => visit.placeId === place.id
+  )
+  if (!visits.length) {
+    throw new Error(
+      `Place "${place.id}" is not a Visit in Journey "${resolution.journey.id}". No geographic association was created.`
+    )
+  }
+  if (visits.length > 1) {
+    throw new Error(
+      `Place "${place.id}" occurs in multiple Visits in Journey "${resolution.journey.id}"; this command cannot choose one safely.`
+    )
+  }
+
+  return { ...resolution, place, visit: visits[0] }
+}
+
 function reportTagMatch(tag, match) {
   if (!match.best || match.best.score < 0.6) {
     console.log(
@@ -777,7 +835,7 @@ async function createPackageAsset(source, filename, index, context) {
   )
 
   return {
-    provisionalId: `local-${context.journey.slug}-${String(index + 1).padStart(3, "0")}-${checksum.slice(0, 12)}`,
+    provisionalId: `local-${context.scopeLabel}-${String(index + 1).padStart(3, "0")}-${checksum.slice(0, 12)}`,
     assetId: null,
     revision: null,
     source: {
@@ -800,8 +858,8 @@ async function createPackageAsset(source, filename, index, context) {
     },
     associations: {
       journeyId: context.journey.id,
-      visitId: null,
-      placeId: null,
+      visitId: context.visit?.id || null,
+      placeId: context.place?.id || null,
       experienceId: null,
     },
     placement: {
@@ -831,12 +889,23 @@ async function runPackageMode(options) {
   const outputDirectory = path.resolve(process.cwd(), options.output)
   await requireDirectory(sourceDirectory)
 
-  const resolution = await resolvePackageJourney(options.tag, options.journey)
+  const resolution = await resolvePackageScope(
+    options.tag,
+    options.journey,
+    options.place
+  )
   const journey = resolution.journey
+  const place = resolution.place
+  const visit = resolution.visit
   const percentage = Math.round(resolution.score * 100)
   console.log(
     `Journey match: "${options.tag}" -> ${journey.title} [${journey.id}] (${resolution.explicit ? "explicit" : `${percentage}% confidence`}).`
   )
+  if (place) {
+    console.log(
+      `Place scope: ${place.name} [${place.id}] -> Visit [${visit.id}] (explicit canonical match).`
+    )
+  }
 
   const images = (await findImages(sourceDirectory, false)).sort(
     (left, right) => left.localeCompare(right)
@@ -847,21 +916,25 @@ async function runPackageMode(options) {
     )
   }
 
-  const packageDirectory = path.join(outputDirectory, journey.slug)
+  const scopeLabel = place ? `${journey.slug}-${place.id}` : journey.slug
+  const packageDirectory = path.join(outputDirectory, scopeLabel)
   if (await pathExists(packageDirectory)) {
     throw new Error(
-      `Refusing to overwrite existing Journey package: ${packageDirectory}`
+      `Refusing to overwrite existing media package: ${packageDirectory}`
     )
   }
 
   const normalizedPrefix = options.r2Prefix.replace(/^\/+|\/+$/g, "")
   const stagingDirectory = path.join(
     outputDirectory,
-    `.${journey.slug}-prepare-${process.pid}-${Date.now()}`
+    `.${scopeLabel}-prepare-${process.pid}-${Date.now()}`
   )
   const context = {
     dryRun: options.dryRun,
     journey,
+    place,
+    scopeLabel,
+    visit,
     rightsOwner: options.rightsOwner,
     rightsStatus: options.rightsStatus,
     stagingDirectory,
@@ -876,7 +949,7 @@ async function runPackageMode(options) {
     const assets = []
     for (let index = 0; index < images.length; index += 1) {
       const extension = path.extname(images[index]).toLowerCase()
-      const filename = `${journey.slug}-${String(index + 1).padStart(3, "0")}${extension}`
+      const filename = `${place?.id || journey.slug}-${String(index + 1).padStart(3, "0")}${extension}`
       assets.push(
         await createPackageAsset(images[index], filename, index, context)
       )
@@ -887,12 +960,18 @@ async function runPackageMode(options) {
       manifestType: "journey-media-publication",
       journeyId: journey.id,
       journeySlug: journey.slug,
+      placeId: place?.id || null,
+      visitId: visit?.id || null,
       inputTag: options.tag,
-      parentR2Prefix: `${normalizedPrefix}/${journey.slug}/`,
+      parentR2Prefix: place
+        ? `${normalizedPrefix}/${journey.slug}/${place.id}/`
+        : `${normalizedPrefix}/${journey.slug}/`,
       assets,
     })
-    const batchId = `media-${journey.slug}-${sha256(batchSeed).slice(0, 16)}`
-    const r2Prefix = `${normalizedPrefix}/${journey.slug}/${batchId}`
+    const batchId = `media-${scopeLabel}-${sha256(batchSeed).slice(0, 16)}`
+    const r2Prefix = place
+      ? `${normalizedPrefix}/${journey.slug}/${place.id}/${batchId}`
+      : `${normalizedPrefix}/${journey.slug}/${batchId}`
     assets.forEach(asset => {
       asset.output.objectKey = `${r2Prefix}/${asset.output.relativePath}`
     })
@@ -902,6 +981,8 @@ async function runPackageMode(options) {
       batchId,
       journeyId: journey.id,
       journeySlug: journey.slug,
+      placeId: place?.id || null,
+      visitId: visit?.id || null,
       inputTag: options.tag,
       r2Prefix: `${r2Prefix}/`,
       assets,
@@ -918,9 +999,13 @@ async function runPackageMode(options) {
 
     console.log("")
     console.log(
-      `${options.dryRun ? "Would create" : "Created"} Journey package with ${assets.length} image(s).`
+      `${options.dryRun ? "Would create" : "Created"} ${place ? "Place-scoped" : "Journey"} package with ${assets.length} image(s).`
     )
     console.log(`Canonical Journey: ${journey.id}`)
+    if (place) {
+      console.log(`Canonical Place: ${place.id}`)
+      console.log(`Canonical Visit: ${visit.id}`)
+    }
     console.log(`R2 prefix: ${manifest.r2Prefix}`)
     console.log(
       `Manifest: ${path.join(packageDirectory, "publication-manifest.json")}`

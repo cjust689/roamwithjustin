@@ -92,6 +92,12 @@ async function main() {
       id: "usvi-st-john-2025",
       slug: "usvi",
       title: "St. John, USVI",
+      visits: [
+        {
+          id: "usvi-st-john-2025-waterlemon-cay",
+          placeId: "waterlemon-cay",
+        },
+      ],
     }
     assert.deepStrictEqual(
       validateManifest(manifest, { journeys: [journey] }).errors,
@@ -184,7 +190,116 @@ async function main() {
     ])
     assert.match(unverifiedDryRun.stdout, /not-verified-dry-run/)
 
+    const placeOutputDirectory = path.join(testRoot, "ready-place")
+    const placePrepared = runNode([
+      "scripts/optimize-images.js",
+      "--package",
+      "--source",
+      sourceDirectory,
+      "--output",
+      placeOutputDirectory,
+      "--tag",
+      "waterlemon cay",
+      "--journey",
+      "usvi-st-john-2025",
+      "--place",
+      "waterlemon-cay",
+      "--rights-owner",
+      "roam-with-justin",
+      "--rights-status",
+      "owned",
+    ])
+    assert.match(placePrepared.stdout, /Place scope: Waterlemon Cay/)
+    const placePackageDirectory = path.join(
+      placeOutputDirectory,
+      "usvi-waterlemon-cay"
+    )
+    const placeManifestContents = fs.readFileSync(
+      path.join(placePackageDirectory, "publication-manifest.json"),
+      "utf8"
+    )
+    const placeManifest = JSON.parse(placeManifestContents)
+    assert.strictEqual(placeManifest.placeId, "waterlemon-cay")
+    assert.strictEqual(
+      placeManifest.visitId,
+      "usvi-st-john-2025-waterlemon-cay"
+    )
+    assert.strictEqual(
+      placeManifest.assets[0].output.relativePath,
+      "waterlemon-cay-001.jpg"
+    )
+    assert.strictEqual(
+      placeManifest.r2Prefix,
+      `images/usvi/waterlemon-cay/${placeManifest.batchId}/`
+    )
+    assert.deepStrictEqual(placeManifest.assets[0].associations, {
+      journeyId: "usvi-st-john-2025",
+      visitId: "usvi-st-john-2025-waterlemon-cay",
+      placeId: "waterlemon-cay",
+      experienceId: null,
+    })
+    assert.deepStrictEqual(
+      validateManifest(placeManifest, { journeys: [journey] }).errors,
+      []
+    )
+
+    const placePlan = planMediaIngestion(placeManifest, emptyRecords(), {
+      journeys: [journey],
+      staticMedia: [],
+      manifestSha256: sha256(placeManifestContents),
+      verification: { method: "receipt-sha256" },
+    })
+    assert.deepStrictEqual(placePlan.errors, [])
+    assert.strictEqual(
+      placePlan.records.placements[0].placeId,
+      "waterlemon-cay"
+    )
+    assert.strictEqual(
+      placePlan.records.placements[0].visitId,
+      "usvi-st-john-2025-waterlemon-cay"
+    )
+
     runNode(prepareArgs, 1)
+    runNode(
+      [
+        "scripts/optimize-images.js",
+        "--package",
+        "--source",
+        sourceDirectory,
+        "--output",
+        path.join(testRoot, "wrong-place"),
+        "--tag",
+        "arches",
+        "--journey",
+        "usvi-st-john-2025",
+        "--place",
+        "arches-national-park",
+        "--rights-owner",
+        "roam-with-justin",
+        "--rights-status",
+        "owned",
+      ],
+      1
+    )
+    runNode(
+      [
+        "scripts/optimize-images.js",
+        "--package",
+        "--source",
+        sourceDirectory,
+        "--output",
+        path.join(testRoot, "place-without-journey"),
+        "--tag",
+        "waterlemon cay",
+        "--place",
+        "waterlemon-cay",
+        "--rights-owner",
+        "roam-with-justin",
+        "--rights-status",
+        "owned",
+      ],
+      1
+    )
     runNode(
       [
         "scripts/optimize-images.js",

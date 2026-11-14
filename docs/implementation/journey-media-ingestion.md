@@ -32,12 +32,13 @@ verification:
 The media workflow has two deliberately separate stages:
 
 1. `media:prepare` optimizes local exports, gives them deterministic names,
-   and writes a provisional publication manifest.
+   validates a Journey or optional Place/Visit scope, and writes a provisional
+   publication manifest.
 2. `media:ingest` verifies both the local package and the uploaded R2 objects,
-   then adds generated canonical Media assets and Journey-only placements.
+   then adds generated canonical Media assets and publication placements.
 
 Uploading files alone never publishes them. Ingestion never edits a curated
-Journey cover, hero, gallery, visit, Place, or Atlas pin.
+Journey cover, hero, story gallery, Visit, Place, or Atlas pin.
 
 ## Commands
 
@@ -83,6 +84,29 @@ npm run media:prepare -- \
 List accepted IDs with `npm run media:journeys`. Unknown, weak, or ambiguous
 matches fail closed; the tool does not guess a publication association.
 
+`media:prepare` already performs compression. Do not run
+`images:optimize:copies` first unless you separately want same-directory copies
+that are not part of a publication package.
+
+### Prepare images for one Place/Visit
+
+Use `--place` when the image set represents one social post, Atlas pin, or
+location inside a Journey. Place scope is explicit: it requires `--journey`,
+accepts only a canonical Place ID, and continues only when exactly one Visit
+for that Place exists in the selected Journey. The free-form `--tag` remains an
+operator label; it never creates the geographic association.
+
+Git Bash, copy/paste as one line:
+
+```bash
+npm run media:prepare -- --source "O:/WebWorksMedia/Davinci Edits/USVI/edits/_2" --output "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready" --tag "waterlemon cay" --journey "usvi-st-john-2025" --place "waterlemon-cay" --rights-owner "roam-with-justin" --rights-status "owned"
+```
+
+For this repository, that resolves Place `waterlemon-cay` to Visit
+`usvi-st-john-2025-waterlemon-cay`. A Place from a different Journey, an alias
+instead of a canonical ID, a missing Visit, or multiple Visits for the same
+Place fails without creating a package.
+
 The example creates:
 
 ```text
@@ -93,19 +117,33 @@ D:\R2 Ready\usvi\
   publication-manifest.json
 ```
 
+The Place example creates:
+
+```text
+O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/
+  waterlemon-cay-001.jpg
+  waterlemon-cay-002.jpg
+  ...
+  publication-manifest.json
+```
+
 Images are auto-oriented, bounded to 2560 pixels, encoded using the existing
 optimizer policy, and measured after encoding. The manifest records the real
 MIME type, width, height, byte size, SHA-256, intended R2 object key, explicit
-rights, canonical Journey ID, and a Journey-only gallery placement. The
-default object prefix is
-`images/<journey-slug>/<content-derived-batch-id>/`; change the parent with
-`--r2-prefix <prefix>`. The versioned batch segment prevents a later upload
-from silently replacing a previously published object.
+rights, canonical Journey ID, and a gallery placement. Place packages also
+record the validated canonical Place and Visit IDs. The default object prefix
+is `images/<journey-slug>/<content-derived-batch-id>/` for Journey-only
+packages and
+`images/<journey-slug>/<place-id>/<content-derived-batch-id>/` for Place
+packages; change the parent with `--r2-prefix <prefix>`. The versioned batch
+segment prevents a later upload from silently replacing a previously
+published object.
 
-Preparation refuses to overwrite an existing `<output>/<journey-slug>`
-package. Use a clean output parent or deliberately move the reviewed package
-before preparing another batch. `--dry-run` performs the transforms in memory
-and reports the plan without writing anything.
+Preparation refuses to overwrite an existing `<output>/<journey-slug>` or
+`<output>/<journey-slug>-<place-id>` package. Use a clean output parent or
+deliberately move the reviewed package before preparing another batch.
+`--dry-run` performs the transforms in memory and reports the plan without
+writing anything.
 
 The original in-place optimizer and same-directory numbered-copy mode remain
 available and unchanged:
