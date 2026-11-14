@@ -37,11 +37,32 @@ export const atlasPresentation = Object.freeze([
     ],
     relatedIds: [],
   },
+  // Stop-level hero and gallery media intentionally resolve from each Journey
+  // visit. Atlas presentation owns only map hierarchy, camera, and discovery
+  // relationships so media curation stays in one canonical record.
+  {
+    id: "bonneville-salt-flats",
+    placeId: "bonneville-salt-flats",
+    journeyId: "utah-winter-2025",
+    parentId: "utah",
+    eyebrow: "Sunrise landscape",
+    category: "Salt flats",
+    camera: {
+      center: [-113.896194, 40.762583],
+      zoom: 11.1,
+      pitch: 48,
+      bearing: -18,
+    },
+    relatedIds: ["moab", "salt-lake-city-airport"],
+  },
   {
     id: "moab",
     placeId: "moab",
     journeyId: "utah-winter-2025",
     parentId: "utah",
+    // The Moab hub is not itself a Journey visit. Anchor its overview-route
+    // order to the first confirmed stop nested beneath it.
+    journeyOrderPlaceId: "moab-giants",
     eyebrow: "Exploration hub",
     category: "Desert landscapes",
     camera: {
@@ -73,6 +94,43 @@ export const atlasPresentation = Object.freeze([
       },
     ],
     relatedIds: [],
+  },
+  {
+    id: "moab-giants",
+    placeId: "moab-giants",
+    journeyId: "utah-winter-2025",
+    parentId: "moab",
+    eyebrow: "Family discovery",
+    category: "Dinosaur park",
+    camera: {
+      center: [-109.761166, 38.543939],
+      zoom: 13.4,
+      pitch: 52,
+      bearing: 18,
+    },
+    relatedIds: ["potash-road", "arches-national-park"],
+  },
+  {
+    id: "potash-road",
+    placeId: "potash-road",
+    journeyId: "utah-winter-2025",
+    // Two Journey visits share this Place. The Atlas node deliberately opens
+    // the first full scenic-drive chapter instead of creating overlapping pins.
+    visitId: "utah-winter-2025-potash-road",
+    parentId: "moab",
+    eyebrow: "Scenic drive",
+    category: "Canyon road",
+    camera: {
+      center: [-109.600122, 38.544455],
+      zoom: 12.2,
+      pitch: 64,
+      bearing: -30,
+    },
+    relatedIds: [
+      "moab-giants",
+      "canyonlands-national-park",
+      "dead-horse-point",
+    ],
   },
   {
     id: "arches-national-park",
@@ -109,7 +167,11 @@ export const atlasPresentation = Object.freeze([
         alt: "Arches National Park media 3",
       },
     ],
-    relatedIds: ["canyonlands-national-park", "dead-horse-point"],
+    relatedIds: [
+      "canyonlands-national-park",
+      "dead-horse-point",
+      "potash-road",
+    ],
   },
   {
     id: "canyonlands-national-park",
@@ -155,7 +217,7 @@ export const atlasPresentation = Object.freeze([
         caption: "Canyonlands in changing winter weather",
       },
     ],
-    relatedIds: ["dead-horse-point", "arches-national-park"],
+    relatedIds: ["dead-horse-point", "arches-national-park", "potash-road"],
   },
   {
     id: "dead-horse-point",
@@ -192,7 +254,71 @@ export const atlasPresentation = Object.freeze([
         alt: "Dead Horse Point media 3",
       },
     ],
-    relatedIds: ["canyonlands-national-park", "arches-national-park"],
+    relatedIds: [
+      "canyonlands-national-park",
+      "arches-national-park",
+      "potash-road",
+    ],
+  },
+  {
+    id: "park-city",
+    placeId: "park-city",
+    journeyId: "utah-winter-2025",
+    parentId: "utah",
+    eyebrow: "Mountain town",
+    category: "Skiing and exploring",
+    camera: {
+      center: [-111.506627, 40.651887],
+      zoom: 12.1,
+      pitch: 66,
+      bearing: 20,
+    },
+    relatedIds: ["woodward-park-city", "uintas"],
+  },
+  {
+    id: "woodward-park-city",
+    placeId: "woodward-park-city",
+    journeyId: "utah-winter-2025",
+    parentId: "utah",
+    eyebrow: "Family adventure",
+    category: "Action sports",
+    camera: {
+      center: [-111.585887, 40.754775],
+      zoom: 13.2,
+      pitch: 58,
+      bearing: -20,
+    },
+    relatedIds: ["park-city", "uintas"],
+  },
+  {
+    id: "uintas",
+    placeId: "uintas",
+    journeyId: "utah-winter-2025",
+    parentId: "utah",
+    eyebrow: "Winter adventure",
+    category: "Skiing and dog sledding",
+    camera: {
+      center: [-111.159263, 40.78474],
+      zoom: 11.3,
+      pitch: 60,
+      bearing: -18,
+    },
+    relatedIds: ["park-city", "woodward-park-city"],
+  },
+  {
+    id: "salt-lake-city-airport",
+    placeId: "salt-lake-city-airport",
+    journeyId: "utah-winter-2025",
+    parentId: "utah",
+    eyebrow: "Journey gateway",
+    category: "Airport",
+    camera: {
+      center: [-111.977773, 40.788393],
+      zoom: 11.4,
+      pitch: 42,
+      bearing: -5,
+    },
+    relatedIds: ["bonneville-salt-flats", "park-city"],
   },
   {
     id: "puerto-rico",

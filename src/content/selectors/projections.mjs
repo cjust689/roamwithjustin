@@ -275,6 +275,9 @@ export function buildAtlasNodeView(presentation) {
     placeId: place.id,
     journeyId: journey.id,
     parentId: presentation.parentId,
+    // Structural Atlas hubs may not be Journey visits themselves. An optional
+    // anchor lets their route position come from the first real stop they group.
+    journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
     title: place.name,
     eyebrow: presentation.eyebrow,
     category: presentation.category,
@@ -305,8 +308,12 @@ export function orderAtlasNodesByJourney(nodes = []) {
   })
 
   return [...nodes].sort((left, right) => {
-    const leftOrder = journeyOrder.get(left.placeId || left.id)
-    const rightOrder = journeyOrder.get(right.placeId || right.id)
+    const leftOrder = journeyOrder.get(
+      left.journeyOrderPlaceId || left.placeId || left.id
+    )
+    const rightOrder = journeyOrder.get(
+      right.journeyOrderPlaceId || right.placeId || right.id
+    )
 
     if (leftOrder == null && rightOrder == null) {
       return originalOrder.get(left.id) - originalOrder.get(right.id)

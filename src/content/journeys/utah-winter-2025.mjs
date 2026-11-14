@@ -748,10 +748,24 @@ export const utahWinter2025Journey = Object.freeze({
   ],
   atlasNotes: {
     utah: "This atlas slice uses photography and notes from the existing seven-day Utah trip story.",
+    "bonneville-salt-flats":
+      "We arrived before dawn and watched the wet salt catch the first light. The reflections made the landscape feel almost weightless.",
     moab: "We used Moab as our base while exploring Arches, Canyonlands, Dead Horse Point, and Potash Road.",
+    "moab-giants":
+      "The life-sized dinosaurs turned a road-trip stop into fuel for our son's imagination all the way into Moab.",
+    "potash-road":
+      "We followed the canyon beside the Colorado River near sunset, then returned for a quieter solo filming run over the potash ponds.",
     "arches-national-park":
       "We arrived in the afternoon and stayed for sunset. The drive and shorter walks made this stop work well with a young child.",
     "dead-horse-point":
       "A sudden snowstorm changed the light and made an already dramatic overlook feel surreal.",
+    "park-city":
+      "We spent the morning skiing and snowboarding, then traded the slopes for an afternoon walking through Park City.",
+    "woodward-park-city":
+      "Woodward gave the whole family room to play, from the snow to the indoor ramps, trampolines, bikes, and boards.",
+    uintas:
+      "Cross-country skiing slowed the day down before the dogs pulled us into a completely different kind of winter adventure.",
+    "salt-lake-city-airport":
+      "SLC was both the starting line and the final stop of the seven-day drive across Utah.",
   },
 })

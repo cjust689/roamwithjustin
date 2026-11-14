@@ -484,13 +484,37 @@ async function main() {
 
   atlasModule.atlasPresentation.forEach(presentation => {
     const owner = 'Atlas presentation "' + presentation.id + '"'
-    if (!placeModule.getPlace(presentation.placeId)) {
+    const place = placeModule.getPlace(presentation.placeId)
+    const journey = journeyModule.getJourney(presentation.journeyId)
+    if (!place) {
       report(owner + ' references unknown place "' + presentation.placeId + '"')
     }
-    if (!journeyModule.getJourney(presentation.journeyId)) {
+    if (!journey) {
       report(
         owner + ' references unknown journey "' + presentation.journeyId + '"'
       )
+    }
+    if (presentation.journeyOrderPlaceId) {
+      if (!placeModule.getPlace(presentation.journeyOrderPlaceId)) {
+        report(
+          owner +
+            ' references unknown Journey-order place "' +
+            presentation.journeyOrderPlaceId +
+            '"'
+        )
+      } else if (
+        journey &&
+        !journey.visits.some(
+          visit => visit.placeId === presentation.journeyOrderPlaceId
+        )
+      ) {
+        report(
+          owner +
+            ' uses Journey-order place "' +
+            presentation.journeyOrderPlaceId +
+            '" that is not visited by its Journey'
+        )
+      }
     }
     if (presentation.parentId && !presentationIds.has(presentation.parentId)) {
       report(
@@ -502,7 +526,11 @@ async function main() {
         report(owner + ' references unknown related node "' + relatedId + '"')
       }
     })
-    validateMediaUsage(presentation.hero, owner + " hero", mediaModule)
+    // Stop presentations may inherit hero/media from their canonical Journey
+    // visit. When Atlas overrides a hero explicitly, validate that override.
+    if (presentation.hero) {
+      validateMediaUsage(presentation.hero, owner + " hero", mediaModule)
+    }
     ;(presentation.media || []).forEach(usage =>
       validateMediaUsage(usage, owner, mediaModule)
     )
@@ -535,6 +563,8 @@ async function main() {
     .orderAtlasNodesByJourney(moabChildren)
     .map(node => node.id)
   const expectedMoabOrder = [
+    "moab-giants",
+    "potash-road",
     "canyonlands-national-park",
     "dead-horse-point",
     "arches-national-park",
@@ -542,6 +572,57 @@ async function main() {
   if (orderedMoab.join("|") !== expectedMoabOrder.join("|")) {
     report("Moab Atlas route does not follow Utah Journey visit order")
   }
+
+  const utah = completeAtlasViews.find(node => node.id === "utah")
+  const orderedUtahOverview = projections
+    .orderAtlasNodesByJourney(
+      (utah?.childIds || [])
+        .map(id => completeAtlasViews.find(node => node.id === id))
+        .filter(Boolean)
+    )
+    .map(node => node.id)
+  const expectedUtahOverviewOrder = [
+    "bonneville-salt-flats",
+    "moab",
+    "park-city",
+    "woodward-park-city",
+    "uintas",
+    "salt-lake-city-airport",
+  ]
+  if (orderedUtahOverview.join("|") !== expectedUtahOverviewOrder.join("|")) {
+    report("Utah Atlas overview route does not follow Journey visit order")
+  }
+
+  // Utah is a completed migration: every unique canonical Place in its Journey
+  // must have a public Atlas node. Repeated visits, such as Potash Road, still
+  // resolve to one pin because coverage is checked by Place identity.
+  const utahJourney = journeyModule.getJourney("utah-winter-2025")
+  const expectedUtahPlaceIds = [
+    ...new Set((utahJourney?.visits || []).map(visit => visit.placeId)),
+  ]
+  const utahAtlasPlaceIds = new Set(
+    completeAtlasViews
+      .filter(node => node.journeyId === "utah-winter-2025")
+      .map(node => node.placeId)
+  )
+  expectedUtahPlaceIds.forEach(placeId => {
+    if (!utahAtlasPlaceIds.has(placeId)) {
+      report('Utah Journey Place "' + placeId + '" has no Atlas node')
+    }
+  })
+
+  const expectedUtahGuidedOrder = [
+    "bonneville-salt-flats",
+    "moab-giants",
+    "potash-road",
+    "canyonlands-national-park",
+    "dead-horse-point",
+    "arches-national-park",
+    "park-city",
+    "woodward-park-city",
+    "uintas",
+    "salt-lake-city-airport",
+  ]
 
   const puertoRico = completeAtlasViews.find(node => node.id === "puerto-rico")
   const orderedPuertoRico = projections
@@ -601,7 +682,7 @@ async function main() {
   const guidedJourneys = [
     {
       journeyId: "utah-winter-2025",
-      expectedStops: expectedMoabOrder,
+      expectedStops: expectedUtahGuidedOrder,
     },
     {
       journeyId: "puerto-rico-2024",
