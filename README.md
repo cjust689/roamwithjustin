@@ -145,7 +145,7 @@ The project uses [Sharp](https://sharp.pixelplumbing.com/) as a development
 dependency for deterministic image processing. This re-encodes the existing
 pixels; it does not use generative AI or recreate the photographs.
 
-The agreed optimization policy is:
+The default in-place optimization policy is:
 
 - resize photographs to a maximum width or height of 2560 pixels without
   enlarging smaller images;
@@ -178,6 +178,51 @@ safe from repeated lossy JPEG encoding. An oversized file is also left
 unchanged when the optimized output would be larger than its current file.
 Run the production build after an optimization pass and visually review the
 main galleries before committing the binary changes.
+
+### Create compressed, numbered copies in a source directory
+
+The optimizer also has a copy mode for preparing a directory of new images.
+Pass the source directory and a filename tag at run time:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico"
+```
+
+This reads the JPEG and PNG files directly inside the source directory in
+alphabetical order and writes the compressed copies back to that same
+directory as `puerto-rico-1.jpg`, `puerto-rico-2.png`, and so on. It does not
+scan subdirectories, and the original files are left unchanged. Images are
+auto-oriented, reduced to a maximum width or height of 2560 pixels, and
+re-encoded using the same settings as the in-place optimizer. If re-encoding
+would make an image larger, the numbered output is instead a byte-for-byte
+copy of the original.
+
+Preview the filenames and savings without keeping any output files by adding
+`--dry-run`:
+
+```bash
+npm run images:optimize:copies -- --source "path/to/photos" --tag "puerto-rico" --dry-run
+```
+
+Copy mode refuses to overwrite an existing numbered output. Choose a new tag
+or move the existing output files before running it again.
+
+### Command-line help
+
+The script contains its complete command reference. Display it with any of
+these help flags:
+
+```bash
+node scripts/optimize-images.js --help
+node scripts/optimize-images.js --h
+node scripts/optimize-images.js -h
+```
+
+The same help is available through npm:
+
+```bash
+npm run images:optimize -- --help
+```
 
 ## How production works
 
