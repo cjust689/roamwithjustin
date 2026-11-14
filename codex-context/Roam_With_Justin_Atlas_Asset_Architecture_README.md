@@ -395,7 +395,9 @@ Keep business identity, URLs, affiliate disclosures and booking data in Partner 
 
 Third-party hotel images should remain explicit external URLs until ownership or usage permission is confirmed. Do not automatically copy vendor media into R2.
 
-The first canonical provider record is now implemented in `src/content/partners/index.mjs` for Nate's Custom Charters. Journey days reference it through `partnerIds`; selectors resolve the public operator link and disclosure, and validation rejects unknown providers or unsafe URLs. This establishes the Partner boundary without turning the charter day into a premature standalone Experience.
+The Partner registry now owns Nate's Custom Charters, High Tide, Reef2Peak, and Mercado La Carreta. Journey days reference them through `partnerIds`; selectors resolve each record's preferred official or platform link, public label, and disclosure, while validation rejects unknown providers, missing links, or unsafe URLs. This establishes the Partner boundary without turning restaurants, rentals, or the charter day into premature standalone Experiences.
+
+Every resolved canonical Place must expose at least one HTTPS `externalLinks` value, preferring an official source and falling back to a stable tourism platform or Maps search. `hermit-crab-island` is the sole deliberate exception because its formal geographic identity remains unresolved. Journey lodging records must also expose an HTTPS stay link. The current coverage and remaining prose-only gaps are tracked in `Roam_With_Justin_External_Link_Audit.md`.
 
 ## Derived application views
 
