@@ -6,15 +6,13 @@
     <template v-else>
       <!-- Show different headers depending on the route -->
       <component :is="currentHeader" />
-      <div id="main-content" class="grey darken-4">
+      <div id="main-content">
         <!-- Only show banner if not on root or about -->
         <Banner v-if="showBanner" />
         <transition name="fade" mode="out-in">
           <router-view />
         </transition>
       </div>
-
-      <div class="divider yellow darken-2"></div>
       <VueFooter />
     </template>
   </div>
@@ -40,7 +38,10 @@ export default {
     },
     showBanner() {
       const hiddenRoutes = ["/", "/about", "/affiliates"]
-      return !hiddenRoutes.includes(this.$route.path)
+      return (
+        !hiddenRoutes.includes(this.$route.path) &&
+        !this.$route.path.startsWith("/trips")
+      )
     },
   },
   mounted() {
@@ -70,6 +71,8 @@ body,
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-top: 64px;
+  min-height: 70vh;
+  padding-top: 72px;
+  background: #0b1114;
 }
 </style>

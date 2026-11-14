@@ -377,6 +377,42 @@ async function main() {
     childIds: childIdsByParent[node.id] || [],
   }))
 
+  // Cross-presentation links are derived from shared Journey and Place IDs.
+  // Validate both the journey root fallback and every exact Place-to-pin match
+  // so UI navigation cannot drift into a second hand-maintained mapping.
+  tripViews
+    .map(trip => projections.addTripAtlasNavigation(trip, completeAtlasViews))
+    .forEach(trip => {
+      const journeyNodes = completeAtlasViews.filter(
+        node => node.journeyId === trip.journeyId
+      )
+      const rootNode = journeyNodes.find(node => !node.parentId)
+      const expectedRootHref = rootNode ? "/atlas/" + rootNode.id : ""
+
+      if (trip.atlasHref !== expectedRootHref) {
+        report('Trip view "' + trip.id + '" has an invalid Atlas root link')
+      }
+
+      trip.locations.forEach(location => {
+        const exactNode = journeyNodes.find(
+          node => node.placeId === location.canonicalId
+        )
+        const expectedHref = exactNode
+          ? "/atlas/" + exactNode.id
+          : expectedRootHref
+        if (
+          location.atlasHref !== expectedHref ||
+          location.atlasExact !== Boolean(exactNode)
+        ) {
+          report(
+            'Trip location "' +
+              location.id +
+              '" has an invalid Atlas navigation projection'
+          )
+        }
+      })
+    })
+
   atlasModule.atlasPresentation.forEach(presentation => {
     const owner = 'Atlas presentation "' + presentation.id + '"'
     if (!placeModule.getPlace(presentation.placeId)) {
