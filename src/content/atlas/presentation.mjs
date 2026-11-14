@@ -536,6 +536,11 @@ export const atlasPresentation = Object.freeze([
         alt: "St. John journey photograph",
         caption: "Cruz Bay photography will be added in the next media pass.",
       },
+      {
+        assetId: "video-usvi-arrival-ferry-001",
+        role: "gallery",
+        caption: "Arriving on St. Thomas and crossing to St. John by ferry",
+      },
     ],
     relatedIds: ["red-hook-ferry-terminal", "great-cruz-bay", "maho-bay"],
   },
@@ -619,6 +624,12 @@ export const atlasPresentation = Object.freeze([
         role: "gallery",
         alt: "St. John journey photograph",
         caption: "Lovango charter photography will be added after review.",
+      },
+      {
+        assetId: "video-usvi-nates-charters-001",
+        role: "gallery",
+        caption:
+          "Boat day with Nate's Custom Charters between St. Thomas and St. John",
       },
     ],
     relatedIds: ["cruz-bay", "trunk-bay"],
@@ -705,6 +716,11 @@ export const atlasPresentation = Object.freeze([
         alt: "St. John journey photograph",
         caption:
           "Waterlemon Cay photography will be added in the next media pass.",
+      },
+      {
+        assetId: "video-usvi-waterlemon-001",
+        role: "gallery",
+        caption: "The coastal approach and water around Waterlemon Cay",
       },
     ],
     relatedIds: ["cinnamon-bay", "maho-bay"],

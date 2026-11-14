@@ -754,7 +754,7 @@ Still out of scope:
 - Unknown media, Place and Journey references fail validation.
 - Missing local files fail validation.
 - Route order is not inferred from geographic hierarchy.
-- All 92 controlled assets are registered once in Media.
+- All 99 controlled assets are registered once in Media.
 - All five existing trip cards and 37 detailed visits are Journey projections.
 - All twenty-one Atlas nodes are canonical projections; no `atlasData.js` authority remains.
 - Missing or unverified coordinates remain `null` outside map-visible Atlas nodes.

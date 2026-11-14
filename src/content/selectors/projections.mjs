@@ -58,7 +58,10 @@ export function buildTripLocationView(journey, visit) {
   // cover instead of inventing a location-specific asset association.
   const hero = resolveMediaReference(visit.hero || journey.hero)
   const media = resolveMediaList(visit.media)
-  const mediaPending = !visit.hero && media.length === 0
+  // A video makes a stop richer, but it does not make the shared Journey
+  // cover a verified location photograph. Keep the photo-pending cue visible
+  // until this visit owns either a hero or a location-specific image.
+  const mediaPending = !visit.hero && !media.some(item => item.kind === "image")
   const gallery = media
     .filter(item => item.kind === "image")
     .map(item => item.src)

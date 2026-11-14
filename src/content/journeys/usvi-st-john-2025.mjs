@@ -9,7 +9,7 @@ export const usviStJohn2025Journey = Object.freeze({
   dateRange: {
     start: null,
     end: null,
-    label: "Year to be confirmed",
+    label: "2025",
   },
   hero: {
     assetId: "image-usvi-usvi",
@@ -114,7 +114,13 @@ export const usviStJohn2025Journey = Object.freeze({
         "The ride felt surprisingly fast, with strong wind on the open upper deck.",
         "After arriving, the family stopped for a quick bite at a packed High Tide near the ferry dock.",
       ],
-      media: [],
+      media: [
+        {
+          assetId: "video-usvi-arrival-ferry-001",
+          role: "gallery",
+          caption: "Arriving on St. Thomas and crossing to St. John by ferry",
+        },
+      ],
       socialLinks: [],
     },
     {
@@ -197,7 +203,14 @@ export const usviStJohn2025Journey = Object.freeze({
         "The exact restaurant or beach-club venue is not confirmed.",
         "Nate's Custom Charters was the operator, not a sponsor or affiliate.",
       ],
-      media: [],
+      media: [
+        {
+          assetId: "video-usvi-nates-charters-001",
+          role: "gallery",
+          caption:
+            "Boat day with Nate's Custom Charters between St. Thomas and St. John",
+        },
+      ],
       socialLinks: [],
     },
     {
@@ -260,7 +273,13 @@ export const usviStJohn2025Journey = Object.freeze({
         "The family encountered only one or two other people and observed abundant sea life, including reef sharks.",
         "The current felt challenging during the visit; the story treats that as a firsthand warning to avoid underestimating the ocean.",
       ],
-      media: [],
+      media: [
+        {
+          assetId: "video-usvi-waterlemon-001",
+          role: "gallery",
+          caption: "The coastal approach and water around Waterlemon Cay",
+        },
+      ],
       socialLinks: [],
     },
   ],

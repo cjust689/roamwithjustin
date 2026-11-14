@@ -13,7 +13,17 @@ export function getMediaBaseUrl() {
 
 export function r2Url(objectKey) {
   if (!objectKey) return ""
-  return getMediaBaseUrl() + "/" + objectKey.replace(/^\/+/, "")
+
+  // R2 keys are stored exactly as uploaded. Encode each path segment only
+  // when building the public URL so spaces and other filename characters do
+  // not produce an invalid <video> or <img> request while slashes stay intact.
+  const encodedObjectKey = objectKey
+    .replace(/^\/+/, "")
+    .split("/")
+    .map(segment => encodeURIComponent(segment))
+    .join("/")
+
+  return getMediaBaseUrl() + "/" + encodedObjectKey
 }
 
 function inferKind(src, declaredKind = "") {
