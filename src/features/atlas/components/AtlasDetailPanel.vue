@@ -204,14 +204,14 @@
       class="atlas-lightbox"
       role="dialog"
       aria-modal="true"
-      :aria-label="`${node.title} photography viewer`"
+      :aria-label="`${node.title} media viewer`"
       @click.self="closeGallery"
     >
       <button
         ref="lightboxClose"
         class="atlas-lightbox-close"
         type="button"
-        aria-label="Close photography viewer"
+        aria-label="Close media viewer"
         @click="closeGallery"
       >
         &times;
@@ -244,7 +244,7 @@
           <strong>{{ node.title }}</strong>
           <span>
             {{ activeMedia.kind === "video" ? "Video" : "Photo" }}
-            {{ lightboxIndex + 1 }} / {{ galleryMedia.length }}
+            {{ activeMediaTypePosition }} of {{ activeMediaTypeTotal }}
           </span>
         </figcaption>
       </figure>
@@ -309,6 +309,20 @@ export default {
     },
     hasVideo() {
       return this.galleryMedia.some(item => item.kind === "video")
+    },
+    activeMediaTypeItems() {
+      return this.galleryMedia.filter(
+        item => item.kind === this.activeMedia.kind
+      )
+    },
+    activeMediaTypePosition() {
+      const activeIndex = this.activeMediaTypeItems.findIndex(
+        item => item.key === this.activeMedia.key
+      )
+      return activeIndex + 1
+    },
+    activeMediaTypeTotal() {
+      return this.activeMediaTypeItems.length
     },
   },
   watch: {
