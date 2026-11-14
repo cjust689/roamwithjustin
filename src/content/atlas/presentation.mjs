@@ -358,6 +358,43 @@ export const atlasPresentation = Object.freeze([
     relatedIds: [],
   },
   {
+    id: "don-rafa-boutique-hotel",
+    placeId: "don-rafa-boutique-hotel",
+    journeyId: "puerto-rico-2024",
+    parentId: "puerto-rico",
+    eyebrow: "San Juan stay",
+    category: "Boutique hotel",
+    camera: {
+      center: [-66.0849, 18.4563],
+      zoom: 15.2,
+      pitch: 58,
+      bearing: -12,
+    },
+    hero: {
+      assetId: "image-puerto-rico-pxl-20240804-023431011",
+      role: "hero",
+      alt: "Traveler at the entrance to Don Rafa Boutique Hotel",
+    },
+    media: [
+      {
+        assetId: "image-puerto-rico-pxl-20240804-023431011",
+        role: "gallery",
+        alt: "Traveler at the entrance to Don Rafa Boutique Hotel",
+      },
+      {
+        assetId: "video-puerto-rico-don-rafa-001",
+        role: "gallery",
+        caption: "Settling into Don Rafa during the San Juan stay",
+      },
+      {
+        assetId: "video-puerto-rico-don-rafa-002",
+        role: "gallery",
+        caption: "Hotel and rooftop moments between city outings",
+      },
+    ],
+    relatedIds: ["old-san-juan"],
+  },
+  {
     id: "old-san-juan",
     placeId: "old-san-juan",
     journeyId: "puerto-rico-2024",
@@ -387,12 +424,17 @@ export const atlasPresentation = Object.freeze([
         alt: "Old San Juan media 2",
       },
       {
-        assetId: "image-puerto-rico-pxl-20240804-023431011",
+        assetId: "video-puerto-rico-old-san-juan-001",
         role: "gallery",
-        alt: "Old San Juan media 3",
+        caption: "Walking through the color and movement of Old San Juan",
+      },
+      {
+        assetId: "video-puerto-rico-san-cristobal-001",
+        role: "gallery",
+        caption: "Exploring Castillo San Cristobal before the city heats up",
       },
     ],
-    relatedIds: ["cueva-del-indio"],
+    relatedIds: ["don-rafa-boutique-hotel", "cueva-del-indio"],
   },
   {
     id: "cueva-del-indio",
@@ -473,6 +515,41 @@ export const atlasPresentation = Object.freeze([
         assetId: "image-puerto-rico-hacienda-pxl-20240804-205323274",
         role: "gallery",
         alt: "Sunlit pool terrace at Hacienda Florecer",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-hf-001",
+        role: "gallery",
+        alt: "Aerial overview of Hacienda Florecer and its mountain setting",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-hf-002",
+        role: "gallery",
+        alt: "Pool, hot tub, and container home at Hacienda Florecer",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-hf-003",
+        role: "gallery",
+        alt: "Pool loungers facing the Moca hills at Hacienda Florecer",
+      },
+      {
+        assetId: "image-puerto-rico-hacienda-hf-004",
+        role: "gallery",
+        alt: "Sunset over the hills beyond Hacienda Florecer",
+      },
+      {
+        assetId: "video-puerto-rico-hacienda-sunset-002",
+        role: "gallery",
+        caption: "The first sunset sequence from Hacienda Florecer",
+      },
+      {
+        assetId: "video-puerto-rico-hacienda-sunset-003",
+        role: "gallery",
+        caption: "Evening light moving across the mountains near Moca",
+      },
+      {
+        assetId: "video-puerto-rico-hacienda-sunset-004",
+        role: "gallery",
+        caption: "The final glow beyond the pool at Hacienda Florecer",
       },
     ],
     relatedIds: ["cueva-del-indio", "crash-boat-beach", "gozalandia-falls"],
