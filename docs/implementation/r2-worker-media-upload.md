@@ -121,7 +121,17 @@ browser bundle.
 3. Generate a unique upload token locally. A 32-byte random value is suitable:
 
 ```bash
-export MEDIA_UPLOAD_TOKEN="$(node -e 'process.stdout.write(require("crypto").randomBytes(32).toString("hex"))')"
+export MEDIA_UPLOAD_TOKEN="$(openssl rand -hex 32)"
+```
+
+In Git Bash, do not type the displayed shell prompt `$` and do not add a
+trailing backslash. Calling `node` through a local `winpty` alias inside
+`$(...)` can fail with `stdout is not a tty`; OpenSSL avoids that wrapper and
+is included with standard Git for Windows installations. Confirm the variable
+contains 64 characters without printing the secret:
+
+```bash
+printf '%s' "$MEDIA_UPLOAD_TOKEN" | wc -c
 ```
 
 Keep that shell private. Do not paste the resulting value into chat, source,
@@ -160,7 +170,7 @@ curl "$MEDIA_UPLOAD_WORKER_URL/health"
 The upload token can be rotated without changing object keys or content:
 
 ```bash
-export MEDIA_UPLOAD_TOKEN="$(node -e 'process.stdout.write(require("crypto").randomBytes(32).toString("hex"))')"
+export MEDIA_UPLOAD_TOKEN="$(openssl rand -hex 32)"
 printf '%s' "$MEDIA_UPLOAD_TOKEN" | npm run media:worker:secret
 ```
 
