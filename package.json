@@ -6,7 +6,8 @@
     "node": ">=20.9.0"
   },
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "node scripts/serve.js",
+    "server": "node scripts/serve.js",
     "build": "vue-cli-service build",
     "postbuild": "node scripts/prepare-pages.js",
     "images:optimize": "node scripts/optimize-images.js",
@@ -18,8 +19,12 @@
     "core-js": "^3.6.5",
     "express": "^4.17.1",
     "jquery": "^3.6.0",
+    "maplibre-gl": "^6.18.0",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0"
+  },
+  "overrides": {
+    "@mapbox/jsonlint-lines-primitives": "2.0.2"
   },
   "devDependencies": {
     "@vue/babel-preset-app": "^4.5.13",

@@ -39,7 +39,7 @@ Install the exact dependencies recorded in `package-lock.json`:
 npm ci
 ```
 
-Start the Vue development server:
+Start the Vue development server for this computer only:
 
 ```bash
 npm run serve
@@ -49,12 +49,29 @@ Open <http://localhost:8080>. The development server includes SPA history
 fallback, so routes such as `/trips` and `/gear` should work when opened
 directly.
 
+To test from another phone or computer on the same local network, bind the
+development server to the primary private LAN address:
+
+```bash
+npm run serve --network
+```
+
+The launcher prefers a physical Ethernet or Wi-Fi adapter over common VPN and
+virtual adapters, then prints the selected interface and address. Open the
+`Network` URL printed by Vue, such as `http://192.168.1.25:8080`. Allow Node.js
+through the Windows administrator prompt. On Windows, the launcher temporarily
+allows the Node.js process on TCP port 8080 for Private networks and devices on
+the local subnet only. Press `Ctrl+C` in the elevated server window to stop the
+server and remove that firewall rule. The local network origin must also be
+included in the MapTiler key's allowed HTTP origins for the Atlas map to load.
+
 On Windows PowerShell, use `npm.cmd` and `npx.cmd` if the PowerShell execution
 policy blocks `npm.ps1`:
 
 ```powershell
 npm.cmd ci
 npm.cmd run serve
+npm.cmd run serve --network
 ```
 
 If `vue-cli-service` is reported as missing, the dependencies are not installed
@@ -104,6 +121,18 @@ npx serve -s dist -l 5000
 ```
 
 Then open <http://localhost:5000>.
+
+## Interactive Travel Atlas
+
+The experimental atlas is isolated at `/atlas` and is lazy-loaded separately
+from the existing site. Its components, data, persistence, map configuration,
+environment setup, content instructions, and removal checklist are documented
+in [`src/features/atlas/README.md`](src/features/atlas/README.md).
+
+The atlas works locally with a basic preview map. Satellite imagery and 3D
+terrain require `VUE_APP_MAPTILER_KEY`; copy `.env.example` to an uncommitted
+`.env.local` and add a MapTiler browser key. Production reads the key from the
+GitHub Actions secret `MAPTILER_API_KEY`.
 
 ## Image optimization
 
@@ -230,3 +259,43 @@ the rollback path for the currently published site.
 The branches do not need to be merged. The target state is one maintained
 source branch plus an automated Pages artifact that can be recreated at any
 time.
+
+New-NetFirewallRule -Name "VueDevServer80" -DisplayName "Vue Dev Server 80" -Direction Inbound -Protocol TCP -LocalPort 80 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+New-NetFirewallRule -Name "VueDevServer8080" -DisplayName "Vue Dev Server 8080" -Direction Inbound -Protocol TCP -LocalPort 8080 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+
+Remove-NetFirewallRule -Name "VueDevServer80"
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallPortFilter | Format-List Protocol,LocalPort
+
+Get-NetFirewallRule -Name "VueDevServer8080" | Get-NetFirewallAddressFilter | Format-List RemoteAddress
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List Enabled,Profile,EnforcementStatus
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List Enabled,AllowInboundRules,AllowLocalFirewallRules,DefaultInboundAction
+
+Set-NetFirewallProfile -Name Private -AllowInboundRules True
+
+Get-NetFirewallRule -PolicyStore ActiveStore -Name "VueDevServer8080" | Format-List EnforcementStatus
+
+Get-CimInstance -Namespace root/SecurityCenter2 -ClassName FirewallProduct | Format-Table displayName,productState -AutoSize
+
+Get-NetFirewallProfile -PolicyStore ActiveStore -Name Private | Format-List DisabledInterfaceAliases
+
+ping -n 1 192.168.86.247 arp -a | findstr 192.168.86.247
+
+Get-NetTCPConnection -LocalPort 8080 -State Listen | Select-Object LocalAddress, LocalPort, OwningProcess
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Get-NetFirewallApplicationFilter | Select-Object Program
+
+Get-NetFirewallRule -DisplayName "Roam With Justin\*" | Select-Object Name, Enabled, Direction, Action, Profile
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-\*" | Remove-NetFirewallRule
+
+Get-NetFirewallRule -Name "RoamWithJustinDevServer-26220" | Get-NetFirewallAddressFilter | Format-List
+
+New-NetFirewallRule `    -DisplayName "Node 8080 Diagnostic"`
+-Direction Inbound `    -Protocol TCP`
+-LocalPort 8080 `    -Action Allow`
+-Profile Private `
+-RemoteAddress Any
