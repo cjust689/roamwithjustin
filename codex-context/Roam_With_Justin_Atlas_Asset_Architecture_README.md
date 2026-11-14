@@ -1,18 +1,18 @@
 # Roam With Justin Atlas - Content and Media Architecture
 
-**Status:** Approved direction; foundation not yet implemented  
-**Application:** Vue 2, static GitHub Pages deployment, Cloudflare R2 media delivery  
-**Immediate objective:** Establish durable sources of truth before adding more Atlas or publishing features
+**Status:** Foundation and Canyonlands vertical slice implemented; broader migration remains incremental
+**Application:** Vue 2, static GitHub Pages deployment, Cloudflare R2 media delivery
+**Immediate objective:** Use the Canyonlands pattern to migrate future content without restoring duplicate authority
 
 ## Executive decision
 
 Roam With Justin will begin with three authoritative content domains:
 
-| Domain | Owns | Does not own |
-| --- | --- | --- |
-| Media | File identity, delivery location, R2 object keys, formats, renditions, intrinsic metadata, ownership and rights | Story-specific captions, crop choices, itinerary order |
-| Places | Canonical place identity, name, coordinates, geographic hierarchy and stable place information | Visit dates, personal notes, route order |
-| Journeys | A particular trip or visit, dates, ordered stops, day-by-day itinerary, lodging and visit-specific observations | Canonical geography or physical file storage |
+| Domain   | Owns                                                                                                            | Does not own                                           |
+| -------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Media    | File identity, delivery location, R2 object keys, formats, renditions, intrinsic metadata, ownership and rights | Story-specific captions, crop choices, itinerary order |
+| Places   | Canonical place identity, name, coordinates, geographic hierarchy and stable place information                  | Visit dates, personal notes, route order               |
+| Journeys | A particular trip or visit, dates, ordered stops, day-by-day itinerary, lodging and visit-specific observations | Canonical geography or physical file storage           |
 
 Experiences are a planned fourth domain, but they are not required for the foundation. An Experience will eventually represent a publishable story that can span places, visits, media and social posts.
 
@@ -23,6 +23,20 @@ The Atlas and Trips are not additional sources of truth:
 - Selectors produce the view models expected by the existing Vue components.
 
 The application will remain static. Plain JavaScript modules, small selectors and build-time validation are sufficient. This architecture does not require a database, backend API, CMS, generic repository framework or class hierarchy.
+
+## Relationship to the other context documents
+
+This README owns the content boundaries and migration architecture. The other files in `codex-context/` provide constraints or future plans; they do not create competing sources of truth.
+
+| Document                                                 | How this implementation uses it                                                                                                                                                                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `roam_with_justin_travel_context.md`                     | Supplies evidence and confidence boundaries. Unknown visit dates, districts and viewpoints remain `null` or explicitly unverified rather than being inferred. It also establishes the canonical Journey ID `utah-winter-2025`. |
+| `Roam_With_Justin_Atlas_R2_Video_README.md`              | Supplies delivery behavior: poster-first video, native controls, `playsinline`, metadata preload, byte-range-friendly R2 delivery and no autoplaying map media. R2 object identity still belongs to Media.                     |
+| `Roam_With_Justin_Atlas_Content_Strategy.md`             | Guides the future Experience domain and progressive publishing. It does not move story ownership into Atlas nodes or Vue components.                                                                                           |
+| `roam_with_justin_monetization_adsense_codex_brief.md`   | Keeps advertising out of immersive Atlas and media experiences. Monetization work must not alter these canonical content records.                                                                                              |
+| `Roam_With_Justin_Photo_EXIF_Gear_Integration_README.md` | May enrich Media capture and gear metadata later. EXIF ingestion must propose or update Media records rather than create a parallel asset catalog.                                                                             |
+
+When documents overlap, use this order of authority: verified first-party travel evidence for facts, this architecture for data ownership, then delivery or publishing documents for presentation and workflow. Never promote a plausible detail to a confirmed fact merely because a UI requires a value.
 
 ## Why the architecture must change
 
@@ -95,8 +109,8 @@ Example image:
       },
       intrinsic: {
         mimeType: "image/jpeg",
-        width: 1600,
-        height: 1067
+        width: 2560,
+        height: 1707
       },
       rights: {
         owner: "roam-with-justin",
@@ -141,10 +155,10 @@ Use arrays of records composed by a registry helper rather than a single object 
 The current content volume already warrants destination modules:
 
     src/content/media/
-      shared.js
-      utah.js
-      puerto-rico.js
-      index.js
+      shared.mjs
+      utah.mjs
+      puerto-rico.mjs
+      index.mjs
 
 The index composes modules and exposes a single lookup API.
 
@@ -155,8 +169,8 @@ Presentation belongs at the point of use:
     {
       assetId: "utah-canyonlands-hero-001",
       role: "hero",
-      caption: "A storm moving through Island in the Sky",
-      alt: "Snow clouds moving across the Canyonlands overlooks",
+      caption: "Winter weather moving across the canyon landscape",
+      alt: "Snow clouds moving across the Canyonlands landscape",
       focalPoint: {
         x: 0.55,
         y: 0.4
@@ -230,8 +244,12 @@ A Place is a durable geographic identity.
       countryCode: "US",
       regionCode: "US-UT",
       category: "national-park",
+      evidenceStatus: "confirmed",
+      coordinatePrecision: "park",
       description:
-        "Layered canyons and immense overlooks carved by the Colorado Plateau.",
+        "Layered canyons and immense overlooks where fast-changing weather can completely transform the scene.",
+      verificationNotes:
+        "Do not publish a precise district or viewpoint until verified.",
       externalLinks: {
         official:
           "https://www.nps.gov/cany/index.htm"
@@ -293,31 +311,38 @@ Atlas map paths must use ordered Journey visits. They must not infer route order
 A Journey represents one time-bounded trip or visit.
 
     {
-      id: "utah-2025",
+      id: "utah-winter-2025",
       slug: "utah",
-      title: "Utah",
+      title: "Utah Winter Road Trip",
+      evidenceStatus: "confirmed",
       dateRange: {
-        start: "2025-02-14",
-        end: "2025-02-21"
-      },
-      hero: {
-        assetId: "utah-cover-001",
-        role: "hero",
-        focalPoint: {
-          x: 0.5,
-          y: 0.45
-        }
+        start: null,
+        end: null,
+        label: "February 2025"
       },
       visits: [
         {
-          id: "utah-2025-canyonlands",
+          id: "utah-winter-2025-canyonlands",
           placeId: "canyonlands-national-park",
-          date: "2025-02-18",
+          date: null,
+          visitStatus: "visited",
+          evidenceStatus: "confirmed",
+          migrated: true,
           summary:
             "We experienced sunshine, rain and snow during one visit.",
+          verificationNotes:
+            "Keep the date and exact district or viewpoint unset until verified.",
+          hero: {
+            assetId: "utah-canyonlands-hero-001",
+            role: "hero",
+            focalPoint: {
+              x: 0.5,
+              y: 0.48
+            }
+          },
           media: [
             {
-              assetId: "utah-canyonlands-hero-001",
+              assetId: "utah-canyonlands-gallery-001",
               role: "gallery"
             },
             {
@@ -335,7 +360,7 @@ A Journey represents one time-bounded trip or visit.
 
 The visits array is ordered and becomes the authoritative journey path. A day itinerary can reference visit IDs or canonical Place IDs depending on whether it needs visit-specific detail.
 
-Public compatibility may preserve the existing /trips/utah route while the canonical Journey ID is utah-2025.
+Public compatibility preserves the existing `/trips/utah` route while the canonical Journey ID is `utah-winter-2025`.
 
 ### 4. Experiences - future
 
@@ -433,29 +458,30 @@ The long-term goal is for trips.js and atlasData.js to become compatibility expo
     src/
       content/
         media/
-          shared.js
-          utah.js
-          puerto-rico.js
-          index.js
+          shared.mjs
+          utah.mjs
+          puerto-rico.mjs
+          index.mjs
         places/
-          utah.js
-          puerto-rico.js
-          index.js
-          aliases.js
+          utah.mjs
+          puerto-rico.mjs
+          index.mjs
+          aliases.mjs
         journeys/
-          utah-2025.js
-          puerto-rico-2024.js
-          index.js
+          utah-winter-2025.mjs
+          puerto-rico-2024.mjs
+          index.mjs
         experiences/
           README.md
         partners/
           index.js
         selectors/
-          media.js
-          places.js
+          media.mjs
+          places.mjs
+          projections.mjs
           trips.js
           atlas.js
-        contracts.js
+        contracts.mjs
       data/
         trips.js
       features/
@@ -465,7 +491,21 @@ The long-term goal is for trips.js and atlasData.js to become compatibility expo
     scripts/
       validate-content.js
 
-contracts.js should contain JSDoc contracts and small assertion helpers. A TypeScript migration is not required.
+`contracts.mjs` contains JSDoc contracts and small assertion helpers. A TypeScript migration is not required. Canonical modules use `.mjs` so the Node validator and Vue build consume the same ESM records; Vue-facing compatibility entry points may remain `.js`.
+
+### Concrete extension workflow
+
+Use this sequence for each newly migrated place. It is intentionally explicit so future work does not reintroduce a second authority:
+
+1. Add or confirm one canonical Place. Put coordinates and geographic parentage there; record evidence status and verification notes when precision is limited.
+2. Add each controlled file once to Media. Record the local path or R2 object key, MIME type, dimensions or duration when known, rights, capture place and poster relationship.
+3. Add a Journey visit that references the Place and Media IDs. Put dates, visit status, personal observations, captions, focal points and ordered route position there.
+4. Keep only join keys and truly view-specific settings in the old Trip or Atlas record. Set `migrated: true` only after both projections are complete.
+5. Extend selectors only when a new reusable output field is needed. Do not assemble R2 URLs, resolve aliases or infer media kinds in Vue components.
+6. Extend `scripts/validate-content.js` whenever a new relationship or required field is introduced. A record is not part of the architecture until invalid forms fail the build.
+7. Compare the Atlas and Trip presentations at desktop and portrait/mobile sizes. For video, confirm poster display, controls, `playsinline`, metadata preload and playback through the public R2 domain.
+
+For a future Experience, begin with `src/content/experiences/<experience-id>.mjs`, reference existing Place, Journey visit and Media IDs, add an Experience registry, then add a selector for the public page. Do not move the underlying assets, coordinates or visit facts into the Experience. Add publication state, narrative sections, social relationships and partner references only when an actual standalone story requires them.
 
 ## R2 delivery rules
 
