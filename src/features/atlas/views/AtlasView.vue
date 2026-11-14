@@ -61,6 +61,7 @@
       @finish="finishGuidedJourney"
       @replay="startGuidedJourney"
       @exit="exitGuidedJourney"
+      @layout-change="handleGuidedLayoutChange"
     />
 
     <section
@@ -149,6 +150,8 @@
       :guided-presentation="
         guidedStatus === 'at-stop' || guidedStatus === 'complete'
       "
+      :guided-controls-expanded="guidedPanelExpanded"
+      :guided-controls-clearance="guidedPanelClearance"
       @close="goToParent"
       @select="selectNode"
       @toggle-favorite="toggleFavorite"
@@ -227,6 +230,8 @@ export default {
       pendingMapPinNodeId: null,
       detailCollapseRequest: 0,
       guidedStatus: "idle",
+      guidedPanelExpanded: false,
+      guidedPanelClearance: 0,
       guidedIndex: -1,
       guidedTravel: null,
       guidedTravelSerial: 0,
@@ -376,6 +381,10 @@ export default {
     document.title = this.previousTitle
   },
   methods: {
+    handleGuidedLayoutChange({ expanded = false, clearance = 0 } = {}) {
+      this.guidedPanelExpanded = expanded
+      this.guidedPanelClearance = clearance
+    },
     handleRoute(nodeId) {
       if (nodeId && !getAtlasNode(nodeId)) {
         this.$router.replace({ name: "TravelAtlas" })

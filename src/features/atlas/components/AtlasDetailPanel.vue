@@ -6,7 +6,9 @@
       :class="{
         'is-expanded': mobileExpanded,
         'is-guided': guidedPresentation,
+        'has-expanded-guide': guidedControlsExpanded,
       }"
+      :style="guidedClearanceStyle"
       :aria-label="`${node.title} details`"
     >
       <div
@@ -312,6 +314,11 @@ export default {
       default: 0,
     },
     guidedPresentation: Boolean,
+    guidedControlsExpanded: Boolean,
+    guidedControlsClearance: {
+      type: Number,
+      default: 0,
+    },
   },
   data() {
     return {
@@ -327,6 +334,14 @@ export default {
     }
   },
   computed: {
+    guidedClearanceStyle() {
+      if (!this.guidedControlsExpanded || !this.guidedControlsClearance) {
+        return null
+      }
+      return {
+        "--atlas-guided-clearance": `${this.guidedControlsClearance}px`,
+      }
+    },
     galleryMedia() {
       const media = [this.node.image, ...this.node.media]
         .map(this.normalizeMedia)
@@ -1070,6 +1085,15 @@ export default {
      scrollable, so the smaller guided drawer does not hide any story fields. */
   .atlas-detail.is-guided {
     max-height: min(62dvh, calc(100dvh - 18rem));
+  }
+
+  /* The journey player reports its live bottom edge, including a map gutter.
+     This remains accurate when copy wraps or the mobile viewport changes. */
+  .atlas-detail.is-expanded.has-expanded-guide {
+    max-height: min(
+      54dvh,
+      calc(100dvh - var(--atlas-guided-clearance, 22.5rem))
+    );
   }
 
   .atlas-detail:not(.is-expanded) .atlas-detail-scroll {

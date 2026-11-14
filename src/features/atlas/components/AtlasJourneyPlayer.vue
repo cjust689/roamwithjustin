@@ -2,6 +2,7 @@
 <template>
   <section
     v-if="journey"
+    ref="journeyPlayer"
     class="atlas-guided"
     :class="[`is-${status}`, { 'is-collapsed': isCollapsed }]"
     aria-label="Guided journey controls"
@@ -12,7 +13,7 @@
         type="button"
         aria-expanded="false"
         aria-label="Expand guided journey controls"
-        @click="isCollapsed = false"
+        @click="setCollapsed(false)"
       >
         <span>{{ compactEyebrow }}</span>
         <strong>{{ compactTitle }}</strong>
@@ -30,7 +31,7 @@
         class="atlas-guided-exit"
         type="button"
         aria-label="Exit guided journey"
-        @click="$emit('exit')"
+        @click="handleExit"
       >
         &times;
       </button>
@@ -47,7 +48,7 @@
             class="atlas-guided-collapse"
             type="button"
             aria-label="Collapse guided journey controls"
-            @click="isCollapsed = true"
+            @click="setCollapsed(true)"
           >
             &minus;
           </button>
@@ -56,7 +57,7 @@
             class="atlas-guided-exit"
             type="button"
             aria-label="Exit guided journey"
-            @click="$emit('exit')"
+            @click="handleExit"
           >
             &times;
           </button>
@@ -169,9 +170,11 @@ export default {
   },
   data() {
     return {
-      // The compact dock is the default so the tour remains discoverable
-      // without covering the map or the stop being presented.
+      // A full page load begins with the compact dock. Once a visitor expands
+      // it, navigation and journey status changes preserve that choice until
+      // they explicitly collapse or exit the guide.
       isCollapsed: true,
+      layoutResizeObserver: null,
     }
   },
   computed: {
@@ -225,16 +228,45 @@ export default {
       return `Paused at ${title}. Explore the open story, then continue.`
     },
   },
-  watch: {
-    status(nextStatus) {
-      // Expansion is deliberately temporary. Starting a leg, completing the
-      // tour, or exiting restores the unobtrusive single-row dock.
-      if (["idle", "traveling", "complete"].includes(nextStatus)) {
-        this.isCollapsed = true
-      }
-    },
+  mounted() {
+    window.addEventListener("resize", this.emitLayoutChange)
+    if (typeof ResizeObserver !== "undefined") {
+      this.layoutResizeObserver = new ResizeObserver(this.emitLayoutChange)
+      this.layoutResizeObserver.observe(this.$refs.journeyPlayer)
+    }
+    this.emitLayoutChange()
+  },
+  // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
+  // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
+  beforeDestroy() {
+    this.layoutResizeObserver?.disconnect()
+    window.removeEventListener("resize", this.emitLayoutChange)
+    this.$emit("layout-change", { expanded: false, clearance: 0 })
   },
   methods: {
+    emitLayoutChange() {
+      const panel = this.$refs.journeyPlayer
+      const expanded = !this.isCollapsed
+      // The stop drawer consumes this live bottom edge instead of assuming a
+      // fixed guide height. Longer labels and small screens therefore keep a
+      // reliable strip of map between the two independently scrolling panels.
+      const clearance =
+        expanded && panel
+          ? Math.ceil(panel.getBoundingClientRect().bottom) + 12
+          : 0
+      this.$emit("layout-change", { expanded, clearance })
+    },
+    setCollapsed(isCollapsed) {
+      if (this.isCollapsed === isCollapsed) return
+      this.isCollapsed = isCollapsed
+      this.$nextTick(this.emitLayoutChange)
+    },
+    handleExit() {
+      // Exit is an explicit close action, so it also returns the guide to its
+      // compact state for the remainder of the current Atlas session.
+      this.setCollapsed(true)
+      this.$emit("exit")
+    },
     handlePrimaryAction() {
       if (this.status === "idle") this.$emit("start")
       else if (this.status === "traveling") this.$emit("pause")
@@ -489,6 +521,13 @@ export default {
     padding: 0.35rem;
   }
 
+  .atlas-guided:not(.is-collapsed) {
+    max-height: calc(100vh - 12rem);
+    max-height: calc(100dvh - 12rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
   .atlas-guided-summary span {
     font-size: 0.72rem;
   }
@@ -531,6 +570,19 @@ export default {
   .atlas-guided-collapse {
     width: 3rem;
     height: 3rem;
+  }
+}
+
+/* The mobile Atlas toolbar uses two rows at this width. Keep the guided
+   controls below it so both the toolbar and the map remain operable. */
+@media (max-width: 540px) {
+  .atlas-guided {
+    top: 8.9rem;
+  }
+
+  .atlas-guided:not(.is-collapsed) {
+    max-height: calc(100vh - 14.8rem);
+    max-height: calc(100dvh - 14.8rem);
   }
 }
 
