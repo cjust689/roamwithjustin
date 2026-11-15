@@ -156,6 +156,16 @@ export function buildTripViewModel(journey) {
     item => item.src
   )
   const publishedMedia = getJourneyPublishedMedia(journey.id)
+  const allMedia = publishedMedia.map(media => ({
+    id: media.id,
+    kind: media.kind,
+    src: media.src,
+    mimeType: media.mimeType,
+    poster: media.poster,
+    alt: media.alt,
+    width: media.width,
+    height: media.height,
+  }))
   const locations = journey.visits
     .map(visit => buildTripLocationView(journey, visit))
     .filter(Boolean)
@@ -184,13 +194,8 @@ export function buildTripViewModel(journey) {
       comingSoon && fullImage && !resolvedGallery.includes(fullImage)
         ? [fullImage, ...resolvedGallery]
         : resolvedGallery,
-    allPhotography: publishedMedia.map(media => ({
-      id: media.id,
-      src: media.src,
-      alt: media.alt,
-      width: media.width,
-      height: media.height,
-    })),
+    allMedia,
+    allPhotography: allMedia.filter(media => media.kind === "image"),
     description: journeyPreviewCopy(journey),
     dates: journey.dateRange?.label || "Date to be confirmed",
     duration: journey.duration,

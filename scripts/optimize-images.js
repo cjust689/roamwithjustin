@@ -6,14 +6,20 @@ const { pathToFileURL } = require("url")
 
 const projectRoot = path.resolve(__dirname, "..")
 const defaultImageDirectory = path.join(projectRoot, "public", "img")
-const supportedExtensions = new Set([".jpg", ".jpeg", ".png"])
+const supportedImageExtensions = new Set([".jpg", ".jpeg", ".png"])
+const supportedVideoExtensions = new Set([".mp4"])
+const supportedPackageExtensions = new Set([
+  ...supportedImageExtensions,
+  ...supportedVideoExtensions,
+])
 const maximumDimension = 2560
 const jpegQuality = 82
+const defaultMaximumVideoMiB = 190
 
 const formatBytes = bytes => `${(bytes / 1024 / 1024).toFixed(1)} MiB`
 
 function usage() {
-  return `Image optimizer
+  return `Image optimizer and media package preparer
 
 Usage:
   npm run images:optimize
@@ -43,27 +49,33 @@ Modes:
   Journey publication package (--package)
     Resolves --tag (or --journey) to exactly one canonical Journey. With an
     explicit --place, it also requires exactly one matching Visit inside that
-    Journey. It writes optimized numbered files and a publication-manifest.json
-    to <output>/<journey-slug>/ or <output>/<journey-slug>-<place-id>/.
+    Journey. An image source folder writes optimized numbered JPEG/PNG files.
+    An MP4 source folder writes byte-identical numbered video copies without
+    transcoding. It then writes publication-manifest.json beside those files.
+
+    Keep images and videos in separate source folders. Video packages use a
+    -videos package-directory suffix and versioned videos/ R2 object keys.
 
     The package can be uploaded under the manifest's R2 prefix and then applied
-    with npm run media:ingest. Place-scoped images remain part of the Journey's
-    All Photography collection and also appear for that Visit and any existing
-    Atlas presentation. This command never creates an Atlas pin.
+    with npm run media:ingest. Place-scoped media remains part of the Journey
+    collection and also appears for that Visit and any existing Atlas
+    presentation. This command never creates an Atlas pin.
 
     This mode requires explicit rights metadata. It never uploads files,
     publishes content, overwrites an existing package, or changes curated
     Journey hero/gallery fields.
 
 Options:
-  --source <directory>  Directory containing images to copy and compress
+  --source <directory>  Directory containing images, or MP4s in package mode
   --tag <label>         Filename label for the numbered copies
   --package             Build a Journey publication package and manifest
   --output <directory>  Parent directory for a Journey package
   --journey <id>        Explicit canonical Journey ID (optional tag override)
   --place <id>          Optional canonical Place ID; requires --journey and one
                         matching Visit in that Journey
-  --r2-prefix <prefix>  R2 parent prefix (default: images)
+  --r2-prefix <prefix>  R2 parent prefix (default: images or videos by type)
+  --max-video-mib <n>   Largest accepted MP4 object (default: ${defaultMaximumVideoMiB} MiB);
+                        upload transport is selected later by media:upload
   --rights-owner <id>   Explicit rights owner stored in the manifest
   --rights-status <id>  Explicit rights status, such as owned or licensed
   --copy                Explicitly select copy mode (optional with --source/--tag)
@@ -77,6 +89,7 @@ Examples:
   node scripts/optimize-images.js --source ./photos --tag "trunk bay" --use-suggested-tag
   node scripts/optimize-images.js --source ./photos --tag utah --dry-run
   node scripts/optimize-images.js --package --source ./exports --output ./ready --tag usvi --rights-owner roam-with-justin --rights-status owned
+  node scripts/optimize-images.js --package --source ./video-exports --output ./ready --tag usvi --journey usvi-st-john-2025 --rights-owner roam-with-justin --rights-status owned
   node scripts/optimize-images.js --package --source ./exports --output ./ready --tag "waterlemon cay" --journey usvi-st-john-2025 --place waterlemon-cay --rights-owner roam-with-justin --rights-status owned`
 }
 
@@ -90,16 +103,24 @@ function readOptionValue(args, index, option) {
   return value
 }
 
+function parsePositiveInteger(value, option) {
+  if (!/^\d+$/.test(value || "") || Number(value) < 1) {
+    throw new Error(`${option} must be a positive integer`)
+  }
+  return Number(value)
+}
+
 function parseArguments(args) {
   const options = {
     copyMode: false,
     dryRun: false,
     help: false,
     journey: null,
+    maxVideoMib: defaultMaximumVideoMiB,
     output: null,
     packageMode: false,
     place: null,
-    r2Prefix: "images",
+    r2Prefix: null,
     rightsOwner: null,
     rightsStatus: null,
     source: null,
@@ -149,6 +170,17 @@ function parseArguments(args) {
       index += 1
     } else if (argument.startsWith("--r2-prefix=")) {
       options.r2Prefix = argument.slice("--r2-prefix=".length)
+    } else if (argument === "--max-video-mib") {
+      options.maxVideoMib = parsePositiveInteger(
+        readOptionValue(args, index, "--max-video-mib"),
+        "--max-video-mib"
+      )
+      index += 1
+    } else if (argument.startsWith("--max-video-mib=")) {
+      options.maxVideoMib = parsePositiveInteger(
+        argument.slice("--max-video-mib=".length),
+        "--max-video-mib"
+      )
     } else if (argument === "--rights-owner") {
       options.rightsOwner = readOptionValue(args, index, "--rights-owner")
       index += 1
@@ -193,7 +225,7 @@ function parseArguments(args) {
       )
     }
     validateTag(options.tag)
-    validateR2Prefix(options.r2Prefix)
+    if (options.r2Prefix) validateR2Prefix(options.r2Prefix)
     return options
   }
 
@@ -206,10 +238,11 @@ function parseArguments(args) {
     options.place ||
     options.rightsOwner ||
     options.rightsStatus ||
-    options.r2Prefix !== "images"
+    options.r2Prefix !== null ||
+    options.maxVideoMib !== defaultMaximumVideoMiB
   ) {
     throw new Error(
-      `--output, --journey, --place, --r2-prefix, and rights options require --package\n\n${usage()}`
+      `--output, --journey, --place, --r2-prefix, --max-video-mib, and rights options require --package\n\n${usage()}`
     )
   }
 
@@ -608,13 +641,24 @@ async function findImages(directory, recursive) {
       images.push(...(await findImages(entryPath, true)))
     } else if (
       !entry.isDirectory() &&
-      supportedExtensions.has(path.extname(entry.name).toLowerCase())
+      supportedImageExtensions.has(path.extname(entry.name).toLowerCase())
     ) {
       images.push(entryPath)
     }
   }
 
   return images
+}
+
+async function findPackageMedia(directory) {
+  const entries = await fs.promises.readdir(directory, { withFileTypes: true })
+  return entries
+    .filter(
+      entry =>
+        entry.isFile() &&
+        supportedPackageExtensions.has(path.extname(entry.name).toLowerCase())
+    )
+    .map(entry => path.join(directory, entry.name))
 }
 
 async function requireDirectory(directory) {
@@ -806,48 +850,55 @@ async function createCompressedCopy(source, target, dryRun) {
 function mimeTypeForExtension(extension) {
   if (extension === ".jpg" || extension === ".jpeg") return "image/jpeg"
   if (extension === ".png") return "image/png"
-  throw new Error(`Unsupported image extension: ${extension}`)
+  if (extension === ".mp4") return "video/mp4"
+  throw new Error(`Unsupported media extension: ${extension}`)
 }
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex")
 }
 
-async function createPackageAsset(source, filename, index, context) {
-  const extension = path.extname(source).toLowerCase()
-  const input = await fs.promises.readFile(source)
-  const { data, info } = await compressedPipeline(input, extension).toBuffer({
-    resolveWithObject: true,
+function sha256File(file) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256")
+    const stream = fs.createReadStream(file)
+    stream.on("error", reject)
+    stream.on("data", chunk => hash.update(chunk))
+    stream.on("end", () => resolve(hash.digest("hex")))
   })
-  const checksum = sha256(data)
-  if (!context.dryRun) {
-    await fs.promises.writeFile(
-      path.join(context.stagingDirectory, filename),
-      data,
-      {
-        flag: "wx",
-      }
-    )
+}
+
+async function requireMp4Container(file) {
+  const handle = await fs.promises.open(file, "r")
+  try {
+    const header = Buffer.alloc(12)
+    const { bytesRead } = await handle.read(header, 0, header.length, 0)
+    if (bytesRead < 12 || header.toString("ascii", 4, 8) !== "ftyp") {
+      throw new Error(
+        `${path.basename(file)} does not have a valid MP4 file-type header`
+      )
+    }
+  } finally {
+    await handle.close()
   }
+}
 
-  console.log(
-    `${context.dryRun ? "WOULD PACKAGE" : "PACKAGED"} ${filename} from ${path.basename(source)}: ${formatBytes(data.length)}, ${info.width}x${info.height}`
-  )
-
+function basePackageAsset(filename, index, checksum, context) {
   return {
     provisionalId: `local-${context.scopeLabel}-${String(index + 1).padStart(3, "0")}-${checksum.slice(0, 12)}`,
     assetId: null,
     revision: null,
     source: {
-      originalFilename: path.basename(source),
+      originalFilename: null,
     },
     output: {
       relativePath: filename,
       objectKey: null,
-      mimeType: mimeTypeForExtension(extension),
-      width: info.width,
-      height: info.height,
-      byteSize: data.length,
+      mimeType: null,
+      width: null,
+      height: null,
+      durationSeconds: null,
+      byteSize: null,
       sha256: checksum,
     },
     capture: {
@@ -872,6 +923,59 @@ async function createPackageAsset(source, filename, index, context) {
       status: context.rightsStatus,
     },
   }
+}
+
+async function createPackageAsset(source, filename, index, context) {
+  const extension = path.extname(source).toLowerCase()
+  if (supportedVideoExtensions.has(extension)) {
+    await requireMp4Container(source)
+    const stats = await fs.promises.stat(source)
+    const checksum = await sha256File(source)
+    if (!context.dryRun) {
+      await fs.promises.copyFile(
+        source,
+        path.join(context.stagingDirectory, filename),
+        fs.constants.COPYFILE_EXCL
+      )
+    }
+
+    console.log(
+      `${context.dryRun ? "WOULD PACKAGE" : "PACKAGED"} ${filename} from ${path.basename(source)}: ${formatBytes(stats.size)}, original MP4 bytes preserved`
+    )
+
+    const asset = basePackageAsset(filename, index, checksum, context)
+    asset.source.originalFilename = path.basename(source)
+    asset.output.mimeType = "video/mp4"
+    asset.output.byteSize = stats.size
+    return asset
+  }
+
+  const input = await fs.promises.readFile(source)
+  const { data, info } = await compressedPipeline(input, extension).toBuffer({
+    resolveWithObject: true,
+  })
+  const checksum = sha256(data)
+  if (!context.dryRun) {
+    await fs.promises.writeFile(
+      path.join(context.stagingDirectory, filename),
+      data,
+      {
+        flag: "wx",
+      }
+    )
+  }
+
+  console.log(
+    `${context.dryRun ? "WOULD PACKAGE" : "PACKAGED"} ${filename} from ${path.basename(source)}: ${formatBytes(data.length)}, ${info.width}x${info.height}`
+  )
+
+  const asset = basePackageAsset(filename, index, checksum, context)
+  asset.source.originalFilename = path.basename(source)
+  asset.output.mimeType = mimeTypeForExtension(extension)
+  asset.output.width = info.width
+  asset.output.height = info.height
+  asset.output.byteSize = data.length
+  return asset
 }
 
 async function pathExists(target) {
@@ -907,27 +1011,63 @@ async function runPackageMode(options) {
     )
   }
 
-  const images = (await findImages(sourceDirectory, false)).sort(
+  const mediaFiles = (await findPackageMedia(sourceDirectory)).sort(
     (left, right) => left.localeCompare(right)
   )
-  if (!images.length) {
+  if (!mediaFiles.length) {
     throw new Error(
-      `No JPEG/PNG images found directly inside ${sourceDirectory}`
+      `No JPEG, PNG, or MP4 files found directly inside ${sourceDirectory}`
     )
+  }
+  const containsImages = mediaFiles.some(file =>
+    supportedImageExtensions.has(path.extname(file).toLowerCase())
+  )
+  const containsVideos = mediaFiles.some(file =>
+    supportedVideoExtensions.has(path.extname(file).toLowerCase())
+  )
+  if (containsImages && containsVideos) {
+    throw new Error(
+      "Package mode requires separate source folders for images and MP4 videos so each package has one R2 delivery policy"
+    )
+  }
+  const mediaKind = containsVideos ? "video" : "image"
+  const maximumVideoBytes = options.maxVideoMib * 1024 * 1024
+  if (mediaKind === "video") {
+    for (const file of mediaFiles) {
+      const stats = await fs.promises.stat(file)
+      if (stats.size > maximumVideoBytes) {
+        throw new Error(
+          `${path.basename(file)} is ${formatBytes(stats.size)}; the configured video object limit is ${options.maxVideoMib} MiB. Deliberately raise both --max-video-mib and the Worker's MAX_VIDEO_UPLOAD_BYTES to accept a larger object. Automatic video transcoding is disabled.`
+        )
+      }
+    }
   }
 
   const scopeLabel = place ? `${journey.slug}-${place.id}` : journey.slug
-  const packageDirectory = path.join(outputDirectory, scopeLabel)
+  const packageLabel =
+    mediaKind === "video" ? `${scopeLabel}-videos` : scopeLabel
+  const packageDirectory = path.join(outputDirectory, packageLabel)
   if (await pathExists(packageDirectory)) {
     throw new Error(
       `Refusing to overwrite existing media package: ${packageDirectory}`
     )
   }
 
-  const normalizedPrefix = options.r2Prefix.replace(/^\/+|\/+$/g, "")
+  const normalizedPrefix = (options.r2Prefix ||
+    (mediaKind === "video" ? "videos" : "images")
+  ).replace(/^\/+|\/+$/g, "")
+  const requiredPrefixRoot = mediaKind === "video" ? "videos" : "images"
+  if (
+    normalizedPrefix !== requiredPrefixRoot &&
+    !normalizedPrefix.startsWith(`${requiredPrefixRoot}/`)
+  ) {
+    throw new Error(
+      `${mediaKind === "video" ? "MP4" : "Image"} packages require an --r2-prefix below ${requiredPrefixRoot}/`
+    )
+  }
   const stagingDirectory = path.join(
     outputDirectory,
-    `.${scopeLabel}-prepare-${process.pid}-${Date.now()}`
+    `.${packageLabel}-prepare-${process.pid}-${Date.now()}`
   )
   const context = {
     dryRun: options.dryRun,
@@ -947,11 +1087,11 @@ async function runPackageMode(options) {
 
   try {
     const assets = []
-    for (let index = 0; index < images.length; index += 1) {
-      const extension = path.extname(images[index]).toLowerCase()
+    for (let index = 0; index < mediaFiles.length; index += 1) {
+      const extension = path.extname(mediaFiles[index]).toLowerCase()
       const filename = `${place?.id || journey.slug}-${String(index + 1).padStart(3, "0")}${extension}`
       assets.push(
-        await createPackageAsset(images[index], filename, index, context)
+        await createPackageAsset(mediaFiles[index], filename, index, context)
       )
     }
 
@@ -963,6 +1103,7 @@ async function runPackageMode(options) {
       placeId: place?.id || null,
       visitId: visit?.id || null,
       inputTag: options.tag,
+      mediaKind,
       parentR2Prefix: place
         ? `${normalizedPrefix}/${journey.slug}/${place.id}/`
         : `${normalizedPrefix}/${journey.slug}/`,
@@ -984,6 +1125,7 @@ async function runPackageMode(options) {
       placeId: place?.id || null,
       visitId: visit?.id || null,
       inputTag: options.tag,
+      mediaKind,
       r2Prefix: `${r2Prefix}/`,
       assets,
     }
@@ -999,7 +1141,7 @@ async function runPackageMode(options) {
 
     console.log("")
     console.log(
-      `${options.dryRun ? "Would create" : "Created"} ${place ? "Place-scoped" : "Journey"} package with ${assets.length} image(s).`
+      `${options.dryRun ? "Would create" : "Created"} ${place ? "Place-scoped" : "Journey"} package with ${assets.length} ${mediaKind === "video" ? "video" : "image"}(s).`
     )
     console.log(`Canonical Journey: ${journey.id}`)
     if (place) {
@@ -1012,7 +1154,7 @@ async function runPackageMode(options) {
     )
     if (!options.dryRun) {
       console.log(
-        "Upload every packaged image at its manifest objectKey, then run npm run media:ingest with a verification receipt."
+        "Upload every packaged media file at its manifest objectKey, then run npm run media:ingest with a verification receipt."
       )
     }
   } catch (error) {

@@ -11,7 +11,9 @@
     }
   ],
   "vars": {
-    "ALLOWED_R2_PREFIX": "images/",
-    "MAX_UPLOAD_BYTES": "26214400"
+    "ALLOWED_R2_PREFIXES": "images/,videos/",
+    "MAX_IMAGE_UPLOAD_BYTES": "26214400",
+    "MAX_VIDEO_UPLOAD_BYTES": "199229440",
+    "MAX_MULTIPART_PART_BYTES": "16777216"
   }
 }

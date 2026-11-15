@@ -223,38 +223,55 @@
       </section>
 
       <section
-        v-if="trip.allPhotography.length"
+        v-if="trip.allMedia.length"
         id="all-photography"
         class="story-shell photography-section"
       >
         <header class="section-intro compact">
           <div>
-            <span class="story-eyebrow">Latest images</span>
-            <h2>All photography</h2>
+            <span class="story-eyebrow">Latest media</span>
+            <h2>Photography and video</h2>
           </div>
           <p>
-            Newly published photographs associated with this journey. More
-            specific locations and field notes are added only when verified.
+            Newly published photographs and videos associated with this journey.
+            More specific locations and field notes are added only when
+            verified.
           </p>
         </header>
 
         <div class="photography-grid">
-          <a
-            v-for="photo in trip.allPhotography"
-            :key="photo.id"
-            :href="photo.src"
-            target="_blank"
-            rel="noopener noreferrer"
+          <div
+            v-for="media in trip.allMedia"
+            :key="media.id"
+            class="photography-item"
           >
-            <img
-              :src="photo.src"
-              :alt="photo.alt"
-              :width="photo.width || null"
-              :height="photo.height || null"
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
+            <video
+              v-if="media.kind === 'video'"
+              controls
+              playsinline
+              preload="metadata"
+              :poster="media.poster || null"
+              :aria-label="media.alt"
+            >
+              <source :src="media.src" :type="media.mimeType || 'video/mp4'" />
+              Your browser does not support HTML video.
+            </video>
+            <a
+              v-else
+              :href="media.src"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                :src="media.src"
+                :alt="media.alt"
+                :width="media.width || null"
+                :height="media.height || null"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+          </div>
         </div>
       </section>
 
@@ -453,6 +470,7 @@ export default {
   gap: 0.85rem;
 }
 
+.photography-item,
 .photography-grid a {
   display: block;
   overflow: hidden;
@@ -461,10 +479,14 @@ export default {
   aspect-ratio: 4 / 3;
 }
 
-.photography-grid img {
+.photography-grid img,
+.photography-grid video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.photography-grid img {
   transition: transform 220ms ease;
 }
 
