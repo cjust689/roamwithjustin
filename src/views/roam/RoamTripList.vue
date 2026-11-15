@@ -22,8 +22,13 @@
         class="story-card"
         :class="{ 'is-coming-soon': trip.comingSoon }"
       >
-        <div class="story-image">
-          <img :src="trip.cover" :alt="`${trip.name} landscape`" />
+        <div class="story-image" :class="{ 'has-no-media': !trip.cover }">
+          <img
+            v-if="trip.cover"
+            :src="trip.cover"
+            :alt="`${trip.name} landscape`"
+          />
+          <div v-else class="story-image-empty" aria-hidden="true"></div>
           <div class="story-shade"></div>
           <span class="story-status">
             {{ trip.comingSoon ? "Coming soon" : trip.dates }}
@@ -31,9 +36,9 @@
         </div>
 
         <div class="story-body">
-          <span>{{ trip.duration || "Journey preview" }}</span>
+          <span>{{ trip.comingSoon ? "Travel story" : trip.duration }}</span>
           <h2>{{ trip.name }}</h2>
-          <p>{{ trip.description }}</p>
+          <p v-if="trip.description">{{ trip.description }}</p>
 
           <div class="story-actions">
             <router-link class="story-primary" :to="`/trips/${trip.id}`">
@@ -159,6 +164,7 @@ export default {
 }
 
 .story-image img,
+.story-image-empty,
 .story-shade {
   position: absolute;
   inset: 0;
@@ -169,6 +175,16 @@ export default {
 .story-image img {
   object-fit: cover;
   transition: transform 700ms cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+
+.story-image-empty {
+  background:
+    radial-gradient(
+      circle at 72% 24%,
+      rgba(246, 189, 96, 0.2),
+      transparent 24%
+    ),
+    linear-gradient(145deg, #1a2b31, #0b1114 72%);
 }
 
 .story-card:hover .story-image img {

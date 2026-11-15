@@ -57,17 +57,7 @@ function preferredExternalLink(externalLinks = {}) {
 }
 
 function journeyPreviewCopy(journey) {
-  if (journey.publicationStatus !== "coming-soon") return journey.description
-  if (journey.description) return journey.description
-
-  // Preview copy is deliberately derived from publication/evidence state. It
-  // makes every registered Journey routable without turning missing dates,
-  // stops, or research notes into public travel facts.
-  if (journey.evidenceStatus === "confirmed") {
-    return "Verified photography anchors this journey. Its public route, stop-level notes, and itinerary will appear as those details are confirmed."
-  }
-
-  return "This destination is registered as a future story. Dates, stops, and route details remain unpublished until they can be verified."
+  return journey.description || ""
 }
 
 function journeyGearHighlights(journey, canonicalGear) {
@@ -196,10 +186,6 @@ export function buildTripViewModel(journey) {
     comingSoon,
     publicationStatus: journey.publicationStatus,
     evidenceStatus: journey.evidenceStatus,
-    previewStatus:
-      journey.evidenceStatus === "confirmed"
-        ? "Photography confirmed"
-        : "Awaiting verification",
     cover,
     fullImage,
     // A coming-soon record already owns two intentional image usages. Showing
@@ -252,14 +238,6 @@ export function buildTripViewModel(journey) {
       img: media.src,
       caption: media.caption || "",
     })),
-    registeredMediaCount: new Set(
-      [
-        cover,
-        fullImage,
-        ...resolvedGallery,
-        ...publishedMedia.map(media => media.src),
-      ].filter(Boolean)
-    ).size,
     hasItinerary: Boolean(journey.days?.length && locations.length),
     hasFieldNotes: Boolean(
       gearHighlights.length ||

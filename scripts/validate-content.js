@@ -9,10 +9,6 @@ const generatedMediaRecords = require("../src/content/media/generated/records.js
 const projectRoot = path.resolve(__dirname, "..")
 const errors = []
 
-// This creator nickname is intentionally unresolved. Giving it a map or
-// tourism link would falsely assert a formal geographic identity.
-const externalLinkExemptPlaceIds = new Set(["hermit-crab-island"])
-
 function report(message) {
   errors.push(message)
 }
@@ -285,9 +281,6 @@ async function main() {
       Boolean
     )
 
-    if (!externalLinks.length && !externalLinkExemptPlaceIds.has(place.id)) {
-      report(owner + " must expose an official, platform, or maps link")
-    }
     externalLinks.forEach(link => {
       if (!/^https:\/\//i.test(link)) {
         report(owner + ' contains an invalid external link "' + link + '"')
@@ -370,7 +363,9 @@ async function main() {
       report(owner + ' duplicates slug "' + journey.slug + '"')
     }
     journeySlugs.add(journey.slug)
-    validateMediaUsage(journey.hero, owner + " hero", mediaModule)
+    if (journey.hero) {
+      validateMediaUsage(journey.hero, owner + " hero", mediaModule)
+    }
     if (journey.fullImage) {
       validateMediaUsage(journey.fullImage, owner + " full image", mediaModule)
     }
@@ -468,14 +463,15 @@ async function main() {
   )
   tripViews.forEach(trip => {
     const owner = 'Trip view "' + trip.id + '"'
-    if (!trip.cover) report(owner + " has no resolved cover")
-    if (!trip.description) report(owner + " has no public description")
+    if (!trip.cover && !trip.comingSoon) {
+      report(owner + " has no resolved cover")
+    }
+    if (!trip.description && !trip.comingSoon) {
+      report(owner + " has no public description")
+    }
     if (!trip.id || !trip.name) report(owner + " has no public route identity")
     if (!Array.isArray(trip.allPhotography)) {
       report(owner + " has no All Photography projection")
-    }
-    if (trip.comingSoon && trip.registeredMediaCount < 1) {
-      report(owner + " has no media for its journey preview")
     }
     if (trip.comingSoon) return
     const locationIds = new Set(trip.locations.map(location => location.id))

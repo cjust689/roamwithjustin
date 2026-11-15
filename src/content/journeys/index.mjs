@@ -1,4 +1,5 @@
 import { createIdRegistry } from "../contracts.mjs"
+import { nextDestinationJourneys } from "./next-destinations.mjs"
 import { puertoRico2024Journey } from "./puerto-rico-2024.mjs"
 import { upcomingJourneys } from "./upcoming.mjs"
 import { usviStJohn2025Journey } from "./usvi-st-john-2025.mjs"
@@ -12,6 +13,7 @@ const registry = createIdRegistry(
     puertoRico2024Journey,
     usviStJohn2025Journey,
     ...upcomingJourneys,
+    ...nextDestinationJourneys,
   ],
   "Journey registry"
 )

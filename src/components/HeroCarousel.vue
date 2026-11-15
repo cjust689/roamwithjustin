@@ -13,6 +13,11 @@
   >
     <div class="carousel-viewport">
       <div
+        v-if="!allImages.length"
+        class="carousel-empty"
+        aria-hidden="true"
+      ></div>
+      <div
         class="carousel-track"
         :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
       >
@@ -146,7 +151,20 @@ export default {
 }
 
 .carousel-viewport {
+  position: relative;
   overflow: hidden;
+}
+
+.carousel-empty {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 72% 24%,
+      rgba(246, 189, 96, 0.2),
+      transparent 24%
+    ),
+    linear-gradient(145deg, #1a2b31, #0b1114 72%);
 }
 
 .carousel-track {
