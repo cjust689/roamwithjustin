@@ -184,6 +184,12 @@
         </article>
       </section>
 
+      <AdSlot
+        v-if="storyAdEligible"
+        :slot-id="storyAdSlotId"
+        placement="travel-story-inline-1"
+      />
+
       <section
         v-if="trip.allMedia.length"
         id="all-photography"
@@ -366,12 +372,14 @@
 
 <script>
 import { getTripViewModel } from "@/content/selectors/trips"
+import { adSenseConfig } from "@/config/adsense.mjs"
+import AdSlot from "@/components/AdSlot.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
 import LocationModal from "@/components/LocationModal.vue"
 
 export default {
   name: "TripOverview",
-  components: { HeroCarousel, LocationModal },
+  components: { AdSlot, HeroCarousel, LocationModal },
   props: {
     id: {
       type: String,
@@ -396,6 +404,17 @@ export default {
     },
     hasAffiliateGear() {
       return this.trip?.gearHighlights.some(item => item.affiliate) || false
+    },
+    storyAdEligible() {
+      return Boolean(
+        adSenseConfig.ready &&
+          this.trip &&
+          !this.trip.comingSoon &&
+          this.trip.days.length >= 3
+      )
+    },
+    storyAdSlotId() {
+      return adSenseConfig.storySlotId
     },
     itineraryIntroduction() {
       return this.trip?.itineraryMode === "chapters"

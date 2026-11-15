@@ -13,6 +13,11 @@ const routes = [
     component: () => import("../views/roam/About.vue"),
   },
   {
+    path: "/privacy",
+    name: "Privacy",
+    component: () => import("../views/roam/Privacy.vue"),
+  },
+  {
     path: "/trips",
     name: "RoamTrips",
     component: () => import("../views/roam/RoamTripList.vue"),

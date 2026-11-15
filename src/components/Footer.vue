@@ -18,7 +18,10 @@
     </div>
     <div class="footer-meta">
       <span>&copy; {{ new Date().getFullYear() }} Roam With Justin</span>
-      <router-link to="/affiliates">Affiliate disclosure</router-link>
+      <div>
+        <router-link to="/privacy">Privacy</router-link>
+        <router-link to="/affiliates">Affiliate disclosure</router-link>
+      </div>
     </div>
   </footer>
 </template>
@@ -114,6 +117,12 @@ export default {
   text-decoration: none;
 }
 
+.footer-meta > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 @media (max-width: 680px) {
   .footer-inner {
     grid-template-columns: 1fr;
@@ -124,6 +133,10 @@ export default {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .footer-meta > div {
+    gap: 0.5rem 1rem;
   }
 }
 </style>
