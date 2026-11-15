@@ -63,6 +63,10 @@ export default {
 
     this.observeFillStatus()
     this.loader = ensureAdSenseLoader()
+    if (this.loader?.dataset.roamAdsenseState === "error") {
+      this.handleLoaderFailure()
+      return
+    }
     this.loader?.addEventListener("error", this.handleLoaderFailure, {
       once: true,
     })
