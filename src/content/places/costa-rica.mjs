@@ -140,7 +140,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "area",
     description:
-      "A quick confirmed stop in the Manuel Antonio area, not a claim of entry into the national park.",
+      "A brief stop in the wider Manuel Antonio area during the route toward San José, without entering the national park.",
     externalLinks: {},
     verificationNotes:
       "The public copy must preserve the distinction between an area stop and a national-park visit.",

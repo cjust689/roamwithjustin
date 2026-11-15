@@ -34,15 +34,15 @@
         </div>
 
         <dl v-if="!trip.comingSoon" class="story-facts">
-          <div>
+          <div v-if="trip.duration">
             <dt>Duration</dt>
             <dd>{{ trip.duration }}</dd>
           </div>
-          <div>
+          <div v-if="trip.bestTimeToGo">
             <dt>Best time</dt>
             <dd>{{ trip.bestTimeToGo }}</dd>
           </div>
-          <div>
+          <div v-if="trip.who">
             <dt>Made for</dt>
             <dd>{{ trip.who }}</dd>
           </div>
@@ -256,7 +256,11 @@
               :alt="stay.name"
               loading="lazy"
             />
-            <div v-else class="lodging-media-placeholder" aria-hidden="true"></div>
+            <div
+              v-else
+              class="lodging-media-placeholder"
+              aria-hidden="true"
+            ></div>
             <div>
               <span>{{ stay.location }}</span>
               <h3>{{ stay.name }}</h3>

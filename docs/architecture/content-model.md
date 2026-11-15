@@ -99,9 +99,9 @@ captions, editorial roles, and final curation are incomplete.
 
 These previews may omit media, venues, external links, itinerary days, and
 unsupported details. Their Atlas panels and story views present only the facts
-that exist, without labels such as "coming soon," "unconfirmed," or
-"unverified." Missing links stay absent instead of being replaced with guessed
-tourism or map URLs.
+that exist, without labels such as "coming soon," "confirmed," "unconfirmed,"
+"verified," or "unverified." Missing links stay absent instead of being
+replaced with guessed tourism or map URLs.
 Coordinates use verified public geographic points or area centroids, with the
 precision and limitations recorded on each Place; they are not treated as
 photo capture positions.
@@ -124,16 +124,16 @@ missing-data labels, and canonical-record terminology are not exposed to
 visitors. Published Journeys still require a resolved cover and complete
 validated public content.
 
-An internally incomplete Journey may also expose verified chapter copy before media is
-available. When those chapters exist, the story view skips the redundant
-generic destination preview and renders the chapters with chronology-safe
-labels. Publication status remains `coming-soon` until its media and remaining
-public content are ready.
+An internally incomplete Journey may also expose verified chapter copy before
+media is available. When those chapters exist, the story view skips the
+redundant generic destination preview and renders the chapters with
+chronology-safe labels. Publication status remains `coming-soon` until its
+media and remaining public content are ready.
 
-Content validation requires every internally incomplete Journey to have an Atlas root
-and every one of its Visits to resolve to an Atlas node. Confirmed broad route
-order can power guided playback even while story/media content remains marked
-coming soon.
+Content validation requires every internally incomplete Journey to have an
+Atlas root and every one of its Visits to resolve to an Atlas node. Confirmed
+broad route order can power guided playback even while the internal
+publication state remains incomplete.
 
 Retired authorities `src/data/trips.js` and
 `src/features/atlas/data/atlasData.js` are absent and explicitly rejected by

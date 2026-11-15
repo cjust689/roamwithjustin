@@ -28,7 +28,7 @@
             </span>
             <strong>Enter the Travel Atlas</strong>
             <span class="journey-description">
-              Fly across satellite terrain through Utah's red-rock parks and
+              Fly across satellite terrain through Utah's red rock parks and
               Puerto Rico's cities, cliffs, waterfalls, and beaches.
             </span>
             <span class="journey-action">Open the atlas <b>&rarr;</b></span>

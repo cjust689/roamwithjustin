@@ -34,7 +34,7 @@ function collectRawLocalPaths(value, found = new Set()) {
 }
 
 const editorialWorkflowLanguage =
-  /\b(?:coming soon|unconfirmed|unverified|placeholder|in progress|pending|not confirmed|needs verification|date to be confirmed)\b|\bstill being\b|\bremain(?:s|ing)? (?:unverified|open)\b/i
+  /\b(?:coming soon|confirmed|unconfirmed|verified|unverified|placeholder|in progress|pending|not confirmed|needs verification|date to be confirmed)\b|\bstill being\b|\bremain(?:s|ing)? (?:unverified|open)\b|\b(?:the creator|editorial order|media review)\b/i
 
 function validatePublicCopy(value, owner) {
   if (typeof value !== "string" || !value.trim()) return

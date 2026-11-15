@@ -121,7 +121,8 @@ Suggested elastic arc (not a mandatory formula):
   editorial notes are not public prose.
 - **Hide the editorial workflow:** an incomplete story should simply present
   the facts, places, and media that exist. Do not show visitors labels such as
-  "coming soon," "unconfirmed," "unverified," "placeholder," or "pending."
+  "coming soon," "confirmed," "unconfirmed," "verified," "unverified,"
+  "placeholder," or "pending."
 
 ## 5. Evidence boundaries: evocative but truthful
 
