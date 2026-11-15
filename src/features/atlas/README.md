@@ -145,11 +145,16 @@ rendering so commercial or affiliate behavior does not enter the map engine.
 
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible, while absent story/media content renders as
-`Story and photography coming soon`. Planned-only stops are excluded. The
-validator requires every coming-soon Journey Visit to resolve to an Atlas node
-so later media ingestion enriches stable IDs instead of creating a parallel
-map record.
+Place summaries remain visible, and their top-level navigation cards use the
+reader-facing `Journey preview` cue. Missing material stays absent instead of
+rendering an empty section or an editorial workflow message. Planned-only
+stops are excluded. The validator requires every internally incomplete Journey
+Visit to resolve to an Atlas node so later media ingestion enriches stable IDs
+instead of creating a parallel map record.
+
+Every Atlas root uses the canonical Journey title and date label, including
+its year, because the same Place can host multiple trips. Child nodes use their
+canonical Place names and local labels without repeating the Journey year.
 
 ## Persistence
 

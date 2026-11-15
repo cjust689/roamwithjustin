@@ -118,7 +118,7 @@
             type="button"
             @click="selectNode(node.id)"
           >
-            <span>Explore</span>
+            <span>{{ node.comingSoon ? "Journey preview" : "Explore" }}</span>
             <strong>{{ node.title }}</strong>
           </button>
         </div>
