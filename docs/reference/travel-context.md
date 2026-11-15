@@ -11,7 +11,9 @@ related:
   - usvi-st-john-source
 supersedes: []
 superseded_by: []
-code_paths: []
+code_paths:
+  - src/content/places/next-destinations.mjs
+  - src/content/journeys/next-destinations.mjs
 verification:
   state: unverified
   evidence: []

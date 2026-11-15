@@ -16,7 +16,9 @@ code_paths:
   - src/content/contracts.mjs
   - src/content/media/index.mjs
   - src/content/places/index.mjs
+  - src/content/places/next-destinations.mjs
   - src/content/journeys/index.mjs
+  - src/content/journeys/next-destinations.mjs
   - src/content/partners/index.mjs
   - src/content/selectors/projections.mjs
   - scripts/validate-content.js
@@ -57,6 +59,15 @@ Each registry composes records in one `index.mjs` and uses
 Journey public routes use `Journey.slug`; internal relationships use canonical
 IDs. A Place may appear in more than one Journey through distinct Visits.
 
+Top-level scaffolds may deliberately omit coordinates, media, external links,
+and child records. Miami currently has one bounded Place and Journey. Europe
+is one multi-country Journey scaffold with no registered Place or Visit
+children; its named stops remain reference context until that lower level is
+implemented intentionally. Both support stable coming-soon Journey URLs
+without creating Atlas pins or implying unsupported venue and itinerary
+detail. Missing external links stay absent instead of being replaced with
+guessed tourism or map URLs.
+
 Media references use `{ assetId, ...usageOverrides }`. Presentation-specific
 alt text, captions, focal points, and roles belong to the usage/placement, not
 the physical asset. Legacy URL resolution remains isolated in the shared media
@@ -67,6 +78,12 @@ selector for compatibility.
 `src/content/selectors/projections.mjs` builds public trip, location, Atlas,
 and guided-journey shapes. Feature components consume those projections rather
 than maintaining another content database.
+
+A coming-soon Journey may be media-free. Story list/detail components render a
+quiet decorative surface and concise public-facing coming-soon copy; internal
+verification state, media counts, missing-data labels, and canonical-record
+terminology are not exposed to visitors. Published Journeys still require a
+resolved cover and complete validated public content.
 
 Retired authorities `src/data/trips.js` and
 `src/features/atlas/data/atlasData.js` are absent and explicitly rejected by
