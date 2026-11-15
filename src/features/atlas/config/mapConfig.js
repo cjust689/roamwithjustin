@@ -1,5 +1,5 @@
-const mapTilerKey = process.env.VUE_APP_MAPTILER_KEY || ""
-const customStyleUrl = process.env.VUE_APP_MAPTILER_STYLE_URL || ""
+const mapTilerKey = (process.env.VUE_APP_MAPTILER_KEY || "").trim()
+const customStyleUrl = (process.env.VUE_APP_MAPTILER_STYLE_URL || "").trim()
 
 export const hasMapTilerKey = Boolean(mapTilerKey)
 
