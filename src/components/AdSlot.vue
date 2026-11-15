@@ -3,6 +3,7 @@
     v-if="configured"
     v-show="!unfilled"
     class="ad-placement"
+    :class="`ad-placement--${variant}`"
     :data-placement="placement"
     aria-label="Advertisement"
   >
@@ -35,6 +36,11 @@ export default {
     placement: {
       type: String,
       required: true,
+    },
+    variant: {
+      type: String,
+      default: "story",
+      validator: value => ["story", "atlas"].includes(value),
     },
   },
   data() {
@@ -118,6 +124,16 @@ export default {
 .ad-placement-unit[data-ad-status="unfilled"],
 .ad-placement-unit[data-ad-status="unfill-optimized"] {
   display: none !important;
+}
+
+.ad-placement--atlas {
+  width: 100%;
+  margin: 2rem 0 0;
+  padding: 1.1rem 0;
+}
+
+.ad-placement--atlas .ad-placement-unit {
+  min-height: 100px;
 }
 
 @media (max-width: 620px) {

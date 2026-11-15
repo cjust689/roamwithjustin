@@ -15,13 +15,17 @@ export function createAdSenseConfig({
   autoAdsOffFlag = "",
   clientId = "",
   storySlotId = "",
+  atlasEnabledFlag = "",
+  atlasSlotId = "",
   nodeEnv = "development",
 } = {}) {
   const requested = enabled(enabledFlag)
+  const atlasRequested = enabled(atlasEnabledFlag)
   const privacyReady = enabled(privacyReadyFlag)
   const autoAdsOffConfirmed = enabled(autoAdsOffFlag)
   const normalizedClientId = clean(clientId)
   const normalizedStorySlotId = clean(storySlotId)
+  const normalizedAtlasSlotId = clean(atlasSlotId)
   const issues = []
 
   if (requested && !privacyReady) {
@@ -36,20 +40,36 @@ export function createAdSenseConfig({
   if (requested && !SLOT_ID_PATTERN.test(normalizedStorySlotId)) {
     issues.push("VUE_APP_ADSENSE_STORY_SLOT_ID must be a numeric slot ID")
   }
+  if (atlasRequested && !requested) {
+    issues.push(
+      "VUE_APP_ADSENSE_ENABLED must be true when Atlas advertising is enabled"
+    )
+  }
+  if (atlasRequested && !SLOT_ID_PATTERN.test(normalizedAtlasSlotId)) {
+    issues.push("VUE_APP_ADSENSE_ATLAS_SLOT_ID must be a numeric slot ID")
+  }
+
+  const ready =
+    nodeEnv === "production" &&
+    requested &&
+    privacyReady &&
+    autoAdsOffConfirmed &&
+    issues.length === 0
 
   return Object.freeze({
     requested,
+    atlasRequested,
     privacyReady,
     autoAdsOffConfirmed,
     clientId: normalizedClientId,
     storySlotId: normalizedStorySlotId,
+    atlasSlotId: normalizedAtlasSlotId,
     issues: Object.freeze(issues),
-    ready:
-      nodeEnv === "production" &&
-      requested &&
-      privacyReady &&
-      autoAdsOffConfirmed &&
-      issues.length === 0,
+    ready,
+    atlasReady:
+      ready &&
+      atlasRequested &&
+      SLOT_ID_PATTERN.test(normalizedAtlasSlotId),
   })
 }
 
@@ -59,5 +79,7 @@ export const adSenseConfig = createAdSenseConfig({
   autoAdsOffFlag: process.env.VUE_APP_ADSENSE_AUTO_ADS_OFF_CONFIRMED,
   clientId: process.env.VUE_APP_ADSENSE_CLIENT_ID,
   storySlotId: process.env.VUE_APP_ADSENSE_STORY_SLOT_ID,
+  atlasEnabledFlag: process.env.VUE_APP_ADSENSE_ATLAS_ENABLED,
+  atlasSlotId: process.env.VUE_APP_ADSENSE_ATLAS_SLOT_ID,
   nodeEnv: process.env.NODE_ENV,
 })

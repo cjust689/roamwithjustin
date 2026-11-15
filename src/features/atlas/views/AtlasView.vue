@@ -152,6 +152,8 @@
       "
       :guided-controls-expanded="guidedPanelExpanded"
       :guided-controls-clearance="guidedPanelClearance"
+      :show-ad="atlasAdVisible"
+      :ad-slot-id="atlasAdSlotId"
       @close="goToParent"
       @select="selectNode"
       @toggle-favorite="toggleFavorite"
@@ -179,8 +181,13 @@ import AtlasDetailPanel from "../components/AtlasDetailPanel.vue"
 import AtlasJourneyPlayer from "../components/AtlasJourneyPlayer.vue"
 import AtlasMap from "../components/AtlasMap.vue"
 import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
+import { adSenseConfig } from "@/config/adsense.mjs"
 import { hasMapTilerKey } from "../config/mapConfig"
 import { getAtlasPinFocusCamera } from "../config/markerLayout.mjs"
+import {
+  isAtlasAdEligible,
+  reserveAtlasAdRequest,
+} from "../config/atlasAdEligibility.mjs"
 import {
   atlasRootIds,
   getAtlasJourneyNodes,
@@ -241,6 +248,8 @@ export default {
       guidedArrivalTimer: null,
       guidedArrivalDeadline: 0,
       guidedRemainingMs: 0,
+      guidedVisitedStopIds: [],
+      atlasAdNodeId: "",
     }
   },
   computed: {
@@ -264,6 +273,14 @@ export default {
     },
     guidedStop() {
       return this.guidedJourney?.stops?.[this.guidedIndex] || null
+    },
+    atlasAdVisible() {
+      return Boolean(
+        this.atlasAdNodeId && this.currentNode?.id === this.atlasAdNodeId
+      )
+    },
+    atlasAdSlotId() {
+      return adSenseConfig.atlasSlotId
     },
     guidedTransitionLabel() {
       if (this.guidedStatus !== "traveling" || !this.guidedStop) return ""
@@ -337,6 +354,9 @@ export default {
       // Returning to the canonical /atlas root restores the open landing
       // navigator, including browser back and the World breadcrumb.
       if (!nodeId) this.welcomeExpanded = true
+      if (this.atlasAdNodeId && nodeId !== this.atlasAdNodeId) {
+        this.atlasAdNodeId = ""
+      }
       if (this.stateLoaded) this.handleRoute(nodeId)
       if (this.pendingMapPinNodeId === nodeId) {
         this.pendingMapPinNodeId = null
@@ -472,6 +492,8 @@ export default {
       this.guidedStatus = "idle"
       this.guidedIndex = -1
       this.guidedTravel = null
+      this.guidedVisitedStopIds = []
+      this.atlasAdNodeId = ""
       this.goToGuidedStop(0)
     },
     goToGuidedStop(index) {
@@ -521,6 +543,7 @@ export default {
       this.guidedRemainingMs = 0
       this.guidedStatus = "at-stop"
       this.requestMapPinExpansion()
+      this.recordGuidedStopArrival()
 
       if (this.guidedStop) {
         this.announcement = `${this.guidedStop.title}, stop ${this.guidedIndex + 1} of ${this.guidedJourney.stopCount}. Journey paused.`
@@ -578,6 +601,8 @@ export default {
       this.guidedIndex = -1
       this.guidedTravel = null
       this.guidedRemainingMs = 0
+      this.guidedVisitedStopIds = []
+      this.atlasAdNodeId = ""
       if (wasActive) this.detailCollapseRequest += 1
       if (announce) this.announcement = "Guided journey closed"
     },

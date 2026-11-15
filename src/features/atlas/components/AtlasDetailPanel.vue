@@ -211,6 +211,13 @@
             </div>
           </section>
 
+          <AdSlot
+            v-if="showAd"
+            :slot-id="adSlotId"
+            placement="atlas-guided-journey-inline-1"
+            variant="atlas"
+          />
+
           <div v-if="node.actions.length" class="atlas-actions">
             <template v-for="action in node.actions">
               <router-link
@@ -315,8 +322,11 @@
 </template>
 
 <script>
+import AdSlot from "@/components/AdSlot.vue"
+
 export default {
   name: "AtlasDetailPanel",
+  components: { AdSlot },
   props: {
     node: {
       type: Object,
@@ -344,6 +354,11 @@ export default {
     guidedControlsClearance: {
       type: Number,
       default: 0,
+    },
+    showAd: Boolean,
+    adSlotId: {
+      type: String,
+      default: "",
     },
   },
   data() {
