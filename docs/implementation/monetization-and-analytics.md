@@ -4,10 +4,11 @@ title: Monetization, Analytics, and Partner Referrals
 kind: implementation
 status: in-progress
 implementation_state: partial
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - monetization-analytics
   - gear-system
+  - adsense-operations
 supersedes: []
 superseded_by: []
 code_paths:
@@ -15,17 +16,50 @@ code_paths:
   - src/utils/tracking.js
   - src/components/GearGrid.vue
   - src/data/affiliates.js
+  - src/config/adsense.mjs
+  - src/services/adsense.mjs
+  - src/components/AdSlot.vue
+  - src/views/roam/RoamTripOverview.vue
+  - src/views/roam/Privacy.vue
+  - scripts/validate-adsense-config.mjs
+  - scripts/lib/adsense-build-env.js
+  - scripts/prepare-pages.js
+  - .github/workflows/deploy-pages.yml
 verification:
   state: verified
   evidence:
+    - npm run adsense:test
+    - npm run adsense:validate
+    - npm run docs:audit
     - npm run lint
     - npm run build
 ---
 
 > **Implementation status:** GA4 loading and existing GearGrid click tracking
-> are present. AdSense, canonical partner/referral IDs, generalized outbound
-> tracking, and the proposed reporting workflow are not implemented. See the
-> [as-built analytics document](../architecture/monetization-and-analytics.md).
+> are present. The first AdSense phase is implemented as a disabled by default,
+> manually placed story unit with configuration validation, ads.txt generation,
+> a public privacy notice, and the owner supplied publisher verification meta
+> tag. The live ad slot, ads.txt seller line, activation flags, and dashboard
+> settings are not present. Canonical partner referral tracking and the later
+> editorial commerce work remain. See the
+> [as-built analytics document](../architecture/monetization-and-analytics.md)
+> and [AdSense operations guide](../reference/adsense.md).
+
+### Phase 1 implementation result
+
+- One responsive placement may appear after the full itinerary on a published
+  Journey with at least three chapters.
+- There are no placements on the home page, Atlas, incomplete Journeys, story
+  heroes, location cards, galleries, lightboxes, videos, dialogs, navigation,
+  or footer.
+- The shared loader is added only when the eligible unit mounts and is never
+  duplicated. The component does not refresh ads or track their interactions.
+- The homepage exposes the owner supplied publisher ID through Google's
+  supported verification meta tag without loading advertising JavaScript.
+- Live activation fails closed unless privacy readiness and Auto ads being off
+  are explicitly acknowledged alongside valid client, slot, and ads.txt data.
+- Account approval, Auto ads, consent management, Brand safety settings, and
+  production serving remain externally unverified owner actions.
 
 # Roam With Justin — Monetization, Google Analytics 4, AdSense & Partner Referral Plan
 

@@ -34,7 +34,7 @@ export default {
       return RoamHeader
     },
     showBanner() {
-      const hiddenRoutes = ["/", "/about", "/affiliates"]
+      const hiddenRoutes = ["/", "/about", "/affiliates", "/privacy"]
       return (
         !hiddenRoutes.includes(this.$route.path) &&
         !this.$route.path.startsWith("/trips")

@@ -149,6 +149,19 @@ GitHub Actions secret `MAPTILER_API_KEY`. Save the raw key without quotes or
 surrounding whitespace and allow `https://roamwithjustin.com` as an HTTP origin
 in MapTiler.
 
+## Manual AdSense
+
+AdSense is disabled by default. The implementation permits one responsive
+manual unit after the itinerary on eligible long travel stories. It does not
+place ads on the home page, Atlas, incomplete Journeys, heroes, galleries,
+videos, dialogs, navigation, or footer.
+
+Before live activation, Auto ads must be off in the AdSense dashboard, privacy
+and consent setup must be reviewed, and the exact owner supplied publisher,
+slot, and ads.txt values must be configured as GitHub Actions variables. See
+the [AdSense operations guide](docs/reference/adsense.md) for the variables,
+dashboard checklist, and verification commands.
+
 ## Image optimization
 
 GitHub Pages serves the files in `public/` without resizing or recompressing
