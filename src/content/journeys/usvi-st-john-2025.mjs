@@ -2,8 +2,10 @@
 // exact calendar dates and the charter's within-day stop order remain unknown.
 export const usviStJohn2025Journey = Object.freeze({
   id: "usvi-st-john-2025",
-  slug: "usvi",
-  title: "St. John, USVI",
+  year: 2025,
+  slug: "usvi-2025",
+  legacySlugs: ["usvi"],
+  title: "St. John, USVI (2025)",
   publicationStatus: "published",
   evidenceStatus: "confirmed",
   dateRange: {

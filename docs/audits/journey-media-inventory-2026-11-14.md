@@ -58,13 +58,13 @@ This sequence gives the site enough real content now while using one or two actu
 
 | Public page            | Canonical Journey ID |                      State | Visits |         Attached media | Actual coverage                                       | Next action                                                |
 | ---------------------- | -------------------- | -------------------------: | -----: | ---------------------: | ----------------------------------------------------- | ---------------------------------------------------------- |
-| `/trips/utah`          | `utah-winter-2025`   |       Published, confirmed |     11 | 41 images + 1 R2 video | 39 distinct local image files; every visit has a hero | No broad refresh needed                                    |
-| `/trips/puerto-rico`   | `puerto-rico-2024`   |       Published, confirmed |     16 |              48 images | 46 distinct local image files; one visit has no media | Fill only specific gaps if good Lightroom selections exist |
-| `/trips/usvi`          | `usvi-st-john-2025`  | Published structure, media pending |     10 |        2 image records | One distinct journey-level photograph; stop media pending | Highest Lightroom priority                              |
-| `/trips/north-georgia` | `north-georgia-2026` | Preview, confirmed imagery |      0 |        2 image records | Two orientations/crops of one forest scene            | Second Lightroom priority                                  |
-| `/trips/hungary`       | `hungary-trip`       |        Preview, unverified |      0 |        2 image records | Two Parliament photographs with little story variety  | Verify facts before expanding                              |
+| `/trips/utah-2025`          | `utah-winter-2025`   |       Published, confirmed |     11 | 41 images + 1 R2 video | 39 distinct local image files; every visit has a hero | No broad refresh needed                                    |
+| `/trips/puerto-rico-2024`   | `puerto-rico-2024`   |       Published, confirmed |     16 |              48 images | 46 distinct local image files; one visit has no media | Fill only specific gaps if good Lightroom selections exist |
+| `/trips/usvi-2025`          | `usvi-st-john-2025`  | Published structure, media pending |     10 |        2 image records | One distinct journey-level photograph; stop media pending | Highest Lightroom priority                              |
+| `/trips/north-georgia-2026` | `north-georgia-2026` | Preview, confirmed imagery |      0 |        2 image records | Two orientations/crops of one forest scene            | Second Lightroom priority                                  |
+| `/trips/hungary-2024`       | `hungary-2024`       |        Preview, unverified |      0 |        2 image records | Two Parliament photographs with little story variety  | Verify facts before expanding                              |
 
-Utah, Puerto Rico and St. John now qualify for guided Atlas playback because they have ordered Journey visits and multiple mapped leaf stops. North Georgia and Hungary remain previews and should not receive invented pins, dates, or routes merely because more photographs are available.
+Utah, Puerto Rico and St. John now qualify for guided Atlas playback because they have ordered Journey visits and multiple mapped leaf stops. North Georgia and Hungary remain previews and should not receive invented pins, exact dates, or routes merely because more photographs are available.
 
 ## Journey-by-journey media plan
 
@@ -165,12 +165,12 @@ Privacy requirements:
 - do not create trail pins from researched hikes;
 - do not claim a bald-eagle sighting without a matching confirmed photograph and record.
 
-### Hungary — `hungary-trip`
+### Hungary — `hungary-2024`
 
 Current media:
 
 - two distinct landscape images of the Hungarian Parliament Building;
-- no verified date range;
+- the creator-confirmed year is 2024, but no exact date range is verified;
 - no canonical visits or itinerary;
 - no Atlas route;
 - Journey evidence state remains `unverified`.
@@ -178,7 +178,7 @@ Current media:
 Before exporting more images, confirm:
 
 1. whether this is a completed personal trip;
-2. the approximate year or date range;
+2. the exact date range;
 3. the cities and places actually visited;
 4. which photographs belong to this same trip;
 5. whether Budapest should become a canonical Place and Journey visit.

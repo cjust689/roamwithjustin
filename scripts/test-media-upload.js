@@ -9,10 +9,10 @@ const { uploadMediaPackage } = require("./upload-media.js")
 
 const projectRoot = path.resolve(__dirname, "..")
 const testRoot = path.join(projectRoot, ".tmp-media-upload-test")
-const packageDirectory = path.join(testRoot, "usvi-waterlemon-cay")
+const packageDirectory = path.join(testRoot, "usvi-2025-waterlemon-cay")
 const videoPackageDirectory = path.join(
   testRoot,
-  "usvi-waterlemon-cay-videos"
+  "usvi-2025-waterlemon-cay-videos"
 )
 const manifestFile = path.join(packageDirectory, "publication-manifest.json")
 const token = "test-upload-token-that-is-not-a-production-secret"
@@ -167,13 +167,13 @@ async function createPackage() {
   const data = fs.readFileSync(imageFile)
   const checksum = sha256(data)
   const batchId = `media-usvi-waterlemon-cay-${checksum.slice(0, 16)}`
-  const r2Prefix = `images/usvi/waterlemon-cay/${batchId}/`
+  const r2Prefix = `images/usvi-2025/waterlemon-cay/${batchId}/`
   const manifest = {
     schemaVersion: 1,
     manifestType: "journey-media-publication",
     batchId,
     journeyId: "usvi-st-john-2025",
-    journeySlug: "usvi",
+    journeySlug: "usvi-2025",
     placeId: "waterlemon-cay",
     visitId: "usvi-st-john-2025-waterlemon-cay",
     inputTag: "waterlemon cay",
@@ -226,13 +226,13 @@ function createVideoPackage() {
   fs.writeFileSync(videoFile, data)
   const checksum = sha256(data)
   const batchId = `media-usvi-waterlemon-cay-video-${checksum.slice(0, 12)}`
-  const r2Prefix = `videos/usvi/waterlemon-cay/${batchId}/`
+  const r2Prefix = `videos/usvi-2025/waterlemon-cay/${batchId}/`
   const manifest = {
     schemaVersion: 1,
     manifestType: "journey-media-publication",
     batchId,
     journeyId: "usvi-st-john-2025",
-    journeySlug: "usvi",
+    journeySlug: "usvi-2025",
     placeId: "waterlemon-cay",
     visitId: "usvi-st-john-2025-waterlemon-cay",
     inputTag: "waterlemon cay video",
@@ -528,7 +528,7 @@ async function main() {
     const badDigestBody = Buffer.from("wrong digest")
     const checksumMismatch = await workerModule.handleRequest(
       new Request(
-        `https://upload.test/v1/objects/images/usvi/test/${manifest.batchId}/wrong.jpg`,
+        `https://upload.test/v1/objects/images/usvi-2025/test/${manifest.batchId}/wrong.jpg`,
         {
           method: "PUT",
           headers: {

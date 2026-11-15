@@ -56,7 +56,7 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 
 | Subsystem              | As-built authority                                                       | Operational/reference guide                                               | Verified state                                                                                                                                            |
 | ---------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Canonical content      | [Content model](architecture/content-model.md)                           | [Atlas feature guide](../src/features/atlas/README.md)                    | Media, Places, Journeys, Visits, Partners, selectors, and validation exist. Confirmed incomplete Europe, Costa Rica, Utah 2026, Miami, North Georgia, Peoria, and Hungary content is Atlas-visible with coming-soon story/media states; planned-only stops remain excluded. Experiences do not. |
+| Canonical content      | [Content model](architecture/content-model.md)                           | [Atlas feature guide](../src/features/atlas/README.md)                    | Media, Places, Journeys, Visits, Partners, selectors, and validation exist. Every Journey has a year-specific canonical ID, public slug, title, and date label; legacy unyeared URLs remain resolvable. Confirmed incomplete Europe, Costa Rica, Utah 2026, Miami, North Georgia, Peoria, and Hungary content is Atlas-visible with coming-soon story/media states. Miami includes five chronology-safe story chapters and mapped South Pointe, Everglades, Shark Valley, and Oleta stops; generated batches provide 18 Everglades and 9 Oleta images, while the remaining Miami Place media and curated hero remain pending. Planned-only stops remain excluded. Experiences do not. |
 | Media                  | [Media pipeline](architecture/media-pipeline.md)                         | [Journey media implementation](implementation/journey-media-ingestion.md) and [R2 Worker upload](implementation/r2-worker-media-upload.md) | Journey and Place/Visit image optimization plus lossless MP4 pass-through packaging, authenticated manifest-only upload, ingestion, Journey media, location media, and existing-Atlas-pin projection exist. Worker deployment and the first production batch remain unverified. |
 | Gear                   | [Gear system](architecture/gear.md)                                      | [Gear ingestion CLI](reference/gear-ingestion-cli.md)                     | Canonical generated Gear/Usage ingestion and Journey selectors exist. The generated registry is empty.                                                    |
 | Analytics and commerce | [Monetization and analytics](architecture/monetization-and-analytics.md) | [Active monetization plan](implementation/monetization-and-analytics.md)  | GA4 loader and gear-link click tracking exist. AdSense and the proposed canonical referral contract do not.                                               |
@@ -79,6 +79,12 @@ These documents describe future behavior, not available features:
 - [Video metadata pipeline](proposals/video-metadata-pipeline.md)
 
 ## Reference and editorial guidance
+
+Before generating or revising public travel content, read the
+[Experiential storytelling framework](reference/storytelling-framework.md)
+completely, then reconcile the relevant owner-supplied travel context against
+canonical source and registered media. The framework governs voice and pacing;
+it never turns an unverified detail into fact.
 
 - [Living Atlas content strategy](reference/atlas-content-strategy.md)
 - [R2 video delivery](reference/r2-video-delivery.md)

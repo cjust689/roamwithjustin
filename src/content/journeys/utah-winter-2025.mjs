@@ -1,8 +1,10 @@
 // Complete canonical Utah Journey. Array order is the authoritative travel sequence.
 export const utahWinter2025Journey = Object.freeze({
   id: "utah-winter-2025",
-  slug: "utah",
-  title: "Utah",
+  year: 2025,
+  slug: "utah-2025",
+  legacySlugs: ["utah"],
+  title: "Utah (2025)",
   publicationStatus: "published",
   evidenceStatus: "confirmed",
   dateRange: {

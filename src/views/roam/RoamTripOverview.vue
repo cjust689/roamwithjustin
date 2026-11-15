@@ -26,7 +26,11 @@
               Explore this trip in Atlas
             </router-link>
             <a v-if="trip.hasItinerary" href="#itinerary">
-              Read the itinerary
+              {{
+                trip.itineraryMode === "chapters"
+                  ? "Read the chapters"
+                  : "Read the itinerary"
+              }}
             </a>
           </div>
         </div>
@@ -50,7 +54,9 @@
 
     <div class="story-body">
       <section
-        v-if="trip.comingSoon && trip.locations.length > 1"
+        v-if="
+          trip.comingSoon && trip.locations.length > 1 && !trip.hasItinerary
+        "
         id="journey-preview"
         class="story-shell journey-preview"
       >
@@ -76,11 +82,16 @@
         class="story-shell itinerary-section"
       >
         <header class="section-intro">
-          <span class="story-eyebrow">The route, day by day</span>
+          <span class="story-eyebrow">
+            {{
+              trip.itineraryMode === "chapters"
+                ? "Experience chapters"
+                : "The route, day by day"
+            }}
+          </span>
           <h2>Inside the journey</h2>
           <p>
-            Open a place for photographs and field notes, or jump directly to
-            its Atlas pin when that stop has a mapped presentation.
+            {{ itineraryIntroduction }}
           </p>
         </header>
 
@@ -92,7 +103,13 @@
           <header class="day-heading">
             <span>{{ String(index + 1).padStart(2, "0") }}</span>
             <div>
-              <p>Itinerary chapter</p>
+              <p>
+                {{
+                  trip.itineraryMode === "chapters"
+                    ? "Story chapter"
+                    : "Itinerary chapter"
+                }}
+              </p>
               <h3>{{ day.label }}</h3>
             </div>
           </header>
@@ -381,6 +398,11 @@ export default {
     hasAffiliateGear() {
       return this.trip?.gearHighlights.some(item => item.affiliate) || false
     },
+    itineraryIntroduction() {
+      return this.trip?.itineraryMode === "chapters"
+        ? "These experiences follow the known shape of the trip without pretending every outing belongs to a confirmed calendar day. Open a place for its story or jump to its Atlas pin."
+        : "Open a place for photographs and field notes, or jump directly to its Atlas pin when that stop has a mapped presentation."
+    },
   },
   methods: {
     getLocation(ref) {
@@ -492,6 +514,8 @@ export default {
 }
 
 .story-hero-copy {
+  width: 100%;
+  min-width: 0;
   max-width: 820px;
   text-shadow: 0 8px 40px rgba(0, 0, 0, 0.38);
 }
@@ -1118,8 +1142,8 @@ export default {
   .section-intro,
   .story-day,
   .story-details-grid,
-  .atlas-handoff,
-  .section-intro {
+  .atlas-handoff {
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
 
@@ -1166,7 +1190,8 @@ export default {
   }
 
   .story-hero h1 {
-    font-size: clamp(3.3rem, 17vw, 5rem);
+    overflow-wrap: anywhere;
+    font-size: clamp(3rem, 15vw, 5rem);
   }
 
   .story-facts,

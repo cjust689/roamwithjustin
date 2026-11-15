@@ -309,7 +309,8 @@ The workflow at `.github/workflows/deploy-pages.yml` runs after every push to
 
 Generated files are not committed to `main` or copied to another branch.
 
-Vue Router uses history mode, producing clean URLs such as `/trips/utah`.
+Vue Router uses history mode, producing repeat-safe URLs such as
+`/trips/utah-2025`; previous unyeared trip URLs remain lookup aliases.
 GitHub Pages has no configurable server rewrite rule, so a direct request for
 one of those URLs falls through to `404.html`. Making `404.html` match the
 built `index.html` loads Vue, after which Vue Router handles the route.

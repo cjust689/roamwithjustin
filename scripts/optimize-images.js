@@ -403,6 +403,7 @@ function buildTagMatchCandidates(journeys, places, placeAliases) {
         journey.id,
         journey.id.replace(/-\d{4}$/, ""),
         journey.slug,
+        ...(journey.legacySlugs || []),
         journey.title,
         ...journey.title.split(","),
         ...ancestorTerms,
@@ -513,6 +514,7 @@ async function resolvePackageJourney(tag, journeyId) {
           journey.id,
           journey.id.replace(/-\d{4}$/, ""),
           journey.slug,
+          ...(journey.legacySlugs || []),
           journey.title,
           ...journey.title.split(","),
         ]).map(term => scoreMatch(tag, term))

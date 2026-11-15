@@ -211,6 +211,7 @@ export function buildTripViewModel(journey) {
       image: resolveLodgingImage(stay.image),
     })),
     locations,
+    itineraryMode: journey.itineraryMode || "days",
     days: (journey.days || []).map(day => ({
       label: day.label,
       summary: day.summary,
