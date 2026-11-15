@@ -53,6 +53,12 @@ export function getAtlasLeaves() {
   return Object.values(atlasNodes).filter(node => node.childIds.length === 0)
 }
 
+export function getCompletedAtlasPlaces() {
+  return Object.values(atlasNodes).filter(
+    node => node.parentId && !node.comingSoon
+  )
+}
+
 export function getAtlasJourneyNodes(parentNode) {
   return orderAtlasNodesByJourney(getAtlasNodes(parentNode?.childIds || []))
 }
