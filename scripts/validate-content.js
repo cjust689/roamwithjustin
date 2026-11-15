@@ -477,6 +477,9 @@ async function main() {
         owner + ' date label does not display its trip year "' + yearText + '"'
       )
     }
+    if (!["published", "coming-soon"].includes(journey.publicationStatus)) {
+      report(owner + " has an invalid publication status")
+    }
     ;[journey.slug, ...(journey.legacySlugs || [])].forEach(routeSlug => {
       if (!routeSlug || typeof routeSlug !== "string") {
         report(owner + " has an invalid route slug")
@@ -746,10 +749,35 @@ async function main() {
   })
 
   atlasRootsModule.atlasRootPlaceIds.forEach(rootId => {
-    if (!completeAtlasViews.some(node => node.id === rootId)) {
+    const rootNode = completeAtlasViews.find(node => node.id === rootId)
+    if (!rootNode) {
       report('Atlas root "' + rootId + '" does not resolve')
+      return
+    }
+
+    const journey = journeyModule.getJourney(rootNode.journeyId)
+    if (journey && rootNode.title !== journey.title) {
+      report(
+        'Atlas root "' + rootId + '" does not use its year-specific Journey title'
+      )
+    }
+    if (journey && rootNode.eyebrow !== journey.dateRange?.label) {
+      report(
+        'Atlas root "' + rootId + '" does not use its Journey date label'
+      )
     }
   })
+
+  completeAtlasViews
+    .filter(node => node.parentId)
+    .forEach(node => {
+      const place = placeModule.getPlace(node.placeId)
+      if (place && node.title !== place.name) {
+        report(
+          'Atlas child "' + node.id + '" does not preserve its Place title'
+        )
+      }
+    })
 
   // Incomplete Journeys are intentionally public as coming-soon Atlas
   // scaffolds. Keep every one rooted and ensure each confirmed/retained Visit

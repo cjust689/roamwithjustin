@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - media-pipeline
   - gear-system
@@ -77,6 +77,11 @@ Utah 2026 remains separate from Utah winter 2025 and reuses the shared Utah,
 Zion, and Park City geography. Planned-only Hanksville is not registered as a
 visited Place.
 
+Every top-level Atlas entry projects its year-specific Journey title and date
+label. This keeps repeat visits to the same geography visibly separate. Child
+Atlas entries continue to project canonical Place names and their own
+place-level labels, so the Journey year is not repeated at every stop.
+
 Miami's 2026 trip uses the repeat-safe `miami-south-beach-2026` Journey
 identity, while `miami-south-beach` remains the stable geographic Place. Its
 story expands through South Pointe Park, the broad Everglades region, Shark
@@ -131,9 +136,10 @@ chronology-safe labels. Publication status remains `coming-soon` until its
 media and remaining public content are ready.
 
 Content validation requires every internally incomplete Journey to have an
-Atlas root and every one of its Visits to resolve to an Atlas node. Confirmed
-broad route order can power guided playback even while the internal
-publication state remains incomplete.
+Atlas root and every one of its Visits to resolve to an Atlas node. It also
+requires every Atlas root to use its Journey title and date label while child
+nodes retain Place titles. Confirmed broad route order can power guided
+playback even while the internal publication state remains incomplete.
 
 Retired authorities `src/data/trips.js` and
 `src/features/atlas/data/atlasData.js` are absent and explicitly rejected by

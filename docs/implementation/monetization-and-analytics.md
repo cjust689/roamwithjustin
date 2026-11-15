@@ -20,8 +20,12 @@ code_paths:
   - src/services/adsense.mjs
   - src/components/AdSlot.vue
   - src/views/roam/RoamTripOverview.vue
+  - src/features/atlas/config/atlasAdEligibility.mjs
+  - src/features/atlas/views/AtlasView.vue
+  - src/features/atlas/components/AtlasDetailPanel.vue
   - src/views/roam/Privacy.vue
   - scripts/validate-adsense-config.mjs
+  - scripts/test-atlas-ad-eligibility.mjs
   - scripts/lib/adsense-build-env.js
   - scripts/prepare-pages.js
   - .github/workflows/deploy-pages.yml
@@ -39,9 +43,10 @@ verification:
 > are present. The first AdSense phase is implemented as a disabled by default,
 > manually placed story unit with configuration validation, ads.txt generation,
 > a public privacy notice, and the owner supplied publisher verification meta
-> tag. The live ad slot, ads.txt seller line, activation flags, and dashboard
-> settings are not present. Canonical partner referral tracking and the later
-> editorial commerce work remain. See the
+> tag. A second, independently disabled guided Atlas unit is implemented with
+> content eligibility and a one-request-per-Journey-tab cap. Live account
+> values and dashboard state remain externally controlled. Canonical partner
+> referral tracking and the later editorial commerce work remain. See the
 > [as-built analytics document](../architecture/monetization-and-analytics.md)
 > and [AdSense operations guide](../reference/adsense.md).
 
@@ -49,9 +54,12 @@ verification:
 
 - One responsive placement may appear after the full itinerary on a published
   Journey with at least three chapters.
-- There are no placements on the home page, Atlas, incomplete Journeys, story
-  heroes, location cards, galleries, lightboxes, videos, dialogs, navigation,
-  or footer.
+- One separately disabled Atlas placement may appear below editorial stop
+  content after three distinct guided arrivals on a published, media-rich
+  Journey. A browser-tab session reservation prevents per-stop refreshes.
+- There are no placements on the home page, map canvas, markers, free Atlas
+  exploration, incomplete Journeys, story heroes, location cards, galleries,
+  lightboxes, videos, dialogs, navigation, or footer.
 - The shared loader is added only when the eligible unit mounts and is never
   duplicated. The component does not refresh ads or track their interactions.
 - The homepage exposes the owner supplied publisher ID through Google's
@@ -115,17 +123,17 @@ Before editing code:
 
 Use **manual AdSense ad units** only where the page has substantial original content and where an ad does not interfere with the user's main task. The existing site-wide AdSense script is not itself a manually positioned ad unit; manual placement requires the distinct ad-unit markup/slot IDs provided in AdSense.
 
-| Surface | Initial policy | Why |
-|---|---|---|
-| Cinematic homepage hero | **No Google display ads** | Preserve the first impression and visual brand. |
-| Interactive globe / 3D MapLibre atlas | **No Google display ads** | Avoid obstructing exploration or misleading visitors near pins and controls. |
-| Hover photo pins / location previews | **No Google display ads** | Pins/cards are interactive navigation, not ad inventory. |
-| Photo lightboxes, video players, galleries | **No Google display ads** | Respect the art and avoid obscuring controls/media. |
-| Destination editorial guides | **Up to 1–2 intentional display placements initially** | Natural, content-rich reading breaks; measure impact. |
-| Longform travel story / detailed trip report | **1–2 optional placements** | Insert between narrative sections, not within critical actions. |
-| Individual venue / booking profiles | **Generally none at launch** | Prioritize a genuinely useful venue profile, official links, and clearly disclosed sponsorships. |
-| Packing list / photo gear field guide | **Optional 1 carefully placed unit** | Affiliate/editorial product modules will likely be more useful here. |
-| Footer of a long article | **Optional single placement** | Lower interference than in the hero or navigation. |
+| Surface                                      | Initial policy                                                                                       | Why                                                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Cinematic homepage hero                      | **No Google display ads**                                                                            | Preserve the first impression and visual brand.                                                            |
+| Interactive globe / 3D MapLibre atlas        | **No ads on the map or controls; one optional gated unit inside rich guided-stop editorial content** | Preserve exploration, require three distinct guided arrivals, and cap requests to one per Journey and tab. |
+| Hover photo pins / location previews         | **No Google display ads**                                                                            | Pins/cards are interactive navigation, not ad inventory.                                                   |
+| Photo lightboxes, video players, galleries   | **No Google display ads**                                                                            | Respect the art and avoid obscuring controls/media.                                                        |
+| Destination editorial guides                 | **Up to 1–2 intentional display placements initially**                                               | Natural, content-rich reading breaks; measure impact.                                                      |
+| Longform travel story / detailed trip report | **1–2 optional placements**                                                                          | Insert between narrative sections, not within critical actions.                                            |
+| Individual venue / booking profiles          | **Generally none at launch**                                                                         | Prioritize a genuinely useful venue profile, official links, and clearly disclosed sponsorships.           |
+| Packing list / photo gear field guide        | **Optional 1 carefully placed unit**                                                                 | Affiliate/editorial product modules will likely be more useful here.                                       |
+| Footer of a long article                     | **Optional single placement**                                                                        | Lower interference than in the hero or navigation.                                                         |
 
 ### Creative boundaries
 
@@ -165,13 +173,13 @@ The owner wants relevant **apparel, travel footwear, luggage, equipment, photogr
 
 The strongest concept is **"What made this experience possible?"** instead of a generic "Shop" tab. Allow products to emerge from genuine content:
 
-| Travel content | Useful editorial commerce | Design idea |
-|---|---|---|
-| Croatia boat excursion | Camera/lens used, waterproof bag, sunwear, travel kit *if actually used* | Small `Behind the Shot` expansion after gallery/story. |
-| Utah / Moab photo trip | Camera support, footwear used, outdoor gear, packs, filters | `What I packed for this landscape` with concise why-it-mattered notes. |
-| Amsterdam city photography | Compact walkaround setup, camera bag, walking accessories | `My city walk kit` in a side panel or article section. |
-| Morocco travel story | Travel packing choices, camera/lens, weather/comfort gear | `Travel essentials for this day` after the narrative. |
-| Camera/photo tutorial | Body, lens, support gear, capture settings and tradeoffs | `How I captured it` gear + settings card. |
+| Travel content             | Useful editorial commerce                                                | Design idea                                                            |
+| -------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| Croatia boat excursion     | Camera/lens used, waterproof bag, sunwear, travel kit _if actually used_ | Small `Behind the Shot` expansion after gallery/story.                 |
+| Utah / Moab photo trip     | Camera support, footwear used, outdoor gear, packs, filters              | `What I packed for this landscape` with concise why-it-mattered notes. |
+| Amsterdam city photography | Compact walkaround setup, camera bag, walking accessories                | `My city walk kit` in a side panel or article section.                 |
+| Morocco travel story       | Travel packing choices, camera/lens, weather/comfort gear                | `Travel essentials for this day` after the narrative.                  |
+| Camera/photo tutorial      | Body, lens, support gear, capture settings and tradeoffs                 | `How I captured it` gear + settings card.                              |
 
 **Only present firsthand claims for gear and venues actually used.** If a product is merely a potential purchase, a researched alternative, or an item considered but not owned/used, label that clearly. Price, stock, warranties, specifications, and eligibility change: only show live details when a legitimate product feed or API supports them and its terms permit it. Otherwise show plain product names and retailer links without unsupported prices.
 
@@ -200,7 +208,7 @@ All components must fit a high-end visual system: restrained typography, beautif
 
 ## 5. Data model: simple, explicit, reusable
 
-Adapt the current schema rather than creating a database migration just for monetization. The following is a *concept*, not a mandatory implementation:
+Adapt the current schema rather than creating a database migration just for monetization. The following is a _concept_, not a mandatory implementation:
 
 ```typescript
 type CommercialLink = {
@@ -215,7 +223,14 @@ type CommercialLink = {
 type GearItem = {
   id: string
   name: string
-  category: "camera" | "lens" | "drone" | "bag" | "footwear" | "apparel" | "accessory"
+  category:
+    | "camera"
+    | "lens"
+    | "drone"
+    | "bag"
+    | "footwear"
+    | "apparel"
+    | "accessory"
   image?: string
   firstHandStatus: "used" | "owned-not-used-here" | "researched"
   whyItMatters?: string
@@ -321,7 +336,9 @@ These are **separate products** with separate economics:
 
 **Monetization placements in this flow:**
 
-- **Map**: no AdSense.
+- **Map canvas and navigation controls**: no AdSense. The independently enabled
+  guided-stop editorial unit follows the strict eligibility and session cap in
+  the AdSense operations guide.
 - **Experience**: venue referral or direct sponsorship if applicable, visibly disclosed.
 - **Behind the Shot / packing guide**: direct editorial affiliate links, genuinely relevant.
 - **Long-form article**: one carefully placed AdSense unit, possibly a second later if metrics justify it.
@@ -338,16 +355,16 @@ These are **separate products** with separate economics:
 
 ## 9. Google Analytics 4: scalable referral measurement and engagement
 
-**Implementation requirement:** GA4 is already installed and collecting data for Roam With Justin. The owner has verified an Exploration filtered to GA4's automatic `click` event, showing outbound `link_domain` values. **Do not replace its measurement ID, duplicate gtag/GTM loaders, create a second property, or assume the current app is untracked.** First inspect the actual site code and confirm the configuration in use. The owner's WebWorks Media and Roam With Justin sites can share one Analytics *account* but should retain separate GA4 *properties/measurement IDs*.
+**Implementation requirement:** GA4 is already installed and collecting data for Roam With Justin. The owner has verified an Exploration filtered to GA4's automatic `click` event, showing outbound `link_domain` values. **Do not replace its measurement ID, duplicate gtag/GTM loaders, create a second property, or assume the current app is untracked.** First inspect the actual site code and confirm the configuration in use. The owner's WebWorks Media and Roam With Justin sites can share one Analytics _account_ but should retain separate GA4 _properties/measurement IDs_.
 
 ### 9.1 Measurement layers: separate the meanings
 
-| Layer | Event/source | Purpose | Reporting rule |
-| --- | --- | --- | --- |
-| Built-in outbound links | GA4 Enhanced Measurement `click` with `outbound`, `link_domain`, `link_url` | All eligible regular external anchors (Google, Instagram, MapTiler, venue sites, etc.) | Baseline outbound traffic; does **not** identify a partner relationship by itself. |
-| **Commercial referral** | **One reusable `partner_click` event** | Business/venue/operator/gear affiliate referral intent with canonical IDs | Primary per-partner report; do not add to `click` counts for the same interaction. |
-| Optional editorial engagement | Existing/small set of `atlas_*`, `experience_*`, `behind_the_shot_open` events | Engagement in the Atlas | Introduce only when the metric changes a real product/business decision. |
-| Ads and actual sales | AdSense reports; approved affiliate/partner reporting | Ad revenue and any actual transactions | Do not label a GA4 referral click a booking, sale, or verified arrival. |
+| Layer                         | Event/source                                                                   | Purpose                                                                                | Reporting rule                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Built-in outbound links       | GA4 Enhanced Measurement `click` with `outbound`, `link_domain`, `link_url`    | All eligible regular external anchors (Google, Instagram, MapTiler, venue sites, etc.) | Baseline outbound traffic; does **not** identify a partner relationship by itself. |
+| **Commercial referral**       | **One reusable `partner_click` event**                                         | Business/venue/operator/gear affiliate referral intent with canonical IDs              | Primary per-partner report; do not add to `click` counts for the same interaction. |
+| Optional editorial engagement | Existing/small set of `atlas_*`, `experience_*`, `behind_the_shot_open` events | Engagement in the Atlas                                                                | Introduce only when the metric changes a real product/business decision.           |
+| Ads and actual sales          | AdSense reports; approved affiliate/partner reporting                          | Ad revenue and any actual transactions                                                 | Do not label a GA4 referral click a booking, sale, or verified arrival.            |
 
 **No individual partner trackers.** Hundreds of businesses must all use the **same `partner_click` event and the same shared link component/function**. Stable values distinguish businesses, not event names or code branches. Any new partner record automatically participates without changes to Analytics configuration.
 
@@ -360,7 +377,7 @@ Send an event only when the user intentionally activates a commercial outbound a
 window.gtag("event", "partner_click", {
   partner_id: "nates-custom-charters",
   experience_id: "st-john-boat-day",
-  link_type: "website"
+  link_type: "website",
 })
 ```
 
@@ -373,19 +390,19 @@ Contract:
 - `link_type`: required controlled vocabulary such as `website`, `booking`, `maps`, `phone`, `affiliate`. Ensure each value has one defined meaning.
 - `page_location` and acquisition/source attribution: use GA4's built-in collection, subject to consent and availability.
 - Do **not** send email addresses, phone numbers, visitor IDs, private contact information, full URLs containing personal/tokenized query strings, or unknown free-form text as custom dimensions. If needed, keep destination domains in the existing GA4 outbound event; use sanitized, allowlisted fields for custom partner events.
-- Never include an invented `booking` value because a generic website link *might* lead to booking. Label according to the actual clicked action.
+- Never include an invented `booking` value because a generic website link _might_ lead to booking. Label according to the actual clicked action.
 
 ### 9.3 One-time GA4 admin setup (NOT per partner)
 
 In **Admin → Data display → Custom definitions**, create **event-scoped** custom dimensions (where not already present):
 
-| UI name | Event parameter | Importance |
-| --- | --- | --- |
-| Partner ID | `partner_id` | Required |
+| UI name       | Event parameter | Importance  |
+| ------------- | --------------- | ----------- |
+| Partner ID    | `partner_id`    | Required    |
 | Experience ID | `experience_id` | Recommended |
-| Link Type | `link_type` | Required |
+| Link Type     | `link_type`     | Required    |
 
-Enter a new parameter name if it is not listed in the UI. **Do not create dimensions for `nates-custom-charters`, each hotel, or every new partner**; the three parameter *names* are registered only once. Avoid `partner_name` as a second high-cardinality dimension; resolve labels from the canonical content registry when preparing external reports.
+Enter a new parameter name if it is not listed in the UI. **Do not create dimensions for `nates-custom-charters`, each hotel, or every new partner**; the three parameter _names_ are registered only once. Avoid `partner_name` as a second high-cardinality dimension; resolve labels from the canonical content registry when preparing external reports.
 
 GA4 may warn about high cardinality. Stable partner IDs are still the correct general approach, but at larger volumes some GA4 reports may aggregate values into `(other)`. For guaranteed granular partner-level history at larger scale, evaluate **GA4 BigQuery export** later, subject to availability/cost/privacy; do not add a database solely for initial tracking.
 
@@ -393,7 +410,7 @@ The first events do not require manually using **Create event** in GA4; the site
 
 ### 9.4 Implementation in Vue (reuse one analytics adapter)
 
-Inspect the existing analytics initialization and components first. Prefer one reusable analytics function and one reusable external-action component/handler used by all commercial links, rather than attaching tracking to hundreds of pages. Example *conceptual* helper; adapt to actual Vue version, CSP, consent handling, link ownership, and existing gtag adapter:
+Inspect the existing analytics initialization and components first. Prefer one reusable analytics function and one reusable external-action component/handler used by all commercial links, rather than attaching tracking to hundreds of pages. Example _conceptual_ helper; adapt to actual Vue version, CSP, consent handling, link ownership, and existing gtag adapter:
 
 ```js
 export function trackPartnerClick({ partnerId, experienceId, linkType }) {
@@ -402,7 +419,7 @@ export function trackPartnerClick({ partnerId, experienceId, linkType }) {
 
   const params = {
     partner_id: partnerId,
-    link_type: linkType
+    link_type: linkType,
   }
 
   if (experienceId) params.experience_id = experienceId
@@ -418,24 +435,24 @@ export function trackPartnerClick({ partnerId, experienceId, linkType }) {
 - Calls initiated from map cards, venue profiles, deep-linked stories, optional gear modules, and mobile bottom sheets should converge through the same shared action semantics.
 - If a partner appears in multiple experiences, one stable `partner_id` identifies it across all of them, while `experience_id` attributes each eligible click to its context.
 - Avoid double dispatch from nested click handlers and duplicated component layers; no analytics-only redirect URL or self-hosted click logger is required initially.
-- Separate an **outbound action** from the record's *commercial relationship*: a featured operator is not automatically a paid sponsor, affiliate, or booked conversion.
+- Separate an **outbound action** from the record's _commercial relationship_: a featured operator is not automatically a paid sponsor, affiliate, or booked conversion.
 
 ### 9.5 Attribution and reporting for real business proposals
 
 Build/save one reusable GA4 Exploration for referrals:
 
-| Exploration setting | Value |
-| --- | --- |
-| Rows | `Partner ID`, optionally `Link Type`, `Experience ID` |
-| Metric | `Event count` |
-| Filter | `Event name` exactly matches `partner_click` |
-| Date range | Explicit agreed reporting period |
+| Exploration setting | Value                                                 |
+| ------------------- | ----------------------------------------------------- |
+| Rows                | `Partner ID`, optionally `Link Type`, `Experience ID` |
+| Metric              | `Event count`                                         |
+| Filter              | `Event name` exactly matches `partner_click`          |
+| Date range          | Explicit agreed reporting period                      |
 
 Allow filtering to one partner ID, e.g. `nates-custom-charters`, **without adding a new event or dimension**. Include context such as experience views, when measurable, but **do not equate pageviews with unique visitors or click counts with unique people**. A logged outbound click is referral intent, not proof the destination loaded or that a customer booked. Any report for a prospective client should identify the period, metric definition, and limitations.
 
 If GA4's default outbound-link report is useful for comparing all domains, keep a separate Exploration: Rows = `Link domain` / `Link URL`, Values = `Event count`, filter = `Event name` exactly matches `click`, optionally `Outbound` true. The site owner has already configured such an Exploration; do not rebuild it unnecessarily. GA4's generic `click` and custom `partner_click` must stay separate in reporting.
 
-For selected campaigns, use consistent incoming **UTM parameters** on links pointing *to Roam With Justin* (Instagram campaign traffic), not automatically append tracking parameters to third-party URLs. Avoid claiming GA4 can verify a downstream partner purchase without the partner's attribution/reporting agreement.
+For selected campaigns, use consistent incoming **UTM parameters** on links pointing _to Roam With Justin_ (Instagram campaign traffic), not automatically append tracking parameters to third-party URLs. Avoid claiming GA4 can verify a downstream partner purchase without the partner's attribution/reporting agreement.
 
 ### 9.6 Test plan and acceptance criteria
 
@@ -479,16 +496,22 @@ GA4 measures site behavior and visitor actions; **AdSense measures Google-served
 For simple planning, assume total monthly pageviews below are eligible to be monetized, and imagine effective **sitewide page RPM** outcomes of **$2 (low), $5 (middle), $10 (strong)**. These are illustrative input assumptions, not guaranteed travel-photography rates.
 
 | Monthly pageviews | $2 page RPM | $5 page RPM | $10 page RPM |
-|---:|---:|---:|---:|
-| 1,000 | $2 | $5 | $10 |
-| 5,000 | $10 | $25 | $50 |
-| 10,000 | $20 | $50 | $100 |
-| 25,000 | $50 | $125 | $250 |
-| 50,000 | $100 | $250 | $500 |
-| 100,000 | $200 | $500 | $1,000 |
-| 250,000 | $500 | $1,250 | $2,500 |
+| ----------------: | ----------: | ----------: | -----------: |
+|             1,000 |          $2 |          $5 |          $10 |
+|             5,000 |         $10 |         $25 |          $50 |
+|            10,000 |         $20 |         $50 |         $100 |
+|            25,000 |         $50 |        $125 |         $250 |
+|            50,000 |        $100 |        $250 |         $500 |
+|           100,000 |        $200 |        $500 |       $1,000 |
+|           250,000 |        $500 |      $1,250 |       $2,500 |
 
-**Key qualification:** If most traffic stays on the interactive atlas where no ads appear, the **effective RPM across the whole website** may be well below the RPM of the subset of article pages. Don't apply an article-only RPM to every atlas pageview. Google distinguishes page RPM from ad-impression RPM; make sure the denominator is correct when modeling performance.
+**Key qualification:** Most Atlas traffic remains ineligible for ads. Free map
+exploration, early guided stops, incomplete Journeys, thin stops, and repeat
+stops produce no Atlas request. The **effective RPM across the whole website**
+may therefore remain well below the RPM of eligible story or guided-stop
+content. Don't apply an eligible-content RPM to every Atlas pageview. Google
+distinguishes page RPM from ad-impression RPM; make sure the denominator is
+correct when modeling performance.
 
 Example traffic funnel:
 
@@ -542,7 +565,9 @@ Direct featured-experience placements and photo/video rights can be negotiated i
 1. Audit current AdSense placement and loader.
 2. Make a written owner checklist for switching Auto ads OFF in AdSense.
 3. Add a clean ad-placement configuration and one optional responsive article ad unit if **actual slot code is available**.
-4. Ensure no ads appear in the interactive map, hero, photo previews, video overlays, or navigation.
+4. Ensure no ads appear in the map canvas, markers, hero, photo previews, video
+   overlays, or navigation. Keep the optional guided-stop unit below substantial
+   editorial content and limited to one request per Journey and tab.
 5. Validate consent/privacy gaps and avoid deploying noncompliant personalized ad behavior.
 6. Run build/lint/type checks and inspect responsive design.
 

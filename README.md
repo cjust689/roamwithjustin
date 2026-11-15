@@ -152,9 +152,11 @@ in MapTiler.
 ## Manual AdSense
 
 AdSense is disabled by default. The implementation permits one responsive
-manual unit after the itinerary on eligible long travel stories. It does not
-place ads on the home page, Atlas, incomplete Journeys, heroes, galleries,
-videos, dialogs, navigation, or footer.
+manual unit after the itinerary on eligible long travel stories. A separately
+disabled Atlas unit can appear once per guided Journey and browser-tab session,
+only after three distinct content-rich stops. Neither unit appears on the home
+page, incomplete Journeys, map canvas, heroes, galleries, videos, dialogs,
+navigation, or footer.
 
 Before live activation, Auto ads must be off in the AdSense dashboard, privacy
 and consent setup must be reviewed, and the exact owner supplied publisher,

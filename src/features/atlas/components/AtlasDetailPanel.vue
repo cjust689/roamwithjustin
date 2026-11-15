@@ -35,7 +35,7 @@
           <img v-if="node.image" :src="node.image" alt="" />
           <span v-else class="atlas-dock-placeholder" aria-hidden="true"></span>
           <span>
-            <small>{{ node.eyebrow }}</small>
+            <small>{{ displayEyebrow }}</small>
             <strong>{{ node.title }}</strong>
           </span>
           <span class="atlas-dock-toggle" aria-hidden="true">
@@ -109,7 +109,7 @@
             {{ isFavorite ? "Saved" : "Save" }}
           </button>
           <div class="atlas-detail-title">
-            <span>{{ node.eyebrow }}</span>
+            <span>{{ displayEyebrow }}</span>
             <h1>{{ node.title }}</h1>
             <p>{{ node.category }}</p>
           </div>
@@ -210,6 +210,13 @@
               </button>
             </div>
           </section>
+
+          <AdSlot
+            v-if="showAd"
+            :slot-id="adSlotId"
+            placement="atlas-guided-journey-inline-1"
+            variant="atlas"
+          />
 
           <div v-if="node.actions.length" class="atlas-actions">
             <template v-for="action in node.actions">
@@ -315,8 +322,11 @@
 </template>
 
 <script>
+import AdSlot from "@/components/AdSlot.vue"
+
 export default {
   name: "AtlasDetailPanel",
+  components: { AdSlot },
   props: {
     node: {
       type: Object,
@@ -345,6 +355,11 @@ export default {
       type: Number,
       default: 0,
     },
+    showAd: Boolean,
+    adSlotId: {
+      type: String,
+      default: "",
+    },
   },
   data() {
     return {
@@ -360,6 +375,11 @@ export default {
     }
   },
   computed: {
+    displayEyebrow() {
+      return this.node.comingSoon && !this.node.parentId
+        ? `Journey preview / ${this.node.eyebrow}`
+        : this.node.eyebrow
+    },
     guidedClearanceStyle() {
       if (!this.guidedControlsExpanded || !this.guidedControlsClearance) {
         return null
