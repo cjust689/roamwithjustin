@@ -4,6 +4,8 @@ const mediaContract = require("../../src/content/media/contract.js")
 
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const checksumPattern = /^[a-f0-9]{64}$/
+const imageMimeTypes = new Set(["image/jpeg", "image/png"])
+const videoMimeTypes = new Set(["video/mp4"])
 const committedVerificationMethods = new Set([
   "receipt-sha256",
   "public-head-size-and-mime",
@@ -11,6 +13,20 @@ const committedVerificationMethods = new Set([
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex")
+}
+
+function mediaKindForMimeType(mimeType) {
+  if (imageMimeTypes.has(mimeType)) return "image"
+  if (videoMimeTypes.has(mimeType)) return "video"
+  return null
+}
+
+function isOptionalPositiveNumber(value) {
+  return value === null || (Number.isFinite(value) && value > 0)
+}
+
+function isOptionalPositiveInteger(value) {
+  return value === null || (Number.isInteger(value) && value > 0)
 }
 
 function isSafeRelativePath(value) {
@@ -100,6 +116,7 @@ function validateManifest(manifest, context) {
 
   const provisionalIds = new Set()
   const objectKeys = new Set()
+  const manifestKinds = new Set()
   manifest.assets.forEach((asset, index) => {
     const assetOwner = `${owner} asset ${index + 1}`
     const output = asset?.output || {}
@@ -145,16 +162,45 @@ function validateManifest(manifest, context) {
       errors.push(`${assetOwner} duplicates objectKey "${output.objectKey}"`)
     } else objectKeys.add(output.objectKey)
 
-    if (!["image/jpeg", "image/png"].includes(output.mimeType)) {
+    const mediaKind = mediaKindForMimeType(output.mimeType)
+    if (!mediaKind) {
       errors.push(
         `${assetOwner} has unsupported MIME type "${output.mimeType}"`
       )
+    } else {
+      manifestKinds.add(mediaKind)
     }
-    if (!Number.isInteger(output.width) || output.width <= 0) {
-      errors.push(`${assetOwner} has invalid width`)
+    const extension = path.posix.extname(output.relativePath || "").toLowerCase()
+    const extensionMatchesMime =
+      (output.mimeType === "image/jpeg" && [".jpg", ".jpeg"].includes(extension)) ||
+      (output.mimeType === "image/png" && extension === ".png") ||
+      (output.mimeType === "video/mp4" && extension === ".mp4")
+    if (mediaKind && !extensionMatchesMime) {
+      errors.push(`${assetOwner} filename does not match its MIME type`)
     }
-    if (!Number.isInteger(output.height) || output.height <= 0) {
-      errors.push(`${assetOwner} has invalid height`)
+    if (mediaKind === "image") {
+      if (!Number.isInteger(output.width) || output.width <= 0) {
+        errors.push(`${assetOwner} has invalid width`)
+      }
+      if (!Number.isInteger(output.height) || output.height <= 0) {
+        errors.push(`${assetOwner} has invalid height`)
+      }
+    } else if (mediaKind === "video") {
+      if (
+        !isOptionalPositiveNumber(output.width) ||
+        (output.width !== null && !Number.isInteger(output.width))
+      ) {
+        errors.push(`${assetOwner} has invalid optional video width`)
+      }
+      if (
+        !isOptionalPositiveNumber(output.height) ||
+        (output.height !== null && !Number.isInteger(output.height))
+      ) {
+        errors.push(`${assetOwner} has invalid optional video height`)
+      }
+      if (!isOptionalPositiveNumber(output.durationSeconds ?? null)) {
+        errors.push(`${assetOwner} has invalid optional video duration`)
+      }
     }
     if (!Number.isInteger(output.byteSize) || output.byteSize <= 0) {
       errors.push(`${assetOwner} has invalid byteSize`)
@@ -190,6 +236,27 @@ function validateManifest(manifest, context) {
       errors.push(`${assetOwner} is missing explicit rights metadata`)
     }
   })
+
+  if (manifestKinds.size > 1) {
+    errors.push(`${owner} cannot mix image and video assets`)
+  }
+  const onlyKind = manifestKinds.size === 1 ? [...manifestKinds][0] : null
+  if (
+    onlyKind &&
+    !String(manifest.r2Prefix || "").startsWith(
+      onlyKind === "video" ? "videos/" : "images/"
+    )
+  ) {
+    errors.push(
+      `${owner} ${onlyKind} assets must use the ${onlyKind === "video" ? "videos/" : "images/"} R2 boundary`
+    )
+  }
+  if (
+    manifest.mediaKind !== undefined &&
+    (!manifestKinds.has(manifest.mediaKind) || manifestKinds.size !== 1)
+  ) {
+    errors.push(`${owner} mediaKind does not match its assets`)
+  }
 
   return { errors, journey }
 }
@@ -231,8 +298,11 @@ function validateGeneratedRecords(records, context) {
       errors.push(`${owner} duplicates a canonical Media ID`)
     }
     assetIds.add(asset.id)
-    if (asset.kind !== "image" || asset.source?.provider !== "r2") {
-      errors.push(`${owner} must be an R2 image`)
+    if (
+      !["image", "video"].includes(asset.kind) ||
+      asset.source?.provider !== "r2"
+    ) {
+      errors.push(`${owner} must be an R2 image or video`)
     }
     if (!isSafeRelativePath(asset.source?.objectKey)) {
       errors.push(`${owner} has invalid objectKey`)
@@ -242,11 +312,22 @@ function validateGeneratedRecords(records, context) {
     ) {
       errors.push(`${owner} duplicates an R2 objectKey`)
     } else objectKeys.add(asset.source.objectKey)
-    if (
-      !Number.isInteger(asset.intrinsic?.width) ||
-      !Number.isInteger(asset.intrinsic?.height)
+    if (mediaKindForMimeType(asset.intrinsic?.mimeType) !== asset.kind) {
+      errors.push(`${owner} has a MIME type that does not match its kind`)
+    }
+    if (asset.kind === "image") {
+      if (
+        !Number.isInteger(asset.intrinsic?.width) ||
+        !Number.isInteger(asset.intrinsic?.height)
+      ) {
+        errors.push(`${owner} has invalid image dimensions`)
+      }
+    } else if (
+      !isOptionalPositiveInteger(asset.intrinsic?.width ?? null) ||
+      !isOptionalPositiveInteger(asset.intrinsic?.height ?? null) ||
+      !isOptionalPositiveNumber(asset.intrinsic?.durationSeconds ?? null)
     ) {
-      errors.push(`${owner} has invalid dimensions`)
+      errors.push(`${owner} has invalid optional video intrinsic metadata`)
     }
     if (!asset.rights?.owner || !asset.rights?.status) {
       errors.push(`${owner} has missing rights metadata`)
@@ -353,7 +434,8 @@ function validateGeneratedRecords(records, context) {
 }
 
 function canonicalAssetId(journey, asset, index) {
-  return `image-${journey.slug}-${asset.output.sha256.slice(0, 12)}-${String(
+  const kind = mediaKindForMimeType(asset.output.mimeType) || "media"
+  return `${kind}-${journey.slug}-${asset.output.sha256.slice(0, 12)}-${String(
     index + 1
   ).padStart(3, "0")}`
 }
@@ -366,11 +448,14 @@ function upsertById(records, value) {
 
 function reassociationMetadataMatches(existing, asset) {
   return (
+    existing.kind === mediaKindForMimeType(asset.output.mimeType) &&
     existing.publication.sha256 === asset.output.sha256 &&
     existing.publication.byteSize === asset.output.byteSize &&
     existing.intrinsic.mimeType === asset.output.mimeType &&
     existing.intrinsic.width === asset.output.width &&
     existing.intrinsic.height === asset.output.height &&
+    (existing.intrinsic.durationSeconds ?? null) ===
+      (asset.output.durationSeconds ?? null) &&
     existing.rights.owner === asset.rights.owner &&
     existing.rights.status === asset.rights.status
   )
@@ -546,7 +631,7 @@ function planMediaIngestion(manifest, currentRecords, context) {
         : 1
     const mediaRecord = {
       id: assetId,
-      kind: "image",
+      kind: mediaKindForMimeType(asset.output.mimeType),
       source: {
         provider: "r2",
         objectKey: asset.output.objectKey,
@@ -555,6 +640,9 @@ function planMediaIngestion(manifest, currentRecords, context) {
         mimeType: asset.output.mimeType,
         width: asset.output.width,
         height: asset.output.height,
+        ...(mediaKindForMimeType(asset.output.mimeType) === "video"
+          ? { durationSeconds: asset.output.durationSeconds ?? null }
+          : {}),
       },
       rights: {
         owner: asset.rights.owner,
@@ -570,7 +658,7 @@ function planMediaIngestion(manifest, currentRecords, context) {
           },
       defaultAlt: reassociateExisting
         ? existing.defaultAlt
-        : `${manifestValidation.journey.title} journey photograph ${index + 1}`,
+        : `${manifestValidation.journey.title} journey ${mediaKindForMimeType(asset.output.mimeType) === "video" ? "video" : "photograph"} ${index + 1}`,
       publication: {
         revision,
         sha256: asset.output.sha256,
@@ -677,6 +765,7 @@ function serializeMediaRecords(records) {
 
 module.exports = {
   isSafeRelativePath,
+  mediaKindForMimeType,
   planMediaIngestion,
   serializeMediaRecords,
   sha256,

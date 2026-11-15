@@ -17,9 +17,10 @@ verification:
   evidence: []
 ---
 
-> **Proposal:** Controlled R2 videos exist, but no ffprobe/ExifTool ingestion,
-> video sidecar normalization, capture-Gear matching, or Behind-the-Shot video
-> UI exists.
+> **Proposal:** Controlled R2 videos and manifest-driven, byte-preserving MP4
+> preparation/upload/ingestion exist. No ffprobe/ExifTool ingestion, video
+> sidecar normalization, capture-Gear matching, poster generation,
+> transcoding, or Behind-the-Shot video UI exists.
 > References below to `trips.js` or `atlasData.js` are historical; extend the
 > canonical Media registry and selectors documented in
 > [Media Pipeline](../architecture/media-pipeline.md).
@@ -240,14 +241,16 @@ review         (show unknown gear/fields; do not fabricate)
         ↓
 media:register (update destination-scoped media module)
         ↓
-media:upload   (future optional: R2 upload + HEAD verification)
+media:upload   (implemented manifest upload; future metadata checks remain)
         ↓
 validate-content + existing build
         ↓
 Vue Atlas selectors + Behind the Shot UI
 ```
 
-Example intended commands (implement these, they do **not** exist yet):
+The `media:inspect` command does **not** exist yet. The current
+`media:prepare` command uses the flags documented in Journey media ingestion;
+the positional form below remains conceptual metadata-pipeline syntax:
 
 ```bash
 npm run media:inspect -- ./media-staging/zion-bike-morning-001/zion-bike-morning-001.mp4
@@ -265,7 +268,7 @@ Implementation guidance:
 6. Validate canonical `placeId`, all `gearIds`, media type, file existence, R2 path, and duplicate object keys.
 7. Read and write registry modules in the project's preferred format; avoid brittle regex insertion into JS files. If programmatic module rewriting is complex, generate a proposed record to paste/review first.
 8. Don't commit large exports or credentials to Git. Keep `media-staging/` ignored.
-9. For future R2 uploads, keep secrets in the local environment or CI secrets, not Vue frontend variables.
+9. For the implemented R2 uploader, keep secrets in the local environment or CI secrets, not Vue frontend variables.
 10. Set correct HTTP `Content-Type: video/mp4`; verify public GET/range playback and poster access after uploading.
 
 ## 9. Viewer UI: “Behind the Shot”
@@ -319,7 +322,10 @@ UI principles:
 
 **Phase C — Canyonlands/Zion vertical slice:** Register one existing R2 MP4 using its **current** key; show its public data through the centralized resolver and a basic Behind the Shot UI. Use only user-confirmed capture gear.
 
-**Phase D — Publish automation:** Once manual registration is reliable, add upload, poster generation, and registry update tooling with validation and dry-run mode.
+**Phase D — Publish automation:** Manifest-driven byte-preserving MP4
+packaging, upload, checksum receipt, registry update, validation, and dry-run
+mode are implemented. Poster generation, metadata enrichment, and optional
+deliberate transcoding remain future work.
 
 **Phase E — Optional Resolve CSV import:** Add only if it reduces actual repeated effort.
 

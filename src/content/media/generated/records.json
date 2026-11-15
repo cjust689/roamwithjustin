@@ -1530,6 +1530,130 @@
         "byteSize": 232988,
         "batchId": "media-usvi-hermit-crab-island-42036dbfb7dd6b4b"
       }
+    },
+    {
+      "id": "video-usvi-e5dfd0444f01-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/usvi/cinnamon-bay/media-usvi-cinnamon-bay-2bde7d5573d698c5/cinnamon-bay-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "e5dfd0444f01d0802560e5d6267d56b34c181c14f839ad3a87f4553c6e3af768",
+        "byteSize": 130574071,
+        "batchId": "media-usvi-cinnamon-bay-2bde7d5573d698c5"
+      }
+    },
+    {
+      "id": "video-usvi-7870aff2acf7-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/usvi/great-cruz-bay/media-usvi-great-cruz-bay-7881ef9b0275c8e3/great-cruz-bay-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "7870aff2acf73c4364b38e99c70788968b84a1e7a44dbb1d8bdf633f3968711a",
+        "byteSize": 66067828,
+        "batchId": "media-usvi-great-cruz-bay-7881ef9b0275c8e3"
+      }
+    },
+    {
+      "id": "video-usvi-84d27553b631-002",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/usvi/great-cruz-bay/media-usvi-great-cruz-bay-7881ef9b0275c8e3/great-cruz-bay-002.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey video 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "84d27553b631ea3fad422846f7deea510c45e91bc733b83c6fd40006ef01f04e",
+        "byteSize": 124240796,
+        "batchId": "media-usvi-great-cruz-bay-7881ef9b0275c8e3"
+      }
+    },
+    {
+      "id": "video-usvi-5a3a807e57a8-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/usvi/lovango-cay/media-usvi-lovango-cay-7dba63da772c6e25/lovango-cay-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "St. John, USVI journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "5a3a807e57a89e680be29662c0e4a91db1d87ef10a54b0fa40faa8acb0067f59",
+        "byteSize": 75933165,
+        "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
+      }
     }
   ],
   "placements": [
@@ -2195,6 +2319,58 @@
       "sortOrder": 7,
       "publicationSequence": 11,
       "batchId": "media-usvi-red-hook-ferry-terminal-b1e1f10f67b54b44"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-cinnamon-bay-video-usvi-e5dfd0444f01-001",
+      "assetId": "video-usvi-e5dfd0444f01-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-cinnamon-bay",
+      "placeId": "cinnamon-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 12,
+      "batchId": "media-usvi-cinnamon-bay-2bde7d5573d698c5"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-video-usvi-7870aff2acf7-001",
+      "assetId": "video-usvi-7870aff2acf7-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 13,
+      "batchId": "media-usvi-great-cruz-bay-7881ef9b0275c8e3"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-great-cruz-bay-video-usvi-84d27553b631-002",
+      "assetId": "video-usvi-84d27553b631-002",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-great-cruz-bay",
+      "placeId": "great-cruz-bay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 13,
+      "batchId": "media-usvi-great-cruz-bay-7881ef9b0275c8e3"
+    },
+    {
+      "id": "placement-usvi-st-john-2025-usvi-st-john-2025-lovango-cay-video-usvi-5a3a807e57a8-001",
+      "assetId": "video-usvi-5a3a807e57a8-001",
+      "journeyId": "usvi-st-john-2025",
+      "visitId": "usvi-st-john-2025-lovango-cay",
+      "placeId": "lovango-cay",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 14,
+      "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
     }
   ],
   "batches": [
@@ -2386,6 +2562,46 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "840cfa257c9c9496fd4f7fc3d3fb4c4ea0b5d6b0236a6a465425a3f695316ad3"
+      }
+    },
+    {
+      "id": "media-usvi-cinnamon-bay-2bde7d5573d698c5",
+      "sequence": 12,
+      "manifestSha256": "745a1e367cea7885e547a83fa7f79f4bf27aa67d546bbe95f9d8232ff83da415",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "video-usvi-e5dfd0444f01-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "6381c8cf2df68e6636c5650399593df21123363ed54b9853076b583de1704771"
+      }
+    },
+    {
+      "id": "media-usvi-great-cruz-bay-7881ef9b0275c8e3",
+      "sequence": 13,
+      "manifestSha256": "08415fb603cd196b95e83a422654e3466ef594999767db44cd722a9873dacf98",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "video-usvi-7870aff2acf7-001",
+        "video-usvi-84d27553b631-002"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "b56005c1b513cc231e9ec07980e6a0c0426ec942d52c17978287bd3f9c6ab44a"
+      }
+    },
+    {
+      "id": "media-usvi-lovango-cay-7dba63da772c6e25",
+      "sequence": 14,
+      "manifestSha256": "0b45487f77345616a78e1bb1aa7fed92b0e374f66b022df1e795010b1de28c27",
+      "journeyId": "usvi-st-john-2025",
+      "assetIds": [
+        "video-usvi-5a3a807e57a8-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "4a04aef19ddc18271f4500b2f7c76fd27d9d3fd934c216875a4a3939b531a514"
       }
     }
   ]

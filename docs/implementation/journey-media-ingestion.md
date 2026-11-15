@@ -37,9 +37,9 @@ verification:
 
 The media workflow has three deliberately separate stages:
 
-1. `media:prepare` optimizes local exports, gives them deterministic names,
-   validates a Journey or optional Place/Visit scope, and writes a provisional
-   publication manifest.
+1. `media:prepare` optimizes JPEG/PNG exports or byte-copies MP4 exports, gives
+   them deterministic names, validates a Journey or optional Place/Visit
+   scope, and writes a provisional publication manifest.
 2. `media:upload` revalidates the package, uploads its exact manifest-listed
    objects through the private Worker, and writes a verification receipt.
 3. `media:ingest` verifies both the local package and the uploaded R2 objects,
@@ -65,8 +65,9 @@ On Windows PowerShell, use `npm.cmd` if the execution policy blocks `npm.ps1`.
 
 ## 1. Prepare a Journey package
 
-Export JPEG or PNG images into one source directory. Subdirectories are not
-scanned. Then run:
+Export JPEG or PNG images into one source directory. MP4 videos use the same
+command but must be in a separate video-only source directory. Subdirectories
+are not scanned. Then run:
 
 ```bash
 npm run media:prepare -- \
@@ -98,7 +99,7 @@ and Visit IDs with
 ambiguous matches fail closed; the tool does not guess a publication
 association.
 
-`media:prepare` already performs compression. Do not run
+For images, `media:prepare` already performs compression. Do not run
 `images:optimize:copies` first unless you separately want same-directory copies
 that are not part of a publication package.
 
@@ -153,6 +154,59 @@ packages; change the parent with `--r2-prefix <prefix>`. The versioned batch
 segment prevents a later upload from silently replacing a previously
 published object.
 
+### Prepare MP4 videos
+
+Video uses the same Journey and optional Place/Visit binding as photography.
+The preparer accepts an MP4-only source folder, verifies the MP4 file-type
+header, renames each copy deterministically, preserves its bytes exactly, and
+records the real byte size and SHA-256. It does not transcode, recompress,
+change quality, inspect codecs, or generate posters.
+
+Git Bash, one line for a Waterlemon Cay video package:
+
+```bash
+npm run media:prepare -- --source "O:/WebWorksMedia/Davinci Edits/USVI/waterlemon-video" --output "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready" --tag "waterlemon cay video" --journey "usvi-st-john-2025" --place "waterlemon-cay" --rights-owner "roam-with-justin" --rights-status "owned"
+```
+
+That creates a separate package so an existing image package is untouched:
+
+```text
+O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/
+  waterlemon-cay-001.mp4
+  waterlemon-cay-002.mp4
+  publication-manifest.json
+```
+
+Video object keys default to
+`videos/<journey-slug>/<place-id>/<content-derived-batch-id>/` for a Place
+package or `videos/<journey-slug>/<content-derived-batch-id>/` for a
+Journey-only package. The default maximum is 190 MiB per MP4. Uploads through
+64 MiB use one request; larger MP4s automatically use R2 multipart upload with
+16 MiB parts. The manifest, receipt, and ingestion commands are identical for
+both transports. For example, a 124.5 MiB Cinnamon Bay MP4 needs no special
+upload flag after the updated Worker is deployed.
+
+If preparation rejects a file above 190 MiB, re-export a smaller web-delivery
+MP4 or deliberately raise both `--max-video-mib <n>` and the Worker's
+`MAX_VIDEO_UPLOAD_BYTES`. The tool will not silently trade quality for size.
+The uploader's `--multipart-threshold-mib` and `--multipart-part-mib` options
+exist for controlled tuning; their defaults should normally be retained.
+
+After the updated Worker has been deployed, upload and ingest use the exact
+same commands as an image package:
+
+```bash
+npm run media:upload -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/publication-manifest.json" --dry-run
+npm run media:upload -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/publication-manifest.json"
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/r2-verification.json" --dry-run
+npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/r2-verification.json" --build
+```
+
+Ingested video appears in the Journey media collection and in the media for
+its bound Visit/Atlas presentation. A video without a poster does not become a
+still-image hero; publish a Place-scoped image separately when the card or pin
+also needs photography.
+
 Preparation refuses to overwrite an existing `<output>/<journey-slug>` or
 `<output>/<journey-slug>-<place-id>` package. Use a clean output parent or
 deliberately move the reviewed package before preparing another batch.
@@ -171,7 +225,7 @@ Those modes do not create publication records.
 
 ## 2. Upload exactly what the manifest names
 
-The implemented local uploader sends every prepared image to its manifest
+The implemented local uploader sends every prepared image or MP4 to its manifest
 asset's exact `output.objectKey` through the authenticated Cloudflare Worker.
 It does not scan the directory or upload the manifest, receipt, source exports,
 or unrelated files. Start with a local-only dry run:
@@ -310,7 +364,7 @@ Mixed batches, partial matches, public-HEAD-only verification, explicit
 republish manifests, and assets already associated with a Place are rejected.
 
 After a normal site deployment, all published placements appear in the
-Journey page's lazy-loaded **All photography** / **Latest images** section.
+Journey page's lazy-loaded **Photography and video** / **Latest media** section.
 A Place/Visit placement also appears in that Visit's location gallery and in
 the media for an Atlas pin that already presents the Visit. If the Visit has
 no curated hero, the first published image becomes its derived Trip-card and
@@ -343,12 +397,15 @@ than filesystem dates or upload timestamps.
 
 ## Manifest boundary and current scope
 
-Schema version 1 accepts JPEG and PNG assets, explicit rights, one canonical
+Schema version 1 accepts homogeneous JPEG/PNG image packages or MP4 video
+packages, explicit rights, one canonical
 Journey association, an optional validated Place/Visit pair, and `gallery`
 placements with `published` or `draft` visibility. Place and Visit must appear
 together and the Visit must belong to both the manifest Journey and Place.
 Paths must be safe and relative; R2 keys must remain inside the declared
-prefix. Width, height, size, and checksum must match the local output.
+prefix. Image width/height plus every asset's size and checksum must match the
+local output. Video dimensions and duration remain null until the separate
+metadata-inspection proposal is implemented.
 
 The architecture leaves nullable capture fields for future Lightroom/EXIF
 imports, but version 1 does not infer camera, lens, date, Place, Visit, or
