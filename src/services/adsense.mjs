@@ -16,6 +16,21 @@ export function ensureAdSenseLoader() {
   script.id = SCRIPT_ID
   script.async = true
   script.crossOrigin = "anonymous"
+  script.dataset.roamAdsenseState = "loading"
+  script.addEventListener(
+    "load",
+    () => {
+      script.dataset.roamAdsenseState = "loaded"
+    },
+    { once: true }
+  )
+  script.addEventListener(
+    "error",
+    () => {
+      script.dataset.roamAdsenseState = "error"
+    },
+    { once: true }
+  )
   script.src = `${SCRIPT_SOURCE}?client=${encodeURIComponent(
     adSenseConfig.clientId
   )}`

@@ -340,6 +340,10 @@ export function buildAtlasNodeView(presentation) {
     null
   const personalNote =
     visit?.summary || visit?.description || journey.atlasNotes?.[place.id] || ""
+  const isJourneyRoot = !presentation.parentId
+  const useJourneyIdentity =
+    isJourneyRoot || Boolean(presentation.useJourneyIdentity)
+  const isInternalPreviewLabel = presentation.eyebrow === "Coming soon"
 
   return {
     id: presentation.id,
@@ -349,17 +353,20 @@ export function buildAtlasNodeView(presentation) {
     // Structural Atlas hubs may not be Journey visits themselves. An optional
     // anchor lets their route position come from the first real stop they group.
     journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
-    title: presentation.useJourneyIdentity ? journey.title : place.name,
-    eyebrow:
-      presentation.eyebrow === "Coming soon"
-        ? journey.dateRange?.label || "Travel story"
+    // Top-level Atlas entries represent a particular Journey, not only the
+    // reusable geography beneath it. Journey titles and dates carry the year
+    // so repeat visits to the same Place remain visibly distinct. Child nodes
+    // keep Place identity and never inherit a Journey year as their label.
+    title: useJourneyIdentity ? journey.title : place.name,
+    eyebrow: isJourneyRoot
+      ? journey.dateRange?.label || String(journey.year)
+      : isInternalPreviewLabel
+        ? publicTaxonomyLabel(place.category || visit?.type) || "Journey place"
         : presentation.eyebrow,
     category: presentation.category,
     coordinates: place.coordinates ? [...place.coordinates] : null,
     camera: presentation.camera,
-    summary: presentation.useJourneyIdentity
-      ? journey.description
-      : place.description,
+    summary: useJourneyIdentity ? journey.description : place.description,
     personalNote,
     image: hero?.src || "",
     media,

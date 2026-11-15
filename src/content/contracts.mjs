@@ -55,6 +55,9 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @typedef {Object} Journey
  * @property {number} year Calendar year that distinguishes this trip from
  * repeat visits to the same destination.
+ * @property {"published"|"coming-soon"} publicationStatus Internal readiness
+ * state. Public selectors use it to choose a complete story or a bounded
+ * journey preview without exposing workflow terminology.
  * @property {string} slug Public route identity ending in the Journey year.
  * @property {string[]} [legacySlugs] Previous public route identities retained
  * for backward-compatible lookup only.

@@ -3,6 +3,7 @@
     v-if="configured"
     v-show="!unfilled"
     class="ad-placement"
+    :class="`ad-placement--${variant}`"
     :data-placement="placement"
     aria-label="Advertisement"
   >
@@ -36,6 +37,11 @@ export default {
       type: String,
       required: true,
     },
+    variant: {
+      type: String,
+      default: "story",
+      validator: value => ["story", "atlas"].includes(value),
+    },
   },
   data() {
     return {
@@ -57,6 +63,10 @@ export default {
 
     this.observeFillStatus()
     this.loader = ensureAdSenseLoader()
+    if (this.loader?.dataset.roamAdsenseState === "error") {
+      this.handleLoaderFailure()
+      return
+    }
     this.loader?.addEventListener("error", this.handleLoaderFailure, {
       once: true,
     })
@@ -120,10 +130,25 @@ export default {
   display: none !important;
 }
 
+.ad-placement--atlas {
+  width: 100%;
+  margin: 2rem 0 0;
+  padding: 1.1rem 0;
+}
+
+.ad-placement--atlas .ad-placement-unit {
+  min-height: 100px;
+}
+
 @media (max-width: 620px) {
   .ad-placement {
     width: min(100% - 1rem, 960px);
     margin-top: 4rem;
+  }
+
+  .ad-placement--atlas {
+    width: 100%;
+    margin-top: 2rem;
   }
 }
 </style>

@@ -23,8 +23,12 @@ code_paths:
   - src/services/adsense.mjs
   - src/components/AdSlot.vue
   - src/views/roam/RoamTripOverview.vue
+  - src/features/atlas/config/atlasAdEligibility.mjs
+  - src/features/atlas/views/AtlasView.vue
+  - src/features/atlas/components/AtlasDetailPanel.vue
   - src/views/roam/Privacy.vue
   - scripts/validate-adsense-config.mjs
+  - scripts/test-atlas-ad-eligibility.mjs
   - scripts/lib/adsense-build-env.js
   - scripts/prepare-pages.js
   - .github/workflows/deploy-pages.yml
@@ -59,8 +63,16 @@ received event data require external owner verification.
   Auto ads is off before production code can initialize an ad.
 - `AdSlot.vue` and the centralized loader support one responsive manual display
   unit after the itinerary on published Journey stories with at least three
-  chapters. The home page, Atlas, heroes, galleries, videos, dialogs,
-  navigation, and incomplete Journeys contain no placements.
+  chapters.
+- A separately disabled Atlas unit can appear inside a guided stop's editorial
+  detail content after three distinct arrivals. Eligibility requires a
+  published Journey with at least five mapped stops and a current stop with at
+  least 180 characters of combined summary and personal notes plus one media
+  item. A `sessionStorage` reservation limits the unit to one request per
+  Journey and browser-tab session.
+- The home page, map canvas, markers, heroes, galleries, videos, lightboxes,
+  dialogs, navigation controls, incomplete Journeys, free map exploration, and
+  thin Atlas stops contain no placements.
 - The ad component displays a plain `Advertisement` label, does not emit
   analytics events, and collapses units Google marks as unfilled or optimized
   without a returned ad. It also collapses the placement when the external
@@ -76,7 +88,8 @@ received event data require external owner verification.
 
 - No ad slot ID or ads.txt seller line is committed. The publisher verification
   meta tag cannot render an ad, so advertising remains off in repository builds
-  and has not been externally verified against the live AdSense account.
+  and has not been externally verified against the live AdSense account. Atlas
+  advertising also requires its independent enable flag and slot ID.
 - Auto ads state, site approval, Brand safety settings, the certified consent
   management platform, and the final privacy review are owner dashboard or
   legal review steps. Source code cannot verify them.

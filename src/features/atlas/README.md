@@ -4,7 +4,7 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - content-model
 supersedes: []
@@ -17,6 +17,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run adsense:test
+    - npm run atlas:test
     - npm run content:validate
     - npm run build
 ---
@@ -143,14 +145,43 @@ rendering so commercial or affiliate behavior does not enter the map engine.
 
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible, while absent story/media content renders as
-`Story and photography coming soon`. Planned-only stops are excluded. The
-validator requires every coming-soon Journey Visit to resolve to an Atlas node
-so later media ingestion enriches stable IDs instead of creating a parallel
-map record.
+Place summaries remain visible, and their top-level navigation cards use the
+reader-facing `Journey preview` cue. Missing material stays absent instead of
+rendering an empty section or an editorial workflow message. Planned-only
+stops are excluded. The validator requires every internally incomplete Journey
+Visit to resolve to an Atlas node so later media ingestion enriches stable IDs
+instead of creating a parallel map record.
+
+Every Atlas root uses the canonical Journey title and date label, including
+its year, because the same Place can host multiple trips. Child nodes use their
+canonical Place names and local labels without repeating the Journey year.
 
 ## Persistence
 
 Favorites, recently explored IDs, and the most recent camera context use the
 versioned key `roamwithjustin.atlas.v1` in `localStorage`. Invalid or unavailable
 storage falls back to an empty state and does not prevent exploration.
+
+## Optional guided Journey advertising
+
+Atlas advertising is independent of the story placement and disabled by
+default. It uses the shared manual `AdSlot` only after a visitor arrives at
+three distinct stops through the guided Journey player. The Journey must have
+at least five mapped stops, and the current stop must be published, contain at
+least 180 characters across its summary and personal note, and own at least one
+media item.
+
+The unit renders inside the stop's editorial detail content, below its notes
+and media and above its actions. It never renders on the map canvas, markers,
+free exploration, incomplete Journeys, thin stops, or beside the guided
+Previous and Next controls. The key
+`roamwithjustin.adsense.atlas.v1.<journey-id>` in `sessionStorage` reserves the
+single allowed request for that Journey and tab. If storage is unavailable,
+the Atlas ad fails closed. Replaying or revisiting stops does not request a new
+unit.
+
+Eligibility and session reservation live in
+`config/atlasAdEligibility.mjs`. Production activation additionally requires
+`VUE_APP_ADSENSE_ATLAS_ENABLED=true` and a numeric
+`VUE_APP_ADSENSE_ATLAS_SLOT_ID`; the shared privacy, Auto ads, publisher, and
+ads.txt gates remain in force.
