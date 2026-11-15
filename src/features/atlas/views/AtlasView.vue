@@ -549,6 +549,39 @@ export default {
         this.announcement = `${this.guidedStop.title}, stop ${this.guidedIndex + 1} of ${this.guidedJourney.stopCount}. Journey paused.`
       }
     },
+    recordGuidedStopArrival() {
+      const stopId = this.guidedStop?.id
+      if (!stopId || stopId !== this.currentNode?.id) return
+
+      if (!this.guidedVisitedStopIds.includes(stopId)) {
+        this.guidedVisitedStopIds = [...this.guidedVisitedStopIds, stopId]
+      }
+      this.$nextTick(this.maybeOfferAtlasAd)
+    },
+    maybeOfferAtlasAd() {
+      if (
+        !isAtlasAdEligible({
+          atlasReady: adSenseConfig.atlasReady,
+          journey: this.guidedJourney,
+          currentStop: this.guidedStop,
+          guidedStatus: this.guidedStatus,
+          visitedStopIds: this.guidedVisitedStopIds,
+        }) ||
+        this.currentNode?.id !== this.guidedStop?.id
+      ) {
+        return
+      }
+
+      let storage = null
+      try {
+        storage = window.sessionStorage
+      } catch (error) {
+        return
+      }
+
+      if (!reserveAtlasAdRequest(storage, this.guidedJourney.id)) return
+      this.atlasAdNodeId = this.currentNode.id
+    },
     pauseGuidedJourney(source = "control") {
       if (this.guidedStatus !== "traveling") return
 

@@ -18,8 +18,16 @@ const valid = {
   nodeEnv: "production",
 }
 
+const validAtlas = {
+  ...valid,
+  atlasEnabledFlag: "true",
+  atlasSlotId: "9876543210",
+}
+
 assert.equal(createAdSenseConfig().ready, false)
 assert.equal(createAdSenseConfig(valid).ready, true)
+assert.equal(createAdSenseConfig(valid).atlasReady, false)
+assert.equal(createAdSenseConfig(validAtlas).atlasReady, true)
 assert.equal(
   createAdSenseConfig({ ...valid, nodeEnv: "development" }).ready,
   false
@@ -38,6 +46,18 @@ assert.equal(
 )
 assert.equal(
   createAdSenseConfig({ ...valid, storySlotId: "story-slot" }).ready,
+  false
+)
+assert.equal(
+  createAdSenseConfig({ ...validAtlas, atlasSlotId: "atlas-slot" })
+    .atlasReady,
+  false
+)
+assert.equal(
+  createAdSenseConfig({
+    ...validAtlas,
+    enabledFlag: "false",
+  }).atlasReady,
   false
 )
 
@@ -62,7 +82,11 @@ function listSourceFiles(directory) {
 const placementOwners = listSourceFiles(path.join(projectRoot, "src"))
   .filter(file => fs.readFileSync(file, "utf8").includes("<AdSlot"))
   .map(file => path.relative(projectRoot, file).replace(/\\/g, "/"))
+  .sort()
 
-assert.deepEqual(placementOwners, ["src/views/roam/RoamTripOverview.vue"])
+assert.deepEqual(placementOwners, [
+  "src/features/atlas/components/AtlasDetailPanel.vue",
+  "src/views/roam/RoamTripOverview.vue",
+])
 
 console.log("AdSense configuration tests passed.")

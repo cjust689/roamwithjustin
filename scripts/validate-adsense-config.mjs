@@ -18,6 +18,8 @@ const config = createAdSenseConfig({
   autoAdsOffFlag: environment.VUE_APP_ADSENSE_AUTO_ADS_OFF_CONFIRMED,
   clientId: environment.VUE_APP_ADSENSE_CLIENT_ID,
   storySlotId: environment.VUE_APP_ADSENSE_STORY_SLOT_ID,
+  atlasEnabledFlag: environment.VUE_APP_ADSENSE_ATLAS_ENABLED,
+  atlasSlotId: environment.VUE_APP_ADSENSE_ATLAS_SLOT_ID,
   nodeEnv: "production",
 })
 
@@ -56,5 +58,7 @@ if (!config.requested) {
 }
 
 console.log(
-  "AdSense configuration passed: one manual travel story slot is enabled."
+  config.atlasReady
+    ? "AdSense configuration passed: the story slot and session-capped Atlas slot are enabled."
+    : "AdSense configuration passed: one manual travel story slot is enabled."
 )
