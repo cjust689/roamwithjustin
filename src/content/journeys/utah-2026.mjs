@@ -17,8 +17,9 @@ function destinationVisit(placeId, description) {
 
 export const utah2026Journey = Object.freeze({
   id: "utah-2026",
+  year: 2026,
   slug: "utah-2026",
-  title: "Utah, 2026",
+  title: "Utah (2026)",
   publicationStatus: "coming-soon",
   evidenceStatus: "confirmed",
   dateRange: {

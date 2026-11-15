@@ -20,8 +20,10 @@ function destinationVisit(journeyId, placeId, evidenceStatus = "confirmed") {
 export const nextDestinationJourneys = Object.freeze([
   {
     id: "europe-summer-2026",
-    slug: "europe",
-    title: "Europe",
+    year: 2026,
+    slug: "europe-2026",
+    legacySlugs: ["europe"],
+    title: "Europe (2026)",
     publicationStatus: "coming-soon",
     evidenceStatus: "confirmed",
     dateRange: {
@@ -91,15 +93,17 @@ export const nextDestinationJourneys = Object.freeze([
       "Coming-soon route scaffold. Place identity and broad order are mapped; venues, operators, detailed segment dates, and media associations remain unpublished until verified.",
   },
   {
-    id: "peoria-illinois",
-    slug: "peoria",
-    title: "Peoria, Illinois",
+    id: "peoria-illinois-2025",
+    year: 2025,
+    slug: "peoria-2025",
+    legacySlugs: ["peoria"],
+    title: "Peoria, Illinois (2025)",
     publicationStatus: "coming-soon",
     evidenceStatus: "confirmed",
     dateRange: {
       start: null,
       end: null,
-      label: null,
+      label: "Fall 2025",
     },
     hero: null,
     fullImage: null,
@@ -114,13 +118,15 @@ export const nextDestinationJourneys = Object.freeze([
     travelNotes: [],
     tips: [],
     lodging: [],
-    visits: [destinationVisit("peoria-illinois", "peoria-illinois")],
+    visits: [
+      destinationVisit("peoria-illinois-2025", "peoria-illinois"),
+    ],
     days: [],
     socialLinks: [],
     featuredMedia: [],
     atlasNotes: {},
     relatedPlaceIds: ["peoria-illinois"],
     verificationNotes:
-      "Top-level destination scaffold only. Trip year, exact dates, launch point, and media associations remain unverified.",
+      "Top-level destination scaffold only. The creator confirmed the trip year as 2025; exact dates, launch point, and media associations remain unverified.",
   },
 ])

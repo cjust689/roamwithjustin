@@ -53,6 +53,11 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {MediaUsage[]} [media]
  *
  * @typedef {Object} Journey
+ * @property {number} year Calendar year that distinguishes this trip from
+ * repeat visits to the same destination.
+ * @property {string} slug Public route identity ending in the Journey year.
+ * @property {string[]} [legacySlugs] Previous public route identities retained
+ * for backward-compatible lookup only.
  * @property {"days"|"chapters"} [itineraryMode] Controls public chronology
  * labels without changing the ordered `days` storage shape. Use `chapters`
  * when story order is known but exact calendar-day assignment is not.

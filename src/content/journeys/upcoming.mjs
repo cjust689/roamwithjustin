@@ -19,8 +19,10 @@ function destinationVisit(journeyId, placeId, evidenceStatus) {
 export const upcomingJourneys = Object.freeze([
   {
     id: "north-georgia-2026",
-    slug: "north-georgia",
-    title: "North Georgia, USA",
+    year: 2026,
+    slug: "north-georgia-2026",
+    legacySlugs: ["north-georgia"],
+    title: "North Georgia, USA (2026)",
     publicationStatus: "coming-soon",
     evidenceStatus: "confirmed",
     dateRange: {
@@ -65,15 +67,17 @@ export const upcomingJourneys = Object.freeze([
       "Preserve private lodging details and do not promote researched trails or eagle sightings to visited facts.",
   },
   {
-    id: "hungary-trip",
-    slug: "hungary",
-    title: "Hungary",
+    id: "hungary-2024",
+    year: 2024,
+    slug: "hungary-2024",
+    legacySlugs: ["hungary"],
+    title: "Hungary (2024)",
     publicationStatus: "coming-soon",
     evidenceStatus: "unverified",
     dateRange: {
       start: null,
       end: null,
-      label: null,
+      label: "2024",
     },
     hero: {
       assetId: "image-hungary-hungary",
@@ -95,13 +99,13 @@ export const upcomingJourneys = Object.freeze([
     travelNotes: [],
     tips: [],
     lodging: [],
-    visits: [destinationVisit("hungary-trip", "hungary", "unverified")],
+    visits: [destinationVisit("hungary-2024", "hungary", "unverified")],
     days: [],
     socialLinks: [],
     featuredMedia: [],
     atlasNotes: {},
     relatedPlaceIds: ["hungary"],
     verificationNotes:
-      "The existing card is retained without asserting a date, route, or visit details.",
+      "The creator confirmed the trip year as 2024. The existing card is retained without asserting exact dates, a route, or visit details.",
   },
 ])

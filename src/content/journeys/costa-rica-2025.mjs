@@ -17,8 +17,10 @@ function destinationVisit(placeId) {
 
 export const costaRica2025Journey = Object.freeze({
   id: "costa-rica-2025",
-  slug: "costa-rica",
-  title: "Costa Rica",
+  year: 2025,
+  slug: "costa-rica-2025",
+  legacySlugs: ["costa-rica"],
+  title: "Costa Rica (2025)",
   publicationStatus: "coming-soon",
   evidenceStatus: "confirmed",
   dateRange: {

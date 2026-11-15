@@ -1,8 +1,10 @@
 // Complete canonical Puerto Rico Journey, preserving existing public content and evidence boundaries.
 export const puertoRico2024Journey = Object.freeze({
   id: "puerto-rico-2024",
-  slug: "puerto-rico",
-  title: "Puerto Rico",
+  year: 2024,
+  slug: "puerto-rico-2024",
+  legacySlugs: ["puerto-rico"],
+  title: "Puerto Rico (2024)",
   publicationStatus: "published",
   evidenceStatus: "confirmed",
   dateRange: {

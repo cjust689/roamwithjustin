@@ -8,8 +8,8 @@ import { usviStJohn2025Journey } from "./usvi-st-john-2025.mjs"
 import { utah2026Journey } from "./utah-2026.mjs"
 import { utahWinter2025Journey } from "./utah-winter-2025.mjs"
 
-// Public URLs remain slug-based, allowing stable /trips/:slug routes while
-// canonical Journey IDs carry the specific trip identity and approximate year.
+// Canonical IDs and public slugs both carry the trip year so repeat visits can
+// coexist. Previous slugs remain lookup-only aliases for existing links.
 const registry = createIdRegistry(
   [
     utahWinter2025Journey,
@@ -32,7 +32,12 @@ export function getJourney(id) {
 }
 
 export function getJourneyBySlug(slug) {
-  return journeyRecords.find(journey => journey.slug === slug) || null
+  return (
+    journeyRecords.find(
+      journey =>
+        journey.slug === slug || (journey.legacySlugs || []).includes(slug)
+    ) || null
+  )
 }
 
 export function getJourneyVisit(journeyId, placeId) {

@@ -4,7 +4,7 @@
 // remain owned by the media-ingestion registry rather than this narrative file.
 function miamiVisit(placeId, type, description, summary, notes = []) {
   return {
-    id: `miami-south-beach-${placeId}`,
+    id: `miami-south-beach-2026-${placeId}`,
     legacyId: placeId,
     placeId,
     date: null,
@@ -20,16 +20,18 @@ function miamiVisit(placeId, type, description, summary, notes = []) {
 }
 
 export const miamiJourney = Object.freeze({
-  id: "miami-south-beach",
-  slug: "miami",
-  title: "Miami Winter Getaway",
+  id: "miami-south-beach-2026",
+  year: 2026,
+  slug: "miami-2026",
+  legacySlugs: ["miami"],
+  title: "Miami Winter Getaway (2026)",
   publicationStatus: "coming-soon",
   evidenceStatus: "confirmed",
   itineraryMode: "chapters",
   dateRange: {
     start: null,
     end: null,
-    label: "January · year to confirm",
+    label: "January 2026",
   },
   hero: null,
   fullImage: null,
@@ -110,7 +112,7 @@ export const miamiJourney = Object.freeze({
         "We land after a short flight from the Atlanta area, check into an Airbnb, and head straight out on foot. South Beach has the staged familiarity of a Miami Vice scene—distinctive storefronts, restaurants, and architecture—until the crowds make the obvious point that this is real life. We are tourists too. That first walk is enough to move the trip out of the post-Christmas routine and into its own rhythm.",
       visits: [
         {
-          visitId: "miami-south-beach-miami-south-beach",
+          visitId: "miami-south-beach-2026-miami-south-beach",
           notes:
             "The first walk sets the visual language for the trip: cinematic Miami, interrupted in the best way by ordinary family time.",
         },
@@ -124,12 +126,12 @@ export const miamiJourney = Object.freeze({
         "Morning is when Miami feels least like its reputation. It can be cool, even damp, and I head out alone for sunrise before the stronger sun arrives. During a family visit to South Pointe, we scan the water from the pier for sharks and other sea life. Across the stay, the beach keeps taking over again. The January water is cool, but not too cold for our Atlanta-area family to enjoy.",
       visits: [
         {
-          visitId: "miami-south-beach-south-pointe-park",
+          visitId: "miami-south-beach-2026-south-pointe-park",
           notes:
             "A quieter morning chapter built around sunrise, the pier, and time spent looking into the water.",
         },
         {
-          visitId: "miami-south-beach-miami-south-beach",
+          visitId: "miami-south-beach-2026-miami-south-beach",
           notes:
             "Beach time gives the trip its recurring pace rather than a checklist of attractions.",
         },
@@ -143,7 +145,7 @@ export const miamiJourney = Object.freeze({
         "South Beach is busy, but this afternoon goes the other way. A pool and beach pass at the Savoy gives us a boutique-hotel pause with good drinks and nearly the whole pool to ourselves. We move between the property and the beach. Dinners along South Beach make up another part of the stay, but the quiet pool is the detail that lingers—not what I expect in the middle of this trip.",
       visits: [
         {
-          visitId: "miami-south-beach-miami-south-beach",
+          visitId: "miami-south-beach-2026-miami-south-beach",
           notes:
             "A nearly empty pool gives the busiest part of the trip an unexpectedly quiet pause.",
         },
@@ -157,12 +159,12 @@ export const miamiJourney = Object.freeze({
         "The Everglades part of the trip keeps changing speed. On the airboat, the wind arrives before the stronger afternoon heat and my son loves the ride. The guide shares alligator details I had not heard before, while the animals come much closer to the boat than I expect. On the Shark Valley bike outing, the engine is gone and we pedal past resting alligators close to the path. The heat builds, shade is limited, and the smallest children's bike available that day—20 inches—asks a lot of a five-year-old. There are a few tense moments. He keeps going, and we finish safely.",
       visits: [
         {
-          visitId: "miami-south-beach-everglades",
+          visitId: "miami-south-beach-2026-everglades",
           notes:
             "The airboat puts motion, wind, our guide's alligator knowledge, and my son's reaction at the center of the experience.",
         },
         {
-          visitId: "miami-south-beach-shark-valley",
+          visitId: "miami-south-beach-2026-shark-valley",
           notes:
             "The airboat brings the speed; Shark Valley turns the wildlife encounter into a family bike ride.",
         },
@@ -176,7 +178,7 @@ export const miamiJourney = Object.freeze({
         "Miami changes shape again at Oleta River State Park. We rent kayaks and paddle through mangroves, putting the beaches and storefronts behind us for a while. An island brings the oddest wildlife encounter of the trip: raccoons. It is strange, memorable, and worth making room for when a Miami trip has time for one more change of pace.",
       visits: [
         {
-          visitId: "miami-south-beach-oleta-river-state-park",
+          visitId: "miami-south-beach-2026-oleta-river-state-park",
           notes:
             "The mangrove paddle becomes one of the trip's strangest and most memorable detours.",
         },
@@ -196,5 +198,5 @@ export const miamiJourney = Object.freeze({
     "oleta-river-state-park",
   ],
   verificationNotes:
-    "First narrative pass from creator-confirmed recollections. Exact year, dates, chapter chronology beyond arrival, Airbnb, restaurants, Savoy property identity, airboat operator and route, and Oleta island name remain unverified. The generated Media registry currently places published batches on the Everglades and Oleta Visits; other Miami Place media and curated story roles remain unresolved.",
+    "First narrative pass from creator-confirmed recollections. The creator confirmed the trip year as 2026; exact dates, chapter chronology beyond arrival, Airbnb, restaurants, Savoy property identity, airboat operator and route, and Oleta island name remain unverified. The generated Media registry currently places published batches on the Everglades and Oleta Visits; other Miami Place media and curated story roles remain unresolved.",
 })
