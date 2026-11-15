@@ -62,7 +62,9 @@ received event data require external owner verification.
   chapters. The home page, Atlas, heroes, galleries, videos, dialogs,
   navigation, and incomplete Journeys contain no placements.
 - The ad component displays a plain `Advertisement` label, does not emit
-  analytics events, and collapses units Google marks as unfilled.
+  analytics events, and collapses units Google marks as unfilled or optimized
+  without a returned ad. It also collapses the placement when the external
+  loader fails, including when a visitor intentionally blocks advertising.
 - The production build validates AdSense configuration, and the postbuild step
   creates `/ads.txt` only from the exact owner supplied seller line.
 - `/privacy` describes the site's current Analytics, local Atlas storage,

@@ -52,8 +52,10 @@ of these conditions are true:
 The unit appears after the full itinerary and before the media gallery. It does
 not render on the home page, Travel Atlas, story hero, incomplete Journey,
 gallery, lightbox, video player, location dialog, navigation, or footer. The
-component does not track ad impressions or clicks. An unfilled unit collapses
-after Google marks it `data-ad-status="unfilled"`.
+component does not track ad impressions or clicks. An empty unit collapses
+after Google marks it `data-ad-status="unfilled"` or
+`data-ad-status="unfill-optimized"`. It also collapses when a browser,
+extension, or network privacy filter blocks the AdSense loader.
 
 ## Required GitHub repository variables
 
