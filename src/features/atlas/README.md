@@ -96,6 +96,13 @@ zoom of `15.5`; destination/root selections retain their broader configured
 camera. The pure clustering and focus-camera rules live in
 `config/markerLayout.mjs` and are covered by `npm run atlas:test`.
 
+`Surprise me` randomly chooses among mapped child places belonging to published
+Journeys. Journey roots are not destinations for this control. It excludes
+internally incomplete Journey previews, avoids the currently open place, and
+avoids immediately repeating the previous surprise when another completed
+place is available. The selection rule lives in `config/surpriseSelection.mjs`
+and is covered by `npm run atlas:test`.
+
 ## Map configuration
 
 Without configuration, the atlas uses the MapLibre demonstration basemap and

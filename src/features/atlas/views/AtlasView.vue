@@ -184,14 +184,15 @@ import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
 import { adSenseConfig } from "@/config/adsense.mjs"
 import { hasMapTilerKey } from "../config/mapConfig"
 import { getAtlasPinFocusCamera } from "../config/markerLayout.mjs"
+import { selectAtlasSurprisePlace } from "../config/surpriseSelection.mjs"
 import {
   isAtlasAdEligible,
   reserveAtlasAdRequest,
 } from "../config/atlasAdEligibility.mjs"
 import {
   atlasRootIds,
+  getCompletedAtlasPlaces,
   getAtlasJourneyNodes,
-  getAtlasLeaves,
   getAtlasLineage,
   getAtlasNode,
   getAtlasNodes,
@@ -232,6 +233,7 @@ export default {
       savedOpen: false,
       announcement: "",
       previousTitle: "",
+      previousSurpriseNodeId: "",
       stateLoaded: false,
       // The root Atlas always introduces its journey navigator in the open
       // state. Visitors can collapse it without losing the quick-nav trigger.
@@ -676,12 +678,16 @@ export default {
         : "Journey explorer collapsed. The map is ready to explore."
     },
     surpriseMe() {
-      const leaves = getAtlasLeaves()
-      const currentIndex = leaves.findIndex(
-        node => node.id === this.currentNode?.id
-      )
-      const nextIndex = (currentIndex + 1) % leaves.length
-      this.selectNode(leaves[nextIndex].id)
+      const destination = selectAtlasSurprisePlace({
+        nodes: getCompletedAtlasPlaces(),
+        currentNodeId: this.currentNode?.id,
+        previousNodeId: this.previousSurpriseNodeId,
+      })
+      if (!destination) return
+
+      this.previousSurpriseNodeId = destination.id
+      this.selectNode(destination.id)
+      this.announcement = `Surprise destination: ${destination.title}`
     },
     rememberCamera(camera) {
       if (!this.currentNode) return

@@ -12,7 +12,7 @@
     "docs:audit": "node scripts/docs-audit.mjs",
     "adsense:test": "node scripts/test-adsense-config.mjs && node scripts/test-atlas-ad-eligibility.mjs",
     "adsense:validate": "node scripts/validate-adsense-config.mjs",
-    "atlas:test": "node scripts/test-atlas-marker-layout.mjs",
+    "atlas:test": "node scripts/test-atlas-marker-layout.mjs && node scripts/test-atlas-surprise-selection.mjs",
     "gear:ingest": "node scripts/ingest-gear.js",
     "gear:journeys": "node scripts/ingest-gear.js --journeys",
     "gear:list": "node scripts/ingest-gear.js --list",
