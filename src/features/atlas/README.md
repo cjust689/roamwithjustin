@@ -4,7 +4,7 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - content-model
 supersedes: []

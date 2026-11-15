@@ -42,8 +42,7 @@ export function isAtlasAdEligible({
       journey.stopCount >= ATLAS_AD_MINIMUM_JOURNEY_STOPS &&
       guidedStatus === "at-stop" &&
       currentStop?.id &&
-      uniqueStringCount(visitedStopIds) >=
-        ATLAS_AD_MINIMUM_VISITED_STOPS &&
+      uniqueStringCount(visitedStopIds) >= ATLAS_AD_MINIMUM_VISITED_STOPS &&
       isAtlasStopContentRich(currentStop)
   )
 }

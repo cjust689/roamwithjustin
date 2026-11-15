@@ -145,5 +145,10 @@ export default {
     width: min(100% - 1rem, 960px);
     margin-top: 4rem;
   }
+
+  .ad-placement--atlas {
+    width: 100%;
+    margin-top: 2rem;
+  }
 }
 </style>

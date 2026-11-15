@@ -2,7 +2,11 @@ const CLIENT_ID_PATTERN = /^ca-pub-\d+$/
 const SLOT_ID_PATTERN = /^\d+$/
 
 function enabled(value) {
-  return String(value || "").trim().toLowerCase() === "true"
+  return (
+    String(value || "")
+      .trim()
+      .toLowerCase() === "true"
+  )
 }
 
 function clean(value) {
@@ -67,9 +71,7 @@ export function createAdSenseConfig({
     issues: Object.freeze(issues),
     ready,
     atlasReady:
-      ready &&
-      atlasRequested &&
-      SLOT_ID_PATTERN.test(normalizedAtlasSlotId),
+      ready && atlasRequested && SLOT_ID_PATTERN.test(normalizedAtlasSlotId),
   })
 }
 

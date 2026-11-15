@@ -23,14 +23,10 @@ const config = createAdSenseConfig({
   nodeEnv: "production",
 })
 
-const adsTextLine = String(
-  environment.ADSENSE_GOOGLE_ADS_TXT_LINE || ""
-).trim()
+const adsTextLine = String(environment.ADSENSE_GOOGLE_ADS_TXT_LINE || "").trim()
 const issues = [...config.issues]
 const adsTextMatch = adsTextLine
-  ? adsTextLine.match(
-      /^google\.com,\s*pub-(\d+),\s*DIRECT,\s*[a-f0-9]+$/i
-    )
+  ? adsTextLine.match(/^google\.com,\s*pub-(\d+),\s*DIRECT,\s*[a-f0-9]+$/i)
   : null
 
 if (adsTextLine && !adsTextMatch) {

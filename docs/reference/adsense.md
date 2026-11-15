@@ -20,6 +20,7 @@ code_paths:
   - src/features/atlas/components/AtlasDetailPanel.vue
   - src/views/roam/Privacy.vue
   - scripts/validate-adsense-config.mjs
+  - scripts/test-atlas-ad-eligibility.mjs
   - scripts/lib/adsense-build-env.js
   - scripts/prepare-pages.js
   - .github/workflows/deploy-pages.yml
@@ -86,16 +87,16 @@ session.
 
 Configure these under **Settings, Secrets and variables, Actions, Variables**:
 
-| Variable | Value |
-| --- | --- |
-| `ADSENSE_ENABLED` | `true` only when the remaining checklist is complete |
-| `ADSENSE_PRIVACY_READY` | `true` only after the privacy and consent review |
-| `ADSENSE_AUTO_ADS_OFF_CONFIRMED` | `true` after Auto ads is off for the site |
-| `ADSENSE_CLIENT_ID` | Exact `ca-pub-...` value from the account code |
-| `ADSENSE_STORY_SLOT_ID` | Numeric ID from one responsive display ad unit |
-| `ADSENSE_ATLAS_ENABLED` | `true` only when the optional Atlas unit should be active |
-| `ADSENSE_ATLAS_SLOT_ID` | Numeric ID from the separate responsive Atlas display unit |
-| `ADSENSE_GOOGLE_ADS_TXT_LINE` | Exact Google seller line supplied by AdSense |
+| Variable                         | Value                                                      |
+| -------------------------------- | ---------------------------------------------------------- |
+| `ADSENSE_ENABLED`                | `true` only when the remaining checklist is complete       |
+| `ADSENSE_PRIVACY_READY`          | `true` only after the privacy and consent review           |
+| `ADSENSE_AUTO_ADS_OFF_CONFIRMED` | `true` after Auto ads is off for the site                  |
+| `ADSENSE_CLIENT_ID`              | Exact `ca-pub-...` value from the account code             |
+| `ADSENSE_STORY_SLOT_ID`          | Numeric ID from one responsive display ad unit             |
+| `ADSENSE_ATLAS_ENABLED`          | `true` only when the optional Atlas unit should be active  |
+| `ADSENSE_ATLAS_SLOT_ID`          | Numeric ID from the separate responsive Atlas display unit |
+| `ADSENSE_GOOGLE_ADS_TXT_LINE`    | Exact Google seller line supplied by AdSense               |
 
 These identifiers are public configuration, not private API credentials. The
 workflow maps them into the Vue build. `ADSENSE_GOOGLE_ADS_TXT_LINE` is used by

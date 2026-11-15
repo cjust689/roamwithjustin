@@ -28,6 +28,7 @@ code_paths:
   - src/features/atlas/components/AtlasDetailPanel.vue
   - src/views/roam/Privacy.vue
   - scripts/validate-adsense-config.mjs
+  - scripts/test-atlas-ad-eligibility.mjs
   - scripts/lib/adsense-build-env.js
   - scripts/prepare-pages.js
   - .github/workflows/deploy-pages.yml

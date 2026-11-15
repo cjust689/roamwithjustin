@@ -49,8 +49,7 @@ assert.equal(
   false
 )
 assert.equal(
-  createAdSenseConfig({ ...validAtlas, atlasSlotId: "atlas-slot" })
-    .atlasReady,
+  createAdSenseConfig({ ...validAtlas, atlasSlotId: "atlas-slot" }).atlasReady,
   false
 )
 assert.equal(
