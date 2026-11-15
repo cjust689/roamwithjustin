@@ -52,6 +52,11 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {MediaUsage} [hero]
  * @property {MediaUsage[]} [media]
  *
+ * @typedef {Object} Journey
+ * @property {"days"|"chapters"} [itineraryMode] Controls public chronology
+ * labels without changing the ordered `days` storage shape. Use `chapters`
+ * when story order is known but exact calendar-day assignment is not.
+ *
  * @typedef {Object} Partner
  * @property {string} id Stable provider or partner identity.
  * @property {string} name

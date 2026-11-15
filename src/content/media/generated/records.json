@@ -1654,6 +1654,816 @@
         "byteSize": 75933165,
         "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
       }
+    },
+    {
+      "id": "image-miami-37c3e530fb78-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "37c3e530fb780acb4ba214fa8ea5c93e5715574d0703b11cf78906e8b801e510",
+        "byteSize": 580472,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-4a54ff978390-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "4a54ff978390d9a598ba792dbb2885e2a10178fe8fcd10e04b48475037319021",
+        "byteSize": 167817,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-f0e6a6de24b3-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "f0e6a6de24b3092c555b17bfd56f72c007d5bde3337a32ce6afe84efdb56fd06",
+        "byteSize": 174278,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-a3d0b4ab9d7e-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "a3d0b4ab9d7e4af5d6ff148d27e21bac4f35c92b9bc27d9e1e8c8e9bae453a53",
+        "byteSize": 559047,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-1707377022fb-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "1707377022fbe59d34c9d0c85db49cca75900045b584df94297d7f2d0cfc2551",
+        "byteSize": 241694,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-ed79c57812ff-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "ed79c57812ff6ef428075f593cf7faa84ea750d662fbdfc70754a66c182a8b72",
+        "byteSize": 242275,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-f0d7aa8ffb88-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "f0d7aa8ffb8850657f4e6b80e76676d5666f78fdabafaa69f283e95bd8475522",
+        "byteSize": 306895,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-3570a3ec9f73-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "3570a3ec9f7335ac7129835a97723937560b28250682a0bf5da9fe0ae0f21d91",
+        "byteSize": 281049,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-e0458c707b05-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "e0458c707b051183e1d9dac29c56afb9be5e7fba42f1bd43843e347b68509333",
+        "byteSize": 497571,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-bce31d4ad703-010",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-010.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 10",
+      "publication": {
+        "revision": 1,
+        "sha256": "bce31d4ad703f077e726c113ef4d11597441921eb4d3f89a90d362b407ca95f5",
+        "byteSize": 263076,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-43ad2563cae8-011",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-011.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 11",
+      "publication": {
+        "revision": 1,
+        "sha256": "43ad2563cae854fc11d020f3acee3d7e944fa43ab19c61df1a067a1aeebeb3b6",
+        "byteSize": 568941,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-75f9a310d1fb-012",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-012.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 12",
+      "publication": {
+        "revision": 1,
+        "sha256": "75f9a310d1fb8944ef3dfe693cffd8e92782dd9dbd5b7e41e5a562014e9d508d",
+        "byteSize": 280950,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-d8410b185e4b-013",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-013.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 13",
+      "publication": {
+        "revision": 1,
+        "sha256": "d8410b185e4bd8ea5ac3be3802c1cb3fad1630c7e45c19e559ab3b335e94ae56",
+        "byteSize": 799511,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-599cab44423e-014",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-014.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 14",
+      "publication": {
+        "revision": 1,
+        "sha256": "599cab44423e828b7525eb80cc2b1f3d215d0a9b484a7921f82cb062b3e70134",
+        "byteSize": 256045,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-1d78dbf27f8d-015",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-015.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 15",
+      "publication": {
+        "revision": 1,
+        "sha256": "1d78dbf27f8df906a9b01c1f1202ab2d134aff4f43a6ae379c97036287885e00",
+        "byteSize": 314745,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-6bc4cf452821-016",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-016.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 16",
+      "publication": {
+        "revision": 1,
+        "sha256": "6bc4cf452821566431b8958e89763e9fdcf1ad87002a1b8b1b78a69b8e581802",
+        "byteSize": 592137,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-e0458c707b05-017",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-017.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 17",
+      "publication": {
+        "revision": 1,
+        "sha256": "e0458c707b051183e1d9dac29c56afb9be5e7fba42f1bd43843e347b68509333",
+        "byteSize": 497571,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-d2a35e9cb085-018",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-018.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 18",
+      "publication": {
+        "revision": 1,
+        "sha256": "d2a35e9cb085067cc38a3368155b0faac5cc98264099199829dbdbb718e1484f",
+        "byteSize": 537399,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-674cd969d0f3-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "674cd969d0f3b624af305413eb2eebadb9a4bd4bb7b44b0f74360f18795cb284",
+        "byteSize": 644401,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-529b6b6a518b-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "529b6b6a518be237d3ebe522cff046858d98c8f54c428751b5259fb5766d5ae6",
+        "byteSize": 433577,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-0ba76360a606-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "0ba76360a60607fb62998e5a932e5bc129f6db6fbfc0ae870c419f3591bc7351",
+        "byteSize": 310749,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-662fbc3fb188-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 2047
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "662fbc3fb1883bde4d0c0f5f042857ba92f690a6c5d372d388af9933daab8825",
+        "byteSize": 407220,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-8eed37b43275-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "8eed37b432750c17e90684e6a29545626796fb24db7eb1d11ed3fb084637c094",
+        "byteSize": 372271,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-d81bfc971de8-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "d81bfc971de8706ba40dc4fea9b8eeb708cdfa8fe607113e1384f4c4375039f0",
+        "byteSize": 414948,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-879857e8b43d-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "879857e8b43d9ec3e6d2c6000bb49eb936de4bdaec8bd6c8c4b4c688dd8c5d2c",
+        "byteSize": 507613,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-c837c9c08d94-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "c837c9c08d941f86243fae9faf674b819ae9387024dea290b8e194f8b87de62f",
+        "byteSize": 507591,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-5da46085cf23-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "5da46085cf23712c62a610597f6ed25cdbda4005011dcbecaf26b9a17bd9b8ce",
+        "byteSize": 453556,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
     }
   ],
   "placements": [
@@ -2371,6 +3181,357 @@
       "sortOrder": 1,
       "publicationSequence": 14,
       "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-37c3e530fb78-001",
+      "assetId": "image-miami-37c3e530fb78-001",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-4a54ff978390-002",
+      "assetId": "image-miami-4a54ff978390-002",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-f0e6a6de24b3-003",
+      "assetId": "image-miami-f0e6a6de24b3-003",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-a3d0b4ab9d7e-004",
+      "assetId": "image-miami-a3d0b4ab9d7e-004",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-1707377022fb-005",
+      "assetId": "image-miami-1707377022fb-005",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-ed79c57812ff-006",
+      "assetId": "image-miami-ed79c57812ff-006",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-f0d7aa8ffb88-007",
+      "assetId": "image-miami-f0d7aa8ffb88-007",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-3570a3ec9f73-008",
+      "assetId": "image-miami-3570a3ec9f73-008",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-e0458c707b05-009",
+      "assetId": "image-miami-e0458c707b05-009",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-bce31d4ad703-010",
+      "assetId": "image-miami-bce31d4ad703-010",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 10,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-43ad2563cae8-011",
+      "assetId": "image-miami-43ad2563cae8-011",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 11,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-75f9a310d1fb-012",
+      "assetId": "image-miami-75f9a310d1fb-012",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 12,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-d8410b185e4b-013",
+      "assetId": "image-miami-d8410b185e4b-013",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 13,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-599cab44423e-014",
+      "assetId": "image-miami-599cab44423e-014",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 14,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-1d78dbf27f8d-015",
+      "assetId": "image-miami-1d78dbf27f8d-015",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 15,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-6bc4cf452821-016",
+      "assetId": "image-miami-6bc4cf452821-016",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 16,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-e0458c707b05-017",
+      "assetId": "image-miami-e0458c707b05-017",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 17,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-everglades-image-miami-d2a35e9cb085-018",
+      "assetId": "image-miami-d2a35e9cb085-018",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 18,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-674cd969d0f3-001",
+      "assetId": "image-miami-674cd969d0f3-001",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-529b6b6a518b-002",
+      "assetId": "image-miami-529b6b6a518b-002",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-0ba76360a606-003",
+      "assetId": "image-miami-0ba76360a606-003",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-662fbc3fb188-004",
+      "assetId": "image-miami-662fbc3fb188-004",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-8eed37b43275-005",
+      "assetId": "image-miami-8eed37b43275-005",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-d81bfc971de8-006",
+      "assetId": "image-miami-d81bfc971de8-006",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-879857e8b43d-007",
+      "assetId": "image-miami-879857e8b43d-007",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-c837c9c08d94-008",
+      "assetId": "image-miami-c837c9c08d94-008",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-miami-south-beach-oleta-river-state-park-image-miami-5da46085cf23-009",
+      "assetId": "image-miami-5da46085cf23-009",
+      "journeyId": "miami-south-beach",
+      "visitId": "miami-south-beach-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
     }
   ],
   "batches": [
@@ -2602,6 +3763,57 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "4a04aef19ddc18271f4500b2f7c76fd27d9d3fd934c216875a4a3939b531a514"
+      }
+    },
+    {
+      "id": "media-miami-everglades-eca7fe02357c9788",
+      "sequence": 15,
+      "manifestSha256": "8d8fda8c2c9f13b37c6d833867c5e4eacd3346a2172851e8a4875a101f5bb8a1",
+      "journeyId": "miami-south-beach",
+      "assetIds": [
+        "image-miami-37c3e530fb78-001",
+        "image-miami-4a54ff978390-002",
+        "image-miami-f0e6a6de24b3-003",
+        "image-miami-a3d0b4ab9d7e-004",
+        "image-miami-1707377022fb-005",
+        "image-miami-ed79c57812ff-006",
+        "image-miami-f0d7aa8ffb88-007",
+        "image-miami-3570a3ec9f73-008",
+        "image-miami-e0458c707b05-009",
+        "image-miami-bce31d4ad703-010",
+        "image-miami-43ad2563cae8-011",
+        "image-miami-75f9a310d1fb-012",
+        "image-miami-d8410b185e4b-013",
+        "image-miami-599cab44423e-014",
+        "image-miami-1d78dbf27f8d-015",
+        "image-miami-6bc4cf452821-016",
+        "image-miami-e0458c707b05-017",
+        "image-miami-d2a35e9cb085-018"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "de56979fd17aa2e1990e251cccc4724aa4f273c0ef7ac63b4751d65546c379bb"
+      }
+    },
+    {
+      "id": "media-miami-oleta-river-state-park-e5d79b9068b4b960",
+      "sequence": 16,
+      "manifestSha256": "3448271ee5fc8c660935ec03611d72d4ab9967c21dd693519efde7dc5629131f",
+      "journeyId": "miami-south-beach",
+      "assetIds": [
+        "image-miami-674cd969d0f3-001",
+        "image-miami-529b6b6a518b-002",
+        "image-miami-0ba76360a606-003",
+        "image-miami-662fbc3fb188-004",
+        "image-miami-8eed37b43275-005",
+        "image-miami-d81bfc971de8-006",
+        "image-miami-879857e8b43d-007",
+        "image-miami-c837c9c08d94-008",
+        "image-miami-5da46085cf23-009"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "a9e233b2d438d9a59d5e62dbb4e7d67bd0a73040e689076dc468f9739a6a58c7"
       }
     }
   ]

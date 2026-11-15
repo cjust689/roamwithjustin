@@ -15,9 +15,11 @@ code_paths:
   - src/content/places/europe.mjs
   - src/content/places/costa-rica.mjs
   - src/content/places/utah.mjs
+  - src/content/places/miami.mjs
   - src/content/places/next-destinations.mjs
   - src/content/journeys/costa-rica-2025.mjs
   - src/content/journeys/utah-2026.mjs
+  - src/content/journeys/miami.mjs
   - src/content/journeys/next-destinations.mjs
   - src/content/atlas/preview-presentation.mjs
 verification:
@@ -154,7 +156,7 @@ The list below represents known travel material, **not a verified complete chron
 | `puerto-rico-2024` | San Juan → northern/western Puerto Rico | August 2024 | `CONFIRMED`; lodging and venue details discussed. |
 | `costa-rica-2025` | La Fortuna/Bajos del Toro → Drake Bay/Osa → Uvita → San José area | 2025 | `CONFIRMED` route and several specific visited sites; exact dates require journal verification. |
 | `usvi-st-john-2025` | St. John / possibly St. Thomas | 2025 (precise dates to verify) | `CONFIRMED` St. John photo/underwater work; some lodging/charter stops appear only in assistant drafts. |
-| `miami-south-beach` | Miami Beach, Florida | Before March 2026 | `CONFIRMED` photo series; exact dates, lodging, businesses unknown. |
+| `miami-south-beach` | Miami Beach → Everglades → Oleta River State Park | January after Christmas; exact year and dates unknown | `CONFIRMED` short family getaway; five narrative chapters are canonical, while media and several venue/operator details remain unresolved. |
 | `north-georgia-2026` | Blue Ridge / Mineral Bluff / Morganton area | November 2026 | `CONFIRMED` stay and photography; various hikes/eagle sightings remain unconfirmed. |
 | `peoria-illinois` | Peoria / Illinois River | Fall break, date to verify | `CONFIRMED` sunrise aerial/downtown footage discussed. |
 | `utah-future-trip` | Hanksville bentonite area / Park City / Utah | Discussed November 2026 | `PLANNED / DISCUSSED`; **not** evidence of a completed visit. |
@@ -541,11 +543,64 @@ The above is the best recovered sequence, but do not assign exact dates to every
 # 9. MIAMI / SOUTH BEACH
 
 - **Suggested ID:** `miami-south-beach`
-- **Timing:** Before March 2026; exact trip dates unknown.
-- **Status:** `CONFIRMED` family photo series.
-- **Images and scenes:** Beach walks, saltwater, young child running freely, boardwalk scenes, playful sand/block moments, overhead water views, walking away, Miami sign, candid family perspectives.
-- **Story angle:** Casual unstructured family time along the beach; small moments rather than a checklist of destinations.
-- **No named businesses confirmed** from this set; avoid inventing restaurants, hotels, and attractions.
+- **Timing:** January shortly after Christmas; exact year, dates, and trip
+  duration remain unknown.
+- **Status:** `CONFIRMED` short family getaway with a five-year-old son.
+- **Arrival / South Beach:** Short flight from the Atlanta area, Airbnb check-in,
+  then an immediate South Beach walk. Storefronts, restaurants, and architecture
+  felt like a _Miami Vice_ or movie-set version of Miami, grounded by the actual
+  tourists, creator included.
+- **Beach rhythm:** Cooler mornings could feel damp, with stronger sun by
+  midmorning. Beach walks, boardwalk scenes, family time in the sand, and
+  cool-but-swimmable January water made up much of the stay.
+- **South Pointe:** Confirmed park and pier visit while looking for sharks and
+  other sea life, plus a separate or not-yet-sequenced solo sunrise. Looking is
+  not evidence of a wildlife sighting.
+- **Pool and beach afternoon:** Used a pool and beach pass at a Savoy hotel,
+  with good drinks, a boutique atmosphere, and a nearly private pool. The
+  exact official property identity, current pass offering, and any venue link
+  still require verification. The hotel was not the overnight lodging.
+- **Everglades airboat:** Confirmed airboat ride, engaging guide, close
+  alligator encounters, wind before the stronger afternoon heat, and a son who
+  loved the ride. The recalled operator name is uncertain and must not be
+  registered or linked yet; the tour's relationship to the national-park
+  boundary is also unresolved.
+- **Shark Valley:** Confirmed on-site bike rental and family ride beside resting
+  alligators. Heat and limited shade mattered. The smallest children's bike
+  available during that visit was reported as 20 inches and challenged the
+  five-year-old, who persevered; do not present that size as current inventory.
+- **Oleta River State Park:** Confirmed kayak rental, paddling through mangroves,
+  and raccoons seen on an island. The island's official name and exact route are
+  unknown; do not create a separate island pin or imply wildlife contact or
+  feeding.
+- **Media:** The generated registry currently contains 18 R2-backed images from
+  batch `media-miami-everglades-eca7fe02357c9788`, all placed on the Everglades
+  Visit. Treat that placement as scope, not proof that every frame depicts the
+  airboat. Miami Beach, South Pointe, Shark Valley, Oleta, curated hero choices,
+  captions, and capture metadata still need reconciliation.
+
+### Story spine under the experiential framework
+
+- **Doorway:** A quick post-Christmas escape opens on a South Beach walk that
+  feels cinematic and ordinary at the same time.
+- **Contrast:** Familiar Miami imagery versus the unexpected outdoor trip:
+  airboat, family cycling, mangrove kayaking, alligators, and raccoons.
+- **Micro-moments:** Scanning the water from South Pointe Pier; the five-year-old
+  working through an oversized rental bike; an almost-empty hotel pool; the
+  switch from city streets to a mangrove paddle.
+- **Shift:** Miami stops being only a beach backdrop and becomes a compact
+  family adventure with several different speeds.
+- **Resonance:** The trip is short, but it keeps changing form. End on that
+  contrast rather than forcing a broad lesson.
+
+### Miami verification queue
+
+- Exact year, dates, trip duration, and chapter chronology after arrival.
+- Miami media inventory and capture timestamps.
+- Airbnb privacy-safe description, if it belongs in the public story at all.
+- Exact Savoy property identity and whether any current venue link is useful.
+- Airboat operator, tour route, and jurisdiction.
+- Oleta rental provider, island name, and exact day.
 
 ---
 
@@ -633,7 +688,11 @@ Use this table as a **starting inventory**, not a promise that each row already 
 | `manuel-antonio-area` | Costa Rica | area/stop | CONFIRMED | quick stop; park admission NOT confirmed |
 | `trunk-bay` | USVI / St. John | beach | CONFIRMED | underwater swimming/snorkeling |
 | `maho-bay` | USVI / St. John | beach | STRONGLY INDICATED | gallery confirmation needed |
-| `miami-south-beach` | Miami | destination | CONFIRMED | family beach series |
+| `miami-south-beach` | Miami | destination | CONFIRMED | family winter getaway; beach/city root |
+| `south-pointe-park` | Miami | waterfront park | CONFIRMED | sunrise and family pier visit |
+| `everglades` | South Florida | wetland region | CONFIRMED | broad airboat context; operator, launch, and route remain unpinned |
+| `shark-valley` | Miami / Everglades | national park district | CONFIRMED | family bike ride; separate airboat remains unpinned |
+| `oleta-river-state-park` | Miami area | state park | CONFIRMED | mangrove kayaking and island raccoon encounter |
 | `north-georgia-blue-ridge` | Georgia | destination | CONFIRMED | family cabin/mountains |
 | `peoria-illinois` | Illinois | destination | CONFIRMED | sunrise aerial |
 | `hanksville-bentonite` | Utah | future idea | PLANNED / DISCUSSED | **not visited as of this context** |
@@ -666,7 +725,7 @@ The website should **not** treat media as a flat array of generic photographs. A
 | Costa Rica Uvita Whale Tail | Palm-tree portrait, low tide walk, aerial reveal | Excellent map-to-story cinematic payoff. |
 | Costa Rica howler monkeys | Forest encounter, mother and baby | Wildlife micro-story. |
 | St. John Trunk Bay | Coral/rocks/white sand/wife in clear water | Underwater visual experience. |
-| Miami South Beach | Candid family scenes | Warm, uncomplicated family day. |
+| Miami winter getaway | Eighteen generated R2 photographs are placed on the Everglades Visit; other Miami Place media and hero curation remain unresolved | Contrast the familiar movie-set Miami with outdoor family adventure; follow the storytelling framework and do not infer that every Everglades image depicts the airboat. |
 | Mineral Bluff cabin getaway | Fire, cards, film, hot tub, scenic North Georgia | Emotional connective footage; do not assert unfilmed beats exist. |
 | Peoria Illinois River | Sunrise urban river aerial | Small but visually distinct destination story. |
 

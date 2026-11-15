@@ -18,9 +18,11 @@ code_paths:
   - src/content/places/index.mjs
   - src/content/places/europe.mjs
   - src/content/places/costa-rica.mjs
+  - src/content/places/miami.mjs
   - src/content/places/next-destinations.mjs
   - src/content/journeys/index.mjs
   - src/content/journeys/costa-rica-2025.mjs
+  - src/content/journeys/miami.mjs
   - src/content/journeys/utah-2026.mjs
   - src/content/journeys/next-destinations.mjs
   - src/content/atlas/preview-presentation.mjs
@@ -72,6 +74,24 @@ Utah 2026 remains separate from Utah winter 2025 and reuses the shared Utah,
 Zion, and Park City geography. Planned-only Hanksville is not registered as a
 visited Place.
 
+Miami keeps its established `miami-south-beach` Journey identity while its
+story expands through South Pointe Park, the broad Everglades region, Shark
+Valley, and Oleta River State Park Visits. Its five ordered narrative sections use
+`itineraryMode: "chapters"`: this preserves a useful story sequence without
+claiming that every outing belongs to a known calendar day. The public story
+labels these records as experience/story chapters, while the default remains a
+day-by-day itinerary for other Journeys. A chapter may reuse a Visit when more
+than one confirmed moment happened at the same Place. The broad Everglades
+Place gives the confirmed airboat outing a truthful regional association while
+the unresolved operator, launch, route, and park jurisdiction remain unpinned;
+Shark Valley stays a separate, precise child Place.
+
+The current 18-image Everglades batch enters through the generated Media
+registry and resolves against the canonical Everglades Visit. That placement
+does not establish a more precise airboat route or prove that every frame
+depicts the airboat. The Journey remains `coming-soon` while its other Place
+media, captions, editorial roles, and final curation are incomplete.
+
 These previews may omit media, venues, external links, itinerary days, and
 unsupported details. Their Atlas panels show a public coming-soon treatment,
 and the story views expand in place as verified content arrives. Missing links
@@ -96,6 +116,12 @@ quiet decorative surface and concise public-facing coming-soon copy; internal
 verification state, media counts, missing-data labels, and canonical-record
 terminology are not exposed to visitors. Published Journeys still require a
 resolved cover and complete validated public content.
+
+A coming-soon Journey may also expose verified chapter copy before media is
+available. When those chapters exist, the story view skips the redundant
+generic destination preview and renders the chapters with chronology-safe
+labels. Publication status remains `coming-soon` until its media and remaining
+public content are ready.
 
 Content validation requires every coming-soon Journey to have an Atlas root
 and every one of its Visits to resolve to an Atlas node. Confirmed broad route

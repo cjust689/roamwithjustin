@@ -363,6 +363,14 @@ async function main() {
       report(owner + ' duplicates slug "' + journey.slug + '"')
     }
     journeySlugs.add(journey.slug)
+    if (
+      journey.itineraryMode &&
+      !["days", "chapters"].includes(journey.itineraryMode)
+    ) {
+      report(
+        owner + ' has invalid itinerary mode "' + journey.itineraryMode + '"'
+      )
+    }
     if (journey.hero) {
       validateMediaUsage(journey.hero, owner + " hero", mediaModule)
     }

@@ -24,3 +24,15 @@ When implementing:
 In handoffs distinguish implemented, tested, partial, blocked, owner action,
 and externally unverified work. Run `npm run docs:audit` after managed-doc
 changes.
+
+## Public travel content
+
+Before generating or revising any public trip, Place, Atlas, caption, or media
+story copy, read `docs/reference/storytelling-framework.md` completely and use
+it as the governing voice, evidence, and pacing guide. Also read the relevant
+owner-supplied section of `docs/reference/travel-context.md`, then reconcile
+both references against canonical source and registered media.
+
+The framework guides how confirmed events are told; it does not promote a
+proposal, itinerary idea, plausible sensory detail, or unregistered asset into
+fact. Keep unknowns out of public prose or record them as verification work.
