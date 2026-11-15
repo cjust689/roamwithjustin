@@ -780,7 +780,13 @@ export default {
 
 .atlas-tools button,
 .atlas-tools a {
+  display: inline-flex;
   flex: 0 0 auto;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  gap: 0.35rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
   padding: 0.68rem 0.9rem;
@@ -789,6 +795,7 @@ export default {
   font: inherit;
   font-size: 0.75rem;
   font-weight: 700;
+  line-height: 1;
   cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
