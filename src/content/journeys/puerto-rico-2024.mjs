@@ -50,7 +50,7 @@ export const puertoRico2024Journey = Object.freeze({
     },
   ],
   description:
-    "We land after dark, let San Juan wake us up, then follow the north coast west until the roads climb into the hills near Moca. The trip keeps changing scale. Fort walls and crowded nightlife give way to a horse's-eye view of the coast, a waterfall pool before opening-hour quiet disappears, and evenings when the best plan is simply staying at the house and watching the light move across the mountains.",
+    "We land after dark, let San Juan wake us up, then follow the north coast west until the roads climb into the hills near Moca. The trip keeps changing scale. Fort walls and crowded nightlife give way to a view of the coast between a horse's ears, a waterfall pool before the quiet at opening disappears, and evenings when the best plan is simply staying at the house and watching the light move across the mountains.",
   duration: "7 Days",
   audience: "Couples, content creators, nature lovers, partygoers",
   costLevel: "$$",
@@ -246,7 +246,7 @@ export const puertoRico2024Journey = Object.freeze({
       description:
         "We dress up and arrive late on Saturday, trading the street energy for a more polished beachfront night. Upscale attire and the beachside atmosphere make this a distinct first stop before we head toward the louder bars on Calle C. Canals.",
       summary:
-        "A dressed-up beachfront pause between an afternoon at the pool and the louder part of the night.",
+        "A polished beachfront pause between an afternoon at the pool and the louder part of the night.",
       notes: [
         "Went late on a Saturday",
         "Upscale attire recommended",
@@ -272,14 +272,14 @@ export const puertoRico2024Journey = Object.freeze({
       type: "nightlife",
       droneAllowed: false,
       description:
-        "The music changes every few doors, moving through salsa, reggaetón, hip-hop, dance, and electronic. The crowd stretches from people in their twenties to people old enough to have stopped caring what anyone thinks. We bar-hop until one room finally fits our mood. The point is not finding the universally best place; it is letting the street keep offering another version of the night.",
+        "The music changes every few doors, moving through salsa, reggaetón, hip hop, dance, and electronic. The crowd stretches from people in their twenties to people old enough to have stopped caring what anyone thinks. We move from bar to bar until one room finally fits our mood. The point is not finding the universally best place; it is letting the street keep offering another version of the night.",
       summary:
         "We follow the music door to door until the right room finally finds us.",
       notes: [
         "Busy nightlife strip with bars and clubs",
-        "Music ranged from salsa and reggaetón to hip-hop, dance, and electronic",
-        "Mixed-age crowd, from early twenties through sixties",
-        "Best approached as a bar-hop until the atmosphere fits",
+        "Music ranged from salsa and reggaetón to hip hop, dance, and electronic",
+        "The crowd ranged from people in their early twenties through their sixties",
+        "We moved from bar to bar until the atmosphere fit",
       ],
       hero: null,
       media: [],
@@ -302,7 +302,7 @@ export const puertoRico2024Journey = Object.freeze({
         "Easy parking just off the road",
         "Short walk to cliffside overlook and sea caves",
         "No bathrooms or amenities",
-        "The limestone arch and open coast read clearly in drone and wide-angle frames",
+        "The limestone arch and open coast read clearly in drone and wide angle frames",
         "Waves below are rough; stay clear of edges",
       ],
       hero: {
@@ -334,14 +334,14 @@ export const puertoRico2024Journey = Object.freeze({
       type: "attraction",
       droneAllowed: true,
       description:
-        "The Columbus statue announces itself from the highway before it becomes a planned stop. We pull off, take in the scale and the controversy it carries, make a few frames, and keep moving. It is a ten-minute interruption rather than a destination, which is exactly how it fits this drive.",
+        "The Columbus statue announces itself from the highway before it becomes a planned stop. We pull off, take in the scale and the controversy it carries, make a few frames, and keep moving. The interruption lasts about ten minutes rather than becoming a destination, which is exactly how it fits this drive.",
       summary:
         "A giant, complicated roadside landmark turns the highway into a brief pause for scale and context.",
       notes: [
         "Visible from the highway and easy to visit as a quick detour",
-        "Easy parking along nearby pull-offs",
-        "No amenities or signage on-site",
-        "Its scale makes it worth a 10-minute stop",
+        "Easy parking in nearby pullout spaces",
+        "No amenities or signage at the site",
+        "Its scale makes it worth a stop of about ten minutes",
       ],
       hero: {
         assetId: "image-puerto-rico-puerto-rico-statue-2",
@@ -361,11 +361,11 @@ export const puertoRico2024Journey = Object.freeze({
       type: "attraction",
       droneAllowed: true,
       description:
-        "La Cara del Indio appears directly along the north-coast route, a face cut into the rock beside the road. We use the informal pull-off, make the photograph, and move on within minutes. Brief as it is, the stop adds a different layer of history to a day otherwise defined by cliffs, highway, and the next view west.",
+        "La Cara del Indio appears directly along the northern coast route, a face cut into the rock beside the road. We use the informal pullout, make the photograph, and move on within minutes. Brief as it is, the stop adds a different layer of history to a day otherwise defined by cliffs, highway, and the next view west.",
       summary:
         "A face in the roadside rock interrupts the drive just long enough to change what the landscape is saying.",
       notes: [
-        "Quick roadside stop with small informal pull-offs for parking",
+        "A quick roadside stop with small informal pullout spaces for parking",
         "Depicts a Taíno chief carved into the coastal rockface",
         "No amenities or facilities; purely a photo opportunity",
         "Located just minutes from Playa Pastillo and other scenic spots",
@@ -401,7 +401,7 @@ export const puertoRico2024Journey = Object.freeze({
       notes: [
         "Three bedrooms, three bathrooms in a modern container‑based villa with industrial‑chic design.",
         "Infinity pool, hot tub, fire pit, outdoor kitchen and BBQ area set amid tropical gardens.",
-        "Free private on-site parking; roads are accessible and no 4×4 is needed.",
+        "Free private parking at the property; roads are accessible and no 4×4 is needed.",
         "Fully equipped kitchen, laundry, free Wi‑Fi, air conditioning in all rooms.",
         "Pet‑friendly property (up to 3 pets, 50 lb max).",
         "The mountain breeze, quiet setting, and pool made the house a useful reset after coastal drives.",
@@ -503,11 +503,11 @@ export const puertoRico2024Journey = Object.freeze({
       description:
         "The view changes as soon as I am looking between a horse's ears instead of through a windshield. For the next 60 to 90 minutes, the trail moves through fields and tropical growth toward the coast, with palms opening onto blue water. Our guide sings along to old songs as we ride, turning what could have felt staged into something loose and personal.",
       summary:
-        "A horse's-eye view, a palm-framed coast, and a guide singing through the ride change the pace of the whole morning.",
+        "A view between the horse's ears, a coast framed by palms, and a guide singing through the ride change the pace of the whole morning.",
       notes: [
         "About a 25‑minute drive from Hacienda Florecer to the ranch (on Carr 107).",
-        "Tour length ~1 to 1.5 hours; guided private tour routed through fields, forest edge, beach-side trails and ruins.",
-        "Paso Fino horses with a smooth gait, beginner-friendly pace, and gentle demeanor.",
+        "The private guided tour lasted about one to one and a half hours through fields, forest edge, beachside trails, and ruins.",
+        "Paso Fino horses brought a smooth gait, a gentle pace for beginners, and a calm demeanor.",
       ],
       hero: {
         assetId: "image-puerto-rico-horse-8",
@@ -553,7 +553,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "beach",
       droneAllowed: true,
       description:
-        "Clear water, a reef line, and very little between the road and the sea make Shacks feel open and self-contained. It is the kind of stop that asks us to bring everything we need and read the water carefully: calm near shore does not erase the stronger currents farther out.",
+        "Clear water, a reef line, and very little between the road and the sea make Shacks feel open and complete on its own. It is the kind of stop that asks us to bring everything we need and read the water carefully: calm near shore does not erase the stronger currents farther out.",
       summary:
         "Clear shallows and an offshore reef make this a quieter stop. The water, not the amenities, sets the terms.",
       notes: [
@@ -561,7 +561,7 @@ export const puertoRico2024Journey = Object.freeze({
         "Calm, clear waters closer to shore; stronger currents near reefs,",
         "No formal facilities or lifeguards,",
         "Limited roadside parking; arrive early for a spot,",
-        "Quiet and laid-back, popular with locals and adventure travelers,",
+        "Quiet and relaxed, popular with locals and adventure travelers",
       ],
       hero: {
         assetId: "image-puerto-rico-shacks-1",
@@ -714,7 +714,7 @@ export const puertoRico2024Journey = Object.freeze({
       notes: [
         "Arrived right at opening for privacy",
         "Visited both the main falls and the hidden upper falls, which took another 10 to 15 minutes of walking",
-        "Used waterproof gear for water-level footage",
+        "Used waterproof gear for footage from the water",
       ],
       hero: {
         assetId: "image-puerto-rico-puerto-rico-watewerfall-2",
@@ -755,7 +755,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "beach",
       droneAllowed: true,
       description:
-        "The rock barrier does something the photographs explain better than a beach guide. Outside is open coast; inside is a compact pocket of calmer water. Mar Chiquita makes sense as a final-day stop because it can be as brief as we need. One walk, a swim if time allows, and a last look at the coast are enough before the airport route takes over.",
+        "The rock barrier does something the photographs explain better than a beach guide. Outside is open coast; inside is a compact pocket of calmer water. Mar Chiquita makes sense as a final day stop because it can be as brief as we need. One walk, a swim if time allows, and a last look at the coast are enough before the airport route takes over.",
       summary:
         "Rock walls hold a small calm pocket inside the larger Atlantic coast, giving us one last easy stop before the drive east.",
       notes: [
