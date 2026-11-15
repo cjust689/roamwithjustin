@@ -339,12 +339,14 @@ export function buildAtlasNodeView(presentation) {
     // Structural Atlas hubs may not be Journey visits themselves. An optional
     // anchor lets their route position come from the first real stop they group.
     journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
-    title: place.name,
+    title: presentation.useJourneyIdentity ? journey.title : place.name,
     eyebrow: presentation.eyebrow,
     category: presentation.category,
     coordinates: place.coordinates ? [...place.coordinates] : null,
     camera: presentation.camera,
-    summary: place.description,
+    summary: presentation.useJourneyIdentity
+      ? journey.description
+      : place.description,
     personalNote,
     image: hero?.src || "",
     media,
@@ -353,6 +355,7 @@ export function buildAtlasNodeView(presentation) {
     actions: atlasActions(place, journey),
     evidenceStatus: visit?.evidenceStatus || journey.evidenceStatus,
     visitStatus: visit?.visitStatus || null,
+    comingSoon: journey.publicationStatus === "coming-soon",
   }
 }
 

@@ -611,6 +611,32 @@ async function main() {
     }
   })
 
+  // Incomplete Journeys are intentionally public as coming-soon Atlas
+  // scaffolds. Keep every one rooted and ensure each confirmed/retained Visit
+  // resolves to a pin so future content can fill in without changing identity.
+  journeyModule.journeyRecords
+    .filter(journey => journey.publicationStatus === "coming-soon")
+    .forEach(journey => {
+      const journeyNodes = completeAtlasViews.filter(
+        node => node.journeyId === journey.id
+      )
+      if (!journeyNodes.some(node => !node.parentId)) {
+        report('Coming-soon Journey "' + journey.id + '" has no Atlas root')
+      }
+      const atlasPlaceIds = new Set(journeyNodes.map(node => node.placeId))
+      journey.visits.forEach(visit => {
+        if (!atlasPlaceIds.has(visit.placeId)) {
+          report(
+            'Coming-soon Journey "' +
+              journey.id +
+              '" Place "' +
+              visit.placeId +
+              '" has no Atlas node'
+          )
+        }
+      })
+    })
+
   const canyonlandsNode = completeAtlasViews.find(
     node => node.id === "canyonlands-national-park"
   )
@@ -687,6 +713,40 @@ async function main() {
     "salt-lake-city-airport",
   ]
 
+  const expectedEuropeGuidedOrder = [
+    "portsmouth-england",
+    "new-forest-england",
+    "harrogate-england",
+    "york-england",
+    "amsterdam-netherlands",
+    "split-croatia",
+    "krka-national-park",
+    "marrakech-morocco",
+    "agafay-morocco",
+    "malaga-spain",
+    "gibraltar",
+    "cadiz-spain",
+    "seville-spain",
+    "madrid-spain",
+  ]
+
+  const expectedCostaRicaGuidedOrder = [
+    "la-fortuna-costa-rica",
+    "bajos-del-toro",
+    "drake-bay",
+    "playa-san-josecito",
+    "uvita-costa-rica",
+    "uvita-whale-tail",
+    "nauyaca-waterfalls",
+    "manuel-antonio-area",
+    "san-jose-costa-rica",
+  ]
+
+  const expectedUtah2026GuidedOrder = [
+    "utah-2026-zion",
+    "utah-2026-park-city",
+  ]
+
   const puertoRico = completeAtlasViews.find(node => node.id === "puerto-rico")
   const orderedPuertoRico = projections
     .orderAtlasNodesByJourney(
@@ -755,6 +815,18 @@ async function main() {
     {
       journeyId: "usvi-st-john-2025",
       expectedStops: expectedStJohnOrder,
+    },
+    {
+      journeyId: "europe-summer-2026",
+      expectedStops: expectedEuropeGuidedOrder,
+    },
+    {
+      journeyId: "costa-rica-2025",
+      expectedStops: expectedCostaRicaGuidedOrder,
+    },
+    {
+      journeyId: "utah-2026",
+      expectedStops: expectedUtah2026GuidedOrder,
     },
   ].map(({ journeyId, expectedStops }) => {
     const guidedJourney = projections.buildGuidedJourneyViewModel(

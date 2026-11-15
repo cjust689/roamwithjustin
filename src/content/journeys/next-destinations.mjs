@@ -15,9 +15,8 @@ function destinationVisit(journeyId, placeId, evidenceStatus = "confirmed") {
   }
 }
 
-// Public Journey scaffolds expose only the two requested trip-level entries.
-// Europe is one multi-country Journey; its individual route stops remain in
-// the travel reference until lower-level destination records are requested.
+// Public Journey scaffolds expose confirmed route identity while leaving
+// incomplete story, venue, media, and itinerary detail unpublished.
 export const nextDestinationJourneys = Object.freeze([
   {
     id: "europe-summer-2026",
@@ -43,14 +42,53 @@ export const nextDestinationJourneys = Object.freeze([
     travelNotes: [],
     tips: [],
     lodging: [],
-    visits: [],
+    visits: [
+      destinationVisit("europe-summer-2026", "portsmouth-england"),
+      destinationVisit("europe-summer-2026", "new-forest-england"),
+      destinationVisit(
+        "europe-summer-2026",
+        "harrogate-england",
+        "strongly-indicated"
+      ),
+      destinationVisit("europe-summer-2026", "york-england"),
+      destinationVisit("europe-summer-2026", "amsterdam-netherlands"),
+      destinationVisit("europe-summer-2026", "split-croatia"),
+      destinationVisit(
+        "europe-summer-2026",
+        "krka-national-park",
+        "strongly-indicated"
+      ),
+      destinationVisit("europe-summer-2026", "marrakech-morocco"),
+      destinationVisit("europe-summer-2026", "agafay-morocco"),
+      destinationVisit("europe-summer-2026", "malaga-spain"),
+      destinationVisit("europe-summer-2026", "gibraltar"),
+      destinationVisit("europe-summer-2026", "cadiz-spain"),
+      destinationVisit("europe-summer-2026", "seville-spain"),
+      destinationVisit("europe-summer-2026", "madrid-spain"),
+    ],
     days: [],
     socialLinks: [],
     featuredMedia: [],
     atlasNotes: {},
-    relatedPlaceIds: [],
+    relatedPlaceIds: [
+      "europe",
+      "portsmouth-england",
+      "new-forest-england",
+      "harrogate-england",
+      "york-england",
+      "amsterdam-netherlands",
+      "split-croatia",
+      "krka-national-park",
+      "marrakech-morocco",
+      "agafay-morocco",
+      "malaga-spain",
+      "gibraltar",
+      "cadiz-spain",
+      "seville-spain",
+      "madrid-spain",
+    ],
     verificationNotes:
-      "Trip-level scaffold only. The named route remains descriptive context, not a set of registered Place or Visit records. Do not infer coordinates, venues, operators, detailed dates, or media associations.",
+      "Coming-soon route scaffold. Place identity and broad order are mapped; venues, operators, detailed segment dates, and media associations remain unpublished until verified.",
   },
   {
     id: "miami-south-beach",
@@ -83,6 +121,39 @@ export const nextDestinationJourneys = Object.freeze([
     atlasNotes: {},
     relatedPlaceIds: ["miami-south-beach"],
     verificationNotes:
-      "Top-level destination scaffold only. Exact dates, coordinates, lodging, businesses, attractions, and media associations remain unverified.",
+      "Top-level destination scaffold only. Exact dates, lodging, businesses, attractions, and media associations remain unverified.",
+  },
+  {
+    id: "peoria-illinois",
+    slug: "peoria",
+    title: "Peoria, Illinois",
+    publicationStatus: "coming-soon",
+    evidenceStatus: "confirmed",
+    dateRange: {
+      start: null,
+      end: null,
+      label: null,
+    },
+    hero: null,
+    fullImage: null,
+    gallery: [],
+    description:
+      "A quiet fall-break river-city story built around sunrise aerial views over downtown Peoria and the Illinois River.",
+    duration: "",
+    audience: "",
+    costLevel: "",
+    bestTimeToGo: "",
+    gearHighlights: [],
+    travelNotes: [],
+    tips: [],
+    lodging: [],
+    visits: [destinationVisit("peoria-illinois", "peoria-illinois")],
+    days: [],
+    socialLinks: [],
+    featuredMedia: [],
+    atlasNotes: {},
+    relatedPlaceIds: ["peoria-illinois"],
+    verificationNotes:
+      "Top-level destination scaffold only. Trip year, exact dates, launch point, and media associations remain unverified.",
   },
 ])

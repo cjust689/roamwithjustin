@@ -312,7 +312,10 @@
         </article>
       </section>
 
-      <section v-if="trip.atlasHref" class="story-shell atlas-handoff">
+      <section
+        v-if="trip.atlasHref && !trip.comingSoon"
+        class="story-shell atlas-handoff"
+      >
         <div>
           <span class="story-eyebrow">Change perspective</span>
           <h2>See how the story moves across the map.</h2>

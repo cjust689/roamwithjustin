@@ -1,8 +1,10 @@
 import { createIdRegistry } from "../contracts.mjs"
+import { costaRica2025Journey } from "./costa-rica-2025.mjs"
 import { nextDestinationJourneys } from "./next-destinations.mjs"
 import { puertoRico2024Journey } from "./puerto-rico-2024.mjs"
 import { upcomingJourneys } from "./upcoming.mjs"
 import { usviStJohn2025Journey } from "./usvi-st-john-2025.mjs"
+import { utah2026Journey } from "./utah-2026.mjs"
 import { utahWinter2025Journey } from "./utah-winter-2025.mjs"
 
 // Public URLs remain slug-based, allowing stable /trips/:slug routes while
@@ -14,6 +16,8 @@ const registry = createIdRegistry(
     usviStJohn2025Journey,
     ...upcomingJourneys,
     ...nextDestinationJourneys,
+    costaRica2025Journey,
+    utah2026Journey,
   ],
   "Journey registry"
 )
