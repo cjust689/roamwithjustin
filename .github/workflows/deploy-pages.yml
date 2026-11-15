@@ -36,6 +36,12 @@ jobs:
         run: npm run build
         env:
           VUE_APP_MAPTILER_KEY: ${{ secrets.MAPTILER_API_KEY }}
+          VUE_APP_ADSENSE_ENABLED: ${{ vars.ADSENSE_ENABLED }}
+          VUE_APP_ADSENSE_PRIVACY_READY: ${{ vars.ADSENSE_PRIVACY_READY }}
+          VUE_APP_ADSENSE_AUTO_ADS_OFF_CONFIRMED: ${{ vars.ADSENSE_AUTO_ADS_OFF_CONFIRMED }}
+          VUE_APP_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          VUE_APP_ADSENSE_STORY_SLOT_ID: ${{ vars.ADSENSE_STORY_SLOT_ID }}
+          ADSENSE_GOOGLE_ADS_TXT_LINE: ${{ vars.ADSENSE_GOOGLE_ADS_TXT_LINE }}
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
