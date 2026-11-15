@@ -70,7 +70,7 @@ export const usviStJohn2025Journey = Object.freeze({
       description:
         "Cyril E. King Airport made the change in scale immediate: fresh air and palms outside, ocean views nearby, and small prop planes moving where Atlanta's largest jets had filled the horizon hours earlier.",
       summary:
-        "The small St. Thomas airport made arrival feel fast and physical - outside air, palms, ocean, and prop planes replacing the scale of Atlanta.",
+        "The small St. Thomas airport made arrival feel fast and physical. Outside air, palms, ocean, and prop planes replaced the scale of Atlanta.",
       notes: [
         "The flight from Atlanta and arrival at Cyril E. King Airport are creator-confirmed.",
         "The terminal moved quickly on arrival, without the long lines or wait the family expected.",
@@ -93,7 +93,7 @@ export const usviStJohn2025Journey = Object.freeze({
         "The transfer across St. Thomas became part of the arrival story, especially once my son started pointing out the cruise ships in the harbor.",
       notes: [
         "The family loaded their luggage into a taxi or van and crossed St. Thomas to Red Hook.",
-        "Driving on the left in predominantly left-hand-drive vehicles was a memorable adjustment.",
+        "Driving on the left while the steering wheel was also on the left made for a memorable adjustment.",
         "The creator's son pointed out large cruise ships while passing the main harbor.",
       ],
       media: [],
@@ -162,7 +162,6 @@ export const usviStJohn2025Journey = Object.freeze({
       notes: [
         "Oceana Villa and the Great Cruz Bay setting were supplied directly by the creator.",
         "The creator captured drone footage and a small photo set from the patio and around the property.",
-        "Amenity details remain listing claims until an official source is verified, and no sponsorship or affiliate relationship is implied.",
         "The public Atlas pin represents Great Cruz Bay broadly rather than the villa's private address.",
       ],
       media: [],
@@ -177,7 +176,7 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "charter-stop",
       description:
-        "At the place I call Hermit Crab Island, the ground looked still until we stopped and watched it move - hermit crabs everywhere once our eyes adjusted.",
+        "At the place I call Hermit Crab Island, the ground looked still until we stopped and watched it move. Hermit crabs appeared everywhere once our eyes adjusted.",
       summary:
         "The name is mine, not an official map label. What stays with me is the moment the ground seemed to come alive with hermit crabs.",
       notes: [
@@ -287,9 +286,9 @@ export const usviStJohn2025Journey = Object.freeze({
   ],
   days: [
     {
-      label: "Day 1 - From Atlanta to Cruz Bay",
+      label: "Day 1: From Atlanta to Cruz Bay",
       summary:
-        "The first thing that changes is the scale. We leave Atlanta, where some of the largest planes in the sky seem to be taking off constantly, and arrive at this small St. Thomas airport with little prop planes coming and going. We step outside into fresh air with palms in the distance, an ocean breeze, and island views. The terminal moves fast - no long wait, no drawn-out line - which only feeds that pent-up feeling of finally being where we have waited to be.\n\nOur bags go into the taxi and the next adjustment happens immediately: traffic keeps left even though the vehicles are left-hand-drive. On the ride across St. Thomas, my son keeps pointing out the giant cruise ships in the main harbor while the ports and hills slide past the windows.\n\nWe reach Red Hook not long before sunset. The ferry is surprisingly quick, especially from the top deck with the wind in our faces. The sun drops behind us, St. Thomas turns into a silhouette, and the last gold light lands on St. John ahead. By the time we step into a packed High Tide for a quick bite, the travel day no longer feels like something we had to get through. It is the opening scene.",
+        "The first thing that changes is the scale. We leave Atlanta, where some of the largest planes in the sky seem to be taking off constantly, and arrive at this small St. Thomas airport with little prop planes coming and going. We step outside into fresh air with palms in the distance, an ocean breeze, and island views. The terminal moves fast. There is no long wait or drawn out line, which only adds to the anticipation of finally being where we have waited to be.\n\nOur bags go into the taxi and the next adjustment happens immediately: traffic keeps left even though the steering wheel is also on the left. On the ride across St. Thomas, my son keeps pointing out the giant cruise ships in the main harbor while the ports and hills slide past the windows.\n\nWe reach Red Hook not long before sunset. The ferry is surprisingly quick, especially from the top deck with the wind in our faces. The sun drops behind us, St. Thomas turns into a silhouette, and the last gold light lands on St. John ahead. By the time we step into a packed High Tide for a quick bite, the travel day no longer feels like something we had to get through. It is the opening scene.",
       visits: [
         { visitId: "usvi-st-john-2025-cyril-e-king-airport" },
         { visitId: "usvi-st-john-2025-red-hook-ferry-terminal" },
@@ -305,7 +304,7 @@ export const usviStJohn2025Journey = Object.freeze({
       ],
     },
     {
-      label: "Day 2 - Maho and the Villa",
+      label: "Day 2: Maho and the Villa",
       summary:
         "The infamous St. John roosters take care of the alarm. If you know, you know. We make breakfast and sit on the patio above Great Cruz Bay, letting the breeze and the view stretch the morning while I capture a few photographs and send the drone up.\n\nMaho is easy to understand once we arrive. The beach is right off the road, with paddleboards and Reef2Peak rentals, food, drinks, and restrooms all close enough that the family never has to turn the day into a production. Parking gets harder the later the morning goes, but once we are settled, the bay is calm, boats sit at anchor, and everything slows down. I order a Painkiller even though I do not normally like rum. My God, it is good.\n\nMaho ends up being my favorite beach on the island. It is beautiful without requiring much from us, especially with kids, and it gives my son and me the chance to snorkel together and spot a sea turtle. That shared moment lasts longer than the drink, the paddleboards, or any ranking ever could.",
       visits: [
@@ -316,9 +315,9 @@ export const usviStJohn2025Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 3 - Boat Day",
+      label: "Day 3: Boat Day",
       summary:
-        "Nate's Custom Charters picks us up from the National Park dock beside the Cruz Bay Visitor Center. There are twelve of us, and the boat handles the group without ever feeling cramped. Most of it is covered, which matters once the sun is up, and it moves through the chop more smoothly than I expect.\n\nThe captain is phenomenal - funny, relaxed, and serious about the music. 'Hope you like music,' is less a warning than the operating philosophy for the day. We move from reef to reef, watching the coast change between St. Thomas and Leinster Bay and seeing sea life almost everywhere we stop.\n\nAt the place I call Hermit Crab Island, we pause long enough to notice that the ground is moving. There are crabs everywhere. We also pass a sunken sailboat captured in the media; I believe a hurricane put it there and that it may now be gone, but that part still needs verification. Lunch at Lovango slows the day down and opens a wide view toward both St. John and St. Thomas. The places are great. The captain's personality is what holds the whole day together.",
+        "Nate's Custom Charters picks us up from the National Park dock beside the Cruz Bay Visitor Center. There are twelve of us, and the boat handles the group without ever feeling cramped. Most of it is covered, which matters once the sun is up, and it moves through the chop more smoothly than I expect.\n\nThe captain is phenomenal: funny, relaxed, and serious about the music. 'Hope you like music,' is less a warning than the operating philosophy for the day. We move from reef to reef, watching the coast change between St. Thomas and Leinster Bay and seeing sea life almost everywhere we stop.\n\nAt the place I call Hermit Crab Island, we pause long enough to notice that the ground is moving. There are crabs everywhere. We also pass a sunken sailboat captured in the media. Lunch at Lovango slows the day down and opens a wide view toward both St. John and St. Thomas. The places are great. The captain's personality is what holds the whole day together.",
       visits: [
         {
           visitId: "usvi-st-john-2025-cruz-bay",
@@ -332,30 +331,30 @@ export const usviStJohn2025Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 4 - Family Time at Trunk Bay",
+      label: "Day 4: Family Time at Trunk Bay",
       summary:
-        "Trunk Bay carries the kind of reputation that makes you assume it will be the favorite. It is genuinely beautiful - pale sand, rock, coral, clear water, and the kind of underwater scenery that looks exactly like people hope St. John will look.\n\nHonestly, I still enjoy some of the other beaches more. The water feels rougher here during our visit, and with young kids that means watching more closely instead of fully settling in. It does not make Trunk Bay less impressive. It just makes our experience of it more complicated than the ranking.",
+        "Trunk Bay carries the kind of reputation that makes you assume it will be the favorite. It is genuinely beautiful, with pale sand, rock, coral, clear water, and the kind of underwater scenery that looks exactly like people hope St. John will look.\n\nHonestly, I still enjoy some of the other beaches more. The water feels rougher here during our visit, and with young kids that means watching more closely instead of fully settling in. It does not make Trunk Bay less impressive. It just makes our experience of it more complicated than the ranking.",
       visits: [{ visitId: "usvi-st-john-2025-trunk-bay" }],
       routes: [],
     },
     {
-      label: "Day 5 - Cinnamon Bay",
+      label: "Day 5: Cinnamon Bay",
       summary:
-        "Cinnamon feels like the most tourist-oriented beach we visit. There are sailboats offshore, a full sit-down restaurant, a gift shop, and enough amenities that the day can be almost effortless. We find plenty of parking, though the area gets busier as the day develops.\n\nIt is still beautiful - every St. John beach seems to begin with that advantage - but the extra activity makes me appreciate Maho's quieter, easier rhythm even more. That is not a universal ranking. It is simply the version of each beach that our family experiences.",
+        "Cinnamon feels like the most tourist oriented beach we visit. There are sailboats offshore, a full service restaurant, a gift shop, and enough amenities that the day can be almost effortless. We find plenty of parking, though the area gets busier as the day develops.\n\nIt is still beautiful. Every St. John beach seems to begin with that advantage, but the extra activity makes me appreciate Maho's quieter, easier rhythm even more. That is not a universal ranking. It is simply the version of each beach that our family experiences.",
       visits: [{ visitId: "usvi-st-john-2025-cinnamon-bay" }],
       routes: [],
     },
     {
-      label: "Day 6 - Waterlemon Cay",
+      label: "Day 6: Waterlemon Cay",
       summary:
-        "Waterlemon asks more from us before we ever reach the water. The route begins around the Annaberg sugar plantation landscape, where the history can change the mood if you let it. It should. The island's beauty and the people who were forced to build its plantation economy belong in the same view, even when that history is uncomfortable.\n\nFrom there, the walk follows roughly a mile of rocky coast toward the cay. Proper shoes matter. So does carrying less than you think you need. We see only one or two other people the entire time, which makes the water and the active sea life feel unusually close. We even see reef sharks.\n\nThe current is the part not to romanticize. It is challenging enough to remind us how quickly a quiet place can demand our full attention. Waterlemon is really cool, and it feels intimate in a way the more developed beaches do not, but the payoff only works if we respect what it took to get there - and do not underestimate the ocean once we arrive.",
+        "Waterlemon asks more from us before we ever reach the water. The route begins around the Annaberg sugar plantation landscape, where the history can change the mood if you let it. It should. The island's beauty and the people who were forced to build its plantation economy belong in the same view, even when that history is uncomfortable.\n\nFrom there, the walk follows roughly a mile of rocky coast toward the cay. Proper shoes matter. So does carrying less than you think you need. We see only one or two other people the entire time, which makes the water and the active sea life feel unusually close. We even see reef sharks.\n\nThe current is the part not to romanticize. It is challenging enough to remind us how quickly a quiet place can demand our full attention. Waterlemon is really cool, and it feels intimate in a way the more developed beaches do not. The payoff only works if we respect what it took to get there and do not underestimate the ocean once we arrive.",
       visits: [{ visitId: "usvi-st-john-2025-waterlemon-cay" }],
       routes: [],
     },
     {
-      label: "Day 7 - Departure",
+      label: "Day 7: Departure",
       summary:
-        "The final photographs close the journey as an epilogue. Exact ferry, flight, location, and timing details remain open until the departure media and travel records are reviewed.",
+        "The final photographs close the journey as an epilogue, carrying us from the island back into the movement of the trip home.",
       visits: [],
       routes: [],
     },

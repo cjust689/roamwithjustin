@@ -405,7 +405,7 @@ export const puertoRico2024Journey = Object.freeze({
         "Fully equipped kitchen, laundry, free Wi‑Fi, air conditioning in all rooms.",
         "Pet‑friendly property (up to 3 pets, 50 lb max).",
         "The mountain breeze, quiet setting, and pool made the house a useful reset after coastal drives.",
-        "A true sanctuary: very private and peaceful, but still within ~20–30 minutes of Aguadilla, Isabela or Rincón.",
+        "A true sanctuary: very private and peaceful, but still about 20 to 30 minutes from Aguadilla, Isabela, or Rincón.",
       ],
       hero: {
         assetId: "image-puerto-rico-florecer-5",
@@ -501,7 +501,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "activity",
       droneAllowed: false,
       description:
-        "The view changes as soon as I am looking between a horse's ears instead of through a windshield. For the next 60–90 minutes, the trail moves through fields and tropical growth toward the coast, with palms opening onto blue water. Our guide sings along to old songs as we ride, turning what could have felt staged into something loose and personal.",
+        "The view changes as soon as I am looking between a horse's ears instead of through a windshield. For the next 60 to 90 minutes, the trail moves through fields and tropical growth toward the coast, with palms opening onto blue water. Our guide sings along to old songs as we ride, turning what could have felt staged into something loose and personal.",
       summary:
         "A horse's-eye view, a palm-framed coast, and a guide singing through the ride change the pace of the whole morning.",
       notes: [
@@ -682,18 +682,18 @@ export const puertoRico2024Journey = Object.freeze({
       hero: {
         assetId: "image-puerto-rico-aguadilla-1",
         role: "hero",
-        alt: "ARTe – Aguadilla Rooftop Experience photograph",
+        alt: "ARTe Aguadilla Rooftop Experience photograph",
       },
       media: [
         {
           assetId: "image-puerto-rico-aguadilla-1",
           role: "gallery",
-          alt: "ARTe – Aguadilla Rooftop Experience photo 1",
+          alt: "ARTe Aguadilla Rooftop Experience photo 1",
         },
         {
           assetId: "image-puerto-rico-puerto-rico-beach-sunset",
           role: "gallery",
-          alt: "ARTe – Aguadilla Rooftop Experience photo 2",
+          alt: "ARTe Aguadilla Rooftop Experience photo 2",
         },
       ],
       socialLinks: [],
@@ -708,12 +708,12 @@ export const puertoRico2024Journey = Object.freeze({
       type: "hike",
       droneAllowed: true,
       description:
-        "We arrive at opening and reach the main pool before the day gets loud. Light cuts through the trees toward the water while one swimmer crosses beneath the falls; for a while, the frame is mostly rock, green water, and space. After swimming, we take the extra 10–15 minutes to the upper falls, then watch the quiet version of Gozalandia disappear as more people arrive.",
+        "We arrive at opening and reach the main pool before the day gets loud. Light cuts through the trees toward the water while one swimmer crosses beneath the falls; for a while, the frame is mostly rock, green water, and space. After swimming, we take the extra 10 to 15 minutes to the upper falls, then watch the quiet version of Gozalandia disappear as more people arrive.",
       summary:
         "Opening time buys us one quiet swim before Gozalandia becomes everyone else's day too.",
       notes: [
         "Arrived right at opening for privacy",
-        "Visited both main and hidden upper falls - another 10-15 minute walk",
+        "Visited both the main falls and the hidden upper falls, which took another 10 to 15 minutes of walking",
         "Used waterproof gear for water-level footage",
       ],
       hero: {
@@ -826,9 +826,9 @@ export const puertoRico2024Journey = Object.freeze({
   ],
   days: [
     {
-      label: "Day 1 – San Juan Arrival",
+      label: "Day 1: San Juan Arrival",
       summary:
-        "We land around 8:00 p.m. on Friday and move from plane to rental car in about 30 minutes. The drive toward central San Juan takes only 15–20 minutes, but the streets tighten and the city starts arriving all at once. We check into Don Rafa, cross the street for tacos and drinks, then make one pass along Ashford Avenue. It is busy without feeling impossible, and the music outside gives us just enough of San Juan to make sleep feel like a decision rather than the default.",
+        "We land around 8:00 p.m. on Friday and move from plane to rental car in about 30 minutes. The drive toward central San Juan takes only 15 to 20 minutes, but the streets tighten and the city starts arriving all at once. We check into Don Rafa, cross the street for tacos and drinks, then make one pass along Ashford Avenue. It is busy without feeling impossible, and the music outside gives us just enough of San Juan to make sleep feel like a decision rather than the default.",
       visits: [
         {
           visitId: "puerto-rico-2024-san-juan",
@@ -844,7 +844,7 @@ export const puertoRico2024Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 2 – Old San Juan & Nightlife",
+      label: "Day 2: Old San Juan and Nightlife",
       summary:
         "We start early at Castillo San Cristóbal, then let Old San Juan pull us through cobblestone streets, bright facades, small squares, and the coast. Lunch at La Carreta gives the morning an endpoint; the rooftop pool at Don Rafa gives us a reset. After dark, we dress up for the Fairmont, then trade that polished calm for Calle C. Canals, where the music changes every few doors. We keep moving until one place finally matches our mood.",
       visits: [
@@ -873,7 +873,7 @@ export const puertoRico2024Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 3 – Scenic Drive to Moca",
+      label: "Day 3: Scenic Drive to Moca",
       summary:
         "We check out and follow the north coast west, letting the road divide the day into scenes. A short trail opens onto the limestone arch and rough water at Cueva del Indio. The Columbus statue appears at highway scale, then La Cara del Indio brings us close to a face carved directly into rock. By evening, the road climbs toward Moca and ends at Hacienda Florecer, where shipping-container walls frame a long pool and mountain horizon. The place we booked as a base immediately earns its own chapter.",
       visits: [
@@ -907,9 +907,9 @@ export const puertoRico2024Journey = Object.freeze({
       ],
     },
     {
-      label: "Day 4 – Horseback & Beach Hopping + Rooftop Dinner",
+      label: "Day 4: Horseback Riding, Beach Hopping, and Rooftop Dinner",
       summary:
-        "Twenty-five minutes from the house, I am looking at the coast between a Paso Fino's ears while our guide sings through the 60–90 minute ride. The day then keeps changing beaches: clear water and reef at Shacks, the smaller calm of Peña Blanca, and finally the piers, people, underwater footage, and golden-hour energy of Crash Boat. By the time we reach ARTe above Aguadilla Bay, dinner is less a final activity than a chance to let the whole day catch up with us.",
+        "About 25 minutes from the house, I am looking at the coast between a Paso Fino's ears while our guide sings through the 60 to 90 minute ride. The day then keeps changing beaches: clear water and reef at Shacks, the smaller calm of Peña Blanca, and finally the piers, people, underwater footage, and golden hour energy of Crash Boat. By the time we reach ARTe above Aguadilla Bay, dinner is less a final activity than a chance to let the whole day catch up with us.",
       visits: [
         {
           visitId: "puerto-rico-2024-playuelas-horse-rides",
@@ -940,9 +940,9 @@ export const puertoRico2024Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 5 – Gozalandia Waterfall & Poolside Airbnb",
+      label: "Day 5: Gozalandia Waterfall and Poolside Airbnb",
       summary:
-        "We reach Gozalandia at opening and get the quiet version first: a swimmer crossing the green pool, the falls dropping through dark rock, and light cutting between the trees. After the main pool, we walk another 10–15 minutes to the upper falls. The crowd begins filling in as we leave, which makes returning to Hacienda Florecer feel like a deliberate second half rather than downtime. We have the pool, the mountains, and nowhere else we need to be.",
+        "We reach Gozalandia at opening and get the quiet version first: a swimmer crossing the green pool, the falls dropping through dark rock, and light cutting between the trees. After the main pool, we walk another 10 to 15 minutes to the upper falls. The crowd begins filling in as we leave, which makes returning to Hacienda Florecer feel like a deliberate second half rather than downtime. We have the pool, the mountains, and nowhere else we need to be.",
       visits: [
         {
           visitId: "puerto-rico-2024-gozalandia",
@@ -958,7 +958,7 @@ export const puertoRico2024Journey = Object.freeze({
       routes: [],
     },
     {
-      label: "Day 6 – Mar Chiquita, Playa Pastillo & Departure",
+      label: "Day 6: Mar Chiquita, Playa Pastillo, and Departure",
       summary:
         "We check out and point east, leaving room for two final coastal stops before the airport. Mar Chiquita holds a calmer pocket of water behind its rock barrier; Playa Pastillo answers with rougher surf, an undeveloped shoreline, and a cave about a mile from the main access. The contrast gives the coast a proper final scene. From there, the rental-car return at SJU takes over and the road trip ends where it started.",
       visits: [

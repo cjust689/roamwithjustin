@@ -55,7 +55,7 @@ export const miamiJourney = Object.freeze({
     miamiVisit(
       "miami-south-beach",
       "Beach and city walks",
-      "South Beach feels familiar before it feels real: the storefronts and architecture look borrowed from a Miami Vice scene, then the tourists—us included—break the illusion. We check into an Airbnb, head straight outside, and let the first walk set the pace.",
+      "South Beach feels familiar before it feels real. The storefronts and architecture look borrowed from a Miami Vice scene, then the tourists, including us, break the illusion. We check into an Airbnb, head straight outside, and let the first walk set the pace.",
       "Cool January mornings give way to stronger sun, but the first surprise is how quickly South Beach shifts from movie set to an ordinary family walk.",
       [
         "We walked South Beach soon after checking into our Airbnb.",
@@ -86,7 +86,7 @@ export const miamiJourney = Object.freeze({
     miamiVisit(
       "shark-valley",
       "Family cycling",
-      "At Shark Valley, the engine is gone and we are pedaling instead, sometimes past resting alligators closer to the path than we expect. The sun builds, shade is scarce, and a 20-inch bike asks a lot of a determined five-year-old—but he keeps going and we finish safely.",
+      "At Shark Valley, the engine is gone and we are pedaling instead, sometimes past resting alligators closer to the path than we expect. The sun builds, shade is scarce, and a 20 inch bike asks a lot of our son at five years old. He keeps going and we finish safely.",
       "A family bike ride becomes something stranger when resting alligators share the edge of the path and the afternoon heat keeps building.",
       [
         "We rented bikes on site; the smallest children's bike available during our visit was 20 inches.",
@@ -107,9 +107,9 @@ export const miamiJourney = Object.freeze({
   ],
   days: [
     {
-      label: "Arrival – South Beach feels like a movie set",
+      label: "Arrival: South Beach feels like a movie set",
       summary:
-        "We land after a short flight from the Atlanta area, check into an Airbnb, and head straight out on foot. South Beach has the staged familiarity of a Miami Vice scene—distinctive storefronts, restaurants, and architecture—until the crowds make the obvious point that this is real life. We are tourists too. That first walk is enough to move the trip out of the post-Christmas routine and into its own rhythm.",
+        "We land after a short flight from the Atlanta area, check into an Airbnb, and head straight out on foot. South Beach has the staged familiarity of a Miami Vice scene, with distinctive storefronts, restaurants, and architecture, until the crowds make the obvious point that this is real life. We are tourists too. That first walk is enough to move the trip out of the routine after Christmas and into its own rhythm.",
       visits: [
         {
           visitId: "miami-south-beach-2026-miami-south-beach",
@@ -142,7 +142,7 @@ export const miamiJourney = Object.freeze({
     {
       label: "A quieter pool-and-beach afternoon",
       summary:
-        "South Beach is busy, but this afternoon goes the other way. A pool and beach pass at the Savoy gives us a boutique-hotel pause with good drinks and nearly the whole pool to ourselves. We move between the property and the beach. Dinners along South Beach make up another part of the stay, but the quiet pool is the detail that lingers—not what I expect in the middle of this trip.",
+        "South Beach is busy, but this afternoon goes the other way. A pool and beach pass at the Savoy gives us a quiet pause at a boutique hotel, with good drinks and nearly the whole pool to ourselves. We move between the property and the beach. Dinners along South Beach make up another part of the stay, but the quiet pool is the detail that lingers. It is not what I expect in the middle of this trip.",
       visits: [
         {
           visitId: "miami-south-beach-2026-miami-south-beach",
@@ -156,7 +156,7 @@ export const miamiJourney = Object.freeze({
     {
       label: "Bikes, gators, and airboats",
       summary:
-        "The Everglades part of the trip keeps changing speed. On the airboat, the wind arrives before the stronger afternoon heat and my son loves the ride. The guide shares alligator details I had not heard before, while the animals come much closer to the boat than I expect. On the Shark Valley bike outing, the engine is gone and we pedal past resting alligators close to the path. The heat builds, shade is limited, and the smallest children's bike available that day—20 inches—asks a lot of a five-year-old. There are a few tense moments. He keeps going, and we finish safely.",
+        "The Everglades part of the trip keeps changing speed. On the airboat, the wind arrives before the stronger afternoon heat and my son loves the ride. The guide shares alligator details I had not heard before, while the animals come much closer to the boat than I expect. On the Shark Valley bike outing, the engine is gone and we pedal past resting alligators close to the path. The heat builds, shade is limited, and the smallest children's bike available that day is 20 inches. It asks a lot of our son at five years old. There are a few tense moments. He keeps going, and we finish safely.",
       visits: [
         {
           visitId: "miami-south-beach-2026-everglades",
