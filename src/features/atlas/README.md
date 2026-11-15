@@ -106,7 +106,16 @@ VUE_APP_MAPTILER_KEY=your_browser_key
 For local development, put the value in an uncommitted `.env.local`. For
 GitHub Pages, add it as the repository Actions secret `MAPTILER_API_KEY`.
 Restrict the browser key to the production and local-development origins in
-MapTiler.
+MapTiler. Store only the key itself: do not include quotes or leading/trailing
+whitespace. The application trims accidental surrounding whitespace before it
+constructs MapTiler requests, but keeping the secret clean makes deployment
+configuration easier to audit.
+
+If production displays `Map unavailable`, inspect the failed `style.json`
+request in browser developer tools. A `401` or `403` response means the key is
+invalid, expired, or does not allow the current production origin. Confirm the
+GitHub Actions `MAPTILER_API_KEY` secret and the key's allowed origins in
+MapTiler, then rerun the Pages deployment.
 
 An optional custom MapTiler style can be supplied locally with:
 

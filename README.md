@@ -145,7 +145,9 @@ in [`src/features/atlas/README.md`](src/features/atlas/README.md).
 The atlas works locally with a basic preview map. Satellite imagery and 3D
 terrain require `VUE_APP_MAPTILER_KEY`; copy `.env.example` to an uncommitted
 `.env.local` and add a MapTiler browser key. Production reads the key from the
-GitHub Actions secret `MAPTILER_API_KEY`.
+GitHub Actions secret `MAPTILER_API_KEY`. Save the raw key without quotes or
+surrounding whitespace and allow `https://roamwithjustin.com` as an HTTP origin
+in MapTiler.
 
 ## Image optimization
 
