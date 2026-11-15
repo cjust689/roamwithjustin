@@ -156,9 +156,10 @@ The list below represents known travel material, **not a verified complete chron
 | `puerto-rico-2024` | San Juan → northern/western Puerto Rico | August 2024 | `CONFIRMED`; lodging and venue details discussed. |
 | `costa-rica-2025` | La Fortuna/Bajos del Toro → Drake Bay/Osa → Uvita → San José area | 2025 | `CONFIRMED` route and several specific visited sites; exact dates require journal verification. |
 | `usvi-st-john-2025` | St. John / possibly St. Thomas | 2025 (precise dates to verify) | `CONFIRMED` St. John photo/underwater work; some lodging/charter stops appear only in assistant drafts. |
-| `miami-south-beach` | Miami Beach → Everglades → Oleta River State Park | January after Christmas; exact year and dates unknown | `CONFIRMED` short family getaway; five narrative chapters are canonical, while media and several venue/operator details remain unresolved. |
+| `miami-south-beach-2026` | Miami Beach → Everglades → Oleta River State Park | January 2026, shortly after Christmas; exact dates unknown | `CONFIRMED` short family getaway; five narrative chapters are canonical, while media and several venue/operator details remain unresolved. |
 | `north-georgia-2026` | Blue Ridge / Mineral Bluff / Morganton area | November 2026 | `CONFIRMED` stay and photography; various hikes/eagle sightings remain unconfirmed. |
-| `peoria-illinois` | Peoria / Illinois River | Fall break, date to verify | `CONFIRMED` sunrise aerial/downtown footage discussed. |
+| `peoria-illinois-2025` | Peoria / Illinois River | Fall break 2025; exact dates unknown | `CONFIRMED` sunrise aerial/downtown footage discussed. |
+| `hungary-2024` | Hungary | 2024; exact dates and route unknown | Creator-confirmed year; trip details and evidence remain incomplete. |
 | `utah-future-trip` | Hanksville bentonite area / Park City / Utah | Discussed November 2026 | `PLANNED / DISCUSSED`; **not** evidence of a completed visit. |
 
 Any new map/published dataset should show only destinations that can be supported by real travel material. A location need not have its own pin until meaningful media and story data exist.
@@ -540,10 +541,10 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ---
 
-# 9. MIAMI / SOUTH BEACH
+# 9. MIAMI / SOUTH BEACH — 2026
 
-- **Suggested ID:** `miami-south-beach`
-- **Timing:** January shortly after Christmas; exact year, dates, and trip
+- **Suggested ID:** `miami-south-beach-2026`
+- **Timing:** January 2026 shortly after Christmas; exact dates and trip
   duration remain unknown.
 - **Status:** `CONFIRMED` short family getaway with a five-year-old son.
 - **Arrival / South Beach:** Short flight from the Atlanta area, Airbnb check-in,
@@ -597,7 +598,7 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ### Miami verification queue
 
-- Exact year, dates, trip duration, and chapter chronology after arrival.
+- Exact dates, trip duration, and chapter chronology after arrival.
 - Miami media inventory and capture timestamps.
 - Airbnb privacy-safe description, if it belongs in the public story at all.
 - Exact Savoy property identity and whether any current venue link is useful.
@@ -620,13 +621,13 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ---
 
-# 11. PEORIA, ILLINOIS — FALL TRIP
+# 11. PEORIA, ILLINOIS — FALL 2025
 
-- **Suggested ID:** `peoria-illinois`
+- **Suggested ID:** `peoria-illinois-2025`
 - **Status:** `CONFIRMED` discussed drone footage.
 - **Location:** Peoria, Illinois; Illinois River / downtown area.
 - **Scenes:** Early/sunrise aerial view over the river and city.
-- **Timing:** Fall-break period, year/date needs verification against metadata/journal.
+- **Timing:** Fall-break period in 2025; exact dates need verification against metadata/journal.
 - **Editorial:** A quiet river-city morning and an unexpected aerial perspective, potentially distinct from larger destination travel.
 - **No specific hospitality venue** verified.
 

@@ -63,8 +63,11 @@ describe Experiences are future design, not current application behavior.
 
 Each registry composes records in one `index.mjs` and uses
 `createIdRegistry()` to reject missing or duplicate IDs at import time.
-Journey public routes use `Journey.slug`; internal relationships use canonical
-IDs. A Place may appear in more than one Journey through distinct Visits.
+Every Journey carries a numeric `year`; its canonical ID and public slug end in
+that year so repeat trips to the same destination can coexist. Public routes
+use `Journey.slug`, while `legacySlugs` keep older unyeared links resolvable.
+Internal relationships use canonical IDs. A Place may appear in more than one
+Journey through distinct Visits.
 
 Incomplete but confirmed trips use bounded coming-soon scaffolds. Europe,
 Costa Rica, Utah 2026, Miami, North Georgia, Peoria, and the retained Hungary
@@ -74,7 +77,8 @@ Utah 2026 remains separate from Utah winter 2025 and reuses the shared Utah,
 Zion, and Park City geography. Planned-only Hanksville is not registered as a
 visited Place.
 
-Miami keeps its established `miami-south-beach` Journey identity while its
+Miami's 2026 trip uses the repeat-safe `miami-south-beach-2026` Journey
+identity, while `miami-south-beach` remains the stable geographic Place. Its
 story expands through South Pointe Park, the broad Everglades region, Shark
 Valley, and Oleta River State Park Visits. Its five ordered narrative sections use
 `itineraryMode: "chapters"`: this preserves a useful story sequence without
