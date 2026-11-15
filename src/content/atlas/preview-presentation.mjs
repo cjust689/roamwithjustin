@@ -286,7 +286,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "miami-south-beach",
     placeId: "miami-south-beach",
-    journeyId: "miami-south-beach",
+    journeyId: "miami-south-beach-2026",
     parentId: null,
     useJourneyIdentity: true,
     eyebrow: "Coming soon",
@@ -297,7 +297,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "south-pointe-park",
     placeId: "south-pointe-park",
-    journeyId: "miami-south-beach",
+    journeyId: "miami-south-beach-2026",
     parentId: "miami-south-beach",
     eyebrow: "Cooler morning pace",
     category: "Sunrise and pier walk",
@@ -307,7 +307,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "everglades",
     placeId: "everglades",
-    journeyId: "miami-south-beach",
+    journeyId: "miami-south-beach-2026",
     parentId: "miami-south-beach",
     eyebrow: "Airboat speed",
     category: "Regional airboat story",
@@ -317,7 +317,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "shark-valley",
     placeId: "shark-valley",
-    journeyId: "miami-south-beach",
+    journeyId: "miami-south-beach-2026",
     parentId: "everglades",
     eyebrow: "Bikes and gators",
     category: "Family cycling",
@@ -327,7 +327,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "oleta-river-state-park",
     placeId: "oleta-river-state-park",
-    journeyId: "miami-south-beach",
+    journeyId: "miami-south-beach-2026",
     parentId: "miami-south-beach",
     eyebrow: "The other side of Miami",
     category: "Mangrove kayaking",
@@ -352,7 +352,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "peoria-illinois",
     placeId: "peoria-illinois",
-    journeyId: "peoria-illinois",
+    journeyId: "peoria-illinois-2025",
     parentId: null,
     eyebrow: "Coming soon",
     category: "River-city aerial story",
@@ -362,7 +362,7 @@ export const previewAtlasPresentation = Object.freeze([
   {
     id: "hungary",
     placeId: "hungary",
-    journeyId: "hungary-trip",
+    journeyId: "hungary-2024",
     parentId: null,
     eyebrow: "Coming soon",
     category: "Journey details in progress",
