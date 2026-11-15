@@ -47,7 +47,7 @@ export const miamiJourney = Object.freeze({
     "January mornings could feel cool or damp during our stay, while the sun felt much stronger by midmorning.",
     "The ocean felt cool but still swimmable to our family visiting from the Atlanta area.",
     "At Shark Valley, midday heat and limited shade made timing and sun protection matter to us.",
-    "The smallest children's bike available during our visit was 20 inches, which was challenging for our five-year-old; current rental inventory may differ.",
+    "The smallest children's bike available during our visit was 20 inches, which challenged our son at five years old; current rental inventory may differ.",
   ],
   tips: [],
   lodging: [],
@@ -75,10 +75,10 @@ export const miamiJourney = Object.freeze({
     miamiVisit(
       "everglades",
       "Airboat outing",
-      "The Everglades part of the trip starts at airboat speed. The wind reaches us before the stronger afternoon heat, our guide shares lesser-known details about native alligators, and the animals come much closer to the boat than I expect. My son loves the ride. I would do this part again without much convincing.",
+      "The Everglades part of the trip starts at airboat speed. The wind reaches us before the stronger afternoon heat, our guide shares details about native alligators that are new to me, and the animals come much closer to the boat than I expect. My son loves the ride. I would do this part again without much convincing.",
       "An airboat, a guide with stories to share, and close alligator encounters turn the Everglades into the trip's fastest family chapter.",
       [
-        "Our guide shared lesser-known information about native alligators.",
+        "Our guide shared information about native alligators that was new to us.",
         "We remember coming within inches of alligators while on the airboat.",
         "My son loved the ride, and I would do the outing again.",
       ]
@@ -90,14 +90,14 @@ export const miamiJourney = Object.freeze({
       "A family bike ride becomes something stranger when resting alligators share the edge of the path and the afternoon heat keeps building.",
       [
         "We rented bikes on site; the smallest children's bike available during our visit was 20 inches.",
-        "There were a few tense moments with our five-year-old, but everyone finished safely.",
+        "There were a few tense moments with our son at five years old, but everyone finished safely.",
         "Midday heat and limited shade mattered more than we expected.",
       ]
     ),
     miamiVisit(
       "oleta-river-state-park",
       "Mangrove kayaking",
-      "The route shifts from familiar beach-and-street Miami to rented kayaks and mangroves at Oleta. We paddle out to an island, find raccoons there, and end up with one of the strangest memories of the trip.",
+      "The route shifts from the familiar beaches and streets of Miami to rented kayaks and mangroves at Oleta. We paddle out to an island, find raccoons there, and end up with one of the strangest memories of the trip.",
       "Kayaks, mangroves, and raccoons on an island reveal a version of Miami we did not expect to find.",
       [
         "We rented kayaks in the park and paddled through mangroves.",
@@ -123,7 +123,7 @@ export const miamiJourney = Object.freeze({
     {
       label: "Cool mornings, South Pointe, and the water",
       summary:
-        "Morning is when Miami feels least like its reputation. It can be cool, even damp, and I head out alone for sunrise before the stronger sun arrives. During a family visit to South Pointe, we scan the water from the pier for sharks and other sea life. Across the stay, the beach keeps taking over again. The January water is cool, but not too cold for our Atlanta-area family to enjoy.",
+        "Morning is when Miami feels least like its reputation. It can be cool, even damp, and I head out alone for sunrise before the stronger sun arrives. During a family visit to South Pointe, we scan the water from the pier for sharks and other sea life. Across the stay, the beach keeps taking over again. The January water is cool, but not too cold for our family visiting from the Atlanta area.",
       visits: [
         {
           visitId: "miami-south-beach-2026-south-pointe-park",
@@ -140,7 +140,7 @@ export const miamiJourney = Object.freeze({
       routes: [],
     },
     {
-      label: "A quieter pool-and-beach afternoon",
+      label: "A quieter pool and beach afternoon",
       summary:
         "South Beach is busy, but this afternoon goes the other way. A pool and beach pass at the Savoy gives us a quiet pause at a boutique hotel, with good drinks and nearly the whole pool to ourselves. We move between the property and the beach. Dinners along South Beach make up another part of the stay, but the quiet pool is the detail that lingers. It is not what I expect in the middle of this trip.",
       visits: [

@@ -856,7 +856,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-don-rafa-boutique-hotel",
           notes:
-            "The rooftop pool becomes the hinge between the heat of Old San Juan and the dressed-up night ahead.",
+            "The rooftop pool becomes the hinge between the heat of Old San Juan and the polished night ahead.",
         },
         {
           visitId: "puerto-rico-2024-fairmont-el-san-juan",
@@ -866,7 +866,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-calle-c-canals",
           notes:
-            "Salsa, reggaetón, hip-hop, dance, and electronic spill out of different rooms. The crowd spans generations, so we stop searching for the 'best' bar and keep walking until one feels like ours.",
+            "Salsa, reggaetón, hip hop, dance, and electronic spill out of different rooms. The crowd spans generations, so we stop searching for the 'best' bar and keep walking until one feels like ours.",
         },
       ],
       partnerIds: ["mercado-la-carreta"],
@@ -875,7 +875,7 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 3: Scenic Drive to Moca",
       summary:
-        "We check out and follow the north coast west, letting the road divide the day into scenes. A short trail opens onto the limestone arch and rough water at Cueva del Indio. The Columbus statue appears at highway scale, then La Cara del Indio brings us close to a face carved directly into rock. By evening, the road climbs toward Moca and ends at Hacienda Florecer, where shipping-container walls frame a long pool and mountain horizon. The place we booked as a base immediately earns its own chapter.",
+        "We check out and follow the north coast west, letting the road divide the day into scenes. A short trail opens onto the limestone arch and rough water at Cueva del Indio. The Columbus statue appears at highway scale, then La Cara del Indio brings us close to a face carved directly into rock. By evening, the road climbs toward Moca and ends at Hacienda Florecer, where shipping container walls frame a long pool and mountain horizon. The place we booked as a base immediately earns its own chapter.",
       visits: [
         {
           visitId: "puerto-rico-2024-cueva-del-indio",
@@ -885,7 +885,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-estatua-de-colon",
           notes:
-            "The statue is visible before we decide to stop. Its scale and the history it represents turn a quick roadside pull-off into a more complicated pause.",
+            "The statue is visible before we decide to stop. Its scale and the history it represents turn a quick roadside pullout into a more complicated pause.",
         },
         {
           visitId: "puerto-rico-2024-la-cara-del-indio",
@@ -919,7 +919,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-shacks-beach",
           notes:
-            "Clear water near shore gives way to the reef and stronger currents farther out. With no formal facilities, this is a bring-what-you-need and read-the-water stop.",
+            "Clear water near shore gives way to the reef and stronger currents farther out. With no formal facilities, this is a stop where we bring what we need and read the water carefully.",
         },
         {
           visitId: "puerto-rico-2024-pena-blanca-beach",
@@ -960,7 +960,7 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 6: Mar Chiquita, Playa Pastillo, and Departure",
       summary:
-        "We check out and point east, leaving room for two final coastal stops before the airport. Mar Chiquita holds a calmer pocket of water behind its rock barrier; Playa Pastillo answers with rougher surf, an undeveloped shoreline, and a cave about a mile from the main access. The contrast gives the coast a proper final scene. From there, the rental-car return at SJU takes over and the road trip ends where it started.",
+        "We check out and point east, leaving room for two final coastal stops before the airport. Mar Chiquita holds a calmer pocket of water behind its rock barrier; Playa Pastillo answers with rougher surf, an undeveloped shoreline, and a cave about a mile from the main access. The contrast gives the coast a proper final scene. From there, returning the rental car at SJU takes over and the road trip ends where it started.",
       visits: [
         {
           visitId: "puerto-rico-2024-mar-chiquita",
@@ -988,7 +988,7 @@ export const puertoRico2024Journey = Object.freeze({
       assetId: "image-puerto-rico-featured-puerto-rico-gozalandia",
       role: "featured",
       caption:
-        "Early light cuts through the trees toward Gozalandia's main pool before the opening-hour quiet disappears.",
+        "Early light cuts through the trees toward Gozalandia's main pool before the quiet at opening disappears.",
     },
     {
       assetId: "image-puerto-rico-featured-puerto-rico-crash-boat",
@@ -1003,25 +1003,25 @@ export const puertoRico2024Journey = Object.freeze({
     "san-juan":
       "Rental keys, narrowing streets, tacos across from the hotel, and a quick pass along Ashford Avenue pull us into the city before we have fully arrived.",
     "don-rafa-boutique-hotel":
-      "The Miramar hotel gives both San Juan days a center, from the first late check-in to the rooftop pause after Old San Juan.",
+      "The Miramar hotel gives both San Juan days a center, from the first late arrival to the rooftop pause after Old San Juan.",
     "old-san-juan":
       "We move from Castillo San Cristóbal into bright streets and lunch at La Carreta, then retreat to the rooftop pool when the afternoon heat takes over.",
     "fairmont-el-san-juan":
       "We dress up for a polished beachfront pause before trading the Fairmont's atmosphere for the louder bars ahead.",
     "calle-c-canals":
-      "The music changes every few doors, so we keep bar-hopping until one room finally matches our mood.",
+      "The music changes every few doors, so we keep moving from bar to bar until one room finally matches our mood.",
     "cueva-del-indio":
       "A short trail opens abruptly onto limestone arches and rough Atlantic water; we keep back from the edge and let the wide frames carry the scale.",
     "estatua-de-colon":
-      "The statue appears at highway scale before we decide to stop, turning a quick pull-off into a complicated pause for history and context.",
+      "The statue appears at highway scale before we decide to stop, turning a quick pullout into a complicated pause for history and context.",
     "la-cara-del-indio":
-      "A face carved into the roadside rock interrupts the north-coast drive just long enough to change what the landscape is saying.",
+      "A face carved into the roadside rock interrupts the drive along the northern coast just long enough to change what the landscape is saying.",
     "hacienda-florecer":
       "The pool points toward the mountains, and our western base quickly becomes one of the trip's real destinations rather than somewhere we only sleep.",
     "playuelas-horse-rides":
       "The coast appears between a Paso Fino's ears while our guide sings through the trail, making the morning feel loose and personal.",
     "shacks-beach":
-      "Clear shallows and an offshore reef make this a quieter stop, with stronger currents beyond the near-shore calm.",
+      "Clear shallows and an offshore reef make this a quieter stop, with stronger currents beyond the calm water near shore.",
     "pena-blanca-beach":
       "A small cove gives the beach day a quiet middle: calmer water, roadside access, and no pressure to make the stop bigger than it is.",
     "gozalandia-falls":
@@ -1031,7 +1031,7 @@ export const puertoRico2024Journey = Object.freeze({
     "arte-aguadilla":
       "After horses, beaches, and underwater footage, dinner above Aguadilla Bay is where the whole day finally catches up with us.",
     "mar-chiquita":
-      "Rock walls hold a compact pocket of calmer water inside the larger coast, making this an easy final-day pause.",
+      "Rock walls hold a compact pocket of calmer water inside the larger coast, making this an easy final day pause.",
     "playa-pastillo":
       "Rough water, an undeveloped shore, and no crowd give the trip a quieter, moodier final coastal frame.",
   },

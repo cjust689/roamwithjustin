@@ -25,7 +25,7 @@ export const usviStJohn2025Journey = Object.freeze({
   },
   gallery: [],
   description:
-    "A family journey that shifts from Atlanta jets to St. Thomas prop planes, crosses into St. John in sunset light, and finds its pace between Maho, a music-filled charter, north-shore beaches, and Waterlemon Cay.",
+    "A family journey that shifts from Atlanta jets to St. Thomas prop planes, crosses into St. John in sunset light, and finds its pace between Maho, a charter shaped by music, beaches along the northern shore, and Waterlemon Cay.",
   duration: "7 story chapters",
   audience: "Families, beach lovers, and island explorers",
   costLevel: "",
@@ -33,7 +33,7 @@ export const usviStJohn2025Journey = Object.freeze({
   gearHighlights: [],
   travelNotes: [
     "We flew from Atlanta into Cyril E. King Airport on St. Thomas, crossed the island by taxi, and took the passenger ferry from Red Hook into Cruz Bay.",
-    "Traffic keeps left even though many vehicles are left-hand-drive, something the first taxi ride makes impossible to forget.",
+    "Traffic keeps left even though the steering wheel is also on the left, something the first taxi ride makes impossible to forget.",
     "The seven chapters preserve the creator's current editorial order without inventing exact calendar dates.",
     "Nate's Custom Charters operated the boat day; the captain's humor and love of music became part of the memory.",
   ],
@@ -49,7 +49,7 @@ export const usviStJohn2025Journey = Object.freeze({
       location: "Great Cruz Bay, St. John",
       nights: null,
       blurb:
-        "Our vacation-rental home base overlooking Great Cruz Bay. The roosters, breakfasts on the patio, steady breeze, and broad water view gave the mornings their own rhythm before we went anywhere.",
+        "Our vacation rental home base overlooking Great Cruz Bay. The roosters, breakfasts on the patio, steady breeze, and broad water view gave the mornings their own rhythm before we went anywhere.",
       image: null,
       link: "https://oceanastjohn.com/",
       verificationNotes:
@@ -72,9 +72,9 @@ export const usviStJohn2025Journey = Object.freeze({
       summary:
         "The small St. Thomas airport made arrival feel fast and physical. Outside air, palms, ocean, and prop planes replaced the scale of Atlanta.",
       notes: [
-        "The flight from Atlanta and arrival at Cyril E. King Airport are creator-confirmed.",
+        "The flight from Atlanta ended at Cyril E. King Airport on St. Thomas.",
         "The terminal moved quickly on arrival, without the long lines or wait the family expected.",
-        "Prop planes arriving and departing created the first strong contrast with ATL's large-aircraft traffic.",
+        "Prop planes arriving and departing created the first strong contrast with ATL's large jets.",
       ],
       media: [],
       socialLinks: [],
@@ -86,9 +86,9 @@ export const usviStJohn2025Journey = Object.freeze({
       date: null,
       visitStatus: "visited",
       evidenceStatus: "confirmed",
-      type: "ferry-terminal",
+      type: "ferry terminal",
       description:
-        "The taxi ride to Red Hook introduced left-side traffic, the working harbors of St. Thomas, and the cruise ships that kept catching my son's attention before we boarded for Cruz Bay.",
+        "The taxi ride to Red Hook introduced traffic moving on the left, the working harbors of St. Thomas, and the cruise ships that kept catching my son's attention before we boarded for Cruz Bay.",
       summary:
         "The transfer across St. Thomas became part of the arrival story, especially once my son started pointing out the cruise ships in the harbor.",
       notes: [
@@ -174,7 +174,7 @@ export const usviStJohn2025Journey = Object.freeze({
       date: null,
       visitStatus: "visited",
       evidenceStatus: "confirmed",
-      type: "charter-stop",
+      type: "charter stop",
       description:
         "At the place I call Hermit Crab Island, the ground looked still until we stopped and watched it move. Hermit crabs appeared everywhere once our eyes adjusted.",
       summary:
@@ -194,14 +194,13 @@ export const usviStJohn2025Journey = Object.freeze({
       date: null,
       visitStatus: "visited",
       evidenceStatus: "confirmed",
-      type: "charter-stop",
+      type: "charter stop",
       description:
         "Lovango gave the charter day a slower middle: lunch, time to relax, and open views back toward both St. John and St. Thomas.",
       summary:
         "The stop had a cool, relaxed feel and enough distance to see St. John and St. Thomas as part of the same view.",
       notes: [
-        "The Lovango visit, lunch, and relaxation are creator-confirmed.",
-        "The exact restaurant or beach-club venue is not confirmed.",
+        "We stopped at Lovango for lunch and time to relax.",
         "Nate's Custom Charters was the operator, not a sponsor or affiliate.",
       ],
       media: [
@@ -223,11 +222,11 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "beach",
       description:
-        "Trunk Bay arrived with a world-best reputation and absolutely looked the part, but honestly, I enjoyed some of St. John's other beaches more.",
+        "Trunk Bay arrived with a world class reputation and absolutely looked the part, but honestly, I enjoyed some of St. John's other beaches more.",
       summary:
         "The beauty was obvious; the more useful truth for our family was that the rougher water demanded a closer eye on the younger kids.",
       notes: [
-        "Children playing and the Trunk Bay visit are creator-confirmed.",
+        "Children played along the beach during our Trunk Bay visit.",
         "The tide and shore break felt rougher than at Maho during the family's visit, which required more attention with young children.",
         "Previous firsthand discussion confirms footage of rocks, coral, pale underwater sand, and the creator's wife swimming and diving.",
         "Specific reef or wildlife identifications wait for media review.",
@@ -244,14 +243,14 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "beach",
       description:
-        "Cinnamon Bay felt like the most built-out and tourist-oriented beach we visited, with sailboats, a sit-down restaurant, a gift shop, and more amenities close at hand.",
+        "Cinnamon Bay felt like the most developed and tourist focused beach we visited, with sailboats, a full service restaurant, a gift shop, and more amenities close at hand.",
       summary:
         "Cinnamon was beautiful, but its busier, more developed rhythm made the quieter ease of Maho stand out even more.",
       notes: [
-        "The visit and photographs are creator-confirmed.",
+        "The photographs follow our family visit to Cinnamon Bay.",
         "The family found plenty of parking, though the area became busier as the day developed.",
-        "Sailboats, a full sit-down restaurant, a gift shop, and other amenities were present during the visit.",
-        "The more-touristy comparison is explicitly subjective.",
+        "Sailboats, a full service restaurant, a gift shop, and other amenities were present during the visit.",
+        "The comparison with quieter beaches reflects our family's experience.",
       ],
       media: [],
       socialLinks: [],
@@ -263,11 +262,11 @@ export const usviStJohn2025Journey = Object.freeze({
       date: null,
       visitStatus: "visited",
       evidenceStatus: "confirmed",
-      type: "island-outing",
+      type: "island outing",
       description:
-        "Waterlemon Cay was for the more adventurous, no-amenities version of the trip: plantation history, a rocky coastal walk, active sea life, and a current that deserved more respect than the calm beaches had asked of us.",
+        "Waterlemon Cay was the more adventurous version of the trip, without the amenities of the easier beaches. It brought plantation history, a rocky coastal walk, active sea life, and a current that deserved more respect than the calm beaches had asked of us.",
       summary:
-        "The roughly mile-long coastal approach made Waterlemon feel earned, and seeing almost no one else there made the payoff unusually intimate.",
+        "The coastal approach of roughly a mile made Waterlemon feel earned, and seeing almost no one else there made the payoff unusually intimate.",
       notes: [
         "The outing began around the old Annaberg sugar plantation landscape, whose history added necessary weight before the walk to the cay.",
         "The creator remembers roughly a mile of rocky coastal walking and recommends proper shoes and carrying as little as practical.",
@@ -363,11 +362,11 @@ export const usviStJohn2025Journey = Object.freeze({
   featuredMedia: [],
   atlasNotes: {
     "st-john":
-      "We moved between a harbor arrival, family beach days, a personality-filled charter, and one more involved island outing without forcing every day into the same rhythm.",
+      "We moved between a harbor arrival, family beach days, a charter shaped by the captain's personality, and one more involved island outing without forcing every day into the same rhythm.",
     "cyril-e-king-airport":
       "The change from Atlanta's huge jets to St. Thomas prop planes, palms, fresh air, and ocean views made the trip feel different before we even left the airport.",
     "red-hook-ferry-terminal":
-      "The taxi ride brought the first left-side-driving adjustment and my son's running commentary on the cruise ships before we crossed to St. John.",
+      "The taxi ride brought the first adjustment to traffic moving on the left and my son's running commentary on the cruise ships before we crossed to St. John.",
     "cruz-bay":
       "We rode the top deck into Cruz Bay near sunset, with St. Thomas silhouetted behind us and gold light reaching St. John ahead.",
     "maho-bay":
@@ -379,7 +378,7 @@ export const usviStJohn2025Journey = Object.freeze({
     "trunk-bay":
       "Trunk Bay looked worthy of its reputation, but the rougher water kept us more watchful with the kids and left other beaches higher on my personal list.",
     "cinnamon-bay":
-      "Cinnamon felt more touristy and built-out than Maho, with sailboats, a restaurant, a gift shop, and a busier rhythm during our visit.",
+      "Cinnamon felt more tourist focused and developed than Maho, with sailboats, a restaurant, a gift shop, and a busier rhythm during our visit.",
     "waterlemon-cay":
       "Waterlemon combined Annaberg's difficult history, a rocky coastal walk, very few people, active sea life, and a current that demanded respect.",
   },
