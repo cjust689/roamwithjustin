@@ -57,17 +57,7 @@ function preferredExternalLink(externalLinks = {}) {
 }
 
 function journeyPreviewCopy(journey) {
-  if (journey.publicationStatus !== "coming-soon") return journey.description
-  if (journey.description) return journey.description
-
-  // Preview copy is deliberately derived from publication/evidence state. It
-  // makes every registered Journey routable without turning missing dates,
-  // stops, or research notes into public travel facts.
-  if (journey.evidenceStatus === "confirmed") {
-    return "Verified photography anchors this journey. Its public route, stop-level notes, and itinerary will appear as those details are confirmed."
-  }
-
-  return "This destination is registered as a future story. Dates, stops, and route details remain unpublished until they can be verified."
+  return journey.description || ""
 }
 
 function journeyGearHighlights(journey, canonicalGear) {
@@ -155,17 +145,31 @@ export function buildTripViewModel(journey) {
   const resolvedGallery = resolveMediaList(journey.gallery).map(
     item => item.src
   )
+  const curatedStoryMedia = comingSoon
+    ? []
+    : resolveMediaList([
+        journey.hero,
+        journey.fullImage,
+        ...(journey.gallery || []),
+        ...journey.visits.flatMap(visit => [
+          visit.hero,
+          ...(visit.media || []),
+        ]),
+        ...(journey.lodging || []).map(stay => stay.image),
+      ])
   const publishedMedia = getJourneyPublishedMedia(journey.id)
-  const allMedia = publishedMedia.map(media => ({
-    id: media.id,
-    kind: media.kind,
-    src: media.src,
-    mimeType: media.mimeType,
-    poster: media.poster,
-    alt: media.alt,
-    width: media.width,
-    height: media.height,
-  }))
+  const allMedia = uniqueMedia([...publishedMedia, ...curatedStoryMedia]).map(
+    media => ({
+      id: media.id,
+      kind: media.kind,
+      src: media.src,
+      mimeType: media.mimeType,
+      poster: media.poster,
+      alt: media.alt,
+      width: media.width,
+      height: media.height,
+    })
+  )
   const locations = journey.visits
     .map(visit => buildTripLocationView(journey, visit))
     .filter(Boolean)
@@ -182,10 +186,6 @@ export function buildTripViewModel(journey) {
     comingSoon,
     publicationStatus: journey.publicationStatus,
     evidenceStatus: journey.evidenceStatus,
-    previewStatus:
-      journey.evidenceStatus === "confirmed"
-        ? "Photography confirmed"
-        : "Awaiting verification",
     cover,
     fullImage,
     // A coming-soon record already owns two intentional image usages. Showing
@@ -238,14 +238,6 @@ export function buildTripViewModel(journey) {
       img: media.src,
       caption: media.caption || "",
     })),
-    registeredMediaCount: new Set(
-      [
-        cover,
-        fullImage,
-        ...resolvedGallery,
-        ...publishedMedia.map(media => media.src),
-      ].filter(Boolean)
-    ).size,
     hasItinerary: Boolean(journey.days?.length && locations.length),
     hasFieldNotes: Boolean(
       gearHighlights.length ||
@@ -347,12 +339,14 @@ export function buildAtlasNodeView(presentation) {
     // Structural Atlas hubs may not be Journey visits themselves. An optional
     // anchor lets their route position come from the first real stop they group.
     journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
-    title: place.name,
+    title: presentation.useJourneyIdentity ? journey.title : place.name,
     eyebrow: presentation.eyebrow,
     category: presentation.category,
     coordinates: place.coordinates ? [...place.coordinates] : null,
     camera: presentation.camera,
-    summary: place.description,
+    summary: presentation.useJourneyIdentity
+      ? journey.description
+      : place.description,
     personalNote,
     image: hero?.src || "",
     media,
@@ -361,6 +355,7 @@ export function buildAtlasNodeView(presentation) {
     actions: atlasActions(place, journey),
     evidenceStatus: visit?.evidenceStatus || journey.evidenceStatus,
     visitStatus: visit?.visitStatus || null,
+    comingSoon: journey.publicationStatus === "coming-soon",
   }
 }
 

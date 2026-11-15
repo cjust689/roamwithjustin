@@ -11,7 +11,15 @@ related:
   - usvi-st-john-source
 supersedes: []
 superseded_by: []
-code_paths: []
+code_paths:
+  - src/content/places/europe.mjs
+  - src/content/places/costa-rica.mjs
+  - src/content/places/utah.mjs
+  - src/content/places/next-destinations.mjs
+  - src/content/journeys/costa-rica-2025.mjs
+  - src/content/journeys/utah-2026.mjs
+  - src/content/journeys/next-destinations.mjs
+  - src/content/atlas/preview-presentation.mjs
 verification:
   state: unverified
   evidence: []
@@ -142,7 +150,7 @@ The list below represents known travel material, **not a verified complete chron
 |---|---|---|---|
 | `europe-summer-2026` | UK → Netherlands → Croatia → Morocco → Spain | June 25–July 25, 2026 | `CONFIRMED` trip; segment dates originally from itinerary, many independently corroborated by photo/story discussions. |
 | `utah-winter-2025` | Salt Lake City/Wendover/Bonneville → Moab → Park City | February 2025, roughly seven days | `CONFIRMED` completed family road trip with many detailed firsthand notes. |
-| `utah-2026` | Utah, including Zion National Park | 2026; exact dates to verify | `CONFIRMED` trip that included **two days at Zion National Park**. Other stops, dates, media and itinerary order are not yet established. Keep separate from Utah winter 2025 and the proposed future Hanksville visit. |
+| `utah-2026` | Zion National Park → Park City | 2026; exact dates to verify | `CONFIRMED` trip with **two days at Zion National Park**, followed by **five days skiing and snowboarding in Park City**. Keep separate from Utah winter 2025 and the proposed future Hanksville visit. |
 | `puerto-rico-2024` | San Juan → northern/western Puerto Rico | August 2024 | `CONFIRMED`; lodging and venue details discussed. |
 | `costa-rica-2025` | La Fortuna/Bajos del Toro → Drake Bay/Osa → Uvita → San José area | 2025 | `CONFIRMED` route and several specific visited sites; exact dates require journal verification. |
 | `usvi-st-john-2025` | St. John / possibly St. Thomas | 2025 (precise dates to verify) | `CONFIRMED` St. John photo/underwater work; some lodging/charter stops appear only in assistant drafts. |
@@ -400,15 +408,15 @@ The above is the best recovered sequence, but do not assign exact dates to every
 - Utah hiking with family and compact footwear/camera setup were discussed for a forthcoming trip.
 - Do not include `hanksville-bentonite` as a *visited* pin until actual footage or confirmation exists. It can be an unpublished itinerary idea if useful.
 
-## 5.4 Utah — 2026 trip, including Zion National Park
+## 5.4 Utah — 2026 trip, Zion and Park City
 
 - **Suggested journey ID:** `utah-2026` (verify against any existing canonical Journey record before creating a new one).
-- **Status:** `CONFIRMED` by the creator: a Utah 2026 trip included **two days at Zion National Park**.
-- **Place ID:** `zion-national-park` (reuse the canonical Place record if one already exists).
-- **Visit duration:** Two days at Zion. Exact calendar dates, individual trail/area visits, lodging, additional Utah destinations and route chronology are **TO VERIFY**.
+- **Status:** `CONFIRMED` by the creator: a Utah 2026 trip included **two days at Zion National Park**, followed by **five days skiing and snowboarding in Park City**.
+- **Place IDs:** `zion-national-park` and `park-city` (reuse the shared canonical Place records).
+- **Visit duration/order:** Two days at Zion, then five days in Park City. Exact calendar dates, Zion trails/areas, Park City mountain/resort details, lodging, and transport are **TO VERIFY**.
 - **Media:** Do not infer that specific photographs or videos belong to this trip merely from a Zion filename, an existing R2 test clip, or footage from another year. Associate verified assets through source metadata, the Lightroom publishing collection, or explicit creator confirmation.
-- **Architectural note:** Represent this as its own **Journey** with a Zion **visit**, pointing to the shared canonical Zion **Place**. Reuse the Place across journeys; do not merge this trip into `utah-winter-2025` or treat a Zion visit as evidence for Hanksville/Park City stops.
-- **Publication note:** Zion can support a place gallery when assets are verified; a two-day visit does **not** imply two distinct public stories or map pins. Allow experiences to be added progressively.
+- **Architectural note:** Represent this as its own **Journey** with Zion and Park City **visits**, pointing to shared canonical Places. Reuse Park City across the 2025 and 2026 Journeys; do not merge the trips or treat either as evidence for Hanksville.
+- **Publication note:** Zion and Park City can support place galleries when assets are verified. Visit duration does **not** imply one public story or pin per day; add experiences progressively.
 
 ---
 
@@ -758,7 +766,7 @@ The following appeared as **possible** activities, editor ideas, route alternati
 - Entry into Manuel Antonio National Park (only a quick area stop is confirmed).
 - Lovango Beach Club, Shipwreck Cove, specific St. John charter operator, Cruz Bay accommodation, or exact St. Thomas transit route: only assistant draft context currently supports these.
 - North Georgia hiking trails and actual bald eagle sighting: researched, not confirmed.
-- Hanksville bentonite hills visited in late 2026: discussed as an upcoming Utah idea, not completed. **This is separate from the confirmed 2026 Utah trip that included two days at Zion National Park.**
+- Hanksville bentonite hills visited in late 2026: discussed as an upcoming Utah idea, not completed. **This is separate from the confirmed 2026 Utah trip with two days at Zion followed by five days skiing and snowboarding in Park City.**
 - Any business contact phone, current opening hours, price, menu, or booking conditions listed nowhere in the evidence.
 
 ---
