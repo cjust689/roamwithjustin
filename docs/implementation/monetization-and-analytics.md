@@ -39,9 +39,10 @@ verification:
 > are present. The first AdSense phase is implemented as a disabled by default,
 > manually placed story unit with configuration validation, ads.txt generation,
 > a public privacy notice, and the owner supplied publisher verification meta
-> tag. The live ad slot, ads.txt seller line, activation flags, and dashboard
-> settings are not present. Canonical partner referral tracking and the later
-> editorial commerce work remain. See the
+> tag. A second, independently disabled guided Atlas unit is implemented with
+> content eligibility and a one-request-per-Journey-tab cap. Live account
+> values and dashboard state remain externally controlled. Canonical partner
+> referral tracking and the later editorial commerce work remain. See the
 > [as-built analytics document](../architecture/monetization-and-analytics.md)
 > and [AdSense operations guide](../reference/adsense.md).
 
@@ -49,9 +50,12 @@ verification:
 
 - One responsive placement may appear after the full itinerary on a published
   Journey with at least three chapters.
-- There are no placements on the home page, Atlas, incomplete Journeys, story
-  heroes, location cards, galleries, lightboxes, videos, dialogs, navigation,
-  or footer.
+- One separately disabled Atlas placement may appear below editorial stop
+  content after three distinct guided arrivals on a published, media-rich
+  Journey. A browser-tab session reservation prevents per-stop refreshes.
+- There are no placements on the home page, map canvas, markers, free Atlas
+  exploration, incomplete Journeys, story heroes, location cards, galleries,
+  lightboxes, videos, dialogs, navigation, or footer.
 - The shared loader is added only when the eligible unit mounts and is never
   duplicated. The component does not refresh ads or track their interactions.
 - The homepage exposes the owner supplied publisher ID through Google's
@@ -118,7 +122,7 @@ Use **manual AdSense ad units** only where the page has substantial original con
 | Surface | Initial policy | Why |
 |---|---|---|
 | Cinematic homepage hero | **No Google display ads** | Preserve the first impression and visual brand. |
-| Interactive globe / 3D MapLibre atlas | **No Google display ads** | Avoid obstructing exploration or misleading visitors near pins and controls. |
+| Interactive globe / 3D MapLibre atlas | **No ads on the map or controls; one optional gated unit inside rich guided-stop editorial content** | Preserve exploration, require three distinct guided arrivals, and cap requests to one per Journey and tab. |
 | Hover photo pins / location previews | **No Google display ads** | Pins/cards are interactive navigation, not ad inventory. |
 | Photo lightboxes, video players, galleries | **No Google display ads** | Respect the art and avoid obscuring controls/media. |
 | Destination editorial guides | **Up to 1–2 intentional display placements initially** | Natural, content-rich reading breaks; measure impact. |
@@ -321,7 +325,9 @@ These are **separate products** with separate economics:
 
 **Monetization placements in this flow:**
 
-- **Map**: no AdSense.
+- **Map canvas and navigation controls**: no AdSense. The independently enabled
+  guided-stop editorial unit follows the strict eligibility and session cap in
+  the AdSense operations guide.
 - **Experience**: venue referral or direct sponsorship if applicable, visibly disclosed.
 - **Behind the Shot / packing guide**: direct editorial affiliate links, genuinely relevant.
 - **Long-form article**: one carefully placed AdSense unit, possibly a second later if metrics justify it.
@@ -488,7 +494,13 @@ For simple planning, assume total monthly pageviews below are eligible to be mon
 | 100,000 | $200 | $500 | $1,000 |
 | 250,000 | $500 | $1,250 | $2,500 |
 
-**Key qualification:** If most traffic stays on the interactive atlas where no ads appear, the **effective RPM across the whole website** may be well below the RPM of the subset of article pages. Don't apply an article-only RPM to every atlas pageview. Google distinguishes page RPM from ad-impression RPM; make sure the denominator is correct when modeling performance.
+**Key qualification:** Most Atlas traffic remains ineligible for ads. Free map
+exploration, early guided stops, incomplete Journeys, thin stops, and repeat
+stops produce no Atlas request. The **effective RPM across the whole website**
+may therefore remain well below the RPM of eligible story or guided-stop
+content. Don't apply an eligible-content RPM to every Atlas pageview. Google
+distinguishes page RPM from ad-impression RPM; make sure the denominator is
+correct when modeling performance.
 
 Example traffic funnel:
 
@@ -542,7 +554,9 @@ Direct featured-experience placements and photo/video rights can be negotiated i
 1. Audit current AdSense placement and loader.
 2. Make a written owner checklist for switching Auto ads OFF in AdSense.
 3. Add a clean ad-placement configuration and one optional responsive article ad unit if **actual slot code is available**.
-4. Ensure no ads appear in the interactive map, hero, photo previews, video overlays, or navigation.
+4. Ensure no ads appear in the map canvas, markers, hero, photo previews, video
+   overlays, or navigation. Keep the optional guided-stop unit below substantial
+   editorial content and limited to one request per Journey and tab.
 5. Validate consent/privacy gaps and avoid deploying noncompliant personalized ad behavior.
 6. Run build/lint/type checks and inspect responsive design.
 
