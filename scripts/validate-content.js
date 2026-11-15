@@ -358,11 +358,49 @@ async function main() {
     const owner = 'Journey "' + journey.id + '"'
     const visitIds = new Set()
     const legacyIds = new Set()
+    const year = journey.year
+    const yearText = String(year || "")
+    const yearSuffix = "-" + yearText
 
-    if (journeySlugs.has(journey.slug)) {
-      report(owner + ' duplicates slug "' + journey.slug + '"')
+    if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+      report(owner + " has no valid trip year")
     }
-    journeySlugs.add(journey.slug)
+    if (!journey.id.endsWith(yearSuffix)) {
+      report(owner + ' ID does not end in its trip year "' + yearText + '"')
+    }
+    if (!journey.slug.endsWith(yearSuffix)) {
+      report(owner + ' slug does not end in its trip year "' + yearText + '"')
+    }
+    if (!journey.title.includes(yearText)) {
+      report(owner + ' title does not display its trip year "' + yearText + '"')
+    }
+    if (!journey.dateRange?.label?.includes(yearText)) {
+      report(
+        owner + ' date label does not display its trip year "' + yearText + '"'
+      )
+    }
+    ;[journey.slug, ...(journey.legacySlugs || [])].forEach(routeSlug => {
+      if (!routeSlug || typeof routeSlug !== "string") {
+        report(owner + " has an invalid route slug")
+      } else if (journeySlugs.has(routeSlug)) {
+        report(owner + ' duplicates route slug "' + routeSlug + '"')
+      } else {
+        journeySlugs.add(routeSlug)
+      }
+    })
+    ;(journey.legacySlugs || []).forEach(legacySlug => {
+      if (journeyModule.getJourneyBySlug(legacySlug)?.id !== journey.id) {
+        report(owner + ' does not resolve legacy slug "' + legacySlug + '"')
+      }
+    })
+    if (
+      journey.itineraryMode &&
+      !["days", "chapters"].includes(journey.itineraryMode)
+    ) {
+      report(
+        owner + ' has invalid itinerary mode "' + journey.itineraryMode + '"'
+      )
+    }
     if (journey.hero) {
       validateMediaUsage(journey.hero, owner + " hero", mediaModule)
     }

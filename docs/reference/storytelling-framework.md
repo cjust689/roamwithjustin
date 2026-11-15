@@ -10,7 +10,8 @@ related:
   - travel-context
 supersedes: []
 superseded_by: []
-code_paths: []
+code_paths:
+  - AGENTS.md
 verification:
   state: not-applicable
   evidence: []

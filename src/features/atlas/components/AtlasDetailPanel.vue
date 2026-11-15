@@ -82,15 +82,11 @@
               {{ guidedHeroLabel }}
             </span>
           </button>
-          <div v-else class="atlas-detail-hero-image is-empty">
-            <span class="is-placeholder">
-              {{
-                node.comingSoon
-                  ? "Story and photography coming soon"
-                  : "Photography coming soon"
-              }}
-            </span>
-          </div>
+          <div
+            v-else
+            class="atlas-detail-hero-image is-empty"
+            aria-hidden="true"
+          ></div>
           <div class="atlas-detail-shade"></div>
           <button
             class="atlas-detail-close"
@@ -409,7 +405,7 @@ export default {
         : this.guidedHeroMedia.src
     },
     guidedHeroLabel() {
-      if (!this.guidedHeroMedia.src) return "Photography coming soon"
+      if (!this.guidedHeroMedia.src) return ""
       if (!this.guidedPresentation) {
         return this.guidedHeroMedia.kind === "video"
           ? "Play video"

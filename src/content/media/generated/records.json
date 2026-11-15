@@ -1654,6 +1654,3336 @@
         "byteSize": 75933165,
         "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
       }
+    },
+    {
+      "id": "image-miami-37c3e530fb78-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "37c3e530fb780acb4ba214fa8ea5c93e5715574d0703b11cf78906e8b801e510",
+        "byteSize": 580472,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-4a54ff978390-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "4a54ff978390d9a598ba792dbb2885e2a10178fe8fcd10e04b48475037319021",
+        "byteSize": 167817,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-f0e6a6de24b3-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "f0e6a6de24b3092c555b17bfd56f72c007d5bde3337a32ce6afe84efdb56fd06",
+        "byteSize": 174278,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-a3d0b4ab9d7e-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "a3d0b4ab9d7e4af5d6ff148d27e21bac4f35c92b9bc27d9e1e8c8e9bae453a53",
+        "byteSize": 559047,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-1707377022fb-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "1707377022fbe59d34c9d0c85db49cca75900045b584df94297d7f2d0cfc2551",
+        "byteSize": 241694,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-ed79c57812ff-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "ed79c57812ff6ef428075f593cf7faa84ea750d662fbdfc70754a66c182a8b72",
+        "byteSize": 242275,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-f0d7aa8ffb88-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "f0d7aa8ffb8850657f4e6b80e76676d5666f78fdabafaa69f283e95bd8475522",
+        "byteSize": 306895,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-3570a3ec9f73-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "3570a3ec9f7335ac7129835a97723937560b28250682a0bf5da9fe0ae0f21d91",
+        "byteSize": 281049,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-e0458c707b05-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "e0458c707b051183e1d9dac29c56afb9be5e7fba42f1bd43843e347b68509333",
+        "byteSize": 497571,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-bce31d4ad703-010",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-010.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 10",
+      "publication": {
+        "revision": 1,
+        "sha256": "bce31d4ad703f077e726c113ef4d11597441921eb4d3f89a90d362b407ca95f5",
+        "byteSize": 263076,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-43ad2563cae8-011",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-011.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 11",
+      "publication": {
+        "revision": 1,
+        "sha256": "43ad2563cae854fc11d020f3acee3d7e944fa43ab19c61df1a067a1aeebeb3b6",
+        "byteSize": 568941,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-75f9a310d1fb-012",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-012.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 12",
+      "publication": {
+        "revision": 1,
+        "sha256": "75f9a310d1fb8944ef3dfe693cffd8e92782dd9dbd5b7e41e5a562014e9d508d",
+        "byteSize": 280950,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-d8410b185e4b-013",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-013.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 13",
+      "publication": {
+        "revision": 1,
+        "sha256": "d8410b185e4bd8ea5ac3be3802c1cb3fad1630c7e45c19e559ab3b335e94ae56",
+        "byteSize": 799511,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-599cab44423e-014",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-014.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 14",
+      "publication": {
+        "revision": 1,
+        "sha256": "599cab44423e828b7525eb80cc2b1f3d215d0a9b484a7921f82cb062b3e70134",
+        "byteSize": 256045,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-1d78dbf27f8d-015",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-015.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 15",
+      "publication": {
+        "revision": 1,
+        "sha256": "1d78dbf27f8df906a9b01c1f1202ab2d134aff4f43a6ae379c97036287885e00",
+        "byteSize": 314745,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-6bc4cf452821-016",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-016.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 16",
+      "publication": {
+        "revision": 1,
+        "sha256": "6bc4cf452821566431b8958e89763e9fdcf1ad87002a1b8b1b78a69b8e581802",
+        "byteSize": 592137,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-e0458c707b05-017",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-017.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 17",
+      "publication": {
+        "revision": 1,
+        "sha256": "e0458c707b051183e1d9dac29c56afb9be5e7fba42f1bd43843e347b68509333",
+        "byteSize": 497571,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-d2a35e9cb085-018",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/everglades/media-miami-everglades-eca7fe02357c9788/everglades-018.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 18",
+      "publication": {
+        "revision": 1,
+        "sha256": "d2a35e9cb085067cc38a3368155b0faac5cc98264099199829dbdbb718e1484f",
+        "byteSize": 537399,
+        "batchId": "media-miami-everglades-eca7fe02357c9788"
+      }
+    },
+    {
+      "id": "image-miami-674cd969d0f3-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "674cd969d0f3b624af305413eb2eebadb9a4bd4bb7b44b0f74360f18795cb284",
+        "byteSize": 644401,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-529b6b6a518b-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "529b6b6a518be237d3ebe522cff046858d98c8f54c428751b5259fb5766d5ae6",
+        "byteSize": 433577,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-0ba76360a606-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "0ba76360a60607fb62998e5a932e5bc129f6db6fbfc0ae870c419f3591bc7351",
+        "byteSize": 310749,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-662fbc3fb188-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 2047
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "662fbc3fb1883bde4d0c0f5f042857ba92f690a6c5d372d388af9933daab8825",
+        "byteSize": 407220,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-8eed37b43275-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "8eed37b432750c17e90684e6a29545626796fb24db7eb1d11ed3fb084637c094",
+        "byteSize": 372271,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-d81bfc971de8-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "d81bfc971de8706ba40dc4fea9b8eeb708cdfa8fe607113e1384f4c4375039f0",
+        "byteSize": 414948,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-879857e8b43d-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "879857e8b43d9ec3e6d2c6000bb49eb936de4bdaec8bd6c8c4b4c688dd8c5d2c",
+        "byteSize": 507613,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-c837c9c08d94-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "c837c9c08d941f86243fae9faf674b819ae9387024dea290b8e194f8b87de62f",
+        "byteSize": 507591,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-5da46085cf23-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami/oleta-river-state-park/media-miami-oleta-river-state-park-e5d79b9068b4b960/oleta-river-state-park-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "5da46085cf23712c62a610597f6ed25cdbda4005011dcbecaf26b9a17bd9b8ce",
+        "byteSize": 453556,
+        "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+      }
+    },
+    {
+      "id": "image-miami-2026-a264f3991eb1-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "a264f3991eb1f710e9f5f3711a7b2b1c807655cb53d5319e19f8e9b9ef479540",
+        "byteSize": 520770,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-1d1fc161574f-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "1d1fc161574f14a4548a20a81ab8e260f887362de794897fb340e62a8d669c9c",
+        "byteSize": 437454,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-142f6d4666cf-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "142f6d4666cfe8452ae8bc17b3bcd696c5e2408af8accf46f4c809392a7beb62",
+        "byteSize": 294775,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5fd04cb899df-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2045,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "5fd04cb899df740e25bd010c7a8a31eaab91197de4931c172557cdc58801cff6",
+        "byteSize": 674472,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-a8701cbf6c07-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "a8701cbf6c0798184e9268c9bc9212cfb073d699b5fceeb0857985a369f3e769",
+        "byteSize": 225595,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-0dbbb0a6e237-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "0dbbb0a6e237577d1de6510f6e0ac25163490a6ca863f43fab8155a5dd4ed0d1",
+        "byteSize": 518439,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-7f163011f9ef-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "7f163011f9ef0abb5027fcfe190f6a84146d4582107101de0891c032346eaff9",
+        "byteSize": 289923,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-b99c5b4e11fa-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "b99c5b4e11fa8ce0bd431f54d9abb3babe033d779fd81ed930f17e247b80ce45",
+        "byteSize": 211398,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-4fff55a850e8-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "4fff55a850e8b2cd8687817c004f1d98688cde68ddaf5aebc33f9a85cf1481bf",
+        "byteSize": 458742,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-22fd993647be-010",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-010.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 10",
+      "publication": {
+        "revision": 1,
+        "sha256": "22fd993647be16a062afedac029391df0ea7fac22dd51077ca6aad92155b4bfd",
+        "byteSize": 559549,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-9b99507f1f03-011",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-011.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 11",
+      "publication": {
+        "revision": 1,
+        "sha256": "9b99507f1f03b9deeb19afb38f363dcf5bd07c8f76bf3fe16748cc0e957da47b",
+        "byteSize": 397101,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5c53a3c28023-012",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-012.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 12",
+      "publication": {
+        "revision": 1,
+        "sha256": "5c53a3c2802350069cd33002ee3a043c4f6e6a65a035a18a23d10cd8d2853e78",
+        "byteSize": 278910,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-1abbe43a9d87-013",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-013.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 13",
+      "publication": {
+        "revision": 1,
+        "sha256": "1abbe43a9d8749e5489df6ba72c30f5dbaedef2e0e0af8dfc5892de546f3b037",
+        "byteSize": 407549,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-20371147e0cb-014",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-014.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 14",
+      "publication": {
+        "revision": 1,
+        "sha256": "20371147e0cbe892f900ec96e2225109961dad2347c9275eda53779b634bb61a",
+        "byteSize": 248521,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-d2d80e0c2259-015",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-015.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 15",
+      "publication": {
+        "revision": 1,
+        "sha256": "d2d80e0c2259666e4fd98ac730d7e759237eb661b5d83bd4f5118c7a47137278",
+        "byteSize": 170788,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-00b1ca6e61ac-016",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-016.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 16",
+      "publication": {
+        "revision": 1,
+        "sha256": "00b1ca6e61ac4960233398ed1b9a2874b2891188b5718e99dea1b220bccf79e3",
+        "byteSize": 382084,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-c1b23d770604-017",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-017.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 17",
+      "publication": {
+        "revision": 1,
+        "sha256": "c1b23d770604db026c00992289346a80bbf80cc6268a1b4f9a19b61f59dc6d56",
+        "byteSize": 643513,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-92bb1d2a90ff-018",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-018.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1705
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 18",
+      "publication": {
+        "revision": 1,
+        "sha256": "92bb1d2a90ffacfee3da0539e89c33a297c574615c3094948aab3e5098b99894",
+        "byteSize": 183144,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-161b34174ce2-019",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-019.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 19",
+      "publication": {
+        "revision": 1,
+        "sha256": "161b34174ce28923f3cefb1d2b726a3e4be0f9b2d193ae50013834bd95041902",
+        "byteSize": 282106,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-1ae818940149-020",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-020.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 20",
+      "publication": {
+        "revision": 1,
+        "sha256": "1ae8189401491110862b70972432269657d4c05d9cb5b7e8f2708ddc7fa9453d",
+        "byteSize": 332112,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-b5c00ecdb046-021",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-021.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 21",
+      "publication": {
+        "revision": 1,
+        "sha256": "b5c00ecdb046695f90506b85e111f9c065d605bf7f73c076ae8d25a9cedd8ee7",
+        "byteSize": 262913,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-2abe45316348-022",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-022.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 22",
+      "publication": {
+        "revision": 1,
+        "sha256": "2abe4531634803b26f23ea3f4518145905c678856fa60e097bd8f0697f23449b",
+        "byteSize": 438462,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-6b1d8dbb7364-023",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-023.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2045,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 23",
+      "publication": {
+        "revision": 1,
+        "sha256": "6b1d8dbb7364462177b0ef173aba7dfbb28a23f70c8192a6c43b9bdc17fac822",
+        "byteSize": 452690,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-6af554a1790a-024",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-024.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 24",
+      "publication": {
+        "revision": 1,
+        "sha256": "6af554a1790a9dfe6fd57ff41d4dd8e508673ac214b8c380db4bfd0cf413d4c0",
+        "byteSize": 287554,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-7f902ca108c2-025",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-025.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 25",
+      "publication": {
+        "revision": 1,
+        "sha256": "7f902ca108c2c43e5fcd1c825e63d2ec8e1d8de82b28ff1fe980a816efa4d879",
+        "byteSize": 312390,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-8ad6067faf51-026",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-026.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1715,
+        "height": 1143
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 26",
+      "publication": {
+        "revision": 1,
+        "sha256": "8ad6067faf518b704409f6a38ad696790f8a867335f942c0b2b705f76a9cbdf1",
+        "byteSize": 234808,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-ef93653c9bac-027",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-027.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 27",
+      "publication": {
+        "revision": 1,
+        "sha256": "ef93653c9bac9421468fe16e02b62c606e9a33ffe38b754d72d9ff40118a7925",
+        "byteSize": 553370,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-f8efdb7de95d-028",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-028.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 28",
+      "publication": {
+        "revision": 1,
+        "sha256": "f8efdb7de95db2f578aaebfe006caeb62223084f0be8ec6b1cdb22b5abeaf279",
+        "byteSize": 362769,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-8cb94ede458f-029",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-029.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 29",
+      "publication": {
+        "revision": 1,
+        "sha256": "8cb94ede458f769b86ec80a3b4852c769ff8e3b7cd78ab97280f7334e741b127",
+        "byteSize": 787125,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-c420d1300c1c-030",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-030.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 30",
+      "publication": {
+        "revision": 1,
+        "sha256": "c420d1300c1c882e6131992d3b434781d7eb83148cb1c9e3a2448a6baa732217",
+        "byteSize": 386866,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-1ac5f3b29a14-031",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-031.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1705,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 31",
+      "publication": {
+        "revision": 1,
+        "sha256": "1ac5f3b29a14d7a62f8ff6fa5635f393821140d70a233814fc7b2fe10829cc0e",
+        "byteSize": 275431,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-7bd0740f0f49-032",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-032.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1500,
+        "height": 2250
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 32",
+      "publication": {
+        "revision": 1,
+        "sha256": "7bd0740f0f49fc671bb22eb3272979a84921bba3aafee7389b11bdceedd45654",
+        "byteSize": 321018,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-337f5bc48350-033",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-033.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 33",
+      "publication": {
+        "revision": 1,
+        "sha256": "337f5bc483501b90bee83a930c71f8bc4114d5bc0e570a48b7d10e0eb43f480c",
+        "byteSize": 321740,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-24217496bf4d-034",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-034.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1500,
+        "height": 2250
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 34",
+      "publication": {
+        "revision": 1,
+        "sha256": "24217496bf4d405c430d899a67aa56d62b3cbe8aea78b33dc3e45fce89903a2d",
+        "byteSize": 261953,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-342f54d94487-035",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-035.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 35",
+      "publication": {
+        "revision": 1,
+        "sha256": "342f54d94487dc10134d580aca3d553942cb95cf4c2ae1c4597e01f25715df4e",
+        "byteSize": 411229,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5fe585949b4d-036",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-036.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 36",
+      "publication": {
+        "revision": 1,
+        "sha256": "5fe585949b4d8d57f6015e14f6149a450ec38454135f4512b014c17b3c8957ad",
+        "byteSize": 452454,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5fbd20d944d4-037",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-037.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 37",
+      "publication": {
+        "revision": 1,
+        "sha256": "5fbd20d944d4722c5ed7eefd1ff0c3c860f9f74d17c5f4bf037f1b709c220fe7",
+        "byteSize": 297550,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-2b3020abd111-038",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-038.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 38",
+      "publication": {
+        "revision": 1,
+        "sha256": "2b3020abd1112699c34bed95a0fbc61dfffe897d6c17b81b6487b765f9641e76",
+        "byteSize": 261625,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-b8894984768c-039",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-039.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 39",
+      "publication": {
+        "revision": 1,
+        "sha256": "b8894984768c555fae9ed1f3e6bd6c50596d04c02ec1b38b1689eafb169e68bd",
+        "byteSize": 292342,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-75153dcadbef-040",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-040.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 40",
+      "publication": {
+        "revision": 1,
+        "sha256": "75153dcadbef6c0bf21efae983aff37defff4092c285dbec6e2651d2f86845ce",
+        "byteSize": 481709,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-fab99e452285-041",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-041.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 41",
+      "publication": {
+        "revision": 1,
+        "sha256": "fab99e452285f56af113ac9b444659888080941e68a617c153fe6175f835af3d",
+        "byteSize": 555774,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5eceeac2b8fd-042",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-042.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 42",
+      "publication": {
+        "revision": 1,
+        "sha256": "5eceeac2b8fda84b6d16ec0dbd2ac87491d01c720d4e44002b7bb02c17be1a81",
+        "byteSize": 548229,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-93b213a36c0f-043",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-043.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 43",
+      "publication": {
+        "revision": 1,
+        "sha256": "93b213a36c0ff80fa7012f0514f012c13613948b1b3094bbf6781c768270839e",
+        "byteSize": 411303,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-5c171c69cce7-044",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-044.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 44",
+      "publication": {
+        "revision": 1,
+        "sha256": "5c171c69cce7552de4789bddb37403de5ebd311c815c0a97f332894d06c7d9f0",
+        "byteSize": 396328,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-8cee077c76be-045",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-045.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 45",
+      "publication": {
+        "revision": 1,
+        "sha256": "8cee077c76be601a44fb7a1db4051a4cd7ff3178447eddcf99f4b854b8ba817b",
+        "byteSize": 236976,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-dbbd8c1409b4-046",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-046.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 46",
+      "publication": {
+        "revision": 1,
+        "sha256": "dbbd8c1409b4c8ff502fdd3bd2c21ad4cfc2901db97afff8e99c36ddd8b940d9",
+        "byteSize": 211337,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-08fbb7a86dab-047",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-047.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 47",
+      "publication": {
+        "revision": 1,
+        "sha256": "08fbb7a86dab145afc676a94c1f8233e15a30f4d712c8c3821f555c400bf7459",
+        "byteSize": 273100,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-24f42110d471-048",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-048.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 48",
+      "publication": {
+        "revision": 1,
+        "sha256": "24f42110d4719cf4d54b89906538188a331b75aa5092ab44ee133aaea661432d",
+        "byteSize": 459189,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-7fd7c6678721-049",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-049.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 49",
+      "publication": {
+        "revision": 1,
+        "sha256": "7fd7c66787215ec98ecfb656002f2f75556c7ab4a28883c0b4a6e11b225b910f",
+        "byteSize": 361638,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-382152e1f9a9-050",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-050.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 50",
+      "publication": {
+        "revision": 1,
+        "sha256": "382152e1f9a9eca4e3c3d0f29085ea610ef68546d86c1f07446d8b8edf745cfd",
+        "byteSize": 470890,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-ff5cf94a3f16-051",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-051.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 51",
+      "publication": {
+        "revision": 1,
+        "sha256": "ff5cf94a3f16398914c433fe002001c9a6b6ddb5b24e2244928a8ba618ddde52",
+        "byteSize": 108115,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-d493f112c429-052",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-052.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 52",
+      "publication": {
+        "revision": 1,
+        "sha256": "d493f112c42969c3922db03a9a0077320d46f0172a901c8079e8b40ce92f294a",
+        "byteSize": 149817,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-e548b22584fd-053",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-053.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 53",
+      "publication": {
+        "revision": 1,
+        "sha256": "e548b22584fd553c7c9cb77c60bc4460fd9f87a6052c4eeb99ec592d5de65b15",
+        "byteSize": 107561,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-ecc6a563294b-054",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-054.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 54",
+      "publication": {
+        "revision": 1,
+        "sha256": "ecc6a563294b926d9d1bbe8457f41ada4fea0faf073b1fe743172808f8871d8e",
+        "byteSize": 185281,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-d2c23b77e6e5-055",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-055.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 55",
+      "publication": {
+        "revision": 1,
+        "sha256": "d2c23b77e6e5a087ed258dc81008bdd6da83a4030b0a0e892972ddba1e55dae3",
+        "byteSize": 119248,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-9ed9910e3279-056",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-056.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 56",
+      "publication": {
+        "revision": 1,
+        "sha256": "9ed9910e3279cb6d66d5ddad18f01d737b1dbc14a3b745c69a4370ca93ecaed0",
+        "byteSize": 368417,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-bfd194b60b2a-057",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-057.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1706,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 57",
+      "publication": {
+        "revision": 1,
+        "sha256": "bfd194b60b2a52b74e8eabe9b4c703aa2898c2466e2c753e14dbe59c95fce678",
+        "byteSize": 220049,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-32f082bcdfac-058",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-058.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 58",
+      "publication": {
+        "revision": 1,
+        "sha256": "32f082bcdfac26c3050575e32b13e7c193497a68d8788d6cabc9863d02991d68",
+        "byteSize": 221081,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-e1c3c0efa608-059",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-059.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 59",
+      "publication": {
+        "revision": 1,
+        "sha256": "e1c3c0efa60868df23b53a23b4e196a881b13e9814744c392a61eae89ea49dca",
+        "byteSize": 241452,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-14756d3f52f2-060",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-060.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 60",
+      "publication": {
+        "revision": 1,
+        "sha256": "14756d3f52f2ec9478ac72d0957b44c5145b6793adf50859960747218b7daad1",
+        "byteSize": 292709,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-059d2c5a7bd4-061",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-061.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 61",
+      "publication": {
+        "revision": 1,
+        "sha256": "059d2c5a7bd4410da78964c403f4fc9f6f87a43ac99d731a9d0d489de360f60f",
+        "byteSize": 277902,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-77824e1c746c-062",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-062.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 62",
+      "publication": {
+        "revision": 1,
+        "sha256": "77824e1c746ce522c455e67d11d44f3a1824500cc79c640a9e836abab09c3c94",
+        "byteSize": 268430,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-15cb9bb13d92-063",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-063.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 63",
+      "publication": {
+        "revision": 1,
+        "sha256": "15cb9bb13d9229af42d922ff6dea46fd7647ead4557b3d9df8f4a5847a68b1ab",
+        "byteSize": 193602,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-709b645b73fd-064",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-064.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 64",
+      "publication": {
+        "revision": 1,
+        "sha256": "709b645b73fd897d4a018a960c486e42d35d36f66d10b6c69d56a9cd66e7ee7f",
+        "byteSize": 295288,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-19970f191a04-065",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-065.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 65",
+      "publication": {
+        "revision": 1,
+        "sha256": "19970f191a04f20ae6bea4c2cbc692f543d5ed5f5bdf45996617958cee22bdc4",
+        "byteSize": 461708,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-31fb05273abd-066",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-066.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 66",
+      "publication": {
+        "revision": 1,
+        "sha256": "31fb05273abd93ba71287e775fbe202fe0152ede820f36933708080134f20ae4",
+        "byteSize": 564277,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-c63fc147dee2-067",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-067.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 67",
+      "publication": {
+        "revision": 1,
+        "sha256": "c63fc147dee21665e508b7ba5ec4458555b81846f06c53d65bf7214f0edfb9ce",
+        "byteSize": 322319,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-1fbcf189cd50-068",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-068.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 68",
+      "publication": {
+        "revision": 1,
+        "sha256": "1fbcf189cd505e54bff82b6a1cd7f4ed9869bdae3771f69e2b4299454c1fe5de",
+        "byteSize": 251736,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-00865e6301c4-069",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-069.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 69",
+      "publication": {
+        "revision": 1,
+        "sha256": "00865e6301c417108b90bb07cb0a05fc322a031e196ff160e4ba622d10ae0d6e",
+        "byteSize": 242483,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-a180a7b7bbbd-070",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-070.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 70",
+      "publication": {
+        "revision": 1,
+        "sha256": "a180a7b7bbbda8c2058eb6154a88ae822cc25d2434f2d428213ae591840c53f5",
+        "byteSize": 394352,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-faabdc1c9388-071",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-071.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 71",
+      "publication": {
+        "revision": 1,
+        "sha256": "faabdc1c9388aa03b5d47907f59979cd102b87f4cbfa359481fb5d0709063474",
+        "byteSize": 460016,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-e7ceb7bc4abc-072",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-072.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 72",
+      "publication": {
+        "revision": 1,
+        "sha256": "e7ceb7bc4abcacf6582b6ff4cc2a8983ec78db03b0afba6f671523998625f498",
+        "byteSize": 390316,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-48113b0cd6b6-073",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-073.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 73",
+      "publication": {
+        "revision": 1,
+        "sha256": "48113b0cd6b616bbefa54d132e074c89481bc765415803153678e19cec4ce9ff",
+        "byteSize": 227701,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-509a9d478f3f-074",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-074.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 74",
+      "publication": {
+        "revision": 1,
+        "sha256": "509a9d478f3f9fd8ab9a333a3d6d51b64cf54bc250b674f1a40dd7f544523499",
+        "byteSize": 177942,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-a1dae65d0f67-075",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-075.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 75",
+      "publication": {
+        "revision": 1,
+        "sha256": "a1dae65d0f67a44917982e9e5bcebc4fd893b12e8893114ba8e4736ea2db9fd0",
+        "byteSize": 285161,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-a4fc7bad4a42-076",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-076.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 76",
+      "publication": {
+        "revision": 1,
+        "sha256": "a4fc7bad4a42f1d235d2a693d82e07870ce115488cc81104271e28dd827f03fa",
+        "byteSize": 332871,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-b589ce5adc78-077",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-077.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 77",
+      "publication": {
+        "revision": 1,
+        "sha256": "b589ce5adc7877ee753acd0597915fc1a5f7bc97d9e71a286985baf4f4026a5f",
+        "byteSize": 337144,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-21b0a1aded16-078",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-078.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 78",
+      "publication": {
+        "revision": 1,
+        "sha256": "21b0a1aded1637a05ac1b4f521843311976529842da7b03a15ac566afd0b0026",
+        "byteSize": 456435,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-fb757bf02853-079",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-079.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 79",
+      "publication": {
+        "revision": 1,
+        "sha256": "fb757bf028535c6dd7e6c50ddc5ef0e539ccc2ca8fc45aa35062a2768576942e",
+        "byteSize": 251967,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-d916f98f45fb-080",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-080.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 80",
+      "publication": {
+        "revision": 1,
+        "sha256": "d916f98f45fb1e23f655d747cd9160e7291fab11043756399bdeeb065b4c6d57",
+        "byteSize": 298502,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-a2935172d35c-081",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-081.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 81",
+      "publication": {
+        "revision": 1,
+        "sha256": "a2935172d35c582b9e18ad5fbec04edc04b24e19b97dfdfffdc9df462a57cd94",
+        "byteSize": 543466,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-e2674cd0f65a-082",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-082.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 82",
+      "publication": {
+        "revision": 1,
+        "sha256": "e2674cd0f65a73f3da2912a300a8eb55e9e0611e8943266c15637623c52b3029",
+        "byteSize": 228230,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-087cf43354eb-083",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-083.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 83",
+      "publication": {
+        "revision": 1,
+        "sha256": "087cf43354ebb5b0caf9a027e02340ea3a9c18cc76099a4e07807ec253295742",
+        "byteSize": 1154450,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
+    },
+    {
+      "id": "image-miami-2026-861f63cf63a6-084",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/miami-2026/miami-south-beach/media-miami-2026-miami-south-beach-d4ec637ec53cc427/miami-south-beach-084.png"
+      },
+      "intrinsic": {
+        "mimeType": "image/png",
+        "width": 1024,
+        "height": 1536
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Miami Winter Getaway (2026) journey photograph 84",
+      "publication": {
+        "revision": 1,
+        "sha256": "861f63cf63a6f05e246ce7d634879b0d3fc31b95b656b833b376ee109adcf761",
+        "byteSize": 1957785,
+        "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+      }
     }
   ],
   "placements": [
@@ -2371,6 +5701,1449 @@
       "sortOrder": 1,
       "publicationSequence": 14,
       "batchId": "media-usvi-lovango-cay-7dba63da772c6e25"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-37c3e530fb78-001",
+      "assetId": "image-miami-37c3e530fb78-001",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-4a54ff978390-002",
+      "assetId": "image-miami-4a54ff978390-002",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-f0e6a6de24b3-003",
+      "assetId": "image-miami-f0e6a6de24b3-003",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-a3d0b4ab9d7e-004",
+      "assetId": "image-miami-a3d0b4ab9d7e-004",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-1707377022fb-005",
+      "assetId": "image-miami-1707377022fb-005",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-ed79c57812ff-006",
+      "assetId": "image-miami-ed79c57812ff-006",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-f0d7aa8ffb88-007",
+      "assetId": "image-miami-f0d7aa8ffb88-007",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-3570a3ec9f73-008",
+      "assetId": "image-miami-3570a3ec9f73-008",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-e0458c707b05-009",
+      "assetId": "image-miami-e0458c707b05-009",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-bce31d4ad703-010",
+      "assetId": "image-miami-bce31d4ad703-010",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 10,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-43ad2563cae8-011",
+      "assetId": "image-miami-43ad2563cae8-011",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 11,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-75f9a310d1fb-012",
+      "assetId": "image-miami-75f9a310d1fb-012",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 12,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-d8410b185e4b-013",
+      "assetId": "image-miami-d8410b185e4b-013",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 13,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-599cab44423e-014",
+      "assetId": "image-miami-599cab44423e-014",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 14,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-1d78dbf27f8d-015",
+      "assetId": "image-miami-1d78dbf27f8d-015",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 15,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-6bc4cf452821-016",
+      "assetId": "image-miami-6bc4cf452821-016",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 16,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-e0458c707b05-017",
+      "assetId": "image-miami-e0458c707b05-017",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 17,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-everglades-image-miami-d2a35e9cb085-018",
+      "assetId": "image-miami-d2a35e9cb085-018",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-everglades",
+      "placeId": "everglades",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 18,
+      "publicationSequence": 15,
+      "batchId": "media-miami-everglades-eca7fe02357c9788"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-674cd969d0f3-001",
+      "assetId": "image-miami-674cd969d0f3-001",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-529b6b6a518b-002",
+      "assetId": "image-miami-529b6b6a518b-002",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-0ba76360a606-003",
+      "assetId": "image-miami-0ba76360a606-003",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-662fbc3fb188-004",
+      "assetId": "image-miami-662fbc3fb188-004",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-8eed37b43275-005",
+      "assetId": "image-miami-8eed37b43275-005",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-d81bfc971de8-006",
+      "assetId": "image-miami-d81bfc971de8-006",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-879857e8b43d-007",
+      "assetId": "image-miami-879857e8b43d-007",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-c837c9c08d94-008",
+      "assetId": "image-miami-c837c9c08d94-008",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-oleta-river-state-park-image-miami-5da46085cf23-009",
+      "assetId": "image-miami-5da46085cf23-009",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-oleta-river-state-park",
+      "placeId": "oleta-river-state-park",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 16,
+      "batchId": "media-miami-oleta-river-state-park-e5d79b9068b4b960"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a264f3991eb1-001",
+      "assetId": "image-miami-2026-a264f3991eb1-001",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-1d1fc161574f-002",
+      "assetId": "image-miami-2026-1d1fc161574f-002",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-142f6d4666cf-003",
+      "assetId": "image-miami-2026-142f6d4666cf-003",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5fd04cb899df-004",
+      "assetId": "image-miami-2026-5fd04cb899df-004",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a8701cbf6c07-005",
+      "assetId": "image-miami-2026-a8701cbf6c07-005",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-0dbbb0a6e237-006",
+      "assetId": "image-miami-2026-0dbbb0a6e237-006",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-7f163011f9ef-007",
+      "assetId": "image-miami-2026-7f163011f9ef-007",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-b99c5b4e11fa-008",
+      "assetId": "image-miami-2026-b99c5b4e11fa-008",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-4fff55a850e8-009",
+      "assetId": "image-miami-2026-4fff55a850e8-009",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-22fd993647be-010",
+      "assetId": "image-miami-2026-22fd993647be-010",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 10,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-9b99507f1f03-011",
+      "assetId": "image-miami-2026-9b99507f1f03-011",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 11,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5c53a3c28023-012",
+      "assetId": "image-miami-2026-5c53a3c28023-012",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 12,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-1abbe43a9d87-013",
+      "assetId": "image-miami-2026-1abbe43a9d87-013",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 13,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-20371147e0cb-014",
+      "assetId": "image-miami-2026-20371147e0cb-014",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 14,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-d2d80e0c2259-015",
+      "assetId": "image-miami-2026-d2d80e0c2259-015",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 15,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-00b1ca6e61ac-016",
+      "assetId": "image-miami-2026-00b1ca6e61ac-016",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 16,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-c1b23d770604-017",
+      "assetId": "image-miami-2026-c1b23d770604-017",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 17,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-92bb1d2a90ff-018",
+      "assetId": "image-miami-2026-92bb1d2a90ff-018",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 18,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-161b34174ce2-019",
+      "assetId": "image-miami-2026-161b34174ce2-019",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 19,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-1ae818940149-020",
+      "assetId": "image-miami-2026-1ae818940149-020",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 20,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-b5c00ecdb046-021",
+      "assetId": "image-miami-2026-b5c00ecdb046-021",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 21,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-2abe45316348-022",
+      "assetId": "image-miami-2026-2abe45316348-022",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 22,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-6b1d8dbb7364-023",
+      "assetId": "image-miami-2026-6b1d8dbb7364-023",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 23,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-6af554a1790a-024",
+      "assetId": "image-miami-2026-6af554a1790a-024",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 24,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-7f902ca108c2-025",
+      "assetId": "image-miami-2026-7f902ca108c2-025",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 25,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-8ad6067faf51-026",
+      "assetId": "image-miami-2026-8ad6067faf51-026",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 26,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-ef93653c9bac-027",
+      "assetId": "image-miami-2026-ef93653c9bac-027",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 27,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-f8efdb7de95d-028",
+      "assetId": "image-miami-2026-f8efdb7de95d-028",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 28,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-8cb94ede458f-029",
+      "assetId": "image-miami-2026-8cb94ede458f-029",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 29,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-c420d1300c1c-030",
+      "assetId": "image-miami-2026-c420d1300c1c-030",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 30,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-1ac5f3b29a14-031",
+      "assetId": "image-miami-2026-1ac5f3b29a14-031",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 31,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-7bd0740f0f49-032",
+      "assetId": "image-miami-2026-7bd0740f0f49-032",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 32,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-337f5bc48350-033",
+      "assetId": "image-miami-2026-337f5bc48350-033",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 33,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-24217496bf4d-034",
+      "assetId": "image-miami-2026-24217496bf4d-034",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 34,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-342f54d94487-035",
+      "assetId": "image-miami-2026-342f54d94487-035",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 35,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5fe585949b4d-036",
+      "assetId": "image-miami-2026-5fe585949b4d-036",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 36,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5fbd20d944d4-037",
+      "assetId": "image-miami-2026-5fbd20d944d4-037",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 37,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-2b3020abd111-038",
+      "assetId": "image-miami-2026-2b3020abd111-038",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 38,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-b8894984768c-039",
+      "assetId": "image-miami-2026-b8894984768c-039",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 39,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-75153dcadbef-040",
+      "assetId": "image-miami-2026-75153dcadbef-040",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 40,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-fab99e452285-041",
+      "assetId": "image-miami-2026-fab99e452285-041",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 41,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5eceeac2b8fd-042",
+      "assetId": "image-miami-2026-5eceeac2b8fd-042",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 42,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-93b213a36c0f-043",
+      "assetId": "image-miami-2026-93b213a36c0f-043",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 43,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-5c171c69cce7-044",
+      "assetId": "image-miami-2026-5c171c69cce7-044",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 44,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-8cee077c76be-045",
+      "assetId": "image-miami-2026-8cee077c76be-045",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 45,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-dbbd8c1409b4-046",
+      "assetId": "image-miami-2026-dbbd8c1409b4-046",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 46,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-08fbb7a86dab-047",
+      "assetId": "image-miami-2026-08fbb7a86dab-047",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 47,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-24f42110d471-048",
+      "assetId": "image-miami-2026-24f42110d471-048",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 48,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-7fd7c6678721-049",
+      "assetId": "image-miami-2026-7fd7c6678721-049",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 49,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-382152e1f9a9-050",
+      "assetId": "image-miami-2026-382152e1f9a9-050",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 50,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-ff5cf94a3f16-051",
+      "assetId": "image-miami-2026-ff5cf94a3f16-051",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 51,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-d493f112c429-052",
+      "assetId": "image-miami-2026-d493f112c429-052",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 52,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-e548b22584fd-053",
+      "assetId": "image-miami-2026-e548b22584fd-053",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 53,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-ecc6a563294b-054",
+      "assetId": "image-miami-2026-ecc6a563294b-054",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 54,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-d2c23b77e6e5-055",
+      "assetId": "image-miami-2026-d2c23b77e6e5-055",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 55,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-9ed9910e3279-056",
+      "assetId": "image-miami-2026-9ed9910e3279-056",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 56,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-bfd194b60b2a-057",
+      "assetId": "image-miami-2026-bfd194b60b2a-057",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 57,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-32f082bcdfac-058",
+      "assetId": "image-miami-2026-32f082bcdfac-058",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 58,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-e1c3c0efa608-059",
+      "assetId": "image-miami-2026-e1c3c0efa608-059",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 59,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-14756d3f52f2-060",
+      "assetId": "image-miami-2026-14756d3f52f2-060",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 60,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-059d2c5a7bd4-061",
+      "assetId": "image-miami-2026-059d2c5a7bd4-061",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 61,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-77824e1c746c-062",
+      "assetId": "image-miami-2026-77824e1c746c-062",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 62,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-15cb9bb13d92-063",
+      "assetId": "image-miami-2026-15cb9bb13d92-063",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 63,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-709b645b73fd-064",
+      "assetId": "image-miami-2026-709b645b73fd-064",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 64,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-19970f191a04-065",
+      "assetId": "image-miami-2026-19970f191a04-065",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 65,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-31fb05273abd-066",
+      "assetId": "image-miami-2026-31fb05273abd-066",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 66,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-c63fc147dee2-067",
+      "assetId": "image-miami-2026-c63fc147dee2-067",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 67,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-1fbcf189cd50-068",
+      "assetId": "image-miami-2026-1fbcf189cd50-068",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 68,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-00865e6301c4-069",
+      "assetId": "image-miami-2026-00865e6301c4-069",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 69,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a180a7b7bbbd-070",
+      "assetId": "image-miami-2026-a180a7b7bbbd-070",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 70,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-faabdc1c9388-071",
+      "assetId": "image-miami-2026-faabdc1c9388-071",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 71,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-e7ceb7bc4abc-072",
+      "assetId": "image-miami-2026-e7ceb7bc4abc-072",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 72,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-48113b0cd6b6-073",
+      "assetId": "image-miami-2026-48113b0cd6b6-073",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 73,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-509a9d478f3f-074",
+      "assetId": "image-miami-2026-509a9d478f3f-074",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 74,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a1dae65d0f67-075",
+      "assetId": "image-miami-2026-a1dae65d0f67-075",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 75,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a4fc7bad4a42-076",
+      "assetId": "image-miami-2026-a4fc7bad4a42-076",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 76,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-b589ce5adc78-077",
+      "assetId": "image-miami-2026-b589ce5adc78-077",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 77,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-21b0a1aded16-078",
+      "assetId": "image-miami-2026-21b0a1aded16-078",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 78,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-fb757bf02853-079",
+      "assetId": "image-miami-2026-fb757bf02853-079",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 79,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-d916f98f45fb-080",
+      "assetId": "image-miami-2026-d916f98f45fb-080",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 80,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-a2935172d35c-081",
+      "assetId": "image-miami-2026-a2935172d35c-081",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 81,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-e2674cd0f65a-082",
+      "assetId": "image-miami-2026-e2674cd0f65a-082",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 82,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-087cf43354eb-083",
+      "assetId": "image-miami-2026-087cf43354eb-083",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 83,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-miami-south-beach-2026-miami-south-beach-2026-miami-south-beach-image-miami-2026-861f63cf63a6-084",
+      "assetId": "image-miami-2026-861f63cf63a6-084",
+      "journeyId": "miami-south-beach-2026",
+      "visitId": "miami-south-beach-2026-miami-south-beach",
+      "placeId": "miami-south-beach",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 84,
+      "publicationSequence": 17,
+      "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
     }
   ],
   "batches": [
@@ -2602,6 +7375,153 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "4a04aef19ddc18271f4500b2f7c76fd27d9d3fd934c216875a4a3939b531a514"
+      }
+    },
+    {
+      "id": "media-miami-everglades-eca7fe02357c9788",
+      "sequence": 15,
+      "manifestSha256": "8d8fda8c2c9f13b37c6d833867c5e4eacd3346a2172851e8a4875a101f5bb8a1",
+      "journeyId": "miami-south-beach-2026",
+      "assetIds": [
+        "image-miami-37c3e530fb78-001",
+        "image-miami-4a54ff978390-002",
+        "image-miami-f0e6a6de24b3-003",
+        "image-miami-a3d0b4ab9d7e-004",
+        "image-miami-1707377022fb-005",
+        "image-miami-ed79c57812ff-006",
+        "image-miami-f0d7aa8ffb88-007",
+        "image-miami-3570a3ec9f73-008",
+        "image-miami-e0458c707b05-009",
+        "image-miami-bce31d4ad703-010",
+        "image-miami-43ad2563cae8-011",
+        "image-miami-75f9a310d1fb-012",
+        "image-miami-d8410b185e4b-013",
+        "image-miami-599cab44423e-014",
+        "image-miami-1d78dbf27f8d-015",
+        "image-miami-6bc4cf452821-016",
+        "image-miami-e0458c707b05-017",
+        "image-miami-d2a35e9cb085-018"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "de56979fd17aa2e1990e251cccc4724aa4f273c0ef7ac63b4751d65546c379bb"
+      }
+    },
+    {
+      "id": "media-miami-oleta-river-state-park-e5d79b9068b4b960",
+      "sequence": 16,
+      "manifestSha256": "3448271ee5fc8c660935ec03611d72d4ab9967c21dd693519efde7dc5629131f",
+      "journeyId": "miami-south-beach-2026",
+      "assetIds": [
+        "image-miami-674cd969d0f3-001",
+        "image-miami-529b6b6a518b-002",
+        "image-miami-0ba76360a606-003",
+        "image-miami-662fbc3fb188-004",
+        "image-miami-8eed37b43275-005",
+        "image-miami-d81bfc971de8-006",
+        "image-miami-879857e8b43d-007",
+        "image-miami-c837c9c08d94-008",
+        "image-miami-5da46085cf23-009"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "a9e233b2d438d9a59d5e62dbb4e7d67bd0a73040e689076dc468f9739a6a58c7"
+      }
+    },
+    {
+      "id": "media-miami-2026-miami-south-beach-d4ec637ec53cc427",
+      "sequence": 17,
+      "manifestSha256": "22e0d60d21879cea7e1d4ba00b336a5389c27ad937aa46434579005a3b0137da",
+      "journeyId": "miami-south-beach-2026",
+      "assetIds": [
+        "image-miami-2026-a264f3991eb1-001",
+        "image-miami-2026-1d1fc161574f-002",
+        "image-miami-2026-142f6d4666cf-003",
+        "image-miami-2026-5fd04cb899df-004",
+        "image-miami-2026-a8701cbf6c07-005",
+        "image-miami-2026-0dbbb0a6e237-006",
+        "image-miami-2026-7f163011f9ef-007",
+        "image-miami-2026-b99c5b4e11fa-008",
+        "image-miami-2026-4fff55a850e8-009",
+        "image-miami-2026-22fd993647be-010",
+        "image-miami-2026-9b99507f1f03-011",
+        "image-miami-2026-5c53a3c28023-012",
+        "image-miami-2026-1abbe43a9d87-013",
+        "image-miami-2026-20371147e0cb-014",
+        "image-miami-2026-d2d80e0c2259-015",
+        "image-miami-2026-00b1ca6e61ac-016",
+        "image-miami-2026-c1b23d770604-017",
+        "image-miami-2026-92bb1d2a90ff-018",
+        "image-miami-2026-161b34174ce2-019",
+        "image-miami-2026-1ae818940149-020",
+        "image-miami-2026-b5c00ecdb046-021",
+        "image-miami-2026-2abe45316348-022",
+        "image-miami-2026-6b1d8dbb7364-023",
+        "image-miami-2026-6af554a1790a-024",
+        "image-miami-2026-7f902ca108c2-025",
+        "image-miami-2026-8ad6067faf51-026",
+        "image-miami-2026-ef93653c9bac-027",
+        "image-miami-2026-f8efdb7de95d-028",
+        "image-miami-2026-8cb94ede458f-029",
+        "image-miami-2026-c420d1300c1c-030",
+        "image-miami-2026-1ac5f3b29a14-031",
+        "image-miami-2026-7bd0740f0f49-032",
+        "image-miami-2026-337f5bc48350-033",
+        "image-miami-2026-24217496bf4d-034",
+        "image-miami-2026-342f54d94487-035",
+        "image-miami-2026-5fe585949b4d-036",
+        "image-miami-2026-5fbd20d944d4-037",
+        "image-miami-2026-2b3020abd111-038",
+        "image-miami-2026-b8894984768c-039",
+        "image-miami-2026-75153dcadbef-040",
+        "image-miami-2026-fab99e452285-041",
+        "image-miami-2026-5eceeac2b8fd-042",
+        "image-miami-2026-93b213a36c0f-043",
+        "image-miami-2026-5c171c69cce7-044",
+        "image-miami-2026-8cee077c76be-045",
+        "image-miami-2026-dbbd8c1409b4-046",
+        "image-miami-2026-08fbb7a86dab-047",
+        "image-miami-2026-24f42110d471-048",
+        "image-miami-2026-7fd7c6678721-049",
+        "image-miami-2026-382152e1f9a9-050",
+        "image-miami-2026-ff5cf94a3f16-051",
+        "image-miami-2026-d493f112c429-052",
+        "image-miami-2026-e548b22584fd-053",
+        "image-miami-2026-ecc6a563294b-054",
+        "image-miami-2026-d2c23b77e6e5-055",
+        "image-miami-2026-9ed9910e3279-056",
+        "image-miami-2026-bfd194b60b2a-057",
+        "image-miami-2026-32f082bcdfac-058",
+        "image-miami-2026-e1c3c0efa608-059",
+        "image-miami-2026-14756d3f52f2-060",
+        "image-miami-2026-059d2c5a7bd4-061",
+        "image-miami-2026-77824e1c746c-062",
+        "image-miami-2026-15cb9bb13d92-063",
+        "image-miami-2026-709b645b73fd-064",
+        "image-miami-2026-19970f191a04-065",
+        "image-miami-2026-31fb05273abd-066",
+        "image-miami-2026-c63fc147dee2-067",
+        "image-miami-2026-1fbcf189cd50-068",
+        "image-miami-2026-00865e6301c4-069",
+        "image-miami-2026-a180a7b7bbbd-070",
+        "image-miami-2026-faabdc1c9388-071",
+        "image-miami-2026-e7ceb7bc4abc-072",
+        "image-miami-2026-48113b0cd6b6-073",
+        "image-miami-2026-509a9d478f3f-074",
+        "image-miami-2026-a1dae65d0f67-075",
+        "image-miami-2026-a4fc7bad4a42-076",
+        "image-miami-2026-b589ce5adc78-077",
+        "image-miami-2026-21b0a1aded16-078",
+        "image-miami-2026-fb757bf02853-079",
+        "image-miami-2026-d916f98f45fb-080",
+        "image-miami-2026-a2935172d35c-081",
+        "image-miami-2026-e2674cd0f65a-082",
+        "image-miami-2026-087cf43354eb-083",
+        "image-miami-2026-861f63cf63a6-084"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "2616654ee0a440c46c153b0e0c66de9b38a78b2e24c64b65bf056e641d550ee9"
       }
     }
   ]

@@ -61,7 +61,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "strongly-indicated",
     coordinatePrecision: "town",
     description:
-      "Harrogate formed part of the England route; the individual places and stories are still being confirmed.",
+      "Harrogate carries the England route north between the New Forest and York chapters.",
     externalLinks: {},
     verificationNotes:
       "Route presence is strongly indicated. Do not add attractions, lodging, or media without further evidence.",
@@ -173,7 +173,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "city",
     description:
-      "Málaga begins the southern Spain segment; its individual sights and stories are still being matched to source material.",
+      "Málaga begins the southern Spain segment and shifts the journey back toward the Mediterranean coast.",
     externalLinks: {},
     verificationNotes:
       "Confirmed at route and city level only.",
@@ -189,7 +189,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "territory",
     description:
-      "A confirmed point on the coastal route whose individual attractions and stop details remain to be documented.",
+      "A compact coastal chapter where the route meets the Strait of Gibraltar.",
     externalLinks: {},
     verificationNotes:
       "No individual Gibraltar attraction is asserted by this Place.",
@@ -205,7 +205,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "city",
     description:
-      "A confirmed coastal-city stop whose photographs, local stories, and exact timing still need to be reconciled.",
+      "A coastal city chapter shaped by Atlantic light, old streets, and the southern Spain route.",
     externalLinks: {},
     verificationNotes:
       "Confirmed at route and city level only.",

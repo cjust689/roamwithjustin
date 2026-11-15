@@ -91,7 +91,11 @@ function validateManifest(manifest, context) {
   }
   if (!journey) {
     errors.push(`${owner} references unknown Journey "${manifest.journeyId}"`)
-  } else if (manifest.journeySlug !== journey.slug) {
+  } else if (
+    ![journey.slug, ...(journey.legacySlugs || [])].includes(
+      manifest.journeySlug
+    )
+  ) {
     errors.push(
       `${owner} declares Journey slug "${manifest.journeySlug}"; expected "${journey.slug}"`
     )

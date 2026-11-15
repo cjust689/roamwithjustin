@@ -17,8 +17,9 @@ function destinationVisit(placeId, description) {
 
 export const utah2026Journey = Object.freeze({
   id: "utah-2026",
+  year: 2026,
   slug: "utah-2026",
-  title: "Utah, 2026",
+  title: "Utah (2026)",
   publicationStatus: "coming-soon",
   evidenceStatus: "confirmed",
   dateRange: {
@@ -42,11 +43,11 @@ export const utah2026Journey = Object.freeze({
   visits: [
     destinationVisit(
       "zion-national-park",
-      "Two days at Zion National Park are confirmed; trails, lodging, exact dates, and media are still being reconciled."
+      "Two days at Zion National Park begin the trip before the route turns north toward Park City."
     ),
     destinationVisit(
       "park-city",
-      "Five days in Park City focused on skiing and snowboarding; mountain details, lodging, and media are still being reconciled."
+      "Five days in Park City center the rest of the trip on skiing and snowboarding."
     ),
   ],
   days: [],

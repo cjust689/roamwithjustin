@@ -1,4 +1,4 @@
-import { journeyRecords } from "../journeys/index.mjs"
+import { getJourneyBySlug, journeyRecords } from "../journeys/index.mjs"
 import { atlasNodes } from "./atlas"
 import { addTripAtlasNavigation, buildTripViewModel } from "./projections.mjs"
 
@@ -12,5 +12,8 @@ export const trips = Object.freeze(
 )
 
 export function getTripViewModel(slug) {
-  return trips.find(trip => trip.id === slug) || null
+  const journey = getJourneyBySlug(slug)
+  return journey
+    ? trips.find(trip => trip.journeyId === journey.id) || null
+    : null
 }

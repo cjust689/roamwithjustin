@@ -172,7 +172,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "protected-area",
     description:
-      "Two days in Zion are confirmed for the separate 2026 Utah trip; individual trails, overlooks, and media remain to be matched.",
+      "Two days in Zion open the 2026 Utah trip before the journey turns north toward Park City.",
     externalLinks: {
       official: "https://www.nps.gov/zion/index.htm",
       maps:

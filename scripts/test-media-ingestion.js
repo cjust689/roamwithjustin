@@ -95,7 +95,7 @@ async function main() {
     const prepared = runNode(prepareArgs)
     assert.match(prepared.stdout, /usvi-st-john-2025/)
 
-    const packageDirectory = path.join(outputDirectory, "usvi")
+    const packageDirectory = path.join(outputDirectory, "usvi-2025")
     const manifestFile = path.join(
       packageDirectory,
       "publication-manifest.json"
@@ -103,7 +103,10 @@ async function main() {
     const manifestContents = fs.readFileSync(manifestFile, "utf8")
     const manifest = JSON.parse(manifestContents)
     assert.strictEqual(manifest.journeyId, "usvi-st-john-2025")
-    assert.strictEqual(manifest.r2Prefix, `images/usvi/${manifest.batchId}/`)
+    assert.strictEqual(
+      manifest.r2Prefix,
+      `images/usvi-2025/${manifest.batchId}/`
+    )
     assert.strictEqual(manifest.assets.length, 1)
     assert.strictEqual(manifest.assets[0].rights.status, "owned")
 
@@ -116,8 +119,9 @@ async function main() {
 
     const journey = {
       id: "usvi-st-john-2025",
-      slug: "usvi",
-      title: "St. John, USVI",
+      slug: "usvi-2025",
+      legacySlugs: ["usvi"],
+      title: "St. John, USVI (2025)",
       visits: [
         {
           id: "usvi-st-john-2025-waterlemon-cay",
@@ -127,6 +131,13 @@ async function main() {
     }
     assert.deepStrictEqual(
       validateManifest(manifest, { journeys: [journey] }).errors,
+      []
+    )
+    assert.deepStrictEqual(
+      validateManifest(
+        { ...manifest, journeySlug: "usvi" },
+        { journeys: [journey] }
+      ).errors,
       []
     )
 
@@ -147,7 +158,8 @@ async function main() {
 
     const revisionManifest = JSON.parse(JSON.stringify(manifest))
     revisionManifest.batchId = "media-usvi-explicit-revision"
-    revisionManifest.r2Prefix = "images/usvi/media-usvi-explicit-revision/"
+    revisionManifest.r2Prefix =
+      "images/usvi-2025/media-usvi-explicit-revision/"
     revisionManifest.assets[0].assetId = firstPlan.assetIds[0]
     revisionManifest.assets[0].revision = 2
     revisionManifest.assets[0].output.objectKey = `${revisionManifest.r2Prefix}${output.relativePath}`
@@ -170,7 +182,8 @@ async function main() {
 
     const staleRevision = JSON.parse(JSON.stringify(revisionManifest))
     staleRevision.batchId = "media-usvi-stale-revision"
-    staleRevision.r2Prefix = "images/usvi/media-usvi-stale-revision/"
+    staleRevision.r2Prefix =
+      "images/usvi-2025/media-usvi-stale-revision/"
     staleRevision.assets[0].output.objectKey = `${staleRevision.r2Prefix}${output.relativePath}`
     const stalePlan = planMediaIngestion(staleRevision, revisionPlan.records, {
       ...context,
@@ -238,7 +251,7 @@ async function main() {
     assert.match(placePrepared.stdout, /Place scope: Waterlemon Cay/)
     const placePackageDirectory = path.join(
       placeOutputDirectory,
-      "usvi-waterlemon-cay"
+      "usvi-2025-waterlemon-cay"
     )
     const placeManifestContents = fs.readFileSync(
       path.join(placePackageDirectory, "publication-manifest.json"),
@@ -256,7 +269,7 @@ async function main() {
     )
     assert.strictEqual(
       placeManifest.r2Prefix,
-      `images/usvi/waterlemon-cay/${placeManifest.batchId}/`
+      `images/usvi-2025/waterlemon-cay/${placeManifest.batchId}/`
     )
     assert.deepStrictEqual(placeManifest.assets[0].associations, {
       journeyId: "usvi-st-john-2025",
@@ -307,7 +320,7 @@ async function main() {
     assert.match(videoPrepared.stdout, /original MP4 bytes preserved/)
     const videoPackageDirectory = path.join(
       videoOutputDirectory,
-      "usvi-waterlemon-cay-videos"
+      "usvi-2025-waterlemon-cay-videos"
     )
     const videoManifestContents = fs.readFileSync(
       path.join(videoPackageDirectory, "publication-manifest.json"),
@@ -318,7 +331,7 @@ async function main() {
     assert.strictEqual(videoManifest.mediaKind, "video")
     assert.strictEqual(
       videoManifest.r2Prefix,
-      `videos/usvi/waterlemon-cay/${videoManifest.batchId}/`
+      `videos/usvi-2025/waterlemon-cay/${videoManifest.batchId}/`
     )
     assert.strictEqual(videoOutput.mimeType, "video/mp4")
     assert.strictEqual(videoOutput.relativePath, "waterlemon-cay-001.mp4")
@@ -455,7 +468,7 @@ async function main() {
     const alreadyScopedManifest = JSON.parse(JSON.stringify(placeManifest))
     alreadyScopedManifest.batchId = "media-usvi-already-scoped"
     alreadyScopedManifest.r2Prefix =
-      "images/usvi/waterlemon-cay/media-usvi-already-scoped/"
+      "images/usvi-2025/waterlemon-cay/media-usvi-already-scoped/"
     alreadyScopedManifest.assets[0].output.objectKey =
       `${alreadyScopedManifest.r2Prefix}${alreadyScopedManifest.assets[0].output.relativePath}`
     const alreadyScopedPlan = planMediaIngestion(
@@ -474,7 +487,7 @@ async function main() {
     const explicitRevisionManifest = JSON.parse(JSON.stringify(placeManifest))
     explicitRevisionManifest.batchId = "media-usvi-explicit-reassociation"
     explicitRevisionManifest.r2Prefix =
-      "images/usvi/waterlemon-cay/media-usvi-explicit-reassociation/"
+      "images/usvi-2025/waterlemon-cay/media-usvi-explicit-reassociation/"
     explicitRevisionManifest.assets[0].assetId = firstPlan.assetIds[0]
     explicitRevisionManifest.assets[0].revision = 2
     explicitRevisionManifest.assets[0].output.objectKey =

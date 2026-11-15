@@ -211,6 +211,7 @@ export function buildTripViewModel(journey) {
       image: resolveLodgingImage(stay.image),
     })),
     locations,
+    itineraryMode: journey.itineraryMode || "days",
     days: (journey.days || []).map(day => ({
       label: day.label,
       summary: day.summary,
@@ -340,7 +341,10 @@ export function buildAtlasNodeView(presentation) {
     // anchor lets their route position come from the first real stop they group.
     journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
     title: presentation.useJourneyIdentity ? journey.title : place.name,
-    eyebrow: presentation.eyebrow,
+    eyebrow:
+      presentation.eyebrow === "Coming soon"
+        ? journey.dateRange?.label || "Travel story"
+        : presentation.eyebrow,
     category: presentation.category,
     coordinates: place.coordinates ? [...place.coordinates] : null,
     camera: presentation.camera,

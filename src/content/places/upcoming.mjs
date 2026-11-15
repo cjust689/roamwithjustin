@@ -30,7 +30,7 @@ export const upcomingPlaces = Object.freeze([
     evidenceStatus: "unverified",
     coordinatePrecision: "country",
     description:
-      "A future Hungary story whose dates, route, and individual places are still being confirmed.",
+      "A 2024 journey through Hungary, remembered through views of the Hungarian Parliament and the Danube.",
     externalLinks: {
       official: "https://visithungary.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=Hungary",
