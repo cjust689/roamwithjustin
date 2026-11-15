@@ -15,9 +15,7 @@
         </router-link>
         <div class="story-hero-copy">
           <span class="story-eyebrow">
-            {{
-              trip.comingSoon ? "Coming soon" : `Travel story / ${trip.dates}`
-            }}
+            {{ `Travel story / ${trip.dates}` }}
           </span>
           <h1 :id="`story-title-${trip.id}`">{{ trip.name }}</h1>
           <p v-if="trip.description">{{ trip.description }}</p>
@@ -60,8 +58,8 @@
         id="journey-preview"
         class="story-shell journey-preview"
       >
-        <span class="story-eyebrow">Coming soon</span>
-        <h2>More from {{ trip.name }} is on the way.</h2>
+        <span class="story-eyebrow">Places on this journey</span>
+        <h2>Explore {{ trip.name }} by place.</h2>
 
         <div
           v-if="trip.locations.length"
@@ -197,9 +195,8 @@
             <h2>Photography and video</h2>
           </div>
           <p>
-            Newly published photographs and videos associated with this journey.
-            More specific locations and field notes are added only when
-            verified.
+            Photographs and videos from this journey, grouped with the places
+            and field notes that give them context.
           </p>
         </header>
 
@@ -259,9 +256,7 @@
               :alt="stay.name"
               loading="lazy"
             />
-            <div v-else class="lodging-media-placeholder" aria-hidden="true">
-              <span>Photography coming soon</span>
-            </div>
+            <div v-else class="lodging-media-placeholder" aria-hidden="true"></div>
             <div>
               <span>{{ stay.location }}</span>
               <h3>{{ stay.name }}</h3>
@@ -400,7 +395,7 @@ export default {
     },
     itineraryIntroduction() {
       return this.trip?.itineraryMode === "chapters"
-        ? "These experiences follow the known shape of the trip without pretending every outing belongs to a confirmed calendar day. Open a place for its story or jump to its Atlas pin."
+        ? "These chapters follow the trip by experience, giving each place room for its own story. Open a place for field notes or jump to its Atlas pin."
         : "Open a place for photographs and field notes, or jump directly to its Atlas pin when that stop has a mapped presentation."
     },
   },

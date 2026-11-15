@@ -32,7 +32,7 @@ export const costaRica2025Journey = Object.freeze({
   fullImage: null,
   gallery: [],
   description:
-    "A rainforest-to-Pacific journey through La Fortuna and Bajos del Toro, the Osa Peninsula, Uvita, and the San José area.",
+    "A journey from the rainforests around La Fortuna and Bajos del Toro to the Osa Peninsula, Uvita, and the San José area.",
   duration: "",
   audience: "",
   costLevel: "",

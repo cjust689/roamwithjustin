@@ -7,9 +7,9 @@
       </div>
       <div class="intro-copy">
         <p>
-          Day-by-day routes, photographs, places, lodging, and the practical
-          details behind each trip. Switch to the Atlas whenever geography tells
-          the story better.
+          Routes by day, photographs, places, lodging, and the practical details
+          behind each trip. Switch to the Atlas whenever geography tells the
+          story better.
         </p>
         <router-link to="/atlas">Explore the interactive Atlas</router-link>
       </div>
@@ -31,7 +31,7 @@
           <div v-else class="story-image-empty" aria-hidden="true"></div>
           <div class="story-shade"></div>
           <span class="story-status">
-            {{ trip.comingSoon ? "Coming soon" : trip.dates }}
+            {{ trip.dates }}
           </span>
         </div>
 
@@ -42,7 +42,7 @@
 
           <div class="story-actions">
             <router-link class="story-primary" :to="`/trips/${trip.id}`">
-              {{ trip.comingSoon ? "Preview the journey" : "Read the story" }}
+              {{ trip.comingSoon ? "Explore the journey" : "Read the story" }}
               <b aria-hidden="true">&rarr;</b>
             </router-link>
             <router-link

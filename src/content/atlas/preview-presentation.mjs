@@ -365,7 +365,7 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "hungary-2024",
     parentId: null,
     eyebrow: "Coming soon",
-    category: "Journey details in progress",
+    category: "Danube city views",
     camera: { center: [19.5060937, 47.1817585], zoom: 6.4, pitch: 38, bearing: 5 },
     hero: {
       assetId: "image-hungary-hungary",

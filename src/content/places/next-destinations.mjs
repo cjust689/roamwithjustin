@@ -11,7 +11,7 @@ export const nextDestinationPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "city",
     description:
-      "A quiet river-city morning remembered through sunrise aerial views over downtown Peoria and the Illinois River.",
+      "A quiet river city morning remembered through sunrise aerial views over downtown Peoria and the Illinois River.",
     externalLinks: {},
     verificationNotes:
       "The city and river footage are confirmed; the trip date and precise launch or capture position remain unverified.",
