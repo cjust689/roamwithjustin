@@ -20,7 +20,10 @@
 
 <script>
 import { adSenseConfig } from "@/config/adsense.mjs"
-import { initializeAdSenseUnit } from "@/services/adsense.mjs"
+import {
+  ensureAdSenseLoader,
+  initializeAdSenseUnit,
+} from "@/services/adsense.mjs"
 
 export default {
   name: "AdSlot",
@@ -36,6 +39,7 @@ export default {
   },
   data() {
     return {
+      loader: null,
       observer: null,
       unfilled: false,
     }
@@ -52,19 +56,28 @@ export default {
     if (!this.configured || !this.$refs.unit) return
 
     this.observeFillStatus()
+    this.loader = ensureAdSenseLoader()
+    this.loader?.addEventListener("error", this.handleLoaderFailure, {
+      once: true,
+    })
     this.$nextTick(() => initializeAdSenseUnit(this.$refs.unit))
   },
   // Vue 2 lifecycle hook. The lint preset also checks Vue 3 conventions.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.loader?.removeEventListener("error", this.handleLoaderFailure)
     this.observer?.disconnect()
   },
   methods: {
+    handleLoaderFailure() {
+      this.unfilled = true
+    },
     observeFillStatus() {
       if (typeof MutationObserver === "undefined") return
 
       this.observer = new MutationObserver(() => {
-        this.unfilled = this.$refs.unit?.dataset.adStatus === "unfilled"
+        const status = this.$refs.unit?.dataset.adStatus
+        this.unfilled = ["unfilled", "unfill-optimized"].includes(status)
       })
       this.observer.observe(this.$refs.unit, {
         attributes: true,
@@ -102,7 +115,8 @@ export default {
   min-height: 90px;
 }
 
-.ad-placement-unit[data-ad-status="unfilled"] {
+.ad-placement-unit[data-ad-status="unfilled"],
+.ad-placement-unit[data-ad-status="unfill-optimized"] {
   display: none !important;
 }
 
