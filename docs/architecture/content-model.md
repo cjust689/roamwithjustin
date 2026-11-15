@@ -86,11 +86,12 @@ Place gives the confirmed airboat outing a truthful regional association while
 the unresolved operator, launch, route, and park jurisdiction remain unpinned;
 Shark Valley stays a separate, precise child Place.
 
-The current 18-image Everglades batch enters through the generated Media
-registry and resolves against the canonical Everglades Visit. That placement
-does not establish a more precise airboat route or prove that every frame
-depicts the airboat. The Journey remains `coming-soon` while its other Place
-media, captions, editorial roles, and final curation are incomplete.
+The current 18-image Everglades batch and 9-image Oleta batch enter through the
+generated Media registry and resolve against their canonical Visits. Those
+placements do not establish a more precise airboat route, prove that every
+Everglades frame depicts the airboat, or identify Oleta's unnamed island. The
+Journey remains `coming-soon` while its other Place media, captions, editorial
+roles, and final curation are incomplete.
 
 These previews may omit media, venues, external links, itinerary days, and
 unsupported details. Their Atlas panels show a public coming-soon treatment,
