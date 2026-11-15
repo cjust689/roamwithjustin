@@ -150,6 +150,11 @@ phone, or booking actions when the source has been confirmed. External actions
 are derived from canonical Place/Journey links and remain separate from map
 rendering so commercial or affiliate behavior does not enter the map engine.
 
+Atlas media strips render video entries as dedicated `Play video` tiles rather
+than borrowing the Place hero as a poster. This prevents a photograph and a
+video from appearing to be duplicate items. An explicitly registered video
+poster is reserved for the opened video player; a missing poster remains empty.
+
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
 Place summaries remain visible, and their top-level navigation cards use the

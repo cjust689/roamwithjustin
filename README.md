@@ -276,6 +276,21 @@ instead of borrowing the Journey cover.
 Worker deployment and credential setup are documented in
 [the R2 Worker upload runbook](docs/implementation/r2-worker-media-upload.md).
 
+To remove an already ingested generated asset from public Journey, Place, and
+Atlas views without deleting its R2 object, preview and apply a reversible
+placement cull:
+
+```bash
+npm run media:cull -- --asset-id "image-usvi-..." --dry-run
+npm run media:cull -- --asset-id "image-usvi-..." --apply
+```
+
+The command preserves the Media asset and publication history, changes its
+published placements to draft, validates the result, and rolls back a failed
+apply. See the
+[Journey media ingestion guide](docs/implementation/journey-media-ingestion.md#5-cull-an-ingested-asset-without-deleting-it)
+for the complete behavior and limitations.
+
 ### Command-line help
 
 The script contains its complete command reference. Display it with any of

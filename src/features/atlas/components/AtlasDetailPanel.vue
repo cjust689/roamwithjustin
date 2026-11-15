@@ -179,8 +179,13 @@
               <button
                 v-for="(media, mediaIndex) in galleryMedia"
                 :key="media.key"
+                :class="{ 'is-video': media.kind === 'video' }"
                 type="button"
-                :aria-label="`Open ${node.title} ${media.kind} ${mediaIndex + 1} of ${galleryMedia.length}`"
+                :aria-label="
+                  media.kind === 'video'
+                    ? `Play ${node.title} video ${mediaIndex + 1} of ${galleryMedia.length}`
+                    : `Open ${node.title} photograph ${mediaIndex + 1} of ${galleryMedia.length}`
+                "
                 @click="openGallery(media)"
               >
                 <img
@@ -190,17 +195,10 @@
                   loading="lazy"
                   @load="updateScrollCue"
                 />
-                <video
-                  v-else
-                  muted
-                  playsinline
-                  preload="metadata"
-                  :poster="media.poster"
-                  :aria-label="media.alt"
-                  @loadedmetadata="updateScrollCue"
-                >
-                  <source :src="media.src" :type="media.mimeType" />
-                </video>
+                <span v-else class="atlas-video-tile" aria-hidden="true">
+                  <b>&#9654;</b>
+                  <span>Play video</span>
+                </span>
                 <span class="atlas-media-badge">
                   <span v-if="media.kind === 'video'" aria-hidden="true"
                     >&#9654;</span
@@ -421,7 +419,7 @@ export default {
     },
     guidedHeroImage() {
       return this.guidedHeroMedia.kind === "video"
-        ? this.guidedHeroMedia.poster || this.node.image
+        ? ""
         : this.guidedHeroMedia.src
     },
     guidedHeroLabel() {
@@ -586,7 +584,10 @@ export default {
         kind,
         key: `${kind}:${src}`,
         src,
-        poster: isVideo ? media.poster || this.node.image : "",
+        // A Place hero is not a video poster. Missing video posters remain
+        // empty so the UI can present an explicit play affordance instead of
+        // making a photo and video look like duplicate media.
+        poster: isVideo ? media.poster || "" : "",
         mimeType: isVideo
           ? media.mimeType ||
             media.mime ||
@@ -1010,11 +1011,54 @@ export default {
 }
 
 .atlas-mini-gallery img,
-.atlas-mini-gallery video {
+.atlas-video-tile {
   display: block;
   width: 100%;
   height: 150px;
+}
+
+.atlas-mini-gallery img {
   object-fit: cover;
+}
+
+.atlas-mini-gallery > div > button.is-video {
+  cursor: pointer;
+}
+
+.atlas-video-tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.55rem;
+  background:
+    radial-gradient(
+      circle at 50% 42%,
+      rgba(246, 189, 96, 0.2),
+      transparent 42%
+    ),
+    linear-gradient(145deg, #17272e, #091014);
+  color: #fff;
+}
+
+.atlas-video-tile b {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 1px solid rgba(246, 189, 96, 0.72);
+  border-radius: 50%;
+  background: rgba(7, 11, 14, 0.72);
+  color: #f6bd60;
+  font-size: 1rem;
+  text-indent: 0.12em;
+}
+
+.atlas-video-tile > span {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .atlas-media-badge {
