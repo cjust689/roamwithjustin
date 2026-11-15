@@ -28,7 +28,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "district",
     description:
-      "A confirmed rainforest-route stop; specific lodging, hot springs, tours, and Arenal activities remain unverified.",
+      "A rainforest stop in northern Costa Rica where the route begins near the Arenal landscape.",
     externalLinks: {},
     verificationNotes:
       "Route-level confirmation only. Do not attach suggested activities without source evidence.",
@@ -44,7 +44,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "village",
     description:
-      "A misty rainforest and waterfall segment whose precise attraction and access route still need confirmation.",
+      "A misty rainforest and waterfall segment in the highlands of Alajuela Province.",
     externalLinks: {},
     verificationNotes:
       "The village is confirmed at route level; the proposed Jurassic Canyon label is not treated as a visited venue.",
@@ -124,7 +124,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "waterfall",
     description:
-      "A confirmed waterfall visit whose entrance, access method, duration, and source media still need reconciliation.",
+      "A waterfall chapter in the southern Pacific portion of the route, set among steep forest and moving water.",
     externalLinks: {},
     verificationNotes:
       "Do not infer an operator or entry route from the waterfall coordinate.",
@@ -156,7 +156,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "metropolitan-area",
     description:
-      "The broad end-of-trip area overlooking or near San José; the exact stay and city activities remain unverified.",
+      "The broad San José area closes the route after the Pacific coast and brings the journey back toward the city.",
     externalLinks: {},
     verificationNotes:
       "The metropolitan coordinate comes from Costa Rican/UN geographic sources and does not expose lodging.",

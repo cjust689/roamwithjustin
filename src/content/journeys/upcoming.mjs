@@ -90,7 +90,8 @@ export const upcomingJourneys = Object.freeze([
       alt: "Hungary destination photograph",
     },
     gallery: [],
-    description: "",
+    description:
+      "A 2024 journey through Hungary, remembered through views of the Hungarian Parliament and the Danube.",
     duration: "",
     audience: "",
     costLevel: "",

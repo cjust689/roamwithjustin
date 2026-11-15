@@ -29,13 +29,13 @@ export const nextDestinationJourneys = Object.freeze([
     dateRange: {
       start: "2026-06-25",
       end: "2026-07-25",
-      label: "June–July 2026",
+      label: "June to July 2026",
     },
     hero: null,
     fullImage: null,
     gallery: [],
     description:
-      "A month-long family journey through England, Amsterdam, Croatia, Marrakech and Agafay, and Spain's southern cities before Madrid.",
+      "A month long family journey through England, Amsterdam, Croatia, Marrakech and Agafay, and Spain's southern cities before Madrid.",
     duration: "One month",
     audience: "",
     costLevel: "",
@@ -109,7 +109,7 @@ export const nextDestinationJourneys = Object.freeze([
     fullImage: null,
     gallery: [],
     description:
-      "A quiet fall-break river-city story built around sunrise aerial views over downtown Peoria and the Illinois River.",
+      "A quiet fall break story built around sunrise aerial views over downtown Peoria and the Illinois River.",
     duration: "",
     audience: "",
     costLevel: "",

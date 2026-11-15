@@ -49,7 +49,7 @@ export const miamiPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "region",
     description:
-      "The broad wetland setting for the trip's airboat outing: wind, an engaging guide, a delighted five-year-old, and alligators much closer than expected.",
+      "The broad wetland setting for the trip's airboat outing, with wind, an engaging guide, a delighted five year old, and alligators much closer than expected.",
     externalLinks: {},
     verificationNotes:
       "The coordinate is the USGS/GNIS reference for the Everglades geographic region. It provides regional Atlas context only and is not the airboat launch, tour route, operator, or a national-park boundary claim.",
