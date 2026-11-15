@@ -155,17 +155,31 @@ export function buildTripViewModel(journey) {
   const resolvedGallery = resolveMediaList(journey.gallery).map(
     item => item.src
   )
+  const curatedStoryMedia = comingSoon
+    ? []
+    : resolveMediaList([
+        journey.hero,
+        journey.fullImage,
+        ...(journey.gallery || []),
+        ...journey.visits.flatMap(visit => [
+          visit.hero,
+          ...(visit.media || []),
+        ]),
+        ...(journey.lodging || []).map(stay => stay.image),
+      ])
   const publishedMedia = getJourneyPublishedMedia(journey.id)
-  const allMedia = publishedMedia.map(media => ({
-    id: media.id,
-    kind: media.kind,
-    src: media.src,
-    mimeType: media.mimeType,
-    poster: media.poster,
-    alt: media.alt,
-    width: media.width,
-    height: media.height,
-  }))
+  const allMedia = uniqueMedia([...publishedMedia, ...curatedStoryMedia]).map(
+    media => ({
+      id: media.id,
+      kind: media.kind,
+      src: media.src,
+      mimeType: media.mimeType,
+      poster: media.poster,
+      alt: media.alt,
+      width: media.width,
+      height: media.height,
+    })
+  )
   const locations = journey.visits
     .map(visit => buildTripLocationView(journey, visit))
     .filter(Boolean)

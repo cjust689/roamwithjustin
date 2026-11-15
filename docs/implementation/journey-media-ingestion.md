@@ -363,15 +363,19 @@ not deleted from R2; the upload-only Worker intentionally has no delete API.
 Mixed batches, partial matches, public-HEAD-only verification, explicit
 republish manifests, and assets already associated with a Place are rejected.
 
-After a normal site deployment, all published placements appear in the
-Journey page's lazy-loaded **Photography and video** / **Latest media** section.
-A Place/Visit placement also appears in that Visit's location gallery and in
-the media for an Atlas pin that already presents the Visit. If the Visit has
-no curated hero, the first published image becomes its derived Trip-card and
-Atlas display image. This does not write or overwrite curated hero state. A
-Visit without verified photography has an intentional pending placeholder;
-the Journey cover is not reused as if it were location-specific. Ingestion
-still does not create a pin, Visit, Place, or curated story-gallery entry.
+After a normal site deployment, the Journey page's lazy-loaded **Photography
+and video** / **Latest media** section combines existing curated Journey and
+Visit media with all generated published placements, deduplicated by resolved
+source. This lets established Journeys display their already-canonical media
+without repackaging or re-uploading it; ingestion remains the additive path
+for new media. A Place/Visit placement also appears in that Visit's location
+gallery and in the media for an Atlas pin that already presents the Visit. If
+the Visit has no curated hero, the first published image becomes its derived
+Trip-card and Atlas display image. This does not write or overwrite curated
+hero state. A Visit without verified photography has an intentional pending
+placeholder; the Journey cover is not reused as if it were location-specific.
+Ingestion still does not create a pin, Visit, Place, or curated story-gallery
+entry.
 
 The collection displays newer ingested batches first while retaining each
 batch's manifest order. This ordering uses a stored monotonic sequence rather
