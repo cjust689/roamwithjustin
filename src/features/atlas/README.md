@@ -12,6 +12,7 @@ superseded_by: []
 code_paths:
   - src/features/atlas
   - src/content/atlas
+  - src/content/atlas/preview-presentation.mjs
   - src/content/selectors/atlas.js
 verification:
   state: verified
@@ -50,8 +51,11 @@ would remove the Atlas UI but must not delete `src/content/` records.
 ## Routes
 
 - `/atlas` opens the atlas landing view.
-- `/atlas/utah`, `/atlas/puerto-rico`, and `/atlas/st-john` open registered
-  destination roots directly.
+- `/atlas/utah`, `/atlas/utah-2026`, `/atlas/puerto-rico`, `/atlas/st-john`,
+  `/atlas/europe`, and `/atlas/costa-rica` open multi-stop journey roots.
+- `/atlas/miami-south-beach`, `/atlas/north-georgia-blue-ridge`,
+  `/atlas/peoria-illinois`, and `/atlas/hungary` open bounded coming-soon
+  destination roots.
 - `/atlas/moab`, `/atlas/old-san-juan`, and other IDs registered in
   `src/content/atlas/presentation.mjs` are shareable deep links.
 
@@ -136,6 +140,14 @@ Do not add unverified business information. Only include website, directions,
 phone, or booking actions when the source has been confirmed. External actions
 are derived from canonical Place/Journey links and remain separate from map
 rendering so commercial or affiliate behavior does not enter the map engine.
+
+Confirmed but incomplete Journeys are registered through
+`src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
+Place summaries remain visible, while absent story/media content renders as
+`Story and photography coming soon`. Planned-only stops are excluded. The
+validator requires every coming-soon Journey Visit to resolve to an Atlas node
+so later media ingestion enriches stable IDs instead of creating a parallel
+map record.
 
 ## Persistence
 

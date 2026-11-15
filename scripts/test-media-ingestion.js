@@ -575,9 +575,11 @@ async function main() {
     const { getJourney: getCanonicalJourney, getJourneyVisit } = await import(
       "../src/content/journeys/index.mjs"
     )
-    const { buildAtlasNodeView, buildTripLocationView } = await import(
-      "../src/content/selectors/projections.mjs"
-    )
+    const {
+      buildAtlasNodeView,
+      buildTripLocationView,
+      buildTripViewModel,
+    } = await import("../src/content/selectors/projections.mjs")
     const { getVisitPublishedMedia } = await import(
       "../src/content/selectors/media.mjs"
     )
@@ -620,6 +622,35 @@ async function main() {
       atlasPresentation.find(item => item.id === "st-john")
     )
     assert.strictEqual(rootNode.image, journeyCover)
+
+    // Established stories already own canonical Journey/Visit media. Their
+    // story-level collection must not depend on repackaging those assets as a
+    // generated ingestion batch, while newly published placements remain
+    // additive and duplicate sources stay collapsed.
+    const utahTrip = buildTripViewModel(
+      getCanonicalJourney("utah-winter-2025")
+    )
+    const puertoRicoTrip = buildTripViewModel(
+      getCanonicalJourney("puerto-rico-2024")
+    )
+    assert.ok(utahTrip.allMedia.some(media => media.kind === "image"))
+    assert.ok(
+      utahTrip.allMedia.some(
+        media => media.id === "utah-canyonlands-video-001"
+      )
+    )
+    assert.ok(puertoRicoTrip.allMedia.some(media => media.kind === "image"))
+    assert.ok(
+      puertoRicoTrip.allMedia.some(
+        media => media.id === "video-puerto-rico-don-rafa-001"
+      )
+    )
+    ;[utahTrip, puertoRicoTrip].forEach(trip => {
+      const uniqueSources = new Set(
+        trip.allMedia.map(media => `${media.kind}:${media.src}`)
+      )
+      assert.strictEqual(uniqueSources.size, trip.allMedia.length)
+    })
 
     console.log("Media ingestion tests passed.")
   } finally {

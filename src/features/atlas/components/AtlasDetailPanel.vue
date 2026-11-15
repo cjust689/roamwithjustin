@@ -83,7 +83,13 @@
             </span>
           </button>
           <div v-else class="atlas-detail-hero-image is-empty">
-            <span class="is-placeholder">Photography coming soon</span>
+            <span class="is-placeholder">
+              {{
+                node.comingSoon
+                  ? "Story and photography coming soon"
+                  : "Photography coming soon"
+              }}
+            </span>
           </div>
           <div class="atlas-detail-shade"></div>
           <button
@@ -115,7 +121,7 @@
 
         <div class="atlas-detail-content">
           <p class="atlas-summary">{{ node.summary }}</p>
-          <div class="atlas-note">
+          <div v-if="node.personalNote" class="atlas-note">
             <span>From the trip</span>
             <p>{{ node.personalNote }}</p>
           </div>
@@ -239,7 +245,13 @@
         aria-label="Scroll down for more information about this stop"
         @click="scrollDetailsForward"
       >
-        <span>Scroll for story, photos &amp; links</span>
+        <span>
+          {{
+            node.comingSoon
+              ? "Scroll for places and trip details"
+              : "Scroll for story, photos & links"
+          }}
+        </span>
         <b aria-hidden="true">&#8964;</b>
       </button>
     </aside>

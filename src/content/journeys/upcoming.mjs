@@ -1,3 +1,20 @@
+function destinationVisit(journeyId, placeId, evidenceStatus) {
+  return {
+    id: `${journeyId}-${placeId}`,
+    legacyId: placeId,
+    placeId,
+    date: null,
+    visitStatus: evidenceStatus === "confirmed" ? "visited" : "to-verify",
+    evidenceStatus,
+    type: "destination",
+    description: "",
+    summary: "",
+    notes: [],
+    media: [],
+    socialLinks: [],
+  }
+}
+
 // Canonical journey stubs behind the existing coming-soon cards.
 export const upcomingJourneys = Object.freeze([
   {
@@ -32,7 +49,13 @@ export const upcomingJourneys = Object.freeze([
     travelNotes: [],
     tips: [],
     lodging: [],
-    visits: [],
+    visits: [
+      destinationVisit(
+        "north-georgia-2026",
+        "north-georgia-blue-ridge",
+        "confirmed"
+      ),
+    ],
     days: [],
     socialLinks: [],
     featuredMedia: [],
@@ -72,7 +95,7 @@ export const upcomingJourneys = Object.freeze([
     travelNotes: [],
     tips: [],
     lodging: [],
-    visits: [],
+    visits: [destinationVisit("hungary-trip", "hungary", "unverified")],
     days: [],
     socialLinks: [],
     featuredMedia: [],

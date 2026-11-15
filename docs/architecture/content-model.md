@@ -16,7 +16,14 @@ code_paths:
   - src/content/contracts.mjs
   - src/content/media/index.mjs
   - src/content/places/index.mjs
+  - src/content/places/europe.mjs
+  - src/content/places/costa-rica.mjs
+  - src/content/places/next-destinations.mjs
   - src/content/journeys/index.mjs
+  - src/content/journeys/costa-rica-2025.mjs
+  - src/content/journeys/utah-2026.mjs
+  - src/content/journeys/next-destinations.mjs
+  - src/content/atlas/preview-presentation.mjs
   - src/content/partners/index.mjs
   - src/content/selectors/projections.mjs
   - scripts/validate-content.js
@@ -57,6 +64,22 @@ Each registry composes records in one `index.mjs` and uses
 Journey public routes use `Journey.slug`; internal relationships use canonical
 IDs. A Place may appear in more than one Journey through distinct Visits.
 
+Incomplete but confirmed trips use bounded coming-soon scaffolds. Europe,
+Costa Rica, Utah 2026, Miami, North Georgia, Peoria, and the retained Hungary
+preview have canonical Journey/Place identity and public Atlas presentation.
+Europe remains one Journey with geographic stops beneath its Europe root;
+Utah 2026 remains separate from Utah winter 2025 and reuses the shared Utah,
+Zion, and Park City geography. Planned-only Hanksville is not registered as a
+visited Place.
+
+These previews may omit media, venues, external links, itinerary days, and
+unsupported details. Their Atlas panels show a public coming-soon treatment,
+and the story views expand in place as verified content arrives. Missing links
+stay absent instead of being replaced with guessed tourism or map URLs.
+Coordinates use verified public geographic points or area centroids, with the
+precision and limitations recorded on each Place; they are not treated as
+photo capture positions.
+
 Media references use `{ assetId, ...usageOverrides }`. Presentation-specific
 alt text, captions, focal points, and roles belong to the usage/placement, not
 the physical asset. Legacy URL resolution remains isolated in the shared media
@@ -67,6 +90,17 @@ selector for compatibility.
 `src/content/selectors/projections.mjs` builds public trip, location, Atlas,
 and guided-journey shapes. Feature components consume those projections rather
 than maintaining another content database.
+
+A coming-soon Journey may be media-free. Story list/detail components render a
+quiet decorative surface and concise public-facing coming-soon copy; internal
+verification state, media counts, missing-data labels, and canonical-record
+terminology are not exposed to visitors. Published Journeys still require a
+resolved cover and complete validated public content.
+
+Content validation requires every coming-soon Journey to have an Atlas root
+and every one of its Visits to resolve to an Atlas node. Confirmed broad route
+order can power guided playback even while story/media content remains marked
+coming soon.
 
 Retired authorities `src/data/trips.js` and
 `src/features/atlas/data/atlasData.js` are absent and explicitly rejected by

@@ -162,6 +162,26 @@ export const utahPlaces = Object.freeze([
       "The public Atlas pin uses the Park City Mountain Village base for the confirmed ski and snowboard portion of this stop; the Journey narrative also covers downtown Park City.",
   },
   {
+    id: "zion-national-park",
+    name: "Zion National Park",
+    coordinates: [-113.0047934, 37.3221673],
+    parentPlaceId: "utah",
+    countryCode: "US",
+    regionCode: "US-UT",
+    category: "national-park",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "protected-area",
+    description:
+      "Two days in Zion are confirmed for the separate 2026 Utah trip; individual trails, overlooks, and media remain to be matched.",
+    externalLinks: {
+      official: "https://www.nps.gov/zion/index.htm",
+      maps:
+        "https://www.google.com/maps/search/?api=1&query=37.3221673%2C-113.0047934",
+    },
+    verificationNotes:
+      "The Atlas uses the park-level OpenStreetMap/NPS geography and does not infer a trail, entrance, lodging, or media capture position.",
+  },
+  {
     id: "woodward-park-city",
     name: "Park City Woodward",
     coordinates: [-111.585887, 40.754775],

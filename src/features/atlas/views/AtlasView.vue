@@ -193,9 +193,11 @@ import {
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
 
 const worldCamera = {
-  center: [-91.5, 30.5],
-  zoom: 2.55,
-  pitch: 22,
+  // Offset the world view west so both American and European roots remain
+  // visible beside the open journey navigator instead of beneath it.
+  center: [-65, 29],
+  zoom: 1.3,
+  pitch: 10,
   bearing: 0,
 }
 
