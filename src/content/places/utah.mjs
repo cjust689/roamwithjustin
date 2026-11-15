@@ -11,7 +11,7 @@ export const utahPlaces = Object.freeze([
     category: "region",
     evidenceStatus: "confirmed",
     description:
-      "A west-to-east run from wet salt before sunrise to weather-darkened red rock, followed by a final shift into Park City snow.",
+      "A route across Utah from wet salt before sunrise to darkened red rock beneath changing weather, followed by a final shift into Park City snow.",
     externalLinks: {
       official: "https://www.visitutah.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=Utah",
@@ -27,7 +27,7 @@ export const utahPlaces = Object.freeze([
     category: "national-park",
     evidenceStatus: "confirmed",
     description:
-      "Red fins and arches that can be reached on short, well-marked walks, especially striking when the evening light begins warming the rock.",
+      "Red fins and arches that can be reached on short, clearly marked walks, especially striking when the evening light begins warming the rock.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.722618%2C-109.586367",
       official: "https://www.nps.gov/arch/index.htm",
@@ -78,7 +78,7 @@ export const utahPlaces = Object.freeze([
     category: "desert-landscapes",
     evidenceStatus: "confirmed",
     description:
-      "The practical center of the red-rock leg, with dinosaur stops, canyon roads, overlooks, and national-park walks radiating out from town.",
+      "The practical center of the red rock leg, with dinosaur stops, canyon roads, overlooks, and national park walks radiating out from town.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=38.57447%2C-109.54583",
       official: "https://www.discovermoab.com/",
@@ -114,7 +114,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "route-anchor",
     description:
-      "A river-and-cliff drive where late light reduces people to tiny figures beneath the canyon and aerial views turn the ponds into pure geometry.",
+      "A drive between river and cliff where late light reduces people to tiny figures beneath the canyon and aerial views turn the ponds into pure geometry.",
     externalLinks: {
       official:
         "https://www.discovermoab.com/trail/potash-lower-colorado-river-scenic-byway-%28u-279%29/681e961cc610f14d9362aa64/",
@@ -134,7 +134,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "venue",
     description:
-      "Life-sized dinosaurs and hands-on exhibits turn a road-trip break into a new way for kids to imagine the desert outside.",
+      "Full size dinosaurs and interactive exhibits turn a break in the drive into a new way for kids to imagine the desert outside.",
     externalLinks: {
       official: "https://www.moabgiants.com",
       maps: "https://www.google.com/maps/search/?api=1&query=38.543939%2C-109.761166",
@@ -202,7 +202,7 @@ export const utahPlaces = Object.freeze([
   },
   {
     id: "uintas",
-    name: "Uintas - Cross-Country Skiing + Dog Sledding",
+    name: "Uintas Cross Country Skiing and Dog Sledding",
     coordinates: [-111.159263, 40.78474],
     parentPlaceId: "utah",
     countryCode: "US",
@@ -211,7 +211,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "activity-area",
     description:
-      "A winter day that begins at cross-country pace, then changes energy when the guide clips in the dog team for a sled ride on private ranch trails.",
+      "A winter day that begins on cross country skis, then changes energy when the guide clips in the dog team for a sled ride on private ranch trails.",
     externalLinks: {
       official:
         "https://wasatchadventureguides.com/winter-adventures-park-city/dog-sledding/",
@@ -231,7 +231,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "airport",
     description:
-      "The ordinary bookend to a week of salt, sandstone, and snow: rental keys on arrival and ski-season security lines on departure.",
+      "The ordinary bookend to a week of salt, sandstone, and snow: rental keys on arrival and busy winter security lines on departure.",
     externalLinks: {
       official: "https://slcairport.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.788393%2C-111.977773",

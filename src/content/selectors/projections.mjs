@@ -60,6 +60,15 @@ function journeyPreviewCopy(journey) {
   return journey.description || ""
 }
 
+function publicTaxonomyLabel(value) {
+  if (!value) return ""
+  return value
+    .split("-")
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
 function journeyGearHighlights(journey, canonicalGear) {
   const canonical = canonicalGear.map(item => ({
     gearId: item.id,
@@ -116,7 +125,7 @@ export function buildTripLocationView(journey, visit) {
     canonicalId: place.id,
     name: place.name,
     description: visit.description || place.description,
-    type: visit.type || place.category,
+    type: visit.type || publicTaxonomyLabel(place.category),
     droneAllowed: Boolean(visit.droneAllowed),
     image: hero?.src || "",
     mediaPending,
@@ -197,7 +206,7 @@ export function buildTripViewModel(journey) {
     allMedia,
     allPhotography: allMedia.filter(media => media.kind === "image"),
     description: journeyPreviewCopy(journey),
-    dates: journey.dateRange?.label || "Date to be confirmed",
+    dates: journey.dateRange?.label || String(journey.year),
     duration: journey.duration,
     who: journey.audience,
     costLevel: journey.costLevel,

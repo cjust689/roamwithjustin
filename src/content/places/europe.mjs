@@ -13,7 +13,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "continent",
     description:
-      "A month-long family route through England, the Netherlands, Croatia, Morocco, and Spain.",
+      "A month of family travel through England, the Netherlands, Croatia, Morocco, and Spain.",
     externalLinks: {},
     verificationNotes:
       "The Atlas root uses the OpenStreetMap continent coordinate as a map anchor, not as a visited stop.",
@@ -45,7 +45,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "protected-area",
     description:
-      "A quieter England stay shaped by woodland, pasture, streams, free-roaming ponies, and time with extended family.",
+      "A quieter England stay shaped by woodland, pasture, streams, roaming ponies, and time with extended family.",
     externalLinks: {},
     verificationNotes:
       "The park-level coordinate avoids publishing the private stay or an inferred animal location.",
@@ -93,7 +93,7 @@ export const europePlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "city",
     description:
-      "A city chapter moving between quiet canals, layered architecture, street-level energy, and views from above.",
+      "A city chapter moving between quiet canals, layered architecture, energy in the streets, and views from above.",
     externalLinks: {},
     verificationNotes:
       "Canals and rooftop coverage are confirmed; lodging, operators, and planned-only outings remain excluded.",
