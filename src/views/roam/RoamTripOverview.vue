@@ -753,6 +753,10 @@ export default {
   padding: clamp(2.5rem, 6vw, 5rem) 0;
 }
 
+.story-day > * {
+  min-width: 0;
+}
+
 .day-heading {
   display: flex;
   align-items: flex-start;
@@ -793,13 +797,17 @@ export default {
 .experience-links {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 0.75rem;
   margin-top: 1.4rem;
 }
 
 .experience-links a {
   display: grid;
+  min-width: 0;
+  flex: 0 1 520px;
   gap: 0.22rem;
+  width: 100%;
   max-width: 520px;
   border: 1px solid rgba(246, 189, 96, 0.28);
   border-radius: 16px;
@@ -1204,6 +1212,7 @@ export default {
 
   .section-intro > p,
   .day-summary,
+  .experience-links,
   .route-links,
   .location-grid {
     grid-row: auto;
@@ -1212,6 +1221,14 @@ export default {
 
   .story-day {
     gap: 1.5rem;
+  }
+
+  .experience-links {
+    width: 100%;
+  }
+
+  .experience-links a {
+    max-width: none;
   }
 
   .lodging-grid {
