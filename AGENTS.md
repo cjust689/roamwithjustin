@@ -36,3 +36,10 @@ both references against canonical source and registered media.
 The framework guides how confirmed events are told; it does not promote a
 proposal, itinerary idea, plausible sensory detail, or unregistered asset into
 fact. Keep unknowns out of public prose or record them as verification work.
+
+Public Journey, Place, Atlas, caption, and media story prose must not use dash
+punctuation. Rewrite with commas, colons, periods, or natural phrasing. This
+does not apply to technical IDs, slugs, URLs, or private editorial notes. Never
+expose workflow labels such as "coming soon," "unconfirmed," "unverified,"
+"placeholder," or "pending" to visitors; omit missing material and present the
+confirmed content cleanly.

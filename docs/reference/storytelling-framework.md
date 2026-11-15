@@ -116,6 +116,12 @@ Suggested elastic arc (not a mandatory formula):
 - **Leave visual breathing room:** photos and clips can carry a moment that words would over-explain.
 - **One chapter, one primary emotional shift.** A trip may have many stories; avoid forcing every observation into one sweeping recap.
 - **Avoid sameness:** not every chapter needs an obstacle, revelation, or tidy moral. Quiet enjoyment can be its own payoff.
+- **Keep public prose free of dash punctuation:** use commas, colons, periods,
+  or a rewritten sentence instead. Technical IDs, slugs, URLs, and private
+  editorial notes are not public prose.
+- **Hide the editorial workflow:** an incomplete story should simply present
+  the facts, places, and media that exist. Do not show visitors labels such as
+  "coming soon," "unconfirmed," "unverified," "placeholder," or "pending."
 
 ## 5. Evidence boundaries: evocative but truthful
 
@@ -142,7 +148,7 @@ Keep **personal reflections** distinct from objective claims. "Cinnamon feels mo
 7. **Sketch the timing.** Decide the opening moment, where to slow down, the pivot, and the exit image.
 8. **Draft in present tense and Justin's voice.** Keep it human, concrete, lightly reflective, with restraint.
 9. **Run a truth and voice pass.** Remove inventions, generic poetic filler, repeated lessons, unsupported superlatives, and over-explanation.
-10. **Produce a publishable version plus a concise editorial note.** The note should flag meaningful missing details and media that might deepen the story. Do not make every incomplete detail block publication.
+10. **Produce a publishable version plus a concise private editorial note.** The note should flag meaningful missing details and media that might deepen the story. Keep that note out of public copy, and do not make every incomplete detail block publication.
 
 ## 7. Structured input template (human-friendly Markdown)
 

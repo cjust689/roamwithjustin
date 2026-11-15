@@ -33,6 +33,104 @@ function collectRawLocalPaths(value, found = new Set()) {
   return found
 }
 
+const editorialWorkflowLanguage =
+  /\b(?:coming soon|unconfirmed|unverified|placeholder|in progress|pending|not confirmed|needs verification|date to be confirmed)\b|\bstill being\b|\bremain(?:s|ing)? (?:unverified|open)\b/i
+
+function validatePublicCopy(value, owner) {
+  if (typeof value !== "string" || !value.trim()) return
+
+  if (/[-–—]/u.test(value)) {
+    report(owner + " uses dash punctuation in public copy")
+  }
+  if (editorialWorkflowLanguage.test(value)) {
+    report(owner + " exposes editorial workflow language in public copy")
+  }
+}
+
+function validateTripPublicCopy(trip) {
+  const owner = 'Trip view "' + trip.id + '"'
+
+  ;[
+    "name",
+    "description",
+    "dates",
+    "duration",
+    "who",
+    "costLevel",
+    "bestTimeToGo",
+  ].forEach(field => validatePublicCopy(trip[field], owner + " " + field))
+  ;[...(trip.travelNotes || []), ...(trip.tips || [])].forEach(
+    (value, index) => validatePublicCopy(value, owner + " note " + index)
+  )
+  ;(trip.lodging || []).forEach((stay, index) => {
+    ;["name", "location", "blurb"].forEach(field =>
+      validatePublicCopy(
+        stay[field],
+        owner + " lodging " + index + " " + field
+      )
+    )
+  })
+  ;(trip.locations || []).forEach((location, index) => {
+    ;["name", "description", "type"].forEach(field =>
+      validatePublicCopy(
+        location[field],
+        owner + " location " + index + " " + field
+      )
+    )
+    ;(location.notes || []).forEach((note, noteIndex) =>
+      validatePublicCopy(
+        note,
+        owner + " location " + index + " note " + noteIndex
+      )
+    )
+    ;(location.media || []).forEach((media, mediaIndex) => {
+      validatePublicCopy(
+        media.alt,
+        owner + " location " + index + " media " + mediaIndex + " alt"
+      )
+      validatePublicCopy(
+        media.caption,
+        owner + " location " + index + " media " + mediaIndex + " caption"
+      )
+    })
+  })
+  ;(trip.days || []).forEach((day, index) => {
+    ;["label", "summary"].forEach(field =>
+      validatePublicCopy(day[field], owner + " day " + index + " " + field)
+    )
+    ;(day.locations || []).forEach((location, locationIndex) =>
+      validatePublicCopy(
+        location.notes,
+        owner + " day " + index + " location " + locationIndex + " notes"
+      )
+    )
+    ;(day.routes || []).forEach((route, routeIndex) => {
+      ;["label", "duration"].forEach(field =>
+        validatePublicCopy(
+          route[field],
+          owner + " day " + index + " route " + routeIndex + " " + field
+        )
+      )
+    })
+  })
+  ;(trip.allMedia || []).forEach((media, index) =>
+    validatePublicCopy(media.alt, owner + " media " + index + " alt")
+  )
+  ;(trip.featuredShots || []).forEach((media, index) =>
+    validatePublicCopy(
+      media.caption,
+      owner + " featured media " + index + " caption"
+    )
+  )
+}
+
+function validateAtlasPublicCopy(node) {
+  const owner = 'Atlas node "' + node.id + '"'
+  ;["title", "eyebrow", "category", "summary", "personalNote"].forEach(
+    field => validatePublicCopy(node[field], owner + " " + field)
+  )
+}
+
 function validateLocalPath(localPath, owner) {
   const absolutePath = path.join(
     projectRoot,
@@ -501,6 +599,7 @@ async function main() {
   )
   tripViews.forEach(trip => {
     const owner = 'Trip view "' + trip.id + '"'
+    validateTripPublicCopy(trip)
     if (!trip.cover && !trip.comingSoon) {
       report(owner + " has no resolved cover")
     }
@@ -641,7 +740,10 @@ async function main() {
       'Atlas presentation bypasses Media with raw path "' + localPath + '"'
     )
   )
-  completeAtlasViews.forEach(node => validateAtlasView(node, contracts))
+  completeAtlasViews.forEach(node => {
+    validateAtlasView(node, contracts)
+    validateAtlasPublicCopy(node)
+  })
 
   atlasRootsModule.atlasRootPlaceIds.forEach(rootId => {
     if (!completeAtlasViews.some(node => node.id === rootId)) {
