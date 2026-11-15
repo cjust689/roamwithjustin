@@ -17,6 +17,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run adsense:test
+    - npm run atlas:test
     - npm run content:validate
     - npm run build
 ---
@@ -154,3 +156,27 @@ map record.
 Favorites, recently explored IDs, and the most recent camera context use the
 versioned key `roamwithjustin.atlas.v1` in `localStorage`. Invalid or unavailable
 storage falls back to an empty state and does not prevent exploration.
+
+## Optional guided Journey advertising
+
+Atlas advertising is independent of the story placement and disabled by
+default. It uses the shared manual `AdSlot` only after a visitor arrives at
+three distinct stops through the guided Journey player. The Journey must have
+at least five mapped stops, and the current stop must be published, contain at
+least 180 characters across its summary and personal note, and own at least one
+media item.
+
+The unit renders inside the stop's editorial detail content, below its notes
+and media and above its actions. It never renders on the map canvas, markers,
+free exploration, incomplete Journeys, thin stops, or beside the guided
+Previous and Next controls. The key
+`roamwithjustin.adsense.atlas.v1.<journey-id>` in `sessionStorage` reserves the
+single allowed request for that Journey and tab. If storage is unavailable,
+the Atlas ad fails closed. Replaying or revisiting stops does not request a new
+unit.
+
+Eligibility and session reservation live in
+`config/atlasAdEligibility.mjs`. Production activation additionally requires
+`VUE_APP_ADSENSE_ATLAS_ENABLED=true` and a numeric
+`VUE_APP_ADSENSE_ATLAS_SLOT_ID`; the shared privacy, Auto ads, publisher, and
+ads.txt gates remain in force.
