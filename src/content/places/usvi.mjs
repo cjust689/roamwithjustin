@@ -50,7 +50,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "airport",
     description:
-      "St. Thomas's public airport and the first island-scale contrast after departing Atlanta.",
+      "St. Thomas's public airport and the first view of island life after departing Atlanta.",
     externalLinks: {
       official: "https://www.viport.com/cekastt",
       maps: "https://www.google.com/maps?q=Cyril+E.+King+Airport,+St.+Thomas",
@@ -69,7 +69,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "terminal",
     description:
-      "The east-St. Thomas passenger-ferry departure point for the short crossing into Cruz Bay.",
+      "The passenger ferry departure point on eastern St. Thomas for the short crossing into Cruz Bay.",
     externalLinks: {
       official: "https://dpw.vi.gov/ferries/",
       maps: "https://www.google.com/maps?q=Red+Hook+Ferry+Terminal,+St.+Thomas,+USVI",
@@ -143,7 +143,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "beach",
     description:
-      "A broad north-shore bay within Virgin Islands National Park, known here through the family's relaxed beach day.",
+      "A broad bay on the north shore within Virgin Islands National Park, known here through the family's relaxed beach day.",
     externalLinks: {
       official: "https://www.nps.gov/viis/planyourvisit/maps.htm",
       maps: "https://www.google.com/maps?q=Maho+Bay,+St.+John,+USVI",
@@ -162,7 +162,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A creator-confirmed boat-day stop preserved under Justin's nickname, Hermit Crab Island, while its formal geographic identity is resolved.",
+      "A boat day stop remembered by Justin as Hermit Crab Island, with clear water, a narrow beach, and a story rooted in the experience rather than a formal map label.",
     externalLinks: {},
     verificationNotes:
       "Do not create an Atlas pin or alias this to Cas Cay or another island without creator or itinerary confirmation.",
@@ -196,7 +196,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "bay",
     description:
-      "A north-shore bay in Virgin Islands National Park that anchors the trip's family and underwater chapter.",
+      "A bay on the north shore in Virgin Islands National Park that anchors the trip's family and underwater chapter.",
     externalLinks: {
       official: "https://www.nps.gov/viis/planyourvisit/maps.htm",
       maps: "https://www.google.com/maps?q=Trunk+Bay,+St.+John,+USVI",
@@ -215,7 +215,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "bay",
     description:
-      "A north-shore bay and beach within Virgin Islands National Park, visited as its own day chapter.",
+      "A bay and beach on the north shore within Virgin Islands National Park, visited as its own day chapter.",
     externalLinks: {
       official: "https://www.nps.gov/viis/planyourvisit/maps.htm",
       maps: "https://www.google.com/maps?q=Cinnamon+Bay,+St.+John,+USVI",
@@ -234,7 +234,7 @@ export const usviPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "island",
     description:
-      "A small cay off St. John's northeast shore that provided the trip's more involved walk-and-water outing.",
+      "A small cay off St. John's northeast shore that provided the trip's more involved outing on foot and in the water.",
     externalLinks: {
       official: "https://www.nps.gov/viis/planyourvisit/maps.htm",
       maps: "https://www.google.com/maps?q=Waterlemon+Cay,+St.+John,+USVI",

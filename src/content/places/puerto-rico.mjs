@@ -26,7 +26,7 @@ export const puertoRicoPlaces = Object.freeze([
     category: "waterfall",
     evidenceStatus: "confirmed",
     description:
-      "A main swimming pool beneath dark rock and filtered light, with an upper fall another 10–15 minutes along the trail.",
+      "A main swimming pool beneath dark rock and filtered light, with an upper fall another 10 to 15 minutes along the trail.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=18.36093%2C-66.9831",
     },
@@ -128,7 +128,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A polished beachfront night stop where dressed-up calm provides a counterpoint to San Juan's busier bar strips.",
+      "A polished beachfront night stop where an elegant calm provides a counterpoint to San Juan's busier bar strips.",
     externalLinks: {
       official:
         "https://www.fairmont.com/en/hotels/puerto-rico/fairmont-el-san-juan-hotel/dining/the-lobby.restaurant.html",
@@ -148,7 +148,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A giant and controversial Columbus statue that appears from the highway and turns a brief pull-off into a complicated pause.",
+      "A giant and controversial Columbus statue that appears from the highway and turns a brief roadside stop into a complicated pause.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Estatua+de+Colon%2C+Arecibo%2C+Puerto+Rico",
     },
@@ -166,7 +166,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A busy nightlife strip where salsa, reggaetón, hip-hop, dance, and electronic music offer a different room every few doors.",
+      "A busy nightlife strip where salsa, reggaetón, hip hop, dance, and electronic music offer a different room every few doors.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Calle+C.+Canals%2C+San+Juan%2C+Puerto+Rico",
     },
@@ -184,7 +184,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "Clear near-shore water and an offshore reef define this quiet northwest-coast stop, with stronger currents farther out and no formal facilities.",
+      "Clear water near shore and an offshore reef define this quiet stop on the northwest coast, with stronger currents farther out and no formal facilities.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=Shacks+Beach%2C+Isabela%2C+Puerto+Rico",
     },
@@ -256,7 +256,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A Taíno chief's face carved into roadside rock near Isabela, brief enough to remain part of the north-coast drive rather than interrupt it.",
+      "A Taíno chief's face carved into roadside rock near Isabela, brief enough to remain part of the drive along the north coast rather than interrupt it.",
     externalLinks: {
       maps: "https://www.google.com/maps/search/?api=1&query=La+Cara+del+Indio%2C+Isabela%2C+Puerto+Rico",
     },
@@ -275,7 +275,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "exact",
     description:
-      "Shipping-container architecture, a long pool, and open mountain views turn this Moca Airbnb from a practical base into one of the trip's real locations.",
+      "Container architecture, a long pool, and open mountain views turn this Moca Airbnb from a practical base into one of the trip's real locations.",
     externalLinks: {
       maps: "https://www.google.com/maps?q=18.3882008,-67.0752792",
     },
@@ -293,7 +293,7 @@ export const puertoRicoPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "unknown",
     description:
-      "A private Paso Fino ride through fields and tropical growth toward palm-framed coastal trails, made personal by an energetic guide who sings along the way.",
+      "A private Paso Fino ride through fields and tropical growth toward coastal trails lined with palms, made personal by an energetic guide who sings along the way.",
     externalLinks: {
       official:
         "https://www.discoverpuertorico.com/es/profile/playuelas-horse-rides/12105",
@@ -304,7 +304,7 @@ export const puertoRicoPlaces = Object.freeze([
   },
   {
     id: "arte-aguadilla",
-    name: "ARTe – Aguadilla Rooftop Experience",
+    name: "ARTe Aguadilla Rooftop Experience",
     coordinates: null,
     parentPlaceId: "puerto-rico",
     countryCode: "PR",

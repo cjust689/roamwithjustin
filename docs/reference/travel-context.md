@@ -574,13 +574,16 @@ The above is the best recovered sequence, but do not assign exact dates to every
   and raccoons seen on an island. The island's official name and exact route are
   unknown; do not create a separate island pin or imply wildlife contact or
   feeding.
-- **Media:** The generated registry currently contains 27 R2-backed images: 18
-  from batch `media-miami-everglades-eca7fe02357c9788` placed on the Everglades
-  Visit and 9 from batch `media-miami-oleta-river-state-park-e5d79b9068b4b960`
-  placed on the Oleta Visit. Treat those placements as scope, not proof that
-  every Everglades frame depicts the airboat or that an Oleta frame establishes
-  the island's identity. Miami Beach, South Pointe, Shark Valley, curated hero
-  choices, captions, and capture metadata still need reconciliation.
+- **Media:** The generated registry currently contains 111 R2-backed images:
+  84 from batch `media-miami-2026-miami-south-beach-d4ec637ec53cc427` placed
+  on the Miami Beach Visit, 18 from batch
+  `media-miami-everglades-eca7fe02357c9788` placed on the Everglades Visit,
+  and 9 from batch
+  `media-miami-oleta-river-state-park-e5d79b9068b4b960` placed on the Oleta
+  Visit. Treat those placements as scope, not proof that every Everglades
+  frame depicts the airboat or that an Oleta frame establishes the island's
+  identity. South Pointe and Shark Valley media, curated hero choices,
+  captions, and capture metadata still need reconciliation.
 
 ### Story spine under the experiential framework
 
@@ -728,7 +731,7 @@ The website should **not** treat media as a flat array of generic photographs. A
 | Costa Rica Uvita Whale Tail | Palm-tree portrait, low tide walk, aerial reveal | Excellent map-to-story cinematic payoff. |
 | Costa Rica howler monkeys | Forest encounter, mother and baby | Wildlife micro-story. |
 | St. John Trunk Bay | Coral/rocks/white sand/wife in clear water | Underwater visual experience. |
-| Miami winter getaway | Twenty-seven generated R2 photographs are placed on the Everglades (18) and Oleta (9) Visits; other Miami Place media and hero curation remain unresolved | Contrast the familiar movie-set Miami with outdoor family adventure; follow the storytelling framework and do not infer more precise locations from the broad placements. |
+| Miami winter getaway | 111 generated R2 photographs are placed on the Miami Beach (84), Everglades (18), and Oleta (9) Visits; South Pointe and Shark Valley media plus hero curation remain unresolved | Contrast the familiar movie set Miami with outdoor family adventure; follow the storytelling framework and do not infer more precise locations from the broad placements. |
 | Mineral Bluff cabin getaway | Fire, cards, film, hot tub, scenic North Georgia | Emotional connective footage; do not assert unfilmed beats exist. |
 | Peoria Illinois River | Sunrise urban river aerial | Small but visually distinct destination story. |
 

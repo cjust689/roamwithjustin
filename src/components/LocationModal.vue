@@ -46,9 +46,6 @@
               location.droneAllowed ? "Allowed" : "Check locally"
             }}</strong>
           </span>
-          <span v-if="location.evidenceStatus">
-            {{ location.evidenceStatus }} visit record
-          </span>
         </div>
       </header>
 

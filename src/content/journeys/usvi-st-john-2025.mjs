@@ -29,12 +29,12 @@ export const usviStJohn2025Journey = Object.freeze({
   duration: "7 story chapters",
   audience: "Families, beach lovers, and island explorers",
   costLevel: "",
-  bestTimeToGo: "Trip timing to be confirmed",
+  bestTimeToGo: "",
   gearHighlights: [],
   travelNotes: [
     "We flew from Atlanta into Cyril E. King Airport on St. Thomas, crossed the island by taxi, and took the passenger ferry from Red Hook into Cruz Bay.",
     "Traffic keeps left even though the steering wheel is also on the left, something the first taxi ride makes impossible to forget.",
-    "The seven chapters preserve the creator's current editorial order without inventing exact calendar dates.",
+    "The story follows seven chapters, moving from arrival through beach days, the charter, and the Waterlemon Cay outing.",
     "Nate's Custom Charters operated the boat day; the captain's humor and love of music became part of the memory.",
   ],
   tips: [
@@ -94,7 +94,7 @@ export const usviStJohn2025Journey = Object.freeze({
       notes: [
         "The family loaded their luggage into a taxi or van and crossed St. Thomas to Red Hook.",
         "Driving on the left while the steering wheel was also on the left made for a memorable adjustment.",
-        "The creator's son pointed out large cruise ships while passing the main harbor.",
+        "My son pointed out large cruise ships while we passed the main harbor.",
       ],
       media: [],
       socialLinks: [],
@@ -140,9 +140,8 @@ export const usviStJohn2025Journey = Object.freeze({
       notes: [
         "Parking became more difficult later in the morning, but the beach remained easy to reach directly from the road.",
         "Reef2Peak rentals, food, drinks, and restrooms were all within a short walk during the visit.",
-        "The creator does not usually enjoy rum but loved the Painkiller he tried at Maho.",
-        "The creator snorkeled with his son and saw a sea turtle together.",
-        "The story does not promise wildlife sightings or assign every animal photograph to this day before media review.",
+        "I do not usually enjoy rum, but I loved the Painkiller I tried at Maho.",
+        "I snorkeled with my son, and we saw a sea turtle together.",
       ],
       media: [],
       socialLinks: [],
@@ -160,8 +159,8 @@ export const usviStJohn2025Journey = Object.freeze({
       summary:
         "The villa mornings had their own island soundtrack: the infamous St. John roosters, breakfast outside, and the view over Great Cruz Bay.",
       notes: [
-        "Oceana Villa and the Great Cruz Bay setting were supplied directly by the creator.",
-        "The creator captured drone footage and a small photo set from the patio and around the property.",
+        "Oceana Villa in Great Cruz Bay became our base for the trip.",
+        "I captured drone footage and a small photo set from the patio and around the property.",
         "The public Atlas pin represents Great Cruz Bay broadly rather than the villa's private address.",
       ],
       media: [],
@@ -180,9 +179,8 @@ export const usviStJohn2025Journey = Object.freeze({
       summary:
         "The name is mine, not an official map label. What stays with me is the moment the ground seemed to come alive with hermit crabs.",
       notes: [
-        "Hermit Crab Island is the creator's nickname for the confirmed stop, not a verified formal place name.",
-        "The group also saw a sunken sailboat depicted in their media. The creator believes a hurricane sank it and that it may now be gone, but neither detail is verified.",
-        "No coordinates, alternate official name, or route order are asserted yet.",
+        "Hermit Crab Island is the name we use for this boat day stop.",
+        "We also saw a sunken sailboat in the water.",
       ],
       media: [],
       socialLinks: [],
@@ -228,8 +226,7 @@ export const usviStJohn2025Journey = Object.freeze({
       notes: [
         "Children played along the beach during our Trunk Bay visit.",
         "The tide and shore break felt rougher than at Maho during the family's visit, which required more attention with young children.",
-        "Previous firsthand discussion confirms footage of rocks, coral, pale underwater sand, and the creator's wife swimming and diving.",
-        "Specific reef or wildlife identifications wait for media review.",
+        "Our footage moves across rocks, coral, pale underwater sand, and a swimmer diving through clear water.",
       ],
       media: [],
       socialLinks: [],
@@ -269,7 +266,7 @@ export const usviStJohn2025Journey = Object.freeze({
         "The coastal approach of roughly a mile made Waterlemon feel earned, and seeing almost no one else there made the payoff unusually intimate.",
       notes: [
         "The outing began around the old Annaberg sugar plantation landscape, whose history added necessary weight before the walk to the cay.",
-        "The creator remembers roughly a mile of rocky coastal walking and recommends proper shoes and carrying as little as practical.",
+        "I remember roughly a mile of rocky coastal walking and recommend proper shoes and carrying as little as practical.",
         "The family encountered only one or two other people and observed abundant sea life, including reef sharks.",
         "The current felt challenging during the visit; the story treats that as a firsthand warning to avoid underestimating the ocean.",
       ],

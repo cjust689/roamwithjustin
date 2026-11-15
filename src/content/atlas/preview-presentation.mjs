@@ -1,6 +1,6 @@
 // Atlas presentation for confirmed but incomplete Journeys. Every node points
 // to canonical Place/Journey identity; missing media stays empty so the UI can
-// present a public coming-soon state instead of a fabricated photograph.
+// present only the available facts instead of a fabricated photograph.
 export const previewAtlasPresentation = Object.freeze([
   {
     id: "europe",
@@ -8,7 +8,7 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "europe-summer-2026",
     parentId: null,
     eyebrow: "Coming soon",
-    category: "Multi-country journey",
+    category: "Journey across several countries",
     camera: { center: [-0.5, 42.5], zoom: 3.25, pitch: 34, bearing: -6 },
     relatedIds: [],
   },
@@ -218,7 +218,7 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "costa-rica-2025",
     parentId: "costa-rica",
     eyebrow: "Coming soon",
-    category: "Low-tide coastal walk",
+    category: "Coastal walk at low tide",
     camera: { center: [-83.7484997, 9.1304772], zoom: 12.6, pitch: 58, bearing: -16 },
     relatedIds: ["uvita-costa-rica", "nauyaca-waterfalls"],
   },
@@ -269,7 +269,7 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "utah-2026",
     parentId: "utah-2026",
     eyebrow: "Coming soon",
-    category: "Two-day park visit",
+    category: "Two days in the park",
     camera: { center: [-113.0047934, 37.3221673], zoom: 10.7, pitch: 58, bearing: -16 },
     relatedIds: ["utah-2026-park-city"],
   },
@@ -355,7 +355,7 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "peoria-illinois-2025",
     parentId: null,
     eyebrow: "Coming soon",
-    category: "River-city aerial story",
+    category: "River city aerial story",
     camera: { center: [-89.5891008, 40.6938609], zoom: 11.1, pitch: 48, bearing: -10 },
     relatedIds: [],
   },

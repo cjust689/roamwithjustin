@@ -198,5 +198,5 @@ export const miamiJourney = Object.freeze({
     "oleta-river-state-park",
   ],
   verificationNotes:
-    "First narrative pass from creator-confirmed recollections. The creator confirmed the trip year as 2026; exact dates, chapter chronology beyond arrival, Airbnb, restaurants, Savoy property identity, airboat operator and route, and Oleta island name remain unverified. The generated Media registry currently places published batches on the Everglades and Oleta Visits; other Miami Place media and curated story roles remain unresolved.",
+    "First narrative pass from creator-confirmed recollections. The creator confirmed the trip year as 2026; exact dates, chapter chronology beyond arrival, Airbnb, restaurants, Savoy property identity, airboat operator and route, and Oleta island name remain unverified. The generated Media registry currently places published batches on the Miami Beach, Everglades, and Oleta Visits; South Pointe and Shark Valley media plus curated story roles remain unresolved.",
 })

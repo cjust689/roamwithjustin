@@ -12,7 +12,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "country",
     description:
-      "A rainforest-to-Pacific route through La Fortuna, the Osa Peninsula, Uvita, and the San José area.",
+      "A route from the rainforest to the Pacific through La Fortuna, the Osa Peninsula, Uvita, and the San José area.",
     externalLinks: {},
     verificationNotes:
       "The country coordinate is an OpenStreetMap administrative centroid used only as the Atlas journey anchor.",
@@ -76,7 +76,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "nearby-area",
     description:
-      "A firsthand jungle-beach stop south of Drake Bay, with a lush tree line and calmer-water context.",
+      "A jungle beach stop south of Drake Bay, with a lush tree line and calmer water near shore.",
     externalLinks: {},
     verificationNotes:
       "The coordinate uses the geocoded San Josecito area near Drake Bay, not an asserted photo capture point on the beach.",
@@ -108,7 +108,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "protected-area",
     description:
-      "A low-tide walk whose distinctive shape becomes clear when the story shifts from ground level to an aerial view.",
+      "A walk at low tide whose distinctive shape becomes clear when the story shifts from ground level to an aerial view.",
     externalLinks: {},
     verificationNotes:
       "The Atlas uses the Marino Ballena protected-area coordinate rather than inventing an exact path or drone position.",
@@ -140,7 +140,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "area",
     description:
-      "A quick confirmed stop in the Manuel Antonio area, not a claim of entry into the national park.",
+      "A brief stop in the wider Manuel Antonio area during the route toward San José, without entering the national park.",
     externalLinks: {},
     verificationNotes:
       "The public copy must preserve the distinction between an area stop and a national-park visit.",
