@@ -47,15 +47,16 @@ scripts/upload-media.js
   - validates canonical manifest
   - verifies every local image/MP4 signature, size, and SHA-256
   - uploads only manifest-listed files with bounded concurrency/retries
+  - automatically chunks MP4s above 64 MiB into fixed multipart parts
         |
         v
 authenticated upload-only Worker
-  - accepts PUT /v1/objects/<manifest-key>
+  - accepts single PUT and constrained multipart actions for a manifest key
   - restricts keys to images/ and videos/
   - accepts JPEG, PNG, and MP4 only
-  - enforces size, batch ID, and SHA-256
-  - uses an atomic create-only R2 write
-  - verifies stored R2 checksum/metadata
+  - enforces object/part size, batch ID, and SHA-256 contracts
+  - uses R2 native multipart for larger MP4s
+  - verifies the completed object before returning success
         |
         v
 local r2-verification.json
@@ -68,6 +69,17 @@ The Worker exposes no object download, delete, list, arbitrary bucket, or
 canonical-publication endpoint. Upload success does not edit the repository or
 publish a placement. The existing ingestor remains the only generated-record
 writer.
+
+The authenticated object route supports these internal actions. The local CLI
+constructs them; normal use does not require calling them directly.
+
+| Method and action | Purpose |
+| --- | --- |
+| `PUT /v1/objects/<key>` | Single-request image or smaller MP4 upload |
+| `POST ?action=multipart-create` | Create an R2 multipart session for an MP4 |
+| `PUT ?action=multipart-part` | Validate and upload one numbered part |
+| `POST ?action=multipart-complete` | Complete and verify the immutable object |
+| `DELETE ?action=multipart-abort` | Best-effort cleanup after a failed upload |
 
 ## Credentials and configuration
 
@@ -146,9 +158,9 @@ Cloudflare deployment:
 npm run media:worker:check
 ```
 
-Redeploy the Worker after pulling video-pipeline changes. Updating only the
-local CLI is insufficient because an older deployed Worker rejects `video/mp4`
-and keys outside `images/`:
+Redeploy the Worker after pulling video or multipart-pipeline changes. Updating
+only the local CLI is insufficient because an older deployed Worker does not
+provide the multipart action routes:
 
 ```bash
 npm run media:worker:deploy
@@ -227,22 +239,30 @@ npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready
 
 - The uploader retries network errors, HTTP 429, and HTTP 5xx responses with
   bounded exponential backoff.
-- Rerunning the same package is the resume mechanism. Objects with the exact
-  stored R2 SHA-256, size, and MIME type return `already_present`.
+- Rerunning the same package is the object-level resume mechanism. Objects with
+  the exact verified digest metadata, size, and MIME type return
+  `already_present`. A process restart begins a new multipart session rather
+  than trying to reuse an interrupted upload ID.
 - An existing key with different or unverifiable metadata returns HTTP 409 and
   is never overwritten.
 - R2 receives an atomic `If-None-Match: *` condition, preventing a race from
-  replacing an immutable object after the Worker's initial existence check.
+  replacing an immutable object during a single PUT. Multipart completion is
+  constrained to content-derived keys and checks for an existing object before
+  publishing.
 - A changed local file fails before upload.
 - A checksum mismatch during R2 write fails without a success receipt.
 - The default per-image limit is 25 MiB through
-  `MAX_IMAGE_UPLOAD_BYTES`. The default MP4 limit is 95 MiB through
-  `MAX_VIDEO_UPLOAD_BYTES`, which stays below the Cloudflare Free/Pro 100 MB
-  request-body limit. Both are non-secret Worker variables.
-- The current endpoint uses one immutable PUT per object. It intentionally
-  rejects larger videos instead of transcoding them or pretending a quality
-  guarantee. Re-export below the active limit or implement a separately
-  reviewed multipart flow.
+  `MAX_IMAGE_UPLOAD_BYTES`. The default MP4 object limit is 190 MiB through
+  `MAX_VIDEO_UPLOAD_BYTES`. The maximum accepted multipart part is 16 MiB
+  through `MAX_MULTIPART_PART_BYTES`. All three are non-secret Worker
+  variables.
+- MP4s above the uploader's 64 MiB threshold use multipart automatically.
+  Every part is at least 5 MiB except the final part, carries its own SHA-256,
+  and is checked against its returned R2 ETag. Upload failure triggers a
+  best-effort abort; R2 also expires abandoned sessions.
+- The Worker does not transcode or recompress video. An MP4 above the configured
+  190 MiB object policy must be re-exported or accepted through a deliberate
+  configuration change.
 
 ## Credential recovery
 
@@ -261,6 +281,8 @@ npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready
 ## Official Cloudflare references
 
 - [R2 Workers API reference](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/)
+- [R2 multipart uploads from Workers](https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/)
+- [R2 object upload guidance](https://developers.cloudflare.com/r2/objects/upload-objects/)
 - [R2 Worker bindings](https://developers.cloudflare.com/r2/api/workers/workers-api-usage/)
 - [Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/)
 - [Workers secrets](https://developers.cloudflare.com/workers/configuration/secrets/)

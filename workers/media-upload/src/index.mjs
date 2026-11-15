@@ -3,7 +3,10 @@ const checksumPattern = /^[a-f0-9]{64}$/
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "video/mp4"])
 const defaultPrefixes = "images/,videos/"
 const defaultMaximumImageBytes = 25 * 1024 * 1024
-const defaultMaximumVideoBytes = 95 * 1024 * 1024
+const defaultMaximumVideoBytes = 190 * 1024 * 1024
+const defaultMaximumMultipartPartBytes = 16 * 1024 * 1024
+const minimumMultipartPartBytes = 5 * 1024 * 1024
+const maximumMultipartParts = 10000
 
 function jsonResponse(value, status = 200, requestId = null) {
   const headers = {
@@ -102,7 +105,13 @@ function decodeObjectKey(pathname) {
 }
 
 function storedSha256(object) {
-  return bytesToHex(object?.checksums?.sha256)
+  return (
+    bytesToHex(object?.checksums?.sha256) ||
+    (object?.customMetadata?.digestVerification ===
+    "multipart-parts-sha256-v1"
+      ? object.customMetadata.sha256 || null
+      : null)
+  )
 }
 
 function storedObjectMatches(object, expected) {
@@ -125,7 +134,47 @@ function objectResult(outcome, object, expected, requestId) {
     etag: object.etag,
     version: object.version || null,
     digestVerified: true,
+    uploadProtocol:
+      object.customMetadata?.digestVerification ===
+      "multipart-parts-sha256-v1"
+        ? "multipart"
+        : "single",
     requestId,
+  }
+}
+
+function validUploadId(value) {
+  return (
+    typeof value === "string" &&
+    value.length >= 8 &&
+    value.length <= 512 &&
+    !/[\u0000-\u001f]/.test(value)
+  )
+}
+
+function normalizeEtag(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^"|"$/g, "")
+    .toLowerCase()
+}
+
+async function bufferSha256(value) {
+  return bytesToHex(await crypto.subtle.digest("SHA-256", value))
+}
+
+function multipartOptions(expected, batchId, partSize) {
+  return {
+    httpMetadata: {
+      contentType: expected.mimeType,
+      cacheControl: "public, max-age=31536000, immutable",
+    },
+    customMetadata: {
+      batchId,
+      sha256: expected.sha256,
+      digestVerification: "multipart-parts-sha256-v1",
+      multipartPartSize: String(partSize),
+    },
   }
 }
 
@@ -164,11 +213,19 @@ export async function handleRequest(request, env) {
   }
 
   const key = decodeObjectKey(url.pathname)
-  if (request.method !== "PUT" || !key) {
+  const action = url.searchParams.get("action") || "single"
+  const methodByAction = {
+    single: "PUT",
+    "multipart-create": "POST",
+    "multipart-part": "PUT",
+    "multipart-complete": "POST",
+    "multipart-abort": "DELETE",
+  }
+  if (!key || methodByAction[action] !== request.method) {
     return errorResponse(
       404,
       "route_not_found",
-      "Only the object upload route is available.",
+      "The requested upload route is unavailable.",
       requestId
     )
   }
@@ -185,7 +242,11 @@ export async function handleRequest(request, env) {
     )
   }
 
-  const mimeType = (request.headers.get("content-type") || "")
+  const mimeType = (
+    request.headers.get("x-media-mime-type") ||
+    request.headers.get("content-type") ||
+    ""
+  )
     .split(";", 1)[0]
     .trim()
     .toLowerCase()
@@ -193,9 +254,6 @@ export async function handleRequest(request, env) {
   const batchId = request.headers.get("x-media-batch-id") || ""
   const declaredSize = parsePositiveInteger(
     request.headers.get("x-media-byte-size")
-  )
-  const contentLength = parsePositiveInteger(
-    request.headers.get("content-length")
   )
   const maximumBytes =
     mimeType === "video/mp4"
@@ -244,11 +302,11 @@ export async function handleRequest(request, env) {
       requestId
     )
   }
-  if (!declaredSize || !contentLength || declaredSize !== contentLength) {
+  if (!declaredSize) {
     return errorResponse(
       422,
       "invalid_content_length",
-      "Content-Length must match the declared manifest byte size.",
+      "A positive manifest byte size is required.",
       requestId
     )
   }
@@ -260,18 +318,268 @@ export async function handleRequest(request, env) {
       requestId
     )
   }
-  if (!request.body) {
-    return errorResponse(
-      422,
-      "missing_body",
-      "The prepared object body is required.",
+
+  const expected = { key, byteSize: declaredSize, mimeType, sha256 }
+  const existing = await env.MEDIA_BUCKET.head(key)
+
+  if (action === "single") {
+    const contentLength = parsePositiveInteger(
+      request.headers.get("content-length")
+    )
+    if (!contentLength || declaredSize !== contentLength) {
+      return errorResponse(
+        422,
+        "invalid_content_length",
+        "Content-Length must match the declared manifest byte size.",
+        requestId
+      )
+    }
+    if (!request.body) {
+      return errorResponse(
+        422,
+        "missing_body",
+        "The prepared object body is required.",
+        requestId
+      )
+    }
+    if (existing) {
+      if (storedObjectMatches(existing, expected)) {
+        return jsonResponse(
+          objectResult("already_present", existing, expected, requestId),
+          200,
+          requestId
+        )
+      }
+      return errorResponse(
+        409,
+        "object_conflict",
+        "An object already exists at this immutable key with different verified metadata.",
+        requestId
+      )
+    }
+
+    let uploaded
+    try {
+      uploaded = await env.MEDIA_BUCKET.put(key, request.body, {
+        onlyIf: new Headers({ "if-none-match": "*" }),
+        httpMetadata: {
+          contentType: mimeType,
+          cacheControl: "public, max-age=31536000, immutable",
+        },
+        customMetadata: {
+          batchId,
+          sha256,
+        },
+        sha256: hexToArrayBuffer(sha256),
+      })
+    } catch (error) {
+      const checksumFailure = /checksum|digest|hash/i.test(error?.message || "")
+      return errorResponse(
+        checksumFailure ? 422 : 502,
+        checksumFailure ? "checksum_mismatch" : "r2_upload_failed",
+        checksumFailure
+          ? "R2 rejected the object because its bytes did not match the manifest digest."
+          : "R2 did not accept the prepared object.",
+        requestId
+      )
+    }
+
+    if (!uploaded) {
+      const racedObject = await env.MEDIA_BUCKET.head(key)
+      if (storedObjectMatches(racedObject, expected)) {
+        return jsonResponse(
+          objectResult("already_present", racedObject, expected, requestId),
+          200,
+          requestId
+        )
+      }
+      return errorResponse(
+        409,
+        "object_conflict",
+        "A competing upload claimed this immutable object key.",
+        requestId
+      )
+    }
+
+    const stored = await env.MEDIA_BUCKET.head(key)
+    if (!storedObjectMatches(stored, expected)) {
+      return errorResponse(
+        502,
+        "remote_verification_failed",
+        "The stored R2 object did not match the manifest after upload.",
+        requestId
+      )
+    }
+
+    return jsonResponse(
+      objectResult("uploaded", stored, expected, requestId),
+      201,
       requestId
     )
   }
 
-  const expected = { key, byteSize: declaredSize, mimeType, sha256 }
-  const existing = await env.MEDIA_BUCKET.head(key)
+  const partSize = parsePositiveInteger(
+    request.headers.get("x-media-part-size")
+  )
+  const maximumPartBytes =
+    parsePositiveInteger(String(env.MAX_MULTIPART_PART_BYTES || "")) ||
+    defaultMaximumMultipartPartBytes
+  if (
+    mimeType !== "video/mp4" ||
+    !partSize ||
+    partSize < minimumMultipartPartBytes ||
+    partSize > maximumPartBytes ||
+    Math.ceil(declaredSize / partSize) > maximumMultipartParts
+  ) {
+    return errorResponse(
+      422,
+      "invalid_multipart_contract",
+      "Multipart uploads require an MP4, a permitted fixed part size, and at most 10,000 parts.",
+      requestId
+    )
+  }
+
+  const uploadId = url.searchParams.get("uploadId")
+  if (action !== "multipart-create" && !validUploadId(uploadId)) {
+    return errorResponse(
+      422,
+      "invalid_upload_id",
+      "A valid multipart upload ID is required.",
+      requestId
+    )
+  }
+
+  if (action === "multipart-create") {
+    if (existing) {
+      if (storedObjectMatches(existing, expected)) {
+        return jsonResponse(
+          objectResult("already_present", existing, expected, requestId),
+          200,
+          requestId
+        )
+      }
+      return errorResponse(
+        409,
+        "object_conflict",
+        "An object already exists at this immutable key with different verified metadata.",
+        requestId
+      )
+    }
+    try {
+      const multipartUpload = await env.MEDIA_BUCKET.createMultipartUpload(
+        key,
+        multipartOptions(expected, batchId, partSize)
+      )
+      return jsonResponse(
+        {
+          schemaVersion: 1,
+          outcome: "multipart_created",
+          key,
+          uploadId: multipartUpload.uploadId,
+          partSize,
+          requestId,
+        },
+        201,
+        requestId
+      )
+    } catch {
+      return errorResponse(
+        502,
+        "multipart_create_failed",
+        "R2 did not create the multipart upload.",
+        requestId
+      )
+    }
+  }
+
+  if (action === "multipart-abort") {
+    try {
+      await env.MEDIA_BUCKET.resumeMultipartUpload(key, uploadId).abort()
+    } catch {
+      // Abort is best-effort and idempotent from the local uploader's view.
+    }
+    return jsonResponse(
+      { schemaVersion: 1, outcome: "multipart_aborted", key, requestId },
+      200,
+      requestId
+    )
+  }
+
+  if (action === "multipart-part") {
+    const partNumber = parsePositiveInteger(url.searchParams.get("partNumber"))
+    const contentLength = parsePositiveInteger(
+      request.headers.get("content-length")
+    )
+    const partSha256 = (
+      request.headers.get("x-media-part-sha256") || ""
+    ).toLowerCase()
+    const partStart = partNumber ? (partNumber - 1) * partSize : declaredSize
+    const expectedPartBytes = Math.min(
+      partSize,
+      Math.max(0, declaredSize - partStart)
+    )
+    if (
+      !partNumber ||
+      partNumber > maximumMultipartParts ||
+      !checksumPattern.test(partSha256) ||
+      !contentLength ||
+      contentLength !== expectedPartBytes ||
+      !request.body
+    ) {
+      return errorResponse(
+        422,
+        "invalid_multipart_part",
+        "The multipart part number, size, body, or SHA-256 is invalid.",
+        requestId
+      )
+    }
+    try {
+      const partData = await request.arrayBuffer()
+      if (
+        partData.byteLength !== expectedPartBytes ||
+        (await bufferSha256(partData)) !== partSha256
+      ) {
+        return errorResponse(
+          422,
+          "multipart_part_checksum_mismatch",
+          "The multipart part bytes did not match their declared SHA-256.",
+          requestId
+        )
+      }
+      const uploadedPart = await env.MEDIA_BUCKET.resumeMultipartUpload(
+        key,
+        uploadId
+      ).uploadPart(partNumber, partData)
+      return jsonResponse(
+        {
+          schemaVersion: 1,
+          outcome: "part_uploaded",
+          key,
+          partNumber: uploadedPart.partNumber,
+          etag: normalizeEtag(uploadedPart.etag),
+          byteSize: partData.byteLength,
+          sha256: partSha256,
+          requestId,
+        },
+        200,
+        requestId
+      )
+    } catch {
+      return errorResponse(
+        502,
+        "multipart_part_failed",
+        "R2 did not accept the multipart part.",
+        requestId
+      )
+    }
+  }
+
   if (existing) {
+    try {
+      await env.MEDIA_BUCKET.resumeMultipartUpload(key, uploadId).abort()
+    } catch {
+      // A completed or already-expired session needs no further cleanup.
+    }
     if (storedObjectMatches(existing, expected)) {
       return jsonResponse(
         objectResult("already_present", existing, expected, requestId),
@@ -287,45 +595,78 @@ export async function handleRequest(request, env) {
     )
   }
 
-  let uploaded
+  let completion
   try {
-    uploaded = await env.MEDIA_BUCKET.put(key, request.body, {
-      onlyIf: new Headers({ "if-none-match": "*" }),
-      httpMetadata: {
-        contentType: mimeType,
-        cacheControl: "public, max-age=31536000, immutable",
-      },
-      customMetadata: {
-        batchId,
-        sha256,
-      },
-      sha256: hexToArrayBuffer(sha256),
-    })
-  } catch (error) {
-    const checksumFailure = /checksum|digest|hash/i.test(error?.message || "")
+    completion = await request.json()
+  } catch {
     return errorResponse(
-      checksumFailure ? 422 : 502,
-      checksumFailure ? "checksum_mismatch" : "r2_upload_failed",
-      checksumFailure
-        ? "R2 rejected the object because its bytes did not match the manifest digest."
-        : "R2 did not accept the prepared object.",
+      422,
+      "invalid_completion",
+      "Multipart completion requires a JSON part list.",
+      requestId
+    )
+  }
+  const parts = completion?.parts
+  const expectedPartCount = Math.ceil(declaredSize / partSize)
+  if (!Array.isArray(parts) || parts.length !== expectedPartCount) {
+    return errorResponse(
+      422,
+      "invalid_completion",
+      "Multipart completion must contain every expected part.",
+      requestId
+    )
+  }
+  let completedBytes = 0
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index]
+    const expectedBytes = Math.min(
+      partSize,
+      declaredSize - index * partSize
+    )
+    if (
+      part?.partNumber !== index + 1 ||
+      !/^[a-f0-9]{32}$/.test(normalizeEtag(part?.etag)) ||
+      part?.byteSize !== expectedBytes ||
+      !checksumPattern.test(part?.sha256 || "")
+    ) {
+      return errorResponse(
+        422,
+        "invalid_completion",
+        "Multipart completion contains an invalid or out-of-order part.",
+        requestId
+      )
+    }
+    completedBytes += part.byteSize
+  }
+  if (completedBytes !== declaredSize) {
+    return errorResponse(
+      422,
+      "invalid_completion",
+      "Multipart completion byte size does not match the manifest.",
       requestId
     )
   }
 
-  if (!uploaded) {
-    const racedObject = await env.MEDIA_BUCKET.head(key)
-    if (storedObjectMatches(racedObject, expected)) {
+  try {
+    await env.MEDIA_BUCKET.resumeMultipartUpload(key, uploadId).complete(
+      parts.map(part => ({
+        partNumber: part.partNumber,
+        etag: normalizeEtag(part.etag),
+      }))
+    )
+  } catch {
+    const completedObject = await env.MEDIA_BUCKET.head(key)
+    if (storedObjectMatches(completedObject, expected)) {
       return jsonResponse(
-        objectResult("already_present", racedObject, expected, requestId),
+        objectResult("already_present", completedObject, expected, requestId),
         200,
         requestId
       )
     }
     return errorResponse(
-      409,
-      "object_conflict",
-      "A competing upload claimed this immutable object key.",
+      502,
+      "multipart_complete_failed",
+      "R2 did not complete the multipart upload.",
       requestId
     )
   }
@@ -335,13 +676,16 @@ export async function handleRequest(request, env) {
     return errorResponse(
       502,
       "remote_verification_failed",
-      "The stored R2 object did not match the manifest after upload.",
+      "The completed R2 object did not match the manifest.",
       requestId
     )
   }
-
   return jsonResponse(
-    objectResult("uploaded", stored, expected, requestId),
+    {
+      ...objectResult("uploaded", stored, expected, requestId),
+      partCount: parts.length,
+      partSize,
+    },
     201,
     requestId
   )

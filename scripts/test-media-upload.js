@@ -29,7 +29,7 @@ function hexBuffer(value) {
   )
 }
 
-function testMp4Bytes() {
+function testMp4Bytes(byteSize = 11 * 1024 * 1024 + 123) {
   const fileTypeBox = Buffer.alloc(24)
   fileTypeBox.writeUInt32BE(24, 0)
   fileTypeBox.write("ftyp", 4, "ascii")
@@ -37,12 +37,16 @@ function testMp4Bytes() {
   fileTypeBox.writeUInt32BE(0, 12)
   fileTypeBox.write("isom", 16, "ascii")
   fileTypeBox.write("mp42", 20, "ascii")
-  return Buffer.concat([fileTypeBox, Buffer.from("test-video-payload")])
+  const data = Buffer.alloc(byteSize)
+  fileTypeBox.copy(data)
+  Buffer.from("test-video-payload").copy(data, fileTypeBox.length)
+  return data
 }
 
 class MockR2Bucket {
   constructor() {
     this.objects = new Map()
+    this.multipartUploads = new Map()
   }
 
   async head(key) {
@@ -75,6 +79,74 @@ class MockR2Bucket {
     }
     this.objects.set(key, object)
     return object
+  }
+
+  async createMultipartUpload(key, options = {}) {
+    const uploadId = crypto.randomUUID()
+    this.multipartUploads.set(uploadId, {
+      key,
+      options,
+      parts: new Map(),
+    })
+    return this.multipartHandle(key, uploadId)
+  }
+
+  resumeMultipartUpload(key, uploadId) {
+    return this.multipartHandle(key, uploadId)
+  }
+
+  multipartHandle(key, uploadId) {
+    const bucket = this
+    const session = () => {
+      const value = bucket.multipartUploads.get(uploadId)
+      if (!value || value.key !== key) throw new Error("NoSuchUpload")
+      return value
+    }
+    return {
+      key,
+      uploadId,
+      async uploadPart(partNumber, value) {
+        const data = Buffer.from(await new Response(value).arrayBuffer())
+        const etag = crypto.createHash("md5").update(data).digest("hex")
+        session().parts.set(partNumber, { data, etag, partNumber })
+        return { etag, partNumber }
+      },
+      async complete(parts) {
+        const active = session()
+        const selected = parts.map(part => {
+          const stored = active.parts.get(part.partNumber)
+          if (!stored || stored.etag !== part.etag) {
+            throw new Error("InvalidPart")
+          }
+          return stored
+        })
+        const data = Buffer.concat(selected.map(part => part.data))
+        const multipartDigest = crypto
+          .createHash("md5")
+          .update(
+            Buffer.concat(
+              selected.map(part => Buffer.from(part.etag, "hex"))
+            )
+          )
+          .digest("hex")
+        const object = {
+          checksums: {},
+          customMetadata: { ...(active.options.customMetadata || {}) },
+          etag: `${multipartDigest}-${selected.length}`,
+          httpMetadata: { ...(active.options.httpMetadata || {}) },
+          key,
+          size: data.length,
+          uploaded: new Date(),
+          version: crypto.randomUUID(),
+        }
+        bucket.objects.set(key, object)
+        bucket.multipartUploads.delete(uploadId)
+        return object
+      },
+      async abort() {
+        bucket.multipartUploads.delete(uploadId)
+      },
+    }
   }
 }
 
@@ -238,7 +310,8 @@ async function main() {
     const env = {
       ALLOWED_R2_PREFIXES: "images/,videos/",
       MAX_IMAGE_UPLOAD_BYTES: String(25 * 1024 * 1024),
-      MAX_VIDEO_UPLOAD_BYTES: String(95 * 1024 * 1024),
+      MAX_MULTIPART_PART_BYTES: String(5 * 1024 * 1024),
+      MAX_VIDEO_UPLOAD_BYTES: String(190 * 1024 * 1024),
       MEDIA_BUCKET: bucket,
       MEDIA_UPLOAD_TOKEN: token,
     }
@@ -332,19 +405,76 @@ async function main() {
       manifestFile: videoPackage.videoManifestFile,
     })
     assert.strictEqual(videoDryRun.dryRun, true)
+    let rejectedPart = false
+    await assert.rejects(
+      () =>
+        uploadMediaPackage({
+          concurrency: 2,
+          endpoint: "https://upload.test",
+          fetchImpl: async (url, init) => {
+            const requestUrl = new URL(url)
+            if (
+              !rejectedPart &&
+              requestUrl.searchParams.get("action") === "multipart-part" &&
+              requestUrl.searchParams.get("partNumber") === "2"
+            ) {
+              rejectedPart = true
+              return Response.json(
+                {
+                  error: "test_part_rejection",
+                  message: "Simulated part rejection",
+                },
+                { status: 422 }
+              )
+            }
+            return fetchImpl(url, init)
+          },
+          manifestFile: videoPackage.videoManifestFile,
+          multipartPartBytes: 5 * 1024 * 1024,
+          multipartThresholdBytes: 5 * 1024 * 1024,
+          retries: 0,
+          token,
+        }),
+      /Multipart upload failed/
+    )
+    assert.strictEqual(rejectedPart, true)
+    assert.strictEqual(bucket.multipartUploads.size, 0)
+    assert.strictEqual(
+      bucket.objects.has(videoPackage.manifest.assets[0].output.objectKey),
+      false
+    )
+
     const videoUpload = await uploadMediaPackage({
+      concurrency: 2,
       endpoint: "https://upload.test",
       fetchImpl,
       manifestFile: videoPackage.videoManifestFile,
+      multipartPartBytes: 5 * 1024 * 1024,
+      multipartThresholdBytes: 5 * 1024 * 1024,
       retries: 0,
       token,
     })
     assert.strictEqual(videoUpload.results[0].outcome, "uploaded")
+    assert.strictEqual(videoUpload.results[0].uploadProtocol, "multipart")
+    assert.strictEqual(videoUpload.results[0].partCount, 3)
     const storedVideo = bucket.objects.get(
       videoPackage.manifest.assets[0].output.objectKey
     )
     assert.strictEqual(storedVideo.httpMetadata.contentType, "video/mp4")
     assert.strictEqual(storedVideo.size, fs.statSync(videoPackage.videoFile).size)
+    assert.strictEqual(bucket.multipartUploads.size, 0)
+
+    const repeatedVideo = await uploadMediaPackage({
+      endpoint: "https://upload.test",
+      fetchImpl,
+      manifestFile: videoPackage.videoManifestFile,
+      multipartPartBytes: 5 * 1024 * 1024,
+      multipartThresholdBytes: 5 * 1024 * 1024,
+      retries: 0,
+      token,
+    })
+    assert.strictEqual(repeatedVideo.results[0].outcome, "already_present")
+    assert.strictEqual(repeatedVideo.results[0].uploadProtocol, "multipart")
 
     let retryAttempts = 0
     const retried = await uploadMediaPackage({

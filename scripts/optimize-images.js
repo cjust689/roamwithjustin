@@ -14,7 +14,7 @@ const supportedPackageExtensions = new Set([
 ])
 const maximumDimension = 2560
 const jpegQuality = 82
-const defaultMaximumVideoMiB = 95
+const defaultMaximumVideoMiB = 190
 
 const formatBytes = bytes => `${(bytes / 1024 / 1024).toFixed(1)} MiB`
 
@@ -74,8 +74,8 @@ Options:
   --place <id>          Optional canonical Place ID; requires --journey and one
                         matching Visit in that Journey
   --r2-prefix <prefix>  R2 parent prefix (default: images or videos by type)
-  --max-video-mib <n>   Largest accepted MP4 (default: ${defaultMaximumVideoMiB} MiB); no automatic
-                        video transcoding or quality-changing compression
+  --max-video-mib <n>   Largest accepted MP4 object (default: ${defaultMaximumVideoMiB} MiB);
+                        upload transport is selected later by media:upload
   --rights-owner <id>   Explicit rights owner stored in the manifest
   --rights-status <id>  Explicit rights status, such as owned or licensed
   --copy                Explicitly select copy mode (optional with --source/--tag)
@@ -1037,7 +1037,7 @@ async function runPackageMode(options) {
       const stats = await fs.promises.stat(file)
       if (stats.size > maximumVideoBytes) {
         throw new Error(
-          `${path.basename(file)} is ${formatBytes(stats.size)}; the configured single-request limit is ${options.maxVideoMib} MiB. Re-export a web-delivery MP4 below that limit, or deliberately raise both --max-video-mib and the Worker's MAX_VIDEO_UPLOAD_BYTES after confirming the Cloudflare plan limit. Automatic video transcoding is disabled.`
+          `${path.basename(file)} is ${formatBytes(stats.size)}; the configured video object limit is ${options.maxVideoMib} MiB. Deliberately raise both --max-video-mib and the Worker's MAX_VIDEO_UPLOAD_BYTES to accept a larger object. Automatic video transcoding is disabled.`
         )
       }
     }

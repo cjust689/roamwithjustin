@@ -146,13 +146,14 @@ For handheld scenes, water, trees, and complex motion, test actual visual qualit
 3. Run `media:prepare` with the canonical Journey and optional Place.
 4. Review the byte-preserving package and manifest.
 5. Run `media:upload`; the authenticated Worker writes only immutable
-   manifest keys below `videos/` and creates a checksum receipt.
+   manifest keys below `videos/` and creates a checksum receipt. MP4s above
+   64 MiB automatically use R2 multipart upload with 16 MiB parts.
 6. Dry-run and apply `media:ingest`, then deploy the site.
 7. Verify public playback, seeking/range behavior, and MIME type on real
    desktop and mobile devices.
 
-The exact copy/paste commands, 95 MiB default limit, and Place/Visit behavior
-are documented in
+The exact copy/paste commands, 190 MiB default object limit, and Place/Visit
+behavior are documented in
 [Journey media ingestion](../implementation/journey-media-ingestion.md).
 Automatic transcoding is deliberately absent because a smaller encode cannot
 guarantee identical visual quality. A dashboard upload remains a manual

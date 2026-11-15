@@ -180,12 +180,17 @@ O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay-videos/
 Video object keys default to
 `videos/<journey-slug>/<place-id>/<content-derived-batch-id>/` for a Place
 package or `videos/<journey-slug>/<content-derived-batch-id>/` for a
-Journey-only package. The default maximum is 95 MiB per MP4, below the
-Cloudflare Free/Pro 100 MB single-request limit. If preparation rejects a
-larger file, re-export a web-delivery MP4 below the limit. Only use
-`--max-video-mib <n>` when the Worker `MAX_VIDEO_UPLOAD_BYTES` and the
-Cloudflare account limit have deliberately been raised too. The tool will not
-silently trade quality for size.
+Journey-only package. The default maximum is 190 MiB per MP4. Uploads through
+64 MiB use one request; larger MP4s automatically use R2 multipart upload with
+16 MiB parts. The manifest, receipt, and ingestion commands are identical for
+both transports. For example, a 124.5 MiB Cinnamon Bay MP4 needs no special
+upload flag after the updated Worker is deployed.
+
+If preparation rejects a file above 190 MiB, re-export a smaller web-delivery
+MP4 or deliberately raise both `--max-video-mib <n>` and the Worker's
+`MAX_VIDEO_UPLOAD_BYTES`. The tool will not silently trade quality for size.
+The uploader's `--multipart-threshold-mib` and `--multipart-part-mib` options
+exist for controlled tuning; their defaults should normally be retained.
 
 After the updated Worker has been deployed, upload and ingest use the exact
 same commands as an image package:

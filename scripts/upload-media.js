@@ -1,5 +1,6 @@
 const fs = require("fs")
 const path = require("path")
+const crypto = require("crypto")
 const sharp = require("sharp")
 const { pathToFileURL } = require("url")
 const {
@@ -11,6 +12,8 @@ const {
 const projectRoot = path.resolve(__dirname, "..")
 const defaultConcurrency = 3
 const defaultRetries = 3
+const defaultMultipartThresholdBytes = 64 * 1024 * 1024
+const defaultMultipartPartBytes = 16 * 1024 * 1024
 
 function usage() {
   return `Prepared media upload
@@ -25,6 +28,11 @@ Options:
   --receipt <file>       Receipt output (default: <package>/r2-verification.json)
   --concurrency <n>      Simultaneous object uploads (default: ${defaultConcurrency}, maximum: 8)
   --retries <n>          Retries for network, 429, and 5xx failures (default: ${defaultRetries})
+  --multipart-threshold-mib <n>
+                         MP4s above this size use R2 multipart (default: 64)
+  --multipart-part-mib <n>
+                         Fixed multipart part size (default: 16, range: 5-95;
+                         the Worker must permit the selected size)
   --dry-run              Validate local bytes and print the remote plan; upload nothing
   --resume               Accepted for clarity; reruns are idempotent by default
   --help, --h, -h        Show this help
@@ -63,6 +71,8 @@ function parseArguments(args) {
     endpoint: process.env.MEDIA_UPLOAD_WORKER_URL || "",
     help: false,
     manifest: null,
+    multipartPartBytes: defaultMultipartPartBytes,
+    multipartThresholdBytes: defaultMultipartThresholdBytes,
     receipt: null,
     resume: false,
     retries: defaultRetries,
@@ -119,6 +129,48 @@ function parseArguments(args) {
         0,
         10
       )
+    } else if (argument === "--multipart-threshold-mib") {
+      options.multipartThresholdBytes =
+        parseInteger(
+          readValue(args, index, "--multipart-threshold-mib"),
+          "--multipart-threshold-mib",
+          5,
+          5120
+        ) *
+        1024 *
+        1024
+      index += 1
+    } else if (argument.startsWith("--multipart-threshold-mib=")) {
+      options.multipartThresholdBytes =
+        parseInteger(
+          argument.slice("--multipart-threshold-mib=".length),
+          "--multipart-threshold-mib",
+          5,
+          5120
+        ) *
+        1024 *
+        1024
+    } else if (argument === "--multipart-part-mib") {
+      options.multipartPartBytes =
+        parseInteger(
+          readValue(args, index, "--multipart-part-mib"),
+          "--multipart-part-mib",
+          5,
+          95
+        ) *
+        1024 *
+        1024
+      index += 1
+    } else if (argument.startsWith("--multipart-part-mib=")) {
+      options.multipartPartBytes =
+        parseInteger(
+          argument.slice("--multipart-part-mib=".length),
+          "--multipart-part-mib",
+          5,
+          95
+        ) *
+        1024 *
+        1024
     } else {
       throw new Error(`Unknown argument: ${argument}\n\n${usage()}`)
     }
@@ -268,12 +320,40 @@ function encodedObjectKey(objectKey) {
   return objectKey.split("/").map(encodeURIComponent).join("/")
 }
 
-function uploadUrl(endpoint, objectKey) {
+function uploadUrl(endpoint, objectKey, action = null, parameters = {}) {
   const base = new URL(endpoint)
   base.pathname = `/v1/objects/${encodedObjectKey(objectKey)}`
   base.search = ""
+  if (action) base.searchParams.set("action", action)
+  Object.entries(parameters).forEach(([name, value]) => {
+    base.searchParams.set(name, String(value))
+  })
   base.hash = ""
   return base.toString()
+}
+
+function commonUploadHeaders(manifest, output, options) {
+  return {
+    authorization: `Bearer ${options.token}`,
+    "x-media-batch-id": manifest.batchId,
+    "x-media-byte-size": String(output.byteSize),
+    "x-media-mime-type": output.mimeType,
+    "x-media-sha256": output.sha256,
+  }
+}
+
+function validateRemoteObject(result, output) {
+  if (
+    !["uploaded", "already_present"].includes(result.outcome) ||
+    result.key !== output.objectKey ||
+    result.byteSize !== output.byteSize ||
+    result.sha256 !== output.sha256 ||
+    result.digestVerified !== true
+  ) {
+    throw new Error(
+      `${output.relativePath} received incomplete or mismatched remote verification`
+    )
+  }
 }
 
 function retryDelay(response, attempt) {
@@ -298,37 +378,25 @@ async function responseJson(response) {
   }
 }
 
-async function uploadPreparedAsset(prepared, manifest, options) {
-  const data = await readVerifiedAsset(prepared)
-  const output = prepared.asset.output
-  const targetUrl = uploadUrl(options.endpoint, output.objectKey)
+async function fetchWithRetries(url, init, options, relativePath) {
   let lastError
-
   for (let attempt = 0; attempt <= options.retries; attempt += 1) {
     let response
     try {
-      response = await options.fetchImpl(targetUrl, {
-        method: "PUT",
-        headers: {
-          authorization: `Bearer ${options.token}`,
-          "content-length": String(data.length),
-          "content-type": output.mimeType,
-          "x-media-batch-id": manifest.batchId,
-          "x-media-byte-size": String(output.byteSize),
-          "x-media-sha256": output.sha256,
-        },
-        body: data,
-      })
+      response = await options.fetchImpl(url, init)
     } catch (error) {
       lastError = error
       if (attempt < options.retries) {
         await options.waitImpl(Math.min(250 * 2 ** attempt, 4000))
         continue
       }
-      throw new Error(`${output.relativePath} upload failed: ${error.message}`)
+      throw new Error(`${relativePath} upload failed: ${error.message}`)
     }
 
-    if ((response.status === 429 || response.status >= 500) && attempt < options.retries) {
+    if (
+      (response.status === 429 || response.status >= 500) &&
+      attempt < options.retries
+    ) {
       await response.arrayBuffer()
       await options.waitImpl(retryDelay(response, attempt))
       continue
@@ -337,24 +405,210 @@ async function uploadPreparedAsset(prepared, manifest, options) {
     const result = await responseJson(response)
     if (!response.ok) {
       throw new Error(
-        `${output.relativePath} upload rejected (${response.status} ${result.error || "upload_error"}): ${result.message || "No detail returned"}`
-      )
-    }
-    if (
-      !["uploaded", "already_present"].includes(result.outcome) ||
-      result.key !== output.objectKey ||
-      result.byteSize !== output.byteSize ||
-      result.sha256 !== output.sha256 ||
-      result.digestVerified !== true
-    ) {
-      throw new Error(
-        `${output.relativePath} received incomplete or mismatched remote verification`
+        `${relativePath} upload rejected (${response.status} ${result.error || "upload_error"}): ${result.message || "No detail returned"}`
       )
     }
     return result
   }
+  throw lastError || new Error(`${relativePath} upload failed`)
+}
 
-  throw lastError || new Error(`${output.relativePath} upload failed`)
+function multipartEtag(parts) {
+  const binaryDigests = parts.map(part => Buffer.from(part.md5, "hex"))
+  return `${crypto
+    .createHash("md5")
+    .update(Buffer.concat(binaryDigests))
+    .digest("hex")}-${parts.length}`
+}
+
+async function uploadSingleAsset(data, output, manifest, options) {
+  const result = await fetchWithRetries(
+    uploadUrl(options.endpoint, output.objectKey),
+    {
+      method: "PUT",
+      headers: {
+        ...commonUploadHeaders(manifest, output, options),
+        "content-length": String(data.length),
+        "content-type": output.mimeType,
+      },
+      body: data,
+    },
+    options,
+    output.relativePath
+  )
+  validateRemoteObject(result, output)
+  return result
+}
+
+async function abortMultipartUpload(output, manifest, options, uploadId) {
+  if (!uploadId) return
+  try {
+    await options.fetchImpl(
+      uploadUrl(options.endpoint, output.objectKey, "multipart-abort", {
+        uploadId,
+      }),
+      {
+        method: "DELETE",
+        headers: {
+          ...commonUploadHeaders(manifest, output, options),
+          "x-media-part-size": String(options.multipartPartBytes),
+        },
+      }
+    )
+  } catch {
+    // The R2 lifecycle also expires incomplete multipart uploads after 7 days.
+  }
+}
+
+async function uploadMultipartAsset(data, output, manifest, options) {
+  const commonHeaders = {
+    ...commonUploadHeaders(manifest, output, options),
+    "x-media-part-size": String(options.multipartPartBytes),
+  }
+  let uploadId = null
+  try {
+    const created = await fetchWithRetries(
+      uploadUrl(options.endpoint, output.objectKey, "multipart-create"),
+      { method: "POST", headers: commonHeaders },
+      options,
+      output.relativePath
+    )
+    if (created.outcome === "already_present") {
+      validateRemoteObject(created, output)
+      return created
+    }
+    if (
+      created.outcome !== "multipart_created" ||
+      created.key !== output.objectKey ||
+      !created.uploadId ||
+      created.partSize !== options.multipartPartBytes
+    ) {
+      throw new Error(
+        `${output.relativePath} received an invalid multipart upload session`
+      )
+    }
+    uploadId = created.uploadId
+
+    const partCount = Math.ceil(data.length / options.multipartPartBytes)
+    const partInputs = Array.from({ length: partCount }, (_, index) => {
+      const start = index * options.multipartPartBytes
+      const body = data.subarray(
+        start,
+        Math.min(start + options.multipartPartBytes, data.length)
+      )
+      return {
+        body,
+        byteSize: body.length,
+        md5: crypto.createHash("md5").update(body).digest("hex"),
+        partNumber: index + 1,
+        sha256: sha256(body),
+      }
+    })
+    const settled = await mapWithConcurrency(
+      partInputs,
+      options.concurrency,
+      async part => {
+        const result = await fetchWithRetries(
+          uploadUrl(options.endpoint, output.objectKey, "multipart-part", {
+            uploadId,
+            partNumber: part.partNumber,
+          }),
+          {
+            method: "PUT",
+            headers: {
+              ...commonHeaders,
+              "content-length": String(part.byteSize),
+              "content-type": "application/octet-stream",
+              "x-media-part-sha256": part.sha256,
+            },
+            body: part.body,
+          },
+          options,
+          `${output.relativePath} part ${part.partNumber}`
+        )
+        if (
+          result.outcome !== "part_uploaded" ||
+          result.key !== output.objectKey ||
+          result.partNumber !== part.partNumber ||
+          result.byteSize !== part.byteSize ||
+          result.sha256 !== part.sha256 ||
+          result.etag !== part.md5
+        ) {
+          throw new Error(
+            `${output.relativePath} part ${part.partNumber} failed remote integrity verification`
+          )
+        }
+        return { ...part, etag: result.etag, requestId: result.requestId }
+      }
+    )
+    const failures = settled.filter(result => result.error)
+    if (failures.length) {
+      throw new Error(
+        `Multipart upload failed:\n- ${failures.map(result => result.error.message).join("\n- ")}`
+      )
+    }
+    const parts = settled.map(result => result.value)
+    const completionBody = Buffer.from(
+      JSON.stringify({
+        parts: parts.map(part => ({
+          partNumber: part.partNumber,
+          etag: part.etag,
+          byteSize: part.byteSize,
+          sha256: part.sha256,
+        })),
+      })
+    )
+    const completed = await fetchWithRetries(
+      uploadUrl(options.endpoint, output.objectKey, "multipart-complete", {
+        uploadId,
+      }),
+      {
+        method: "POST",
+        headers: {
+          ...commonHeaders,
+          "content-length": String(completionBody.length),
+          "content-type": "application/json",
+        },
+        body: completionBody,
+      },
+      options,
+      output.relativePath
+    )
+    validateRemoteObject(completed, output)
+    const expectedEtag = multipartEtag(parts)
+    if (
+      completed.outcome === "uploaded" &&
+      (completed.uploadProtocol !== "multipart" ||
+        completed.partCount !== partCount ||
+        completed.partSize !== options.multipartPartBytes ||
+        completed.etag !== expectedEtag)
+    ) {
+      throw new Error(
+        `${output.relativePath} completed with mismatched multipart verification`
+      )
+    }
+    return {
+      ...completed,
+      partRequestIds: [
+        created.requestId,
+        ...parts.map(part => part.requestId),
+      ].filter(Boolean),
+    }
+  } catch (error) {
+    await abortMultipartUpload(output, manifest, options, uploadId)
+    throw error
+  }
+}
+
+async function uploadPreparedAsset(prepared, manifest, options) {
+  const data = await readVerifiedAsset(prepared)
+  const output = prepared.asset.output
+  const useMultipart =
+    output.mimeType === "video/mp4" &&
+    output.byteSize > options.multipartThresholdBytes
+  return useMultipart
+    ? uploadMultipartAsset(data, output, manifest, options)
+    : uploadSingleAsset(data, output, manifest, options)
 }
 
 async function mapWithConcurrency(items, concurrency, callback) {
@@ -440,6 +694,10 @@ async function uploadMediaPackage(input) {
     concurrency: input.concurrency ?? defaultConcurrency,
     endpoint: input.endpoint,
     fetchImpl: input.fetchImpl || fetch,
+    multipartPartBytes:
+      input.multipartPartBytes ?? defaultMultipartPartBytes,
+    multipartThresholdBytes:
+      input.multipartThresholdBytes ?? defaultMultipartThresholdBytes,
     retries: input.retries ?? defaultRetries,
     token: input.token,
     waitImpl: input.waitImpl || wait,
@@ -469,11 +727,19 @@ async function uploadMediaPackage(input) {
     batchId: mediaPackage.manifest.batchId,
     objects: receiptObjects(mediaPackage.manifest),
     verification: {
-      method: "worker-r2-sha256",
+      method: "worker-r2-integrity-v2",
       endpoint: new URL(options.endpoint).origin,
       manifestSha256: mediaPackage.manifestSha256,
       verifiedAt: new Date().toISOString(),
-      requestIds: results.map(result => result.requestId).filter(Boolean),
+      uploadProtocols: [
+        ...new Set(results.map(result => result.uploadProtocol || "single")),
+      ],
+      requestIds: results
+        .flatMap(result => [
+          ...(result.partRequestIds || []),
+          result.requestId,
+        ])
+        .filter(Boolean),
     },
   }
   const receiptFile =
@@ -495,6 +761,8 @@ async function main() {
     dryRun: options.dryRun,
     endpoint: options.endpoint,
     manifestFile: options.manifest,
+    multipartPartBytes: options.multipartPartBytes,
+    multipartThresholdBytes: options.multipartThresholdBytes,
     receiptFile: options.receipt,
     retries: options.retries,
     token: options.token,
@@ -507,8 +775,13 @@ async function main() {
 
   if (result.dryRun) {
     manifest.assets.forEach(asset => {
+      const protocol =
+        asset.output.mimeType === "video/mp4" &&
+        asset.output.byteSize > options.multipartThresholdBytes
+          ? `multipart (${Math.ceil(asset.output.byteSize / options.multipartPartBytes)} parts)`
+          : "single PUT"
       console.log(
-        `WOULD UPLOAD ${asset.output.relativePath} -> ${asset.output.objectKey} (${asset.output.byteSize} bytes)`
+        `WOULD UPLOAD ${asset.output.relativePath} -> ${asset.output.objectKey} (${asset.output.byteSize} bytes, ${protocol})`
       )
     })
     console.log("Dry run complete; no remote requests or receipt writes occurred.")
@@ -517,7 +790,10 @@ async function main() {
 
   result.results.forEach((remote, index) => {
     const relativePath = manifest.assets[index].output.relativePath
-    console.log(`${remote.outcome.toUpperCase()} ${relativePath} -> ${remote.key}`)
+    const protocol = remote.uploadProtocol || "single"
+    console.log(
+      `${remote.outcome.toUpperCase()} ${relativePath} -> ${remote.key} (${protocol})`
+    )
   })
   console.log(
     `${result.receiptWrite.existing ? "Verified existing" : "Created"} receipt: ${result.receiptWrite.target}`

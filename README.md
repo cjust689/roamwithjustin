@@ -252,7 +252,9 @@ Media records idempotently, and places them in a Journey's additive
 **Photography and video** collection without overwriting curated hero or
 gallery content. JPEG/PNG packages use the image optimizer; MP4-only packages
 preserve the original bytes and use versioned `videos/` keys. Automatic video
-transcoding is intentionally not performed.
+transcoding is intentionally not performed. MP4s above 64 MiB upload through
+R2 multipart automatically, so the prepare, upload, and ingest commands do not
+change for larger files within the configured object limit.
 A Place/Visit package supplies that stop's default card and Atlas image only
 when no curated hero exists; stops without verified photography remain empty
 instead of borrowing the Journey cover.

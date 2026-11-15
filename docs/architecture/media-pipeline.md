@@ -104,18 +104,27 @@ batch-versioned below `images/`; new MP4 package keys are batch-versioned below
 not transcode, compress, claim codec compatibility, or generate a poster.
 
 The local uploader owns filesystem access, canonical manifest validation,
-bounded concurrency/retries, and receipt creation. The Worker owns bearer-token
-authentication, the `images/` and `videos/` key boundaries, MIME/size checks, atomic
-create-only writes, and stored R2 SHA-256 verification. It exposes no object
-download, delete, list, or canonical-publication API. The upload bearer secret
-is distinct from Wrangler/Cloudflare deployment authentication, and no R2 S3
-access keys are distributed to the local uploader.
+bounded concurrency/retries, transport selection, and receipt creation. It
+uses one create-only PUT for images and smaller MP4s. MP4s above 64 MiB use R2
+multipart upload automatically, with 16 MiB parts by default; no workflow or
+manifest change is required. Failed multipart sessions are aborted, and a
+normal rerun safely recognizes an already-completed immutable object.
 
-Images default to a 25 MiB Worker limit. MP4 files default to 95 MiB so the
-single-request upload remains below Cloudflare's 100 MB Free/Pro request-body
-limit; both limits are configurable Worker variables. A larger video must be
-re-exported below the active limit or use a future multipart/direct-upload
-path. Automatic quality-changing compression is intentionally absent.
+The Worker owns bearer-token authentication, the `images/` and `videos/` key
+boundaries, MIME/object-size checks, per-part size and SHA-256 validation, R2
+multipart completion, and post-write object verification. The uploader also
+checks each returned part ETag and the final multipart ETag before it writes a
+receipt. The Worker exposes no object download, bucket-wide delete/list, or
+canonical-publication API. Its upload bearer secret is distinct from
+Wrangler/Cloudflare deployment authentication, and no R2 S3 access keys are
+distributed to the local uploader.
+
+Images default to a 25 MiB object limit and MP4 files to a 190 MiB object
+limit. These are publication-policy limits, not per-request body sizes;
+multipart parts remain below the request-body limit. The MP4 object limit and
+maximum part size are configurable through `MAX_VIDEO_UPLOAD_BYTES` and
+`MAX_MULTIPART_PART_BYTES`. Automatic quality-changing compression is
+intentionally absent.
 
 The Worker source and bundle are locally verified. Deployment into the
 owner's Cloudflare account and the first production upload remain
@@ -127,6 +136,5 @@ externally unverified.
 - EXIF extraction, privacy filtering, or capture-Gear matching
 - Multiple photo renditions (thumbnail/gallery/full) per generated asset
 - Automatic video transcoding, codec inspection, posters, or adaptive bitrate
-- Multipart upload for MP4 files above the configured single-request limit
 - Experience-scoped media preparation and placement
 - Automated Git commit/push/deployment reporting after ingestion
