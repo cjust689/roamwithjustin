@@ -789,7 +789,7 @@ export const utahWinter2025Journey = Object.freeze({
     },
   ],
   atlasNotes: {
-    utah: "We cross Utah from wet salt before sunrise to red-rock weather and finally snow, with our four-year-old setting the pace and changing what we notice.",
+    utah: "We cross Utah from wet salt before sunrise to red rock weather and finally snow, with our son setting the pace at four years old and changing what we notice.",
     "bonneville-salt-flats":
       "We step onto the flats in the dark and wait until the mountains separate from the sky and wet salt begins reflecting the first light.",
     moab: "Moab becomes our base, but it never feels like a pause: dinosaurs, canyon roads, national parks, and constantly changing weather radiate out from town.",
@@ -798,17 +798,17 @@ export const utahWinter2025Journey = Object.freeze({
     "potash-road":
       "We first follow the canyon in late light as a family, then I return alone to trade human scale for the aerial geometry of the ponds.",
     "canyonlands-national-park":
-      "Sun, wind, rain, and snow redraw the canyon within two hours while our four-year-old keeps hiking through every version of it.",
+      "Sun, wind, rain, and snow redraw the canyon within two hours while our son keeps hiking through every version of it at four years old.",
     "arches-national-park":
-      "We arrive at 4:00 p.m. for warmer light, short walks, and a family frame that makes the enormous red-rock landscape feel personal.",
+      "We arrive at 4:00 p.m. for warmer light, short walks, and a family frame that makes the enormous red rock landscape feel personal.",
     "dead-horse-point":
-      "A five-minute walk ends at an overlook where fast snow hides whole canyon layers and then gives them back.",
+      "Five minutes of walking ends at an overlook where fast snow hides whole canyon layers and then gives them back.",
     "park-city":
       "Our son takes ski school while we find our own runs, then we regroup and let an afternoon downtown slow the day down.",
     "woodward-park-city":
       "A kid rotates upside down on a BMX bike while a young skateboarder launches nearby, and everyone treats it as another ordinary afternoon. Built different.",
     uintas:
-      "After three to four hours on cross-country skis, the guide clips in the dogs and our son settles behind goggles almost as large as his face.",
+      "After three to four hours on cross country skis, the guide clips in the dogs and our son settles behind goggles almost as large as his face.",
     "salt-lake-city-airport":
       "SLC is the plain bookend to a week of salt, sandstone, and snow: rental keys on arrival, bags and security on the way home.",
   },
