@@ -4,7 +4,7 @@ title: Journey Media Ingestion
 kind: implementation
 status: in-progress
 implementation_state: partial
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - media-pipeline
   - lightroom-publishing
@@ -14,9 +14,12 @@ superseded_by: []
 code_paths:
   - scripts/optimize-images.js
   - scripts/ingest-media.js
+  - scripts/cull-media.js
   - scripts/lib/media-ingestion.js
+  - scripts/lib/media-culling.js
   - scripts/upload-media.js
   - scripts/test-media-ingestion.js
+  - scripts/test-media-culling.js
   - scripts/test-media-upload.js
   - workers/media-upload/src/index.mjs
   - workers/media-upload/wrangler.jsonc
@@ -54,6 +57,7 @@ Journey cover, hero, story gallery, Visit, Place, or Atlas pin.
 npm run media:prepare -- --help
 npm run media:upload -- --help
 npm run media:ingest -- --help
+npm run media:cull -- --help
 npm run media:journeys
 npm run media:places -- --journey usvi-st-john-2025
 npm run media:test
@@ -380,6 +384,35 @@ entry.
 The collection displays newer ingested batches first while retaining each
 batch's manifest order. This ordering uses a stored monotonic sequence rather
 than filesystem dates or upload timestamps.
+
+## 5. Cull an ingested asset without deleting it
+
+Use the generated Media asset ID shown in `records.json`, an ingestion plan,
+or the asset's publication manifest. Always preview the exact placements first:
+
+```bash
+npm run media:cull -- --asset-id "image-usvi-380d1e6f91eb-001" --dry-run
+```
+
+Apply the cull only after the reported Journey and Place/Visit scope is correct:
+
+```bash
+npm run media:cull -- --asset-id "image-usvi-380d1e6f91eb-001" --apply
+```
+
+`--apply` changes every published placement for that generated asset to `draft`.
+The public selectors then omit it from the Journey-wide media collection, its
+Place/Visit gallery, and any existing Atlas pin projection. The Media asset,
+batch history, immutable R2 object, and rights/publication metadata remain
+unchanged. Running apply again is a successful no-op.
+
+The command validates the current and proposed generated registry before it
+writes, replaces `records.json` atomically, runs canonical content validation,
+and restores the original file if validation fails. It does not alter explicit
+curated hero or gallery usages in Journey modules. Remove such an intentional
+curated usage separately when one exists. Use `npm run media:validate` for a
+quick local check; the GitHub Pages build runs the same content validation
+again after the change is pushed to `main`.
 
 ## Identity, retries, and revisions
 

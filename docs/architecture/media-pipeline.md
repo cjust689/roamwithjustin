@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-15
 related:
   - content-model
   - journey-media-ingestion
@@ -17,7 +17,9 @@ superseded_by: []
 code_paths:
   - scripts/optimize-images.js
   - scripts/ingest-media.js
+  - scripts/cull-media.js
   - scripts/lib/media-ingestion.js
+  - scripts/lib/media-culling.js
   - scripts/upload-media.js
   - workers/media-upload/src/index.mjs
   - workers/media-upload/wrangler.jsonc
@@ -56,6 +58,12 @@ The repository supports three local preparation modes and one upload boundary:
    manifest-listed media through an authenticated upload-only Worker, and
    atomically creates the checksum receipt already accepted by `media:ingest`.
 
+Published generated media can be removed from public Journey, Place, and Atlas
+views with `media:cull`. The command changes every published placement for one
+generated asset to `draft`; it does not remove the canonical asset, batch
+history, or R2 object. Dry run is an explicit mode, and apply is atomic,
+validated, idempotent, and rolled back when canonical validation fails.
+
 The full operator workflow and flags are in
 [Journey media ingestion](../implementation/journey-media-ingestion.md).
 Worker deployment, credentials, retry behavior, and recovery are in
@@ -90,6 +98,11 @@ or curated story galleries. When a Visit has no curated hero, its first
 published image becomes the derived display image for the Trip card and Atlas
 node. A Visit with no verified image stays image-free; selectors never use the
 Journey cover as a location-specific fallback.
+
+The public selectors ignore draft placements. Culling a derived display image
+therefore promotes the next published Visit image automatically. Culling does
+not edit explicit curated Journey or Visit hero/gallery references; those
+remain a separate editorial authority.
 
 The generated registry is live production state and currently includes
 R2-backed USVI Place/Visit batches. Its checked-in records, rather than this
