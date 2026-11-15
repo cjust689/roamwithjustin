@@ -39,7 +39,7 @@ verification:
 
 ## Current paths
 
-The repository supports three image-processing modes and one upload boundary:
+The repository supports three local preparation modes and one upload boundary:
 
 1. `images:optimize` recursively optimizes oversized JPEG/PNG files under
    `public/img` in place.
@@ -48,11 +48,12 @@ The repository supports three image-processing modes and one upload boundary:
    adopted.
 3. `media:prepare` resolves one canonical Journey and can optionally validate
    one explicitly named canonical Place and its single Visit in that Journey.
-   It creates a collision-safe package folder, optimized numbered images,
-   versioned R2 object keys, and a measured `publication-manifest.json` with
-   explicit rights and the validated publication scope.
+   An image-only source folder creates optimized numbered JPEG/PNG files. An
+   MP4-only source folder creates byte-identical numbered copies without
+   transcoding. Both produce versioned R2 object keys and a measured
+   `publication-manifest.json` with explicit rights and validated scope.
 4. `media:upload` revalidates a prepared local package, uploads only its
-   manifest-listed images through an authenticated upload-only Worker, and
+   manifest-listed media through an authenticated upload-only Worker, and
    atomically creates the checksum receipt already accepted by `media:ingest`.
 
 The full operator workflow and flags are in
@@ -78,13 +79,13 @@ Place-scoped object keys, advances revisions, replaces the single generic
 placement for each asset, and records the corrected batch atomically. It does
 not infer scope, alter curated media, or move already-specific placements.
 
-Curated `.mjs` Media records and generated JSON assets are composed by
+Curated `.mjs` Media records and generated JSON image/video assets are composed by
 `src/content/media/index.mjs`. `getJourneyPublishedMedia()` includes all
 published placements for a Journey in the root Journey page's lazy-loaded
-**All photography** collection. `getVisitPublishedMedia()` additionally
+**Photography and video** collection. `getVisitPublishedMedia()` additionally
 projects a validated Place/Visit placement into that Journey location's media
 and into an existing Atlas presentation for the Visit. It never creates a
-Place, Visit, or Atlas pin. Generated images do not overwrite curated heroes
+Place, Visit, or Atlas pin. Generated media do not overwrite curated heroes
 or curated story galleries. When a Visit has no curated hero, its first
 published image becomes the derived display image for the Trip card and Atlas
 node. A Visit with no verified image stays image-free; selectors never use the
@@ -97,20 +98,27 @@ document, determine which assets and placements exist.
 ## Delivery
 
 R2 object keys are resolved against `https://media.roamwithjustin.com` unless
-`VUE_APP_MEDIA_BASE_URL` overrides it at build time. Existing controlled R2
-videos retain their current object keys; new package keys are batch-versioned
-under the selected image prefix.
+`VUE_APP_MEDIA_BASE_URL` overrides it at build time. New image package keys are
+batch-versioned below `images/`; new MP4 package keys are batch-versioned below
+`videos/`. Video preparation preserves the input bytes and checksum. It does
+not transcode, compress, claim codec compatibility, or generate a poster.
 
 The local uploader owns filesystem access, canonical manifest validation,
 bounded concurrency/retries, and receipt creation. The Worker owns bearer-token
-authentication, the `images/` key boundary, MIME/size checks, atomic
+authentication, the `images/` and `videos/` key boundaries, MIME/size checks, atomic
 create-only writes, and stored R2 SHA-256 verification. It exposes no object
 download, delete, list, or canonical-publication API. The upload bearer secret
 is distinct from Wrangler/Cloudflare deployment authentication, and no R2 S3
 access keys are distributed to the local uploader.
 
+Images default to a 25 MiB Worker limit. MP4 files default to 95 MiB so the
+single-request upload remains below Cloudflare's 100 MB Free/Pro request-body
+limit; both limits are configurable Worker variables. A larger video must be
+re-exported below the active limit or use a future multipart/direct-upload
+path. Automatic quality-changing compression is intentionally absent.
+
 The Worker source and bundle are locally verified. Deployment into the
-owner's Cloudflare account and the first production image upload remain
+owner's Cloudflare account and the first production upload remain
 externally unverified.
 
 ## Not implemented
@@ -118,5 +126,7 @@ externally unverified.
 - Lightroom Classic plug-in or durable publisher outbox
 - EXIF extraction, privacy filtering, or capture-Gear matching
 - Multiple photo renditions (thumbnail/gallery/full) per generated asset
+- Automatic video transcoding, codec inspection, posters, or adaptive bitrate
+- Multipart upload for MP4 files above the configured single-request limit
 - Experience-scoped media preparation and placement
 - Automated Git commit/push/deployment reporting after ingestion

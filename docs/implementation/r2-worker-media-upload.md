@@ -45,14 +45,14 @@ local publication-manifest.json
         v
 scripts/upload-media.js
   - validates canonical manifest
-  - verifies every local image, dimension, size, and SHA-256
+  - verifies every local image/MP4 signature, size, and SHA-256
   - uploads only manifest-listed files with bounded concurrency/retries
         |
         v
 authenticated upload-only Worker
   - accepts PUT /v1/objects/<manifest-key>
-  - restricts keys to images/
-  - accepts JPEG/PNG only
+  - restricts keys to images/ and videos/
+  - accepts JPEG, PNG, and MP4 only
   - enforces size, batch ID, and SHA-256
   - uses an atomic create-only R2 write
   - verifies stored R2 checksum/metadata
@@ -85,7 +85,7 @@ These are not credentials:
 
 - `MEDIA_BUCKET` is the Worker binding name.
 - `roamwithjustin-media` is the configured R2 bucket name.
-- `images/` is the permitted object-key prefix.
+- `images/` and `videos/` are the permitted object-key prefixes.
 - `media.roamwithjustin.com` is the public delivery origin, not the upload
   endpoint.
 
@@ -144,6 +144,14 @@ Cloudflare deployment:
 
 ```bash
 npm run media:worker:check
+```
+
+Redeploy the Worker after pulling video-pipeline changes. Updating only the
+local CLI is insufficient because an older deployed Worker rejects `video/mp4`
+and keys outside `images/`:
+
+```bash
+npm run media:worker:deploy
 ```
 
 Deploy the Worker. The first deployment may briefly be unconfigured and will
@@ -227,9 +235,14 @@ npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready
   replacing an immutable object after the Worker's initial existence check.
 - A changed local file fails before upload.
 - A checksum mismatch during R2 write fails without a success receipt.
-- The default per-image limit is 25 MiB and can be changed through the
-  non-secret `MAX_UPLOAD_BYTES` Worker variable after reviewing Cloudflare and
-  project requirements.
+- The default per-image limit is 25 MiB through
+  `MAX_IMAGE_UPLOAD_BYTES`. The default MP4 limit is 95 MiB through
+  `MAX_VIDEO_UPLOAD_BYTES`, which stays below the Cloudflare Free/Pro 100 MB
+  request-body limit. Both are non-secret Worker variables.
+- The current endpoint uses one immutable PUT per object. It intentionally
+  rejects larger videos instead of transcoding them or pretending a quality
+  guarantee. Re-export below the active limit or implement a separately
+  reviewed multipart flow.
 
 ## Credential recovery
 
@@ -237,7 +250,7 @@ npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready
   and update the local environment. Existing objects and manifests are
   unaffected.
 - Exposed upload token: rotate it immediately with `media:worker:secret`; the
-  Worker still permits only constrained immutable image keys and has no delete
+  Worker still permits only constrained immutable media keys and has no delete
   or list endpoint.
 - Exposed Cloudflare API token: revoke it in Cloudflare, issue a least-privilege
   replacement, and review deployment/audit history. It is not used by

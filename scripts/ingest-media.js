@@ -199,6 +199,10 @@ function readJsonFile(file, label) {
   }
 }
 
+function hasMp4FileTypeHeader(data) {
+  return data.length >= 12 && data.toString("ascii", 4, 8) === "ftyp"
+}
+
 async function verifyLocalPackage(manifest, manifestFile) {
   const packageDirectory = path.dirname(manifestFile)
 
@@ -231,19 +235,25 @@ async function verifyLocalPackage(manifest, manifestFile) {
     if (checksum !== asset.output.sha256) {
       throw new Error(`${relativePath} does not match its manifest SHA-256`)
     }
-    const metadata = await sharp(data).metadata()
-    if (
-      metadata.width !== asset.output.width ||
-      metadata.height !== asset.output.height
-    ) {
-      throw new Error(`${relativePath} dimensions do not match the manifest`)
-    }
-    const expectedFormat =
-      asset.output.mimeType === "image/jpeg" ? "jpeg" : "png"
-    if (metadata.format !== expectedFormat) {
-      throw new Error(
-        `${relativePath} MIME type does not match its image bytes`
-      )
+    if (asset.output.mimeType === "video/mp4") {
+      if (!hasMp4FileTypeHeader(data)) {
+        throw new Error(`${relativePath} does not contain MP4 bytes`)
+      }
+    } else {
+      const metadata = await sharp(data).metadata()
+      if (
+        metadata.width !== asset.output.width ||
+        metadata.height !== asset.output.height
+      ) {
+        throw new Error(`${relativePath} dimensions do not match the manifest`)
+      }
+      const expectedFormat =
+        asset.output.mimeType === "image/jpeg" ? "jpeg" : "png"
+      if (metadata.format !== expectedFormat) {
+        throw new Error(
+          `${relativePath} MIME type does not match its image bytes`
+        )
+      }
     }
   }
 }

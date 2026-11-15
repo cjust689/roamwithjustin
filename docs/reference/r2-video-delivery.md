@@ -19,9 +19,10 @@ verification:
   evidence: []
 ---
 
-> **Scope note:** Source confirms R2-backed Media resolution and native video
-> consumers. Cloudflare dashboard configuration, CORS, caching, and live range
-> behavior still require external verification.
+> **Scope note:** Source confirms R2-backed Media resolution, native video
+> consumers, and manifest-driven MP4 preparation/upload/ingestion. Cloudflare
+> dashboard configuration, CORS, caching, and live range behavior still
+> require external verification.
 
 # Roam With Justin Atlas — Video Hosting with Cloudflare R2
 
@@ -138,26 +139,25 @@ For handheld scenes, water, trees, and complex motion, test actual visual qualit
 
 ## 5. Upload workflow
 
-### Simple manual approach (recommended first)
+### Manifest pipeline (implemented)
 
-1. Export optimized video and poster from Resolve.
-2. Save the high-quality master to Google Drive.
-3. Upload the optimized video to the matching path in R2 from the dashboard.
-4. Verify object metadata: video should return `Content-Type: video/mp4`; posters should have their correct image content type.
-5. Open the public media URL in an incognito/private browser window.
-6. Add that URL to the Atlas experience's metadata, then publish the Vue site.
+1. Export a web-delivery MP4 from Resolve and retain the master separately.
+2. Put MP4s in a video-only source folder.
+3. Run `media:prepare` with the canonical Journey and optional Place.
+4. Review the byte-preserving package and manifest.
+5. Run `media:upload`; the authenticated Worker writes only immutable
+   manifest keys below `videos/` and creates a checksum receipt.
+6. Dry-run and apply `media:ingest`, then deploy the site.
+7. Verify public playback, seeking/range behavior, and MIME type on real
+   desktop and mobile devices.
 
-For a handful of updates per week, manual uploads are perfectly reasonable. Add an automated upload pipeline only when repetitive uploads become painful.
-
-### Optional CLI upload later
-
-Cloudflare's Wrangler CLI can upload objects:
-
-```bash
-npx wrangler r2 object put roamwithjustin-media/videos/croatia/split/boat-day/v1/ambient-sunset.mp4 --file ./exports/ambient-sunset.mp4 --content-type video/mp4
-```
-
-Authenticate Wrangler to your Cloudflare account first. Confirm the installed Wrangler version's flag support before scripting bulk uploads. **Never put R2 API tokens or access keys in Vue client code or commit them to Git.** Public read-only media URLs do not need credentials.
+The exact copy/paste commands, 95 MiB default limit, and Place/Visit behavior
+are documented in
+[Journey media ingestion](../implementation/journey-media-ingestion.md).
+Automatic transcoding is deliberately absent because a smaller encode cannot
+guarantee identical visual quality. A dashboard upload remains a manual
+fallback, but it does not by itself create the repository's checksum receipt
+or canonical placement.
 
 ## 6. Vue content model
 
@@ -292,12 +292,12 @@ Curate photos/reel for Instagram
 - [ ] Connect `media.roamwithjustin.com` using Cloudflare's custom domain flow.
 - [ ] Upload **one** 5–10-second optimized H.264 MP4 and poster.
 - [ ] Verify HTTPS public playback and MIME type on desktop and Pixel.
-- [ ] Add R2 media provider/base URL to the Vue content model.
+- [x] Add R2 media provider/base URL to the Vue content model.
 - [ ] Implement poster-first, lazy-loading video component.
 - [ ] Respect reduced-motion preferences and limit simultaneous playback.
 - [ ] Test seek/range behavior, mobile data consumption, and caching.
 - [ ] Publish one Instagram post and matching Atlas experience as an end-to-end pilot.
-- [ ] Add batch upload/automation later, only if needed.
+- [x] Add manifest-driven MP4 package, upload, receipt, and ingestion tooling.
 
 ## 11. Official references
 

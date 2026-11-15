@@ -244,16 +244,22 @@ async function readVerifiedAsset(prepared) {
   if (sha256(data) !== output.sha256) {
     throw new Error(`${output.relativePath} does not match its manifest SHA-256`)
   }
-  const metadata = await sharp(data).metadata()
-  const expectedFormat = output.mimeType === "image/jpeg" ? "jpeg" : "png"
-  if (
-    metadata.format !== expectedFormat ||
-    metadata.width !== output.width ||
-    metadata.height !== output.height
-  ) {
-    throw new Error(
-      `${output.relativePath} image format or dimensions do not match the manifest`
-    )
+  if (output.mimeType === "video/mp4") {
+    if (data.length < 12 || data.toString("ascii", 4, 8) !== "ftyp") {
+      throw new Error(`${output.relativePath} does not contain MP4 bytes`)
+    }
+  } else {
+    const metadata = await sharp(data).metadata()
+    const expectedFormat = output.mimeType === "image/jpeg" ? "jpeg" : "png"
+    if (
+      metadata.format !== expectedFormat ||
+      metadata.width !== output.width ||
+      metadata.height !== output.height
+    ) {
+      throw new Error(
+        `${output.relativePath} image format or dimensions do not match the manifest`
+      )
+    }
   }
   return data
 }

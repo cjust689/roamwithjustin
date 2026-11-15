@@ -12,6 +12,7 @@ const {
 const projectRoot = path.resolve(__dirname, "..")
 const testRoot = path.join(projectRoot, ".tmp-media-ingestion-test")
 const sourceDirectory = path.join(testRoot, "source")
+const videoSourceDirectory = path.join(testRoot, "video-source")
 const outputDirectory = path.join(testRoot, "ready")
 
 function runNode(args, expectedStatus = 0) {
@@ -31,6 +32,17 @@ function emptyRecords() {
   return { schemaVersion: 1, assets: [], placements: [], batches: [] }
 }
 
+function testMp4Bytes() {
+  const fileTypeBox = Buffer.alloc(24)
+  fileTypeBox.writeUInt32BE(24, 0)
+  fileTypeBox.write("ftyp", 4, "ascii")
+  fileTypeBox.write("isom", 8, "ascii")
+  fileTypeBox.writeUInt32BE(0, 12)
+  fileTypeBox.write("isom", 16, "ascii")
+  fileTypeBox.write("mp42", 20, "ascii")
+  return Buffer.concat([fileTypeBox, Buffer.from("test-video-payload")])
+}
+
 async function main() {
   const resolvedRoot = path.resolve(testRoot)
   if (!resolvedRoot.startsWith(`${projectRoot}${path.sep}`)) {
@@ -39,6 +51,7 @@ async function main() {
 
   fs.rmSync(testRoot, { recursive: true, force: true })
   fs.mkdirSync(sourceDirectory, { recursive: true })
+  fs.mkdirSync(videoSourceDirectory, { recursive: true })
 
   try {
     await sharp({
@@ -51,6 +64,8 @@ async function main() {
     })
       .jpeg({ quality: 94 })
       .toFile(path.join(sourceDirectory, "IMG_0001.jpg"))
+    const originalVideo = testMp4Bytes()
+    fs.writeFileSync(path.join(videoSourceDirectory, "resolve-export.mp4"), originalVideo)
 
     const listedPlaces = runNode([
       "scripts/ingest-media.js",
@@ -269,6 +284,94 @@ async function main() {
       placePlan.records.placements[0].visitId,
       "usvi-st-john-2025-waterlemon-cay"
     )
+
+    const videoOutputDirectory = path.join(testRoot, "ready-video")
+    const videoPrepared = runNode([
+      "scripts/optimize-images.js",
+      "--package",
+      "--source",
+      videoSourceDirectory,
+      "--output",
+      videoOutputDirectory,
+      "--tag",
+      "waterlemon cay video",
+      "--journey",
+      "usvi-st-john-2025",
+      "--place",
+      "waterlemon-cay",
+      "--rights-owner",
+      "roam-with-justin",
+      "--rights-status",
+      "owned",
+    ])
+    assert.match(videoPrepared.stdout, /original MP4 bytes preserved/)
+    const videoPackageDirectory = path.join(
+      videoOutputDirectory,
+      "usvi-waterlemon-cay-videos"
+    )
+    const videoManifestContents = fs.readFileSync(
+      path.join(videoPackageDirectory, "publication-manifest.json"),
+      "utf8"
+    )
+    const videoManifest = JSON.parse(videoManifestContents)
+    const videoOutput = videoManifest.assets[0].output
+    assert.strictEqual(videoManifest.mediaKind, "video")
+    assert.strictEqual(
+      videoManifest.r2Prefix,
+      `videos/usvi/waterlemon-cay/${videoManifest.batchId}/`
+    )
+    assert.strictEqual(videoOutput.mimeType, "video/mp4")
+    assert.strictEqual(videoOutput.relativePath, "waterlemon-cay-001.mp4")
+    assert.strictEqual(videoOutput.width, null)
+    assert.strictEqual(videoOutput.height, null)
+    assert.strictEqual(videoOutput.durationSeconds, null)
+    assert.deepStrictEqual(
+      fs.readFileSync(path.join(videoPackageDirectory, videoOutput.relativePath)),
+      originalVideo
+    )
+    const videoPlan = planMediaIngestion(videoManifest, emptyRecords(), {
+      journeys: [journey],
+      staticMedia: [],
+      manifestSha256: sha256(videoManifestContents),
+      verification: { method: "receipt-sha256" },
+    })
+    assert.deepStrictEqual(videoPlan.errors, [])
+    assert.match(videoPlan.assetIds[0], /^video-usvi-/)
+    assert.strictEqual(videoPlan.records.assets[0].kind, "video")
+    assert.strictEqual(
+      videoPlan.records.assets[0].intrinsic.mimeType,
+      "video/mp4"
+    )
+
+    const oversizedVideoSource = path.join(testRoot, "oversized-video-source")
+    fs.mkdirSync(oversizedVideoSource)
+    const oversizedVideoFile = path.join(oversizedVideoSource, "too-large.mp4")
+    fs.writeFileSync(oversizedVideoFile, originalVideo)
+    fs.truncateSync(oversizedVideoFile, 1024 * 1024 + 1)
+    const oversizedVideo = runNode(
+      [
+        "scripts/optimize-images.js",
+        "--package",
+        "--source",
+        oversizedVideoSource,
+        "--output",
+        path.join(testRoot, "ready-oversized-video"),
+        "--tag",
+        "waterlemon cay video",
+        "--journey",
+        "usvi-st-john-2025",
+        "--place",
+        "waterlemon-cay",
+        "--rights-owner",
+        "roam-with-justin",
+        "--rights-status",
+        "owned",
+        "--max-video-mib",
+        "1",
+      ],
+      1
+    )
+    assert.match(oversizedVideo.stderr, /Automatic video transcoding is disabled/)
 
     const collisionPlan = planMediaIngestion(
       placeManifest,

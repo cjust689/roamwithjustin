@@ -1,8 +1,9 @@
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const checksumPattern = /^[a-f0-9]{64}$/
-const allowedMimeTypes = new Set(["image/jpeg", "image/png"])
-const defaultPrefix = "images/"
-const defaultMaximumBytes = 25 * 1024 * 1024
+const allowedMimeTypes = new Set(["image/jpeg", "image/png", "video/mp4"])
+const defaultPrefixes = "images/,videos/"
+const defaultMaximumImageBytes = 25 * 1024 * 1024
+const defaultMaximumVideoBytes = 95 * 1024 * 1024
 
 function jsonResponse(value, status = 200, requestId = null) {
   const headers = {
@@ -57,8 +58,15 @@ function parsePositiveInteger(value) {
 }
 
 function normalizedPrefix(value) {
-  const prefix = String(value || defaultPrefix).replace(/^\/+/, "")
+  const prefix = String(value || "").replace(/^\/+/, "")
   return prefix.endsWith("/") ? prefix : `${prefix}/`
+}
+
+function normalizedPrefixes(value) {
+  return String(value || defaultPrefixes)
+    .split(",")
+    .map(item => normalizedPrefix(item.trim()))
+    .filter(prefix => prefix !== "/")
 }
 
 function safeKey(key, allowedPrefix) {
@@ -165,8 +173,10 @@ export async function handleRequest(request, env) {
     )
   }
 
-  const prefix = normalizedPrefix(env.ALLOWED_R2_PREFIX)
-  if (!safeKey(key, prefix)) {
+  const prefixes = normalizedPrefixes(
+    env.ALLOWED_R2_PREFIXES || env.ALLOWED_R2_PREFIX
+  )
+  if (!prefixes.some(prefix => safeKey(key, prefix))) {
     return errorResponse(
       422,
       "invalid_object_key",
@@ -188,14 +198,18 @@ export async function handleRequest(request, env) {
     request.headers.get("content-length")
   )
   const maximumBytes =
-    parsePositiveInteger(String(env.MAX_UPLOAD_BYTES || "")) ||
-    defaultMaximumBytes
+    mimeType === "video/mp4"
+      ? parsePositiveInteger(String(env.MAX_VIDEO_UPLOAD_BYTES || "")) ||
+        defaultMaximumVideoBytes
+      : parsePositiveInteger(
+          String(env.MAX_IMAGE_UPLOAD_BYTES || env.MAX_UPLOAD_BYTES || "")
+        ) || defaultMaximumImageBytes
 
   if (!allowedMimeTypes.has(mimeType)) {
     return errorResponse(
       415,
       "unsupported_media_type",
-      "Only prepared JPEG and PNG images are accepted.",
+      "Only prepared JPEG, PNG, and MP4 media are accepted.",
       requestId
     )
   }
@@ -220,12 +234,13 @@ export async function handleRequest(request, env) {
   const keyBatchId = keyParts[keyParts.length - 2]
   const extensionMatchesMime =
     (mimeType === "image/jpeg" && /\.jpe?g$/i.test(filename)) ||
-    (mimeType === "image/png" && /\.png$/i.test(filename))
+    (mimeType === "image/png" && /\.png$/i.test(filename)) ||
+    (mimeType === "video/mp4" && /\.mp4$/i.test(filename))
   if (keyBatchId !== batchId || !extensionMatchesMime) {
     return errorResponse(
       422,
       "invalid_object_contract",
-      "The object key must contain its batch ID and match its declared image type.",
+      "The object key must contain its batch ID and match its declared media type.",
       requestId
     )
   }
