@@ -29,10 +29,18 @@ code_paths:
   - src/content/partners/index.mjs
   - src/content/selectors/projections.mjs
   - scripts/validate-content.js
+  - scripts/editorial-baseline.mjs
+  - scripts/lib/editorial-baseline.mjs
+  - scripts/lib/editorial-google-auth.mjs
+  - scripts/lib/editorial-google-sheets.mjs
+  - scripts/lib/editorial-google-drive.mjs
+  - scripts/test-editorial-google.mjs
 verification:
   state: verified
   evidence:
     - npm run content:validate
+    - npm run editorial:test
+    - npm run editorial:baseline -- --dry-run
     - npm run build
 ---
 
@@ -156,9 +164,31 @@ workflow phrases in the Journey and Atlas copy that the selectors expose to
 visitors. Technical IDs, slugs, URLs, and internal notes are outside that prose
 rule. `npm run build` runs content validation first.
 
+## Editorial baseline catalog
+
+`scripts/editorial-baseline.mjs` now provides a read-only catalog and audit
+boundary for the accepted single-row Google Sheets publishing direction. It
+projects the current code-owned Journey, Place, Visit, and Atlas presentation
+identities into a deterministic lookup catalog without cloning canonical
+records or changing public content. An optional private CSV export can be
+checked for the existing Posts headers, proposed Atlas columns, eligible
+account rows, exact Journey/Place matches, missing stable IDs, and ambiguity.
+
+The same command has a read-only Google adapter for local installed-app OAuth,
+batch-reading a designated Posts tab, and optionally inventorying every direct
+child of an explicitly supplied Drive folder. OAuth credentials and refresh
+tokens are rejected when their paths are inside the repository. The adapter is
+mock-tested, but access to the owner's real Sheet and Drive folder remains
+externally unverified. It does not write Sheet cells, download media, create
+Experience or Moment records, ingest media, or deploy content.
+
 ## Current limitations
 
 - Experiences and standalone experience stories are not implemented.
 - Some Journey gear remains in legacy `gearHighlights` as a selector fallback.
 - Many images are still local static files rather than generated R2 records.
 - Canonical content is Git-backed; there is no runtime CMS or database.
+- The single-row editorial workflow has a local read-only catalog plus mocked
+  Sheets/Drive adapters. Live owner access, reconciliation, protected catalog
+  writes, stable ID seeding, and generated Journey, Place, Visit, Experience,
+  and Moment compilation are not implemented or verified.

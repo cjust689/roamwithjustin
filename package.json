@@ -10,6 +10,8 @@
     "server": "node scripts/serve.js",
     "content:validate": "node scripts/validate-content.js",
     "docs:audit": "node scripts/docs-audit.mjs",
+    "editorial:baseline": "node scripts/editorial-baseline.mjs",
+    "editorial:test": "node scripts/test-editorial-baseline.mjs && node scripts/test-editorial-google.mjs",
     "adsense:test": "node scripts/test-adsense-config.mjs && node scripts/test-atlas-ad-eligibility.mjs",
     "adsense:validate": "node scripts/validate-adsense-config.mjs",
     "atlas:test": "node scripts/test-atlas-marker-layout.mjs && node scripts/test-atlas-surprise-selection.mjs",
@@ -42,6 +44,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "express": "^4.17.1",
+    "google-auth-library": "^10.9.1",
     "jquery": "^3.6.0",
     "maplibre-gl": "^6.18.0",
     "vue": "^2.6.11",
