@@ -21,6 +21,10 @@ verification:
     - npm run atlas:test
     - npm run content:validate
     - npm run build
+    - GitHub pull request 38 validated and merged to develop as c75d8d9 on 2026-11-16
+    - GitHub pull request 39 validated and merged to main as a36da55 on 2026-11-16
+    - Pages workflow run 43816272856 succeeded on 2026-11-16
+    - exact First look chooser and Journey-panel copy verified in production on 2026-11-16
 ---
 
 # Travel Atlas feature
