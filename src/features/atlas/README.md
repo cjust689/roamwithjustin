@@ -157,12 +157,15 @@ poster is reserved for the opened video player; a missing poster remains empty.
 
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible, and their top-level navigation cards use the
-reader-facing `Journey preview` cue. Missing material stays absent instead of
-rendering an empty section or an editorial workflow message. Planned-only
-stops are excluded. The validator requires every internally incomplete Journey
-Visit to resolve to an Atlas node so later media ingestion enriches stable IDs
-instead of creating a parallel map record.
+Place summaries remain visible. Their top-level navigation cards use the
+reader-facing `First look` cue and say that more stories and media will be
+added. Every incomplete Journey panel also explains that the Journey is still
+taking shape, including child Place panels where sparse content could otherwise
+look accidental. Missing material stays absent instead of rendering empty
+sections or internal workflow language. Planned-only stops are excluded. The
+validator requires every internally incomplete Journey Visit to resolve to an
+Atlas node so later media ingestion enriches stable IDs instead of creating a
+parallel map record.
 
 Every Atlas root uses the canonical Journey title and date label, including
 its year, because the same Place can host multiple trips. Child nodes use their

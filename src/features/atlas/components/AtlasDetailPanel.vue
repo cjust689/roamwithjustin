@@ -117,6 +117,24 @@
 
         <div class="atlas-detail-content">
           <p class="atlas-summary">{{ node.summary }}</p>
+          <section
+            v-if="node.comingSoon"
+            class="atlas-first-look"
+            aria-label="Journey availability"
+          >
+            <span>First look</span>
+            <strong>
+              {{
+                node.parentId
+                  ? "This part of the journey is still taking shape."
+                  : "This journey is still taking shape."
+              }}
+            </strong>
+            <p>
+              Explore what is here now. More places, stories, photographs, and
+              films will be added over time.
+            </p>
+          </section>
           <div v-if="node.personalNote" class="atlas-note">
             <span>From the trip</span>
             <p>{{ node.personalNote }}</p>
@@ -375,7 +393,7 @@ export default {
   computed: {
     displayEyebrow() {
       return this.node.comingSoon && !this.node.parentId
-        ? `Journey preview / ${this.node.eyebrow}`
+        ? `First look / ${this.node.eyebrow}`
         : this.node.eyebrow
     },
     guidedClearanceStyle() {
@@ -894,6 +912,41 @@ export default {
   line-height: 1.65;
 }
 
+.atlas-first-look {
+  margin: 0 0 1.4rem;
+  border: 1px solid rgba(246, 189, 96, 0.42);
+  border-radius: 16px;
+  padding: 1rem;
+  background:
+    linear-gradient(135deg, rgba(246, 189, 96, 0.13), transparent 70%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.atlas-first-look > span {
+  display: block;
+  margin-bottom: 0.35rem;
+  color: #f6bd60;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.atlas-first-look > strong {
+  display: block;
+  font-family: Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.atlas-first-look > p {
+  margin: 0.5rem 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
 .atlas-note {
   border-left: 2px solid #f6bd60;
   padding-left: 1rem;
@@ -1392,6 +1445,18 @@ export default {
 
   .atlas-summary {
     font-size: 1.08rem;
+  }
+
+  .atlas-first-look > span {
+    font-size: 0.76rem;
+  }
+
+  .atlas-first-look > strong {
+    font-size: 1.3rem;
+  }
+
+  .atlas-first-look > p {
+    font-size: 0.96rem;
   }
 
   .atlas-section-heading strong {
