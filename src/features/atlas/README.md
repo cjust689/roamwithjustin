@@ -12,6 +12,7 @@ superseded_by: []
 code_paths:
   - src/features/atlas
   - src/content/atlas
+  - src/content/geography
   - src/content/atlas/preview-presentation.mjs
   - src/content/selectors/atlas.js
 verification:
@@ -142,12 +143,22 @@ VUE_APP_MAPTILER_STYLE_URL=https://api.maptiler.com/maps/your-style/style.json?k
 
 ## Adding content
 
-Add factual identity and coordinates to the appropriate canonical Place,
-Journey/Visit, and Media modules. Add only Atlas-specific grouping/camera
-choices to `src/content/atlas/presentation.mjs`, then register a destination
-root in `src/content/atlas/roots.mjs` when needed. Child relationships are
-derived from `parentId`; guided order comes from Journey visit order rather
-than a hand-maintained `childIds` array.
+Existing curated records can still be added to the appropriate canonical
+Place, Journey/Visit, and Media modules. A missing Place beneath an existing
+Journey also has an explicit Sheet-backed route: use `New: <name>` in `Atlas
+Place` with `Atlas Mode = Off`, then preview and apply
+`editorial:register:place`. The command writes the generated geography shard,
+adds the Visit and child Atlas pin, deploys it through protected branches,
+refreshes the Sheet Catalog, and binds the row. Ordinary post publication never
+creates geography from a Location label.
+
+Add only Atlas-specific grouping/camera choices to
+`src/content/atlas/presentation.mjs`, then register a destination root in
+`src/content/atlas/roots.mjs` when needed. Child relationships are derived from
+`parentId`; guided order comes from Journey visit order rather than a
+hand-maintained `childIds` array. Generated Visits use the explicit
+`--after-place` registration option or append to the Journey; dates do not
+silently determine order.
 
 Do not add unverified business information. Only include website, directions,
 phone, or booking actions when the source has been confirmed. External actions

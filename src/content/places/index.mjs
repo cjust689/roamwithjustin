@@ -1,4 +1,5 @@
 import { createIdRegistry } from "../contracts.mjs"
+import { generatedPlaceRecords } from "../geography/index.mjs"
 import { costaRicaPlaces } from "./costa-rica.mjs"
 import { europePlaces } from "./europe.mjs"
 import { miamiPlaces } from "./miami.mjs"
@@ -19,6 +20,7 @@ const registry = createIdRegistry(
     ...nextDestinationPlaces,
     ...europePlaces,
     ...costaRicaPlaces,
+    ...generatedPlaceRecords,
   ],
   "Place registry"
 )

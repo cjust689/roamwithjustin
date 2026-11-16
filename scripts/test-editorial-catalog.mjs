@@ -176,6 +176,8 @@ assert.deepEqual(
   ["Social", "Atlas", "Both"]
 )
 assert.equal(tableAtlasPlace.columnType, "DROPDOWN")
+assert.equal(tableAtlasPlace.dataValidationRule.strict, false)
+assert.equal(tableAtlasPlace.dataValidationRule.showCustomUi, true)
 assert.equal(
   tableAtlasPlace.dataValidationRule.condition.values.length,
   new Set(

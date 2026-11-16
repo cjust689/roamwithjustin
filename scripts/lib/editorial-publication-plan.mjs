@@ -55,6 +55,11 @@ export function resolvePublicationTarget({ row, catalog }) {
       scope: "journey",
     }
   }
+  if (/^new:\s*.+/i.test(placeInput)) {
+    throw new Error(
+      `Atlas Place ${placeInput} is an explicit registration request; keep Atlas Mode Off and run editorial:register:place first`
+    )
+  }
   const visitMatches = catalog.records.filter(
     record =>
       record.entityType === "visit" &&

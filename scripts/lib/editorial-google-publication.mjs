@@ -120,6 +120,93 @@ export function buildPublicationWriteback({
   }
 }
 
+export function buildPlaceRegistrationWriteback({
+  sheetId,
+  headers,
+  rows,
+  postId,
+  expectedSheetSourceHash,
+  requestedPlace,
+  placeLabel,
+  journeyId,
+  placeId,
+  visitId,
+}) {
+  const requiredHeaders = [
+    "Atlas Place",
+    "post_id",
+    "journey_id",
+    "place_id",
+    "visit_id",
+    "sync_error",
+  ]
+  const missing = requiredHeaders.filter(header => !headers.includes(header))
+  if (missing.length) {
+    throw new Error(
+      `Posts Sheet is missing Place registration metadata: ${missing.join(", ")}`
+    )
+  }
+  const matches = rows
+    .map((row, index) => ({ row, rowIndex: index + 1, rowNumber: index + 2 }))
+    .filter(entry => String(entry.row.post_id || "").trim() === postId)
+  if (matches.length !== 1) {
+    throw new Error(
+      matches.length
+        ? `Duplicate post_id ${postId} blocks Place registration write-back`
+        : `Post ID ${postId} no longer exists in the Sheet`
+    )
+  }
+  const target = matches[0]
+  const values = {
+    "Atlas Place": placeLabel,
+    journey_id: journeyId,
+    place_id: placeId,
+    visit_id: visitId,
+    sync_error: "",
+  }
+  const alreadyApplied = Object.entries(values).every(
+    ([header, value]) => String(target.row[header] || "") === String(value)
+  )
+  if (alreadyApplied) {
+    return {
+      requests: [],
+      postId,
+      rowNumber: target.rowNumber,
+      values,
+      alreadyApplied: true,
+    }
+  }
+  if (String(target.row["Atlas Mode"] || "").trim() !== "Off") {
+    throw new Error(
+      `Post ID ${postId} must keep Atlas Mode Off during Place registration`
+    )
+  }
+  if (String(target.row["Atlas Place"] || "").trim() !== requestedPlace) {
+    throw new Error(`Post ID ${postId} changed its requested Atlas Place`)
+  }
+  const currentSourceHash = postSourceHash(target.row)
+  if (currentSourceHash !== expectedSheetSourceHash) {
+    throw new Error(
+      `Post ID ${postId} changed after Place registration planning`
+    )
+  }
+  return {
+    requests: Object.entries(values).map(([header, value]) =>
+      updateCellRequest({
+        sheetId,
+        rowIndex: target.rowIndex,
+        columnIndex: headers.indexOf(header),
+        value,
+      })
+    ),
+    postId,
+    rowNumber: target.rowNumber,
+    currentSourceHash,
+    values,
+    alreadyApplied: false,
+  }
+}
+
 export async function applyPublicationWriteback({
   auth,
   spreadsheetId,

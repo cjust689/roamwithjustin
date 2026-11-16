@@ -7,6 +7,7 @@ import {
 } from "./lib/editorial-baseline.mjs"
 import {
   applyPublicationWriteback,
+  buildPlaceRegistrationWriteback,
   buildPublicationWriteback,
 } from "./lib/editorial-google-publication.mjs"
 
@@ -86,5 +87,45 @@ await applyPublicationWriteback({
 })
 assert.equal(calls.length, 1)
 assert.match(calls[0].url, /sheet%2Fid:batchUpdate$/)
+
+const registrationRow = {
+  ...row,
+  "Atlas Place": "New: Test Cove",
+  "Atlas Mode": "Off",
+  journey_id: "",
+  place_id: "",
+  visit_id: "",
+}
+const registrationInput = {
+  sheetId: 123,
+  headers,
+  rows: [registrationRow],
+  postId: "post-123",
+  expectedSheetSourceHash: postSourceHash(registrationRow),
+  requestedPlace: "New: Test Cove",
+  placeLabel: "Test Cove",
+  journeyId: "test-country-2026",
+  placeId: "test-cove",
+  visitId: "test-country-2026-test-cove",
+}
+const registration = buildPlaceRegistrationWriteback(registrationInput)
+assert.equal(registration.requests.length, 5)
+assert.equal(registration.values["Atlas Place"], "Test Cove")
+assert.equal(registration.values.visit_id, "test-country-2026-test-cove")
+assert.equal(
+  buildPlaceRegistrationWriteback({
+    ...registrationInput,
+    rows: [{ ...registrationRow, ...registration.values }],
+  }).alreadyApplied,
+  true
+)
+assert.throws(
+  () =>
+    buildPlaceRegistrationWriteback({
+      ...registrationInput,
+      rows: [{ ...registrationRow, Caption: "changed" }],
+    }),
+  /changed after Place registration planning/
+)
 
 console.log("Editorial publication write-back tests passed.")

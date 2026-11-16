@@ -9,6 +9,7 @@ export const PAGES_DEPLOYMENT_WORKFLOW = "deploy-pages.yml"
 export const PUBLICATION_PATH_ALLOWLIST = Object.freeze([
   "src/content/media/generated/records.json",
   "src/content/editorial/generated/records.json",
+  "src/content/geography/generated/records.json",
 ])
 
 export function parseGitHubRemote(remoteUrl) {
@@ -40,7 +41,10 @@ export function publicationBranchName({ postId, label, sourceHash = "" }) {
   if (!stableId) throw new Error("A stable Post ID is required for a branch")
   const suffix = slugify(label).slice(0, 48)
   const revision = slugify(sourceHash).slice(0, 10)
-  return `atlas/post-${stableId}${revision ? `-r${revision}` : ""}${suffix ? `-${suffix}` : ""}`.slice(0, 120)
+  return `atlas/post-${stableId}${revision ? `-r${revision}` : ""}${suffix ? `-${suffix}` : ""}`.slice(
+    0,
+    120
+  )
 }
 
 export function parseGitCredentialOutput(output) {
@@ -188,10 +192,13 @@ export function createGitHubClient({
     getPullRequest: pullNumber =>
       api(`/repos/${owner}/${repo}/pulls/${encodeURIComponent(pullNumber)}`),
     mergePullRequest: (pullNumber, body) =>
-      api(`/repos/${owner}/${repo}/pulls/${encodeURIComponent(pullNumber)}/merge`, {
-        method: "PUT",
-        body: JSON.stringify({ ...body, merge_method: "merge" }),
-      }),
+      api(
+        `/repos/${owner}/${repo}/pulls/${encodeURIComponent(pullNumber)}/merge`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ ...body, merge_method: "merge" }),
+        }
+      ),
     listCheckRunsForRef: ref =>
       api(
         `/repos/${owner}/${repo}/commits/${encodeURIComponent(ref)}/check-runs?filter=latest&per_page=100`
@@ -209,20 +216,43 @@ export function createGitHubClient({
 }
 
 export function normalizePublicationPaths(paths) {
-  const values = [...new Set((paths || []).map(value => String(value || "").replace(/\\/g, "/").replace(/^\.\//, "")))]
-  if (!values.length) throw new Error("At least one generated publication path is required")
-  const invalid = values.filter(value => !PUBLICATION_PATH_ALLOWLIST.includes(value))
+  const values = [
+    ...new Set(
+      (paths || []).map(value =>
+        String(value || "")
+          .replace(/\\/g, "/")
+          .replace(/^\.\//, "")
+      )
+    ),
+  ]
+  if (!values.length)
+    throw new Error("At least one generated publication path is required")
+  const invalid = values.filter(
+    value => !PUBLICATION_PATH_ALLOWLIST.includes(value)
+  )
   if (invalid.length) {
-    throw new Error(`Publication path is not automation-owned: ${invalid.join(", ")}`)
+    throw new Error(
+      `Publication path is not automation-owned: ${invalid.join(", ")}`
+    )
   }
   return values.sort()
 }
 
-export function evaluateValidationChecks(payload, checkName = EDITORIAL_VALIDATION_CHECK) {
-  const checks = (payload?.check_runs || []).filter(run => run.name === checkName)
+export function evaluateValidationChecks(
+  payload,
+  checkName = EDITORIAL_VALIDATION_CHECK
+) {
+  const checks = (payload?.check_runs || []).filter(
+    run => run.name === checkName
+  )
   if (!checks.length) return { state: "waiting", reason: "check-not-created" }
   const active = checks.find(run => run.status !== "completed")
-  if (active) return { state: "waiting", reason: active.status, url: active.html_url || null }
+  if (active)
+    return {
+      state: "waiting",
+      reason: active.status,
+      url: active.html_url || null,
+    }
   const failed = checks.find(run => run.conclusion !== "success")
   if (failed) {
     return {
@@ -231,7 +261,11 @@ export function evaluateValidationChecks(payload, checkName = EDITORIAL_VALIDATI
       url: failed.html_url || null,
     }
   }
-  return { state: "succeeded", reason: "success", url: checks[0].html_url || null }
+  return {
+    state: "succeeded",
+    reason: "success",
+    url: checks[0].html_url || null,
+  }
 }
 
 export function evaluateWorkflowRuns(payload, { headSha } = {}) {
@@ -240,10 +274,15 @@ export function evaluateWorkflowRuns(payload, { headSha } = {}) {
   )
   if (!runs.length) return { state: "waiting", reason: "workflow-not-created" }
   const latest = [...runs].sort(
-    (left, right) => new Date(right.created_at || 0) - new Date(left.created_at || 0)
+    (left, right) =>
+      new Date(right.created_at || 0) - new Date(left.created_at || 0)
   )[0]
   if (latest.status !== "completed") {
-    return { state: "waiting", reason: latest.status, url: latest.html_url || null }
+    return {
+      state: "waiting",
+      reason: latest.status,
+      url: latest.html_url || null,
+    }
   }
   if (latest.conclusion !== "success") {
     return {
@@ -266,7 +305,8 @@ export async function waitForGate({
   timeoutMs = 30 * 60 * 1000,
   pollMs = 10 * 1000,
   now = Date.now,
-  wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
+  wait = milliseconds =>
+    new Promise(resolve => setTimeout(resolve, milliseconds)),
 }) {
   const startedAt = now()
   let last = null
@@ -274,12 +314,16 @@ export async function waitForGate({
     last = evaluate(await read())
     if (last.state === "succeeded") return last
     if (last.state === "failed") {
-      throw new Error(`Remote gate failed: ${last.reason}${last.url ? ` (${last.url})` : ""}`)
+      throw new Error(
+        `Remote gate failed: ${last.reason}${last.url ? ` (${last.url})` : ""}`
+      )
     }
     if (now() - startedAt >= timeoutMs) break
     await wait(pollMs)
   } while (true)
-  throw new Error(`Timed out waiting for remote gate: ${last?.reason || "unknown"}`)
+  throw new Error(
+    `Timed out waiting for remote gate: ${last?.reason || "unknown"}`
+  )
 }
 
 function summarizeRules(rules) {
