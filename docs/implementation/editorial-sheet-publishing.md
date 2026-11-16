@@ -60,6 +60,11 @@ verification:
     - GitHub pull request 31 validated and merged to main as 63686ed on 2026-11-16
     - Pages workflow run 43800514937 succeeded on 2026-11-16
     - rendered production Journey title and media section verified on 2026-11-16
+    - GitHub pull request 34 validated and merged to develop as 6db1e08 on 2026-11-16
+    - develop workflow run 43812635732 succeeded on 2026-11-16
+    - GitHub pull request 35 validated and merged to main as 0e60b31 on 2026-11-16
+    - Pages workflow run 43813022343 succeeded on 2026-11-16
+    - rendered production Journey markers verified after Atlas Reference deployment on 2026-11-16
     - active ruleset 27216249 verified merge-only with required validate check
 ---
 
@@ -274,6 +279,8 @@ Implemented and test-covered:
   branches, and GitHub checkpoints
 - live feature promotion through pull requests 30 and 31, two successful
   validation jobs, Pages run 43800514937, and exact rendered production proof
+- Atlas Reference routing promotion through pull requests 34 and 35, develop
+  run 43812635732, Pages run 43813022343, and rendered production proof
 
 Still owner-controlled or externally unverified:
 
