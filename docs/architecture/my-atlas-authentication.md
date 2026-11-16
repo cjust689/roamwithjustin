@@ -40,6 +40,9 @@ verification:
     - A noninteractive Auth0 connection check redirected the configured SPA to accounts.google.com
     - Owner reported successful Google sign in, callback return, and audience-scoped API access verification in the local browser proof
     - npm run my-atlas:test verified checkSession restoration and login_required handling while retaining the memory-only token cache
+    - Pull requests 51 and 52 passed validation and deployed the controlled frontend through Pages run 43969999089
+    - Headless Chrome rendered the production My Atlas heading, Google sign-in section, and product branding
+    - The staging Worker returned 200 health and Uvita search with Access-Control-Allow-Origin for https://roamwithjustin.com
 ---
 
 # My Atlas Auth0 browser authentication
@@ -131,5 +134,7 @@ audience-scoped token acquisition and protected Worker round trip. This is
 owner-verified external evidence; no token was exposed to the implementation
 process. Silent restoration after reload is implemented and test verified but
 still needs owner verification against the live tenant session. The controlled
-Pages route is release configured but not yet production verified. The Worker
-remains the separately deployed staging service.
+Pages route is deployed and rendered verified. Direct deep links still use the
+GitHub Pages fallback and therefore retain the known HTTP 404 and crawler
+limitation even though the browser application renders. The Worker remains the
+separately deployed staging service.
