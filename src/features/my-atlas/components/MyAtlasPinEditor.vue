@@ -99,9 +99,7 @@ export default {
     return {
       currentYear: new Date().getFullYear(),
       dates: [
-        ...new Set(
-          visitedDatesForPlace(this.pin || {}).map(date => date.year)
-        ),
+        ...new Set(visitedDatesForPlace(this.pin || {}).map(date => date.year)),
       ].map(year => ({ year })),
       year: "",
     }
@@ -119,10 +117,9 @@ export default {
   methods: {
     addDraftDate() {
       if (!this.validDraftDate) return
-      this.dates = [
-        ...this.dates,
-        { year: this.year },
-      ].sort((left, right) => left.year - right.year)
+      this.dates = [...this.dates, { year: this.year }].sort(
+        (left, right) => left.year - right.year
+      )
       this.year = ""
     },
     dateKey(date) {
