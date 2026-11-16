@@ -53,8 +53,9 @@ function usage() {
   npm run editorial:register:place -- --preview --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> --post-id <id> [Place options]
   npm run editorial:register:place -- --apply --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> --post-id <id> [Place options]
 
-The selected row must use Atlas Place "New: Place name", Publish To Atlas or
-Both, and Atlas Mode Off. Preview is read-only. Apply explicitly registers the
+The selected row must use the Atlas Place choice "New Place", put the requested
+name in Location, use Publish To Atlas or Both, and keep Atlas Mode Off. Preview
+is read-only. Apply explicitly registers the
 Place when needed, adds its Visit and Atlas pin, promotes the generated shard
 through protected GitHub branches, refreshes the Sheet catalog, and replaces
 the request with the registered Atlas Place.

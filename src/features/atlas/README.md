@@ -145,8 +145,8 @@ VUE_APP_MAPTILER_STYLE_URL=https://api.maptiler.com/maps/your-style/style.json?k
 
 Existing curated records can still be added to the appropriate canonical
 Place, Journey/Visit, and Media modules. A missing Place beneath an existing
-Journey also has an explicit Sheet-backed route: use `New: <name>` in `Atlas
-Place` with `Atlas Mode = Off`, then preview and apply
+Journey also has an explicit Sheet-backed route: put its name in `Location`,
+choose `New Place` in `Atlas Place`, keep `Atlas Mode = Off`, then preview and apply
 `editorial:register:place`. The command writes the generated geography shard,
 adds the Visit and child Atlas pin, deploys it through protected branches,
 refreshes the Sheet Catalog, and binds the row. Ordinary post publication never

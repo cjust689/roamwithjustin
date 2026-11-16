@@ -6,6 +6,7 @@ import {
   ATLAS_POST_HEADERS,
   AUTOMATION_POST_HEADERS,
   EXISTING_POST_HEADERS,
+  NEW_PLACE_REQUEST_LABEL,
   buildCanonicalCatalog,
 } from "./lib/editorial-baseline.mjs"
 import {
@@ -176,15 +177,19 @@ assert.deepEqual(
   ["Social", "Atlas", "Both"]
 )
 assert.equal(tableAtlasPlace.columnType, "DROPDOWN")
-assert.equal(tableAtlasPlace.dataValidationRule.strict, false)
-assert.equal(tableAtlasPlace.dataValidationRule.showCustomUi, true)
+assert.equal(
+  tableAtlasPlace.dataValidationRule.condition.values.some(
+    value => value.userEnteredValue === NEW_PLACE_REQUEST_LABEL
+  ),
+  true
+)
 assert.equal(
   tableAtlasPlace.dataValidationRule.condition.values.length,
   new Set(
     buildAtlasReferenceRows(catalog)
       .filter(row => row[0] === "Visit")
       .map(row => row[2])
-  ).size
+  ).size + 1
 )
 
 const applyCalls = []
