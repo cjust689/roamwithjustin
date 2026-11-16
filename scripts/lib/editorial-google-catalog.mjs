@@ -1,4 +1,5 @@
 import crypto from "node:crypto"
+import { NEW_PLACE_REQUEST_LABEL } from "./editorial-baseline.mjs"
 
 export const ATLAS_CATALOG_TITLE = "Atlas Catalog"
 export const ATLAS_REFERENCE_TITLE = "Atlas Reference"
@@ -237,7 +238,7 @@ function appendManagedReferenceRequests({
   }
 }
 
-function tableDropdown(values, { strict = true } = {}) {
+function tableDropdown(values) {
   return {
     columnType: "DROPDOWN",
     dataValidationRule: {
@@ -247,8 +248,6 @@ function tableDropdown(values, { strict = true } = {}) {
           userEnteredValue,
         })),
       },
-      strict,
-      showCustomUi: true,
     },
   }
 }
@@ -601,9 +600,12 @@ export function buildAtlasCatalogMigration({
     const journeyChoices = journeyRowNumbers.map(
       rowNumber => rows[rowNumber - 2][2]
     )
-    const placeChoices = visitReferenceRowNumbers.map(
-      rowNumber => referenceRows[rowNumber - 2][2]
-    )
+    const placeChoices = [
+      ...visitReferenceRowNumbers.map(
+        rowNumber => referenceRows[rowNumber - 2][2]
+      ),
+      NEW_PLACE_REQUEST_LABEL,
+    ]
     requests.push({
       updateTable: {
         table: {
@@ -614,7 +616,7 @@ export function buildAtlasCatalogMigration({
             overrides: new Map([
               ["Publish To", tableDropdown(["Social", "Atlas", "Both"])],
               ["Atlas Journey", tableDropdown(journeyChoices)],
-              ["Atlas Place", tableDropdown(placeChoices, { strict: false })],
+              ["Atlas Place", tableDropdown(placeChoices)],
               ["Atlas Mode", tableDropdown(["Off", "Preview", "Publish"])],
             ]),
           }),

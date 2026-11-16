@@ -244,12 +244,13 @@ keys candidate Place matches by stable Post ID. Catalog generation does not
 write creator-owned values into Posts.
 
 The native Google Sheets table owns typed dropdowns for `Publish To`, `Atlas
-Journey`, `Atlas Place`, and `Atlas Mode`. The Place dropdown permits an
-explicit custom `New: <name>` request while preserving current choices.
-`Atlas Experience` remains free text so it can accept an existing label or
-`New:` request. Catalog sync refreshes the hidden and visible projections plus
-those table choices. Apply-mode publication performs that refresh before
-selecting a row and again after a successful content change.
+Journey`, `Atlas Place`, and `Atlas Mode`. The Place dropdown includes the
+explicit `New Place` request while preserving current choices; the requested
+name comes from the row's existing `Location` field. `Atlas Experience`
+remains free text so it can accept an existing label or `New:` request.
+Catalog sync refreshes the hidden and visible projections plus those table
+choices. Apply-mode publication performs that refresh before selecting a row
+and again after a successful content change.
 
 After creator review, a separate guarded writer applied 33 exact `place_id`
 bindings for Amsterdam, Costa Rica, and Utah. It keys by stable Post ID and
@@ -292,8 +293,8 @@ leaves the media at Journey or Visit scope rather than inventing one. The
 publisher does not infer missing geography.
 
 `editorial:register:place` is the separate explicit geography boundary. The
-selected row must contain `Atlas Place = New: <name>` and keep
-`Atlas Mode = Off`. Preview resolves the Journey and produces the proposed canonical IDs,
+selected row must contain `Atlas Place = New Place`, put the requested name in
+`Location`, and keep `Atlas Mode = Off`. Preview resolves the Journey and produces the proposed canonical IDs,
 order, coordinates, public summary, Visit, and Atlas pin without writes. Apply
 updates only `src/content/geography/generated/records.json`, validates and
 builds it, promotes it through the protected develop and main branches,
