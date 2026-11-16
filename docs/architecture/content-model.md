@@ -69,6 +69,7 @@ verification:
     - npm run build
     - live table-aware Sheet migration verified on 106 eligible rows on 2026-11-16
     - live Atlas Reference verified with 81 canonical choices on 2026-11-16
+    - Atlas Journey First look presentation verified in production on 2026-11-16
 ---
 
 # Canonical content model
