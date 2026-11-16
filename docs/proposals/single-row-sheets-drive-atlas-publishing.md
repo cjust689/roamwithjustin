@@ -523,12 +523,13 @@ Until the optional local watcher runs, one command/VS Code task triggers publica
 The earlier designs are archived. Phase 0, the authenticated Sheet baseline,
 the creator-authorized schema and identity migration, the visible protected
 Reference, the hidden canonical Catalog, and all 106 Journey and Place
-bindings are verified. Eighty-two rows also have canonical Visit bindings. The private
-review ledger records the owner-confirmed Salt Lake City Airport binding as
-lacking a Utah 2026 Visit. It remains Journey-scoped unless a real transit
-Visit is deliberately added. The one-command preview and apply implementation
-is locally verified. Its GitHub promotion and Pages path is also live verified
-through pull requests 30 and 31, two validation jobs, Pages run 43800514937,
-and rendered production proof. No real row has yet downloaded Drive source,
-uploaded new R2 objects, changed generated production content, or completed
-its final Sheet Published write-back.
+bindings are verified. Eighty-two rows also have canonical Visit bindings. The
+private review ledger records the owner-confirmed Salt Lake City Airport
+binding as lacking a Utah 2026 Visit. It remains Journey-scoped unless a real
+transit Visit is deliberately added. The one-command preview and apply
+implementation is locally verified. The Atlas Reference routing release was
+promoted through pull requests 34 and 35 as develop merge `6db1e08` and main
+merge `0e60b31`. Pages run 43813022343 and rendered production verification
+succeeded. No real row has yet downloaded Drive source, uploaded new R2
+objects, changed generated production content, or completed its final Sheet
+Published write-back.
