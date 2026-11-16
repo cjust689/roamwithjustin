@@ -67,6 +67,8 @@ verification:
     - npm run editorial:test
     - npm run editorial:baseline -- --dry-run
     - npm run build
+    - live table-aware Sheet migration verified on 106 eligible rows on 2026-11-16
+    - live Atlas Reference verified with 81 canonical choices on 2026-11-16
 ---
 
 # Canonical content model
@@ -219,10 +221,19 @@ fields. The owner's real Sheet baseline and migration are verified. A real
 reviewed Drive download remains externally unverified.
 
 The automation-owned hidden Atlas Catalog mirrors canonical references from
-these registries without cloning their authority. Dropdowns expose Journey and
-generated Experience labels while permitting `New:` values. A private
-Git-ignored binding report keys candidate Place matches by stable Post ID.
-Catalog generation does not write creator-owned values into Posts.
+these registries without cloning their authority. A visible, warning-protected
+Atlas Reference projects readable Journey, Journey-to-Place Visit, Experience,
+scope, URL, and entity-ID rows from the same source. It is a review surface,
+not a creator-managed relational model. A private Git-ignored binding report
+keys candidate Place matches by stable Post ID. Catalog generation does not
+write creator-owned values into Posts.
+
+The native Google Sheets table owns typed dropdowns for `Publish To`, `Atlas
+Journey`, `Atlas Place`, and `Atlas Mode`. `Atlas Experience` remains free text
+so it can accept an existing label or `New:` request. Catalog sync refreshes
+the hidden and visible projections plus those table choices. Apply-mode
+publication performs that refresh before selecting a row and again after a
+successful content change.
 
 After creator review, a separate guarded writer applied 33 exact `place_id`
 bindings for Amsterdam, Costa Rica, and Utah. It keys by stable Post ID and
@@ -244,23 +255,25 @@ text rank candidates, but the report marks every result unsafe to write. The
 deterministic private JSON and CSV contain no generated Place records and do
 not change Sheet or application state.
 
-The creator subsequently reviewed every suggestion. A guarded per-Post writer
-applied and verified the remaining 71 `place_id` values, so all 104 eligible
-rows now have canonical Journey and Place identities. A guarded relation pass
-wrote 82 unique matching Visit IDs. Twenty-one broad Utah or Costa Rica root
-rows and Salt Lake City Airport have no canonical Visit. Their Place binding
-remains useful source context, while publication deliberately falls back to
-Journey scope rather than inventing a Visit. A future real transit Visit can
-make the airport contribution Place-scoped.
+The creator subsequently reviewed every suggestion. Guarded per-Post writers
+and later eligible rows now yield 106 verified canonical Journey and Place
+identities. A guarded relation pass wrote 82 unique matching Visit IDs. The
+2026-11-16 table upgrade backfilled those 82 rows with readable `Atlas Place`
+values, defaulted all 106 eligible rows to `Publish To = Social`, and preserved
+all original creator fields. Rows without `Atlas Place` deliberately publish
+at Journey scope rather than inventing a Visit.
 
-`editorial:publish` now translates exactly one `Preview` or `Publish` row. It
-requires an existing canonical Journey and, when Place-scoped, a matching
-Visit. Preview plans generated Media and editorial records without remote
-writes. Apply uses verified R2 receipts, creates or reuses an Experience,
-upserts one stable Moment for the Post, validates the generated pair, and then
-hands only those machine-owned shards to the isolated Git publisher. A blank
-Experience leaves the media at Journey or Visit scope rather than inventing
-one. The compiler does not yet create missing Journeys, Places, or Visits.
+`editorial:publish` now translates exactly one `Preview` or `Publish` row whose
+`Publish To` is `Atlas` or `Both`. It resolves the friendly Journey at runtime.
+Blank `Atlas Place` clears Place and Visit targeting for Journey scope. A
+selected Atlas Place must resolve to an existing canonical Place and a matching
+Visit in that Journey. Guarded write-back persists the resolved hidden IDs.
+Preview plans generated Media and editorial records without remote writes.
+Apply uses verified R2 receipts, creates or reuses an Experience, upserts one
+stable Moment for the Post, validates the generated pair, and then hands only
+those machine-owned shards to the isolated Git publisher. A blank Experience
+leaves the media at Journey or Visit scope rather than inventing one. The
+compiler does not yet create missing Journeys, Places, or Visits.
 
 ## Current limitations
 
@@ -269,7 +282,7 @@ one. The compiler does not yet create missing Journeys, Places, or Visits.
 - Canonical content is Git-backed; there is no runtime CMS or database.
 - The single-row workflow is implemented for existing Journeys and Visits,
   including generated Experiences and Moments, guarded deployment, and Sheet
-  write-back. Live Sheet identity and all 104 historical Journey and Place
+  write-back. Live Sheet identity and all 106 Journey and Place
   bindings are verified. The first real Drive and R2 post, the Utah 2026 Salt
   Lake City Airport transit Visit, and creation of missing Journeys, Places,
   or Visits remain unverified or unimplemented.

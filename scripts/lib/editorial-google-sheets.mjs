@@ -50,11 +50,12 @@ export async function readSpreadsheetSheets({
   const response = await api.spreadsheets.get({
     spreadsheetId,
     fields:
-      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)),protectedRanges(protectedRangeId,description,warningOnly,range))",
+      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)),protectedRanges(protectedRangeId,description,warningOnly,range),tables(tableId,name,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values)))))",
   })
   return (response.data?.sheets || []).map(sheet => ({
     ...sheet.properties,
     protectedRanges: sheet.protectedRanges || [],
+    tables: sheet.tables || [],
   }))
 }
 
@@ -97,15 +98,16 @@ export async function readSheetStructure({
   const response = await api.spreadsheets.get({
     spreadsheetId,
     fields:
-      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)))",
+      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)),tables(tableId,name,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values)))))",
   })
-  const properties = (response.data?.sheets || []).find(
+  const sheet = (response.data?.sheets || []).find(
     entry => entry.properties?.sheetId === numericSheetId
-  )?.properties
+  )
+  const properties = sheet?.properties
   if (!properties?.title || !properties.gridProperties) {
     throw new Error(`No Google Sheet tab has gid ${numericSheetId}`)
   }
-  return properties
+  return { ...properties, tables: sheet.tables || [] }
 }
 
 export function normalizeSheetValues(values = []) {

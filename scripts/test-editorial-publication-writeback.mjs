@@ -21,6 +21,8 @@ Object.assign(row, {
   "Series/Post": "Arrival",
   Account: "Roam",
   "Atlas Journey": "USVI and St. John (2025)",
+  "Atlas Place": "Cruz Bay",
+  "Publish To": "Both",
   "Atlas Mode": "Publish",
   post_id: "post-123",
 })
@@ -39,12 +41,16 @@ const input = {
   experienceId: "experience-test",
   momentId: "moment-test",
   sourceRevision: "1",
+  journeyId: "usvi-st-john-2025",
+  placeId: "cruz-bay",
+  visitId: "usvi-st-john-2025-cruz-bay",
 }
 const plan = buildPublicationWriteback(input)
 assert.equal(plan.rowNumber, 2)
-assert.equal(plan.requests.length, 11)
+assert.equal(plan.requests.length, 14)
 assert.equal(plan.values.atlas_status, "Published")
 assert.equal(plan.values.last_deployment, "main-merge-sha")
+assert.equal(plan.values.place_id, "cruz-bay")
 
 const appliedRow = { ...row, ...plan.values }
 assert.equal(

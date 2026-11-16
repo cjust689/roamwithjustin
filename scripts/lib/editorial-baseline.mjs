@@ -18,6 +18,8 @@ export const ATLAS_POST_HEADERS = Object.freeze([
   "Atlas Notes",
   "Travel Date / Range",
   "Atlas Mode",
+  "Publish To",
+  "Atlas Place",
 ])
 
 export const AUTOMATION_POST_HEADERS = Object.freeze([
@@ -324,7 +326,8 @@ export function planBaseline({
       catalog
     )
     const currentPlaceId = String(row.place_id || "").trim()
-    const locationPlace = resolveCatalogValue(row.Location, "place", catalog)
+    const placeInput = String(row["Atlas Place"] || "").trim() || row.Location
+    const locationPlace = resolveCatalogValue(placeInput, "place", catalog)
     const boundPlace = currentPlaceId
       ? resolveCatalogValue(currentPlaceId, "place", catalog)
       : null
@@ -336,7 +339,7 @@ export function planBaseline({
                 status: "invalid-binding",
                 matches: boundPlace?.matches || [],
               }),
-          input: String(row.Location || "").trim(),
+          input: String(placeInput || "").trim(),
           bindingInput: currentPlaceId,
           bindingSource: "place_id",
         }

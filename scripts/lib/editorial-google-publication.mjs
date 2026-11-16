@@ -1,4 +1,7 @@
-import { AUTOMATION_POST_HEADERS, postSourceHash } from "./editorial-baseline.mjs"
+import {
+  AUTOMATION_POST_HEADERS,
+  postSourceHash,
+} from "./editorial-baseline.mjs"
 
 function cellValue(value) {
   return { userEnteredValue: { stringValue: String(value) } }
@@ -34,10 +37,17 @@ export function buildPublicationWriteback({
   experienceId = null,
   momentId = null,
   sourceRevision = null,
+  journeyId,
+  placeId = "",
+  visitId = "",
 }) {
-  const missing = AUTOMATION_POST_HEADERS.filter(header => !headers.includes(header))
+  const missing = AUTOMATION_POST_HEADERS.filter(
+    header => !headers.includes(header)
+  )
   if (missing.length) {
-    throw new Error(`Posts Sheet is missing publication metadata: ${missing.join(", ")}`)
+    throw new Error(
+      `Posts Sheet is missing publication metadata: ${missing.join(", ")}`
+    )
   }
   const matches = rows
     .map((row, index) => ({ row, rowIndex: index + 1, rowNumber: index + 2 }))
@@ -51,7 +61,9 @@ export function buildPublicationWriteback({
   }
   const target = matches[0]
   if (String(target.row["Atlas Mode"] || "").trim() !== "Publish") {
-    throw new Error(`Post ID ${postId} is no longer approved for Atlas publication`)
+    throw new Error(
+      `Post ID ${postId} is no longer approved for Atlas publication`
+    )
   }
   const currentSourceHash = postSourceHash(target.row)
   if (currentSourceHash !== expectedSheetSourceHash) {
@@ -63,11 +75,16 @@ export function buildPublicationWriteback({
     atlasUrl,
     atlasUrlLevel,
     verifiedAt,
+    journeyId,
   })) {
-    if (!String(value || "").trim()) throw new Error(`${label} is required for write-back`)
+    if (!String(value || "").trim())
+      throw new Error(`${label} is required for write-back`)
   }
 
   const values = {
+    journey_id: journeyId,
+    place_id: placeId,
+    visit_id: visitId,
     atlas_status: "Published",
     atlas_url: atlasUrl,
     atlas_url_level: atlasUrlLevel,

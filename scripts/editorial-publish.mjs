@@ -5,10 +5,14 @@ import { createRequire } from "node:module"
 import { spawnSync } from "node:child_process"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
+import { experienceRecords } from "../src/content/experiences/index.mjs"
 import { journeyRecords } from "../src/content/journeys/index.mjs"
 import { mediaRecords } from "../src/content/media/index.mjs"
 import { placeRecords } from "../src/content/places/index.mjs"
-import { buildCanonicalCatalog, postSourceHash } from "./lib/editorial-baseline.mjs"
+import {
+  buildCanonicalCatalog,
+  postSourceHash,
+} from "./lib/editorial-baseline.mjs"
 import {
   planEditorialCompilation,
   serializeEditorialRecords,
@@ -43,6 +47,7 @@ import {
   nextSourceRevision,
   publicationSourceHash,
   publicObjectUrl,
+  resolvePublicationTarget,
   selectPublicationRow,
 } from "./lib/editorial-publication-plan.mjs"
 import {
@@ -57,7 +62,10 @@ const {
   serializeMediaRecords,
   sha256,
 } = require("./lib/media-ingestion.js")
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
+const projectRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+)
 const mediaRecordsPath = path.join(
   projectRoot,
   "src/content/media/generated/records.json"
@@ -130,7 +138,8 @@ function parseArgs(args) {
       index += 1
       if (argument === "--oauth-client") options.oauthClientPath = candidate
       else if (argument === "--token-path") options.tokenPath = candidate
-      else if (argument === "--spreadsheet-id") options.spreadsheetId = candidate
+      else if (argument === "--spreadsheet-id")
+        options.spreadsheetId = candidate
       else if (argument === "--posts-gid") options.postsSheetId = candidate
       else if (argument === "--post-id") options.postId = candidate
       else if (argument === "--account") options.account = candidate
@@ -159,7 +168,9 @@ function run(command, args, { capture = false } = {}) {
   })
   if (result.error) throw result.error
   if (result.status !== 0) {
-    const detail = capture ? String(result.stderr || result.stdout || "").trim() : ""
+    const detail = capture
+      ? String(result.stderr || result.stdout || "").trim()
+      : ""
     throw new Error(
       `${command} ${args.join(" ")} exited with ${result.status}${detail ? `: ${detail}` : ""}`
     )
@@ -191,7 +202,9 @@ function verifyExistingSnapshot(snapshotDirectory, fingerprint) {
   if (!fs.existsSync(manifestPath)) return null
   const snapshot = readJson(manifestPath)
   if (snapshot.inventoryFingerprint !== fingerprint) {
-    throw new Error("Existing private Drive snapshot belongs to another inventory")
+    throw new Error(
+      "Existing private Drive snapshot belongs to another inventory"
+    )
   }
   for (const file of snapshot.files || []) {
     const target = path.resolve(snapshotDirectory, file.relativePath)
@@ -216,16 +229,31 @@ function packageDescriptor({ journey, row, runDirectory, kind }) {
   const packageLabel = kind === "video" ? `${scopeLabel}-videos` : scopeLabel
   return {
     kind,
-    source: path.join(runDirectory, "drive", kind === "video" ? "videos" : "images"),
-    manifest: path.join(runDirectory, "packages", packageLabel, "publication-manifest.json"),
-    receipt: path.join(runDirectory, "packages", packageLabel, "r2-verification.json"),
+    source: path.join(
+      runDirectory,
+      "drive",
+      kind === "video" ? "videos" : "images"
+    ),
+    manifest: path.join(
+      runDirectory,
+      "packages",
+      packageLabel,
+      "publication-manifest.json"
+    ),
+    receipt: path.join(
+      runDirectory,
+      "packages",
+      packageLabel,
+      "r2-verification.json"
+    ),
   }
 }
 
 function preparePackages({ snapshot, journey, row, runDirectory }) {
   const packages = []
   for (const kind of ["image", "video"]) {
-    const count = kind === "image" ? snapshot.counts.images : snapshot.counts.videos
+    const count =
+      kind === "image" ? snapshot.counts.images : snapshot.counts.videos
     if (!count) continue
     const descriptor = packageDescriptor({ journey, row, runDirectory, kind })
     if (!fs.existsSync(descriptor.manifest)) {
@@ -259,12 +287,15 @@ function preparePackages({ snapshot, journey, row, runDirectory }) {
     descriptor.value = readJson(descriptor.manifest)
     packages.push(descriptor)
   }
-  if (!packages.length) throw new Error("Drive snapshot contains no supported media")
+  if (!packages.length)
+    throw new Error("Drive snapshot contains no supported media")
   return packages
 }
 
 function staticMediaRecords(currentGenerated) {
-  const generatedIds = new Set((currentGenerated.assets || []).map(asset => asset.id))
+  const generatedIds = new Set(
+    (currentGenerated.assets || []).map(asset => asset.id)
+  )
   return mediaRecords.filter(asset => !generatedIds.has(asset.id))
 }
 
@@ -303,7 +334,10 @@ function planCombinedContent({ packages, row, processedHash, mode }) {
 function replaceGeneratedPair({ media, editorial }) {
   const inputs = [
     { target: mediaRecordsPath, serialized: serializeMediaRecords(media) },
-    { target: editorialRecordsPath, serialized: serializeEditorialRecords(editorial) },
+    {
+      target: editorialRecordsPath,
+      serialized: serializeEditorialRecords(editorial),
+    },
   ]
   const suffix = `${process.pid}-${Date.now()}`
   try {
@@ -322,13 +356,22 @@ function replaceGeneratedPair({ media, editorial }) {
         if (fs.existsSync(input.target)) fs.unlinkSync(input.target)
         fs.renameSync(input.backup, input.target)
       }
-      if (input.incoming && fs.existsSync(input.incoming)) fs.unlinkSync(input.incoming)
+      if (input.incoming && fs.existsSync(input.incoming))
+        fs.unlinkSync(input.incoming)
     }
-    throw new Error(`Generated publication update was rolled back: ${error.message}`)
+    throw new Error(
+      `Generated publication update was rolled back: ${error.message}`
+    )
   }
 }
 
-async function assertFreshSources({ auth, configuration, postsTitle, original, fingerprint }) {
+async function assertFreshSources({
+  auth,
+  configuration,
+  postsTitle,
+  original,
+  fingerprint,
+}) {
   const currentSheet = await readPostsSheet({
     auth,
     spreadsheetId: configuration.spreadsheetId,
@@ -355,7 +398,9 @@ async function assertFreshSources({ auth, configuration, postsTitle, original, f
 
 function publicDestination({ plan, journey, row }) {
   if (plan.experienceId) {
-    const experience = plan.editorial.experiences.find(item => item.id === plan.experienceId)
+    const experience = plan.editorial.experiences.find(
+      item => item.id === plan.experienceId
+    )
     return {
       url: `https://roamwithjustin.com/trips/${journey.slug}#experience-${experience.slug}`,
       level: "experience",
@@ -367,10 +412,19 @@ function publicDestination({ plan, journey, row }) {
   )
   return node
     ? { url: `https://roamwithjustin.com/atlas/${node.id}`, level: "visit" }
-    : { url: `https://roamwithjustin.com/trips/${journey.slug}`, level: "journey" }
+    : {
+        url: `https://roamwithjustin.com/trips/${journey.slug}`,
+        level: "journey",
+      }
 }
 
-async function refreshCatalog({ auth, configuration, postsStructure, postsSheet, experiences }) {
+async function refreshCatalog({
+  auth,
+  configuration,
+  postsStructure,
+  postsSheet,
+  experiences,
+}) {
   const catalog = buildCanonicalCatalog({
     journeys: journeyRecords,
     places: placeRecords,
@@ -424,32 +478,64 @@ async function main() {
     spreadsheetId: configuration.spreadsheetId,
     sheetId: options.postsSheetId,
   })
-  const postsSheet = await readPostsSheet({
+  let postsSheet = await readPostsSheet({
     auth,
     spreadsheetId: configuration.spreadsheetId,
     postsRange: postsStructure.title,
   })
-  const selected = selectPublicationRow({
+  if (options.apply) {
+    await refreshCatalog({
+      auth,
+      configuration,
+      postsStructure,
+      postsSheet,
+      experiences: experienceRecords,
+    })
+    postsSheet = await readPostsSheet({
+      auth,
+      spreadsheetId: configuration.spreadsheetId,
+      postsRange: postsStructure.title,
+    })
+  }
+  const selectedSource = selectPublicationRow({
     rows: postsSheet.rows,
     account: options.account,
     postId: options.postId,
     apply: options.apply,
   })
+  const authoringCatalog = buildCanonicalCatalog({
+    journeys: journeyRecords,
+    places: placeRecords,
+    atlasNodes: atlasPresentation,
+    experiences: experienceRecords,
+  })
+  const target = resolvePublicationTarget({
+    row: selectedSource.row,
+    catalog: authoringCatalog,
+  })
+  const selected = { ...selectedSource, row: target.row, target }
   const sheetSourceHash = postSourceHash(selected.row)
   const inventory = await inventoryDriveFolder({
     auth,
     folderUrl: selected.row["Drive Folder"],
   })
   const fingerprint = driveInventoryFingerprint(inventory)
-  const processedHash = publicationSourceHash({ sheetSourceHash, driveFingerprint: fingerprint })
+  const processedHash = publicationSourceHash({
+    sheetSourceHash,
+    driveFingerprint: fingerprint,
+  })
   if (
     String(selected.row.atlas_status || "") === "Published" &&
     String(selected.row.last_processed_hash || "") === processedHash
   ) {
-    console.log(`Post ${selected.row.post_id} already matches the deployed source hash.`)
+    console.log(
+      `Post ${selected.row.post_id} already matches the deployed source hash.`
+    )
     return
   }
-  const journey = journeyRecords.find(item => item.id === selected.row.journey_id)
+  const journey = journeyRecords.find(
+    item => item.id === selected.row.journey_id
+  )
   if (!journey) throw new Error(`Unknown Journey ${selected.row.journey_id}`)
   const runDirectory = path.join(
     projectRoot,
@@ -465,7 +551,12 @@ async function main() {
       inventory,
       outputDirectory: snapshotDirectory,
     }))
-  const packages = preparePackages({ snapshot, journey, row: selected.row, runDirectory })
+  const packages = preparePackages({
+    snapshot,
+    journey,
+    row: selected.row,
+    runDirectory,
+  })
   const previewPlan = planCombinedContent({
     packages,
     row: selected.row,
@@ -477,6 +568,12 @@ async function main() {
     mode: options.apply ? "apply" : "preview",
     postId: selected.row.post_id,
     rowNumber: selected.rowNumber,
+    target: {
+      scope: target.scope,
+      journeyId: selected.row.journey_id,
+      placeId: selected.row.place_id || null,
+      visitId: selected.row.visit_id || null,
+    },
     sheetSourceHash,
     driveFingerprint: fingerprint,
     processedHash,
@@ -533,7 +630,10 @@ async function main() {
       journeys: journeyRecords,
       mode: "Publish",
     })
-    replaceGeneratedPair({ media: appliedPlan.media, editorial: appliedPlan.editorial })
+    replaceGeneratedPair({
+      media: appliedPlan.media,
+      editorial: appliedPlan.editorial,
+    })
     const npm = process.platform === "win32" ? "npm.cmd" : "npm"
     run(npm, ["run", "build"])
   } catch (error) {
@@ -551,7 +651,11 @@ async function main() {
   })
   const firstObjectKey = packages[0].value.assets[0].output.objectKey
   const mediaMarker = publicObjectUrl(firstObjectKey)
-  const destination = publicDestination({ plan: appliedPlan, journey, row: selected.row })
+  const destination = publicDestination({
+    plan: appliedPlan,
+    journey,
+    row: selected.row,
+  })
   const command = createCommandRunner()
   const remoteUrl = command("git", ["remote", "get-url", options.remote], {
     cwd: projectRoot,
@@ -581,7 +685,9 @@ async function main() {
     },
   })
   if (deployment.state !== "deployed") {
-    throw new Error(`GitHub publication ended in unexpected state ${deployment.state}`)
+    throw new Error(
+      `GitHub publication ended in unexpected state ${deployment.state}`
+    )
   }
 
   const latestSheet = await readPostsSheet({
@@ -623,6 +729,9 @@ async function main() {
     experienceId: appliedPlan.experienceId,
     momentId: appliedPlan.momentId,
     sourceRevision,
+    journeyId: selected.row.journey_id,
+    placeId: selected.row.place_id,
+    visitId: selected.row.visit_id,
   })
   await applyPublicationWriteback({
     auth,

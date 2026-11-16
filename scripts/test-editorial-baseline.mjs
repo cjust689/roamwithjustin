@@ -65,6 +65,8 @@ const parsed = parseCsvRecords(
       '"First line\nSecond line"',
       "June 2026",
       "Preview",
+      "Both",
+      "",
       "post-opaque-a1",
     ].join(","),
     [
@@ -82,6 +84,8 @@ const parsed = parseCsvRecords(
       "",
       "",
       "Off",
+      "Social",
+      "",
       "post-opaque-b2",
     ].join(","),
   ].join("\r\n")
