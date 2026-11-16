@@ -11,6 +11,9 @@ related:
   - media-pipeline
   - gear-system
   - monetization-analytics
+  - my-atlas-geography
+  - my-atlas-private-beta
+  - my-atlas-private-beta-implementation
 supersedes:
   - documentation-lifecycle-adoption-brief
   - master-plan-ai-context
@@ -61,6 +64,7 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 | Gear                   | [Gear system](architecture/gear.md)                                      | [Gear ingestion CLI](reference/gear-ingestion-cli.md)                                                                                      | Canonical generated Gear/Usage ingestion and Journey selectors exist. The generated registry is empty.                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Analytics and commerce | [Monetization and analytics](architecture/monetization-and-analytics.md) | [AdSense operations](reference/adsense.md) and [active monetization plan](implementation/monetization-and-analytics.md)                    | GA4 loader and gear-link click tracking exist. A disabled by default manual AdSense integration supports one eligible long story placement plus a separately disabled, session-capped guided Atlas placement after three distinct rich stops. Build validation, ads.txt generation, blocked-unit collapse, and a public privacy notice exist. Live account configuration, dashboard verification, consent setup, and the canonical referral contract remain.                                                                                     |
 | Deployment             | [Project README](../README.md#how-production-works)                      | [Pages workflow](../.github/workflows/deploy-pages.yml) and [editorial implementation](implementation/editorial-sheet-publishing.md)       | GitHub Actions builds and deploys the static Vue site to Pages. Protected `develop` and `main` require pull requests, merge commits, and the strict `validate` check. The explicit Place registration release was promoted through pull requests 42 and 43, then its table-compatible `New Place` correction through pull requests 44 and 45. Develop runs 43866268383 and 43867984954 and Pages runs 43866785598 and 43868555523 succeeded. The live Catalog refresh and actual table metadata readback then verified the new request choice without changing Posts values. |
+| My Atlas               | [Geographic catalog and local proof](architecture/my-atlas-geography.md) | [Accepted private beta target](proposals/my-atlas-private-beta.md) and [active implementation](implementation/my-atlas-private-beta.md)      | Phase 1 is an isolated, environment-gated local proof. A deterministic GeoNames importer, stable country and city IDs, bounded search, append-preserving deprecation, draft pin validation, and a separate MapLibre component are verified. The default production route remains disabled. Auth0, invitations, persistence, Worker and Durable Object state, sharing, and invited users are not implemented. |
 
 ## Active work
 
@@ -70,6 +74,7 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 | [R2 Worker media upload](implementation/r2-worker-media-upload.md)                     | Partial, verified | Deploy to the owner's Cloudflare account, install the upload secret, and verify the first real immutable image/video batch.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | [Monetization and analytics](implementation/monetization-and-analytics.md)             | Partial, verified | Complete the AdSense site review and ads.txt crawl, verify consent and Auto ads state, create the optional Atlas unit only after the site is Ready, then replace hostname-specific event branching with a stable referral contract and verify partner data.                                                                                                                                                                                                                                                                                                               |
 | [Single-row Sheets and Drive publishing](implementation/editorial-sheet-publishing.md) | Partial, verified | One-command preview/apply, friendly routing, the protected Atlas Reference, Drive snapshots, generated Experience/Moment presentation, and guarded GitHub promotion are implemented. A separate explicit `New Place` choice uses the row's Location to create or reuse a Place, add its Visit and Atlas pin, refresh the Catalog, and bind the requesting row without allowing ordinary publication to infer geography. The live Sheet table and 106 current bindings are verified. The first live Place registration and first row-backed Drive/R2 publication remain owner-controlled and unverified. Missing Journey creation and optional polling remain. |
+| [My Atlas private beta](implementation/my-atlas-private-beta.md)                         | Partial, verified | The repository, live fallback behavior, GeoNames license and full catalog size were audited. The local geographic proof is implemented and disabled by default. Owner Auth0, cost, terms/privacy/retention, and staging route decisions gate the secure backend. No production resources, routes, ads, uploads, or user accounts exist. |
 
 ## Proposals and backlog
 
@@ -78,6 +83,8 @@ These documents describe future behavior, not available features:
 - [Lightroom publishing](proposals/lightroom-publishing.md)
 - [Photo EXIF and capture gear](proposals/photo-exif-gear.md)
 - [Video metadata pipeline](proposals/video-metadata-pipeline.md)
+- [My Atlas private beta](proposals/my-atlas-private-beta.md), accepted and
+  partially implemented through its local geographic proof
 
 The [accepted single-row Sheets and Drive target](proposals/single-row-sheets-drive-atlas-publishing.md)
 is partially implemented and tracked by the active implementation document.
@@ -139,6 +146,10 @@ structure only; it cannot prove application behavior.
   require owner validation before they are treated as commercial facts.
 - No Lightroom plug-in, background publishing watcher, or EXIF extractor
   exists. The local one-row publisher must be started explicitly.
+- My Atlas has no Auth0 application, API audience, Worker, Durable Object,
+  catalog R2 bucket, production route, user account, or invited beta. Its local
+  geographic proof is environment gated and excluded from the default route
+  table.
 - Owner OAuth, live Sheet reads, the table-aware schema and identity migration,
   the visible protected Reference, the hidden Catalog, and all 106 Journey and
   Place bindings are verified. Eighty-two rows have Visit-backed Atlas Place

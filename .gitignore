@@ -13,6 +13,7 @@ node_modules
 # local editorial publishing state
 .cache/editorial/
 .state/editorial/
+.state/my-atlas/
 
 # Log files
 npm-debug.log*

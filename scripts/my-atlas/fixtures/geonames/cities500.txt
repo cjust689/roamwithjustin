@@ -1,0 +1,5 @@
+3621138	Uvita	Uvita	Uvita,Увита	9.17039	-83.7395	P	PPL	CR		07	605	60504		3000		63	America/Costa_Rica	2026-09-02
+3621849	San José	San Jose	San Jose,San José	9.93388	-84.08489	P	PPLC	CR		08	101	10103		335007		1133	America/Costa_Rica	2025-05-15
+2988507	Paris	Paris	Paris,París,Pariž	48.85341	2.3488	P	PPLC	FR		11	75	751	75056	2138551		42	Europe/Paris	2026-02-23
+4140963	Washington	Washington	District of Columbia,Washington,Washington DC	38.89511	-77.03637	P	PPLC	US		DC	001			689545	7	6	America/New_York	2026-06-12
+4717560	Paris	Paris	Paris,Paris Texas	33.66094	-95.55551	P	PPLA2	US		TX	277			24782	183	190	America/Chicago	2025-11-24
