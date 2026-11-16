@@ -100,7 +100,7 @@ const row = {
   "Drive Folder": "https://drive.google.com/drive/folders/test",
   "Publish To": "Both",
   "Atlas Journey": journey.title,
-  "Atlas Place": "New: Test Cove",
+  "Atlas Place": "New Place",
   "Atlas Experience": "",
   "Atlas Mode": "Off",
   "Atlas Notes": "",
@@ -181,7 +181,7 @@ assert.equal(resumed.registration.id, plan.registration.id)
 const existingRow = {
   ...row,
   Location: existingPlace.name,
-  "Atlas Place": `New: ${existingPlace.name}`,
+  "Atlas Place": "New Place",
   post_id: "post-existing-cove",
 }
 const existingAtlasNode = {
@@ -223,13 +223,13 @@ assert.throws(
       places,
       atlasNodes,
     }),
-  /explicit request form/
+  /explicit New Place choice/
 )
 assert.throws(
   () =>
     planPlaceRegistration({
       current: empty,
-      row: { ...row, "Atlas Place": "New: Test Cove" },
+      row: { ...row, "Atlas Place": "New Place" },
       catalog,
       journeys: [journey],
       places,

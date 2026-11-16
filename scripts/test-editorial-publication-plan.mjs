@@ -106,7 +106,7 @@ assert.throws(
 assert.throws(
   () =>
     resolvePublicationTarget({
-      row: { ...base, "Atlas Place": "New: Test Cove" },
+      row: { ...base, "Atlas Place": "New Place" },
       catalog,
     }),
   /run editorial:register:place first/

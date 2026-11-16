@@ -90,7 +90,7 @@ assert.match(calls[0].url, /sheet%2Fid:batchUpdate$/)
 
 const registrationRow = {
   ...row,
-  "Atlas Place": "New: Test Cove",
+  "Atlas Place": "New Place",
   "Atlas Mode": "Off",
   journey_id: "",
   place_id: "",
@@ -102,7 +102,7 @@ const registrationInput = {
   rows: [registrationRow],
   postId: "post-123",
   expectedSheetSourceHash: postSourceHash(registrationRow),
-  requestedPlace: "New: Test Cove",
+  requestedPlace: "New Place",
   placeLabel: "Test Cove",
   journeyId: "test-country-2026",
   placeId: "test-cove",

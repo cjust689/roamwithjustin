@@ -135,9 +135,10 @@ publisher resolves the canonical Place and matching Visit within the chosen
 Journey. It rejects an unknown Place or a real Place that has no Visit in that
 Journey. The friendly choices are authoritative at publication time; guarded
 write-back stores the resolved hidden `journey_id`, `place_id`, and `visit_id`.
-The custom value `New: <name>` is an explicit registration request, not a
-publication target. Normal preview and publication reject it until the
-separate registration command succeeds.
+The `New Place` dropdown choice is an explicit registration request, not a
+publication target. Its requested name comes from the row's existing
+`Location` field. Normal preview and publication reject it until the separate
+registration command succeeds.
 
 `Atlas Experience` remains optional free text in the native Sheets table so an
 existing label or `New: <title>` can be entered. The protected `Atlas
@@ -148,9 +149,10 @@ again after successful generated content changes.
 ## Explicit Place and Visit registration
 
 Adding a row never creates geography by inference. To request a missing Place,
-set the row to `Publish To = Atlas` or `Both`, select an existing `Atlas
-Journey`, enter `New: <name>` in `Atlas Place`, and keep `Atlas Mode = Off`.
-The stable Post ID identifies the request even if the Sheet is sorted.
+put its name in `Location`, set the row to `Publish To = Atlas` or `Both`,
+select an existing `Atlas Journey`, choose `New Place` in `Atlas Place`, and
+keep `Atlas Mode = Off`. The stable Post ID identifies the request even if the
+Sheet is sorted.
 
 Preview the exact registration first:
 
@@ -174,7 +176,7 @@ stops and directs the creator to select the existing choice.
 Apply updates only the generated geography shard, validates and builds it,
 promotes it through the same protected develop and main pull-request path,
 waits for Pages, checks the exact rendered Atlas Place, refreshes the hidden
-Catalog and visible Atlas Reference, then replaces `New: <name>` with the
+Catalog and visible Atlas Reference, then replaces `New Place` with the
 registered Place and writes its hidden IDs. The command is resumable and checks
 the unchanged Sheet source before every guarded write. It never uploads media
 or changes `Atlas Mode`; the creator chooses Preview or Publish afterward.
@@ -334,7 +336,7 @@ Still owner-controlled or externally unverified:
 - first real Drive download through the chosen OAuth scope
 - production R2 Worker endpoint and token availability in this environment
 - first row-backed end-to-end post publication and Sheet Published readback
-- first live `New:` Place registration and rendered production proof; the path
+- first live `New Place` registration and rendered production proof; the path
   is implemented and locally test-covered
 - creating an entirely new Journey from a row
 - an optional Utah 2026 Salt Lake City Airport transit Visit if that stop later
@@ -354,7 +356,7 @@ Still owner-controlled or externally unverified:
 - [x] Implement real-receipt R2 apply and atomic generated-record compilation.
 - [x] Implement isolated per-post branches and staged merge-commit promotion.
 - [x] Implement workflow, Pages, rendered content, Catalog, and Sheet checks.
-- [x] Implement an explicit `New:` Place and Visit registration command.
+- [x] Implement an explicit `New Place` and Visit registration command.
 - [ ] Run the first owner-selected Preview row against a real Drive folder.
 - [ ] Run the first owner-approved Publish row through R2 and production.
 - [ ] Prove the two-Post, one-Experience regression with real content.

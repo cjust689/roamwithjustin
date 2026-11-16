@@ -22,6 +22,8 @@ export const ATLAS_POST_HEADERS = Object.freeze([
   "Atlas Place",
 ])
 
+export const NEW_PLACE_REQUEST_LABEL = "New Place"
+
 export const AUTOMATION_POST_HEADERS = Object.freeze([
   "post_id",
   "journey_id",

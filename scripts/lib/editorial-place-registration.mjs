@@ -1,6 +1,10 @@
 import crypto from "node:crypto"
 import { isCoordinatePair } from "../../src/content/contracts.mjs"
-import { postSourceHash, resolveCatalogValue } from "./editorial-baseline.mjs"
+import {
+  NEW_PLACE_REQUEST_LABEL,
+  postSourceHash,
+  resolveCatalogValue,
+} from "./editorial-baseline.mjs"
 
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const atlasDestinations = new Set(["Atlas", "Both"])
@@ -76,12 +80,15 @@ function exactJourney(row, catalog) {
   return result.matches[0]
 }
 
-function parsePlaceRequest(value) {
-  const input = String(value || "").trim()
+function parsePlaceRequest(row) {
+  const input = String(row["Atlas Place"] || "").trim()
+  if (normalize(input) === normalize(NEW_PLACE_REQUEST_LABEL)) {
+    return requiredPublicCopy(row.Location, "Location for the new Place")
+  }
   const match = input.match(/^new:\s*(.+)$/i)
   if (!match) {
     throw new Error(
-      'Atlas Place must use the explicit request form "New: Place name"'
+      `Atlas Place must use the explicit ${NEW_PLACE_REQUEST_LABEL} choice`
     )
   }
   return requiredPublicCopy(match[1], "Requested Place name")
@@ -240,7 +247,7 @@ export function planPlaceRegistration({
   const postId = String(row.post_id || "").trim()
   if (!postId) throw new Error("A stable post_id is required")
 
-  const requestedName = parsePlaceRequest(row["Atlas Place"])
+  const requestedName = parsePlaceRequest(row)
   const journeyRecord = exactJourney(row, catalog)
   const journey = journeys.find(item => item.id === journeyRecord.id)
   if (!journey) throw new Error(`Unknown Journey ${journeyRecord.id}`)

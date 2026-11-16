@@ -1,4 +1,5 @@
 import crypto from "node:crypto"
+import { NEW_PLACE_REQUEST_LABEL } from "./editorial-baseline.mjs"
 
 const supportedModes = new Set(["Preview", "Publish"])
 const atlasDestinations = new Set(["Atlas", "Both"])
@@ -55,7 +56,10 @@ export function resolvePublicationTarget({ row, catalog }) {
       scope: "journey",
     }
   }
-  if (/^new:\s*.+/i.test(placeInput)) {
+  if (
+    normalize(placeInput) === normalize(NEW_PLACE_REQUEST_LABEL) ||
+    /^new:\s*.+/i.test(placeInput)
+  ) {
     throw new Error(
       `Atlas Place ${placeInput} is an explicit registration request; keep Atlas Mode Off and run editorial:register:place first`
     )
