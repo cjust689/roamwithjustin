@@ -299,6 +299,13 @@ const drive = await inventoryDriveFolder({
                 capabilities: { canDownload: true },
               },
               {
+                id: "file-image-0002",
+                name: "02-graphic.png",
+                mimeType: "image/png",
+                size: "150",
+                capabilities: { canDownload: true },
+              },
+              {
                 id: "file-document-1",
                 name: "notes.txt",
                 mimeType: "text/plain",
@@ -316,13 +323,13 @@ assert.equal(driveCalls.get.length, 1)
 assert.equal(driveCalls.list.length, 2)
 assert.deepEqual(
   drive.files.map(file => file.name),
-  ["01-photo.jpg", "02-clip.mp4", "notes.txt"]
+  ["01-photo.jpg", "02-clip.mp4", "02-graphic.png", "notes.txt"]
 )
 assert.deepEqual(drive.summary, {
-  total: 3,
-  supported: 2,
+  total: 4,
+  supported: 3,
   unsupported: 1,
-  images: 1,
+  images: 2,
   videos: 1,
   blockedDownloads: 0,
 })
@@ -331,6 +338,7 @@ assert.equal(driveInventoryFingerprint(drive).length, 64)
 const snapshotRoot = fs.mkdtempSync(path.join(os.tmpdir(), "editorial-drive-"))
 try {
   const imageBytes = Buffer.from("image-bytes")
+  const pngBytes = Buffer.from("png-bytes")
   const videoBytes = Buffer.from("video-bytes")
   const snapshot = await snapshotDriveFolder({
     auth: null,
@@ -353,6 +361,21 @@ try {
           kind: "image",
         },
         {
+          id: "png-1",
+          name: "graphic.png",
+          mimeType: "image/png",
+          byteSize: String(pngBytes.length),
+          modifiedTime: "2026-01-01T00:00:00Z",
+          version: "1",
+          sha256Checksum: crypto
+            .createHash("sha256")
+            .update(pngBytes)
+            .digest("hex"),
+          canDownload: true,
+          supported: true,
+          kind: "image",
+        },
+        {
           id: "video-1",
           name: "clip.mp4",
           mimeType: "video/mp4",
@@ -369,16 +392,38 @@ try {
     outputDirectory: path.join(snapshotRoot, "snapshot"),
     driveApi: {
       files: {
-        getMedia: async ({ fileId }) => ({
-          data: fileId === "image-1" ? imageBytes : videoBytes,
-        }),
+        getMedia: async ({ fileId }) => {
+          const bytesById = {
+            "image-1": imageBytes,
+            "png-1": pngBytes,
+            "video-1": videoBytes,
+          }
+          return { data: bytesById[fileId] }
+        },
       },
     },
   })
-  assert.deepEqual(snapshot.counts, { images: 1, videos: 1 })
+  assert.deepEqual(snapshot.counts, { images: 2, videos: 1 })
   assert.equal(
-    fs.readFileSync(path.join(snapshotRoot, "snapshot", "images", "001.jpg"), "utf8"),
+    fs.readFileSync(
+      path.join(snapshotRoot, "snapshot", "images", "001.jpg"),
+      "utf8"
+    ),
     "image-bytes"
+  )
+  assert.equal(
+    fs.readFileSync(
+      path.join(snapshotRoot, "snapshot", "images", "002.png"),
+      "utf8"
+    ),
+    "png-bytes"
+  )
+  assert.equal(
+    fs.readFileSync(
+      path.join(snapshotRoot, "snapshot", "videos", "001.mp4"),
+      "utf8"
+    ),
+    "video-bytes"
   )
   await assert.rejects(
     () =>
