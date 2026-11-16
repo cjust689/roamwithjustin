@@ -153,6 +153,20 @@ async function loadSavedClient(tokenPath, scopes) {
   }
 }
 
+async function archiveSavedClient(tokenPath) {
+  try {
+    await fs.promises.access(tokenPath, fs.constants.F_OK)
+  } catch (error) {
+    if (error.code === "ENOENT") return null
+    throw error
+  }
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
+  const archivePath = `${tokenPath}.backup-${timestamp}`
+  await fs.promises.rename(tokenPath, archivePath)
+  return archivePath
+}
+
 async function saveClientCredentials({
   client,
   oauthClientPath,
@@ -191,25 +205,21 @@ async function saveClientCredentials({
 }
 
 function openAuthorizationUrl(authorizationUrl) {
+  console.log(`Google account chooser:\n${authorizationUrl}`)
   const platformCommands = {
     win32: ["rundll32", ["url.dll,FileProtocolHandler", authorizationUrl]],
     darwin: ["open", [authorizationUrl]],
     linux: ["xdg-open", [authorizationUrl]],
   }
   const command = platformCommands[process.platform]
-  if (!command) {
-    console.log(`Open this Google authorization URL:\n${authorizationUrl}`)
-    return
-  }
+  if (!command) return
 
   const child = spawn(command[0], command[1], {
     detached: true,
     stdio: "ignore",
     windowsHide: true,
   })
-  child.once("error", () => {
-    console.log(`Open this Google authorization URL:\n${authorizationUrl}`)
-  })
+  child.once("error", () => {})
   child.unref()
 }
 
@@ -307,7 +317,7 @@ export async function authenticateWithLoopback({
       client.redirectUri = redirectUri
       const authorizationUrl = client.generateAuthUrl({
         access_type: "offline",
-        prompt: "consent",
+        prompt: "select_account consent",
         scope: scopes,
         state,
         code_challenge_method: "S256",
@@ -330,13 +340,20 @@ export async function authenticateWithLoopback({
 
 export async function authorizeGoogleReadOnly(
   configuration,
-  { interactiveAuthorize = authenticateWithLoopback } = {}
+  {
+    interactiveAuthorize = authenticateWithLoopback,
+    forceReauthorize = false,
+  } = {}
 ) {
-  const saved = await loadSavedClient(
-    configuration.tokenPath,
-    configuration.scopes
-  )
-  if (saved) return saved
+  if (forceReauthorize) {
+    await archiveSavedClient(configuration.tokenPath)
+  } else {
+    const saved = await loadSavedClient(
+      configuration.tokenPath,
+      configuration.scopes
+    )
+    if (saved) return saved
+  }
 
   const client = await interactiveAuthorize({
     scopes: configuration.scopes,

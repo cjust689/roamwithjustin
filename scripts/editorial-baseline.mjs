@@ -18,7 +18,7 @@ const projectRoot = path.resolve(
 function usage() {
   return `Usage:
   npm run editorial:baseline -- --dry-run [--posts-csv <path>] [--account <label>] [--json]
-  npm run editorial:baseline -- --dry-run --live --oauth-client <path> --spreadsheet-id <id> [--posts-range Posts] [--drive-folder <url>]
+  npm run editorial:baseline -- --dry-run --live --oauth-client <path> --spreadsheet-id <id> [--posts-range Posts | --posts-gid <gid>] [--drive-folder <url>] [--reauthorize]
 
 This command is read-only. It builds a deterministic catalog from current
 canonical repository records, audits an offline Posts CSV, or reads the live
@@ -52,9 +52,11 @@ function parseArgs(args) {
     tokenPath: null,
     spreadsheetId: null,
     postsRange: null,
+    postsSheetId: null,
     driveFolder: null,
     driveScope: null,
     allowRestrictedDriveScope: false,
+    reauthorize: false,
     json: false,
     help: false,
   }
@@ -95,6 +97,11 @@ function parseArgs(args) {
       index += 1
     } else if (argument.startsWith("--posts-range=")) {
       options.postsRange = argument.slice("--posts-range=".length)
+    } else if (argument === "--posts-gid") {
+      options.postsSheetId = readValue(args, index, "--posts-gid")
+      index += 1
+    } else if (argument.startsWith("--posts-gid=")) {
+      options.postsSheetId = argument.slice("--posts-gid=".length)
     } else if (argument === "--drive-folder") {
       options.driveFolder = readValue(args, index, "--drive-folder")
       index += 1
@@ -107,6 +114,8 @@ function parseArgs(args) {
       options.driveScope = argument.slice("--drive-scope=".length)
     } else if (argument === "--allow-restricted-drive-scope") {
       options.allowRestrictedDriveScope = true
+    } else if (argument === "--reauthorize") {
+      options.reauthorize = true
     } else if (argument === "--json") {
       options.json = true
     } else if (argument === "--help" || argument === "-h") {
@@ -137,7 +146,13 @@ function displayReport(report) {
     `Rows: ${report.posts.plan.summary.eligibleRows} eligible, ${report.posts.plan.summary.ignoredRows} ignored, ${report.posts.plan.summary.blockedRows} need review`
   )
   console.log(
+    `Migration: ${report.posts.plan.summary.missingPostIds} stable Post IDs to seed, ${report.posts.plan.summary.exactPlaceMatches} exact Place matches`
+  )
+  console.log(
     `Header additions proposed: ${report.posts.plan.schema.missingAtlas.join(", ") || "none"}`
+  )
+  console.log(
+    `Hidden automation columns proposed: ${report.posts.plan.schema.missingAutomation.length}`
   )
   if (report.drive) {
     console.log(
@@ -163,6 +178,12 @@ async function main() {
   }
   if (options.driveFolder && !options.live) {
     throw new Error("--drive-folder requires --live")
+  }
+  if (options.reauthorize && !options.live) {
+    throw new Error("--reauthorize requires --live")
+  }
+  if (options.postsRange && options.postsSheetId !== null) {
+    throw new Error("Use either --posts-range or --posts-gid, not both")
   }
 
   const catalog = buildCanonicalCatalog({
@@ -191,11 +212,21 @@ async function main() {
       options,
       projectRoot,
     })
-    const auth = await authorizeGoogleReadOnly(configuration)
+    const auth = await authorizeGoogleReadOnly(configuration, {
+      forceReauthorize: options.reauthorize,
+    })
+    const postsRange =
+      options.postsSheetId === null
+        ? configuration.postsRange
+        : await sheets.resolveSheetTitle({
+            auth,
+            spreadsheetId: configuration.spreadsheetId,
+            sheetId: options.postsSheetId,
+          })
     const parsed = await sheets.readPostsSheet({
       auth,
       spreadsheetId: configuration.spreadsheetId,
-      postsRange: configuration.postsRange,
+      postsRange,
     })
     const plan = planBaseline({
       headers: parsed.headers,
@@ -204,7 +235,7 @@ async function main() {
       eligibleAccount: options.account,
     })
     report.posts = {
-      source: `Google Sheets tab "${configuration.postsRange}"`,
+      source: `Google Sheets tab "${postsRange}"`,
       plan,
     }
     if (options.driveFolder) {

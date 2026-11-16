@@ -178,9 +178,10 @@ The same command has a read-only Google adapter for local installed-app OAuth,
 batch-reading a designated Posts tab, and optionally inventorying every direct
 child of an explicitly supplied Drive folder. OAuth credentials and refresh
 tokens are rejected when their paths are inside the repository. The adapter is
-mock-tested, but access to the owner's real Sheet and Drive folder remains
-externally unverified. It does not write Sheet cells, download media, create
-Experience or Moment records, ingest media, or deploy content.
+mock-tested, and the owner's real Sheet has completed a read-only baseline.
+Access to a real reviewed Drive folder remains externally unverified. The
+adapter does not write Sheet cells, download media, create Experience or Moment
+records, ingest media, or deploy content.
 
 ## Current limitations
 
@@ -189,6 +190,7 @@ Experience or Moment records, ingest media, or deploy content.
 - Many images are still local static files rather than generated R2 records.
 - Canonical content is Git-backed; there is no runtime CMS or database.
 - The single-row editorial workflow has a local read-only catalog plus mocked
-  Sheets/Drive adapters. Live owner access, reconciliation, protected catalog
-  writes, stable ID seeding, and generated Journey, Place, Visit, Experience,
-  and Moment compilation are not implemented or verified.
+  Sheets/Drive adapters. Live Sheet reading is verified; Drive-folder access,
+  reconciliation, protected catalog writes, stable ID seeding, and generated
+  Journey, Place, Visit, Experience, and Moment compilation are not implemented
+  or verified.

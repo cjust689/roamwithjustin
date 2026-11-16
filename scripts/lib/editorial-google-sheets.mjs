@@ -8,6 +8,13 @@ function createSheetsApi(auth) {
   }
   return {
     spreadsheets: {
+      get: request => {
+        const url = new URL(
+          `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(request.spreadsheetId)}`
+        )
+        url.searchParams.set("fields", request.fields)
+        return auth.request({ method: "GET", url: url.toString() })
+      },
       values: {
         batchGet: request => {
           const url = new URL(
@@ -23,6 +30,31 @@ function createSheetsApi(auth) {
       },
     },
   }
+}
+
+export async function resolveSheetTitle({
+  auth,
+  spreadsheetId,
+  sheetId,
+  sheetsApi = null,
+}) {
+  const numericSheetId = Number(sheetId)
+  if (!Number.isSafeInteger(numericSheetId) || numericSheetId < 0) {
+    throw new Error("Google Sheet gid must be a non-negative integer")
+  }
+
+  const api = sheetsApi || createSheetsApi(auth)
+  const response = await api.spreadsheets.get({
+    spreadsheetId,
+    fields: "sheets(properties(sheetId,title,index,hidden))",
+  })
+  const sheet = (response.data?.sheets || []).find(
+    entry => entry.properties?.sheetId === numericSheetId
+  )
+  if (!sheet?.properties?.title) {
+    throw new Error(`No Google Sheet tab has gid ${numericSheetId}`)
+  }
+  return sheet.properties.title
 }
 
 export function normalizeSheetValues(values = []) {

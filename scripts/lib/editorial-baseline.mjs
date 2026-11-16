@@ -20,6 +20,25 @@ export const ATLAS_POST_HEADERS = Object.freeze([
   "Atlas Mode",
 ])
 
+export const AUTOMATION_POST_HEADERS = Object.freeze([
+  "post_id",
+  "journey_id",
+  "place_id",
+  "visit_id",
+  "experience_id",
+  "moment_id",
+  "atlas_status",
+  "atlas_url",
+  "atlas_url_level",
+  "source_hash",
+  "source_revision",
+  "last_processed_hash",
+  "last_deployment",
+  "last_verified_at",
+  "sync_error",
+  "source_owner",
+])
+
 function normalizeText(value) {
   return String(value || "")
     .trim()
@@ -143,6 +162,9 @@ export function validatePostsHeaders(headers) {
       header => !present.has(header)
     ),
     missingAtlas: ATLAS_POST_HEADERS.filter(header => !present.has(header)),
+    missingAutomation: AUTOMATION_POST_HEADERS.filter(
+      header => !present.has(header)
+    ),
   }
 }
 
@@ -309,6 +331,21 @@ export function planBaseline({
   return {
     mode: "dry-run",
     schema,
+    migration: {
+      visibleHeadersToAppend: schema.missingAtlas,
+      automationHeadersToAppend: schema.missingAutomation,
+      automationHeadersToHide: AUTOMATION_POST_HEADERS,
+      eligibleRowsNeedingPostIds: eligibleRows.filter(row => row.needsPostId)
+        .length,
+      eligibleRowsDefaultedOff: eligibleRows.filter(
+        row => !String(rows[row.diagnosticRow - 2]?.["Atlas Mode"] || "").trim()
+      ).length,
+      requiresCreatorAuthorizedWrite: Boolean(
+        schema.missingAtlas.length ||
+          schema.missingAutomation.length ||
+          eligibleRows.some(row => row.needsPostId)
+      ),
+    },
     eligibleAccount,
     eligibleRows,
     ignoredRows,
@@ -322,6 +359,15 @@ export function planBaseline({
       ).length,
       exactPlaceMatches: eligibleRows.filter(
         row => row.place.status === "matched"
+      ).length,
+      ambiguousPlaceMatches: eligibleRows.filter(
+        row => row.place.status === "ambiguous"
+      ).length,
+      unmatchedPlaceCandidates: eligibleRows.filter(
+        row => row.place.status === "unmatched"
+      ).length,
+      blankPlaceCandidates: eligibleRows.filter(
+        row => row.place.status === "blank"
       ).length,
       proposedJourneys: eligibleRows.filter(
         row => row.journey.status === "proposed-new"

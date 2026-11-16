@@ -33,9 +33,9 @@ verification:
 
 **Project:** Roam With Justin  
 **Audience:** VS Code / Codex coding agent  
-**Document status:** Accepted architecture; Phase 0, the read-only baseline,
-and mock-tested Google read adapters are implemented. Live owner access,
-baseline reconciliation, and publication remain incomplete.  
+**Document status:** Accepted architecture; Phase 0, the authenticated
+read-only Sheet baseline, and mock-tested Drive adapter are implemented.
+Baseline writes, reconciliation, and publication remain incomplete.
 **Supersedes as the proposed direction:** `Roam_With_Justin_Sheets_Drive_Atlas_Publishing_Proposal_v2.md`  
 **Revision objective:** Keep v2's normalized backend, publication safety, and validation while **removing the multi-tab creator workflow**. This corrected v2.1 also tightens baseline non-duplication, the `New:` creation example, Phase 2's dry-run/write boundary, and illustrative ID syntax.
 

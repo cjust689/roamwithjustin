@@ -64,12 +64,12 @@ evidence. Partial delivery remains `in-progress` / `partial`.
 
 ## Active work
 
-| Work                                                                                   | Status            | What remains                                                                                                                                                                                                                                                 |
-| -------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Journey media ingestion](implementation/journey-media-ingestion.md)                   | Partial, verified | Deploy the upload Worker and run the first real R2-backed publication batch; automated Git/deployment remains later work.                                                                                                                                    |
-| [R2 Worker media upload](implementation/r2-worker-media-upload.md)                     | Partial, verified | Deploy to the owner's Cloudflare account, install the upload secret, and verify the first real immutable image/video batch.                                                                                                                                  |
-| [Monetization and analytics](implementation/monetization-and-analytics.md)             | Partial, verified | Complete the AdSense site review and ads.txt crawl, verify consent and Auto ads state, create the optional Atlas unit only after the site is Ready, then replace hostname-specific event branching with a stable referral contract and verify partner data.  |
-| [Single-row Sheets and Drive publishing](implementation/editorial-sheet-publishing.md) | Partial, verified | The deterministic catalog, offline audit, and mock-tested read-only Sheets/Drive adapters exist. Live owner access, stable ID seeding, reconciliation, publication orchestration, Experience/Moment support, deployment verification, and write-back remain. |
+| Work                                                                                   | Status            | What remains                                                                                                                                                                                                                                                      |
+| -------------------------------------------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Journey media ingestion](implementation/journey-media-ingestion.md)                   | Partial, verified | Deploy the upload Worker and run the first real R2-backed publication batch; automated Git/deployment remains later work.                                                                                                                                         |
+| [R2 Worker media upload](implementation/r2-worker-media-upload.md)                     | Partial, verified | Deploy to the owner's Cloudflare account, install the upload secret, and verify the first real immutable image/video batch.                                                                                                                                       |
+| [Monetization and analytics](implementation/monetization-and-analytics.md)             | Partial, verified | Complete the AdSense site review and ads.txt crawl, verify consent and Auto ads state, create the optional Atlas unit only after the site is Ready, then replace hostname-specific event branching with a stable referral contract and verify partner data.       |
+| [Single-row Sheets and Drive publishing](implementation/editorial-sheet-publishing.md) | Partial, verified | The deterministic catalog and authenticated read-only Sheet baseline are verified. Stable ID seeding, protected fields, Drive-folder proof, reconciliation, publication orchestration, Experience/Moment support, deployment verification, and write-back remain. |
 
 ## Proposals and backlog
 
@@ -137,9 +137,9 @@ structure only; it cannot prove application behavior.
   require owner validation before they are treated as commercial facts.
 - No Lightroom plug-in, durable publishing outbox, EXIF extractor, or automated
   Git publisher exists in the repository.
-- The editorial baseline catalog and Google adapters are read-only. OAuth and
-  API behavior are locally mock-tested, while real owner Sheet/Drive access,
-  narrow folder-grant behavior, protected catalog write-back, and remote
-  publication reconciliation remain externally unverified.
+- The editorial baseline catalog and Google adapters are read-only. Owner OAuth
+  and the live Sheet baseline are verified; real Drive-folder access, narrow
+  folder-grant behavior, protected catalog write-back, and remote publication
+  reconciliation remain externally unverified.
 
 **Last repository documentation audit:** 2026-11-15.

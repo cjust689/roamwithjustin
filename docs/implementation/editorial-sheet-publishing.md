@@ -32,6 +32,7 @@ verification:
     - npm run content:validate
     - npm run docs:audit
     - npm run build
+    - authenticated read-only Sheet baseline on 2026-11-15
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
@@ -41,9 +42,10 @@ The accepted target is documented in the
 This implementation remains deliberately bounded. It establishes the verified
 Phase 0 repository audit and a read-only Phase 1 baseline client. It can
 authenticate locally and read a designated Posts tab plus an explicitly
-supplied Drive folder, but the Google path has only mocked API verification so
-far. It does not mutate the Posts sheet, upload media, alter canonical content,
-commit generated publication state, or deploy the site.
+supplied Drive folder. The Sheet reader now has both mocked API coverage and a
+successful owner-authenticated baseline read. It does not mutate the Posts
+sheet, upload media, alter canonical content, commit generated publication
+state, or deploy the site.
 
 ## Implemented and tested
 
@@ -54,8 +56,9 @@ commit generated publication state, or deploy the site.
 - An optional `--posts-csv <path>` input audits an offline Posts export. This
   is a migration and testing bridge, not the intended live source.
 - `--live` uses an installed desktop-app OAuth client, a loopback callback with
-  PKCE and state validation, and refresh-token storage outside the repository.
-  It batch-reads only the designated Posts tab.
+  PKCE and state validation, an explicit Google account chooser, and
+  refresh-token storage outside the repository. It batch-reads only the
+  designated Posts tab.
 - An optional `--drive-folder <url>` validates the Drive folder, lists every
   direct child through pagination, and reports supported JPEG, PNG, and MP4
   inventory without downloading anything.
@@ -79,6 +82,13 @@ commit generated publication state, or deploy the site.
 Current verified catalog totals are 10 Journeys, 77 Places, 71 Visits, and 65
 Atlas nodes. These totals are evidence from the current repository, not a
 promise that future runs will retain the same counts.
+
+The first authenticated live baseline on November 15, 2026 resolved the shared
+tab gid to `Sheet1`. It found 104 eligible `Roam` rows and ignored 6 unrelated
+rows. All eight original headers remain present. The six visible Atlas headers
+and the automation-owned metadata headers are absent, all 104 eligible rows
+need stable Post IDs, and 33 Location values resolve to exact unambiguous Place
+records. No remote write occurred.
 
 ## Phase 0 authority audit
 
@@ -128,6 +138,10 @@ Read the designated live Posts tab without writing it:
 npm run editorial:baseline -- --dry-run --live --oauth-client "C:\\private\\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID"
 ```
 
+When the shared URL supplies a numeric `gid`, use `--posts-gid <gid>` to
+resolve the current tab title through spreadsheet metadata rather than assuming
+the tab is literally named `Posts`.
+
 Add `--drive-folder "https://drive.google.com/drive/folders/FOLDER_ID"` only
 when the OAuth grant is expected to cover that folder. The first run opens the
 Google consent page. The refresh token defaults to the current user's
@@ -143,6 +157,12 @@ These equivalent environment variable names are supported:
 
 Do not put credential or token values in a repository `.env` file.
 
+If Google authorized the wrong signed-in account, rerun the live command with
+`--reauthorize`. The prior token is moved to a timestamped backup beside the
+active token, and Google must show the account chooser before issuing a
+replacement. Use an OAuth desktop client from the intended Cloud project; an
+unrelated project's client can leave API enablement under the wrong owner.
+
 ## Phase checklist
 
 - [x] Verify current registries, selectors, routes, media tooling, and
@@ -152,7 +172,8 @@ Do not put credential or token values in a repository `.env` file.
 - [x] Validate the original and proposed Posts header contracts offline.
 - [x] Add exact, non-destructive Journey and Place matching for audit reports.
 - [x] Implement read-only Sheets and Drive adapters with mocked API tests.
-- [ ] Authenticate to the live designated Google Sheet.
+- [x] Authenticate to and baseline the live designated Google Sheet without
+      writing it.
 - [ ] Build and protect the automation-owned Atlas Catalog range.
 - [ ] Dry-run stable Post ID seeding and targeted hidden-column writes.
 - [ ] Reconcile the real historical Posts and record creator-reviewed
@@ -164,25 +185,21 @@ Do not put credential or token values in a repository `.env` file.
 
 ## Missing setup and external verification
 
-The first authenticated Phase 1 verification requires owner-controlled Google
-configuration:
+The owner-controlled Internal OAuth client, read-only Sheets access, shared
+workbook, gid resolution, and secure refresh-token storage outside the
+repository are now verified. The remaining external setup decision is whether
+the narrow `drive.file` grant can cover the real reviewed folder workflow or a
+different owner-approved approach is required.
 
-- a Google Cloud project with Sheets and Drive APIs enabled;
-- an installed-app OAuth client;
-- the designated spreadsheet ID and actual Posts tab name;
-- a decision between a narrow selected-file/folder grant and any broader Drive
-  read scope after testing the real folder workflow;
-- secure local refresh-token storage outside the repository.
-
-No real Google OAuth grant, live Sheet schema, Drive folder access, Cloudflare
-upload, Git push, GitHub Actions run, or public Atlas change was verified or
-performed by this implementation slice. The Sheets and Drive API tests use
-mock clients and do not claim external access.
+No Drive folder access, Cloudflare upload, Git push, GitHub Actions run, or
+public Atlas change was verified or performed by this implementation slice.
+Drive API behavior remains mock-tested only.
 
 ## Next safe implementation step
 
-Run the authenticated, read-only baseline against the owner-designated Posts
-tab. Confirm the real header contract, eligible row counts, missing stable IDs,
-exact mappings, and ambiguities, and separately prove whether the narrow Drive
-grant can list every intended child. ID seeding and protected catalog
-write-back remain a later reviewed write step.
+Review the generated migration plan for six visible columns, hidden
+automation-owned fields, 104 stable Post IDs, historical `Off` defaults, and
+the 33 exact Place bindings. Only after creator authorization should a targeted
+writer re-read source hashes, apply those additions, protect/hide automation
+fields, and verify the workbook again. Drive folder access remains a separate
+read-only proof.

@@ -3,6 +3,7 @@ import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
 import { journeyRecords } from "../src/content/journeys/index.mjs"
 import { placeRecords } from "../src/content/places/index.mjs"
 import {
+  AUTOMATION_POST_HEADERS,
   ATLAS_POST_HEADERS,
   EXISTING_POST_HEADERS,
   buildCanonicalCatalog,
@@ -89,6 +90,9 @@ const parsed = parseCsvRecords(
 assert.deepEqual(validatePostsHeaders(parsed.headers), {
   missingExisting: [],
   missingAtlas: [],
+  missingAutomation: AUTOMATION_POST_HEADERS.filter(
+    header => header !== "post_id"
+  ),
 })
 assert.equal(parsed.rows.length, 2)
 assert.equal(parsed.rows[0].Caption, "A caption, with punctuation")
@@ -117,10 +121,14 @@ assert.equal(plan.eligibleRows[0].journey.matches[0].id, "europe-summer-2026")
 assert.equal(plan.eligibleRows[0].atlasMode, "Preview")
 assert.equal(plan.eligibleRows[0].postId, "post-opaque-a1")
 assert.deepEqual(plan.eligibleRows[0].blockers, ["place-needs-review"])
+assert.equal(plan.migration.eligibleRowsNeedingPostIds, 0)
+assert.equal(plan.migration.eligibleRowsDefaultedOff, 0)
+assert.equal(plan.migration.requiresCreatorAuthorizedWrite, true)
 
 const historicalHeaders = validatePostsHeaders(EXISTING_POST_HEADERS)
 assert.deepEqual(historicalHeaders.missingExisting, [])
 assert.deepEqual(historicalHeaders.missingAtlas, ATLAS_POST_HEADERS)
+assert.deepEqual(historicalHeaders.missingAutomation, AUTOMATION_POST_HEADERS)
 
 console.log(
   `Editorial baseline tests passed: ${catalog.counts.journey} Journeys, ${catalog.counts.place} Places, ${catalog.counts.visit} Visits, ${catalog.counts["atlas-node"]} Atlas nodes.`

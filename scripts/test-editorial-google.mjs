@@ -13,6 +13,7 @@ import {
 import {
   normalizeSheetValues,
   readPostsSheet,
+  resolveSheetTitle,
 } from "./lib/editorial-google-sheets.mjs"
 
 const projectRoot = process.cwd()
@@ -47,6 +48,43 @@ assert.throws(
       projectRoot,
     }),
   /OAuth client path is required/
+)
+
+const resolvedSheetTitle = await resolveSheetTitle({
+  auth: null,
+  spreadsheetId: "sheet-id",
+  sheetId: "87724606",
+  sheetsApi: {
+    spreadsheets: {
+      get: async request => {
+        assert.equal(request.spreadsheetId, "sheet-id")
+        return {
+          data: {
+            sheets: [
+              {
+                properties: {
+                  sheetId: 87724606,
+                  title: "Content Calendar",
+                  index: 0,
+                  hidden: false,
+                },
+              },
+            ],
+          },
+        }
+      },
+    },
+  },
+})
+assert.equal(resolvedSheetTitle, "Content Calendar")
+await assert.rejects(
+  () =>
+    resolveSheetTitle({
+      auth: null,
+      spreadsheetId: "sheet-id",
+      sheetId: "not-a-number",
+    }),
+  /non-negative integer/
 )
 
 assert.throws(
