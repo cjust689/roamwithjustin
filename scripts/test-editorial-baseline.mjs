@@ -125,6 +125,31 @@ assert.equal(plan.migration.eligibleRowsNeedingPostIds, 0)
 assert.equal(plan.migration.eligibleRowsDefaultedOff, 0)
 assert.equal(plan.migration.requiresCreatorAuthorizedWrite, true)
 
+const boundPlacePlan = planBaseline({
+  headers: parsed.headers,
+  rows: [{ ...parsed.rows[0], place_id: "split-croatia" }],
+  catalog,
+  eligibleAccount: "Roam",
+})
+assert.equal(boundPlacePlan.eligibleRows[0].place.status, "matched")
+assert.equal(boundPlacePlan.eligibleRows[0].place.bindingSource, "place_id")
+assert.equal(
+  boundPlacePlan.eligibleRows[0].place.matches[0].id,
+  "split-croatia"
+)
+assert.deepEqual(boundPlacePlan.eligibleRows[0].blockers, [])
+
+const invalidPlacePlan = planBaseline({
+  headers: parsed.headers,
+  rows: [{ ...parsed.rows[0], place_id: "missing-place" }],
+  catalog,
+  eligibleAccount: "Roam",
+})
+assert.equal(invalidPlacePlan.eligibleRows[0].place.status, "invalid-binding")
+assert.deepEqual(invalidPlacePlan.eligibleRows[0].blockers, [
+  "place-needs-review",
+])
+
 const historicalHeaders = validatePostsHeaders(EXISTING_POST_HEADERS)
 assert.deepEqual(historicalHeaders.missingExisting, [])
 assert.deepEqual(historicalHeaders.missingAtlas, ATLAS_POST_HEADERS)

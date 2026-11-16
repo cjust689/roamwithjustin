@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
+import { experienceRecords } from "../src/content/experiences/index.mjs"
 import { journeyRecords } from "../src/content/journeys/index.mjs"
 import { placeRecords } from "../src/content/places/index.mjs"
 import {
@@ -146,7 +147,7 @@ function displayReport(report) {
     `Rows: ${report.posts.plan.summary.eligibleRows} eligible, ${report.posts.plan.summary.ignoredRows} ignored, ${report.posts.plan.summary.blockedRows} need review`
   )
   console.log(
-    `Migration: ${report.posts.plan.summary.missingPostIds} stable Post IDs to seed, ${report.posts.plan.summary.exactPlaceMatches} exact Place matches`
+    `Migration: ${report.posts.plan.summary.missingPostIds} stable Post IDs to seed, ${report.posts.plan.summary.exactPlaceMatches} exact Place matches, ${report.posts.plan.summary.boundPlaceIds} Place IDs bound, ${report.posts.plan.summary.boundJourneyIds} Journey IDs bound`
   )
   console.log(
     `Header additions proposed: ${report.posts.plan.schema.missingAtlas.join(", ") || "none"}`
@@ -190,6 +191,7 @@ async function main() {
     journeys: journeyRecords,
     places: placeRecords,
     atlasNodes: atlasPresentation,
+    experiences: experienceRecords,
   })
   const report = {
     mode: "dry-run",

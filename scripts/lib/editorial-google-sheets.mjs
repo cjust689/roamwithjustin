@@ -13,6 +13,15 @@ function createSheetsApi(auth) {
           `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(request.spreadsheetId)}`
         )
         url.searchParams.set("fields", request.fields)
+        if (request.includeGridData !== undefined) {
+          url.searchParams.set(
+            "includeGridData",
+            String(request.includeGridData)
+          )
+        }
+        ;(request.ranges || []).forEach(range =>
+          url.searchParams.append("ranges", range)
+        )
         return auth.request({ method: "GET", url: url.toString() })
       },
       values: {
@@ -30,6 +39,23 @@ function createSheetsApi(auth) {
       },
     },
   }
+}
+
+export async function readSpreadsheetSheets({
+  auth,
+  spreadsheetId,
+  sheetsApi = null,
+}) {
+  const api = sheetsApi || createSheetsApi(auth)
+  const response = await api.spreadsheets.get({
+    spreadsheetId,
+    fields:
+      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)),protectedRanges(protectedRangeId,description,warningOnly,range))",
+  })
+  return (response.data?.sheets || []).map(sheet => ({
+    ...sheet.properties,
+    protectedRanges: sheet.protectedRanges || [],
+  }))
 }
 
 export async function resolveSheetTitle({

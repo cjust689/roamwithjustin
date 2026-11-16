@@ -5,7 +5,7 @@ kind: proposal
 status: approved
 implementation_state: partial
 created: 2026-11-15
-updated: 2026-11-15
+updated: 2026-11-16
 related:
   - content-model
   - media-pipeline
@@ -22,10 +22,32 @@ code_paths:
   - scripts/lib/editorial-google-sheets.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-google-migration.mjs
+  - scripts/lib/editorial-google-catalog.mjs
+  - scripts/lib/editorial-google-bindings.mjs
+  - scripts/lib/editorial-place-suggestions.mjs
+  - scripts/lib/editorial-place-decisions.mjs
   - scripts/editorial-migrate-sheet.mjs
+  - scripts/editorial-build-catalog.mjs
+  - scripts/editorial-bind-places.mjs
+  - scripts/editorial-bind-journeys.mjs
+  - scripts/editorial-suggest-places.mjs
+  - scripts/editorial-bind-reviewed-places.mjs
+  - scripts/editorial-publish.mjs
+  - scripts/editorial-github-audit.mjs
+  - scripts/editorial-github-configure.mjs
+  - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-github-publisher.mjs
+  - scripts/lib/editorial-google-publication.mjs
+  - src/content/experiences/index.mjs
+  - src/content/editorial/generated/records.json
+  - .github/workflows/editorial-publication-ci.yml
   - scripts/test-editorial-baseline.mjs
   - scripts/test-editorial-google.mjs
   - scripts/test-editorial-migration.mjs
+  - scripts/test-editorial-catalog.mjs
+  - scripts/test-editorial-bindings.mjs
+  - scripts/test-editorial-place-suggestions.mjs
+  - scripts/test-editorial-place-decisions.mjs
   - docs/implementation/editorial-sheet-publishing.md
 verification:
   state: unverified
@@ -36,10 +58,13 @@ verification:
 
 **Project:** Roam With Justin  
 **Audience:** VS Code / Codex coding agent  
-**Document status:** Accepted architecture; Phase 0, the authenticated Sheet
-baseline, schema/identity migration, and mock-tested Drive adapter are
-implemented. Catalog bindings, reconciliation, and publication remain
-incomplete.
+**Document status:** Accepted architecture, partially implemented. The live
+baseline, schema and identity migration, Catalog, 104 Journey and Place
+bindings, local Drive snapshot and preview path, Experience and Moment layer,
+real-receipt apply coordinator, guarded GitHub promotion, deployment checks,
+and Sheet write-back code now exist. The first real Drive and R2 post remains
+unverified. Creating a missing Journey, Place, or Visit and optional background
+polling remain future work.
 **Supersedes as the proposed direction:** `Roam_With_Justin_Sheets_Drive_Atlas_Publishing_Proposal_v2.md`  
 **Revision objective:** Keep v2's normalized backend, publication safety, and validation while **removing the multi-tab creator workflow**. This corrected v2.1 also tightens baseline non-duplication, the `New:` creation example, Phase 2's dry-run/write boundary, and illustrative ID syntax.
 
@@ -112,16 +137,16 @@ Internal records stay normalized:
 
 ## 1. Ownership: one row does not mean one flattened data model
 
-| Surface | Owner / authority | Responsibility |
-|---|---|---|
-| **Posts tab** | Creator | Social queue, Drive handoff, Atlas-friendly labels, source notes, publish intent |
-| **Protected Atlas Catalog** | Automation | Hidden lookup index for names, IDs, parentage, owner, existence, URL and ambiguity hints; never a second authoring form |
-| **Hidden Posts metadata** | Automation | Post ID, resolved entity IDs, Moment ID, source/revision fingerprint, Atlas status, URL, optional concise error |
-| **Existing curated `.mjs` records** | Code-owned until deliberate migration | Trusted legacy Journey/Place/Visit/Atlas facts; must not be overwritten by Sheet compiler |
-| **Generated Git content** | Content compiler + media ingestor | Deterministic, validated, machine-owned published entity/placement snapshot |
-| **Cloudflare R2** | Media publisher | Actual published media bytes and versioned object keys |
-| **Private local ledger** | Local publisher | Detailed Google Drive provenance, source hashes, run checkpoints, revisions, receipts, deployment reconciliation |
-| **Public Atlas application** | Compiled snapshot | Reads generated/curated data; **never authenticates directly to Google** at runtime |
+| Surface                             | Owner / authority                     | Responsibility                                                                                                          |
+| ----------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **Posts tab**                       | Creator                               | Social queue, Drive handoff, Atlas-friendly labels, source notes, publish intent                                        |
+| **Protected Atlas Catalog**         | Automation                            | Hidden lookup index for names, IDs, parentage, owner, existence, URL and ambiguity hints; never a second authoring form |
+| **Hidden Posts metadata**           | Automation                            | Post ID, resolved entity IDs, Moment ID, source/revision fingerprint, Atlas status, URL, optional concise error         |
+| **Existing curated `.mjs` records** | Code-owned until deliberate migration | Trusted legacy Journey/Place/Visit/Atlas facts; must not be overwritten by Sheet compiler                               |
+| **Generated Git content**           | Content compiler + media ingestor     | Deterministic, validated, machine-owned published entity/placement snapshot                                             |
+| **Cloudflare R2**                   | Media publisher                       | Actual published media bytes and versioned object keys                                                                  |
+| **Private local ledger**            | Local publisher                       | Detailed Google Drive provenance, source hashes, run checkpoints, revisions, receipts, deployment reconciliation        |
+| **Public Atlas application**        | Compiled snapshot                     | Reads generated/curated data; **never authenticates directly to Google** at runtime                                     |
 
 One row is **an editorial change request**, not necessarily a brand-new Journey, Place, Visit, Experience or Moment. The compiler resolves existing records first, creates only missing validated records, and appends a new contribution when appropriate.
 
@@ -131,29 +156,29 @@ A Post is not an Experience. One Experience can have many Posts and many Moments
 
 ### 2.1 Preserve the existing eight columns verbatim
 
-| Existing column | Existing use |
-|---|---|
-| `Location` | Human-readable geographic association; input to **Place** resolution (may be broad/ambiguous) |
-| `Series/Post` | Distinct Instagram post concept/title, not canonical Experience ID |
-| `Status` | Instagram progression: Idea / Stage / Ready / Posted, not Atlas publication |
-| `Account` | Distinguishes `Roam` from other creator/business content; Atlas automation only processes eligible account rows |
-| `Type` | Carousel, Reel, etc. |
-| `Caption` | Social caption or pointer; not automatically authoritative Atlas long-form copy |
-| `Drive Folder` | Link to deliberately reviewed media exported for the post |
-| `Posted` | Social release date; **not the trip/visit date** |
+| Existing column | Existing use                                                                                                    |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| `Location`      | Human-readable geographic association; input to **Place** resolution (may be broad/ambiguous)                   |
+| `Series/Post`   | Distinct Instagram post concept/title, not canonical Experience ID                                              |
+| `Status`        | Instagram progression: Idea / Stage / Ready / Posted, not Atlas publication                                     |
+| `Account`       | Distinguishes `Roam` from other creator/business content; Atlas automation only processes eligible account rows |
+| `Type`          | Carousel, Reel, etc.                                                                                            |
+| `Caption`       | Social caption or pointer; not automatically authoritative Atlas long-form copy                                 |
+| `Drive Folder`  | Link to deliberately reviewed media exported for the post                                                       |
+| `Posted`        | Social release date; **not the trip/visit date**                                                                |
 
 Do not rename, reorder, erase, or reinterpret these eight existing columns just to accommodate the Atlas. Match columns by headers, not fixed numeric positions. The current CSV is only a snapshot; obtain the latest live Sheet during implementation.
 
 ### 2.2 Add exactly six routine Atlas authoring columns
 
-| New visible column | Creator input | Rule |
-|---|---|---|
-| **`Atlas Journey`** | Choose friendly existing title, or `New: <journey title>` | Required when Atlas Mode is Preview/Publish; resolution against the blended catalog |
-| **`Atlas Experience`** | Choose existing within the Journey, `New: <experience title>`, or leave blank | Optional; no invented outing/pin if blank; a Journey-level contribution is allowed |
-| **`Moment / Angle`** | Short social/story perspective | Optional; defaults to `Series/Post` as a draft label, not invented narrative |
-| **`Atlas Notes`** | Creator's firsthand trip/experience/story observations; may reference an approved `.md` file | Optional; blanks must stay blanks, not be AI-filled with fiction |
-| **`Travel Date / Range`** | Date, approximate range or plain precision-bearing text | Optional; never derive from `Posted`; do not silently convert an approximate month into exact days |
-| **`Atlas Mode`** | `Off`, `Preview`, `Publish` | Only creator-controlled public-publishing gate |
+| New visible column        | Creator input                                                                                | Rule                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **`Atlas Journey`**       | Choose friendly existing title, or `New: <journey title>`                                    | Required when Atlas Mode is Preview/Publish; resolution against the blended catalog                |
+| **`Atlas Experience`**    | Choose existing within the Journey, `New: <experience title>`, or leave blank                | Optional; no invented outing/pin if blank; a Journey-level contribution is allowed                 |
+| **`Moment / Angle`**      | Short social/story perspective                                                               | Optional; defaults to `Series/Post` as a draft label, not invented narrative                       |
+| **`Atlas Notes`**         | Creator's firsthand trip/experience/story observations; may reference an approved `.md` file | Optional; blanks must stay blanks, not be AI-filled with fiction                                   |
+| **`Travel Date / Range`** | Date, approximate range or plain precision-bearing text                                      | Optional; never derive from `Posted`; do not silently convert an approximate month into exact days |
+| **`Atlas Mode`**          | `Off`, `Preview`, `Publish`                                                                  | Only creator-controlled public-publishing gate                                                     |
 
 **Defaults:** Historical rows `Off`. During rollout, newly added rows also default to `Off` or `Preview`, with no silent change to `Publish`. Once verified, the creator may choose a deliberate new-row default; do not bulk-opt-in past content.
 
@@ -256,12 +281,12 @@ Journey: Europe 2026
 
 ## 5. First deliverable: baseline the existing app and current Posts tab
 
-**Baselining is Phase 1, not a cleanup task left until after the publishing automation.** Most manual matching should occur *once*, with long-term reductions in creator workload.
+**Baselining is Phase 1, not a cleanup task left until after the publishing automation.** Most manual matching should occur _once_, with long-term reductions in creator workload.
 
 1. Read actual repository HEAD and run existing content/media/docs validators. Export an **authoritative canonical catalog** of Journeys, Places, Visits, existing Atlas routes, curated owner metadata, and any actual Experience/Moment records (if added since review).
 2. Pull the current live `Posts` tab through an authenticated Google Sheets client. Preserve row data and original column names. Filter to Roam With Justin account entries; ignore WebWorks or unrelated rows.
 3. Assign **stable `post_id`** values carefully. Sort/insert operations may change row numbers; do not key identity by row or title. Detect duplicated IDs on copied rows. Seed IDs only after a dry-run report and creator authorization.
-4. Match historical rows against the canonical catalog by normalized names, parent context, and existing published links. **Auto-accept verified exact, unambiguous matches**. Use fuzzy matches for *suggestions*, not irreversible entity creation.
+4. Match historical rows against the canonical catalog by normalized names, parent context, and existing published links. **Auto-accept verified exact, unambiguous matches**. Use fuzzy matches for _suggestions_, not irreversible entity creation.
 5. Show one small **ambiguity report** of only unresolved cases (e.g. two journeys named Utah; `Raptor Experience` vs boat-themed Atlas node; broad `Croatia` location). Resolve them once; record binding mappings.
 6. Write resolved stable IDs and existing verified Atlas URLs to protected automation fields; do **not** imply an old social row's specific Moment is live if only a Journey URL exists.
 7. Generate a **baseline catalog/bindings snapshot only**: Post-to-existing-canonical ID mappings, candidate matches, source-owner annotations, and verified URL references. **Do not generate duplicate Journey, Place, Visit, Experience, or Atlas entity records from existing code-owned content.** The public application and generated content registries must remain unchanged in this phase. Compare pre/post public content, and prove repeated baseline output is byte-stable and causes no unintended public changes.
@@ -272,7 +297,7 @@ Journey: Europe 2026
 
 ## 6. From a Drive link to the existing media pipeline
 
-**One Post -> one reviewed folder (default)**. The folder is the creator-approved *publishing selection*, not the private Lightroom archive. Files can be the same export set used on Instagram; note that social exports can lose EXIF or be compressed, and do not infer missing gear/capture metadata.
+**One Post -> one reviewed folder (default)**. The folder is the creator-approved _publishing selection_, not the private Lightroom archive. Files can be the same export set used on Instagram; note that social exports can lose EXIF or be compressed, and do not infer missing gear/capture metadata.
 
 ### Download and validation
 
@@ -369,11 +394,11 @@ These illustrative IDs use lowercase hyphens to align with the existing media ID
 
 ### Creator-facing mode — deliberately simple
 
-| `Atlas Mode` | Promise |
-|---|---|
-| `Off` | Ignore for publication; still eligible for read-only baseline lookup |
-| `Preview` | Resolve, inspect/download sources if authorized, prepare safely, show proposed diff, **no R2 writes or public Git publication** |
-| `Publish` | Creator authorizes reviewed folder/notes for publication; run checkpoints automatically **when requirements pass**, otherwise `Needs Review` with one combined targeted preview |
+| `Atlas Mode` | Promise                                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Off`        | Ignore for publication; still eligible for read-only baseline lookup                                                                                                            |
+| `Preview`    | Resolve, inspect/download sources if authorized, prepare safely, show proposed diff, **no R2 writes or public Git publication**                                                 |
+| `Publish`    | Creator authorizes reviewed folder/notes for publication; run checkpoints automatically **when requirements pass**, otherwise `Needs Review` with one combined targeted preview |
 
 ### Private/automation statuses — not additional creator work
 
@@ -422,32 +447,32 @@ The CLI orchestrates deterministic file/network operations. Codex helps reconcil
 
 ## 11. Strict test and acceptance matrix
 
-| Test | Expected behavior |
-|---|---|
-| Existing Sheet | All eight original columns and social workflow preserved; **only six new visible Atlas columns** |
-| No extra authoring tabs | Creator never edits separate Journey, Place, Visit, Experience or Moment tabs |
-| Initial baseline | Only catalog bindings / Post-to-canonical mappings generated; **no duplicate code-owned entity records**; existing curated and generated public content unchanged; exact matches auto-linked; ambiguity report finite; historical rows Off |
-| Sort/insert/copy rows | Stable Post ID survives sort/insert; copied duplicate IDs trigger safe review |
-| Account filter | `Roam` rows eligible; unrelated WebWorks rows remain untouched |
-| Existing Raptor row | Correct existing Journey/Experience resolved without manually typing IDs |
-| Second Raptor post | One Experience, two additive Moments and media sets; previous hero/story/order preserved |
-| New `New: Portugal 2027` row | Reviewable Journey + Place + Visit + Experience + Moment generated from **one row** |
-| Ambiguous Place | No invented coordinates, fake visit or duplicate map pin; targeted review |
-| New experience unsupported in media ingestor | No invalid `experienceId` passed; content staged until schema/routing supported |
-| `Atlas Mode = Off` | Never downloads/publishes that row as live content merely due to social Ready/Posted |
-| `Atlas Mode = Preview` | Local prepare + planned/dry-run ingestion only; **no R2 writes, applied ingestion, Git public commits or Sheet Published status** |
-| `Atlas Mode = Publish` | Normal verified creator-owned content uses single approval; exceptional issues yield focused review |
-| No notes | No invented firsthand paragraphs, dates, gear, or operator claims |
-| Mixed Drive folder | Deterministically ordered photo/video packages; existing media tools reused |
-| Interrupted upload/retry | Correct resumed checkpoints, R2 receipts, no duplicated bytes/assets/Moments |
-| Same row rerun | No changes to published snapshot, Git commit, R2 upload or URLs |
-| Changed source Drive file | Stable identity proposal and explicit revision handling; no silent new asset |
-| Removed Sheet row / Drive item | No destructive deletion without separate approved unpublish mechanism |
-| Deployed but Sheet offline | Status retry only; no second publication |
-| Public deep link | Verify actual expected content, not merely an SPA 200 response |
-| Family/private or uncertain rights | Stop/request approval; no silent public exposure |
-| Repository safety | Preserve unrelated dirty worktree; stage/commit only approved generated paths |
-| Documentation | Update `docs/README.md`, architecture and implementation states only after tests verify changes |
+| Test                                         | Expected behavior                                                                                                                                                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Existing Sheet                               | All eight original columns and social workflow preserved; **only six new visible Atlas columns**                                                                                                                                           |
+| No extra authoring tabs                      | Creator never edits separate Journey, Place, Visit, Experience or Moment tabs                                                                                                                                                              |
+| Initial baseline                             | Only catalog bindings / Post-to-canonical mappings generated; **no duplicate code-owned entity records**; existing curated and generated public content unchanged; exact matches auto-linked; ambiguity report finite; historical rows Off |
+| Sort/insert/copy rows                        | Stable Post ID survives sort/insert; copied duplicate IDs trigger safe review                                                                                                                                                              |
+| Account filter                               | `Roam` rows eligible; unrelated WebWorks rows remain untouched                                                                                                                                                                             |
+| Existing Raptor row                          | Correct existing Journey/Experience resolved without manually typing IDs                                                                                                                                                                   |
+| Second Raptor post                           | One Experience, two additive Moments and media sets; previous hero/story/order preserved                                                                                                                                                   |
+| New `New: Portugal 2027` row                 | Reviewable Journey + Place + Visit + Experience + Moment generated from **one row**                                                                                                                                                        |
+| Ambiguous Place                              | No invented coordinates, fake visit or duplicate map pin; targeted review                                                                                                                                                                  |
+| New experience unsupported in media ingestor | No invalid `experienceId` passed; content staged until schema/routing supported                                                                                                                                                            |
+| `Atlas Mode = Off`                           | Never downloads/publishes that row as live content merely due to social Ready/Posted                                                                                                                                                       |
+| `Atlas Mode = Preview`                       | Local prepare + planned/dry-run ingestion only; **no R2 writes, applied ingestion, Git public commits or Sheet Published status**                                                                                                          |
+| `Atlas Mode = Publish`                       | Normal verified creator-owned content uses single approval; exceptional issues yield focused review                                                                                                                                        |
+| No notes                                     | No invented firsthand paragraphs, dates, gear, or operator claims                                                                                                                                                                          |
+| Mixed Drive folder                           | Deterministically ordered photo/video packages; existing media tools reused                                                                                                                                                                |
+| Interrupted upload/retry                     | Correct resumed checkpoints, R2 receipts, no duplicated bytes/assets/Moments                                                                                                                                                               |
+| Same row rerun                               | No changes to published snapshot, Git commit, R2 upload or URLs                                                                                                                                                                            |
+| Changed source Drive file                    | Stable identity proposal and explicit revision handling; no silent new asset                                                                                                                                                               |
+| Removed Sheet row / Drive item               | No destructive deletion without separate approved unpublish mechanism                                                                                                                                                                      |
+| Deployed but Sheet offline                   | Status retry only; no second publication                                                                                                                                                                                                   |
+| Public deep link                             | Verify actual expected content, not merely an SPA 200 response                                                                                                                                                                             |
+| Family/private or uncertain rights           | Stop/request approval; no silent public exposure                                                                                                                                                                                           |
+| Repository safety                            | Preserve unrelated dirty worktree; stage/commit only approved generated paths                                                                                                                                                              |
+| Documentation                                | Update `docs/README.md`, architecture and implementation states only after tests verify changes                                                                                                                                            |
 
 ## 12. Implement in bounded phases
 
@@ -479,7 +504,7 @@ Until the optional local watcher runs, one command/VS Code task triggers publica
 
 ---
 
-**North star:** *One reviewed Google Drive folder and one familiar Google Sheet row. Instagram publishes the moment; the Atlas gains a richer, enduring experience. The backend may be relational and sophisticated, but the creator should not have to administer it.*
+**North star:** _One reviewed Google Drive folder and one familiar Google Sheet row. Instagram publishes the moment; the Atlas gains a richer, enduring experience. The backend may be relational and sophisticated, but the creator should not have to administer it._
 
 ### v2.1 correction notes (editorial clarifications; not implementation evidence)
 
@@ -490,6 +515,11 @@ Until the optional local watcher runs, one command/VS Code task triggers publica
 
 **Repository handoff:** This accepted proposal now lives in `docs/proposals/`.
 The earlier designs are archived. Phase 0, the authenticated Sheet baseline,
-and the creator-authorized schema/identity migration are verified. **No Drive
-source files, R2 objects, canonical application content, or deployed Atlas
-content have been modified by this work.**
+the creator-authorized schema and identity migration, the hidden canonical
+Catalog, and all 104 Journey and Place bindings are verified. The private
+review ledger records the owner-confirmed Salt Lake City Airport binding as
+lacking a Utah 2026 Visit. It remains Journey-scoped unless a real transit
+Visit is deliberately added. The one-command preview and apply implementation
+is locally verified, but no real row has yet downloaded Drive source, uploaded
+new R2 objects, changed generated production content, or completed its final
+Sheet Published write-back.

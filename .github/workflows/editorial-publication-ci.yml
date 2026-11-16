@@ -1,0 +1,50 @@
+name: Editorial publication CI
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editorial-publication-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate editorial integration
+        run: npm run editorial:test
+
+      - name: Build production site
+        run: npm run build
+        env:
+          VUE_APP_MAPTILER_KEY: ${{ secrets.MAPTILER_API_KEY }}
+          VUE_APP_ADSENSE_ENABLED: ${{ vars.ADSENSE_ENABLED }}
+          VUE_APP_ADSENSE_PRIVACY_READY: ${{ vars.ADSENSE_PRIVACY_READY }}
+          VUE_APP_ADSENSE_AUTO_ADS_OFF_CONFIRMED: ${{ vars.ADSENSE_AUTO_ADS_OFF_CONFIRMED }}
+          VUE_APP_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          VUE_APP_ADSENSE_STORY_SLOT_ID: ${{ vars.ADSENSE_STORY_SLOT_ID }}
+          VUE_APP_ADSENSE_ATLAS_ENABLED: ${{ vars.ADSENSE_ATLAS_ENABLED }}
+          VUE_APP_ADSENSE_ATLAS_SLOT_ID: ${{ vars.ADSENSE_ATLAS_SLOT_ID }}
+          ADSENSE_GOOGLE_ADS_TXT_LINE: ${{ vars.ADSENSE_GOOGLE_ADS_TXT_LINE }}

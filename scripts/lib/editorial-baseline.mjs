@@ -56,6 +56,15 @@ function stableHash(value) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex")
 }
 
+export function postSourceHash(row) {
+  const sourceFields = Object.fromEntries(
+    [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
+      .sort()
+      .map(header => [header, row?.[header] || ""])
+  )
+  return stableHash(sourceFields)
+}
+
 function atlasNodeForVisit(atlasNodes, journeyId, visit) {
   return (
     atlasNodes.find(
@@ -66,8 +75,14 @@ function atlasNodeForVisit(atlasNodes, journeyId, visit) {
   )
 }
 
-export function buildCanonicalCatalog({ journeys, places, atlasNodes }) {
+export function buildCanonicalCatalog({
+  journeys,
+  places,
+  atlasNodes,
+  experiences = [],
+}) {
   const placeById = new Map(places.map(place => [place.id, place]))
+  const journeyById = new Map(journeys.map(journey => [journey.id, journey]))
   const records = []
 
   journeys.forEach(journey => {
@@ -135,6 +150,23 @@ export function buildCanonicalCatalog({ journeys, places, atlasNodes }) {
       owner: "code",
       url: `/atlas/${node.id}`,
       aliases: unique([node.id, place?.name]),
+    })
+  })
+
+  experiences.forEach(experience => {
+    const journey = journeyById.get(experience.journeyId)
+    records.push({
+      entityType: "experience",
+      id: experience.id,
+      label: experience.title,
+      parentId: experience.journeyId,
+      journeyId: experience.journeyId,
+      placeId: experience.placeId,
+      owner: experience.sourceOwner || "generated",
+      url: journey
+        ? `/trips/${journey.slug}#experience-${experience.slug}`
+        : null,
+      aliases: unique([experience.id, experience.title, experience.slug]),
     })
   })
 
@@ -291,7 +323,24 @@ export function planBaseline({
       "journey",
       catalog
     )
-    const place = resolveCatalogValue(row.Location, "place", catalog)
+    const currentPlaceId = String(row.place_id || "").trim()
+    const locationPlace = resolveCatalogValue(row.Location, "place", catalog)
+    const boundPlace = currentPlaceId
+      ? resolveCatalogValue(currentPlaceId, "place", catalog)
+      : null
+    const place = currentPlaceId
+      ? {
+          ...(boundPlace?.status === "matched"
+            ? boundPlace
+            : {
+                status: "invalid-binding",
+                matches: boundPlace?.matches || [],
+              }),
+          input: String(row.Location || "").trim(),
+          bindingInput: currentPlaceId,
+          bindingSource: "place_id",
+        }
+      : { ...locationPlace, bindingSource: "location" }
     const atlasMode = String(row["Atlas Mode"] || "Off").trim() || "Off"
     const postId = String(row.post_id || row["Post ID"] || "").trim()
     const blockers = []
@@ -309,18 +358,14 @@ export function planBaseline({
       blockers.push("place-needs-review")
     }
 
-    const sourceFields = Object.fromEntries(
-      [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
-        .sort()
-        .map(header => [header, row[header] || ""])
-    )
-
     eligibleRows.push({
       diagnosticRow: index + 2,
       postId: postId || null,
+      currentJourneyId: String(row.journey_id || "").trim() || null,
+      currentPlaceId: currentPlaceId || null,
       needsPostId: !postId,
       atlasMode,
-      sourceHash: stableHash(sourceFields),
+      sourceHash: postSourceHash(row),
       journey,
       place,
       experienceInput: String(row["Atlas Experience"] || "").trim(),
@@ -372,6 +417,8 @@ export function planBaseline({
       proposedJourneys: eligibleRows.filter(
         row => row.journey.status === "proposed-new"
       ).length,
+      boundPlaceIds: eligibleRows.filter(row => row.currentPlaceId).length,
+      boundJourneyIds: eligibleRows.filter(row => row.currentJourneyId).length,
     },
   }
 }

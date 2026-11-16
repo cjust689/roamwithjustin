@@ -1,4 +1,7 @@
 import assert from "node:assert/strict"
+import crypto from "node:crypto"
+import fs from "node:fs"
+import os from "node:os"
 import path from "node:path"
 import {
   DRIVE_FILE_SCOPE,
@@ -9,8 +12,10 @@ import {
   savedScopesSatisfy,
 } from "./lib/editorial-google-auth.mjs"
 import {
+  driveInventoryFingerprint,
   inventoryDriveFolder,
   parseDriveFolderId,
+  snapshotDriveFolder,
 } from "./lib/editorial-google-drive.mjs"
 import {
   normalizeSheetValues,
@@ -321,6 +326,72 @@ assert.deepEqual(drive.summary, {
   videos: 1,
   blockedDownloads: 0,
 })
+assert.equal(driveInventoryFingerprint(drive).length, 64)
+
+const snapshotRoot = fs.mkdtempSync(path.join(os.tmpdir(), "editorial-drive-"))
+try {
+  const imageBytes = Buffer.from("image-bytes")
+  const videoBytes = Buffer.from("video-bytes")
+  const snapshot = await snapshotDriveFolder({
+    auth: null,
+    inventory: {
+      folder: { id: "folder-1", name: "Reviewed" },
+      files: [
+        {
+          id: "image-1",
+          name: "photo.jpg",
+          mimeType: "image/jpeg",
+          byteSize: String(imageBytes.length),
+          modifiedTime: "2026-01-01T00:00:00Z",
+          version: "1",
+          sha256Checksum: crypto
+            .createHash("sha256")
+            .update(imageBytes)
+            .digest("hex"),
+          canDownload: true,
+          supported: true,
+          kind: "image",
+        },
+        {
+          id: "video-1",
+          name: "clip.mp4",
+          mimeType: "video/mp4",
+          byteSize: String(videoBytes.length),
+          modifiedTime: "2026-01-01T00:00:00Z",
+          version: "1",
+          sha256Checksum: null,
+          canDownload: true,
+          supported: true,
+          kind: "video",
+        },
+      ],
+    },
+    outputDirectory: path.join(snapshotRoot, "snapshot"),
+    driveApi: {
+      files: {
+        getMedia: async ({ fileId }) => ({
+          data: fileId === "image-1" ? imageBytes : videoBytes,
+        }),
+      },
+    },
+  })
+  assert.deepEqual(snapshot.counts, { images: 1, videos: 1 })
+  assert.equal(
+    fs.readFileSync(path.join(snapshotRoot, "snapshot", "images", "001.jpg"), "utf8"),
+    "image-bytes"
+  )
+  await assert.rejects(
+    () =>
+      snapshotDriveFolder({
+        auth: null,
+        inventory: { folder: { id: "folder-1" }, files: [] },
+        outputDirectory: path.join(snapshotRoot, "empty"),
+      }),
+    /contains no files/
+  )
+} finally {
+  fs.rmSync(snapshotRoot, { recursive: true, force: true })
+}
 
 const driveRestCalls = []
 await inventoryDriveFolder({
