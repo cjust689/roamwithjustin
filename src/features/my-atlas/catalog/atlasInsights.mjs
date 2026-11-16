@@ -8,21 +8,6 @@ export const CONTINENT_NAMES = Object.freeze({
   SA: "South America",
 })
 
-const MONTH_NAMES = Object.freeze([
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-])
-
 export function visitedDatesForPlace(place) {
   if (Array.isArray(place?.visitedDates)) return place.visitedDates
   return Array.isArray(place?.visitedYears)
@@ -31,9 +16,7 @@ export function visitedDatesForPlace(place) {
 }
 
 export function formatVisitedDate(date) {
-  return date.month
-    ? `${MONTH_NAMES[date.month - 1]} ${date.year}`
-    : String(date.year)
+  return String(date.year)
 }
 
 export function formatVisitedDates(place) {

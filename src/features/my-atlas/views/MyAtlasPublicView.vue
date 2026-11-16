@@ -61,7 +61,7 @@
             :disabled="!years.length"
             @click="toggleTimeline"
           >
-            {{ timelinePlaying ? "Pause years" : "Play years" }}
+            {{ timelinePlaying ? "Pause timeline" : "Play timeline" }}
           </button>
           <button type="button" @click="exportStory">Story image</button>
         </div>

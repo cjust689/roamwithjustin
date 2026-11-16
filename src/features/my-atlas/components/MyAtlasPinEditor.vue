@@ -13,7 +13,10 @@
 
     <div class="pin-editor-dates">
       <p>When did you visit?</p>
-      <span>Optional. Add a year, or make it more specific with a month.</span>
+      <span>
+        Optional. Add one or more years for timeline playback, or leave this
+        destination undated.
+      </span>
       <ul v-if="dates.length">
         <li v-for="date in dates" :key="dateKey(date)">
           {{ formatVisitedDate(date) }}
@@ -39,25 +42,12 @@
             placeholder="Optional"
           />
         </label>
-        <label>
-          <span>Month</span>
-          <select v-model.number="month" :disabled="!year">
-            <option :value="0">Any month</option>
-            <option
-              v-for="(name, index) in months"
-              :key="name"
-              :value="index + 1"
-            >
-              {{ name }}
-            </option>
-          </select>
-        </label>
         <button
           type="button"
           :disabled="!validDraftDate || pending"
           @click="addDraftDate"
         >
-          Add visit
+          Add year
         </button>
       </div>
       <p v-if="error" class="pin-editor-error" role="alert">{{ error }}</p>
@@ -65,10 +55,10 @@
 
     <div class="pin-editor-actions">
       <button type="button" :disabled="pending" @click="submit">
-        {{ pending ? "Saving" : pin ? "Save dates" : "Add to My Atlas" }}
+        {{ pending ? "Saving" : pin ? "Save years" : "Add to My Atlas" }}
       </button>
       <small v-if="!dates.length && !year">
-        You can add this destination with no date.
+        You can add this destination without a year.
       </small>
     </div>
   </section>
@@ -108,22 +98,11 @@ export default {
   data() {
     return {
       currentYear: new Date().getFullYear(),
-      dates: visitedDatesForPlace(this.pin || {}).map(date => ({ ...date })),
-      month: 0,
-      months: [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ],
+      dates: [
+        ...new Set(
+          visitedDatesForPlace(this.pin || {}).map(date => date.year)
+        ),
+      ].map(year => ({ year })),
       year: "",
     }
   },
@@ -133,10 +112,7 @@ export default {
         Number.isInteger(this.year) &&
         this.year >= 1900 &&
         this.year <= this.currentYear &&
-        !this.dates.some(
-          date =>
-            date.year === this.year && (date.month || 0) === (this.month || 0)
-        )
+        !this.dates.some(date => date.year === this.year)
       )
     },
   },
@@ -145,19 +121,12 @@ export default {
       if (!this.validDraftDate) return
       this.dates = [
         ...this.dates,
-        {
-          year: this.year,
-          ...(this.month ? { month: this.month } : {}),
-        },
-      ].sort(
-        (left, right) =>
-          left.year - right.year || (left.month || 0) - (right.month || 0)
-      )
+        { year: this.year },
+      ].sort((left, right) => left.year - right.year)
       this.year = ""
-      this.month = 0
     },
     dateKey(date) {
-      return `${date.year}:${date.month || 0}`
+      return String(date.year)
     },
     formatVisitedDate,
     removeDate(date) {
@@ -232,8 +201,7 @@ export default {
 }
 
 .pin-editor button,
-.pin-editor input,
-.pin-editor select {
+.pin-editor input {
   font: inherit;
 }
 
@@ -296,8 +264,7 @@ export default {
   font-size: 0.65rem;
 }
 
-.pin-editor input,
-.pin-editor select {
+.pin-editor input {
   min-width: 0;
   padding: 0.55rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -326,11 +293,7 @@ export default {
 @media (max-width: 520px) {
   .pin-editor-date-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .pin-editor-date-row > button {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 }
 </style>

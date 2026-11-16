@@ -15,6 +15,7 @@ import { getMyAtlasTurnstileSiteKey } from "../src/features/my-atlas/config/turn
 import {
   atlasStats,
   decorativeConnections,
+  formatVisitedDate,
   placesForYear,
   placesThroughYear,
 } from "../src/features/my-atlas/catalog/atlasInsights.mjs"
@@ -1327,6 +1328,7 @@ assert.equal(
     spanMiles: atlasStats(places).spanMiles,
   })
   assert.equal(placesForYear(places, "2024")[0].name, "Uvita")
+  assert.equal(formatVisitedDate({ year: 2024, month: 3 }), "2024")
   assert.equal(placesForYear(places, "undated")[0].name, "United States")
   assert.equal(placesThroughYear(places, 2025).length, 1)
   assert.equal(decorativeConnections(places).length, 2)

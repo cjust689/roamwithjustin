@@ -164,6 +164,11 @@ year and undated filters, cumulative year playback, keyboard and button cycling,
 and mobile layouts. Curved map connections are a deterministic visual treatment
 over the current pins. They do not claim travel sequence or route history.
 
+The owner editor intentionally asks only for optional visit years. Users may
+record multiple years for repeat visits or leave a destination undated. The API
+continues to accept an optional month for backward compatibility, but the
+current timeline and visitor presentation operate at year precision.
+
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land
 silhouette, and the label `My Atlas by RoamWithJustin.com`. The silhouette uses

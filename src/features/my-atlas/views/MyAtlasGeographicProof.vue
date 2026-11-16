@@ -65,7 +65,7 @@
             :disabled="!years.length"
             @click="toggleTimeline"
           >
-            {{ timelinePlaying ? "Pause years" : "Play years" }}
+            {{ timelinePlaying ? "Pause timeline" : "Play timeline" }}
           </button>
           <button type="button" @click="showConnections = !showConnections">
             {{ showConnections ? "Hide paths" : "Show paths" }}
