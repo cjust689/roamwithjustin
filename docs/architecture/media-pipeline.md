@@ -170,6 +170,12 @@ must succeed before the Sheet receives Published metadata. R2 objects are
 immutable and are not deleted as rollback for a later Git, Pages, or Sheet
 failure.
 
+The Git portion is externally proven: the integration itself passed the
+`develop` and `main` validation jobs, deployed through Pages run 43800514937,
+and produced the expected rendered Journey page. Both target branches now
+require the strict `validate` context and merge commits. The remaining live
+proof is a row-backed Drive download and R2 upload, not the Git or Pages path.
+
 ## Not implemented
 
 - Lightroom Classic plug-in or durable publisher outbox
