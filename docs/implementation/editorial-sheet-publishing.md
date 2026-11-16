@@ -71,6 +71,16 @@ verification:
     - Pages workflow run 43813022343 succeeded on 2026-11-16
     - rendered production Journey markers verified after Atlas Reference deployment on 2026-11-16
     - active ruleset 27216249 verified merge-only with required validate check
+    - GitHub pull request 42 merged to develop as 44a8fd1 on 2026-11-16
+    - develop workflow run 43866268383 succeeded on 2026-11-16
+    - GitHub pull request 43 merged to main as 17ace65 on 2026-11-16
+    - Pages workflow run 43866785598 succeeded on 2026-11-16
+    - GitHub pull request 44 merged the Sheets table compatibility correction to develop as 7551244 on 2026-11-16
+    - develop workflow run 43867984954 succeeded on 2026-11-16
+    - GitHub pull request 45 merged the correction to main as 5085ecc on 2026-11-16
+    - Pages workflow run 43868555523 succeeded on 2026-11-16
+    - live Catalog refresh verified 223 canonical references, 71 Visit choices, 106 exact bindings, and no Posts ID writes on 2026-11-16
+    - live Posts table metadata readback verified the New Place dropdown choice on 2026-11-16
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
@@ -280,7 +290,9 @@ Journey scope while `Atlas Place` is blank rather than inventing a Visit.
 The Posts range remains a native Google Sheets table. Its table metadata owns
 the `Publish To`, `Atlas Journey`, `Atlas Place`, and `Atlas Mode` dropdowns.
 This avoids invalid range-level validation writes to typed table columns. A
-catalog sync rebuilds both lookup tabs and refreshes those table choices.
+catalog sync rebuilds both lookup tabs and refreshes those table choices. The
+live table now exposes `New Place` alongside 69 unique existing Place labels;
+the catalog refresh preserved all Posts values and verified all 106 bindings.
 
 ## Supporting commands
 
@@ -330,14 +342,18 @@ Implemented and test-covered:
   validation jobs, Pages run 43800514937, and exact rendered production proof
 - Atlas Reference routing promotion through pull requests 34 and 35, develop
   run 43812635732, Pages run 43813022343, and rendered production proof
+- explicit Place registration promotion through pull requests 42 and 43,
+  table compatibility correction through pull requests 44 and 45, successful
+  develop and Pages workflows, and live `New Place` dropdown readback
 
 Still owner-controlled or externally unverified:
 
 - first real Drive download through the chosen OAuth scope
 - production R2 Worker endpoint and token availability in this environment
 - first row-backed end-to-end post publication and Sheet Published readback
-- first live `New Place` registration and rendered production proof; the path
-  is implemented and locally test-covered
+- first live row-backed `New Place` registration and generated Atlas pin; the
+  command and its Sheet request surface are implemented and verified, but no
+  new Place record has been applied yet
 - creating an entirely new Journey from a row
 - an optional Utah 2026 Salt Lake City Airport transit Visit if that stop later
   needs Place-scoped presentation
