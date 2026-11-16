@@ -22,8 +22,10 @@ code_paths:
   - scripts/lib/media-culling.js
   - scripts/upload-media.js
   - scripts/editorial-publish.mjs
+  - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
   - scripts/lib/editorial-github-publisher.mjs
+  - scripts/test-editorial-google.mjs
   - workers/media-upload/src/index.mjs
   - workers/media-upload/wrangler.jsonc
   - src/content/media/index.mjs
@@ -35,6 +37,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run editorial:test
     - npm run media:test
     - npm run media:worker:check
     - npm run content:validate
@@ -160,6 +163,12 @@ single-command publisher remain externally unverified.
 snapshot, partitions images and MP4s, invokes `media:prepare`, runs mandatory
 receipt-free ingestion planning, and composes the proposed Experience and
 Moment diff. It never uploads or changes tracked content.
+
+One editorial Drive folder may contain any mixture of direct JPEG, PNG, and
+MP4 files. The publisher preserves that single-folder authoring workflow and
+partitions the snapshot internally into one image package and one video
+package because those packages have different R2 delivery policies. The owner
+does not need to separate the source files into multiple Drive folders.
 
 `editorial:publish -- --apply` rechecks the same Sheet row and Drive inventory,
 then invokes `media:upload` and `media:ingest` with genuine checksum receipts.

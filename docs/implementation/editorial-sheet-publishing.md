@@ -38,6 +38,7 @@ code_paths:
   - scripts/lib/editorial-google-visits.mjs
   - scripts/lib/editorial-publication-plan.mjs
   - scripts/lib/editorial-place-registration.mjs
+  - scripts/test-editorial-google.mjs
   - scripts/test-editorial-place-registration.mjs
   - src/content/experiences/index.mjs
   - src/content/editorial/generated/records.json
@@ -204,7 +205,9 @@ Preview performs only local and Google read operations:
 4. Download every direct JPEG, PNG, and MP4 into a private hash-addressed
    snapshot below `.state/editorial/runs/`.
 5. Reuse `media:prepare` to build separate deterministic image and video
-   packages.
+   packages. The linked Drive folder may freely mix all three supported file
+   formats; this partition is internal and requires no folder management by
+   the owner.
 6. Run mandatory receipt-free `media:ingest --dry-run` validation.
 7. Plan the combined generated Media, Experience, Moment, and placement diff.
 8. Write a private `publication-plan.json` and stop.
