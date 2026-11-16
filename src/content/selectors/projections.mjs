@@ -7,6 +7,7 @@ import {
 import { getPlace } from "../places/index.mjs"
 import { getPartner } from "../partners/index.mjs"
 import { getJourneyGear } from "./gear.mjs"
+import { getJourneyExperienceViews } from "./experiences.mjs"
 import {
   getJourneyPublishedMedia,
   getVisitPublishedMedia,
@@ -187,6 +188,7 @@ export function buildTripViewModel(journey) {
   )
   const gear = getJourneyGear(journey.id)
   const gearHighlights = journeyGearHighlights(journey, gear)
+  const experiences = getJourneyExperienceViews(journey.id)
 
   return {
     id: journey.slug,
@@ -213,6 +215,7 @@ export function buildTripViewModel(journey) {
     bestTimeToGo: journey.bestTimeToGo,
     gear,
     gearHighlights,
+    experiences,
     travelNotes: [...(journey.travelNotes || [])],
     tips: [...(journey.tips || [])],
     lodging: (journey.lodging || []).map(stay => ({

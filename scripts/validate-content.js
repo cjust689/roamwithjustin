@@ -116,6 +116,41 @@ function validateTripPublicCopy(trip) {
   ;(trip.allMedia || []).forEach((media, index) =>
     validatePublicCopy(media.alt, owner + " media " + index + " alt")
   )
+  ;(trip.experiences || []).forEach((experience, experienceIndex) => {
+    ;["title", "summary"].forEach(field =>
+      validatePublicCopy(
+        experience[field],
+        owner + " experience " + experienceIndex + " " + field
+      )
+    )
+    ;(experience.moments || []).forEach((moment, momentIndex) => {
+      ;["title", "notes", "travelDate"].forEach(field =>
+        validatePublicCopy(
+          moment[field],
+          owner +
+            " experience " +
+            experienceIndex +
+            " moment " +
+            momentIndex +
+            " " +
+            field
+        )
+      )
+      ;(moment.media || []).forEach((media, mediaIndex) =>
+        validatePublicCopy(
+          media.alt,
+          owner +
+            " experience " +
+            experienceIndex +
+            " moment " +
+            momentIndex +
+            " media " +
+            mediaIndex +
+            " alt"
+        )
+      )
+    })
+  })
   ;(trip.featuredShots || []).forEach((media, index) =>
     validatePublicCopy(
       media.caption,
@@ -221,6 +256,7 @@ async function main() {
     aliasModule,
     journeyModule,
     partnerModule,
+    experienceModule,
     projections,
     gearSelectors,
     atlasModule,
@@ -233,6 +269,7 @@ async function main() {
     importContent("src/content/places/aliases.mjs"),
     importContent("src/content/journeys/index.mjs"),
     importContent("src/content/partners/index.mjs"),
+    importContent("src/content/experiences/index.mjs"),
     importContent("src/content/selectors/projections.mjs"),
     importContent("src/content/selectors/gear.mjs"),
     importContent("src/content/atlas/presentation.mjs"),
@@ -345,6 +382,7 @@ async function main() {
     {
       journeys: journeyModule.journeyRecords,
       staticMedia: mediaModule.mediaRecords.filter(asset => !asset.publication),
+      experiences: experienceModule.experienceRecords,
     }
   )
   generatedMediaValidation.errors.forEach(report)
@@ -359,6 +397,44 @@ async function main() {
         owner + ' references unknown Journey "' + placement.journeyId + '"'
       )
     }
+    if (
+      placement.experienceId &&
+      !experienceModule.getExperience(placement.experienceId)
+    ) {
+      report(
+        owner +
+          ' references unknown Experience "' +
+          placement.experienceId +
+          '"'
+      )
+    }
+  })
+
+  experienceModule.experienceRecords.forEach(experience => {
+    const owner = 'Experience "' + experience.id + '"'
+    if (!journeyModule.getJourney(experience.journeyId)) {
+      report(owner + ' references unknown Journey "' + experience.journeyId + '"')
+    }
+    if (experience.visitId) {
+      const visit = journeyModule.getJourneyVisitById(
+        experience.journeyId,
+        experience.visitId
+      )
+      if (!visit || visit.placeId !== experience.placeId) {
+        report(owner + " has an invalid Place or Visit association")
+      }
+    }
+  })
+  experienceModule.momentRecords.forEach(moment => {
+    const owner = 'Moment "' + moment.id + '"'
+    if (!experienceModule.getExperience(moment.experienceId)) {
+      report(owner + ' references unknown Experience "' + moment.experienceId + '"')
+    }
+    ;(moment.mediaAssetIds || []).forEach(assetId => {
+      if (!mediaModule.getMediaAsset(assetId)) {
+        report(owner + ' references unknown Media "' + assetId + '"')
+      }
+    })
   })
 
   journeyModule.journeyRecords.forEach(journey => {

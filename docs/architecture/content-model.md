@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-15
+updated: 2026-11-16
 related:
   - media-pipeline
   - gear-system
@@ -27,12 +27,45 @@ code_paths:
   - src/content/journeys/next-destinations.mjs
   - src/content/atlas/preview-presentation.mjs
   - src/content/partners/index.mjs
+  - src/content/experiences/index.mjs
+  - src/content/editorial/generated/records.json
+  - src/content/selectors/experiences.mjs
   - src/content/selectors/projections.mjs
   - scripts/validate-content.js
+  - scripts/editorial-baseline.mjs
+  - scripts/lib/editorial-baseline.mjs
+  - scripts/lib/editorial-google-auth.mjs
+  - scripts/lib/editorial-google-sheets.mjs
+  - scripts/lib/editorial-google-drive.mjs
+  - scripts/lib/editorial-google-migration.mjs
+  - scripts/lib/editorial-google-catalog.mjs
+  - scripts/lib/editorial-google-bindings.mjs
+  - scripts/lib/editorial-place-suggestions.mjs
+  - scripts/lib/editorial-place-decisions.mjs
+  - scripts/editorial-migrate-sheet.mjs
+  - scripts/editorial-build-catalog.mjs
+  - scripts/editorial-bind-places.mjs
+  - scripts/editorial-bind-journeys.mjs
+  - scripts/editorial-suggest-places.mjs
+  - scripts/editorial-bind-reviewed-places.mjs
+  - scripts/editorial-bind-visits.mjs
+  - scripts/lib/editorial-google-visits.mjs
+  - scripts/editorial-publish.mjs
+  - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-google-publication.mjs
+  - scripts/lib/editorial-publication-plan.mjs
+  - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-migration.mjs
+  - scripts/test-editorial-catalog.mjs
+  - scripts/test-editorial-bindings.mjs
+  - scripts/test-editorial-place-suggestions.mjs
+  - scripts/test-editorial-place-decisions.mjs
 verification:
   state: verified
   evidence:
     - npm run content:validate
+    - npm run editorial:test
+    - npm run editorial:baseline -- --dry-run
     - npm run build
 ---
 
@@ -56,8 +89,11 @@ design and migration narrative is preserved in the
 - **Atlas presentation** owns map-only grouping, camera, root, and relationship
   choices. It does not replace Place or Journey identity.
 
-There is no implemented canonical Experience registry. Older proposals that
-describe Experiences are future design, not current application behavior.
+**Experiences** own a reusable outing or story within one Journey and may bind
+to one Place and Visit. **Moments** are additive Post-authored perspectives
+inside an Experience. The generated editorial shard is composed and validated
+by `src/content/experiences/index.mjs`; it does not replace Journey, Place, or
+Visit authority.
 
 ## Identity and composition
 
@@ -122,6 +158,12 @@ selector for compatibility.
 and guided-journey shapes. Feature components consume those projections rather
 than maintaining another content database.
 
+Published Experiences are projected into their Journey page. Their stable
+deep link is `#experience-<slug>`. Published Moments retain explicit append
+order and their own Media set. `Travel Date / Range` is shown as supplied
+evidence but does not silently reorder Moments or manufacture exact dates.
+Draft Experiences, Moments, and placements are excluded from public selectors.
+
 An internally incomplete Journey may be media free. Story list/detail
 components render a quiet decorative surface and the available date, place,
 and story copy. Internal publication state, verification state, media counts,
@@ -150,15 +192,84 @@ derived from canonical records.
 
 `scripts/validate-content.js` verifies registry identity, foreign keys, local
 media existence/dimensions, R2-key uniqueness, journey/visit relationships,
-Atlas presentation, generated Gear/Media records, projections, and the absence
-of retired legacy authorities. It also rejects dash punctuation and editorial
+Atlas presentation, generated Gear, Media, Experience, and Moment records,
+their foreign keys, projections, and the absence of retired legacy
+authorities. It also rejects dash punctuation and editorial
 workflow phrases in the Journey and Atlas copy that the selectors expose to
 visitors. Technical IDs, slugs, URLs, and internal notes are outside that prose
 rule. `npm run build` runs content validation first.
 
+## Editorial baseline catalog
+
+`scripts/editorial-baseline.mjs` now provides a read-only catalog and audit
+boundary for the accepted single-row Google Sheets publishing direction. It
+projects the current code-owned Journey, Place, Visit, and Atlas presentation
+identities into a deterministic lookup catalog without cloning canonical
+records or changing public content. An optional private CSV export can be
+checked for the existing Posts headers, proposed Atlas columns, eligible
+account rows, exact Journey/Place matches, missing stable IDs, and ambiguity.
+
+The Google adapter uses local installed-app OAuth, batch-reads a designated
+Posts tab, inventories and downloads every supported direct child of an
+explicit Drive folder, and keeps credentials, snapshots, receipts, and
+checkpoints outside tracked source. The separately gated migration writer
+appended the approved Atlas and hidden automation columns, seeded 104 stable
+Post IDs, and preserved historical `Off` state without changing original
+fields. The owner's real Sheet baseline and migration are verified. A real
+reviewed Drive download remains externally unverified.
+
+The automation-owned hidden Atlas Catalog mirrors canonical references from
+these registries without cloning their authority. Dropdowns expose Journey and
+generated Experience labels while permitting `New:` values. A private
+Git-ignored binding report keys candidate Place matches by stable Post ID.
+Catalog generation does not write creator-owned values into Posts.
+
+After creator review, a separate guarded writer applied 33 exact `place_id`
+bindings for Amsterdam, Costa Rica, and Utah. It keys by stable Post ID and
+reviewed source hash rather than row position. The remaining broad or aliased
+Location labels stay unbound because they do not resolve one-to-one to a
+canonical Place.
+
+A second creator-approved guarded writer assigned a canonical Journey label
+and `journey_id` to every one of the 104 eligible historical rows. The five
+approved Journey groupings cover Europe 2026, Costa Rica 2025, Utah winter
+2025, Utah 2026, and St. John, USVI 2025. Each write resolves against the
+catalog, checks the reviewed source hash, rejects conflicts, and preserves all
+non-Journey cells. A separate read-only baseline verified all 104 bindings.
+
+For the 71 still-unbound rows, a read-only suggestion pass now constrains
+candidate Places to each approved Journey and then narrows them using canonical
+country, region, and parent geography. Explicit Place names in existing row
+text rank candidates, but the report marks every result unsafe to write. The
+deterministic private JSON and CSV contain no generated Place records and do
+not change Sheet or application state.
+
+The creator subsequently reviewed every suggestion. A guarded per-Post writer
+applied and verified the remaining 71 `place_id` values, so all 104 eligible
+rows now have canonical Journey and Place identities. A guarded relation pass
+wrote 82 unique matching Visit IDs. Twenty-one broad Utah or Costa Rica root
+rows and Salt Lake City Airport have no canonical Visit. Their Place binding
+remains useful source context, while publication deliberately falls back to
+Journey scope rather than inventing a Visit. A future real transit Visit can
+make the airport contribution Place-scoped.
+
+`editorial:publish` now translates exactly one `Preview` or `Publish` row. It
+requires an existing canonical Journey and, when Place-scoped, a matching
+Visit. Preview plans generated Media and editorial records without remote
+writes. Apply uses verified R2 receipts, creates or reuses an Experience,
+upserts one stable Moment for the Post, validates the generated pair, and then
+hands only those machine-owned shards to the isolated Git publisher. A blank
+Experience leaves the media at Journey or Visit scope rather than inventing
+one. The compiler does not yet create missing Journeys, Places, or Visits.
+
 ## Current limitations
 
-- Experiences and standalone experience stories are not implemented.
 - Some Journey gear remains in legacy `gearHighlights` as a selector fallback.
 - Many images are still local static files rather than generated R2 records.
 - Canonical content is Git-backed; there is no runtime CMS or database.
+- The single-row workflow is implemented for existing Journeys and Visits,
+  including generated Experiences and Moments, guarded deployment, and Sheet
+  write-back. Live Sheet identity and all 104 historical Journey and Place
+  bindings are verified. The first real Drive and R2 post, the Utah 2026 Salt
+  Lake City Airport transit Visit, and creation of missing Journeys, Places,
+  or Visits remain unverified or unimplemented.
