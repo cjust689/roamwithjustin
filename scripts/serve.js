@@ -39,13 +39,14 @@ function findLanAddress() {
 }
 
 const argumentsFromCommandLine = process.argv.slice(2)
+const myAtlasLocalSearch = argumentsFromCommandLine.includes("--my-atlas")
 const networkFlagFromNpm =
   process.env.npm_config_network &&
   process.env.npm_config_network.toLowerCase() !== "false"
 const serveOnNetwork =
   argumentsFromCommandLine.includes("--network") || networkFlagFromNpm
 const forwardedArguments = argumentsFromCommandLine.filter(
-  argument => argument !== "--network"
+  argument => argument !== "--network" && argument !== "--my-atlas"
 )
 const portArgumentIndex = forwardedArguments.findIndex(
   argument => argument === "--port"
@@ -121,12 +122,97 @@ const server = spawn(
   }
 )
 
+let myAtlasSearchServer = null
+let myAtlasWorker = null
+if (myAtlasLocalSearch) {
+  const searchScript = path.join(
+    __dirname,
+    "my-atlas",
+    "local-place-search-server.mjs"
+  )
+  const sourceDirectory = path.join(
+    __dirname,
+    "..",
+    ".state",
+    "my-atlas",
+    "geonames"
+  )
+  myAtlasSearchServer = spawn(
+    process.execPath,
+    [searchScript, "--source-dir", sourceDirectory, "--port", "8788"],
+    {
+      env: process.env,
+      stdio: "inherit",
+    }
+  )
+  myAtlasSearchServer.on("error", error => {
+    console.error(`Unable to start My Atlas search: ${error.message}`)
+    server.kill()
+  })
+  myAtlasSearchServer.on("exit", code => {
+    if (code && server.exitCode === null) {
+      console.error(`My Atlas search exited with code ${code}.`)
+      server.kill()
+    }
+  })
+
+  const wranglerScript = path.join(
+    __dirname,
+    "..",
+    "node_modules",
+    "wrangler",
+    "bin",
+    "wrangler.js"
+  )
+  const workerConfiguration = path.join(
+    __dirname,
+    "..",
+    "workers",
+    "my-atlas",
+    "wrangler.jsonc"
+  )
+  myAtlasWorker = spawn(
+    process.execPath,
+    [
+      wranglerScript,
+      "dev",
+      "--local",
+      "--config",
+      workerConfiguration,
+      "--port",
+      "8787",
+      "--inspector-port",
+      "9230",
+    ],
+    {
+      env: process.env,
+      stdio: "inherit",
+    }
+  )
+  myAtlasWorker.on("error", error => {
+    console.error(`Unable to start the My Atlas Worker: ${error.message}`)
+    server.kill()
+  })
+  myAtlasWorker.on("exit", code => {
+    if (code && server.exitCode === null) {
+      console.error(`The My Atlas Worker exited with code ${code}.`)
+      server.kill()
+    }
+  })
+}
+
 server.on("error", error => {
   console.error(`Unable to start the development server: ${error.message}`)
   process.exitCode = 1
 })
 
 server.on("exit", (code, signal) => {
+  if (myAtlasSearchServer && myAtlasSearchServer.exitCode === null) {
+    myAtlasSearchServer.kill()
+  }
+  if (myAtlasWorker && myAtlasWorker.exitCode === null) {
+    myAtlasWorker.kill()
+  }
   if (signal) {
     process.kill(process.pid, signal)
     return

@@ -1,0 +1,101 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "roamwithjustin-my-atlas-api",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-11-16",
+  "workers_dev": false,
+  "preview_urls": false,
+  "dev": {
+    "ip": "127.0.0.1",
+    "port": 8787,
+    "inspector_port": 9230,
+    "local_protocol": "http",
+  },
+  "vars": {
+    "AUTH0_ISSUER": "https://roamwithjustin.us.auth0.com/",
+    "AUTH0_AUDIENCE": "https://api.roamwithjustin.com",
+    "AUTH0_REQUIRED_PERMISSIONS": "read:my-atlas",
+    "ALLOWED_ORIGINS": "http://localhost:8080,http://127.0.0.1:8080",
+    "TURNSTILE_ACTION": "my-atlas-register",
+    "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
+    "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MY_ATLAS_REGISTRY",
+        "class_name": "RegistrationRegistryDurableObject",
+      },
+      {
+        "name": "MY_ATLAS_USERS",
+        "class_name": "UserProfileDurableObject",
+      },
+    ],
+  },
+  "exports": {
+    "RegistrationRegistryDurableObject": {
+      "type": "durable-object",
+      "storage": "sqlite",
+    },
+    "UserProfileDurableObject": {
+      "type": "durable-object",
+      "storage": "sqlite",
+    },
+  },
+  "env": {
+    "staging": {
+      "workers_dev": true,
+      "preview_urls": false,
+      "vars": {
+        "AUTH0_ISSUER": "https://roamwithjustin.us.auth0.com/",
+        "AUTH0_AUDIENCE": "https://api.roamwithjustin.com",
+        "AUTH0_REQUIRED_PERMISSIONS": "read:my-atlas",
+        "ALLOWED_ORIGINS": "http://localhost:8080,http://127.0.0.1:8080,https://roamwithjustin.com,https://www.roamwithjustin.com",
+        "TURNSTILE_ACTION": "my-atlas-register",
+        "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1,roamwithjustin.com,www.roamwithjustin.com",
+        "BETA_TERMS_VERSION": "staging-beta-1",
+        "BETA_PRIVACY_VERSION": "staging-privacy-1",
+        "BETA_INVITE_USE_CEILING": "1",
+        "BETA_INVITE_MAX_TTL_SECONDS": "86400",
+        "REGISTRATION_PENDING_LEASE_SECONDS": "900",
+        "MY_ATLAS_LOG_CONFIGURATION_ERRORS": "true",
+        "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+      },
+      "secrets": {
+        "required": [
+          "INVITE_HASH_PEPPER",
+          "INVITE_GENERATION_SECRET",
+          "TURNSTILE_SECRET_KEY",
+        ],
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "MY_ATLAS_REGISTRY",
+            "class_name": "RegistrationRegistryDurableObject",
+          },
+          {
+            "name": "MY_ATLAS_USERS",
+            "class_name": "UserProfileDurableObject",
+          },
+        ],
+      },
+      "r2_buckets": [
+        {
+          "binding": "MY_ATLAS_CATALOG_R2",
+          "bucket_name": "roamwithjustin-my-atlas-catalog-staging",
+        },
+      ],
+      "ratelimits": [
+        {
+          "name": "MY_ATLAS_PUBLIC_RATE_LIMITER",
+          "namespace_id": "2026111601",
+          "simple": {
+            "limit": 120,
+            "period": 60,
+          },
+        },
+      ],
+    },
+  },
+}

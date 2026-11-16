@@ -10,6 +10,16 @@
     "server": "node scripts/serve.js",
     "content:validate": "node scripts/validate-content.js",
     "docs:audit": "node scripts/docs-audit.mjs",
+    "my-atlas:catalog": "node scripts/my-atlas/build-place-catalog.mjs",
+    "my-atlas:catalog:worker": "node scripts/my-atlas/build-worker-place-catalog.mjs --catalog .state/my-atlas/catalog-full.json --output-dir .state/my-atlas/worker-catalog",
+    "my-atlas:search:local": "node scripts/my-atlas/local-place-search-server.mjs --source-dir .state/my-atlas/geonames --port 8788",
+    "my-atlas:serve": "node scripts/serve.js --my-atlas --port 8080",
+    "my-atlas:test": "node scripts/test-my-atlas-place-catalog.mjs && npm run my-atlas:worker:test && npm run my-atlas:worker:durable:test",
+    "my-atlas:worker:test": "node scripts/test-my-atlas-worker.mjs",
+    "my-atlas:worker:durable:test": "vitest run --config workers/my-atlas/vitest.config.mjs",
+    "my-atlas:worker:dev": "wrangler dev --local --config workers/my-atlas/wrangler.jsonc",
+    "my-atlas:worker:check": "wrangler deploy --dry-run --config workers/my-atlas/wrangler.jsonc",
+    "my-atlas:worker:check:staging": "wrangler deploy --dry-run --env staging --config workers/my-atlas/wrangler.jsonc",
     "editorial:baseline": "node scripts/editorial-baseline.mjs",
     "editorial:bind:places": "node scripts/editorial-bind-places.mjs",
     "editorial:bind:journeys": "node scripts/editorial-bind-journeys.mjs",
@@ -32,7 +42,7 @@
     "gear:list": "node scripts/ingest-gear.js --list",
     "gear:test": "node scripts/test-gear-ingestion.js",
     "gear:validate": "node scripts/validate-content.js",
-    "build": "npm run docs:audit && npm run content:validate && npm run adsense:test && npm run adsense:validate && vue-cli-service build",
+    "build": "npm run docs:audit && npm run content:validate && npm run adsense:test && npm run adsense:validate && npm run my-atlas:test && vue-cli-service build",
     "postbuild": "node scripts/prepare-pages.js",
     "images:optimize": "node scripts/optimize-images.js",
     "images:optimize:copies": "node scripts/optimize-images.js --copy",
@@ -54,18 +64,24 @@
     "start": "node server server.js"
   },
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.30.0",
     "core-js": "^3.6.5",
+    "d3-geo": "^3.1.1",
     "express": "^4.17.1",
     "google-auth-library": "^10.9.1",
+    "jose": "^6.2.0",
     "jquery": "^3.6.0",
     "maplibre-gl": "^6.18.0",
+    "topojson-client": "^3.1.0",
     "vue": "^2.6.11",
-    "vue-router": "^3.2.0"
+    "vue-router": "^3.2.0",
+    "world-atlas": "^2.0.2"
   },
   "overrides": {
     "@mapbox/jsonlint-lines-primitives": "2.0.2"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.8.3",
     "@vue/babel-preset-app": "^4.5.13",
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
@@ -79,6 +95,7 @@
     "eslint-plugin-vue": "^9.33.0",
     "prettier": "^3.5.3",
     "sharp": "^0.35.5",
+    "vitest": "^4.1.0",
     "vue-template-compiler": "^2.6.11",
     "wrangler": "4.162.0"
   },
