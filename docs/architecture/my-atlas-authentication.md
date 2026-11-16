@@ -37,15 +37,16 @@ verification:
     - Noninteractive Auth0 authorization checks accepted the configured local and production callbacks and returned login_required
     - A noninteractive Auth0 connection check redirected the configured SPA to accounts.google.com
     - Owner reported successful Google sign in, callback return, and audience-scoped API access verification in the local browser proof
+    - npm run my-atlas:test verified checkSession restoration and login_required handling while retaining the memory-only token cache
 ---
 
 # My Atlas Auth0 browser authentication
 
 This document describes the implemented browser authentication slice and its
-connection to the local Phase 2A token-validation API. It does not claim that
-My Atlas membership, invitations, persisted profiles, or a production route
-exists. The Worker boundary is detailed in the linked My Atlas local API
-authentication architecture.
+connection to the isolated Phase 2A token-validation API. Invitation-backed
+membership, a persisted private owner profile, and one Uvita pin are verified
+in staging by owner report. No production route exists. The Worker boundary is
+detailed in the linked My Atlas API authentication architecture.
 
 ## Runtime boundary
 
@@ -81,7 +82,12 @@ to `/my-atlas`, removes the authorization response through router replacement,
 and reports a generic user-facing failure without logging tokens.
 
 The SDK cache is memory-only and rotating refresh tokens are not enabled in
-this slice. Logout returns to `/my-atlas` on the current origin.
+this slice. On application initialization, `checkSession` restores the Auth0
+browser session when the tenant cookie is still available. A normal
+`login_required` response leaves the visitor signed out without surfacing an
+error. This avoids persisting an access token while allowing a page reload to
+restore the signed-in state. Logout returns to `/my-atlas` on the current
+origin.
 
 ## Access-token boundary
 
@@ -93,9 +99,10 @@ the signature, issuer, exact audience, expiration, algorithm and
 `read:my-atlas` permission.
 
 The browser does not display, decode, log, or persist the token. The Worker
-rejects ID-token and other audiences. Google login and a valid API token still
-do not create My Atlas membership; invite redemption and identity binding
-remain future server responsibilities.
+rejects ID-token and other audiences. Google login and a valid API token do not
+create My Atlas membership by themselves. The separate registration boundary
+requires one-use invitation redemption, Turnstile validation, and qualified
+identity binding before owner state is available.
 
 ## External configuration evidence
 
@@ -113,8 +120,8 @@ scopes, and callback allowlist without authenticating a user. Interactive
 Google routing was separately checked with the configured connection and
 redirected to `accounts.google.com`. The owner then reported successful Google
 sign in, return through the local callback, signed-in identity display, and the
-audience-scoped token acquisition. This is owner-verified external evidence;
-no token was exposed to the implementation process. The updated verification
-button now performs the protected Worker request. Its complete round trip with
-the owner's genuine token remains owner verification. The production
+audience-scoped token acquisition and protected Worker round trip. This is
+owner-verified external evidence; no token was exposed to the implementation
+process. Silent restoration after reload is implemented and test verified but
+still needs owner verification against the live tenant session. The production
 application does not enable or deploy the My Atlas route or Worker.

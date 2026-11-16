@@ -22,6 +22,10 @@ code_paths:
   - workers/my-atlas/src/registration/objects.mjs
   - workers/my-atlas/src/index.mjs
   - src/features/my-atlas/api/client.mjs
+  - src/features/my-atlas/auth/session.mjs
+  - src/features/my-atlas/catalog/atlasInsights.mjs
+  - src/features/my-atlas/components/MyAtlasPinEditor.vue
+  - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
   - workers/my-atlas/test/account.test.mjs
@@ -34,15 +38,18 @@ verification:
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
+    - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, cumulative playback, and decorative connection generation
+    - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
+    - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
 ---
 
 # My Atlas local profile, pin, and sharing state
 
-Phase 2B has a local owner-state API on the same isolated Worker and per-user
-SQLite Durable Object. The Phase 2C local slice adds an opt-in public projection,
-a signed-out handle route, and browser owner controls. The backend is deployed
-to isolated staging, but no real user account, stored pin, or public profile has
-been verified.
+Phase 2B has an owner-state API on the same isolated Worker and per-user SQLite
+Durable Object. The Phase 2C slice adds an opt-in public projection, a
+signed-out handle route, and browser owner controls. The backend is deployed to
+isolated staging. The owner verified a real private account and a persisted
+Uvita pin. A public profile has not been verified.
 
 ## Owner authorization
 
@@ -61,7 +68,7 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `PATCH /v1/me` changes display name or visibility;
 - `GET /v1/me/pins` returns at most 100 stored pins and a stable cursor;
 - `POST /v1/me/pins` creates one canonical pin;
-- `PATCH /v1/me/pins/{pinId}` changes its place or visited years;
+- `PATCH /v1/me/pins/{pinId}` changes its place or optional visit dates;
 - `DELETE /v1/me/pins/{pinId}` removes it;
 - `GET /v1/me/export?format=json|csv` returns the owner's profile and pins.
 
@@ -79,7 +86,9 @@ A changed request under that operation conflicts. Competing writes against the
 same revision produce one success and one revision conflict.
 
 Responses expose the current revision as a strong ETag. Stale mutations return
-HTTP 412 without changing state.
+HTTP 412 without changing state. Allowed browser origins can read `ETag` and
+`X-Request-Id` through `Access-Control-Expose-Headers`. This is required for
+the browser to accept the new revision after a successful cross-origin write.
 
 ## Pin state
 
@@ -87,12 +96,16 @@ Pins store only:
 
 - a stable internal pin ID;
 - the canonical `iso-country:XX` or `geonames:N` place ID;
-- a sorted, unique optional list of visited years;
+- a sorted, unique optional list of visit dates, each with a year and optional
+  month;
+- a derived visited-year list retained for compatibility with schema version 1
+  clients and pins;
 - creation and update timestamps.
 
-The object maintains a place index to reject duplicate destinations and a
-profile pin count enforcing the 300-pin beta ceiling. A profile cannot become
-public while empty. Deleting its last pin atomically makes it private.
+Pins may remain undated. The object maintains a place index to reject duplicate
+destinations and a profile pin count enforcing the 300-pin beta ceiling. A
+profile cannot become public while empty. Deleting its last pin atomically
+makes it private.
 
 Pin IDs are deterministically derived from the internal user ID and canonical
 place ID at creation. Replacing a pin's place preserves its pin ID while moving
@@ -106,22 +119,30 @@ versioned Worker catalog to return that exact nondeprecated place ID with usable
 coordinates. The indexed resolver and public search API are implemented and
 test verified. The default local Worker has no catalog R2 binding. The named
 staging environment now resolves its provisioned private catalog, with live
-Uvita and Salt Lake City searches confirming manifest and shard reads. Pin
-writes remain unverified until a genuine registered owner performs them.
+Uvita and Salt Lake City searches confirm manifest and shard reads. The owner
+reported that Uvita persisted even though the earlier browser build displayed a
+false failure after the successful write. Staging Worker
+`c1923a3b-2a8f-47a8-acd0-cf033ea49790` exposes the revision ETag needed to
+remove that false failure. A second owner write after this deployment remains
+external verification.
 
 ## Export, sharing, and privacy boundary
 
 JSON export includes the safe profile projection and all pins. CSV export
-contains only pin ID, canonical place ID, and visited years. Neither format
+contains pin ID, canonical place ID, visited years, and normalized optional
+visit dates. Neither format
 contains Auth0 subjects, qualified identity digests, access tokens, invitation
 data, or Durable Object operation records.
 
-The authenticated owner screen loads saved state, persists pin additions and
-removals through revisioned mutations, changes visibility, and exposes a copyable
-`/my-atlas/{handle}` link only while the profile is public. The signed-out Vue
+The authenticated owner screen restores an existing Auth0 session with
+`checkSession`, loads saved state, persists pin additions, date changes, and
+removals through revisioned mutations, changes visibility, and exposes a
+copyable `/my-atlas/{handle}` link only while the profile is public. Access
+tokens remain memory only. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
-the handle, display name, canonical places, coordinates, and visited years.
+the handle, display name, canonical places, coordinates, and optional visit
+dates, plus derived visited years for compatibility.
 Internal user IDs, pin IDs, qualified identities, invitations, accepted-policy
 records, timestamps, and mutation history do not enter that response.
 
@@ -134,6 +155,19 @@ The local public viewer is client rendered. Profile-specific server HTML, Open
 Graph tags, crawler status behavior, public-directory discovery, and production
 routing are not implemented.
 
+## Browser presentation
+
+Owner and public views derive place, country, continent, capital, date, and map
+span statistics from the safe canonical place projection. They provide exact
+year and undated filters, cumulative year playback, keyboard and button cycling,
+and mobile layouts. Curved map connections are a deterministic visual treatment
+over the current pins. They do not claim travel sequence or route history.
+
+The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
+visible statistics, pins, decorative connections, and the label `My Atlas by
+RoamWithJustin.com`. It does not upload the image or expose private account
+fields.
+
 ## Deliberately incomplete
 
 The local API still needs handle-change coordination with registry tombstones,
@@ -141,4 +175,6 @@ permanent account deletion and its approved retention contract, abuse reporting
 and moderation, and registration or operator rate-limit enforcement. Public
 catalog and Atlas reads have a tested weighted limiter boundary and a deployed
 staging binding, but live exhaustion behavior is not yet verified.
-Profile-specific share HTML and real user verification also remain.
+Profile-specific share HTML, a verified public owner profile, and owner
+verification of the corrected save feedback and silent session restoration
+also remain.

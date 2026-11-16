@@ -264,8 +264,8 @@
           <strong>{{ accountProfile.public ? "Public" : "Private" }}</strong>
         </div>
         <p>
-          Publishing makes your marked places and visited years available to
-          anyone with your link.
+          Publishing makes your marked places and optional visit dates available
+          to anyone with your link.
         </p>
         <div class="my-atlas-sharing-actions">
           <button
@@ -450,8 +450,8 @@ export default {
     },
     searchHelp() {
       return this.placeSearchEndpoint
-        ? "Enter at least two characters. Results use the full local GeoNames cities500 catalog."
-        : "Enter at least two characters. This build uses a small GeoNames proof catalog."
+        ? "Enter at least two characters."
+        : "Enter at least two characters."
     },
     shareUrl() {
       return this.accountProfile
@@ -772,8 +772,10 @@ export default {
       const currentIndex = this.displayedPlaces.findIndex(
         place => place.placeId === this.selectedPlaceId
       )
+      const baseIndex =
+        currentIndex >= 0 ? currentIndex : direction > 0 ? -1 : 0
       const nextIndex =
-        (Math.max(0, currentIndex) + direction + this.displayedPlaces.length) %
+        (baseIndex + direction + this.displayedPlaces.length) %
         this.displayedPlaces.length
       this.selectedPlaceId = this.displayedPlaces[nextIndex].placeId
     },

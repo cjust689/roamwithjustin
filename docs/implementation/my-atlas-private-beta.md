@@ -58,6 +58,10 @@ verification:
     - New-user account-state regression test maps registration_not_found to HTTP 404
     - Staging Worker deployment 037496ad-400a-4dda-b54f-41470cd3aa17 contains the new-user account lookup correction
     - Owner reported successful one-use invitation issuance, localhost Turnstile completion, redemption, and private account entry
+    - Owner reported that the Uvita pin persisted through reload and a second sign in even though the earlier browser build displayed a false save failure
+    - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, cumulative playback, and decorative connection tests
+    - A 390 pixel emulated mobile viewport reported 390 pixel root, body, panel, and input boundaries with no horizontal overflow
+    - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
 ---
 
 # My Atlas private beta implementation
@@ -65,9 +69,9 @@ verification:
 The accepted target is a separate personal pushpin product. Phase 1, the
 bounded Phase 2A authentication boundary, the Phase 2B local registration,
 operator recovery, profile, and pin-state foundations, and a Phase 2C local
-sharing slice are implemented locally.
-Nothing in this work provisions cloud resources, changes DNS, exposes a
-production route, alters the curated Atlas, or changes the media-upload Worker.
+sharing slice are implemented. The owner provisioned an isolated staging R2
+catalog, Durable Objects, secrets, limiter, and Worker. No production route is
+enabled. This work does not alter the curated Atlas or media-upload Worker.
 
 ## Current state
 
@@ -80,12 +84,13 @@ production route, alters the curated Atlas, or changes the media-upload Worker.
 | Geographic proof                          | Implemented and test verified                  | Deterministic importer, stable IDs, append-preserving deprecation, normalized search, disambiguation, bounded draft pins, and a separate MapLibre proof exist. A loopback-only development search server lets the browser query the ignored full cities500 source without bundling or committing it.                                                                                                                                                                                                                                                                                          |
 | Versioned Worker catalog                  | Implemented and staging verified               | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The owner verified all 512 immutable `geonames-2026-11-16` shards with rclone before uploading the manifest last. Live staging health and R2-backed searches for Uvita and Salt Lake City returned 200 with that revision. The complete remote inventory remains owner-verified rather than independently enumerated by the repository environment.                                                                                                                        |
 | Production route                          | Disabled                                       | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. No repository deployment environment enables it.                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Auth0 browser client                      | Implemented and owner verified locally         | The owner supplied the public tenant domain, SPA client ID, and exact API audience. The Vue 2 client implements Google redirect login, callback completion, logout, and audience-scoped access-token acquisition. Auth0 accepted noninteractive authorization requests for the local and production callbacks and routed the configured connection to Google. The owner reported successful sign in, callback return, identity display, and token acquisition. The updated button now submits that token to the local Worker; its first owner-token round trip remains owner verification. |
+| Auth0 browser client                      | Implemented and owner verified locally         | The owner supplied the public tenant domain, SPA client ID, and exact API audience. The Vue 2 client implements Google redirect login, callback completion, logout, audience-scoped access-token acquisition, and silent restoration of an existing Auth0 session after reload. Tokens remain memory only. The owner reported successful sign in, callback return, identity display, token acquisition, and a genuine Worker round trip. Owner verification of silent reload after the latest client build remains. |
 | Worker authentication boundary            | Phase 2A implemented and staging verified      | A separate Worker verifies RS256 signatures through Auth0 JWKS, exact issuer and API audience, time claims, token type, and `read:my-atlas`. The staging `workers.dev` deployment returned Phase 2C health, rejected an unauthenticated protected request with 401, allowed the exact production origin, and rejected an unrelated origin. The owner also verified a genuine Auth0 API-audience access token through the live Worker. The default environment remains undeployed with no production route.                                                                            |
-| Registration Durable Objects and API      | Phase 2B staging redemption owner verified     | One SQLite-backed registry class atomically reserves invitation, qualified identity, handle and idempotency claims. One SQLite-backed user class initializes a private revision-1 profile. The authenticated browser form requires a one-use invitation, bounded identity fields, explicit staging acceptance, and a real Turnstile token. The first live browser lookup exposed and now has a deployed correction for the never-registered identity response. The owner then reported successful invitation redemption and private account entry. Persisted pin behavior remains to be verified.                                                                                           |
+| Registration Durable Objects and API      | Phase 2B staging redemption owner verified     | One SQLite-backed registry class atomically reserves invitation, qualified identity, handle and idempotency claims. One SQLite-backed user class initializes a private revision-1 profile. The authenticated browser form requires a one-use invitation, bounded identity fields, explicit staging acceptance, and a real Turnstile token. The owner reported successful invitation redemption, private account entry, and a Uvita pin that persisted through reload and a second sign in. |
 | Operator invitation and recovery workflow | Implemented and staging issue owner verified   | An `admin:my-atlas` API issues recoverably idempotent high-entropy invitations, returns the code only through the protected issue response, revokes by nonsecret ID, paginates safe pending summaries, completes matching profiles, and releases only aged uninitialized registrations. Per-user abandonment tombstones block late ghost activation. A dedicated M2M grant has `read:my-atlas` and `admin:my-atlas`; the owner reported the first successful one-use invitation response without exposing its code.                                                                                                            |
-| Profile, pin CRUD, and export              | Foundation implemented and test verified       | Owner lookup is derived from the verified qualified identity. Strong ETags, `If-Match`, idempotency keys, display and visibility changes, canonical pin create/update/delete, duplicate rejection, 300-pin ceiling, bounded pagination, JSON/CSV export, owner browser bootstrap, and automatic privacy for an empty profile are tested. The browser now persists pins when an active account exists. Pin writes fail closed because the authoritative cloud catalog is not yet populated. Handle change, deletion, and reporting remain.                                                               |
-| Public Atlas sharing                      | API staging boundary verified                  | Explicit publication exposes `/my-atlas/{handle}` and a signed-out safe API containing only display name, handle, canonical place summaries, and visited years. Live staging returned the generic no-store 404 for an absent handle. Local tests verify private-by-default publication and immediate unpublication. The owner view publishes, unpublishes, and copies the link. Profile-specific server HTML, Open Graph tags, a real public profile, live rate-limit exhaustion, and browser staging verification remain.                                                                    |
+| Profile, pin CRUD, and export              | Implemented, test verified, and partially owner verified | Owner lookup is derived from the verified qualified identity. Strong ETags, `If-Match`, idempotency keys, display and visibility changes, canonical pin create/update/delete, duplicate rejection, 300-pin ceiling, bounded pagination, JSON/CSV export, owner browser bootstrap, and automatic privacy for an empty profile are tested. Pins accept no date, year only, or month and year while retaining legacy year compatibility. Staging Worker `c1923a3b-2a8f-47a8-acd0-cf033ea49790` exposes cross-origin ETags so a successful write no longer becomes a false browser error. The owner verified one persisted Uvita pin before that correction. Handle change, deletion, reporting, and a post-correction owner write remain. |
+| Atlas presentation and Story export       | Implemented and test verified                  | Owner and public views provide place, country, continent, capital, undated, date range, and map span statistics; exact year and undated filters; cumulative year playback; previous and next cycling; mobile layouts; descriptive place labels; and decorative connections that do not claim a travel order. The browser generates a local 1080 by 1920 PNG labeled `My Atlas by RoamWithJustin.com`. Authenticated visual verification remains owner action. |
+| Public Atlas sharing                      | API staging boundary verified                  | Explicit publication exposes `/my-atlas/{handle}` and a signed-out safe API containing only display name, handle, canonical place summaries, optional visit dates, and derived visited years. Live staging returned the generic no-store 404 for an absent handle. Local tests verify private-by-default publication and immediate unpublication. The owner view publishes, unpublishes, copies the link, filters and plays years, and exports the visible Story card. Profile-specific server HTML, Open Graph tags, a real public profile, live rate-limit exhaustion, and browser staging verification remain. |
 | Terms, privacy, retention, and moderation | Staging defaults approved; public beta blocked | Staging uses technical-only policy labels, one use per invitation, a 24-hour maximum invitation lifetime, and a 15-minute abandoned-registration lease. These values permit controlled owner testing and do not constitute final terms or privacy approval. Retention durations, beta reset notice, operator response process, and cost stop limits must be approved before invited accounts.                                                                                                                                        |
 
 ## Phase 0 audit decisions
@@ -137,7 +142,9 @@ without checking the 163 MB generated catalog into Git. The endpoint uses a
 linear in-memory search for browser development. The separate Worker now has a
 deterministic indexed artifact builder, bounded public search, and exact-ID
 resolver. Its full local artifact is ignored. The staging binding is declared
-and dry-run verified, but no isolated R2 bucket or object has been provisioned.
+and dry-run verified. The owner created the isolated staging bucket, verified
+all 512 immutable release objects with rclone, uploaded the manifest last, and
+live staging searches resolved Uvita and Salt Lake City.
 
 ### Auth0 and authorization
 
@@ -162,18 +169,20 @@ Phase 2B now has browser registration, private-profile provisioning, and
 protected operator recovery. Staging has environment secrets, technical policy
 limits, and a dedicated Auth0 M2M grant. The owner reported successful
 invitation issuance, Turnstile completion, redemption, and private account
-entry. Persisted pins remain to be verified. Final policy approval and
-registration or operator rate limiting remain before external users can be
-invited.
+entry. The owner also reported that Uvita persisted through reload and a second
+sign in. The browser now restores an existing Auth0 session with `checkSession`.
+Owner verification of that restoration and of corrected write feedback remains.
+Final policy approval and registration or operator rate limiting remain before
+external users can be invited.
 
 ### Cost and operational gate
 
 Cloudflare's 2026-11-13 Durable Objects pricing documentation lists SQLite
 Durable Objects on Free and Paid plans. The Free plan lists 100,000 requests
 and 13,000 GB-seconds per day, with operations failing after a free limit is
-exceeded. The owner still needs to choose the account plan, monthly stop
-amount, alerts, and initial invite ceiling. No cost-bearing resource was
-created.
+exceeded. The owner has provisioned isolated staging resources and still needs
+to choose the account plan, monthly stop amount, alerts, and initial invite
+ceiling before inviting external users.
 
 ## Phase checklist
 
@@ -235,6 +244,13 @@ created.
 - [x] Connect the authenticated browser to the bounded owner-state bootstrap,
       pin creation and removal, explicit publication, immediate unpublication,
       and copyable handle link.
+- [x] Add backward-compatible optional year and month visit dates, including an
+      undated state and date editing after pin creation.
+- [x] Add safe derived statistics, exact year and undated filters, cumulative
+      year playback, destination cycling, decorative unordered connections,
+      responsive layouts, and local 1080 by 1920 Story export.
+- [x] Restore an existing Auth0 browser session after reload without changing
+      the memory-only access-token cache.
 - [x] Implement and Workers-runtime test the safe signed-out public Atlas
       projection, indistinguishable private or absent 404, no-store response,
       and noindex client viewer.
@@ -248,33 +264,35 @@ created.
       successful live manifest and shard reads for Uvita and Salt Lake City.
       The owner separately verified all 512 release objects with rclone before
       uploading the manifest last.
-- [ ] Pass concurrency, authorization, stale revision, privacy, and retry tests.
+- [x] Pass automated concurrency, authorization, stale revision, privacy, and
+      retry tests.
 
 ### Staging cloud handoff
 
-No following item is complete merely because its binding exists in the tracked
-configuration:
+The owner has completed the isolated bucket, catalog publication, staging
+secrets, Auth0 grants, Turnstile setup, and Worker deployment. Remaining and
+completed handoff evidence is:
 
 1. Confirm the intended Cloudflare account with `npx wrangler whoami`, then set
    the plan, budget alerts, stop threshold, and initial invite ceiling.
-2. Create the private `roamwithjustin-my-atlas-catalog-staging` R2 bucket. Do
-   not enable a public bucket URL and do not reuse the editorial media bucket.
-3. Build the ignored artifact with `npm run my-atlas:catalog:worker`. Bulk upload
-   every object under `catalog/releases/{revision}` first, compare the remote
-   object inventory, and upload `catalog/current.json` only after verification.
+2. Completed by owner report: the private
+   `roamwithjustin-my-atlas-catalog-staging` R2 bucket is separate from the
+   editorial media bucket.
+3. Completed by owner report and live search: all 512 immutable release objects
+   were verified before `catalog/current.json` was uploaded last.
 4. The owner approved staging-only technical labels `staging-beta-1` and
    `staging-privacy-1`, one use per invitation, a 24-hour invitation lifetime,
    and a 15-minute pending-registration lease. Replace these with approved
    policy versions before inviting any external beta user.
-5. Install `INVITE_HASH_PEPPER`, `INVITE_GENERATION_SECRET`, and
-   `TURNSTILE_SECRET_KEY` as staging secrets. Never add them to Wrangler vars or
-   Git.
-6. Grant `admin:my-atlas` only to the owner in Auth0 and confirm the staging
-   frontend origin, callback, logout URL, and Turnstile hostname.
-7. Re-run `npm run my-atlas:test`,
-   `npm run my-atlas:worker:check:staging`, and `npm run build`. Only then run an
-   explicit `wrangler deploy --env staging` after reviewing the Durable Object
-   reconciliation output.
+5. Completed by owner report: `INVITE_HASH_PEPPER`,
+   `INVITE_GENERATION_SECRET`, and `TURNSTILE_SECRET_KEY` are staging secrets
+   rather than tracked variables.
+6. Completed for owner testing: the dedicated M2M client has its staging grant,
+   and the SPA callback, logout URL, frontend origin, and Turnstile hostname are
+   configured. Scope review remains before external users.
+7. Tests and the staging dry run passed. Worker
+   `c1923a3b-2a8f-47a8-acd0-cf033ea49790` is deployed without a production
+   route.
 8. Verify health, Uvita and Salt Lake City search, genuine-token auth, private
    profile 404, public handle read, rate-limit 429, immediate unpublication, and
    direct mobile link loading. Do not add an apex production route yet.
