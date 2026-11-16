@@ -4,7 +4,9 @@ import {
   DRIVE_FILE_SCOPE,
   DRIVE_READONLY_SCOPE,
   SHEETS_READONLY_SCOPE,
+  SHEETS_SCOPE,
   resolveGoogleConfiguration,
+  savedScopesSatisfy,
 } from "./lib/editorial-google-auth.mjs"
 import {
   inventoryDriveFolder,
@@ -38,6 +40,34 @@ assert.deepEqual(configuration.scopes, [
   DRIVE_FILE_SCOPE,
   SHEETS_READONLY_SCOPE,
 ])
+
+const writeConfiguration = resolveGoogleConfiguration({
+  options: {
+    oauthClientPath: path.join(outsideDirectory, "oauth-client.json"),
+    tokenPath: path.join(outsideDirectory, "write-token.json"),
+    spreadsheetId: "sheet-id",
+    sheetsAccess: "write",
+  },
+  environment: {},
+  homeDirectory: outsideDirectory,
+  projectRoot,
+})
+assert.equal(writeConfiguration.sheetsScope, SHEETS_SCOPE)
+assert.deepEqual(writeConfiguration.scopes, [DRIVE_FILE_SCOPE, SHEETS_SCOPE])
+assert.equal(
+  savedScopesSatisfy(
+    [DRIVE_FILE_SCOPE, SHEETS_SCOPE],
+    [DRIVE_FILE_SCOPE, SHEETS_READONLY_SCOPE]
+  ),
+  true
+)
+assert.equal(
+  savedScopesSatisfy(
+    [DRIVE_FILE_SCOPE, SHEETS_READONLY_SCOPE],
+    [DRIVE_FILE_SCOPE, SHEETS_SCOPE]
+  ),
+  false
+)
 
 assert.throws(
   () =>

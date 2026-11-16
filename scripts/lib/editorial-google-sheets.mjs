@@ -57,6 +57,31 @@ export async function resolveSheetTitle({
   return sheet.properties.title
 }
 
+export async function readSheetStructure({
+  auth,
+  spreadsheetId,
+  sheetId,
+  sheetsApi = null,
+}) {
+  const numericSheetId = Number(sheetId)
+  if (!Number.isSafeInteger(numericSheetId) || numericSheetId < 0) {
+    throw new Error("Google Sheet gid must be a non-negative integer")
+  }
+  const api = sheetsApi || createSheetsApi(auth)
+  const response = await api.spreadsheets.get({
+    spreadsheetId,
+    fields:
+      "sheets(properties(sheetId,title,index,hidden,gridProperties(rowCount,columnCount,frozenRowCount)))",
+  })
+  const properties = (response.data?.sheets || []).find(
+    entry => entry.properties?.sheetId === numericSheetId
+  )?.properties
+  if (!properties?.title || !properties.gridProperties) {
+    throw new Error(`No Google Sheet tab has gid ${numericSheetId}`)
+  }
+  return properties
+}
+
 export function normalizeSheetValues(values = []) {
   if (!values.length) return { headers: [], rows: [] }
 

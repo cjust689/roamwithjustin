@@ -19,8 +19,11 @@ code_paths:
   - scripts/lib/editorial-google-auth.mjs
   - scripts/lib/editorial-google-sheets.mjs
   - scripts/lib/editorial-google-drive.mjs
+  - scripts/lib/editorial-google-migration.mjs
+  - scripts/editorial-migrate-sheet.mjs
   - scripts/test-editorial-baseline.mjs
   - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-migration.mjs
   - package.json
   - package-lock.json
   - .gitignore
@@ -33,6 +36,7 @@ verification:
     - npm run docs:audit
     - npm run build
     - authenticated read-only Sheet baseline on 2026-11-15
+    - creator-authorized live Sheet migration on 2026-11-15
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
@@ -40,12 +44,13 @@ verification:
 The accepted target is documented in the
 [single-row publishing proposal](../proposals/single-row-sheets-drive-atlas-publishing.md).
 This implementation remains deliberately bounded. It establishes the verified
-Phase 0 repository audit and a read-only Phase 1 baseline client. It can
-authenticate locally and read a designated Posts tab plus an explicitly
-supplied Drive folder. The Sheet reader now has both mocked API coverage and a
-successful owner-authenticated baseline read. It does not mutate the Posts
-sheet, upload media, alter canonical content, commit generated publication
-state, or deploy the site.
+Phase 0 repository audit and the bounded Phase 1 baseline migration. It can
+authenticate locally, read a designated Posts tab plus an explicitly supplied
+Drive folder, and run the separately gated Posts schema/identity migration.
+The Sheet reader has both mocked API coverage and successful owner-authenticated
+reads. The creator-authorized migration is complete. No command here uploads
+media, alters canonical application content, commits generated publication
+state, or deploys the site.
 
 ## Implemented and tested
 
@@ -73,8 +78,16 @@ state, or deploy the site.
   requests, missing Post IDs, and rows that need review.
 - The command is read-only by construction. It rejects execution without
   `--dry-run`; normal mode performs no remote calls, while `--live` performs
-  Google reads and OAuth token refresh only. No Sheet, Drive, content, Git, R2,
-  or deployment write is implemented.
+  Google reads and OAuth token refresh only.
+- `editorial:migrate -- --apply` is the separate Sheets-write boundary. It
+  requires the Sheets write scope, re-reads the source before one atomic batch,
+  rejects missing original headers or duplicate Post IDs, and verifies the
+  original creator-owned fields afterward.
+- The authorized live migration appended the six visible Atlas columns,
+  appended and hid 16 warning-protected automation columns, froze the header,
+  installed the `Off`/`Preview`/`Publish` validation, assigned 104 UUID Post
+  IDs, and defaulted the same 104 historical Roam rows to `Off`. It left all
+  original fields and six unrelated rows unchanged.
 - Local working paths under `.cache/editorial/` and `.state/editorial/` are
   ignored so future source snapshots, receipts, and private ledger data cannot
   be committed accidentally.
@@ -90,17 +103,22 @@ and the automation-owned metadata headers are absent, all 104 eligible rows
 need stable Post IDs, and 33 Location values resolve to exact unambiguous Place
 records. No remote write occurred.
 
+The subsequent creator-authorized migration completed on November 15, 2026.
+An independent post-migration read found no missing visible or automation
+headers and no missing Post IDs. It retained the same 104 eligible rows, 6
+ignored rows, and 33 exact Place candidates. No Atlas publication was enabled.
+
 ## Phase 0 authority audit
 
-| Capability                                       | State    | Current authority or gap                                                                                                                                                            |
-| ------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Journey, Place, and Visit records                | Existing | `src/content/journeys/index.mjs` and `src/content/places/index.mjs` compose code-owned canonical records.                                                                           |
-| Atlas identity and public projections            | Existing | `src/content/atlas/presentation.mjs`, `src/content/selectors/projections.mjs`, `src/features/atlas/routes.js`, and `src/router/index.js` own presentation, projections, and routes. |
-| Media preparation, R2 upload, and ingestion      | Existing | `scripts/optimize-images.js`, `scripts/upload-media.js`, and `scripts/ingest-media.js` implement separate reviewed commands. The editorial baseline does not invoke them.           |
-| Sheets and Drive source reads                    | Partial  | The new read-only adapters and planner exist and are mock-tested. Owner authentication, real headers, folder coverage, and historical reconciliation are externally unverified.     |
-| Experience and Moment records                    | Missing  | The media contract has an optional `experienceId` hook, but there is no canonical Experience/Moment registry, selector, or route.                                                   |
-| Sheet catalog, stable ID seeding, and write-back | Missing  | No protected catalog range, targeted hidden-column writer, or approved migration exists.                                                                                            |
-| Publication orchestrator                         | Missing  | No command compiles a row, downloads Drive media, calls the media pipeline, creates a scoped Git change, observes Pages, or verifies a public URL.                                  |
+| Capability                                  | State    | Current authority or gap                                                                                                                                                            |
+| ------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Journey, Place, and Visit records           | Existing | `src/content/journeys/index.mjs` and `src/content/places/index.mjs` compose code-owned canonical records.                                                                           |
+| Atlas identity and public projections       | Existing | `src/content/atlas/presentation.mjs`, `src/content/selectors/projections.mjs`, `src/features/atlas/routes.js`, and `src/router/index.js` own presentation, projections, and routes. |
+| Media preparation, R2 upload, and ingestion | Existing | `scripts/optimize-images.js`, `scripts/upload-media.js`, and `scripts/ingest-media.js` implement separate reviewed commands. The editorial baseline does not invoke them.           |
+| Sheets and Drive source reads               | Partial  | Owner-authenticated Sheet reading and gid resolution are verified. Drive folder coverage remains externally unverified.                                                             |
+| Experience and Moment records               | Missing  | The media contract has an optional `experienceId` hook, but there is no canonical Experience/Moment registry, selector, or route.                                                   |
+| Sheet schema, identity, and catalog         | Partial  | The authorized schema/identity migration and guarded writer are verified. The protected Atlas Catalog and canonical binding write-back remain.                                      |
+| Publication orchestrator                    | Missing  | No command compiles a row, downloads Drive media, calls the media pipeline, creates a scoped Git change, observes Pages, or verifies a public URL.                                  |
 
 Canonical Git-backed records remain authoritative. The Sheet is the intended
 creator source for future authoring events, but it does not replace or clone
@@ -132,6 +150,12 @@ Run the deterministic catalog, CSV, schema, filter, and matching tests:
 npm run editorial:test
 ```
 
+Run the separately authorized, guarded Sheet migration:
+
+```bash
+npm run editorial:migrate -- --apply --oauth-client "C:\\private\\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID"
+```
+
 Read the designated live Posts tab without writing it:
 
 ```bash
@@ -152,6 +176,7 @@ These equivalent environment variable names are supported:
 - `EDITORIAL_GOOGLE_TOKEN_PATH`
 - `EDITORIAL_GOOGLE_SPREADSHEET_ID`
 - `EDITORIAL_GOOGLE_POSTS_RANGE`
+- `EDITORIAL_GOOGLE_SHEETS_ACCESS`
 - `EDITORIAL_GOOGLE_DRIVE_SCOPE`
 - `EDITORIAL_GOOGLE_ALLOW_RESTRICTED_DRIVE_SCOPE`
 
@@ -175,10 +200,12 @@ unrelated project's client can leave API enablement under the wrong owner.
 - [x] Authenticate to and baseline the live designated Google Sheet without
       writing it.
 - [ ] Build and protect the automation-owned Atlas Catalog range.
-- [ ] Dry-run stable Post ID seeding and targeted hidden-column writes.
+- [x] Dry-run, authorize, apply, and independently verify stable Post ID
+      seeding plus targeted hidden-column writes.
 - [ ] Reconcile the real historical Posts and record creator-reviewed
       ambiguous mappings.
-- [ ] Prove the live baseline produces no public content change.
+- [x] Prove the baseline and schema/identity migration produce no canonical or
+      public application content change.
 - [ ] Implement the mandatory local Drive and media ingestion planning pass.
 - [ ] Implement later approved upload, applied ingestion, entity compilation,
       Experience/Moment presentation, deployment, and write-back phases.
@@ -197,9 +224,8 @@ Drive API behavior remains mock-tested only.
 
 ## Next safe implementation step
 
-Review the generated migration plan for six visible columns, hidden
-automation-owned fields, 104 stable Post IDs, historical `Off` defaults, and
-the 33 exact Place bindings. Only after creator authorization should a targeted
-writer re-read source hashes, apply those additions, protect/hide automation
-fields, and verify the workbook again. Drive folder access remains a separate
-read-only proof.
+Build the automation-owned Atlas Catalog from canonical references, then
+produce a reviewable binding report for the 33 exact Place candidates before
+writing any `place_id`, Journey, Visit, or URL fields. Separately prove that the
+narrow Drive grant can inventory every intended child in one real reviewed
+folder. Neither step may publish content.

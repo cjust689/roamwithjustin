@@ -34,7 +34,10 @@ code_paths:
   - scripts/lib/editorial-google-auth.mjs
   - scripts/lib/editorial-google-sheets.mjs
   - scripts/lib/editorial-google-drive.mjs
+  - scripts/lib/editorial-google-migration.mjs
+  - scripts/editorial-migrate-sheet.mjs
   - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-migration.mjs
 verification:
   state: verified
   evidence:
@@ -180,8 +183,11 @@ child of an explicitly supplied Drive folder. OAuth credentials and refresh
 tokens are rejected when their paths are inside the repository. The adapter is
 mock-tested, and the owner's real Sheet has completed a read-only baseline.
 Access to a real reviewed Drive folder remains externally unverified. The
-adapter does not write Sheet cells, download media, create Experience or Moment
-records, ingest media, or deploy content.
+separately gated migration writer has appended the approved Atlas and hidden
+automation columns, seeded 104 stable Post IDs, and preserved historical `Off`
+state without changing original fields. It does not write canonical bindings,
+download media, create Experience or Moment records, ingest media, or deploy
+content.
 
 ## Current limitations
 
@@ -190,7 +196,8 @@ records, ingest media, or deploy content.
 - Many images are still local static files rather than generated R2 records.
 - Canonical content is Git-backed; there is no runtime CMS or database.
 - The single-row editorial workflow has a local read-only catalog plus mocked
-  Sheets/Drive adapters. Live Sheet reading is verified; Drive-folder access,
-  reconciliation, protected catalog writes, stable ID seeding, and generated
-  Journey, Place, Visit, Experience, and Moment compilation are not implemented
-  or verified.
+  Sheets/Drive adapters plus the completed schema/identity migration. Live
+  Sheet reading and stable ID seeding are verified; Drive-folder access,
+  canonical reconciliation, protected catalog writes, and generated Journey,
+  Place, Visit, Experience, and Moment compilation are not implemented or
+  verified.

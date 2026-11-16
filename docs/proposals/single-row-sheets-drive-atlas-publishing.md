@@ -21,8 +21,11 @@ code_paths:
   - scripts/lib/editorial-google-auth.mjs
   - scripts/lib/editorial-google-sheets.mjs
   - scripts/lib/editorial-google-drive.mjs
+  - scripts/lib/editorial-google-migration.mjs
+  - scripts/editorial-migrate-sheet.mjs
   - scripts/test-editorial-baseline.mjs
   - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-migration.mjs
   - docs/implementation/editorial-sheet-publishing.md
 verification:
   state: unverified
@@ -33,9 +36,10 @@ verification:
 
 **Project:** Roam With Justin  
 **Audience:** VS Code / Codex coding agent  
-**Document status:** Accepted architecture; Phase 0, the authenticated
-read-only Sheet baseline, and mock-tested Drive adapter are implemented.
-Baseline writes, reconciliation, and publication remain incomplete.
+**Document status:** Accepted architecture; Phase 0, the authenticated Sheet
+baseline, schema/identity migration, and mock-tested Drive adapter are
+implemented. Catalog bindings, reconciliation, and publication remain
+incomplete.
 **Supersedes as the proposed direction:** `Roam_With_Justin_Sheets_Drive_Atlas_Publishing_Proposal_v2.md`  
 **Revision objective:** Keep v2's normalized backend, publication safety, and validation while **removing the multi-tab creator workflow**. This corrected v2.1 also tightens baseline non-duplication, the `New:` creation example, Phase 2's dry-run/write boundary, and illustrative ID syntax.
 
@@ -485,7 +489,7 @@ Until the optional local watcher runs, one command/VS Code task triggers publica
 - **Illustrative IDs:** Use lowercase-hyphenated IDs; validate each registry against its own schema.
 
 **Repository handoff:** This accepted proposal now lives in `docs/proposals/`.
-The earlier designs are archived, and implementation begins with the verified
-Phase 0 and read-only baseline foundation. The live Google adapter is
-mock-tested only. **This document does not assert that remote Sheets, Drive,
-R2, or deployed Atlas content have been modified.**
+The earlier designs are archived. Phase 0, the authenticated Sheet baseline,
+and the creator-authorized schema/identity migration are verified. **No Drive
+source files, R2 objects, canonical application content, or deployed Atlas
+content have been modified by this work.**

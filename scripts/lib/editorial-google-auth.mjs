@@ -8,12 +8,22 @@ import { OAuth2Client } from "google-auth-library"
 
 export const SHEETS_READONLY_SCOPE =
   "https://www.googleapis.com/auth/spreadsheets.readonly"
+export const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
 export const DRIVE_FILE_SCOPE = "https://www.googleapis.com/auth/drive.file"
 export const DRIVE_READONLY_SCOPE =
   "https://www.googleapis.com/auth/drive.readonly"
 
 function normalizeScopes(scopes) {
   return [...new Set(scopes)].sort()
+}
+
+export function savedScopesSatisfy(storedScopes, requestedScopes) {
+  const stored = new Set(storedScopes || [])
+  return (requestedScopes || []).every(
+    scope =>
+      stored.has(scope) ||
+      (scope === SHEETS_READONLY_SCOPE && stored.has(SHEETS_SCOPE))
+  )
 }
 
 function isInside(candidate, parent) {
@@ -55,6 +65,13 @@ export function resolveGoogleConfiguration({
   ).trim()
   const requestedDriveScope = String(
     options.driveScope || environment.EDITORIAL_GOOGLE_DRIVE_SCOPE || "selected"
+  )
+    .trim()
+    .toLowerCase()
+  const requestedSheetsAccess = String(
+    options.sheetsAccess ||
+      environment.EDITORIAL_GOOGLE_SHEETS_ACCESS ||
+      "readonly"
   )
     .trim()
     .toLowerCase()
@@ -102,12 +119,26 @@ export function resolveGoogleConfiguration({
     )
   }
 
+  let sheetsScope
+  if (["readonly", "read-only"].includes(requestedSheetsAccess)) {
+    sheetsScope = SHEETS_READONLY_SCOPE
+  } else if (
+    ["write", "readwrite", "read-write"].includes(requestedSheetsAccess)
+  ) {
+    sheetsScope = SHEETS_SCOPE
+  } else {
+    throw new Error(
+      `Unsupported Sheets access mode "${requestedSheetsAccess}"; use readonly or write`
+    )
+  }
+
   return {
     oauthClientPath,
     tokenPath,
     spreadsheetId,
     postsRange,
-    scopes: normalizeScopes([SHEETS_READONLY_SCOPE, driveScope]),
+    scopes: normalizeScopes([sheetsScope, driveScope]),
+    sheetsScope,
     driveScope,
   }
 }
@@ -130,10 +161,7 @@ async function readInstalledOAuthClient(oauthClientPath) {
 async function loadSavedClient(tokenPath, scopes) {
   try {
     const stored = await readJson(tokenPath)
-    if (
-      JSON.stringify(normalizeScopes(stored.scopes || [])) !==
-      JSON.stringify(normalizeScopes(scopes))
-    ) {
+    if (!savedScopesSatisfy(stored.scopes, scopes)) {
       throw new Error(
         "Saved Google token scopes do not match this read-only request; reauthenticate deliberately"
       )
