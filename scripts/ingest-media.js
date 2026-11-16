@@ -381,10 +381,11 @@ async function main() {
     return
   }
 
-  const [journeyModule, mediaModule, placeModule] = await Promise.all([
+  const [journeyModule, mediaModule, placeModule, experienceModule] = await Promise.all([
     importContent("src/content/journeys/index.mjs"),
     importContent("src/content/media/index.mjs"),
     importContent("src/content/places/index.mjs"),
+    importContent("src/content/experiences/index.mjs"),
   ])
   if (options.journeys) {
     journeyModule.journeyRecords.forEach(journey =>
@@ -452,6 +453,7 @@ async function main() {
     reassociateExisting: options.reassociateExisting,
     staticMedia,
     verification,
+    experiences: experienceModule.experienceRecords,
   })
   if (plan.errors.length) {
     throw new Error(`Media ingestion rejected:\n- ${plan.errors.join("\n- ")}`)

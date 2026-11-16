@@ -36,7 +36,13 @@ function isSafeRelativePath(value) {
   return !parts.some(part => !part || part === "." || part === "..")
 }
 
-function validateAssociationScope(scope, journey, owner, errors) {
+function validateAssociationScope(
+  scope,
+  journey,
+  owner,
+  errors,
+  experiences = []
+) {
   const placeId = scope?.placeId ?? null
   const visitId = scope?.visitId ?? null
   const experienceId = scope?.experienceId ?? null
@@ -44,7 +50,14 @@ function validateAssociationScope(scope, journey, owner, errors) {
   const hasVisit = visitId !== null
 
   if (experienceId !== null) {
-    errors.push(`${owner} contains an unsupported Experience association`)
+    const experience = experiences.find(record => record.id === experienceId)
+    if (!experience) {
+      errors.push(`${owner} references unknown Experience "${experienceId}"`)
+    } else if (experience.journeyId !== journey?.id) {
+      errors.push(
+        `${owner} references Experience "${experienceId}" outside Journey "${journey?.id || "unknown"}"`
+      )
+    }
   }
   if (hasPlace !== hasVisit) {
     errors.push(`${owner} must declare Place and Visit together`)
@@ -364,7 +377,13 @@ function validateGeneratedRecords(records, context) {
         `${owner} references unknown Journey "${placement.journeyId}"`
       )
     }
-    validateAssociationScope(placement, journey, owner, errors)
+    validateAssociationScope(
+      placement,
+      journey,
+      owner,
+      errors,
+      context.experiences || []
+    )
     if (!mediaContract.roles.includes(placement.role)) {
       errors.push(`${owner} has unsupported role`)
     }

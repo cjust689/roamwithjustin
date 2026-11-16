@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-15
+updated: 2026-11-16
 related:
   - content-model
   - journey-media-ingestion
@@ -21,10 +21,14 @@ code_paths:
   - scripts/lib/media-ingestion.js
   - scripts/lib/media-culling.js
   - scripts/upload-media.js
+  - scripts/editorial-publish.mjs
+  - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-github-publisher.mjs
   - workers/media-upload/src/index.mjs
   - workers/media-upload/wrangler.jsonc
   - src/content/media/index.mjs
   - src/content/media/generated/records.json
+  - src/content/editorial/generated/records.json
   - src/content/selectors/media.mjs
   - src/content/selectors/projections.mjs
   - src/views/roam/RoamTripOverview.vue
@@ -99,6 +103,13 @@ published image becomes the derived display image for the Trip card and Atlas
 node. A Visit with no verified image stays image-free; selectors never use the
 Journey cover as a location-specific fallback.
 
+An Experience-scoped placement is valid only when the referenced Experience
+exists and belongs to the same Journey. `getExperiencePublishedMedia()` and
+the Experience selector project those placements into published Moments on the
+Journey page. The Sheet compiler adds the Experience association only after
+the receipt-backed Media batch exists; raw manifests continue to prepare at
+Journey or Place/Visit scope.
+
 The public selectors ignore draft placements. Culling a derived display image
 therefore promotes the next published Visit image automatically. Culling does
 not edit explicit curated Journey or Visit hero/gallery references; those
@@ -139,9 +150,25 @@ maximum part size are configurable through `MAX_VIDEO_UPLOAD_BYTES` and
 `MAX_MULTIPART_PART_BYTES`. Automatic quality-changing compression is
 intentionally absent.
 
-The Worker source and bundle are locally verified. Deployment into the
-owner's Cloudflare account and the first production upload remain
-externally unverified.
+The Worker source and bundle are locally verified. Deployment state in the
+owner's Cloudflare account and the credentials available to the new
+single-command publisher remain externally unverified.
+
+## Sheet and Git publication orchestration
+
+`editorial:publish -- --preview` downloads a hash-addressed private Drive
+snapshot, partitions images and MP4s, invokes `media:prepare`, runs mandatory
+receipt-free ingestion planning, and composes the proposed Experience and
+Moment diff. It never uploads or changes tracked content.
+
+`editorial:publish -- --apply` rechecks the same Sheet row and Drive inventory,
+then invokes `media:upload` and `media:ingest` with genuine checksum receipts.
+It atomically validates the generated Media and editorial shards, builds the
+site, and sends only those two allowlisted paths through an isolated post
+branch, `develop`, and `main`. GitHub Actions and the rendered production page
+must succeed before the Sheet receives Published metadata. R2 objects are
+immutable and are not deleted as rollback for a later Git, Pages, or Sheet
+failure.
 
 ## Not implemented
 
@@ -149,5 +176,6 @@ externally unverified.
 - EXIF extraction, privacy filtering, or capture-Gear matching
 - Multiple photo renditions (thumbnail/gallery/full) per generated asset
 - Automatic video transcoding, codec inspection, posters, or adaptive bitrate
-- Experience-scoped media preparation and placement
-- Automated Git commit/push/deployment reporting after ingestion
+- Direct Experience-scoped manifest preparation; the compiler currently adds
+  the Experience association after Journey or Place/Visit ingestion
+- First live end-to-end Sheet, Drive, R2, GitHub, Pages, and write-back proof

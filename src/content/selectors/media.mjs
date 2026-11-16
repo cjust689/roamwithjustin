@@ -182,3 +182,12 @@ export function getVisitPublishedMedia(journeyId, visitId) {
       placement.journeyId === journeyId && placement.visitId === visitId
   )
 }
+
+export function getExperiencePublishedMedia(experienceId, assetIds = []) {
+  const allowedAssetIds = new Set(assetIds || [])
+  return getPublishedPlacementMedia(
+    placement =>
+      placement.experienceId === experienceId &&
+      (!allowedAssetIds.size || allowedAssetIds.has(placement.assetId))
+  )
+}

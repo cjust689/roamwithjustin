@@ -184,6 +184,76 @@
         </article>
       </section>
 
+      <section
+        v-if="trip.experiences.length"
+        id="experiences"
+        class="story-shell experience-section"
+      >
+        <header class="section-intro compact">
+          <span class="story-eyebrow">Stories within the journey</span>
+          <h2>Experiences and moments</h2>
+        </header>
+
+        <article
+          v-for="experience in trip.experiences"
+          :id="`experience-${experience.slug}`"
+          :key="experience.id"
+          class="experience-story"
+        >
+          <header>
+            <h3>{{ experience.title }}</h3>
+            <p v-if="experience.summary">{{ experience.summary }}</p>
+          </header>
+
+          <article
+            v-for="moment in experience.moments"
+            :key="moment.id"
+            class="experience-moment"
+          >
+            <div class="moment-copy">
+              <span v-if="moment.travelDate">{{ moment.travelDate }}</span>
+              <h4>{{ moment.title }}</h4>
+              <p v-if="moment.notes">{{ moment.notes }}</p>
+            </div>
+            <div v-if="moment.media.length" class="moment-media">
+              <template v-for="media in moment.media">
+                <video
+                  v-if="media.kind === 'video'"
+                  :key="media.id"
+                  controls
+                  playsinline
+                  preload="metadata"
+                  :poster="media.poster || null"
+                  :aria-label="media.alt"
+                >
+                  <source
+                    :src="media.src"
+                    :type="media.mimeType || 'video/mp4'"
+                  />
+                  Your browser does not support HTML video.
+                </video>
+                <a
+                  v-else
+                  :key="media.id"
+                  :href="media.src"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    :src="media.src"
+                    :alt="media.alt"
+                    :width="media.width || null"
+                    :height="media.height || null"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </a>
+              </template>
+            </div>
+          </article>
+        </article>
+      </section>
+
       <AdSlot
         v-if="storyAdEligible"
         :slot-id="storyAdSlotId"
@@ -452,6 +522,88 @@ export default {
 
 .photography-section {
   padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.experience-section {
+  padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.experience-story {
+  scroll-margin-top: 6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  padding: clamp(2.5rem, 6vw, 5rem) 0;
+}
+
+.experience-story > header {
+  max-width: 760px;
+}
+
+.experience-story > header h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.experience-story > header p,
+.moment-copy p {
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.9rem !important;
+  font-weight: 400;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.experience-moment {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1.35fr);
+  gap: clamp(1.5rem, 5vw, 4rem);
+  margin-top: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: clamp(1.2rem, 4vw, 2rem);
+  background: #11191d;
+}
+
+.moment-copy > span {
+  color: #f6bd60;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.moment-copy h4 {
+  margin: 0.45rem 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.5rem, 3vw, 2.4rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.moment-media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.moment-media > a,
+.moment-media > video {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 14px;
+  background: #0b1114;
+  aspect-ratio: 4 / 3;
+}
+
+.moment-media img,
+.moment-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .photography-grid {
@@ -1160,7 +1312,8 @@ export default {
   .section-intro,
   .story-day,
   .story-details-grid,
-  .atlas-handoff {
+  .atlas-handoff,
+  .experience-moment {
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
@@ -1238,6 +1391,10 @@ export default {
   }
 
   .lodging-card {
+    grid-template-columns: 1fr;
+  }
+
+  .moment-media {
     grid-template-columns: 1fr;
   }
 
