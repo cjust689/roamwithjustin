@@ -74,6 +74,8 @@ verification:
     - npm run build
     - live table-aware Sheet migration verified on 106 eligible rows on 2026-11-16
     - live Atlas Reference verified with 81 canonical choices on 2026-11-16
+    - live Atlas Place dropdown verified with the New Place request choice on 2026-11-16
+    - live Catalog refresh verified 223 references, 71 Visit choices, and 106 exact bindings with no Posts ID writes on 2026-11-16
     - Atlas Journey First look presentation verified in production on 2026-11-16
 ---
 
