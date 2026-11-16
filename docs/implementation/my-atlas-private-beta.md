@@ -64,6 +64,12 @@ verification:
     - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
     - npm run my-atlas:test verified year-only visitor formatting while retaining API compatibility with stored month values
+    - Pull request 51 merged to develop as e2b3ae448cfef3fffc01cefb7485f104ce75a956 after its required validation passed
+    - Develop workflow run 43969294710 succeeded before production promotion
+    - Pull request 52 merged to main as db67295c26fb624f36c9318aec1166903cbe8603 after its required validation passed
+    - Pages workflow run 43969999089 succeeded
+    - Headless Chrome rendered the production heading, Google sign-in section, and My Atlas branding
+    - Production-origin health, CORS, and Uvita catalog search returned 200 from the isolated staging Worker
 ---
 
 # My Atlas private beta implementation
@@ -88,7 +94,7 @@ media-upload Worker.
 | GeoNames rights                           | Verified against provider documentation        | GeoNames publishes the dump under CC BY 4.0, requests attribution, permits commercial use, and describes cities500 as cities over 500 population or administrative seats.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Geographic proof                          | Implemented and test verified                  | Deterministic importer, stable IDs, append-preserving deprecation, normalized search, disambiguation, bounded draft pins, and a separate MapLibre proof exist. A loopback-only development search server lets the browser query the ignored full cities500 source without bundling or committing it.                                                                                                                                                                                                                                                                                          |
 | Versioned Worker catalog                  | Implemented and staging verified               | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The owner verified all 512 immutable `geonames-2026-11-16` shards with rclone before uploading the manifest last. Live staging health and R2-backed searches for Uvita and Salt Lake City returned 200 with that revision. The complete remote inventory remains owner-verified rather than independently enumerated by the repository environment.                                                                                                                        |
-| Production frontend route                 | Release configured, promotion pending          | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. Validation and Pages now map explicit repository variables into the build. The route remains disabled when the switch is absent or false. This does not create a Cloudflare apex Worker route or move the API out of isolated staging.                                                                                                                                                                                                                                                           |
+| Production frontend route                 | Deployed and rendered verified                 | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. Pull requests 51 and 52 promoted the explicit repository-variable wiring, and Pages run 43969999089 deployed it. Headless Chrome rendered the expected production heading, Google sign-in section, and branding. Direct deep links still return the known Pages fallback HTTP 404 before client rendering, so server share HTML and crawler behavior remain future work. This does not create a Cloudflare apex Worker route or move the API out of isolated staging. |
 | Auth0 browser client                      | Implemented and owner verified locally         | The owner supplied the public tenant domain, SPA client ID, and exact API audience. The Vue 2 client implements Google redirect login, callback completion, logout, audience-scoped access-token acquisition, and silent restoration of an existing Auth0 session after reload. Tokens remain memory only. The owner reported successful sign in, callback return, identity display, token acquisition, and a genuine Worker round trip. Owner verification of silent reload after the latest client build remains. |
 | Worker authentication boundary            | Phase 2A implemented and staging verified      | A separate Worker verifies RS256 signatures through Auth0 JWKS, exact issuer and API audience, time claims, token type, and `read:my-atlas`. The staging `workers.dev` deployment returned Phase 2C health, rejected an unauthenticated protected request with 401, allowed the exact production origin, and rejected an unrelated origin. The owner also verified a genuine Auth0 API-audience access token through the live Worker. The default environment remains undeployed with no production route.                                                                            |
 | Registration Durable Objects and API      | Phase 2B staging redemption owner verified     | One SQLite-backed registry class atomically reserves invitation, qualified identity, handle and idempotency claims. One SQLite-backed user class initializes a private revision-1 profile. The authenticated browser form requires a one-use invitation, bounded identity fields, explicit staging acceptance, and a real Turnstile token. The owner reported successful invitation redemption, private account entry, and a Uvita pin that persisted through reload and a second sign in. |
@@ -300,9 +306,10 @@ completed handoff evidence is:
 7. Tests and the staging dry run passed. Worker
    `c1923a3b-2a8f-47a8-acd0-cf033ea49790` is deployed without a production
    route.
-8. Verify health, Uvita and Salt Lake City search, genuine-token auth, private
-   profile 404, public handle read, rate-limit 429, immediate unpublication, and
-   direct mobile link loading. Do not add an apex production route yet.
+8. Production-origin health, CORS, Uvita search, and direct client rendering
+   now pass. Genuine-token auth on the production origin, a real public handle,
+   rate-limit 429, immediate unpublication, and direct mobile interaction remain
+   owner verification. Do not add an apex Worker route yet.
 
 ### Later gates
 
