@@ -102,8 +102,9 @@
           <span>Explore through a photographer's eyes</span>
           <h1>The journey starts with a place.</h1>
           <p>
-            Open a mapped journey for its route, stories, photos, and films.
-            Collapse this guide whenever you want the map back.
+            Open a mapped journey for its route, stories, photographs, and
+            films. Journeys marked First look are still taking shape and will
+            grow over time.
           </p>
         </div>
 
@@ -115,11 +116,15 @@
           <button
             v-for="node in rootNodes"
             :key="node.id"
+            :class="{ 'is-first-look': node.comingSoon }"
             type="button"
             @click="selectNode(node.id)"
           >
-            <span>{{ node.comingSoon ? "Journey preview" : "Explore" }}</span>
+            <span>{{ node.comingSoon ? "First look" : "Explore" }}</span>
             <strong>{{ node.title }}</strong>
+            <small v-if="node.comingSoon">
+              More stories and media will be added.
+            </small>
           </button>
         </div>
 
@@ -964,9 +969,9 @@ export default {
 .atlas-journey-nav button {
   display: grid;
   min-width: 0;
-  min-height: 4rem;
+  min-height: 4.5rem;
   align-content: center;
-  gap: 0.08rem;
+  gap: 0.12rem;
   border: 1px solid rgba(246, 189, 96, 0.42);
   border-radius: 15px;
   padding: 0.7rem 0.8rem;
@@ -997,6 +1002,19 @@ export default {
   font-size: 0.82rem;
   line-height: 1.3;
   text-overflow: ellipsis;
+}
+
+.atlas-journey-nav button > small {
+  margin-top: 0.18rem;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.65rem;
+  line-height: 1.35;
+}
+
+.atlas-journey-nav button.is-first-look {
+  background:
+    linear-gradient(135deg, rgba(246, 189, 96, 0.13), transparent 72%),
+    rgba(255, 255, 255, 0.035);
 }
 
 .atlas-welcome-actions {
@@ -1155,8 +1173,12 @@ export default {
   }
 
   .atlas-journey-nav button {
-    min-height: 3.8rem;
+    min-height: 4.8rem;
     padding: 0.62rem 0.7rem;
+  }
+
+  .atlas-journey-nav button > small {
+    font-size: 0.68rem;
   }
 
   .atlas-welcome-actions {

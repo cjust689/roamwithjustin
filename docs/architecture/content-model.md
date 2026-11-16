@@ -141,8 +141,11 @@ its internal `coming-soon` status while South Pointe and Shark Valley media,
 captions, editorial roles, and final curation are incomplete.
 
 These previews may omit media, venues, external links, itinerary days, and
-unsupported details. Their Atlas panels and story views present only the facts
-that exist, without labels such as "coming soon," "confirmed," "unconfirmed,"
+unsupported details. Their Atlas chooser cards use the visitor-facing `First
+look` cue, and every incomplete Journey panel explains that the Journey is
+still taking shape and will gain more places, stories, photographs, and films
+over time. This sets an honest completeness expectation without exposing
+internal status labels such as "coming soon," "confirmed," "unconfirmed,"
 "verified," or "unverified." Missing links stay absent instead of being
 replaced with guessed tourism or map URLs.
 Coordinates use verified public geographic points or area centroids, with the
