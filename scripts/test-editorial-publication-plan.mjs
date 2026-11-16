@@ -106,6 +106,14 @@ assert.throws(
 assert.throws(
   () =>
     resolvePublicationTarget({
+      row: { ...base, "Atlas Place": "New: Test Cove" },
+      catalog,
+    }),
+  /run editorial:register:place first/
+)
+assert.throws(
+  () =>
+    resolvePublicationTarget({
       row: { ...base, "Publish To": "Social" },
       catalog,
     }),

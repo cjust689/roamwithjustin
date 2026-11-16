@@ -237,7 +237,7 @@ function appendManagedReferenceRequests({
   }
 }
 
-function tableDropdown(values) {
+function tableDropdown(values, { strict = true } = {}) {
   return {
     columnType: "DROPDOWN",
     dataValidationRule: {
@@ -247,6 +247,8 @@ function tableDropdown(values) {
           userEnteredValue,
         })),
       },
+      strict,
+      showCustomUi: true,
     },
   }
 }
@@ -612,7 +614,7 @@ export function buildAtlasCatalogMigration({
             overrides: new Map([
               ["Publish To", tableDropdown(["Social", "Atlas", "Both"])],
               ["Atlas Journey", tableDropdown(journeyChoices)],
-              ["Atlas Place", tableDropdown(placeChoices)],
+              ["Atlas Place", tableDropdown(placeChoices, { strict: false })],
               ["Atlas Mode", tableDropdown(["Off", "Preview", "Publish"])],
             ]),
           }),

@@ -1,4 +1,5 @@
 import { previewAtlasPresentation } from "./preview-presentation.mjs"
+import { generatedAtlasPresentation } from "../geography/index.mjs"
 
 // Atlas-only presentation settings. Geographic facts and stories resolve from canonical records.
 export const atlasPresentation = Object.freeze([
@@ -827,4 +828,5 @@ export const atlasPresentation = Object.freeze([
     relatedIds: ["cinnamon-bay", "maho-bay"],
   },
   ...previewAtlasPresentation,
+  ...generatedAtlasPresentation,
 ])

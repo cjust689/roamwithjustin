@@ -15,6 +15,7 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/editorial-publish.mjs
+  - scripts/editorial-register-place.mjs
   - scripts/editorial-baseline.mjs
   - scripts/editorial-migrate-sheet.mjs
   - scripts/editorial-build-catalog.mjs
@@ -36,8 +37,12 @@ code_paths:
   - scripts/lib/editorial-google-publication.mjs
   - scripts/lib/editorial-google-visits.mjs
   - scripts/lib/editorial-publication-plan.mjs
+  - scripts/lib/editorial-place-registration.mjs
+  - scripts/test-editorial-place-registration.mjs
   - src/content/experiences/index.mjs
   - src/content/editorial/generated/records.json
+  - src/content/geography/index.mjs
+  - src/content/geography/generated/records.json
   - src/views/roam/RoamTripOverview.vue
   - .github/workflows/editorial-publication-ci.yml
   - package.json
@@ -130,12 +135,49 @@ publisher resolves the canonical Place and matching Visit within the chosen
 Journey. It rejects an unknown Place or a real Place that has no Visit in that
 Journey. The friendly choices are authoritative at publication time; guarded
 write-back stores the resolved hidden `journey_id`, `place_id`, and `visit_id`.
+The custom value `New: <name>` is an explicit registration request, not a
+publication target. Normal preview and publication reject it until the
+separate registration command succeeds.
 
 `Atlas Experience` remains optional free text in the native Sheets table so an
 existing label or `New: <title>` can be entered. The protected `Atlas
 Reference` tab is for review only. `editorial:catalog -- --apply` rebuilds it
 on demand, and every apply-mode publication refreshes it before selection and
 again after successful generated content changes.
+
+## Explicit Place and Visit registration
+
+Adding a row never creates geography by inference. To request a missing Place,
+set the row to `Publish To = Atlas` or `Both`, select an existing `Atlas
+Journey`, enter `New: <name>` in `Atlas Place`, and keep `Atlas Mode = Off`.
+The stable Post ID identifies the request even if the Sheet is sorted.
+
+Preview the exact registration first:
+
+```bash
+npm run editorial:register:place -- --preview --oauth-client "C:\\private\\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID" --post-id "POST_ID" --parent-place "PARENT_PLACE" --longitude "LONGITUDE" --latitude "LATITUDE" --summary "PUBLIC PLACE SUMMARY" --after-place "PRIOR_PLACE"
+```
+
+Replace `--preview` with `--apply` only after reviewing the output. A new Place
+requires an existing parent Place, or the explicit value `none`, verified
+longitude and latitude, and a short public summary. Category, coordinate
+precision, country/region codes, official links, map links, camera settings,
+and a stable ID override are optional. `--after-place` controls Journey order;
+omitting it appends the Visit. The row date remains display evidence and is not
+used to infer order.
+
+If the requested name resolves to an existing canonical Place that lacks a
+Visit in the selected Journey, the command reuses the Place and creates only
+the Visit and Atlas pin. If that Journey already visits the Place, registration
+stops and directs the creator to select the existing choice.
+
+Apply updates only the generated geography shard, validates and builds it,
+promotes it through the same protected develop and main pull-request path,
+waits for Pages, checks the exact rendered Atlas Place, refreshes the hidden
+Catalog and visible Atlas Reference, then replaces `New: <name>` with the
+registered Place and writes its hidden IDs. The command is resumable and checks
+the unchanged Sheet source before every guarded write. It never uploads media
+or changes `Atlas Mode`; the creator chooses Preview or Publish afterward.
 
 ## Preview behavior
 
@@ -246,6 +288,7 @@ The earlier bounded commands remain available for migration and diagnosis:
 npm run editorial:baseline -- --dry-run
 npm run editorial:migrate -- --apply ...
 npm run editorial:catalog -- --apply ...
+npm run editorial:register:place -- --preview ...
 npm run editorial:suggest:places -- ...
 npm run editorial:bind:reviewed-places -- --apply ...
 npm run editorial:github:audit -- --json
@@ -253,8 +296,9 @@ npm run editorial:github:configure -- --dry-run
 ```
 
 Run `editorial:catalog -- --apply` after adding a canonical Journey, Place, or
-Visit outside the Sheet publisher. Experiences created by an apply-mode
-publication appear automatically in both lookup tabs during that same run.
+Visit outside the Sheet publisher. The explicit registration command performs
+that refresh itself. Experiences created by an apply-mode publication appear
+automatically in both lookup tabs during that same run.
 
 `editorial:github:configure -- --apply` is allowed only after the validation
 workflow exists on both remote branches. The live ruleset now protects
@@ -273,6 +317,9 @@ Implemented and test-covered:
 - receipt-free preview planning and real-receipt apply plumbing
 - generated Experience and Moment records, selectors, validation, and Journey
   presentation
+- explicit row-backed Place and Visit registration with read-only preview,
+  generated canonical geography, Atlas pin creation, protected promotion,
+  Catalog refresh, and guarded row binding
 - isolated generated-file branches, two-stage pull-request promotion, workflow
   observation, exact rendered-page verification, and guarded write-back
 - deterministic retry identities for snapshots, media batches, Moments,
@@ -287,8 +334,9 @@ Still owner-controlled or externally unverified:
 - first real Drive download through the chosen OAuth scope
 - production R2 Worker endpoint and token availability in this environment
 - first row-backed end-to-end post publication and Sheet Published readback
-- creating a missing Journey, Place, or Visit from a row; the current compiler
-  targets existing canonical Journeys and Visits and can create Experiences
+- first live `New:` Place registration and rendered production proof; the path
+  is implemented and locally test-covered
+- creating an entirely new Journey from a row
 - an optional Utah 2026 Salt Lake City Airport transit Visit if that stop later
   needs Place-scoped presentation
 - optional background polling or Windows Task Scheduler integration
@@ -306,6 +354,7 @@ Still owner-controlled or externally unverified:
 - [x] Implement real-receipt R2 apply and atomic generated-record compilation.
 - [x] Implement isolated per-post branches and staged merge-commit promotion.
 - [x] Implement workflow, Pages, rendered content, Catalog, and Sheet checks.
+- [x] Implement an explicit `New:` Place and Visit registration command.
 - [ ] Run the first owner-selected Preview row against a real Drive folder.
 - [ ] Run the first owner-approved Publish row through R2 and production.
 - [ ] Prove the two-Post, one-Experience regression with real content.
