@@ -520,6 +520,8 @@ Catalog, and all 104 Journey and Place bindings are verified. The private
 review ledger records the owner-confirmed Salt Lake City Airport binding as
 lacking a Utah 2026 Visit. It remains Journey-scoped unless a real transit
 Visit is deliberately added. The one-command preview and apply implementation
-is locally verified, but no real row has yet downloaded Drive source, uploaded
-new R2 objects, changed generated production content, or completed its final
-Sheet Published write-back.
+is locally verified. Its GitHub promotion and Pages path is also live verified
+through pull requests 30 and 31, two validation jobs, Pages run 43800514937,
+and rendered production proof. No real row has yet downloaded Drive source,
+uploaded new R2 objects, changed generated production content, or completed
+its final Sheet Published write-back.
