@@ -53,6 +53,12 @@ verification:
     - creator-authorized live Sheet migration on 2026-11-15
     - verified live Atlas Catalog and 104 Journey and Place bindings on 2026-11-15
     - verified 82 live Visit bindings on 2026-11-16
+    - GitHub pull request 30 merged to develop as 4d88df2 on 2026-11-16
+    - develop validate job 133078010450 succeeded on 2026-11-16
+    - GitHub pull request 31 validated and merged to main as 63686ed on 2026-11-16
+    - Pages workflow run 43800514937 succeeded on 2026-11-16
+    - rendered production Journey title and media section verified on 2026-11-16
+    - active ruleset 27216249 verified merge-only with required validate check
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
@@ -64,9 +70,11 @@ private checkpoints, Git branches, validation, deployment observation, and
 guarded Sheet metadata remain automation concerns.
 
 The code path is implemented and locally tested. The historical Sheet
-migration and bindings are live verified. A real post has not yet supplied the
-combination of `Atlas Mode`, Drive media, and credentials needed to prove the
-first end-to-end R2 publication, so the implementation remains partial.
+migration, 82 Visit relations, GitHub pull-request promotion, Actions build,
+Pages deployment, rendered-page verification, and hardened branch rules are
+live verified. A real post has not yet supplied the combination of
+`Atlas Mode`, Drive media, and credentials needed to prove the first
+end-to-end R2 publication, so the implementation remains partial.
 
 ## One-command workflow
 
@@ -204,9 +212,10 @@ npm run editorial:github:configure -- --dry-run
 ```
 
 `editorial:github:configure -- --apply` is allowed only after the validation
-workflow exists on both remote branches. It updates the existing exact
-`develop` and `main` ruleset, then semantically verifies merge-only pull
-requests, strict current-base checks, and the required `validate` context.
+workflow exists on both remote branches. The live ruleset now protects
+`develop` and `main` from deletion and non-fast-forward updates, permits only
+merge-commit pull requests, and requires the strict `validate` context. The
+configuration command semantically verifies those rules after applying them.
 
 ## Verified boundaries and remaining work
 
@@ -221,12 +230,14 @@ Implemented and test-covered:
   observation, exact rendered-page verification, and guarded write-back
 - deterministic retry identities for snapshots, media batches, Moments,
   branches, and GitHub checkpoints
+- live feature promotion through pull requests 30 and 31, two successful
+  validation jobs, Pages run 43800514937, and exact rendered production proof
 
 Still owner-controlled or externally unverified:
 
 - first real Drive download through the chosen OAuth scope
 - production R2 Worker endpoint and token availability in this environment
-- first end-to-end post publication and Sheet Published readback
+- first row-backed end-to-end post publication and Sheet Published readback
 - creating a missing Journey, Place, or Visit from a row; the current compiler
   targets existing canonical Journeys and Visits and can create Experiences
 - an optional Utah 2026 Salt Lake City Airport transit Visit if that stop later
