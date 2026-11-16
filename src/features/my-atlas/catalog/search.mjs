@@ -22,11 +22,19 @@ export function formatPlaceLabel(place) {
 
 function searchScore(record, query) {
   const names = Array.isArray(record.searchNames) ? record.searchNames : []
+  const canonicalNames = [...new Set([record.name, record.asciiName])]
+    .map(normalizeSearchText)
+    .filter(Boolean)
   let score = Number.POSITIVE_INFINITY
 
-  names.forEach(name => {
+  canonicalNames.forEach(name => {
     if (name === query) score = Math.min(score, 0)
     else if (name.startsWith(query)) score = Math.min(score, 10)
+  })
+
+  names.forEach(name => {
+    if (name === query) score = Math.min(score, 5)
+    else if (name.startsWith(query)) score = Math.min(score, 15)
     else if (name.includes(" " + query)) score = Math.min(score, 20)
     else if (name.includes(query)) score = Math.min(score, 30)
   })

@@ -8,6 +8,8 @@ created: 2026-11-16
 updated: 2026-11-16
 related:
   - my-atlas-geography
+  - my-atlas-registration
+  - my-atlas-account-state
   - my-atlas-private-beta-implementation
   - docs-index
 supersedes:
@@ -15,8 +17,11 @@ supersedes:
 superseded_by: []
 code_paths:
   - src/features/my-atlas
+  - workers/my-atlas
   - scripts/my-atlas
   - scripts/test-my-atlas-place-catalog.mjs
+  - scripts/test-my-atlas-worker.mjs
+  - workers/my-atlas/test/registration.test.mjs
 verification:
   state: unverified
   evidence: []
@@ -25,9 +30,26 @@ verification:
 # My Atlas: Private Beta V1.1 - Lean Implementation Proposal
 
 > **Adoption status:** This is the accepted product and architecture target.
-> Phase 1 is implemented as an environment-gated local geographic proof. The
-> secure backend, authentication, sharing, and invited beta remain unimplemented
-> and are tracked in the linked active implementation document.
+> Phase 1 is implemented as an environment-gated local geographic proof. A
+> bounded Auth0 browser client is also implemented and owner verified locally.
+> Phase 2A adds a local-only Worker that cryptographically verifies the exact
+> Auth0 API access-token boundary. Phase 2B has begun with local SQLite-backed
+> registry and user Durable Object classes, atomic registration claims,
+> idempotent private-profile initialization, and a fail-closed registration
+> route. A protected local operator API now issues and revokes invitations,
+> inspects bounded pending records, and safely completes or releases interrupted
+> provisioning. A revisioned local profile and canonical pin-state layer also
+> implements CRUD, pagination, and export. The authoritative catalog now
+> compiles into immutable versioned Worker search and resolution shards, while
+> pin writes fail closed until a separate catalog bucket is published and bound.
+> A local Phase 2C slice now adds owner state bootstrap, saved pin controls,
+> explicit publish or unpublish, a safe signed-out Atlas projection, a
+> `/my-atlas/{handle}` viewer, and a weighted public-read limiter boundary. A
+> dry-run-only staging declaration names an isolated catalog bucket and temporary
+> `workers.dev` target. No cloud resource, namespace, object, limiter, hostname,
+> or route is deployed. Handle changes, account deletion, reporting,
+> profile-specific server HTML, moderation, and the invited beta remain
+> unimplemented and are tracked in the linked active implementation document.
 
 > **Implementation handoff:** This document supersedes the earlier My Atlas beta V1 proposal at the product-design level. Audit the actual repository and external service configuration before each implementation phase. Do not alter the curated Roam With Justin Atlas or existing media-upload Worker. This is the accepted target, not a claim that every phase already exists.
 >
@@ -123,12 +145,12 @@ verification:
 
 ### Separation of responsibilities
 
-| Layer | Use | Persistence rule |
-|---|---|---|
-| MapLibre | Browser renderer, markers, clustering, interactions | No geographic identity or search authority |
-| Existing MapTiler | Basemap and terrain tile delivery; existing cartographic style | Keep tile use within MapTiler terms; **do not derive pin identity from search** |
+| Layer                | Use                                                                                   | Persistence rule                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| MapLibre             | Browser renderer, markers, clustering, interactions                                   | No geographic identity or search authority                                         |
+| Existing MapTiler    | Basemap and terrain tile delivery; existing cartographic style                        | Keep tile use within MapTiler terms; **do not derive pin identity from search**    |
 | Our GeoNames catalog | Search country and city, resolve names/aliases, hierarchy, representative coordinates | Downloaded and transformed under GeoNames CC BY 4.0; persist our canonical entries |
-| User Durable Object | Saved user's selected catalog IDs and optional visited years | Authoritative user state; reads/writes under authenticated owner authorization |
+| User Durable Object  | Saved user's selected catalog IDs and optional visited years                          | Authoritative user state; reads/writes under authenticated owner authorization     |
 
 ### Canonical IDs
 
@@ -214,7 +236,12 @@ Use Turnstile server-side verification for redemption/high-risk actions, strict 
 {
   "schemaVersion": 1,
   "userId": "usr-c7eab2",
-  "identities": [{"issuer": "https://example-auth0-tenant/", "subject": "google-oauth2|opaque"}],
+  "identities": [
+    {
+      "issuer": "https://example-auth0-tenant/",
+      "subject": "google-oauth2|opaque"
+    }
+  ],
   "handle": "traveler-example",
   "displayName": "Traveler Example",
   "public": false,
@@ -258,26 +285,26 @@ Even without photos, display names and handles can be abusive. Offer a **Report 
 
 **Public, no login:**
 
-| Route | Use |
-|---|---|
-| `GET /v1/places/search?q=...` | Search owned, persistent GeoNames-derived catalog; bounded results/quotas |
-| `GET /v1/places/{placeId}` | Resolve canonical catalog item and attribution |
-| `GET /v1/public/atlas/{handle}` | Only if DO status is public and active; sanitized map/pins; no-store |
-| `POST /v1/reports` | Abuse report, rate limited and anti-spam protected |
+| Route                           | Use                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| `GET /v1/places/search?q=...`   | Search owned, persistent GeoNames-derived catalog; bounded results/quotas |
+| `GET /v1/places/{placeId}`      | Resolve canonical catalog item and attribution                            |
+| `GET /v1/public/atlas/{handle}` | Only if DO status is public and active; sanitized map/pins; no-store      |
+| `POST /v1/reports`              | Abuse report, rate limited and anti-spam protected                        |
 
 **Authenticated owner:**
 
-| Route | Use |
-|---|---|
-| `POST /v1/beta/register` | JWT + invite + Turnstile; registry claim and idempotent provisioning |
-| `GET /v1/me` | Own profile and editor data |
-| `PATCH /v1/me` | Display name/handle; visibility Publish or Make Private with revision |
-| `DELETE /v1/me` | Confirmed deletion/tombstone |
-| `GET /v1/me/pins` | Paginated pins and catalog-reconciled metadata |
-| `POST /v1/me/pins` | Canonical place ID, optional visited years; idempotent dedupe |
-| `PATCH /v1/me/pins/{pinId}` | Correct years, optionally replace catalog place; revision required |
-| `DELETE /v1/me/pins/{pinId}` | Delete pin; revision required |
-| `GET /v1/me/export` | JSON or CSV with place IDs, metadata, years, version |
+| Route                        | Use                                                                   |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `POST /v1/beta/register`     | JWT + invite + Turnstile; registry claim and idempotent provisioning  |
+| `GET /v1/me`                 | Own profile and editor data                                           |
+| `PATCH /v1/me`               | Display name/handle; visibility Publish or Make Private with revision |
+| `DELETE /v1/me`              | Confirmed deletion/tombstone                                          |
+| `GET /v1/me/pins`            | Paginated pins and catalog-reconciled metadata                        |
+| `POST /v1/me/pins`           | Canonical place ID, optional visited years; idempotent dedupe         |
+| `PATCH /v1/me/pins/{pinId}`  | Correct years, optionally replace catalog place; revision required    |
+| `DELETE /v1/me/pins/{pinId}` | Delete pin; revision required                                         |
+| `GET /v1/me/export`          | JSON or CSV with place IDs, metadata, years, version                  |
 
 **Restricted admin (CLI or protected API):** issue/revoke invitations, inspect pending provisioning/reconcile, moderate/reinstate, export/delete, initiate announced reset and audit operations. No public invitation-validity endpoint. Existing upload API remains separate and unaffected.
 
@@ -350,19 +377,20 @@ Audit actual repo and configuration before writing code. Prior review reported V
 
 ## 12. Phased implementation and release gates
 
-| Phase | Deliverable | Gate / forbidden shortcuts |
-|---|---|---|
-| **0 - Audit/decisions** | Repo/DNS/Worker route review (including wildcard/reserved-path passthrough), GeoNames license and catalog size benchmark, Auth0 SPA + exact API audience, catalog isolation, cost cap, terms/privacy/retention decisions | **No deployment or content changes**; GeoNames catalog coverage and permanent storage rights are prerequisites |
-| **1 - Geographic proof** | Download/build small country+city catalog, IDs, search and map markers using unchanged MapLibre/MapTiler visuals | Searching Uvita and ambiguous cities works; map tiles do not supply persistent pin ID |
-| **2 - Secure backend** | Worker + Auth0 Google validation + registration registry DO + user DO + invite flow + profile/pin CRUD + export/delete/report | Concurrent invite redemption, registration retries, stale revision and private-visibility tests pass; no public release |
-| **3 - Share experience** | Vue 2 user flow, private default, explicit Publish, dynamic public profile Worker HTML and Open Graph, noindex, staging share preview | HTTP 200 correct OG for public; 404/410/no leak for private/deleted; curated Atlas intact |
-| **4 - Invited beta** | Admin invitations, monitoring, user reports, reset notice/export process, small invited test group | Users can safely sign in/pin/edit/share/revoke; no KV, ads, photos, Facebook or recap graphics |
-| **Later - monetization** | Policy-reviewed one-slot AdSense experiment and analytics | Feature flag off until eligible and approved; zero promises of one impression per visit |
-| **V2 - media/recap** | One cover + three favorites; R2 upload and yearly share graphic | Separate explicit approval, cost/rights/moderation and privacy audit |
+| Phase                    | Deliverable                                                                                                                                                                                                              | Gate / forbidden shortcuts                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| **0 - Audit/decisions**  | Repo/DNS/Worker route review (including wildcard/reserved-path passthrough), GeoNames license and catalog size benchmark, Auth0 SPA + exact API audience, catalog isolation, cost cap, terms/privacy/retention decisions | **No deployment or content changes**; GeoNames catalog coverage and permanent storage rights are prerequisites          |
+| **1 - Geographic proof** | Download/build small country+city catalog, IDs, search and map markers using unchanged MapLibre/MapTiler visuals                                                                                                         | Searching Uvita and ambiguous cities works; map tiles do not supply persistent pin ID                                   |
+| **2 - Secure backend**   | Worker + Auth0 Google validation + registration registry DO + user DO + invite flow + profile/pin CRUD + export/delete/report                                                                                            | Concurrent invite redemption, registration retries, stale revision and private-visibility tests pass; no public release |
+| **3 - Share experience** | Vue 2 user flow, private default, explicit Publish, dynamic public profile Worker HTML and Open Graph, noindex, staging share preview                                                                                    | HTTP 200 correct OG for public; 404/410/no leak for private/deleted; curated Atlas intact                               |
+| **4 - Invited beta**     | Admin invitations, monitoring, user reports, reset notice/export process, small invited test group                                                                                                                       | Users can safely sign in/pin/edit/share/revoke; no KV, ads, photos, Facebook or recap graphics                          |
+| **Later - monetization** | Policy-reviewed one-slot AdSense experiment and analytics                                                                                                                                                                | Feature flag off until eligible and approved; zero promises of one impression per visit                                 |
+| **V2 - media/recap**     | One cover + three favorites; R2 upload and yearly share graphic                                                                                                                                                          | Separate explicit approval, cost/rights/moderation and privacy audit                                                    |
 
 ## 13. Acceptance tests (minimum)
 
 **Geographic correctness**
+
 - [ ] Existing curated map appearance stays unchanged; My Atlas MapLibre uses MapTiler **tiles/terrain only**, not MapTiler feature IDs as stored pins.
 - [ ] GeoNames-derived country/city catalog has documented CC BY 4.0 attribution and versioned source files.
 - [ ] Uvita, Costa Rica and homonymous cities are searchable or a failed catalog-coverage test blocks launch with a documented fix.
@@ -370,6 +398,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - [ ] User cannot create an arbitrary street-level location, unsupported ID, address or duplicate pin.
 
 **Account, invites and ownership**
+
 - [ ] Beta invite is required for My Atlas account provisioning and pin writes; Google login alone cannot create a personal Atlas.
 - [ ] Single registry DO enforces one-use invite and unique handle under concurrent requests; pending registration can recover without ghost accounts or permanently consumed codes.
 - [ ] Auth0 SPA client works with **Vue 2** and in-app/mobile browsers; protected requests use an **access token for the configured My Atlas API audience**, never an ID token; Worker rejects wrong-audience, expired, unsigned and ID tokens and enforces owner authorization.
@@ -378,12 +407,14 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - [ ] Every profile and pin edit requires matching revision or returns a conflict; safe retries do not duplicate state.
 
 **Pin CRUD and portability**
+
 - [ ] Create/read/edit/delete a canonical country or city pin and its optional visited years; dedupe and 300-pin ceiling behave clearly.
 - [ ] Add year to existing pin; country aggregation does not double count a pinned city plus its country.
 - [ ] Profile display name/handle changes work; old handles remain reserved or tombstoned.
 - [ ] Owner can export all data and delete account; account deletion revokes all public data and produces 410 for tombstoned public handles.
 
 **Sharing, privacy, safety**
+
 - [ ] New profile defaults private and has no public content until explicit Publish after one pin.
 - [ ] Every new public profile URL delivers HTTP 200 and correct, safely escaped profile-specific OG metadata without client JavaScript.
 - [ ] Private/suspended/unknown profiles disclose no personal data (404); deleted/tombstoned handles return 410.
@@ -393,6 +424,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - [ ] Route is configured as `roamwithjustin.com/my-atlas/*` (not `{handle}`), valid handle routes produce authoritative share HTML, and `/my-atlas`, reserved login/callback/settings paths, nested paths, site assets, and `/atlas` continue to reach the existing Vue/GitHub Pages application without loops.
 
 **Scope, monetization, operations**
+
 - [ ] Beta contains **no** image upload, public Nominatim autocomplete, Facebook auth, recap graphic, KV, AdSense request or per-pin article.
 - [ ] Terms/privacy versions are acknowledged; beta reset language is shown; export and deletion tested.
 - [ ] Real traffic, storage, map API and auth costs have monitoring/budget alerts.
@@ -420,4 +452,4 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - Cloudflare Worker Route requirements: https://developers.cloudflare.com/workers/configuration/routing/routes/
 - Google policy for user-generated content around AdSense: https://support.google.com/adsense/answer/1355699
 
-**Review status:** The four final review corrections (API access-token audience, real Worker wildcard routing, isolated catalog R2, and append-preserving deprecated GeoNames identities) are incorporated. The target is accepted and managed. Phase 1 is locally implemented and verified; later phases remain gated. No DNS, cloud resources, accounts, production routes, or existing user data were changed during managed-doc adoption.
+**Review status:** The four final review corrections (API access-token audience, real Worker wildcard routing, isolated catalog R2, and append-preserving deprecated GeoNames identities) are incorporated. The target is accepted and managed. Phase 1 and the bounded Auth0 browser client are locally implemented, and the owner verified the Google redirect flow and API-audience access-token acquisition. Later backend phases remain gated. No DNS, Cloudflare resource, My Atlas user account, production route, or existing user data was changed by repository implementation.

@@ -183,6 +183,7 @@ function cityRecord(city, countries, admin1, revision) {
     }),
     countryCode: city.countryCode,
     countryName: country.name,
+    continent: country.continent,
     admin1Code: city.admin1Code,
     admin1Name: admin?.name || "",
     coordinates: [city.longitude, city.latitude],

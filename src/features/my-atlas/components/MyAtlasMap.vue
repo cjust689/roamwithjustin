@@ -20,6 +20,9 @@
 import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { mapStyleUrl, terrainSource } from "../../atlas/config/mapConfig"
+import { decorativeConnections } from "../catalog/atlasInsights.mjs"
+
+const CONNECTION_SOURCE = "my-atlas-connections"
 
 const worldCamera = {
   center: [-35, 22],
@@ -51,6 +54,10 @@ export default {
       type: String,
       default: "",
     },
+    showConnections: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -64,12 +71,16 @@ export default {
     places: {
       deep: true,
       handler() {
+        this.renderConnections()
         this.renderMarkers()
       },
     },
     selectedPlaceId() {
       this.renderMarkers()
       this.focusSelectedPlace()
+    },
+    showConnections() {
+      this.renderConnections()
     },
   },
   mounted() {
@@ -121,6 +132,7 @@ export default {
               "bottom-left"
             )
           }
+          this.initializeConnections()
           this.renderMarkers()
         })
         this.map.on("error", event => {
@@ -133,6 +145,82 @@ export default {
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
+    },
+    connectionGeoJson() {
+      const features = this.showConnections
+        ? decorativeConnections(this.places).map(edge => {
+            const [fromLongitude, fromLatitude] = edge.from.coordinates
+            let [toLongitude, toLatitude] = edge.to.coordinates
+            if (toLongitude - fromLongitude > 180) toLongitude -= 360
+            if (fromLongitude - toLongitude > 180) toLongitude += 360
+            const longitudeDistance = Math.abs(toLongitude - fromLongitude)
+            const latitudeDistance = Math.abs(toLatitude - fromLatitude)
+            const lift = Math.min(
+              18,
+              2.5 + longitudeDistance * 0.045 + latitudeDistance * 0.025
+            )
+            const coordinates = Array.from({ length: 25 }, (_value, index) => {
+              const progress = index / 24
+              return [
+                fromLongitude + (toLongitude - fromLongitude) * progress,
+                fromLatitude +
+                  (toLatitude - fromLatitude) * progress +
+                  Math.sin(progress * Math.PI) * lift,
+              ]
+            })
+            return {
+              type: "Feature",
+              properties: {},
+              geometry: { type: "LineString", coordinates },
+            }
+          })
+        : []
+      return { type: "FeatureCollection", features }
+    },
+    initializeConnections() {
+      if (!this.map || !this.ready || this.map.getSource(CONNECTION_SOURCE)) {
+        return
+      }
+      this.map.addSource(CONNECTION_SOURCE, {
+        type: "geojson",
+        data: this.connectionGeoJson(),
+      })
+      const firstLabelLayer = this.map
+        .getStyle()
+        .layers?.find(layer => layer.type === "symbol")?.id
+      this.map.addLayer(
+        {
+          id: "my-atlas-connections-glow",
+          type: "line",
+          source: CONNECTION_SOURCE,
+          paint: {
+            "line-color": "#e6ba68",
+            "line-opacity": 0.14,
+            "line-width": 8,
+            "line-blur": 4,
+          },
+        },
+        firstLabelLayer
+      )
+      this.map.addLayer(
+        {
+          id: "my-atlas-connections-line",
+          type: "line",
+          source: CONNECTION_SOURCE,
+          paint: {
+            "line-color": "#f0c978",
+            "line-opacity": 0.58,
+            "line-width": 2,
+            "line-dasharray": [2, 2.6],
+          },
+        },
+        firstLabelLayer
+      )
+    },
+    renderConnections() {
+      if (!this.map || !this.ready) return
+      this.initializeConnections()
+      this.map.getSource(CONNECTION_SOURCE)?.setData(this.connectionGeoJson())
     },
     renderMarkers() {
       if (!this.map || !this.ready) return
