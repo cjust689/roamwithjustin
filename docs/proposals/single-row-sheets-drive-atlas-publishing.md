@@ -59,8 +59,9 @@ verification:
 **Project:** Roam With Justin  
 **Audience:** VS Code / Codex coding agent  
 **Document status:** Accepted architecture, partially implemented. The live
-baseline, schema and identity migration, Catalog, 104 Journey and Place
-bindings, local Drive snapshot and preview path, Experience and Moment layer,
+baseline, table-aware schema and identity migration, Catalog, protected
+Reference, 106 Journey and Place bindings, local Drive snapshot and preview
+path, Experience and Moment layer,
 real-receipt apply coordinator, guarded GitHub promotion, deployment checks,
 and Sheet write-back code now exist. The first real Drive and R2 post remains
 unverified. Creating a missing Journey, Place, or Visit and optional background
@@ -137,16 +138,17 @@ Internal records stay normalized:
 
 ## 1. Ownership: one row does not mean one flattened data model
 
-| Surface                             | Owner / authority                     | Responsibility                                                                                                          |
-| ----------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| **Posts tab**                       | Creator                               | Social queue, Drive handoff, Atlas-friendly labels, source notes, publish intent                                        |
-| **Protected Atlas Catalog**         | Automation                            | Hidden lookup index for names, IDs, parentage, owner, existence, URL and ambiguity hints; never a second authoring form |
-| **Hidden Posts metadata**           | Automation                            | Post ID, resolved entity IDs, Moment ID, source/revision fingerprint, Atlas status, URL, optional concise error         |
-| **Existing curated `.mjs` records** | Code-owned until deliberate migration | Trusted legacy Journey/Place/Visit/Atlas facts; must not be overwritten by Sheet compiler                               |
-| **Generated Git content**           | Content compiler + media ingestor     | Deterministic, validated, machine-owned published entity/placement snapshot                                             |
-| **Cloudflare R2**                   | Media publisher                       | Actual published media bytes and versioned object keys                                                                  |
-| **Private local ledger**            | Local publisher                       | Detailed Google Drive provenance, source hashes, run checkpoints, revisions, receipts, deployment reconciliation        |
-| **Public Atlas application**        | Compiled snapshot                     | Reads generated/curated data; **never authenticates directly to Google** at runtime                                     |
+| Surface                             | Owner / authority                     | Responsibility                                                                                                   |
+| ----------------------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Posts tab**                       | Creator                               | Social queue, Drive handoff, Atlas-friendly labels, source notes, publish intent                                 |
+| **Protected Atlas Reference**       | Automation                            | Visible read-only guide to Journeys, Journey-to-Place Visits, Experiences, URLs, and publication scope           |
+| **Protected Atlas Catalog**         | Automation                            | Hidden machine lookup for names, IDs, parentage, owner, existence, URL and ambiguity hints                       |
+| **Hidden Posts metadata**           | Automation                            | Post ID, resolved entity IDs, Moment ID, source/revision fingerprint, Atlas status, URL, optional concise error  |
+| **Existing curated `.mjs` records** | Code-owned until deliberate migration | Trusted legacy Journey/Place/Visit/Atlas facts; must not be overwritten by Sheet compiler                        |
+| **Generated Git content**           | Content compiler + media ingestor     | Deterministic, validated, machine-owned published entity/placement snapshot                                      |
+| **Cloudflare R2**                   | Media publisher                       | Actual published media bytes and versioned object keys                                                           |
+| **Private local ledger**            | Local publisher                       | Detailed Google Drive provenance, source hashes, run checkpoints, revisions, receipts, deployment reconciliation |
+| **Public Atlas application**        | Compiled snapshot                     | Reads generated/curated data; **never authenticates directly to Google** at runtime                              |
 
 One row is **an editorial change request**, not necessarily a brand-new Journey, Place, Visit, Experience or Moment. The compiler resolves existing records first, creates only missing validated records, and appends a new contribution when appropriate.
 
@@ -169,20 +171,22 @@ A Post is not an Experience. One Experience can have many Posts and many Moments
 
 Do not rename, reorder, erase, or reinterpret these eight existing columns just to accommodate the Atlas. Match columns by headers, not fixed numeric positions. The current CSV is only a snapshot; obtain the latest live Sheet during implementation.
 
-### 2.2 Add exactly six routine Atlas authoring columns
+### 2.2 Add eight routine Atlas authoring columns
 
 | New visible column        | Creator input                                                                                | Rule                                                                                               |
 | ------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **`Publish To`**          | `Social`, `Atlas`, or `Both`                                                                 | Separates the social queue from Atlas intent without overloading Instagram `Status`                |
 | **`Atlas Journey`**       | Choose friendly existing title, or `New: <journey title>`                                    | Required when Atlas Mode is Preview/Publish; resolution against the blended catalog                |
+| **`Atlas Place`**         | Choose a Place with a Visit in the selected Journey, or leave blank                          | Blank means Journey scope; a selected Place must resolve to that Journey's real Visit              |
 | **`Atlas Experience`**    | Choose existing within the Journey, `New: <experience title>`, or leave blank                | Optional; no invented outing/pin if blank; a Journey-level contribution is allowed                 |
 | **`Moment / Angle`**      | Short social/story perspective                                                               | Optional; defaults to `Series/Post` as a draft label, not invented narrative                       |
 | **`Atlas Notes`**         | Creator's firsthand trip/experience/story observations; may reference an approved `.md` file | Optional; blanks must stay blanks, not be AI-filled with fiction                                   |
 | **`Travel Date / Range`** | Date, approximate range or plain precision-bearing text                                      | Optional; never derive from `Posted`; do not silently convert an approximate month into exact days |
 | **`Atlas Mode`**          | `Off`, `Preview`, `Publish`                                                                  | Only creator-controlled public-publishing gate                                                     |
 
-**Defaults:** Historical rows `Off`. During rollout, newly added rows also default to `Off` or `Preview`, with no silent change to `Publish`. Once verified, the creator may choose a deliberate new-row default; do not bulk-opt-in past content.
+**Defaults:** Historical rows use `Publish To = Social` and `Atlas Mode = Off`. During rollout, newly added rows also default to `Off` or `Preview`, with no silent change to `Publish`. Once verified, the creator may choose a deliberate new-row default; do not bulk-opt-in past content.
 
-**Sheet ergonomics:** Freeze headers; keep the eight original columns visible in their current order; append the six fields. Use friendly dropdowns where possible, but **allow `New:` values** rather than forcing a trip into a stale dropdown. Don't add auxiliary creator-facing tabs.
+**Sheet ergonomics:** Freeze headers; keep the eight original columns visible in their current order; add the eight fields. Use friendly dropdowns where possible, but **allow `New:` values** for Experience rather than forcing a story into a stale dropdown. The protected `Atlas Reference` is an automation-owned guide, not a creator-maintained relational authoring tab.
 
 ### 2.3 Hidden / automation-owned fields (not routine human work)
 
@@ -196,9 +200,11 @@ Possible implementation: protected, hidden columns at the far right of the **sam
 
 **Protected/hidden is a usability feature, not a security boundary.** Do not store OAuth tokens, private Drive file inventories, secret URLs, Cloudflare credentials or full private audit logs inside the Sheet. If IDs are copied/duplicated, detect and reconcile; a hidden column does not make IDs immutable by itself.
 
-### 2.4 Protected `Atlas Catalog` — optional internal lookup only
+### 2.4 Protected `Atlas Reference` and `Atlas Catalog`
 
-One hidden/protected tab, or an external generated lookup range if the current Sheets environment handles it better. The creator does **not** edit this. It mirrors **both** existing curated entities and generated Sheet-origin entities.
+The visible, warning-protected `Atlas Reference` is rebuilt from canonical records. It shows the Journey, Atlas Place, optional Experience, whether a Journey-to-Place Visit exists, publication scope, URL, and entity ID. It is a lookup guide only. The creator does **not** maintain it.
+
+The hidden/protected `Atlas Catalog` is the corresponding machine lookup. Both tabs mirror existing curated entities and generated Sheet-origin entities.
 
 Internally store: entity type, stable ID, friendly label, Journey/parent, whether code- or Sheet-owned, approved status and active URL; provide disambiguated picker text (e.g. `Raptor Boat Day — Split / Europe 2026`). Rebuild from actual canonical registries, not from guessed text. It must not become a parallel editable CMS.
 
@@ -449,8 +455,8 @@ The CLI orchestrates deterministic file/network operations. Codex helps reconcil
 
 | Test                                         | Expected behavior                                                                                                                                                                                                                          |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Existing Sheet                               | All eight original columns and social workflow preserved; **only six new visible Atlas columns**                                                                                                                                           |
-| No extra authoring tabs                      | Creator never edits separate Journey, Place, Visit, Experience or Moment tabs                                                                                                                                                              |
+| Existing Sheet                               | All eight original columns and social workflow preserved; eight visible workflow fields include `Publish To` and `Atlas Place`                                                                                                             |
+| No extra authoring tabs                      | Creator never edits separate Journey, Place, Visit, Experience or Moment tabs; `Atlas Reference` is protected and automation-owned                                                                                                         |
 | Initial baseline                             | Only catalog bindings / Post-to-canonical mappings generated; **no duplicate code-owned entity records**; existing curated and generated public content unchanged; exact matches auto-linked; ambiguity report finite; historical rows Off |
 | Sort/insert/copy rows                        | Stable Post ID survives sort/insert; copied duplicate IDs trigger safe review                                                                                                                                                              |
 | Account filter                               | `Roam` rows eligible; unrelated WebWorks rows remain untouched                                                                                                                                                                             |
@@ -494,13 +500,13 @@ The CLI orchestrates deterministic file/network operations. Codex helps reconcil
 
 ## 13. Definition of done — creator experience, not tab count
 
-The creator can continue the existing routine: **edit in Lightroom/Resolve -> upload reviewed selections to Drive for Instagram -> add one row or enrich one row in the familiar Posts Sheet -> select Journey/Experience by friendly label (or `New:`) -> write optional Moment/Notes -> set `Atlas Mode = Publish`.** The local publisher resolves/creates the necessary internal canonical records, downloads and validates reviewed media, reuses the installed R2 prepare/upload/ingest pipeline, compiles additive story contributions, validates and deploys a coherent Atlas update, then writes back the actual verified URL/status. A second row about the same outing adds a **second Moment**, not a duplicate Experience or an overwritten first Moment. No routine ID lookup, `.mjs` edit, manual media commands, or separate relational authoring tabs.
+The creator can continue the existing routine: **edit in Lightroom/Resolve -> upload reviewed selections to Drive for Instagram -> add or enrich one row in the familiar Posts Sheet -> choose `Publish To`, Journey, optional Place and optional Experience by friendly label -> write optional Moment/Notes -> set `Atlas Mode = Publish`.** The local publisher resolves the canonical target, creates or reuses the necessary Experience, downloads and validates reviewed media, reuses the installed R2 prepare/upload/ingest pipeline, compiles additive story contributions, validates and deploys a coherent Atlas update, then writes back the actual verified URL/status. A second row about the same outing adds a **second Moment**, not a duplicate Experience or an overwritten first Moment. No routine ID lookup, `.mjs` edit, manual media commands, or separate relational authoring tabs.
 
 Until the optional local watcher runs, one command/VS Code task triggers publication. If the local machine is off, no background job is assumed. If something is ambiguous, the creator sees **one small actionable review**, not another authoring surface.
 
 ## 14. Coding-agent handoff — implement v2.1, not v2's authoring UI
 
-> Inspect the actual Roam With Justin repository HEAD, existing `Posts` Google Sheet, the prior v2 proposal and **this v2.1 document as the accepted proposed target**. Preserve all eight current Posts columns. Add only six routine visible Atlas columns: `Atlas Journey`, `Atlas Experience`, `Moment / Angle`, `Atlas Notes`, `Travel Date / Range`, `Atlas Mode` (`Off`, `Preview`, `Publish`). **Do not build creator-managed Journeys/Places/Visits/Experiences/Moments tabs.** Use a protected automation-owned catalog plus hidden IDs/status/URL and a private local ledger. Baseline the current app against historical Posts FIRST; accept unambiguous exact matches, review only ambiguous mappings, seed immutable identities, and prove that baseline outputs **only Post-to-existing-canonical catalog bindings (not duplicated entity records)** and makes no unintended public changes. Treat each Post row as an authoring event translated into normalized internal canonical records. `Location` is a candidate Place, not proof of coordinates. A new row defaults to appending a stable Moment and reviewed media to an existing Experience; same-row reruns are idempotent. `New:` selections stage missing entities and present one combined preview. `Atlas Mode = Publish` is the creator's reviewed-media/publication approval, with targeted exceptions for ambiguity, private material, rights, or proposed AI-generated claims; no second routine rights checkbox. Reuse actual `media:prepare -> media:upload -> media:ingest` and R2 Worker, with Drive provenance, versioning, mixed media, deterministic ordering, receipts, collision checks, scoped Git changes, public verification and cautious Sheet write-back. **Separate mandatory local dry-run/ingestion planning from an explicitly approved live R2 upload and applied ingestion; no fake receipts or writes in preview.** Build Experience/Moment registries/routes before accepting their placements. Prove the two-Raptor-Posts/one-Experience test. Phase changes, show precise test results, update managed docs only when behavior is verified, and never silently invent details or overwrite curated work.
+> Inspect the actual repository HEAD, live `Posts` Sheet, current docs, and real CLI flags before changing behavior. Preserve the original eight social columns. Use `Publish To`, `Atlas Journey`, `Atlas Place`, `Atlas Experience`, `Moment / Angle`, `Atlas Notes`, `Travel Date / Range`, and `Atlas Mode` as the routine workflow fields. `Location` remains the social label. `Atlas Place` independently selects a canonical Place with a real Visit in the chosen Journey, while blank means Journey scope. Maintain a visible protected `Atlas Reference`, a hidden protected machine Catalog, hidden IDs/status/URL, and a private local ledger. **Do not build creator-managed Journeys, Places, Visits, Experiences, or Moments tabs.** Resolve existing records before staging missing ones, preserve stable Post and Moment identities, and never clone curated authority. Reuse the real media pipeline, real receipts, scoped Git changes, deployment verification, and cautious Sheet write-back. Preview must remain non-publishing. `Publish` is the creator-controlled gate, with focused review only for ambiguity, private material, rights, or unsupported claims.
 
 ---
 
@@ -515,8 +521,9 @@ Until the optional local watcher runs, one command/VS Code task triggers publica
 
 **Repository handoff:** This accepted proposal now lives in `docs/proposals/`.
 The earlier designs are archived. Phase 0, the authenticated Sheet baseline,
-the creator-authorized schema and identity migration, the hidden canonical
-Catalog, and all 104 Journey and Place bindings are verified. The private
+the creator-authorized schema and identity migration, the visible protected
+Reference, the hidden canonical Catalog, and all 106 Journey and Place
+bindings are verified. Eighty-two rows also have canonical Visit bindings. The private
 review ledger records the owner-confirmed Salt Lake City Airport binding as
 lacking a Utah 2026 Visit. It remains Journey-scoped unless a real transit
 Visit is deliberately added. The one-command preview and apply implementation

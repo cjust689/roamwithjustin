@@ -1,5 +1,6 @@
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { placeRecords } from "../src/content/places/index.mjs"
 import {
   authorizeGoogleReadOnly,
   resolveGoogleConfiguration,
@@ -132,7 +133,18 @@ function verifyMigration({ before, after, plan, eligibleAccount }) {
           `Eligible row ${index + 2} has no Atlas Mode after migration`
         )
       }
-    } else if (row.post_id || row["Atlas Mode"]) {
+      if (!String(row["Publish To"] || "").trim()) {
+        throw new Error(
+          `Eligible row ${index + 2} has no Publish To after migration`
+        )
+      }
+    } else if (
+      ["post_id", "Atlas Mode", "Publish To", "Atlas Place"].some(
+        header =>
+          String(row[header] || "") !==
+          String(before.rows[index]?.[header] || "")
+      )
+    ) {
       throw new Error(
         `Unrelated row ${index + 2} received managed values unexpectedly`
       )
@@ -178,10 +190,12 @@ async function main() {
     headers: before.headers,
     rows: before.rows,
     eligibleAccount: options.account,
+    placeLabelById: new Map(placeRecords.map(place => [place.id, place.name])),
+    tables: structure.tables,
   })
 
   console.log(
-    `Approved migration plan: ${plan.summary.visibleHeadersAdded} visible headers, ${plan.summary.automationHeadersAdded} hidden headers, ${plan.summary.postIdsAssigned} Post IDs, ${plan.summary.atlasModesDefaultedOff} Off defaults.`
+    `Approved migration plan: ${plan.summary.visibleHeadersAdded} visible headers, ${plan.summary.automationHeadersAdded} hidden headers, ${plan.summary.postIdsAssigned} Post IDs, ${plan.summary.atlasModesDefaultedOff} Off defaults, ${plan.summary.publishTargetsDefaultedSocial} Social defaults, ${plan.summary.atlasPlacesBackfilled} Atlas Places.`
   )
   if (!plan.requests.length) {
     console.log("Migration is already applied; remote changes: none")

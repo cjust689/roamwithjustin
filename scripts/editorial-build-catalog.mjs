@@ -16,6 +16,8 @@ import {
 import {
   ATLAS_CATALOG_HEADERS,
   ATLAS_CATALOG_TITLE,
+  ATLAS_REFERENCE_HEADERS,
+  ATLAS_REFERENCE_TITLE,
   applyAtlasCatalogMigration,
   buildAtlasCatalogMigration,
   buildBindingReport,
@@ -35,10 +37,11 @@ function usage() {
   return `Usage:
   npm run editorial:catalog -- --apply --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--account Roam]
 
-This command rebuilds one hidden, warning-protected Atlas Catalog from current
-canonical references, adds a Journey dropdown that still permits New: values,
-and writes a private Git-ignored binding report. It never writes canonical IDs
-into Posts and does not publish content.`
+This command rebuilds the hidden Atlas Catalog and the visible, protected Atlas
+Reference from current canonical records, refreshes Publish To, Journey, Place,
+and compatible Experience dropdowns, and writes a private Git-ignored binding
+report. Native Sheets tables keep Experience as free text so New: values remain
+available. It never writes canonical IDs into Posts and does not publish content.`
 }
 
 function readValue(args, index, option) {
@@ -101,12 +104,10 @@ function normalizedSource(sheet) {
   return JSON.stringify({ headers: sheet.headers, rows: sheet.rows })
 }
 
-function normalizedCatalogValues(sheet) {
+function normalizedSheetValues(sheet, headers) {
   return [
     sheet.headers,
-    ...sheet.rows.map(row =>
-      ATLAS_CATALOG_HEADERS.map(header => String(row[header] || ""))
-    ),
+    ...sheet.rows.map(row => headers.map(header => String(row[header] || ""))),
   ]
 }
 
@@ -211,10 +212,26 @@ async function main() {
     row.map(value => String(value || ""))
   )
   if (
-    JSON.stringify(normalizedCatalogValues(actualCatalog)) !==
-    JSON.stringify(expectedValues)
+    JSON.stringify(
+      normalizedSheetValues(actualCatalog, ATLAS_CATALOG_HEADERS)
+    ) !== JSON.stringify(expectedValues)
   ) {
     throw new Error("Atlas Catalog readback does not match canonical records")
+  }
+  const actualReference = await readPostsSheet({
+    auth,
+    spreadsheetId: configuration.spreadsheetId,
+    postsRange: ATLAS_REFERENCE_TITLE,
+  })
+  const expectedReferenceValues = migration.referenceValues.map(row =>
+    row.map(value => String(value || ""))
+  )
+  if (
+    JSON.stringify(
+      normalizedSheetValues(actualReference, ATLAS_REFERENCE_HEADERS)
+    ) !== JSON.stringify(expectedReferenceValues)
+  ) {
+    throw new Error("Atlas Reference readback does not match canonical records")
   }
   const sheetsAfter = await readSpreadsheetSheets({
     auth,
@@ -223,14 +240,23 @@ async function main() {
   const catalogSheet = sheetsAfter.find(
     sheet => sheet.title === ATLAS_CATALOG_TITLE
   )
+  const referenceSheet = sheetsAfter.find(
+    sheet => sheet.title === ATLAS_REFERENCE_TITLE
+  )
   if (!catalogSheet?.hidden || !catalogSheet.protectedRanges.length) {
     throw new Error("Atlas Catalog is not hidden and protected after write")
+  }
+  if (referenceSheet?.hidden || !referenceSheet?.protectedRanges.length) {
+    throw new Error("Atlas Reference is not visible and protected after write")
   }
 
   const report = buildBindingReport({ catalog, baselinePlan })
   const reportPath = await writeBindingReport(report)
   console.log(
-    `Atlas Catalog verified: ${migration.summary.catalogRecords} canonical references and ${migration.summary.journeyChoices} Journey choices.`
+    `Atlas Catalog verified: ${migration.summary.catalogRecords} canonical references, ${migration.summary.journeyChoices} Journeys, ${migration.summary.placeChoices} Visit choices, and ${migration.summary.experienceChoices} Experiences.`
+  )
+  console.log(
+    `Atlas Reference verified: ${migration.summary.referenceRecords} visible protected choices.`
   )
   console.log(
     `Binding report: ${report.summary.exact} exact, ${report.summary.ambiguous} ambiguous, ${report.summary.unmatched} unmatched, ${report.summary.blank} blank.`
