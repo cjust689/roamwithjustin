@@ -109,7 +109,10 @@ const client = createGitHubClient({
 assert.deepEqual(await client.getRepository(), { full_name: "owner/repo" })
 assert.equal((await client.getBranch("develop")).name, "develop")
 assert.equal(await client.getBranchProtection("develop"), null)
-assert.equal((await client.getRulesForBranch("develop"))[0].type, "pull_request")
+assert.equal(
+  (await client.getRulesForBranch("develop"))[0].type,
+  "pull_request"
+)
 assert.equal((await client.getRuleset(1)).id, 1)
 assert.equal(calls[0].options.headers.Authorization, "Bearer secret-token")
 
@@ -117,17 +120,28 @@ assert.deepEqual(
   normalizePublicationPaths(["./src/content/media/generated/records.json"]),
   ["src/content/media/generated/records.json"]
 )
-assert.throws(() => normalizePublicationPaths(["src/content/journeys/index.mjs"]), /not automation-owned/)
+assert.deepEqual(
+  normalizePublicationPaths(["src/content/geography/generated/records.json"]),
+  ["src/content/geography/generated/records.json"]
+)
+assert.throws(
+  () => normalizePublicationPaths(["src/content/journeys/index.mjs"]),
+  /not automation-owned/
+)
 assert.equal(evaluateValidationChecks({ check_runs: [] }).state, "waiting")
 assert.equal(
   evaluateValidationChecks({
-    check_runs: [{ name: "validate", status: "completed", conclusion: "success" }],
+    check_runs: [
+      { name: "validate", status: "completed", conclusion: "success" },
+    ],
   }).state,
   "succeeded"
 )
 assert.equal(
   evaluateValidationChecks({
-    check_runs: [{ name: "validate", status: "completed", conclusion: "failure" }],
+    check_runs: [
+      { name: "validate", status: "completed", conclusion: "failure" },
+    ],
   }).state,
   "failed"
 )
@@ -153,7 +167,10 @@ assert.equal(
   (
     await waitForGate({
       read: async () => ({ ready: (gateReads += 1) > 1 }),
-      evaluate: value => ({ state: value.ready ? "succeeded" : "waiting", reason: "test" }),
+      evaluate: value => ({
+        state: value.ready ? "succeeded" : "waiting",
+        reason: "test",
+      }),
       wait: async () => {},
       now: () => gateReads * 10,
       timeoutMs: 100,
@@ -191,7 +208,12 @@ const audit = summarizeGitHubAudit({
     {
       id: 1,
       conditions: { ref_name: { include: ["refs/heads/main"], exclude: [] } },
-      rules: [{ type: "pull_request", parameters: { required_approving_review_count: 0 } }],
+      rules: [
+        {
+          type: "pull_request",
+          parameters: { required_approving_review_count: 0 },
+        },
+      ],
     },
   ],
   developRules: [{ type: "pull_request", ruleset_id: 1 }],

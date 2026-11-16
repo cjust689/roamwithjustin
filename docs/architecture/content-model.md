@@ -16,6 +16,8 @@ code_paths:
   - src/content/contracts.mjs
   - src/content/media/index.mjs
   - src/content/places/index.mjs
+  - src/content/geography/index.mjs
+  - src/content/geography/generated/records.json
   - src/content/places/europe.mjs
   - src/content/places/costa-rica.mjs
   - src/content/places/miami.mjs
@@ -51,6 +53,8 @@ code_paths:
   - scripts/editorial-bind-visits.mjs
   - scripts/lib/editorial-google-visits.mjs
   - scripts/editorial-publish.mjs
+  - scripts/editorial-register-place.mjs
+  - scripts/lib/editorial-place-registration.mjs
   - scripts/lib/editorial-content-compiler.mjs
   - scripts/lib/editorial-google-publication.mjs
   - scripts/lib/editorial-publication-plan.mjs
@@ -60,6 +64,7 @@ code_paths:
   - scripts/test-editorial-bindings.mjs
   - scripts/test-editorial-place-suggestions.mjs
   - scripts/test-editorial-place-decisions.mjs
+  - scripts/test-editorial-place-registration.mjs
 verification:
   state: verified
   evidence:
@@ -97,6 +102,12 @@ to one Place and Visit. **Moments** are additive Post-authored perspectives
 inside an Experience. The generated editorial shard is composed and validated
 by `src/content/experiences/index.mjs`; it does not replace Journey, Place, or
 Visit authority.
+
+The generated geography shard is a second canonical composition input. It is
+not populated by ordinary publication or by matching free-form Location text.
+Only the explicit Place registration command may add a reviewed Place, its
+Journey Visit, and its Atlas presentation node. Static and generated records
+share the same registries and duplicate-ID validation.
 
 ## Identity and composition
 
@@ -233,11 +244,12 @@ keys candidate Place matches by stable Post ID. Catalog generation does not
 write creator-owned values into Posts.
 
 The native Google Sheets table owns typed dropdowns for `Publish To`, `Atlas
-Journey`, `Atlas Place`, and `Atlas Mode`. `Atlas Experience` remains free text
-so it can accept an existing label or `New:` request. Catalog sync refreshes
-the hidden and visible projections plus those table choices. Apply-mode
-publication performs that refresh before selecting a row and again after a
-successful content change.
+Journey`, `Atlas Place`, and `Atlas Mode`. The Place dropdown permits an
+explicit custom `New: <name>` request while preserving current choices.
+`Atlas Experience` remains free text so it can accept an existing label or
+`New:` request. Catalog sync refreshes the hidden and visible projections plus
+those table choices. Apply-mode publication performs that refresh before
+selecting a row and again after a successful content change.
 
 After creator review, a separate guarded writer applied 33 exact `place_id`
 bindings for Amsterdam, Costa Rica, and Utah. It keys by stable Post ID and
@@ -277,7 +289,20 @@ Apply uses verified R2 receipts, creates or reuses an Experience, upserts one
 stable Moment for the Post, validates the generated pair, and then hands only
 those machine-owned shards to the isolated Git publisher. A blank Experience
 leaves the media at Journey or Visit scope rather than inventing one. The
-compiler does not yet create missing Journeys, Places, or Visits.
+publisher does not infer missing geography.
+
+`editorial:register:place` is the separate explicit geography boundary. The
+selected row must contain `Atlas Place = New: <name>` and keep
+`Atlas Mode = Off`. Preview resolves the Journey and produces the proposed canonical IDs,
+order, coordinates, public summary, Visit, and Atlas pin without writes. Apply
+updates only `src/content/geography/generated/records.json`, validates and
+builds it, promotes it through the protected develop and main branches,
+verifies the rendered Atlas URL, refreshes both Sheet lookup tabs, and replaces
+the request with the registered Place plus hidden Journey, Place, and Visit
+IDs. A matching existing Place is reused when only its Visit is missing. A new
+Place requires explicit parent, longitude, latitude, and public summary. Visit
+order is explicit through `--after-place` or defaults to the Journey end; a
+display date never silently determines route order.
 
 ## Current limitations
 
@@ -286,7 +311,8 @@ compiler does not yet create missing Journeys, Places, or Visits.
 - Canonical content is Git-backed; there is no runtime CMS or database.
 - The single-row workflow is implemented for existing Journeys and Visits,
   including generated Experiences and Moments, guarded deployment, and Sheet
-  write-back. Live Sheet identity and all 106 Journey and Place
-  bindings are verified. The first real Drive and R2 post, the Utah 2026 Salt
-  Lake City Airport transit Visit, and creation of missing Journeys, Places,
-  or Visits remain unverified or unimplemented.
+  write-back. Explicit Place and Visit registration is locally verified but
+  its first live generated record is not. Live Sheet identity and all 106
+  historical Journey and Place bindings are verified. The first real Drive
+  and R2 post and creation of an entirely new Journey remain unverified or
+  unimplemented.
