@@ -26,6 +26,8 @@ code_paths:
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - scripts/test-my-atlas-place-catalog.mjs
   - .env.example
+  - .github/workflows/editorial-publication-ci.yml
+  - .github/workflows/deploy-pages.yml
 verification:
   state: verified
   evidence:
@@ -45,15 +47,18 @@ verification:
 This document describes the implemented browser authentication slice and its
 connection to the isolated Phase 2A token-validation API. Invitation-backed
 membership, a persisted private owner profile, and one Uvita pin are verified
-in staging by owner report. No production route exists. The Worker boundary is
+in staging by owner report. The Pages workflows now accept explicit repository
+variables for a controlled production frontend release. The API remains on the
+isolated staging Worker and no apex Worker route exists. The Worker boundary is
 detailed in the linked My Atlas API authentication architecture.
 
 ## Runtime boundary
 
 My Atlas uses the framework-neutral `@auth0/auth0-spa-js` SDK because the site
 is on Vue 2. The SDK is instantiated only from the environment-gated My Atlas
-route. The normal repository and GitHub Pages production build does not enable
-that route.
+route. The route stays absent when `MY_ATLAS_ENABLED` is unset or false. The
+validation and Pages workflows map explicit repository variables into the
+public browser build when a controlled beta release is authorized.
 
 The browser configuration is supplied through these public build variables:
 
@@ -61,6 +66,8 @@ The browser configuration is supplied through these public build variables:
 - `VUE_APP_MY_ATLAS_AUTH0_CLIENT_ID`
 - `VUE_APP_MY_ATLAS_AUTH0_AUDIENCE`
 - `VUE_APP_MY_ATLAS_API_URL`
+- `VUE_APP_MY_ATLAS_PLACE_SEARCH_URL`
+- `VUE_APP_MY_ATLAS_TURNSTILE_SITEKEY`
 
 No client secret belongs in the browser or repository. The owner values are in
 an ignored development-only environment file on the owner's workstation. The
@@ -123,5 +130,6 @@ sign in, return through the local callback, signed-in identity display, and the
 audience-scoped token acquisition and protected Worker round trip. This is
 owner-verified external evidence; no token was exposed to the implementation
 process. Silent restoration after reload is implemented and test verified but
-still needs owner verification against the live tenant session. The production
-application does not enable or deploy the My Atlas route or Worker.
+still needs owner verification against the live tenant session. The controlled
+Pages route is release configured but not yet production verified. The Worker
+remains the separately deployed staging service.
