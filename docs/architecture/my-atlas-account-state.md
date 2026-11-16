@@ -16,6 +16,7 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - package.json
   - workers/my-atlas/src/account
   - workers/my-atlas/src/public
   - workers/my-atlas/src/catalog/projection.mjs
@@ -164,9 +165,12 @@ and mobile layouts. Curved map connections are a deterministic visual treatment
 over the current pins. They do not claim travel sequence or route history.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
-visible statistics, pins, decorative connections, and the label `My Atlas by
-RoamWithJustin.com`. It does not upload the image or expose private account
-fields.
+visible statistics, pins, decorative connections, a recognizable world land
+silhouette, and the label `My Atlas by RoamWithJustin.com`. The silhouette uses
+bundled Natural Earth 1:110m land geometry from `world-atlas`, decoded by
+`topojson-client` and projected into the canvas by `d3-geo`. Export makes no
+tile-provider or other external request. It does not upload the image or expose
+private account fields.
 
 ## Deliberately incomplete
 

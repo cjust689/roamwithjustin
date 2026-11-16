@@ -1,7 +1,28 @@
 import { decorativeConnections } from "../catalog/atlasInsights.mjs"
+import { geoEquirectangular, geoPath } from "d3-geo"
+import { feature as topojsonFeature } from "topojson-client"
+import worldLandTopology from "world-atlas/land-110m.json"
 
 const WIDTH = 1080
 const HEIGHT = 1920
+const MAP_FRAME = Object.freeze({ x: 60, y: 400, width: 960, height: 930 })
+const MAP_BOUNDS = Object.freeze({
+  left: 90,
+  right: 990,
+  top: 575,
+  bottom: 1075,
+})
+const WORLD_LAND = topojsonFeature(
+  worldLandTopology,
+  worldLandTopology.objects.land
+)
+const WORLD_PROJECTION = geoEquirectangular().fitExtent(
+  [
+    [MAP_BOUNDS.left, MAP_BOUNDS.top],
+    [MAP_BOUNDS.right, MAP_BOUNDS.bottom],
+  ],
+  WORLD_LAND
+)
 
 function roundedRectangle(context, x, y, width, height, radius) {
   context.beginPath()
@@ -9,11 +30,8 @@ function roundedRectangle(context, x, y, width, height, radius) {
 }
 
 function mapPoint(coordinates) {
-  const [longitude, latitude] = coordinates
-  return {
-    x: 90 + ((longitude + 180) / 360) * 900,
-    y: 440 + ((90 - latitude) / 180) * 820,
-  }
+  const [x, y] = WORLD_PROJECTION(coordinates)
+  return { x, y }
 }
 
 function drawBackground(context) {
@@ -31,33 +49,79 @@ function drawBackground(context) {
   context.fillRect(0, 0, WIDTH, 900)
 }
 
-function drawMapGrid(context) {
-  roundedRectangle(context, 60, 400, 960, 930, 52)
-  context.fillStyle = "rgba(6, 16, 18, 0.72)"
+function traceLand(context) {
+  context.beginPath()
+  geoPath(WORLD_PROJECTION, context)(WORLD_LAND)
+}
+
+function drawMap(context) {
+  roundedRectangle(
+    context,
+    MAP_FRAME.x,
+    MAP_FRAME.y,
+    MAP_FRAME.width,
+    MAP_FRAME.height,
+    52
+  )
+  const ocean = context.createLinearGradient(
+    MAP_FRAME.x,
+    MAP_FRAME.y,
+    MAP_FRAME.x,
+    MAP_FRAME.y + MAP_FRAME.height
+  )
+  ocean.addColorStop(0, "rgba(8, 24, 27, 0.96)")
+  ocean.addColorStop(1, "rgba(4, 14, 17, 0.96)")
+  context.fillStyle = ocean
   context.fill()
   context.strokeStyle = "rgba(232, 244, 239, 0.09)"
   context.lineWidth = 2
   context.stroke()
 
   context.save()
-  roundedRectangle(context, 60, 400, 960, 930, 52)
+  roundedRectangle(
+    context,
+    MAP_FRAME.x,
+    MAP_FRAME.y,
+    MAP_FRAME.width,
+    MAP_FRAME.height,
+    52
+  )
   context.clip()
-  context.strokeStyle = "rgba(232, 244, 239, 0.075)"
+  context.strokeStyle = "rgba(232, 244, 239, 0.065)"
   context.lineWidth = 2
   for (let longitude = -150; longitude <= 150; longitude += 30) {
     const point = mapPoint([longitude, 0])
     context.beginPath()
-    context.moveTo(point.x, 440)
-    context.lineTo(point.x, 1260)
+    context.moveTo(point.x, MAP_FRAME.y + 38)
+    context.lineTo(point.x, MAP_FRAME.y + MAP_FRAME.height - 38)
     context.stroke()
   }
   for (let latitude = -60; latitude <= 60; latitude += 30) {
     const point = mapPoint([0, latitude])
     context.beginPath()
-    context.moveTo(90, point.y)
-    context.lineTo(990, point.y)
+    context.moveTo(MAP_FRAME.x + 30, point.y)
+    context.lineTo(MAP_FRAME.x + MAP_FRAME.width - 30, point.y)
     context.stroke()
   }
+
+  traceLand(context)
+  const land = context.createLinearGradient(
+    0,
+    MAP_BOUNDS.top,
+    0,
+    MAP_BOUNDS.bottom
+  )
+  land.addColorStop(0, "#31514a")
+  land.addColorStop(0.55, "#23423e")
+  land.addColorStop(1, "#18332f")
+  context.fillStyle = land
+  context.shadowColor = "rgba(0, 0, 0, 0.42)"
+  context.shadowBlur = 22
+  context.fill("evenodd")
+  context.shadowColor = "transparent"
+  context.strokeStyle = "rgba(240, 201, 120, 0.34)"
+  context.lineWidth = 2
+  context.stroke()
   context.restore()
 }
 
@@ -140,7 +204,7 @@ export function createMyAtlasStoryCanvas({
   context.font = "600 32px Poppins, Arial, sans-serif"
   context.fillText(filterLabel, 64, 330)
 
-  drawMapGrid(context)
+  drawMap(context)
   drawConnections(context, places)
   drawPins(context, places)
 
@@ -173,7 +237,7 @@ export function createMyAtlasStoryCanvas({
   context.fillStyle = "#728780"
   context.font = "500 20px Poppins, Arial, sans-serif"
   context.fillText(
-    "Decorative connections do not represent a travel route.",
+    "Decorative connections do not represent a travel route. Land: Natural Earth.",
     64,
     1883
   )
