@@ -51,8 +51,10 @@ verification:
     - npm run build
     - authenticated read-only Sheet baseline on 2026-11-15
     - creator-authorized live Sheet migration on 2026-11-15
-    - verified live Atlas Catalog and 104 Journey and Place bindings on 2026-11-15
+    - verified live Atlas Catalog and 106 Journey and Place bindings on 2026-11-16
     - verified 82 live Visit bindings on 2026-11-16
+    - creator-authorized Publish To and Atlas Place upgrade verified on 106 rows on 2026-11-16
+    - visible protected Atlas Reference verified with 81 canonical choices on 2026-11-16
     - GitHub pull request 30 merged to develop as 4d88df2 on 2026-11-16
     - develop validate job 133078010450 succeeded on 2026-11-16
     - GitHub pull request 31 validated and merged to main as 63686ed on 2026-11-16
@@ -70,7 +72,8 @@ private checkpoints, Git branches, validation, deployment observation, and
 guarded Sheet metadata remain automation concerns.
 
 The code path is implemented and locally tested. The historical Sheet
-migration, 82 Visit relations, GitHub pull-request promotion, Actions build,
+migration, 106 Journey and Place bindings, 82 Visit relations, the visible
+protected Atlas Reference, GitHub pull-request promotion, Actions build,
 Pages deployment, rendered-page verification, and hardened branch rules are
 live verified. A real post has not yet supplied the combination of
 `Atlas Mode`, Drive media, and credentials needed to prove the first
@@ -107,13 +110,36 @@ also requires `MEDIA_UPLOAD_WORKER_URL` and `MEDIA_UPLOAD_TOKEN` in the process
 environment. GitHub authentication comes from an existing Git Credential
 Manager login or a supported token environment variable.
 
+## Sheet routing fields
+
+`Publish To` separates social and Atlas intent:
+
+- `Social` stays outside Atlas publication even if other Atlas cells contain
+  historical values.
+- `Atlas` publishes only to the Atlas workflow.
+- `Both` keeps the social entry and makes the row Atlas-eligible.
+
+`Atlas Journey` is required for Preview or Publish. `Atlas Place` is optional.
+When it is blank, the row publishes at Journey scope. When selected, the
+publisher resolves the canonical Place and matching Visit within the chosen
+Journey. It rejects an unknown Place or a real Place that has no Visit in that
+Journey. The friendly choices are authoritative at publication time; guarded
+write-back stores the resolved hidden `journey_id`, `place_id`, and `visit_id`.
+
+`Atlas Experience` remains optional free text in the native Sheets table so an
+existing label or `New: <title>` can be entered. The protected `Atlas
+Reference` tab is for review only. `editorial:catalog -- --apply` rebuilds it
+on demand, and every apply-mode publication refreshes it before selection and
+again after successful generated content changes.
+
 ## Preview behavior
 
 Preview performs only local and Google read operations:
 
-1. Resolve the designated Sheet gid and select one stable Post ID.
-2. Require a canonical Journey and Drive folder. A Visit must carry its Place;
-   a broad Place with no Visit deliberately publishes at Journey scope.
+1. Resolve the designated Sheet gid and one stable Post ID.
+2. Require `Publish To = Atlas` or `Both`, a canonical Journey, and a Drive
+   folder. Blank `Atlas Place` means Journey scope. A chosen Atlas Place must
+   resolve to a real Visit in that Journey.
 3. Inventory the folder and combine the Sheet source hash with the immutable
    Drive metadata fingerprint.
 4. Download every direct JPEG, PNG, and MP4 into a private hash-addressed
@@ -131,6 +157,8 @@ No fake upload receipt is accepted.
 ## Apply behavior
 
 Apply requires the selected row to remain exactly `Atlas Mode = Publish`.
+Before selection, apply refreshes the canonical Catalog and visible protected
+Atlas Reference, then re-reads Posts so newly generated choices are current.
 After the preview plan, it re-reads the row and Drive inventory before upload.
 It then:
 
@@ -152,7 +180,8 @@ It then:
     through a second merge-commit pull request;
 11. waits for the Pages workflow and checks the rendered public URL for the
     exact newly published R2 media URL;
-12. refreshes the hidden Catalog, including Experience choices; and
+12. refreshes the hidden Catalog and visible protected Atlas Reference,
+    including the newly generated Experience; and
 13. re-finds the row by Post ID, rechecks its source hash and Publish mode,
     writes deployment metadata, then reads the values back.
 
@@ -185,17 +214,24 @@ can now reference a validated Experience in the same Journey.
 
 ## Live baseline already verified
 
-The owner-authorized migration retained all eight original columns, added only
-the six visible Atlas columns, hid and warning-protected the automation
-columns, seeded 104 UUID Post IDs, and kept every historical row `Off`. Six
-unrelated rows were untouched.
+The owner-authorized migration retained all eight original columns, added the
+workflow fields, hid and warning-protected the automation columns, and kept
+six unrelated rows untouched. The 2026-11-16 upgrade normalized `Publish To`,
+added `Atlas Place`, defaulted all 106 eligible rows to `Social`, backfilled 82
+readable Visit-backed Place labels, and verified that every original creator
+field remained unchanged.
 
 The hidden Catalog contains the current canonical Journey, Place, Visit, Atlas
-node, and generated Experience choices. The owner reviewed and applied all 104
-Journey and Place bindings. A guarded relation pass then wrote and verified 82
-unique Visit IDs. Twenty-one broad Utah or Costa Rica root rows and the Salt
-Lake City Airport arrival and departure row have no artificial Visit. They
-publish at Journey scope unless a real Visit is deliberately added later.
+node, and generated Experience choices. The visible protected Atlas Reference
+currently contains 81 rows: 10 Journeys and 71 Journey-to-Place Visit records.
+The owner reviewed and applied all 106 Journey and Place bindings. Eighty-two
+historical rows have Visit IDs; the remaining rows deliberately publish at
+Journey scope while `Atlas Place` is blank rather than inventing a Visit.
+
+The Posts range remains a native Google Sheets table. Its table metadata owns
+the `Publish To`, `Atlas Journey`, `Atlas Place`, and `Atlas Mode` dropdowns.
+This avoids invalid range-level validation writes to typed table columns. A
+catalog sync rebuilds both lookup tabs and refreshes those table choices.
 
 ## Supporting commands
 
@@ -211,6 +247,10 @@ npm run editorial:github:audit -- --json
 npm run editorial:github:configure -- --dry-run
 ```
 
+Run `editorial:catalog -- --apply` after adding a canonical Journey, Place, or
+Visit outside the Sheet publisher. Experiences created by an apply-mode
+publication appear automatically in both lookup tabs during that same run.
+
 `editorial:github:configure -- --apply` is allowed only after the validation
 workflow exists on both remote branches. The live ruleset now protects
 `develop` and `main` from deletion and non-fast-forward updates, permits only
@@ -222,6 +262,8 @@ configuration command semantically verifies those rules after applying them.
 Implemented and test-covered:
 
 - Google OAuth, Sheet reads and guarded writes, Drive inventory and download
+- table-aware `Publish To`, Journey, Place, and Mode choices plus a visible
+  protected canonical reference
 - deterministic private snapshots and image/video packages
 - receipt-free preview planning and real-receipt apply plumbing
 - generated Experience and Moment records, selectors, validation, and Journey
@@ -250,6 +292,8 @@ Still owner-controlled or externally unverified:
 
 - [x] Baseline the live Sheet and preserve the current social workflow.
 - [x] Seed stable Post IDs and bind all historical Journey and Place choices.
+- [x] Add friendly publication routing and an automatically refreshed Atlas
+      Reference without creator-managed relational tabs.
 - [x] Implement private Drive snapshots and mandatory local media planning.
 - [x] Implement Experience and Moment generated records and public projection.
 - [x] Implement real-receipt R2 apply and atomic generated-record compilation.
