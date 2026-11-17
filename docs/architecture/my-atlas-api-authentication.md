@@ -34,6 +34,7 @@ verification:
     - npm run my-atlas:worker:check:staging
     - npm run my-atlas:test
     - Local Wrangler GET /health returned 200 and GET /v1/auth/check without a token returned 401
+    - API tests verified that read-only tokens cannot delete pins, mutation requests cannot select a user ID, and user-addressed pin routes do not exist
     - npm run my-atlas:serve exposed the Vue proof, authentication Worker, and full catalog search on loopback ports 8080, 8787, and 8788
     - Owner verified the genuine Auth0 API-audience access token through the deployed staging Worker
 ---
@@ -91,6 +92,13 @@ audience, another API audience, another issuer, expired tokens, unsigned
 tokens, HS256 tokens, an invalid token type, malformed authorization, and a
 token without the required permission. It separately checks identity-provider
 unavailability and invalid Worker configuration.
+
+The API surface exposes owner mutations only below `/v1/me`. A signed request
+cannot choose a user ID in the path or request body. User-addressed pin paths
+return 404, unknown ownership fields fail request normalization, and a
+`read:my-atlas` token cannot reach deletion without `write:my-atlas`. The
+verified issuer and subject are the only identity values passed into the
+account service.
 
 ## HTTP and browser boundary
 

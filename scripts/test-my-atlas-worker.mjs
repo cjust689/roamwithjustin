@@ -666,6 +666,86 @@ for (const token of [
 {
   const token = await signToken()
   let captured
+  const pinId = "pin_1234567890abcdef12345678"
+  const response = await workerResponse(
+    `/v1/me/pins/${pinId}`,
+    {
+      method: "DELETE",
+      token,
+      idempotencyKey: "abababab-abab-4bab-8bab-abababababab",
+      ifMatch: '"rev-2"',
+    },
+    {},
+    {
+      deleteMyPin: async options => {
+        captured = options
+        return { profile: { revision: 3 } }
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.deepEqual(captured.identity, { issuer: ISSUER, subject: SUBJECT })
+  assert.deepEqual(captured.input, {
+    pinId,
+    expectedRevision: 2,
+    idempotencyKey: "abababab-abab-4bab-8bab-abababababab",
+  })
+  assert.equal(Object.hasOwn(captured, "userId"), false)
+}
+
+{
+  const token = await signToken({ scope: "read:my-atlas" })
+  const response = await workerResponse(
+    "/v1/me/pins/pin_1234567890abcdef12345678",
+    {
+      method: "DELETE",
+      token,
+      idempotencyKey: "acacacac-acac-4cac-8cac-acacacacacac",
+      ifMatch: '"rev-2"',
+    },
+    {},
+    {
+      deleteMyPin: async () => {
+        throw new Error("Read-only tokens must not reach deletion.")
+      },
+    }
+  )
+  assert.equal(response.status, 403)
+}
+
+{
+  const token = await signToken()
+  const userId = "usr_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+  assert.equal(
+    (await workerResponse(`/v1/users/${userId}/pins`, { token })).status,
+    404
+  )
+  const response = await workerResponse(
+    "/v1/me/pins",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: "adadadad-adad-4dad-8dad-adadadadadad",
+      ifMatch: '"rev-1"',
+      json: {
+        userId,
+        placeId: "geonames:3621138",
+        visitedDates: [],
+      },
+    },
+    {},
+    {
+      createMyPin: async () => {
+        throw new Error("User-selected ownership must be rejected.")
+      },
+    }
+  )
+  assert.equal(response.status, 400)
+}
+
+{
+  const token = await signToken()
+  let captured
   const response = await workerResponse(
     "/v1/me/pins",
     {
