@@ -25,6 +25,7 @@ code_paths:
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
+  - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
@@ -39,7 +40,8 @@ verification:
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
-    - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, cumulative playback, and decorative connection generation
+    - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, ordered destination playback, cumulative reveal, and curved connection generation
+    - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
 ---
@@ -160,9 +162,20 @@ routing are not implemented.
 
 Owner and public views derive place, country, continent, capital, date, and map
 span statistics from the safe canonical place projection. They provide exact
-year and undated filters, cumulative year playback, keyboard and button cycling,
-and mobile layouts. Curved map connections are a deterministic visual treatment
-over the current pins. They do not claim travel sequence or route history.
+year and undated filters, chronological destination playback, keyboard and
+button cycling, and mobile layouts. Playback reveals dated destinations
+cumulatively, moves the camera between successive destinations, and animates a
+plane over a curved connection before focusing the destination. Reduced motion
+preferences suppress the plane animation. Places within the same year use a
+stable name and ID order for presentation only. The interface states that this
+is a visual sequence rather than a recorded travel route.
+
+Map pins use a deterministic color for their earliest visit year, retain a
+visible place and year label, and emphasize the selected destination. A compact
+year legend uses the same colors. Undated destinations remain visible and
+filterable but do not enter chronological playback. Curved map connections are
+a deterministic visual treatment over the current pins and do not claim route
+history.
 
 The owner editor intentionally asks only for optional visit years. Users may
 record multiple years for repeat visits or leave a destination undated. The API
@@ -186,4 +199,7 @@ catalog and Atlas reads have a tested weighted limiter boundary and a deployed
 staging binding, but live exhaustion behavior is not yet verified.
 Profile-specific share HTML, a verified public owner profile, and owner
 verification of the corrected save feedback and silent session restoration
-also remain.
+also remain. Planned destinations are a future feature, not an overload of the
+visited pin state. A future planner needs an explicit planned lifecycle,
+exclusion from visited statistics and playback by default, a deliberate
+planned-to-visited transition, and a separate public-sharing decision.

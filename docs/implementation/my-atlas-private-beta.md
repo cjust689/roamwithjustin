@@ -59,7 +59,8 @@ verification:
     - Staging Worker deployment 037496ad-400a-4dda-b54f-41470cd3aa17 contains the new-user account lookup correction
     - Owner reported successful one-use invitation issuance, localhost Turnstile completion, redemption, and private account entry
     - Owner reported that the Uvita pin persisted through reload and a second sign in even though the earlier browser build displayed a false save failure
-    - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, cumulative playback, and decorative connection tests
+    - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, chronological destination playback, cumulative reveal, and curved connection tests
+    - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - A 390 pixel emulated mobile viewport reported 390 pixel root, body, panel, and input boundaries with no horizontal overflow
     - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
@@ -100,7 +101,7 @@ media-upload Worker.
 | Registration Durable Objects and API      | Phase 2B staging redemption owner verified     | One SQLite-backed registry class atomically reserves invitation, qualified identity, handle and idempotency claims. One SQLite-backed user class initializes a private revision-1 profile. The authenticated browser form requires a one-use invitation, bounded identity fields, explicit staging acceptance, and a real Turnstile token. The owner reported successful invitation redemption, private account entry, and a Uvita pin that persisted through reload and a second sign in. |
 | Operator invitation and recovery workflow | Implemented and staging issue owner verified   | An `admin:my-atlas` API issues recoverably idempotent high-entropy invitations, returns the code only through the protected issue response, revokes by nonsecret ID, paginates safe pending summaries, completes matching profiles, and releases only aged uninitialized registrations. Per-user abandonment tombstones block late ghost activation. A dedicated M2M grant has `read:my-atlas` and `admin:my-atlas`; the owner reported the first successful one-use invitation response without exposing its code.                                                                                                            |
 | Profile, pin CRUD, and export              | Implemented, test verified, and partially owner verified | Owner lookup is derived from the verified qualified identity. Strong ETags, `If-Match`, idempotency keys, display and visibility changes, canonical pin create/update/delete, duplicate rejection, 300-pin ceiling, bounded pagination, JSON/CSV export, owner browser bootstrap, and automatic privacy for an empty profile are tested. The browser authors no year or one or more visit years. The API retains optional month compatibility without exposing month in the current editor or timeline. Staging Worker `c1923a3b-2a8f-47a8-acd0-cf033ea49790` exposes cross-origin ETags so a successful write no longer becomes a false browser error. The owner verified one persisted Uvita pin before that correction. Handle change, deletion, reporting, and a post-correction owner write remain. |
-| Atlas presentation and Story export       | Implemented and test verified                  | Owner and public views provide place, country, continent, capital, undated, date range, and map span statistics; exact year and undated filters; cumulative year playback; previous and next cycling; mobile layouts; descriptive place labels; and decorative connections that do not claim a travel order. The browser generates a local 1080 by 1920 PNG labeled `My Atlas by RoamWithJustin.com` with bundled Natural Earth land geometry, so export does not depend on or capture live tiles. Authenticated visual verification remains owner action. |
+| Atlas presentation and Story export       | Implemented, test and browser verified         | Owner and public views provide place, country, continent, capital, undated, date range, and map span statistics; exact year and undated filters; chronological destination playback with cumulative reveal; previous and next cycling; mobile layouts; persistent place and year pin labels; deterministic year colors; and decorative connections that do not claim a travel order. Playback frames successive destinations, animates a plane across a curved connection, then focuses the destination. Same-year ordering is explicitly a visual sequence, and reduced-motion preferences suppress the plane. Headless Chrome verified both desktop and 390 pixel mobile layouts plus exact desktop year-editor alignment. The browser generates a local 1080 by 1920 PNG labeled `My Atlas by RoamWithJustin.com` with bundled Natural Earth land geometry, so export does not depend on or capture live tiles. Authenticated visual verification remains owner action. |
 | Public Atlas sharing                      | API staging boundary verified                  | Explicit publication exposes `/my-atlas/{handle}` and a signed-out safe API containing only display name, handle, canonical place summaries, optional visit dates, and derived visited years. Live staging returned the generic no-store 404 for an absent handle. Local tests verify private-by-default publication and immediate unpublication. The owner view publishes, unpublishes, copies the link, filters by year, plays the cumulative timeline, and exports the visible Story card. Profile-specific server HTML, Open Graph tags, a real public profile, live rate-limit exhaustion, and browser staging verification remain. |
 | Terms, privacy, retention, and moderation | Staging defaults approved; public beta blocked | Staging uses technical-only policy labels, one use per invitation, a 24-hour maximum invitation lifetime, and a 15-minute abandoned-registration lease. These values permit controlled owner testing and do not constitute final terms or privacy approval. Retention durations, beta reset notice, operator response process, and cost stop limits must be approved before invited accounts.                                                                                                                                        |
 
@@ -259,9 +260,11 @@ ceiling before inviting external users.
 - [x] Add an undated state, multiple optional visit years, and year editing
       after pin creation. Retain optional month compatibility in the API while
       keeping the current editor and timeline at year precision.
-- [x] Add safe derived statistics, exact year and undated filters, cumulative
-      year playback, destination cycling, decorative unordered connections,
-      responsive layouts, and local 1080 by 1920 Story export.
+- [x] Add safe derived statistics, exact year and undated filters,
+      chronological destination playback with cumulative reveal, animated
+      curved hops, deterministic year-colored pins, destination cycling,
+      decorative unordered connections, responsive layouts, and local 1080 by
+      1920 Story export.
 - [x] Restore an existing Auth0 browser session after reload without changing
       the memory-only access-token cache.
 - [x] Implement and Workers-runtime test the safe signed-out public Atlas
@@ -319,6 +322,10 @@ completed handoff evidence is:
       procedures are approved and tested.
 - [ ] Keep ads, photos, Facebook, recaps, public people discovery, and editorial
       content outside the beta.
+- [ ] Design planned destinations as a separate lifecycle that does not count
+      as visited or enter visited playback by default. Require an explicit,
+      revisioned transition into visited state and a separate public-sharing
+      choice before implementing trip-planning behavior.
 
 ## Verification commands
 
@@ -352,6 +359,14 @@ route remains absent by default.
 The full-source local search was then browser tested separately. Headless Chrome
 searched Salt Lake City, received `geonames:5780993` with Utah and United States
 disambiguation, selected the result, and rendered it in the destination list.
+
+The cinematic timeline was browser verified with Uvita in 2024 and Paris in
+2026. At 1248 by 598, both labeled pins, the year legend, the curved connection,
+and the in-flight plane rendered while Paris was the second of two destinations.
+At 390 by 844, the map kept both endpoints and the plane visible above the
+stacked panel with root, body, and panel widths of 390 and no horizontal
+overflow. The desktop year input and Add year button had identical top and
+bottom coordinates, with a zero pixel alignment difference.
 
 ## External references checked
 
