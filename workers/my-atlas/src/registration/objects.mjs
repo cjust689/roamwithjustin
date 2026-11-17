@@ -1,12 +1,17 @@
 import { DurableObject } from "cloudflare:workers"
 import { isNormalizedPinMemory } from "../account/memory.mjs"
+import {
+  CUSTOM_PLACE_ID_PATTERN,
+  isNormalizedCustomPlace,
+} from "../account/custom-place.mjs"
 
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
 const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 const INVITATION_ID_PATTERN = /^inv_[a-f0-9]{24}$/
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
-const PLACE_ID_PATTERN = /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11})$/
+const PLACE_ID_PATTERN =
+  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|custom:[a-f0-9]{24})$/
 
 function validIsoDate(value) {
   return (
@@ -749,6 +754,14 @@ function validPinTiming(command) {
   )
 }
 
+function validStoredPinPlace(value) {
+  if (!PLACE_ID_PATTERN.test(value?.placeId)) return false
+  if (CUSTOM_PLACE_ID_PATTERN.test(value.placeId)) {
+    return isNormalizedCustomPlace(value.customPlace)
+  }
+  return value.customPlace === undefined || value.customPlace === null
+}
+
 function ownerProfile(storage, identityDigest) {
   const profile = storage.kv.get("profile")
   if (!profile) return failure("profile_not_found")
@@ -908,7 +921,7 @@ export class UserProfileDurableObject extends DurableObject {
     if (
       !validOwnerMutation(command) ||
       !PIN_ID_PATTERN.test(command.pinId) ||
-      !PLACE_ID_PATTERN.test(command.placeId) ||
+      !validStoredPinPlace(command) ||
       !validPinTiming(command) ||
       !isNormalizedPinMemory(command.memory)
     ) {
@@ -934,9 +947,10 @@ export class UserProfileDurableObject extends DurableObject {
       }
 
       const pin = {
-        schemaVersion: 3,
+        schemaVersion: 4,
         pinId: command.pinId,
         placeId: command.placeId,
+        ...(command.customPlace ? { customPlace: command.customPlace } : {}),
         visitedYears: command.visitedYears,
         visitedDates: command.visitedDates,
         memory: command.memory,
@@ -974,9 +988,18 @@ export class UserProfileDurableObject extends DurableObject {
       Object.keys(patch).length === 0 ||
       Object.keys(patch).some(
         key =>
-          !["placeId", "visitedYears", "visitedDates", "memory"].includes(key)
+          ![
+            "placeId",
+            "customPlace",
+            "visitedYears",
+            "visitedDates",
+            "memory",
+          ].includes(key)
       ) ||
       (patch.placeId !== undefined && !PLACE_ID_PATTERN.test(patch.placeId)) ||
+      (patch.customPlace !== undefined &&
+        patch.customPlace !== null &&
+        !isNormalizedCustomPlace(patch.customPlace)) ||
       ((patch.visitedYears !== undefined || patch.visitedDates !== undefined) &&
         !validPinTiming(patch)) ||
       (patch.memory !== undefined && !isNormalizedPinMemory(patch.memory))
@@ -1005,9 +1028,11 @@ export class UserProfileDurableObject extends DurableObject {
       const pin = {
         ...current,
         ...patch,
-        schemaVersion: 3,
+        schemaVersion: 4,
         updatedAt: command.now,
       }
+      if (pin.customPlace === null) delete pin.customPlace
+      if (!validStoredPinPlace(pin)) return failure("invalid_pin")
       const profile = {
         ...owner.profile,
         revision: owner.profile.revision + 1,
@@ -1096,7 +1121,9 @@ export class UserProfileDurableObject extends DurableObject {
       pins.length > 300 ||
       pins.length !== profile.pinCount ||
       pins.some(
-        pin => pin.memory !== undefined && !isNormalizedPinMemory(pin.memory)
+        pin =>
+          !validStoredPinPlace(pin) ||
+          (pin.memory !== undefined && !isNormalizedPinMemory(pin.memory))
       )
     ) {
       return failure("public_atlas_inconsistent")
@@ -1111,6 +1138,7 @@ export class UserProfileDurableObject extends DurableObject {
         pins.map(pin =>
           Object.freeze({
             placeId: pin.placeId,
+            ...(pin.customPlace ? { customPlace: pin.customPlace } : {}),
             ...publicPinTiming(pin),
             ...(pin.memory ? { memory: pin.memory } : {}),
           })

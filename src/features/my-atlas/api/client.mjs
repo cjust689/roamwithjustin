@@ -3,6 +3,11 @@ import {
   isNormalizedMyAtlasMemory,
   normalizeMyAtlasMemory,
 } from "../catalog/memory.mjs"
+import {
+  MY_ATLAS_CUSTOM_PLACE_ID_PATTERN,
+  isNormalizedMyAtlasCustomPlace,
+  normalizeMyAtlasCustomPlace,
+} from "../catalog/customPlace.mjs"
 
 export class MyAtlasApiError extends Error {
   constructor(
@@ -18,6 +23,8 @@ export class MyAtlasApiError extends Error {
 }
 
 const PUBLIC_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
+const CATALOG_PLACE_ID_PATTERN =
+  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11})$/
 
 function isVisitedDate(value) {
   return Boolean(
@@ -55,6 +62,14 @@ function isPublicPlace(value) {
     : Array.isArray(value?.visitedYears)
       ? value.visitedYears.map(year => ({ year }))
       : null
+  const customPlaceIsValid =
+    value?.placeType === "custom"
+      ? MY_ATLAS_CUSTOM_PLACE_ID_PATTERN.test(value.placeId) &&
+        isNormalizedMyAtlasCustomPlace({
+          name: value.name,
+          coordinates: value.coordinates,
+        })
+      : CATALOG_PLACE_ID_PATTERN.test(value?.placeId || "")
   return Boolean(
     value &&
       typeof value.placeId === "string" &&
@@ -63,6 +78,7 @@ function isPublicPlace(value) {
       Array.isArray(value.coordinates) &&
       value.coordinates.length === 2 &&
       value.coordinates.every(Number.isFinite) &&
+      customPlaceIsValid &&
       (value.memory === undefined || isNormalizedMyAtlasMemory(value.memory)) &&
       visitedDates &&
       visitedDates.every(isVisitedDate)
@@ -152,6 +168,16 @@ function validatedMemory(value) {
   return memory
 }
 
+function validatedCustomPlace(value) {
+  const customPlace = normalizeMyAtlasCustomPlace(value)
+  if (!customPlace) {
+    throw new MyAtlasApiError("Custom place is invalid.", {
+      code: "invalid_custom_place",
+    })
+  }
+  return customPlace
+}
+
 export async function fetchMyAtlasState({
   apiBaseUrl,
   accessToken,
@@ -224,19 +250,30 @@ export async function createMyAtlasPin({
   apiBaseUrl,
   accessToken,
   placeId,
+  customPlace,
   visitedDates = [],
   memory = "",
   revision,
   fetchImpl = fetch,
 }) {
   const normalizedMemory = validatedMemory(memory)
+  const hasPlaceId = typeof placeId === "string" && Boolean(placeId)
+  const hasCustomPlace = customPlace !== undefined
+  if (hasPlaceId === hasCustomPlace) {
+    throw new MyAtlasApiError("Choose one catalog place or one custom place.", {
+      code: "invalid_place",
+    })
+  }
+  const normalizedCustomPlace = hasCustomPlace
+    ? validatedCustomPlace(customPlace)
+    : null
   const { response, payload } = await authenticatedJsonRequest({
     apiBaseUrl,
     accessToken,
     path: "/v1/me/pins",
     method: "POST",
     body: {
-      placeId,
+      ...(hasPlaceId ? { placeId } : { customPlace: normalizedCustomPlace }),
       visitedDates,
       memory: normalizedMemory,
     },
@@ -246,7 +283,14 @@ export async function createMyAtlasPin({
   })
   if (
     typeof payload.pin?.pinId !== "string" ||
-    payload.pin.placeId !== placeId ||
+    (hasPlaceId
+      ? payload.pin.placeId !== placeId
+      : payload.pin.placeType !== "custom" ||
+        payload.pin.name !== normalizedCustomPlace.name ||
+        payload.pin.coordinates?.some(
+          (coordinate, index) =>
+            coordinate !== normalizedCustomPlace.coordinates[index]
+        )) ||
     !isPublicPlace(payload.pin) ||
     payload.pin.memory !== normalizedMemory
   ) {

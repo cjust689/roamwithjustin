@@ -4,6 +4,7 @@ import {
   normalizeIdempotencyKey,
 } from "../registration/contracts.mjs"
 import { normalizePinMemory } from "./memory.mjs"
+import { normalizeCustomPlace } from "./custom-place.mjs"
 
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
@@ -152,11 +153,32 @@ export function normalizeProfilePatch(value, headers) {
 export function normalizeCreatePin(value, headers, currentYear) {
   assertObject(
     value,
-    new Set(["placeId", "visitedYears", "visitedDates", "memory"]),
+    new Set([
+      "placeId",
+      "customPlace",
+      "visitedYears",
+      "visitedDates",
+      "memory",
+    ]),
     "Pin"
   )
+  const hasPlaceId = value.placeId !== undefined
+  const hasCustomPlace = value.customPlace !== undefined
+  if (hasPlaceId === hasCustomPlace) {
+    throw new RegistrationValidationError(
+      "Supply one canonical place or one custom place."
+    )
+  }
+  const customPlace = hasCustomPlace
+    ? normalizeCustomPlace(value.customPlace)
+    : null
+  if (hasCustomPlace && !customPlace) {
+    throw new RegistrationValidationError("Custom place is invalid.")
+  }
   return Object.freeze({
-    placeId: normalizePlaceId(value.placeId),
+    ...(hasPlaceId
+      ? { placeId: normalizePlaceId(value.placeId) }
+      : { customPlace }),
     ...normalizeVisitTiming(value, currentYear),
     memory: normalizeMemory(value.memory === undefined ? "" : value.memory),
     expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),

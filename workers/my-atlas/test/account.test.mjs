@@ -110,12 +110,19 @@ async function registerSecondOwner() {
 
 function pinInput({
   placeId,
+  customPlace,
   visitedYears = [],
   memory = "",
   expectedRevision,
   idempotencyKey,
 }) {
-  return { placeId, visitedYears, memory, expectedRevision, idempotencyKey }
+  return {
+    ...(customPlace ? { customPlace } : { placeId }),
+    visitedYears,
+    memory,
+    expectedRevision,
+    idempotencyKey,
+  }
 }
 
 const catalogResolver = async placeId =>
@@ -286,6 +293,103 @@ describe("private owner profile and pin services", () => {
         spotCategory: "national-park",
         spotKind: "National park",
         visitedYears: [2025],
+      },
+    })
+  })
+
+  it("stores a validated owner-created custom pin without catalog authority", async () => {
+    const input = pinInput({
+      customPlace: {
+        name: "Krka National Park",
+        coordinates: [15.97217, 43.80123],
+      },
+      visitedYears: [2025],
+      memory: "Waterfalls threaded through the forest.",
+      expectedRevision: 1,
+      idempotencyKey: "17171717-1717-4717-8717-171717171717",
+    })
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      catalogResolver: async () => {
+        throw new Error("Custom pins must not enter catalog resolution.")
+      },
+      now: NOW,
+    })
+    expect(created).toMatchObject({
+      created: true,
+      profile: { revision: 2, pinCount: 1 },
+      pin: {
+        placeId: expect.stringMatching(/^custom:[a-f0-9]{24}$/),
+        placeType: "custom",
+        name: "Krka National Park",
+        coordinates: [15.97217, 43.80123],
+        visitedYears: [2025],
+        memory: "Waterfalls threaded through the forest.",
+      },
+    })
+    expect(
+      await createMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input,
+        now: NOW,
+      })
+    ).toMatchObject({
+      created: false,
+      pin: { pinId: created.pin.pinId, placeType: "custom" },
+    })
+    await expect(
+      createMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          ...input,
+          expectedRevision: 2,
+          idempotencyKey: "17171717-1717-4717-8717-171717171718",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "duplicate_place" })
+
+    await registerSecondOwner()
+    const secondOwnerPin = await createMyPin({
+      environment: environment(),
+      identity: SECOND_IDENTITY,
+      input: {
+        ...input,
+        expectedRevision: 1,
+        idempotencyKey: "17171717-1717-4717-8717-171717171719",
+      },
+      now: NOW,
+    })
+    expect(secondOwnerPin.pin.placeId).not.toBe(created.pin.placeId)
+
+    const state = await getMyAtlasState({
+      environment: environment(),
+      identity: IDENTITY,
+      placeCatalog: {
+        async resolveMany() {
+          throw new Error("Custom pins must not enter catalog resolution.")
+        },
+      },
+    })
+    expect(state.pins).toEqual([
+      expect.objectContaining({
+        placeId: created.pin.placeId,
+        placeType: "custom",
+        name: "Krka National Park",
+      }),
+    ])
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .pins[0]
+    ).toMatchObject({
+      placeId: created.pin.placeId,
+      customPlace: {
+        name: "Krka National Park",
+        coordinates: [15.97217, 43.80123],
       },
     })
   })
