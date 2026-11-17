@@ -57,6 +57,7 @@ verification:
     - Twenty Workers-runtime tests passed, including private-by-default public lookup, safe-field projection, explicit publication, immediate unpublication, spot persistence and projection, and batched catalog resolution
     - Versioned Worker catalog tests passed deterministic artifact generation, exact resolution, bounded search, runtime gzip decoding, revision mismatch rejection, and deprecated-record preservation
     - Full geonames-2026-11-16 local artifact built 256 resolution shards and 256 search shards for 237426 records
+    - Full geonames-2026-11-17-spots local artifact built 256 resolution shards and 256 search shards for 237445 records
     - Local Wrangler POST /v1/beta/register without a token returned 401
     - New-user account-state regression test maps registration_not_found to HTTP 404
     - Staging Worker deployment 037496ad-400a-4dda-b54f-41470cd3aa17 contains the new-user account lookup correction
@@ -72,6 +73,10 @@ verification:
     - Headless Chrome verified the signed-out four-step walkthrough and empty revision-1 account quick start at 390 by 844 and 1200 by 900, including final-action focus targets, saved dismissal, four progress steps, and no horizontal overflow
     - Headless Chrome verified one four-place overview cluster at zoom 3.09, standalone release at zoom 8.5, selected timeline pin alignment within one pixel, a stronger shadowed 94 percent opacity connection line, and no horizontal overflow at 390 pixels
     - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
+    - Pull requests 73 and 74 passed required validation, merged through develop to main, and Pages workflow 44009928197 succeeded
+    - Staging Worker deployment e20404c5-0250-47f0-88af-2d0db14983ee returned 200 health after the spot-aware release
+    - Rclone verified 512 matching geonames-2026-11-17-spots objects with zero differences before catalog/current.json was uploaded last
+    - Production-origin live searches returned Yellowstone National Park, the Eiffel Tower, and Uvita from geonames-2026-11-17-spots, and exact Yellowstone resolution returned 200
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
     - npm run my-atlas:test verified year-only visitor formatting while retaining API compatibility with stored month values
     - Pull request 51 merged to develop as e2b3ae448cfef3fffc01cefb7485f104ce75a956 after its required validation passed
@@ -108,8 +113,8 @@ media-upload Worker.
 | DNS and live route preflight              | Partial, externally observed                   | Apex and www resolve to Cloudflare addresses. Root returned 200 through Cloudflare on 2026-11-16. Atlas and My Atlas returned a hydrated-app 404 status. api and share names did not resolve. Dashboard route and origin settings remain owner-console verification.                                                                                                                                                                                                                                                                                                                       |
 | GeoNames rights                           | Verified against provider documentation        | GeoNames publishes the dump under CC BY 4.0, requests attribution, permits commercial use, and describes cities500 as cities over 500 population or administrative seats.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | Geographic proof                          | Implemented and test verified                  | Deterministic importer, stable IDs, append-preserving deprecation, normalized search, disambiguation, bounded draft pins, and a separate MapLibre proof exist. A reviewed GeoNames-backed spot source adds national parks, cultural landmarks, and natural landmarks as a third destination type. The same search, pin, optional year, timeline, statistics, sharing, and Story export flow now accepts them. A loopback-only development search server lets the browser query the ignored full source without bundling or committing it. |
-| Versioned Worker catalog                  | Implemented and staging verified; spot release local only | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The active staging bucket remains the owner-verified `geonames-2026-11-16` release. The local `geonames-2026-11-17-spots` candidate contains 250 countries, 237,176 cities, and 19 spots across 512 shards. Yellowstone National Park, the Eiffel Tower, and Machu Picchu resolve locally. Its shards and manifest have not been uploaded, and no live spot search is claimed. |
-| Production frontend route                 | Deployed and rendered verified                 | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. Pull requests 51 and 52 promoted the explicit repository-variable wiring, and Pages run 43969999089 deployed it. Pull requests 55 and 56 then promoted the cinematic timeline through both protected validation gates, successful develop workflow 43987307324, and Pages workflow 43987868552. Headless Chrome rendered the expected production heading, Google sign-in section, and branding. Live content-addressed chunks contain the new timeline and year-editor behavior. Direct deep links still return the known Pages fallback HTTP 404 before client rendering, so server share HTML and crawler behavior remain future work. This does not create a Cloudflare apex Worker route or move the API out of isolated staging. |
+| Versioned Worker catalog                  | Implemented and staging verified               | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The active `geonames-2026-11-17-spots` release contains 250 countries, 237,176 cities, and 19 spots across 512 shards. Rclone verified all 512 immutable objects with zero differences before the manifest was uploaded last. Live production-origin searches resolved Yellowstone National Park, the Eiffel Tower, and Uvita, while exact Yellowstone resolution returned its canonical spot record. The intact `geonames-2026-11-16` release provides a reversal target. |
+| Production frontend route                 | Deployed and rendered verified                 | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. Pull requests 51 and 52 promoted the explicit repository-variable wiring, and Pages run 43969999089 deployed it. Pull requests 55 and 56 then promoted the cinematic timeline through both protected validation gates, successful develop workflow 43987307324, and Pages workflow 43987868552. Pull requests 73 and 74 promoted spots through both protected validation gates, and Pages workflow 44009928197 deployed main merge `23d8c96`. Headless Chrome rendered the spot search and editor locally at desktop and mobile widths. Direct deep links still return the known Pages fallback HTTP 404 before client rendering, so server share HTML and crawler behavior remain future work. This does not create a Cloudflare apex Worker route or move the API out of isolated staging. |
 | Auth0 browser client                      | Implemented and owner verified locally         | The owner supplied the public tenant domain, SPA client ID, and exact API audience. The Vue 2 client implements Google redirect login, callback completion, logout, audience-scoped access-token acquisition, and silent restoration of an existing Auth0 session after reload. Tokens remain memory only. The owner reported successful sign in, callback return, identity display, token acquisition, and a genuine Worker round trip. Owner verification of silent reload after the latest client build remains. |
 | Worker authentication boundary            | Phase 2A implemented and staging verified      | A separate Worker verifies RS256 signatures through Auth0 JWKS, exact issuer and API audience, time claims, token type, and `read:my-atlas`. Mutations additionally require `write:my-atlas`; user-addressed mutation paths do not exist and client-supplied ownership fields are rejected. The staging `workers.dev` deployment returned Phase 2C health, rejected an unauthenticated protected request with 401, allowed the exact production origin, and rejected an unrelated origin. The owner also verified a genuine Auth0 API-audience access token through the live Worker. The default environment remains undeployed with no production route.                                                                            |
 | Registration Durable Objects and API      | Phase 2B staging redemption owner verified     | One SQLite-backed registry class atomically reserves invitation, qualified identity, handle and idempotency claims. One SQLite-backed user class initializes a private revision-1 profile. The authenticated browser form requires a one-use invitation, bounded identity fields, explicit staging acceptance, and a real Turnstile token. The owner reported successful invitation redemption, private account entry, and a Uvita pin that persisted through reload and a second sign in. |
@@ -179,9 +184,10 @@ and dry-run verified. The owner created the isolated staging bucket, verified
 all 512 immutable release objects with rclone, uploaded the manifest last, and
 live staging searches resolved Uvita and Salt Lake City.
 
-The spot-inclusive `geonames-2026-11-17-spots` candidate was built locally as
-256 resolution shards and 256 search shards. It remains unpublished, so the
-active staging manifest continues to resolve the city-and-country release.
+The spot-inclusive `geonames-2026-11-17-spots` release was built as 256
+resolution shards and 256 search shards. All 512 objects matched the local
+release before the manifest was uploaded last. Live staging searches and exact
+resolution now return its spot records while preserving legacy city search.
 
 ### Auth0 and authorization
 
@@ -316,7 +322,7 @@ ceiling before inviting external users.
       successful live manifest and shard reads for Uvita and Salt Lake City.
       The owner separately verified all 512 release objects with rclone before
       uploading the manifest last.
-- [ ] Publish and verify all 512 immutable `geonames-2026-11-17-spots` objects,
+- [x] Publish and verify all 512 immutable `geonames-2026-11-17-spots` objects,
       then update the staging `catalog/current.json` manifest last.
 - [x] Pass automated concurrency, authorization, cross-owner isolation, stale
       revision, privacy, and retry tests.
@@ -344,11 +350,12 @@ completed handoff evidence is:
 6. Completed for owner testing: the dedicated M2M client has its staging grant,
    and the SPA callback, logout URL, frontend origin, and Turnstile hostname are
    configured. Scope review remains before external users.
-7. Tests and the staging dry run passed. Worker
-   `c1923a3b-2a8f-47a8-acd0-cf033ea49790` is deployed without a production
+7. Tests and the staging dry run passed. Spot-aware Worker
+   `e20404c5-0250-47f0-88af-2d0db14983ee` is deployed without a production
    route.
-8. Production-origin health, CORS, Uvita search, and direct client rendering
-   now pass. Genuine-token auth on the production origin, a real public handle,
+8. Production-origin health, CORS, Uvita and spot search, exact spot
+   resolution, and direct client rendering now pass. Genuine-token auth on the
+   production origin, a real public handle,
    rate-limit 429, immediate unpublication, and direct mobile interaction remain
    owner verification. Do not add an apex Worker route yet.
 

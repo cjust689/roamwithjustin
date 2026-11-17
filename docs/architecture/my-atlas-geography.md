@@ -53,6 +53,10 @@ verification:
     - Curated spot fixtures passed search, draft pin, authenticated persistence, safe public projection, and Story-stat contracts
     - Full geonames-2026-11-17-spots artifact built 256 resolution shards and 256 search shards for 237445 records
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
+    - Pull requests 73 and 74 passed their required validation gates and merged through develop to main
+    - Pages workflow 44009928197 deployed main merge 23d8c96edc00d291a6f3a119c852dfd89f85f846
+    - Rclone verified 512 matching geonames-2026-11-17-spots release objects before catalog/current.json was uploaded last
+    - Staging Worker e20404c5-0250-47f0-88af-2d0db14983ee returned live Yellowstone, Eiffel Tower, Uvita, and exact Yellowstone resolution from the activated spot catalog
 ---
 
 # My Atlas geographic catalog, local proof, and Worker index
@@ -76,9 +80,10 @@ Without an active beta account, the browser proof stores draft selections in
 Vue component memory only and refreshing clears them. With an authenticated
 active account, the Phase 2C browser loads and persists pins through the Worker.
 The isolated staging Worker, R2 catalog, Durable Object namespaces, and limiter
-are deployed. Live searches for Uvita and Salt Lake City returned the active
-`geonames-2026-11-16` revision. No invitation, user, persisted pin, production
-route, or public profile has been verified.
+are deployed. Live searches for Yellowstone National Park, the Eiffel Tower,
+and Uvita returned the active `geonames-2026-11-17-spots` revision, and exact
+Yellowstone resolution returned its canonical spot record. No production API
+route or public profile has been verified.
 
 For development, `npm run my-atlas:serve` starts the Vue application and a
 loopback-only catalog search process. The search process reads the ignored full
@@ -217,11 +222,12 @@ milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
 The spot-inclusive local artifact remains ignored under
-`.state/my-atlas/worker-catalog-spots`. It has not been uploaded. The staging
-bucket still points to `geonames-2026-11-16`. Publishing the new release must
-upload every immutable release shard first, verify them, and update
-`catalog/current.json` last. The editorial media bucket and uploader remain
-outside this boundary.
+`.state/my-atlas/worker-catalog-spots`. All 512 immutable release shards were
+uploaded to the isolated staging bucket and rclone reported 512 matching files
+with zero differences before `catalog/current.json` was uploaded last. The
+staging Worker now resolves `geonames-2026-11-17-spots`. The earlier
+`geonames-2026-11-16` release remains intact for reversal. The editorial media
+bucket and uploader remain outside this boundary.
 
 ## License boundary
 

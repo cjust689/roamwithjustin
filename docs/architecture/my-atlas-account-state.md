@@ -55,6 +55,7 @@ verification:
     - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
     - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
+    - Staging Worker e20404c5-0250-47f0-88af-2d0db14983ee returned 200 health and resolved a canonical spot after the verified manifest switch
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
 ---
 
@@ -148,9 +149,9 @@ staging environment now resolves its provisioned private catalog, with live
 Uvita and Salt Lake City searches confirm manifest and shard reads. The owner
 reported that Uvita persisted even though the earlier browser build displayed a
 false failure after the successful write. Staging Worker
-`c1923a3b-2a8f-47a8-acd0-cf033ea49790` exposes the revision ETag needed to
-remove that false failure. A second owner write after this deployment remains
-external verification.
+`e20404c5-0250-47f0-88af-2d0db14983ee` retains the revision ETag behavior and
+adds spot-aware catalog validation and projection. A second owner write after
+the original ETag correction remains external verification.
 
 ## Export, sharing, and privacy boundary
 
