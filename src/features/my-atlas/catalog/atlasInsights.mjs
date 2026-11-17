@@ -97,6 +97,7 @@ export function atlasStats(places) {
   const continents = new Set()
   let capitals = 0
   let cities = 0
+  let spots = 0
   let undated = 0
   const years = atlasYears(places)
 
@@ -109,6 +110,7 @@ export function atlasStats(places) {
     if (countryCode) countryCodes.add(countryCode)
     if (place.continent) continents.add(place.continent)
     if (place.placeType === "city") cities += 1
+    if (place.placeType === "spot") spots += 1
     if (place.featureCode === "PPLC") capitals += 1
     if (!visitedDatesForPlace(place).length) undated += 1
   }
@@ -129,6 +131,7 @@ export function atlasStats(places) {
   return Object.freeze({
     places: places.length,
     cities,
+    spots,
     countries: countryCodes.size,
     continents: continents.size,
     capitals,

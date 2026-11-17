@@ -1,4 +1,5 @@
 import { resolveCatalogPlace } from "./search.mjs"
+import { isMyAtlasPlaceType } from "./placeTypes.mjs"
 
 export const MY_ATLAS_PIN_LIMIT = 300
 
@@ -17,7 +18,7 @@ export function addDraftPin(
   const currentPins = Array.isArray(pins) ? pins : []
   const place = resolveCatalogPlace(catalog, placeId)
 
-  if (!place || !["city", "country"].includes(place.placeType)) {
+  if (!place || !isMyAtlasPlaceType(place.placeType)) {
     throw pinError("unsupported_place", "Choose a supported catalog place.")
   }
   if (place.deprecated) {

@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 import fs from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { buildPlaceCatalog } from "./lib/build-place-catalog.mjs"
+
+const defaultSpotSource = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "data",
+  "curated-spots.json"
+)
 
 function usage() {
   return [
@@ -16,6 +23,7 @@ function usage() {
     "Optional:",
     "  --previous <catalog.json>",
     "  --include-place-id <GeoNames ID> (repeatable or comma separated)",
+    "  --spot-source <curated-spots.json>",
   ].join("\n")
 }
 
@@ -30,6 +38,7 @@ function parseArgs(argv) {
     else if (argument === "--revision") options.revision = value
     else if (argument === "--source-date") options.sourceSnapshotDate = value
     else if (argument === "--previous") options.previous = value
+    else if (argument === "--spot-source") options.spotSourceFile = value
     else if (argument === "--include-place-id") {
       options.includePlaceIds.push(
         ...String(value || "")
@@ -53,7 +62,11 @@ try {
   const previousCatalog = options.previous
     ? JSON.parse(fs.readFileSync(path.resolve(options.previous), "utf8"))
     : null
-  const catalog = buildPlaceCatalog({ ...options, previousCatalog })
+  const catalog = buildPlaceCatalog({
+    ...options,
+    previousCatalog,
+    spotSourceFile: path.resolve(options.spotSourceFile || defaultSpotSource),
+  })
   const output = path.resolve(options.output)
   fs.mkdirSync(path.dirname(output), { recursive: true })
   fs.writeFileSync(output, JSON.stringify(catalog) + "\n", "utf8")
@@ -64,7 +77,9 @@ try {
       catalog.stats.countries +
       " countries, " +
       catalog.stats.cities +
-      " cities, and " +
+      " cities, " +
+      catalog.stats.spots +
+      " spots, and " +
       catalog.stats.deprecated +
       " deprecated records."
   )

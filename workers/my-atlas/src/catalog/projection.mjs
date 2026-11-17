@@ -18,7 +18,7 @@ export function projectCatalogPlace(record) {
   if (
     !record ||
     typeof record.placeId !== "string" ||
-    !["country", "city"].includes(record.placeType) ||
+    !["country", "city", "spot"].includes(record.placeType) ||
     typeof record.name !== "string" ||
     !Array.isArray(record.coordinates) ||
     record.coordinates.length !== 2 ||
@@ -41,6 +41,12 @@ export function projectCatalogPlace(record) {
       : {}),
     ...(typeof record.continent === "string" && record.continent
       ? { continent: record.continent }
+      : {}),
+    ...(typeof record.spotCategory === "string" && record.spotCategory
+      ? { spotCategory: record.spotCategory }
+      : {}),
+    ...(typeof record.spotKind === "string" && record.spotKind
+      ? { spotKind: record.spotKind }
       : {}),
     ...(typeof record.source?.featureCode === "string" &&
     record.source.featureCode

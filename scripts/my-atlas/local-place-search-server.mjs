@@ -7,6 +7,12 @@ import { fileURLToPath } from "node:url"
 import { searchPlaceCatalog } from "../../src/features/my-atlas/catalog/search.mjs"
 import { buildPlaceCatalog } from "./lib/build-place-catalog.mjs"
 
+const defaultSpotSource = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "data",
+  "curated-spots.json"
+)
+
 function parseArgs(argv) {
   const options = {}
   for (let index = 0; index < argv.length; index += 1) {
@@ -23,14 +29,13 @@ function parseArgs(argv) {
 function sourceIdentity(sourceDirectory) {
   const cityFile = path.join(sourceDirectory, "cities500.txt")
   const stat = fs.statSync(cityFile)
-  const hash = crypto
-    .createHash("sha256")
-    .update(fs.readFileSync(cityFile))
-    .digest("hex")
+  const hash = crypto.createHash("sha256")
+  hash.update(fs.readFileSync(cityFile))
+  hash.update(fs.readFileSync(defaultSpotSource))
   const sourceSnapshotDate = stat.mtime.toISOString().slice(0, 10)
   return {
     sourceSnapshotDate,
-    revision: `local-${sourceSnapshotDate}-${hash.slice(0, 12)}`,
+    revision: `local-${sourceSnapshotDate}-${hash.digest("hex").slice(0, 12)}`,
   }
 }
 
@@ -128,6 +133,7 @@ export function buildLocalPlaceSearchCatalog(sourceDirectory) {
     sourceDirectory,
     revision: identity.revision,
     sourceSnapshotDate: identity.sourceSnapshotDate,
+    spotSourceFile: defaultSpotSource,
   })
 }
 
@@ -140,7 +146,7 @@ async function main() {
   const server = createLocalPlaceSearchServer({ catalog })
   server.listen(port, "127.0.0.1", () => {
     console.log(
-      `My Atlas local search ready on http://127.0.0.1:${port} with ${catalog.stats.cities} cities and ${catalog.stats.countries} countries.`
+      `My Atlas local search ready on http://127.0.0.1:${port} with ${catalog.stats.cities} cities, ${catalog.stats.countries} countries, and ${catalog.stats.spots} curated spots.`
     )
   })
 }

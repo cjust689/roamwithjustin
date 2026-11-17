@@ -5,6 +5,37 @@ import { normalizeSearchText } from "../../../src/features/my-atlas/catalog/sear
 
 const sourceFiles = ["countryInfo.txt", "admin1CodesASCII.txt", "cities500.txt"]
 const retiredCountryCodes = new Set(["AN", "CS"])
+const spotFeatures = Object.freeze({
+  "L.PRK": Object.freeze({ category: "national-park", kind: "National park" }),
+  "S.AMTH": Object.freeze({
+    category: "cultural-landmark",
+    kind: "Amphitheater",
+  }),
+  "S.ANS": Object.freeze({
+    category: "cultural-landmark",
+    kind: "Archaeological site",
+  }),
+  "S.MNMT": Object.freeze({
+    category: "cultural-landmark",
+    kind: "Monument",
+  }),
+  "S.PYR": Object.freeze({
+    category: "cultural-landmark",
+    kind: "Pyramid",
+  }),
+  "S.RUIN": Object.freeze({
+    category: "cultural-landmark",
+    kind: "Historic ruins",
+  }),
+  "H.FLLS": Object.freeze({
+    category: "natural-landmark",
+    kind: "Waterfall",
+  }),
+  "T.MT": Object.freeze({
+    category: "natural-landmark",
+    kind: "Mountain",
+  }),
+})
 
 function readLines(file) {
   return fs
@@ -93,6 +124,58 @@ function parseCities(file) {
       }
     })
     .filter(Boolean)
+}
+
+function parseSpots(file) {
+  if (!file) return []
+  const value = JSON.parse(fs.readFileSync(file, "utf8"))
+  if (
+    value?.schemaVersion !== 1 ||
+    value.sourceProvider !== "GeoNames" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value.sourceSnapshotDate) ||
+    !Array.isArray(value.records)
+  ) {
+    throw new Error("Invalid curated GeoNames spot source: " + file)
+  }
+  const seen = new Set()
+  return value.records.map(record => {
+    const featureKey = `${record.featureClass}.${record.featureCode}`
+    if (
+      !/^[1-9][0-9]{0,11}$/.test(record.geonameId) ||
+      seen.has(record.geonameId) ||
+      typeof record.name !== "string" ||
+      !record.name.trim() ||
+      !Array.isArray(record.aliases) ||
+      !record.aliases.every(alias => typeof alias === "string") ||
+      !Number.isFinite(record.latitude) ||
+      record.latitude < -90 ||
+      record.latitude > 90 ||
+      !Number.isFinite(record.longitude) ||
+      record.longitude < -180 ||
+      record.longitude > 180 ||
+      !/^[A-Z]{2}$/.test(record.countryCode) ||
+      !spotFeatures[featureKey] ||
+      typeof record.sourceUrl !== "string" ||
+      record.sourceUrl !==
+        `https://www.geonames.org/${record.geonameId}/${new URL(record.sourceUrl).pathname.split("/").filter(Boolean)[1]}`
+    ) {
+      throw new Error(
+        `Invalid curated GeoNames spot record: ${record.geonameId || "unknown"}`
+      )
+    }
+    seen.add(record.geonameId)
+    return {
+      ...record,
+      preferredName:
+        typeof record.preferredName === "string" && record.preferredName.trim()
+          ? record.preferredName.trim()
+          : record.name.trim(),
+      name: record.name.trim(),
+      sourceSnapshotDate: value.sourceSnapshotDate,
+      spotCategory: spotFeatures[featureKey].category,
+      spotKind: spotFeatures[featureKey].kind,
+    }
+  })
 }
 
 function searchNames({ aliases, name, admin1Name, countryName, iso2, iso3 }) {
@@ -201,6 +284,56 @@ function cityRecord(city, countries, admin1, revision) {
   }
 }
 
+function spotRecord(spot, countries, revision) {
+  const country = countries.get(spot.countryCode)
+  if (!country) {
+    throw new Error(
+      `GeoNames spot ${spot.geonameId} references unknown country ${spot.countryCode}`
+    )
+  }
+  const aliases = unique([
+    spot.preferredName,
+    spot.name,
+    ...(spot.aliases || []),
+  ])
+  return {
+    placeId: "geonames:" + spot.geonameId,
+    placeType: "spot",
+    name: spot.preferredName,
+    asciiName: spot.preferredName
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, ""),
+    aliases,
+    searchNames: searchNames({
+      aliases,
+      name: spot.preferredName,
+      admin1Name: spot.admin1Name || "",
+      countryName: country.name,
+    }),
+    countryCode: spot.countryCode,
+    countryName: country.name,
+    continent: country.continent,
+    admin1Code: spot.admin1Code || "",
+    admin1Name: spot.admin1Name || "",
+    coordinates: [spot.longitude, spot.latitude],
+    coordinateKind: "spot",
+    spotCategory: spot.spotCategory,
+    spotKind: spot.spotKind,
+    population: 0,
+    source: {
+      provider: "GeoNames",
+      geonameId: spot.geonameId,
+      canonicalName: spot.name,
+      featureClass: spot.featureClass,
+      featureCode: spot.featureCode,
+      sourceUrl: spot.sourceUrl,
+      retrieved: spot.sourceSnapshotDate,
+    },
+    catalogRevision: revision,
+    deprecated: false,
+  }
+}
+
 function assertStableIdentity(previous, current) {
   if (previous.placeType !== current.placeType) {
     throw new Error("Catalog identity type changed for " + current.placeId)
@@ -236,9 +369,16 @@ function mergePrevious(records, previousCatalog, revision) {
   return [...currentById.values()]
 }
 
-function sourceManifest(sourceDirectory) {
-  return sourceFiles.map(fileName => {
-    const file = path.join(sourceDirectory, fileName)
+function sourceManifest(sourceDirectory, spotSourceFile) {
+  return [
+    ...sourceFiles.map(fileName => ({
+      fileName,
+      file: path.join(sourceDirectory, fileName),
+    })),
+    ...(spotSourceFile
+      ? [{ fileName: path.basename(spotSourceFile), file: spotSourceFile }]
+      : []),
+  ].map(({ fileName, file }) => {
     const stat = fs.statSync(file)
     return {
       file: fileName,
@@ -254,6 +394,7 @@ export function buildPlaceCatalog({
   sourceSnapshotDate,
   includePlaceIds = [],
   previousCatalog = null,
+  spotSourceFile = "",
 }) {
   if (!sourceDirectory || !revision || !sourceSnapshotDate) {
     throw new Error(
@@ -274,6 +415,7 @@ export function buildPlaceCatalog({
   )
   const admin1 = parseAdmin1(path.join(sourceDirectory, "admin1CodesASCII.txt"))
   const cities = parseCities(path.join(sourceDirectory, "cities500.txt"))
+  const spots = parseSpots(spotSourceFile ? path.resolve(spotSourceFile) : "")
   const selectedIds = new Set(includePlaceIds.map(String))
   const selectedCities = selectedIds.size
     ? cities.filter(city => selectedIds.has(city.geonameId))
@@ -292,6 +434,7 @@ export function buildPlaceCatalog({
     ...selectedCities.map(city =>
       cityRecord(city, countries, admin1, revision)
     ),
+    ...spots.map(spot => spotRecord(spot, countries, revision)),
   ]
   records = mergePrevious(records, previousCatalog, revision).sort(
     (left, right) => left.placeId.localeCompare(right.placeId)
@@ -308,13 +451,21 @@ export function buildPlaceCatalog({
       licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
     },
     selection: selectedIds.size
-      ? { mode: "proof-subset", cityIds: [...selectedIds].sort() }
-      : { mode: "all-cities500" },
-    sources: sourceManifest(sourceDirectory),
+      ? {
+          mode: "proof-subset-plus-curated-spots",
+          cityIds: [...selectedIds].sort(),
+          spotIds: spots.map(spot => spot.geonameId).sort(),
+        }
+      : {
+          mode: "all-cities500-plus-curated-spots",
+          spotIds: spots.map(spot => spot.geonameId).sort(),
+        },
+    sources: sourceManifest(sourceDirectory, spotSourceFile),
     stats: {
       countries: records.filter(record => record.placeType === "country")
         .length,
       cities: records.filter(record => record.placeType === "city").length,
+      spots: records.filter(record => record.placeType === "spot").length,
       deprecated: records.filter(record => record.deprecated).length,
     },
     records,

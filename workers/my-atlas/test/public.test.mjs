@@ -191,4 +191,79 @@ describe("public Atlas projection", () => {
       })
     ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
   })
+
+  it("publishes a curated spot through the same safe projection", async () => {
+    await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        placeId: "geonames:5843642",
+        visitedYears: [2025],
+        expectedRevision: 1,
+        idempotencyKey: "56565656-5656-4656-8656-565656565656",
+      },
+      catalogResolver: async placeId => ({
+        placeId,
+        placeType: "spot",
+        name: "Yellowstone National Park",
+        spotCategory: "national-park",
+        spotKind: "National park",
+        countryCode: "US",
+        countryName: "United States",
+        deprecated: false,
+        coordinates: [-110.58846, 44.42796],
+      }),
+      now: NOW,
+    })
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: 2,
+        idempotencyKey: "57575757-5757-4757-8757-575757575757",
+      },
+      now: NOW,
+    })
+
+    const result = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog: {
+        async resolveMany(placeIds) {
+          expect(placeIds).toEqual(["geonames:5843642"])
+          return [
+            {
+              placeId: "geonames:5843642",
+              placeType: "spot",
+              name: "Yellowstone National Park",
+              spotCategory: "national-park",
+              spotKind: "National park",
+              countryCode: "US",
+              countryName: "United States",
+              coordinates: [-110.58846, 44.42796],
+            },
+          ]
+        },
+        async manifest() {
+          return {
+            catalogRevision: "fixture-spots-2026-11-17",
+            attribution: {
+              provider: "GeoNames",
+              url: "https://www.geonames.org/",
+              license: "CC BY 4.0",
+            },
+          }
+        },
+      },
+    })
+    expect(result.atlas.places[0]).toMatchObject({
+      placeId: "geonames:5843642",
+      placeType: "spot",
+      name: "Yellowstone National Park",
+      spotCategory: "national-park",
+      spotKind: "National park",
+      visitedYears: [2025],
+    })
+  })
 })

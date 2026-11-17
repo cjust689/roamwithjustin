@@ -95,9 +95,9 @@ const tutorials = Object.freeze({
     Object.freeze({
       eyebrow: "Build your Atlas",
       title: "Add places one at a time.",
-      body: "Search for a country or city, choose the right match, and add it to your Atlas. Add one or more visit years, or leave the date open.",
+      body: "Search for a country, city, national park, or iconic spot, choose the right match, and add it to your Atlas. Add one or more visit years, or leave the date open.",
       points: Object.freeze([
-        "Countries and cities use a verified place catalog",
+        "Countries, cities, and curated spots use verified catalog IDs",
         "Repeat visits can include more than one year",
       ]),
       action: "",
@@ -129,7 +129,7 @@ const tutorials = Object.freeze({
       title: "Your private Atlas is ready.",
       body: "Begin with any place that matters to you. Your account stays private while you build and refine your map.",
       points: Object.freeze([
-        "Start with a country or city",
+        "Start with a country, city, or spot",
         "Add places in any order",
       ]),
       action: "",

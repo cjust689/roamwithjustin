@@ -41,8 +41,8 @@
             ><span>Continents</span>
           </div>
           <div>
-            <strong>{{ visibleStats.capitals }}</strong
-            ><span>Capitals</span>
+            <strong>{{ visibleStats.spots || visibleStats.capitals }}</strong
+            ><span>{{ visibleStats.spots ? "Spots" : "Capitals" }}</span>
           </div>
         </div>
 

@@ -30,6 +30,8 @@ function publicSearchRecord(record) {
     ...(record.admin1Code ? { admin1Code: record.admin1Code } : {}),
     ...(record.admin1Name ? { admin1Name: record.admin1Name } : {}),
     ...(record.continent ? { continent: record.continent } : {}),
+    ...(record.spotCategory ? { spotCategory: record.spotCategory } : {}),
+    ...(record.spotKind ? { spotKind: record.spotKind } : {}),
     coordinates: record.coordinates,
     coordinateKind: record.coordinateKind,
     population: record.population || 0,

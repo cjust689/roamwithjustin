@@ -1,3 +1,5 @@
+import { isMyAtlasPlaceType } from "../catalog/placeTypes.mjs"
+
 export class MyAtlasApiError extends Error {
   constructor(message, { status = 0, code = "request_failed" } = {}) {
     super(message)
@@ -47,7 +49,7 @@ function isPublicPlace(value) {
   return Boolean(
     value &&
       typeof value.placeId === "string" &&
-      ["country", "city"].includes(value.placeType) &&
+      isMyAtlasPlaceType(value.placeType) &&
       typeof value.name === "string" &&
       Array.isArray(value.coordinates) &&
       value.coordinates.length === 2 &&

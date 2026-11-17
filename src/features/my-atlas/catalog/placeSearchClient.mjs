@@ -1,4 +1,5 @@
 import { searchPlaceCatalog } from "./search.mjs"
+import { isMyAtlasPlaceType } from "./placeTypes.mjs"
 
 function isCanonicalPlace(record) {
   const coordinates = record?.coordinates
@@ -6,7 +7,7 @@ function isCanonicalPlace(record) {
     record &&
     typeof record.placeId === "string" &&
     /^(?:iso-country:[A-Z]{2}|geonames:\d+)$/.test(record.placeId) &&
-    ["country", "city"].includes(record.placeType) &&
+    isMyAtlasPlaceType(record.placeType) &&
     typeof record.name === "string" &&
     record.name.length > 0 &&
     (coordinates === null ||
