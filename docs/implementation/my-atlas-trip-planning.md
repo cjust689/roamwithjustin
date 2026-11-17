@@ -46,6 +46,10 @@ verification:
     - npm run lint and npm run build passed after the planner disclosure spacing and request-reference recovery changes
     - Local Chromium component-state measurements at 1,264 and 390 CSS pixels verified that the planner disclosure exactly matches the neighboring Add destination header width, height, vertical padding, centered alignment, and zero viewport overflow
     - Staging Worker version cfd6a48b-03fe-43fb-9e4a-9e4b8022e962 returned 200 health with the production CORS origin and exposed request ID, while its unauthenticated wishlist read returned the required 401
+    - Pull request 109 passed validation run 44153248293 and merged the recovery to develop as c54a27710689019cab794d17a307c0626462f8f5; develop validation run 44153597602 then succeeded
+    - Pull request 110 passed production validation run 44153925179 and merged to main as ebc0ee59fa25185dbd899662316cf9b59cca0659
+    - Pages workflow 44154348301 built and deployed main merge ebc0ee59fa25185dbd899662316cf9b59cca0659 successfully
+    - Live content-addressed chunk 515.27a58f3d.js returned 200 with the planner disclosure, unavailable-entry recovery, remove-and-add guidance, and request-reference copy together
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, exposed ETag and X-Request-Id, rejected unauthenticated owner reads and deletion with 401, and rejected an unrelated origin with 403
     - Staging Worker version f66133bb-6050-4491-ab37-70ab8fee42b3 deployed the backward-compatible direct start/finish contract, returned 200 health with the production CORS origin and X-Request-Id, and rejected an unauthenticated trip-plan read with 401
     - Pull request 105 passed validation run 44143259391 and merged the feature to develop as e8436e94fe6221ad5757c17e1ef830651970f645; develop validation run 44143711352 then succeeded
@@ -63,10 +67,10 @@ verification:
 The implementation is deployed for controlled owner testing. Staging
 Worker version `cfd6a48b-03fe-43fb-9e4a-9e4b8022e962` now serves the
 backward-compatible direct start and finish contract plus unavailable-wish
-read recovery. Pull requests 105 and 106
-promoted planner-local search, direct endpoint selection, and the compact
-collapsible owner workflow through protected `develop` and `main`. Pages run
-44144353792 and the live content-addressed bundle verify that frontend release.
+read recovery. Pull requests 109 and 110 promoted the server-compatible planner
+recovery and compact disclosure correction through protected `develop` and
+`main`. Pages run 44154348301 and live chunk 515.27a58f3d.js verify the current
+frontend release.
 Additional external beta invitations remain gated on the owner checks below.
 
 ## Implemented and test verified
