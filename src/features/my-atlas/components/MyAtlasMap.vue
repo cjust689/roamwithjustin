@@ -25,6 +25,7 @@
 import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { mapStyleUrl, terrainSource } from "../../atlas/config/mapConfig"
+import { buildAtlasMarkerGroups } from "../../atlas/config/markerLayout.mjs"
 import {
   atlasYears,
   curvedConnectionCoordinates,
@@ -34,6 +35,9 @@ import {
 } from "../catalog/atlasInsights.mjs"
 
 const CONNECTION_SOURCE = "my-atlas-connections"
+const CLUSTER_MAX_ZOOM = 7.75
+const CLUSTER_RADIUS = 96
+const COMPACT_CLUSTER_RADIUS = 76
 const YEAR_COLORS = Object.freeze([
   "#f2c76e",
   "#58d1c9",
@@ -202,6 +206,7 @@ export default {
           this.renderMarkers()
           this.showPlacesOverview()
         })
+        this.map.on("moveend", this.renderMarkers)
         this.map.on("error", event => {
           if (!this.ready) this.error = event?.error?.message || "Map failed"
         })
@@ -260,14 +265,36 @@ export default {
         .layers?.find(layer => layer.type === "symbol")?.id
       this.map.addLayer(
         {
+          id: "my-atlas-connections-shadow",
+          type: "line",
+          source: CONNECTION_SOURCE,
+          layout: {
+            "line-cap": "round",
+            "line-join": "round",
+          },
+          paint: {
+            "line-color": "#071012",
+            "line-opacity": 0.68,
+            "line-width": 7,
+            "line-blur": 1.2,
+          },
+        },
+        firstLabelLayer
+      )
+      this.map.addLayer(
+        {
           id: "my-atlas-connections-glow",
           type: "line",
           source: CONNECTION_SOURCE,
+          layout: {
+            "line-cap": "round",
+            "line-join": "round",
+          },
           paint: {
             "line-color": "#e6ba68",
-            "line-opacity": 0.14,
-            "line-width": 8,
-            "line-blur": 4,
+            "line-opacity": 0.3,
+            "line-width": 9,
+            "line-blur": 3,
           },
         },
         firstLabelLayer
@@ -277,11 +304,15 @@ export default {
           id: "my-atlas-connections-line",
           type: "line",
           source: CONNECTION_SOURCE,
+          layout: {
+            "line-cap": "round",
+            "line-join": "round",
+          },
           paint: {
-            "line-color": "#f0c978",
-            "line-opacity": 0.58,
-            "line-width": 2,
-            "line-dasharray": [2, 2.6],
+            "line-color": "#f8d58d",
+            "line-opacity": 0.94,
+            "line-width": 3,
+            "line-dasharray": [1.5, 1.8],
           },
         },
         firstLabelLayer
@@ -296,39 +327,114 @@ export default {
       if (!this.map || !this.ready) return
       this.clearMarkers()
 
-      this.places.forEach(place => {
-        if (!Array.isArray(place.coordinates)) return
-        const element = document.createElement("button")
-        element.type = "button"
-        element.className = "my-atlas-pin"
-        if (place.placeId === this.selectedPlaceId) {
-          element.classList.add("is-selected")
-        }
-        const dateLabel = formatVisitedDates(place)
-        const year = firstVisitedYear(place)
-        element.style.setProperty("--pin-color", pinColor(year))
-        element.setAttribute("aria-label", `Select ${place.name}, ${dateLabel}`)
-        element.dataset.placeId = place.placeId
+      const markerPlaces = this.places.map(place => ({
+        ...place,
+        id: place.placeId,
+      }))
+      const groups = buildAtlasMarkerGroups(markerPlaces, {
+        zoom: this.map.getZoom(),
+        project: coordinates => this.map.project(coordinates),
+        selectedId: this.selectedPlaceId,
+        clusterMaxZoom: CLUSTER_MAX_ZOOM,
+        clusterRadius:
+          window.innerWidth <= 720 ? COMPACT_CLUSTER_RADIUS : CLUSTER_RADIUS,
+      })
 
-        const pin = document.createElement("span")
-        pin.className = "my-atlas-pin-shape"
-        pin.appendChild(document.createElement("i"))
-        const label = document.createElement("span")
-        label.className = "my-atlas-pin-label"
-        const name = document.createElement("strong")
-        name.textContent = place.name
-        const dates = document.createElement("small")
-        dates.textContent = dateLabel
-        label.append(name, dates)
-        element.append(pin, label)
-        element.addEventListener("click", () =>
-          this.$emit("select", place.placeId)
-        )
+      groups.forEach(group => {
+        if (group.isCluster) this.addClusterMarker(group)
+        else this.addPlaceMarker(group.nodes[0])
+      })
+    },
+    addPlaceMarker(place) {
+      const element = document.createElement("button")
+      element.type = "button"
+      element.className = "my-atlas-pin"
+      if (place.placeId === this.selectedPlaceId) {
+        element.classList.add("is-selected")
+      }
+      const dateLabel = formatVisitedDates(place)
+      const year = firstVisitedYear(place)
+      element.style.setProperty("--pin-color", pinColor(year))
+      element.setAttribute("aria-label", `Select ${place.name}, ${dateLabel}`)
+      element.dataset.placeId = place.placeId
 
-        const marker = new maplibregl.Marker({ element, anchor: "bottom" })
-          .setLngLat(place.coordinates)
-          .addTo(this.map)
-        this.markers.push(marker)
+      const pin = document.createElement("span")
+      pin.className = "my-atlas-pin-shape"
+      pin.appendChild(document.createElement("i"))
+      const label = document.createElement("span")
+      label.className = "my-atlas-pin-label"
+      const name = document.createElement("strong")
+      name.textContent = place.name
+      const dates = document.createElement("small")
+      dates.textContent = dateLabel
+      label.append(name, dates)
+      element.append(pin, label)
+      element.addEventListener("click", () =>
+        this.$emit("select", place.placeId)
+      )
+
+      this.addMarker(element, place.coordinates)
+    },
+    addClusterMarker(group) {
+      const element = document.createElement("button")
+      const pin = document.createElement("span")
+      const count = document.createElement("strong")
+      const label = document.createElement("span")
+      const name = document.createElement("strong")
+      const placeNames = group.nodes.map(place => place.name)
+
+      element.type = "button"
+      element.className = "my-atlas-pin my-atlas-pin-cluster"
+      element.style.setProperty("--pin-color", "#f2c76e")
+      element.setAttribute(
+        "aria-label",
+        `Zoom in to ${group.nodes.length} nearby destinations: ${placeNames.join(", ")}`
+      )
+      element.dataset.clusterId = group.id
+
+      pin.className = "my-atlas-pin-shape"
+      count.textContent = String(group.nodes.length)
+      pin.appendChild(count)
+      label.className = "my-atlas-pin-label"
+      name.textContent = `${group.nodes.length} nearby places`
+      label.appendChild(name)
+      element.append(pin, label)
+      element.addEventListener("click", event => {
+        event.stopPropagation()
+        this.zoomToMarkerGroup(group)
+      })
+
+      this.addMarker(element, group.coordinates)
+    },
+    addMarker(element, coordinates) {
+      const marker = new maplibregl.Marker({
+        element,
+        anchor: "bottom",
+        rotationAlignment: "viewport",
+        pitchAlignment: "viewport",
+        subpixelPositioning: true,
+        opacityWhenCovered: 0.35,
+      })
+        .setLngLat(coordinates)
+        .addTo(this.map)
+      this.markers.push(marker)
+    },
+    zoomToMarkerGroup(group) {
+      if (!this.map || group.nodes.length < 2) return
+      const bounds = group.nodes.reduce(
+        (result, place) => result.extend(place.coordinates),
+        new maplibregl.LngLatBounds()
+      )
+      const reducedMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      this.map.fitBounds(bounds, {
+        padding: window.innerWidth <= 720 ? 72 : 110,
+        maxZoom: CLUSTER_MAX_ZOOM + 0.75,
+        duration: reducedMotion ? 0 : 800,
+        pitch: 18,
+        bearing: 0,
+        essential: false,
       })
     },
     fitPlaces() {
@@ -547,7 +653,9 @@ export default {
 }
 
 ::v-deep .my-atlas-pin {
-  position: relative;
+  /* MapLibre markers must remain out of document flow. Relative positioning
+     overrides MapLibre's marker rule and creates cumulative vertical drift. */
+  position: absolute;
   width: 2.2rem;
   height: 2.8rem;
   padding: 0;
@@ -580,6 +688,20 @@ export default {
   border-radius: 50%;
   background: #102023;
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16);
+}
+
+::v-deep .my-atlas-pin-cluster .my-atlas-pin-shape {
+  display: grid;
+  place-items: center;
+  border-color: #f8e2af;
+  background: #122326;
+}
+
+::v-deep .my-atlas-pin-cluster .my-atlas-pin-shape strong {
+  color: #f8d58d;
+  font-size: 0.82rem;
+  line-height: 1;
+  transform: rotate(45deg);
 }
 
 ::v-deep .my-atlas-pin-label {
