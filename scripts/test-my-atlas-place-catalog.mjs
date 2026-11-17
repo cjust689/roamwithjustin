@@ -36,6 +36,13 @@ import {
   isNormalizedMyAtlasMemory,
   normalizeMyAtlasMemory,
 } from "../src/features/my-atlas/catalog/memory.mjs"
+import {
+  MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS,
+  isNormalizedMyAtlasCustomPlace,
+  normalizeMyAtlasCustomCoordinates,
+  normalizeMyAtlasCustomPlace,
+  normalizeMyAtlasCustomPlaceName,
+} from "../src/features/my-atlas/catalog/customPlace.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../src/features/my-atlas/config/placeSearch.mjs"
 import { createLocalPlaceSearchServer } from "./my-atlas/local-place-search-server.mjs"
 import {
@@ -79,6 +86,34 @@ assert.equal(normalizeMyAtlasMemory("memory\u202Ehidden"), null)
 assert.equal(normalizeMyAtlasMemory("<script>alert(1)</script>"), null)
 assert.equal(isNormalizedMyAtlasMemory("A safe favorite memory."), true)
 assert.equal(isNormalizedMyAtlasMemory("  needs normalization  "), false)
+
+assert.deepEqual(
+  normalizeMyAtlasCustomPlace({
+    name: "  Krka   National Park  ",
+    coordinates: [15.97217, 43.80123],
+  }),
+  { name: "Krka National Park", coordinates: [15.97217, 43.80123] }
+)
+assert.deepEqual(
+  normalizeMyAtlasCustomCoordinates([-0, 85.0511289]),
+  [0, 85.051129]
+)
+assert.equal(normalizeMyAtlasCustomCoordinates([181, 0]), null)
+assert.equal(normalizeMyAtlasCustomCoordinates([0, 85.05113]), null)
+assert.equal(
+  Array.from(normalizeMyAtlasCustomPlaceName("\u{1f332}".repeat(80))).length,
+  MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS
+)
+assert.equal(normalizeMyAtlasCustomPlaceName("a".repeat(81)), null)
+assert.equal(normalizeMyAtlasCustomPlaceName("York <Minster>"), null)
+assert.equal(normalizeMyAtlasCustomPlaceName("Arches\u202E Park"), null)
+assert.equal(
+  isNormalizedMyAtlasCustomPlace({
+    name: "Canyonlands National Park",
+    coordinates: [-109.88016, 38.32687],
+  }),
+  true
+)
 
 function directoryBucket(directory) {
   return {

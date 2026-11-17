@@ -5,6 +5,10 @@ import {
 } from "../catalog/projection.mjs"
 import { REGISTRY_OBJECT_NAME } from "../registration/service.mjs"
 import { isNormalizedPinMemory } from "../account/memory.mjs"
+import {
+  CUSTOM_PLACE_ID_PATTERN,
+  projectCustomPlace,
+} from "../account/custom-place.mjs"
 
 const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 
@@ -36,7 +40,9 @@ function publicPlace(record, pin) {
   }
   let place
   try {
-    place = projectCatalogPlace(record)
+    place = CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+      ? projectCustomPlace(pin.placeId, pin.customPlace)
+      : projectCatalogPlace(record)
   } catch {
     throw new PublicAtlasServiceError("A public Atlas place is unavailable.")
   }
@@ -86,14 +92,21 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
   }
 
   const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
-  const placeIds = snapshot.pins.map(pin => pin.placeId)
-  const records =
-    typeof catalog.resolveMany === "function"
+  const catalogPins = snapshot.pins.filter(
+    pin => !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+  )
+  const placeIds = catalogPins.map(pin => pin.placeId)
+  const records = placeIds.length
+    ? typeof catalog.resolveMany === "function"
       ? await catalog.resolveMany(placeIds)
       : await Promise.all(placeIds.map(placeId => catalog.resolve(placeId)))
+    : []
+  const recordsByPlaceId = new Map(
+    catalogPins.map((pin, index) => [pin.placeId, records[index]])
+  )
   const manifest = await catalog.manifest()
   const places = snapshot.pins
-    .map((pin, index) => publicPlace(records[index], pin))
+    .map(pin => publicPlace(recordsByPlaceId.get(pin.placeId), pin))
     .sort((left, right) => {
       const country = (left.countryName || "").localeCompare(
         right.countryName || ""

@@ -270,6 +270,82 @@ describe("public Atlas projection", () => {
     })
   })
 
+  it("publishes owner-created custom pins without adding them to the catalog", async () => {
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        customPlace: {
+          name: "New Forest",
+          coordinates: [-1.59, 50.87],
+        },
+        visitedYears: [2023],
+        memory: "A quiet walk beneath the old trees.",
+        expectedRevision: 1,
+        idempotencyKey: "58585858-5858-4858-8858-585858585858",
+      },
+      now: NOW,
+    })
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: 2,
+        idempotencyKey: "59595959-5959-4959-8959-595959595959",
+      },
+      now: NOW,
+    })
+    const customCatalog = {
+      async resolveMany() {
+        throw new Error("Custom pins must not enter catalog resolution.")
+      },
+      async manifest() {
+        return {
+          catalogRevision: "fixture-custom-2026-11-17",
+          attribution: {
+            provider: "GeoNames",
+            url: "https://www.geonames.org/",
+            license: "CC BY 4.0",
+          },
+        }
+      },
+    }
+    const result = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog: customCatalog,
+    })
+    expect(result.atlas.places).toEqual([
+      {
+        placeId: created.pin.placeId,
+        placeType: "custom",
+        name: "New Forest",
+        coordinates: [-1.59, 50.87],
+        visitedDates: [{ year: 2023 }],
+        visitedYears: [2023],
+        memory: "A quiet walk beneath the old trees.",
+      },
+    ])
+
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    await runInDurableObject(user, (_instance, state) => {
+      const key = `pin:${created.pin.pinId}`
+      const pin = state.storage.kv.get(key)
+      state.storage.kv.put(key, {
+        ...pin,
+        customPlace: { ...pin.customPlace, name: "<script>" },
+      })
+    })
+    await expect(
+      getPublicAtlas({
+        environment: environment(),
+        handle: "public-owner",
+        placeCatalog: customCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasServiceError)
+  })
+
   it("fails closed when stored public memory no longer satisfies the contract", async () => {
     const created = await createMyPin({
       environment: environment(),

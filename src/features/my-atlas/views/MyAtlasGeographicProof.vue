@@ -1,11 +1,15 @@
 <template>
   <main class="my-atlas-proof">
     <MyAtlasMap
+      ref="atlasMap"
       :places="displayedPlaces"
       :selected-place-id="selectedPlaceId"
       :show-connections="showConnections"
       :playback-active="timelinePlaying"
+      :placement-active="customPlaceOpen"
+      :placement-coordinates="customPlaceCoordinates"
       @select="selectPin"
+      @place-custom="setCustomPlaceCoordinates"
     />
     <MyAtlasTutorial
       v-if="tutorialOpen"
@@ -230,6 +234,85 @@
         </small>
       </label>
 
+      <section
+        v-if="accountProfile"
+        class="my-atlas-custom-place"
+        :class="{ 'is-open': customPlaceOpen }"
+        aria-labelledby="my-atlas-custom-place-title"
+      >
+        <button
+          v-if="!customPlaceOpen"
+          type="button"
+          class="my-atlas-custom-place-trigger"
+          :disabled="accountPending"
+          @click="beginCustomPlace"
+        >
+          Can't find it? Add a custom pin
+        </button>
+        <template v-else>
+          <div class="my-atlas-custom-place-heading">
+            <div>
+              <p id="my-atlas-custom-place-title">Custom map pin</p>
+              <span>Name the place, then choose its position on the map.</span>
+            </div>
+            <button type="button" @click="cancelCustomPlace">Cancel</button>
+          </div>
+          <label>
+            <span>Place name</span>
+            <input
+              ref="customNameInput"
+              v-model="customPlaceName"
+              type="text"
+              maxlength="160"
+              autocomplete="off"
+              placeholder="Krka National Park"
+            />
+            <small>
+              {{ customPlaceCharacterCount }} of
+              {{ customPlaceMaxCharacters }} characters
+            </small>
+            <small v-if="customPlaceNameError" class="is-error">
+              {{ customPlaceNameError }}
+            </small>
+          </label>
+          <div class="my-atlas-custom-place-position">
+            <strong>{{
+              customPlaceCoordinates ? "Position selected" : "Position needed"
+            }}</strong>
+            <span v-if="customPlaceCoordinates">
+              {{ customPlaceCoordinates[1].toFixed(4) }},
+              {{ customPlaceCoordinates[0].toFixed(4) }}
+            </span>
+            <span v-else>
+              Click or tap the map. You can then drag the gold pin or adjust it
+              with the arrow keys.
+            </span>
+            <button
+              v-if="!customPlaceCoordinates"
+              type="button"
+              @click="focusMapForPlacement"
+            >
+              Choose on map
+            </button>
+          </div>
+          <p v-if="customPlaceError" class="my-atlas-custom-place-error">
+            {{ customPlaceError }}
+          </p>
+          <p class="my-atlas-custom-place-disclosure">
+            This name and map position are your own entry. They become visible
+            if you share your Atlas publicly.
+          </p>
+          <button
+            type="button"
+            class="my-atlas-custom-place-continue"
+            :disabled="!customPlaceReady || accountPending"
+            @click="continueCustomPlace"
+          >
+            Continue to visit details
+          </button>
+        </template>
+      </section>
+
       <MyAtlasPinEditor
         v-if="pinEditorPlace"
         :key="pinEditorKey"
@@ -326,7 +409,8 @@
         </div>
         <p>
           Publishing makes your marked places, optional visit dates, and
-          favorite memories available to anyone with your link.
+          favorite memories available to anyone with your link. Names and
+          positions of your custom pins are included.
         </p>
         <div class="my-atlas-sharing-actions">
           <button
@@ -366,8 +450,8 @@
         <a href="https://www.geonames.org/" target="_blank" rel="noopener">
           GeoNames
         </a>
-        under CC BY 4.0. Map rendering uses MapLibre and the configured tile
-        provider.
+        under CC BY 4.0. Custom pins are supplied by each Atlas owner. Map
+        rendering uses MapLibre and the configured tile provider.
       </p>
       <p class="my-atlas-brand">My Atlas by RoamWithJustin.com</p>
       <p class="my-atlas-announcement" aria-live="polite">{{ announcement }}</p>
@@ -391,6 +475,12 @@ import {
 } from "../catalog/atlasInsights.mjs"
 import { formatPlaceLabel, resolveCatalogPlace } from "../catalog/search.mjs"
 import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
+import {
+  MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS,
+  normalizeMyAtlasCustomCoordinates,
+  normalizeMyAtlasCustomPlace,
+  normalizeMyAtlasCustomPlaceName,
+} from "../catalog/customPlace.mjs"
 import { addDraftPin, removeDraftPin } from "../catalog/pinDraft.mjs"
 import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
 import {
@@ -444,6 +534,11 @@ export default {
       pinEditorPlace: null,
       pinEditorPin: null,
       pinEditorError: "",
+      customPlaceOpen: false,
+      customPlaceName: "",
+      customPlaceCoordinates: null,
+      customPlaceError: "",
+      pendingCustomPlace: null,
       yearFilter: "all",
       timelineIndex: -1,
       timelinePlaying: false,
@@ -468,6 +563,26 @@ export default {
   computed: {
     authDisplayName() {
       return this.auth.user?.name || this.auth.user?.email || "Signed in"
+    },
+    customPlaceCharacterCount() {
+      return Array.from(this.customPlaceName).length
+    },
+    customPlaceMaxCharacters() {
+      return MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS
+    },
+    customPlaceNameError() {
+      if (!this.customPlaceName) return ""
+      return normalizeMyAtlasCustomPlaceName(this.customPlaceName)
+        ? ""
+        : `Use plain text up to ${MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS} characters.`
+    },
+    customPlaceReady() {
+      return Boolean(
+        normalizeMyAtlasCustomPlace({
+          name: this.customPlaceName,
+          coordinates: this.customPlaceCoordinates,
+        })
+      )
     },
     runtimeCatalog() {
       const baseIds = new Set(placeCatalog.records.map(place => place.placeId))
@@ -686,6 +801,7 @@ export default {
           placeId: pin.placeId,
           visitedDates: pin.visitedDates,
           visitedYears: pin.visitedYears,
+          memory: pin.memory,
         }))
         state.pins.forEach(pin => {
           this.$set(this.loadedPlaces, pin.placeId, {
@@ -779,6 +895,7 @@ export default {
       }
     },
     placeLabel(place) {
+      if (place.placeType === "custom") return "Custom map pin"
       const label = formatPlaceLabel(place)
       if (place.placeType === "country") return place.countryName || place.name
       return label.replace(place.name + ", ", "")
@@ -787,8 +904,10 @@ export default {
       this.pinEditorPlace = null
       this.pinEditorPin = null
       this.pinEditorError = ""
+      this.pendingCustomPlace = null
     },
     openNewPin(place) {
+      this.cancelCustomPlace()
       if (this.pins.some(pin => pin.placeId === place.placeId)) {
         this.accountError = "This destination is already in your Atlas."
         return
@@ -796,6 +915,64 @@ export default {
       this.pinEditorPlace = place
       this.pinEditorPin = null
       this.pinEditorError = ""
+    },
+    beginCustomPlace() {
+      if (!this.accountProfile) return
+      this.closePinEditor()
+      this.customPlaceOpen = true
+      this.customPlaceCoordinates = null
+      this.customPlaceError = ""
+      const queryName = normalizeMyAtlasCustomPlaceName(this.query)
+      this.customPlaceName = queryName || this.query.trim().slice(0, 160)
+      this.announcement =
+        "Custom pin placement is active. Choose a position on the map."
+      this.$nextTick(() => this.$refs.customNameInput?.focus())
+    },
+    setCustomPlaceCoordinates(value) {
+      if (!this.customPlaceOpen) return
+      const coordinates = normalizeMyAtlasCustomCoordinates(value)
+      if (!coordinates) {
+        this.customPlaceError = "Choose a valid position on the map."
+        return
+      }
+      this.customPlaceCoordinates = [...coordinates]
+      this.customPlaceError = ""
+      this.announcement = "Custom pin position selected."
+    },
+    focusMapForPlacement() {
+      this.$refs.atlasMap?.$el?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    },
+    cancelCustomPlace() {
+      this.customPlaceOpen = false
+      this.customPlaceName = ""
+      this.customPlaceCoordinates = null
+      this.customPlaceError = ""
+      this.pendingCustomPlace = null
+    },
+    continueCustomPlace() {
+      const customPlace = normalizeMyAtlasCustomPlace({
+        name: this.customPlaceName,
+        coordinates: this.customPlaceCoordinates,
+      })
+      if (!customPlace) {
+        this.customPlaceError =
+          "Enter a valid name and choose a position on the map."
+        return
+      }
+      this.pendingCustomPlace = customPlace
+      this.pinEditorPlace = {
+        placeId: "custom:draft",
+        placeType: "custom",
+        name: customPlace.name,
+        coordinates: [...customPlace.coordinates],
+      }
+      this.pinEditorPin = null
+      this.pinEditorError = ""
+      this.customPlaceOpen = false
+      this.customPlaceError = ""
     },
     openExistingPin(place) {
       this.pinEditorPlace = place
@@ -811,6 +988,11 @@ export default {
     },
     async addPlace(place, visitedDates = [], memory = "") {
       if (this.accountProfile) {
+        if (place.placeType === "custom" && !this.pendingCustomPlace) {
+          this.pinEditorError =
+            "This custom pin expired. Return to search and place it again."
+          return
+        }
         this.accountPending = true
         this.accountError = ""
         try {
@@ -818,7 +1000,9 @@ export default {
           const result = await createMyAtlasPin({
             apiBaseUrl: this.apiBaseUrl,
             accessToken: token,
-            placeId: place.placeId,
+            ...(place.placeType === "custom" && this.pendingCustomPlace
+              ? { customPlace: this.pendingCustomPlace }
+              : { placeId: place.placeId }),
             visitedDates,
             memory,
             revision: this.accountProfile.revision,
@@ -829,11 +1013,24 @@ export default {
             revision: result.revision,
             pinCount: this.accountProfile.pinCount + 1,
           }
-          this.$set(this.loadedPlaces, place.placeId, place)
-          this.selectedPlaceId = place.placeId
+          this.$set(this.loadedPlaces, result.pin.placeId, {
+            placeId: result.pin.placeId,
+            placeType: result.pin.placeType,
+            name: result.pin.name,
+            countryCode: result.pin.countryCode,
+            admin1Name: result.pin.admin1Name,
+            countryName: result.pin.countryName,
+            continent: result.pin.continent,
+            featureCode: result.pin.featureCode,
+            spotCategory: result.pin.spotCategory,
+            spotKind: result.pin.spotKind,
+            coordinates: result.pin.coordinates,
+            deprecated: false,
+          })
+          this.selectedPlaceId = result.pin.placeId
           this.query = ""
           this.closePinEditor()
-          this.announcement = place.name + " was added to your map."
+          this.announcement = result.pin.name + " was added to your map."
         } catch (error) {
           this.pinEditorError =
             error.code === "revision_conflict"
@@ -913,6 +1110,9 @@ export default {
             this.selectedPlaceId = ""
           }
           if (this.pinEditorPin?.pinId === pin.pinId) this.closePinEditor()
+          if (place.placeType === "custom") {
+            this.$delete(this.loadedPlaces, place.placeId)
+          }
           this.announcement = place.name + " was removed from your map."
         } catch (error) {
           this.accountError = "This place could not be removed from your Atlas."
@@ -1456,6 +1656,172 @@ export default {
   border-color: #e6ba68;
   box-shadow: 0 0 0 2px rgba(230, 186, 104, 0.2);
   outline: none;
+}
+
+.my-atlas-custom-place {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.my-atlas-custom-place.is-open {
+  padding: 0.9rem;
+  border: 1px solid rgba(230, 186, 104, 0.34);
+  border-radius: 0.95rem;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(230, 186, 104, 0.12),
+      transparent 45%
+    ),
+    rgba(255, 255, 255, 0.035);
+}
+
+.my-atlas-custom-place-trigger,
+.my-atlas-custom-place-continue,
+.my-atlas-custom-place-heading button {
+  border: 1px solid rgba(230, 186, 104, 0.45);
+  border-radius: 0.72rem;
+  color: #f5d999;
+  background: rgba(230, 186, 104, 0.07);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-custom-place-trigger {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-style: dashed;
+  text-align: left;
+}
+
+.my-atlas-custom-place-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.my-atlas-custom-place-heading > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.my-atlas-custom-place-heading p,
+.my-atlas-custom-place-heading span,
+.my-atlas-custom-place-disclosure,
+.my-atlas-custom-place-error {
+  margin: 0;
+}
+
+.my-atlas-custom-place-heading p {
+  color: #e6ba68;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.my-atlas-custom-place-heading span,
+.my-atlas-custom-place-disclosure {
+  color: #94a7a0;
+  font-size: 0.64rem;
+  line-height: 1.45;
+}
+
+.my-atlas-custom-place-heading button {
+  padding: 0.42rem 0.55rem;
+  color: #d9b96f;
+  background: transparent;
+}
+
+.my-atlas-custom-place > label {
+  display: grid;
+  gap: 0.3rem;
+  color: #edf7f2;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.my-atlas-custom-place > label input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.72rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 0.72rem;
+  color: #fff;
+  background: rgba(5, 14, 16, 0.68);
+  font: inherit;
+  font-weight: 400;
+}
+
+.my-atlas-custom-place > label input:focus {
+  border-color: #e6ba68;
+  outline: 2px solid rgba(230, 186, 104, 0.18);
+}
+
+.my-atlas-custom-place > label small {
+  justify-self: end;
+  color: #7f938c;
+  font-size: 0.58rem;
+  font-weight: 400;
+}
+
+.my-atlas-custom-place > label small.is-error {
+  color: #e6a8a1;
+}
+
+.my-atlas-custom-place-position {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.65rem 0.7rem;
+  border-left: 3px solid #e6ba68;
+  border-radius: 0.25rem 0.65rem 0.65rem 0.25rem;
+  background: rgba(230, 186, 104, 0.07);
+}
+
+.my-atlas-custom-place-position strong {
+  color: #f3d28b;
+  font-size: 0.66rem;
+}
+
+.my-atlas-custom-place-position span {
+  color: #a7b9b3;
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+
+.my-atlas-custom-place-position button {
+  justify-self: start;
+  margin-top: 0.35rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgba(230, 186, 104, 0.48);
+  border-radius: 0.6rem;
+  color: #f3d28b;
+  background: rgba(230, 186, 104, 0.08);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-custom-place-error {
+  color: #e6a8a1;
+  font-size: 0.65rem;
+}
+
+.my-atlas-custom-place-continue {
+  justify-self: start;
+  padding: 0.62rem 0.78rem;
+  color: #132023;
+  background: #e6ba68;
+}
+
+.my-atlas-custom-place button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
 }
 
 .my-atlas-search small,

@@ -19,6 +19,7 @@ code_paths:
   - src/features/my-atlas/catalog/placeSearchClient.mjs
   - src/features/my-atlas/catalog/pinDraft.mjs
   - src/features/my-atlas/catalog/placeTypes.mjs
+  - src/features/my-atlas/catalog/customPlace.mjs
   - src/features/my-atlas/config/placeSearch.mjs
   - src/features/my-atlas/config/featureFlags.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
@@ -32,6 +33,7 @@ code_paths:
   - scripts/my-atlas/lib/build-worker-place-catalog.mjs
   - workers/my-atlas/src/catalog/store.mjs
   - workers/my-atlas/src/catalog/projection.mjs
+  - workers/my-atlas/src/account/custom-place.mjs
   - workers/my-atlas/src/index.mjs
   - workers/my-atlas/test/catalog.test.mjs
   - scripts/serve.js
@@ -63,6 +65,9 @@ verification:
     - Pages workflow 44009928197 deployed main merge 23d8c96edc00d291a6f3a119c852dfd89f85f846
     - Rclone verified 512 matching geonames-2026-11-17-spots release objects before catalog/current.json was uploaded last
     - Staging Worker e20404c5-0250-47f0-88af-2d0db14983ee returned live Yellowstone, Eiffel Tower, Uvita, and exact Yellowstone resolution from the activated spot catalog
+    - Twenty-four Workers-runtime tests passed, including owner-created custom-pin persistence, catalog bypass, safe public projection, and corrupt-state failure
+    - Browser and Worker contract tests passed bounded custom names, coordinate normalization, owner-scoped identity, API projection, and formula-safe CSV export
+    - Headless Chrome at 390 pixels verified custom-name entry, map click placement, a draggable rendered marker, transition to the shared visit editor, and zero horizontal overflow
 ---
 
 # My Atlas geographic catalog, local proof, and Worker index
@@ -91,6 +96,12 @@ and Uvita returned the active `geonames-2026-11-17-spots` revision, and exact
 Yellowstone resolution returned its canonical spot record. No production API
 route or public profile has been verified.
 
+An active account may also create an explicitly labeled custom pin when a
+destination is absent from the catalog. The owner supplies its plain-text name
+and selects coordinates on the map. This fallback is owner content, not a new
+GeoNames record, and it never enters catalog search or exact catalog
+resolution.
+
 For development, `npm run my-atlas:serve` starts the Vue application and a
 loopback-only catalog search process. The search process reads the ignored full
 GeoNames source under `.state/my-atlas/geonames`; it does not copy the worldwide
@@ -117,6 +128,13 @@ geonames:3621138. Curated spots use the same stable GeoNames identity, for
 example Yellowstone National Park is geonames:5843642. MapLibre renders the
 coordinates associated with those catalog records, but map tiles never provide
 or replace a stored place ID.
+
+Custom pins use a server-generated `custom:` ID derived from the authenticated
+owner plus the normalized name and coordinates. Repeating that exact entry for
+the same owner therefore hits the existing destination index, while another
+owner receives a different ID. This identity does not claim a stable shared ID
+for the real-world feature. The browser and Worker both normalize the
+owner-supplied name and longitude-latitude pair before storage.
 
 Each generated catalog includes:
 
@@ -196,6 +214,16 @@ rejects arbitrary coordinate IDs, deprecated records, duplicate destinations,
 and more than 300 destinations. Spots use the same optional visit-date,
 timeline, sharing, and export lifecycle as every other destination.
 
+The authenticated custom-pin path is separate from catalog selection. It
+accepts no client-selected place ID. Names are normalized to NFC, folded to one
+line, limited to 80 code points and 320 UTF-8 bytes, and reject markup,
+controls, bidirectional overrides, selected invisible formatting characters,
+noncharacters, and unpaired surrogates. Coordinates are limited to valid
+longitude and Web Mercator latitude, then rounded to six decimals. The map
+supports click or tap placement, a draggable marker, and keyboard arrow
+adjustment. Custom pins do not contribute inferred country, continent, city,
+spot, or capital statistics.
+
 ## Append-preserving releases
 
 Passing a previous catalog to the importer preserves records missing from the
@@ -255,3 +283,7 @@ GeoNames states that its downloadable data is CC BY 4.0 and permits commercial
 use with attribution. The proof displays GeoNames attribution independently
 from MapLibre and the configured tile provider. The imported data remains
 subject to GeoNames accuracy and completeness limitations.
+
+Custom-pin names and positions are supplied by the Atlas owner rather than
+GeoNames. The owner and public views identify that distinction in their
+attribution copy.

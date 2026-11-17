@@ -26,6 +26,7 @@ code_paths:
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
   - src/features/my-atlas/catalog/memory.mjs
+  - src/features/my-atlas/catalog/customPlace.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
   - src/features/my-atlas/components/MyAtlasTutorial.vue
@@ -72,6 +73,9 @@ verification:
     - Staging Worker 2fbce736-0799-4235-a7b5-018727e39b64 returned 200 health after the favorite-memory contract deployed
     - Pages workflow 44019105927 deployed main merge ea1af7cb5c66301d13bf206f084fbe135fa69097
     - Live content-addressed My Atlas chunks 239.39312812 and 229.528c3c46 returned 200 and contained the Favorite memory editor, Save destination action, and explicit public-sharing disclosure
+    - Twenty-four Workers-runtime tests passed after custom-pin persistence, owner-state projection, public projection, catalog bypass, and corrupt-state coverage were added
+    - Browser and Worker tests passed strict custom-name and coordinate validation, server-generated custom IDs, normalized API responses, and formula-safe custom CSV fields
+    - Headless Chrome at 390 pixels verified the authenticated custom-pin form, map placement event, rendered placement marker, shared date and memory editor, and zero horizontal overflow
 ---
 
 # My Atlas local profile, pin, and sharing state
@@ -98,7 +102,7 @@ Read routes require `read:my-atlas`. Mutations additionally require
   browser bootstrap response;
 - `PATCH /v1/me` changes display name or visibility;
 - `GET /v1/me/pins` returns at most 100 stored pins and a stable cursor;
-- `POST /v1/me/pins` creates one canonical pin;
+- `POST /v1/me/pins` creates one catalog pin or one owner-created custom pin;
 - `PATCH /v1/me/pins/{pinId}` changes its place or optional visit dates;
 - `DELETE /v1/me/pins/{pinId}` removes it;
 - `GET /v1/me/export?format=json|csv` returns the owner's profile and pins.
@@ -139,7 +143,9 @@ the browser to accept the new revision after a successful cross-origin write.
 Pins store only:
 
 - a stable internal pin ID;
-- the canonical `iso-country:XX` or `geonames:N` place ID;
+- either a canonical `iso-country:XX` or `geonames:N` place ID, or a
+  server-generated owner custom-place ID;
+- for a custom pin only, its normalized owner-supplied name and coordinates;
 - a sorted, unique optional list of visit dates, each with a year and optional
   month;
 - a derived visited-year list retained for compatibility with schema version 1
@@ -161,14 +167,24 @@ and Unicode noncharacters. The Durable Object independently requires the
 already normalized value so an internal caller cannot bypass the HTTP contract.
 Legacy pins without the field project an empty memory and require no migration.
 
-Pin IDs are deterministically derived from the internal user ID and canonical
-place ID at creation. Replacing a pin's place preserves its pin ID while moving
-the uniqueness index.
+Pin IDs are deterministically derived from the internal user ID and stored
+place ID at creation. A custom place ID is first deterministically derived from
+that internal user ID plus the normalized custom name and coordinates. An
+exact repeat is rejected by the owner's destination index, while another owner
+receives a different ID for the same input. The client cannot choose either ID.
+Replacing a catalog pin's place preserves its pin ID while moving the
+uniqueness index.
 
 The canonical place may be a country, city, or reviewed spot. A spot does not
 create a second ownership model or mutation route. It is resolved through the
 same authoritative catalog and stored inside the same caller-derived per-user
 Durable Object as every other pin.
+
+A custom pin uses that same owner-qualified object, revision, 300-pin ceiling,
+date, memory, export, delete, and sharing lifecycle. It is not resolvable by
+another user's object and never becomes a shared catalog choice. Version 1
+does not update a stored custom name or position. The owner can edit its dates
+and memory, or delete and recreate it to relocate or rename it.
 
 ## Catalog boundary
 
@@ -185,12 +201,19 @@ false failure after the successful write. Staging Worker
 adds spot-aware catalog validation and projection. A second owner write after
 the original ETag correction remains external verification.
 
+Custom creation is the explicit exception to catalog authority. It requires a
+strict owner-input object instead of a place ID. The HTTP contract and Durable
+Object independently require the normalized name and coordinate shape. The
+service projects custom pins without calling catalog resolution and fails
+closed when stored custom fields do not match their `custom:` ID type. No
+country, region, feature kind, or other geography is inferred from coordinates.
+
 ## Export, sharing, and privacy boundary
 
 JSON export includes the safe profile projection and all pins. CSV export
-contains pin ID, canonical place ID, visited years, normalized optional visit
-dates, and favorite memory. Formula-leading user text is apostrophe-neutralized
-before CSV quoting. Neither format
+contains pin ID, stored place ID, optional custom name and coordinates, visited
+years, normalized optional visit dates, and favorite memory. Formula-leading
+cells are apostrophe-neutralized before CSV quoting. Neither format
 contains Auth0 subjects, qualified identity digests, access tokens, invitation
 data, or Durable Object operation records.
 
@@ -201,11 +224,14 @@ copyable `/my-atlas/{handle}` link only while the profile is public. Access
 tokens remain memory only. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
-the handle, display name, canonical places, coordinates, optional visit dates,
+the handle, display name, safe place projections, coordinates, optional visit dates,
 derived visited years for compatibility, and nonempty favorite memories.
 Memory is included only after the owner explicitly publishes the whole Atlas.
 Vue renders it through text interpolation rather than HTML insertion. The
 public service fails closed if stored memory no longer satisfies the contract.
+It also fails closed when a stored custom name or position no longer satisfies
+the custom-place contract. Custom fields enter this projection only after the
+owner explicitly publishes the whole Atlas.
 Internal user IDs, pin IDs, qualified identities, invitations, accepted-policy
 records, timestamps, and mutation history do not enter that response.
 
@@ -274,6 +300,13 @@ current timeline and visitor presentation operate at year precision.
 Selecting a catalog search result opens its Add destination editor immediately
 below the search control. The result list remains below the active editor so
 the selected action is visible before alternate matches.
+
+An active account also sees `Can't find it? Add a custom pin` directly below
+search. The form can seed its name from the current query, requires a valid
+plain-text name, and activates a gold map marker. The owner clicks or taps the
+map, then may drag the marker or use arrow keys before continuing into the same
+date and favorite-memory editor. The form states that this owner-supplied name
+and position become visible if the Atlas is made public.
 
 When the My Atlas route flag is enabled, the public homepage includes a peer My
 Atlas discovery card alongside the Travel Atlas and travel guides. Its call to
