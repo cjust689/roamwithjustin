@@ -57,6 +57,9 @@ verification:
     - Full geonames-2026-11-17-reviewed-spots artifact built 256 resolution shards and 256 search shards for 237448 records, including 225569 selectable populated places and 11607 append-preserved deprecated records
     - Catalog tests reject PPLX sections, populated localities, and settlement records from new search while preserving prior identities as deprecated exact-resolution records
     - Catalog and Worker-artifact tests resolve Krka National Park and Canyonlands as National park, and Mount Rushmore as Monument, from reviewed product classifications
+    - Pull requests 91 and 92 passed validation runs 44031806025 and 44032270298, develop validation run 44032062160 passed, and Pages workflow 44032453669 deployed main merge 44c7811cb07085ad3d01a9661766d687a716469b
+    - Rclone reported 512 matching geonames-2026-11-17-reviewed-spots release objects with zero differences before catalog/current.json was uploaded last
+    - Production-origin live searches returned Krka National Park and Canyonlands as National park and Mount Rushmore as Monument from geonames-2026-11-17-reviewed-spots; Coolbinia returned no search result while its prior PPLX ID resolved as deprecated
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
     - Catalog client tests preserve typed status, error code, bounded Retry-After, and request ID details from a failed search
@@ -98,10 +101,11 @@ Without an active beta account, the browser proof stores draft selections in
 Vue component memory only and refreshing clears them. With an authenticated
 active account, the Phase 2C browser loads and persists pins through the Worker.
 The isolated staging Worker, R2 catalog, Durable Object namespaces, and limiter
-are deployed. Live searches for Yellowstone National Park, the Eiffel Tower,
-and Uvita returned the active `geonames-2026-11-17-spots` revision, and exact
-Yellowstone resolution returned its canonical spot record. No production API
-route or public profile has been verified.
+are deployed. Live searches for Krka National Park, Canyonlands National Park,
+and Mount Rushmore returned the active `geonames-2026-11-17-reviewed-spots`
+revision with their reviewed result types. Coolbinia, a prior `PPLX` record,
+returned no new-search result while exact resolution preserved it as
+deprecated. No production API route or public profile has been verified.
 
 An active account may also create an explicitly labeled custom pin when a
 destination is absent from the catalog. The owner supplies its plain-text name
@@ -286,15 +290,14 @@ Paris, and Paris, Texas from the full artifact in approximately 39 to 242
 milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
-The reviewed successor artifact remains ignored under
-`.state/my-atlas/worker-catalog-reviewed-spots`. It is locally verified but has
-not yet replaced the staging manifest. The deployed spot-inclusive artifact
-remains ignored under `.state/my-atlas/worker-catalog-spots`. All 512 immutable release shards were
-uploaded to the isolated staging bucket and rclone reported 512 matching files
-with zero differences before `catalog/current.json` was uploaded last. The
-staging Worker now resolves `geonames-2026-11-17-spots`. The earlier
-`geonames-2026-11-16` release remains intact for reversal. The editorial media
-bucket and uploader remain outside this boundary.
+The reviewed artifact remains ignored under
+`.state/my-atlas/worker-catalog-reviewed-spots`. All 512 immutable release
+shards were uploaded to the isolated staging bucket and rclone reported 512
+matching files with zero differences before `catalog/current.json` was uploaded
+last. The staging Worker now resolves
+`geonames-2026-11-17-reviewed-spots`. The earlier `geonames-2026-11-16` and
+`geonames-2026-11-17-spots` releases remain intact for reversal. The editorial
+media bucket and uploader remain outside this boundary.
 
 ## License boundary
 
