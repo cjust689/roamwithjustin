@@ -44,6 +44,10 @@ verification:
     - Catalog client tests verified canonical search-result coordinates and the shared rate-limit error presentation used by visited and planner search
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, exposed ETag and X-Request-Id, rejected unauthenticated owner reads and deletion with 401, and rejected an unrelated origin with 403
     - Staging Worker version f66133bb-6050-4491-ab37-70ab8fee42b3 deployed the backward-compatible direct start/finish contract, returned 200 health with the production CORS origin and X-Request-Id, and rejected an unauthenticated trip-plan read with 401
+    - Pull request 105 passed validation run 44143259391 and merged the feature to develop as e8436e94fe6221ad5757c17e1ef830651970f645; develop validation run 44143711352 then succeeded
+    - Pull request 106 passed production validation run 44144016650 and merged to main as db18ad829bb8781dfebb6b8adcf00bcec829fd7c
+    - Pages workflow 44144353792 built and deployed main merge db18ad829bb8781dfebb6b8adcf00bcec829fd7c successfully
+    - Live content-addressed chunk 216.0c437c4d.js returned 200 with Add a destination, Visited destinations, Plan future travel, and Use as finish together; a live headless render showed the compact signed-out flow
     - Pull requests 101 and 102 passed required validation and merged through protected develop and main as 3b30d3608b35b23a05460c33aed659392b21b3e6 and 8add555205dcd23314c0e11e1f0a2b4d1038fd54
     - GitHub Pages run 44128602408 deployed main merge 8add555205dcd23314c0e11e1f0a2b4d1038fd54
     - Live content-addressed privacy and My Atlas bundles contained the final retention notice, ordered-plan UI, segmented Google Maps links, and permanent account-deletion control
@@ -52,14 +56,13 @@ verification:
 
 # My Atlas trip planning implementation
 
-The original implementation is deployed for controlled owner testing. Staging
+The implementation is deployed for controlled owner testing. Staging
 Worker version `f66133bb-6050-4491-ab37-70ab8fee42b3` now serves the
-backward-compatible direct start and finish contract. Pull requests 101 and 102
-promoted the earlier frontend through protected `develop` and `main`.
-Planner-local search, direct endpoint selection, and the compact collapsible
-owner workflow are implemented and verified in the current source but not yet
-promoted. Additional external beta invitations remain gated on the owner checks
-below.
+backward-compatible direct start and finish contract. Pull requests 105 and 106
+promoted planner-local search, direct endpoint selection, and the compact
+collapsible owner workflow through protected `develop` and `main`. Pages run
+44144353792 and the live content-addressed bundle verify that frontend release.
+Additional external beta invitations remain gated on the owner checks below.
 
 ## Implemented and test verified
 

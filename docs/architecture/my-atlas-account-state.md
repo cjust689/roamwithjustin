@@ -55,6 +55,7 @@ verification:
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
+    - Protected pull requests 105 and 106 plus Pages run 44144353792 deployed the planner search, direct endpoint, and collapsible owner-flow release; live chunk 216.0c437c4d.js contained all release markers together
     - Workers-runtime planning tests verified private wishlist isolation, immutable wishlist/direct plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
