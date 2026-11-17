@@ -49,6 +49,8 @@ verification:
     - npm run docs:audit
     - npm run lint
     - npm run build
+    - Pull requests 101 and 102 passed required validation; GitHub Pages run 44128602408 deployed main merge 8add555205dcd23314c0e11e1f0a2b4d1038fd54
+    - The live application bundle contained the atlas_open_clicked and partner_click event contracts
 ---
 
 > **Implementation status:** GA4 now uses one production-host-only adapter, a
