@@ -12,6 +12,11 @@
       <strong>Map unavailable</strong>
       <span>Your selected destinations remain listed beside the map.</span>
     </div>
+    <div v-if="ready && yearLegend.length" class="my-atlas-year-legend">
+      <span v-for="item in yearLegend" :key="item.label">
+        <i :style="{ backgroundColor: item.color }"></i>{{ item.label }}
+      </span>
+    </div>
   </section>
 </template>
 
@@ -20,9 +25,24 @@
 import * as maplibregl from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 import { mapStyleUrl, terrainSource } from "../../atlas/config/mapConfig"
-import { decorativeConnections } from "../catalog/atlasInsights.mjs"
+import {
+  atlasYears,
+  curvedConnectionCoordinates,
+  decorativeConnections,
+  formatVisitedDates,
+  visitedDatesForPlace,
+} from "../catalog/atlasInsights.mjs"
 
 const CONNECTION_SOURCE = "my-atlas-connections"
+const YEAR_COLORS = Object.freeze([
+  "#f2c76e",
+  "#58d1c9",
+  "#f08a72",
+  "#9ea7ff",
+  "#73b7f2",
+  "#d58ce8",
+])
+const UNDATED_COLOR = "#9aaba6"
 
 const worldCamera = {
   center: [-35, 22],
@@ -43,6 +63,17 @@ function supportsWebGL2() {
   }
 }
 
+function pinColor(year) {
+  return Number.isInteger(year)
+    ? YEAR_COLORS[Math.abs(year) % YEAR_COLORS.length]
+    : UNDATED_COLOR
+}
+
+function firstVisitedYear(place) {
+  const years = visitedDatesForPlace(place).map(date => date.year)
+  return years.length ? Math.min(...years) : null
+}
+
 export default {
   name: "MyAtlasMap",
   props: {
@@ -58,14 +89,35 @@ export default {
       type: Boolean,
       default: true,
     },
+    playbackActive: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
       map: null,
       markers: [],
+      flightMarker: null,
+      flightFrame: null,
+      flightStartTimer: null,
+      flightFocusTimer: null,
+      flightCleanupTimer: null,
       ready: false,
       error: "",
     }
+  },
+  computed: {
+    yearLegend() {
+      const years = atlasYears(this.places).map(year => ({
+        label: String(year),
+        color: pinColor(year),
+      }))
+      if (this.places.some(place => visitedDatesForPlace(place).length === 0)) {
+        years.push({ label: "Date open", color: UNDATED_COLOR })
+      }
+      return years
+    },
   },
   watch: {
     places: {
@@ -73,14 +125,23 @@ export default {
       handler() {
         this.renderConnections()
         this.renderMarkers()
+        if (!this.playbackActive) this.showPlacesOverview()
       },
     },
-    selectedPlaceId() {
+    selectedPlaceId(current, previous) {
       this.renderMarkers()
-      this.focusSelectedPlace()
+      this.transitionSelectedPlace(previous, current)
     },
     showConnections() {
       this.renderConnections()
+    },
+    playbackActive(active) {
+      if (active) {
+        window.setTimeout(() => this.focusSelectedPlace(), 40)
+      } else {
+        this.stopFlight()
+        this.focusSelectedPlace()
+      }
     },
   },
   mounted() {
@@ -89,6 +150,7 @@ export default {
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.stopFlight()
     this.clearMarkers()
     if (this.map) this.map.remove()
   },
@@ -134,6 +196,7 @@ export default {
           }
           this.initializeConnections()
           this.renderMarkers()
+          this.showPlacesOverview()
         })
         this.map.on("error", event => {
           if (!this.ready) this.error = event?.error?.message || "Map failed"
@@ -149,29 +212,17 @@ export default {
     connectionGeoJson() {
       const features = this.showConnections
         ? decorativeConnections(this.places).map(edge => {
-            const [fromLongitude, fromLatitude] = edge.from.coordinates
-            let [toLongitude, toLatitude] = edge.to.coordinates
-            if (toLongitude - fromLongitude > 180) toLongitude -= 360
-            if (fromLongitude - toLongitude > 180) toLongitude += 360
-            const longitudeDistance = Math.abs(toLongitude - fromLongitude)
-            const latitudeDistance = Math.abs(toLatitude - fromLatitude)
-            const lift = Math.min(
-              18,
-              2.5 + longitudeDistance * 0.045 + latitudeDistance * 0.025
-            )
-            const coordinates = Array.from({ length: 25 }, (_value, index) => {
-              const progress = index / 24
-              return [
-                fromLongitude + (toLongitude - fromLongitude) * progress,
-                fromLatitude +
-                  (toLatitude - fromLatitude) * progress +
-                  Math.sin(progress * Math.PI) * lift,
-              ]
-            })
             return {
               type: "Feature",
               properties: {},
-              geometry: { type: "LineString", coordinates },
+              geometry: {
+                type: "LineString",
+                coordinates: curvedConnectionCoordinates(
+                  edge.from.coordinates,
+                  edge.to.coordinates,
+                  25
+                ),
+              },
             }
           })
         : []
@@ -234,9 +285,23 @@ export default {
         if (place.placeId === this.selectedPlaceId) {
           element.classList.add("is-selected")
         }
-        element.setAttribute("aria-label", "Select " + place.name)
+        const dateLabel = formatVisitedDates(place)
+        const year = firstVisitedYear(place)
+        element.style.setProperty("--pin-color", pinColor(year))
+        element.setAttribute("aria-label", `Select ${place.name}, ${dateLabel}`)
         element.dataset.placeId = place.placeId
-        element.innerHTML = "<span></span>"
+
+        const pin = document.createElement("span")
+        pin.className = "my-atlas-pin-shape"
+        pin.appendChild(document.createElement("i"))
+        const label = document.createElement("span")
+        label.className = "my-atlas-pin-label"
+        const name = document.createElement("strong")
+        name.textContent = place.name
+        const dates = document.createElement("small")
+        dates.textContent = dateLabel
+        label.append(name, dates)
+        element.append(pin, label)
         element.addEventListener("click", () =>
           this.$emit("select", place.placeId)
         )
@@ -246,9 +311,6 @@ export default {
           .addTo(this.map)
         this.markers.push(marker)
       })
-
-      if (this.places.length === 1) this.focusSelectedPlace()
-      else if (this.places.length > 1) this.fitPlaces()
     },
     fitPlaces() {
       const coordinates = this.places
@@ -272,11 +334,124 @@ export default {
       if (!place || !this.map || !this.ready) return
       this.map.flyTo({
         center: place.coordinates,
-        zoom: place.placeType === "country" ? 4 : 7,
-        pitch: 28,
-        duration: 650,
+        zoom: place.placeType === "country" ? 4.4 : 6.4,
+        pitch: this.playbackActive ? 42 : 28,
+        bearing: this.playbackActive
+          ? Math.max(-18, Math.min(18, place.coordinates[0] * 0.12))
+          : 0,
+        duration: this.playbackActive ? 1150 : 650,
         essential: false,
       })
+    },
+    showPlacesOverview() {
+      if (!this.map || !this.ready || !this.places.length) return
+      if (this.places.length === 1) this.focusSelectedPlace()
+      else this.fitPlaces()
+    },
+    transitionSelectedPlace(previousId, currentId) {
+      if (!this.map || !this.ready) return
+      const current = this.places.find(place => place.placeId === currentId)
+      const previous = this.places.find(place => place.placeId === previousId)
+      if (this.playbackActive && previous && current) {
+        this.stopFlight()
+        this.showFlightOverview(previous.coordinates, current.coordinates)
+        this.flightStartTimer = window.setTimeout(
+          () => this.animateFlight(previous.coordinates, current.coordinates),
+          520
+        )
+        this.flightFocusTimer = window.setTimeout(
+          () => this.focusSelectedPlace(),
+          2500
+        )
+        return
+      }
+      this.focusSelectedPlace()
+    },
+    showFlightOverview(from, to) {
+      let destination = [...to]
+      if (destination[0] - from[0] > 180) destination[0] -= 360
+      if (from[0] - destination[0] > 180) destination[0] += 360
+      const bounds = new maplibregl.LngLatBounds(from, from).extend(destination)
+      const mobile = window.innerWidth <= 640
+      this.map.fitBounds(bounds, {
+        padding: mobile
+          ? {
+              top: 54,
+              right: 42,
+              bottom: 54,
+              left: 72,
+            }
+          : { top: 90, right: 90, bottom: 90, left: 500 },
+        maxZoom: 4.2,
+        pitch: 10,
+        bearing: 0,
+        duration: 480,
+        essential: false,
+      })
+    },
+    stopFlight() {
+      if (this.flightFrame) window.cancelAnimationFrame(this.flightFrame)
+      this.flightFrame = null
+      window.clearTimeout(this.flightStartTimer)
+      window.clearTimeout(this.flightFocusTimer)
+      window.clearTimeout(this.flightCleanupTimer)
+      this.flightStartTimer = null
+      this.flightFocusTimer = null
+      this.flightCleanupTimer = null
+      if (this.flightMarker) this.flightMarker.remove()
+      this.flightMarker = null
+    },
+    animateFlight(from, to) {
+      if (
+        !Array.isArray(from) ||
+        !Array.isArray(to) ||
+        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ) {
+        return
+      }
+
+      const route = curvedConnectionCoordinates(from, to, 90)
+      const element = document.createElement("div")
+      element.className = "my-atlas-flight"
+      const aircraft = document.createElement("span")
+      aircraft.setAttribute("aria-hidden", "true")
+      aircraft.textContent = "✈"
+      element.appendChild(aircraft)
+      this.flightMarker = new maplibregl.Marker({ element, anchor: "center" })
+        .setLngLat(route[0])
+        .addTo(this.map)
+
+      const duration = 1850
+      const startedAt = performance.now()
+      const advance = now => {
+        const rawProgress = Math.min(1, (now - startedAt) / duration)
+        const progress = rawProgress * rawProgress * (3 - 2 * rawProgress)
+        const routePosition = progress * (route.length - 1)
+        const index = Math.min(route.length - 2, Math.floor(routePosition))
+        const fraction = routePosition - index
+        const current = route[index]
+        const next = route[index + 1]
+        const coordinate = [
+          current[0] + (next[0] - current[0]) * fraction,
+          current[1] + (next[1] - current[1]) * fraction,
+        ]
+        const angle =
+          (Math.atan2(next[1] - current[1], next[0] - current[0]) * 180) /
+          Math.PI
+        aircraft.style.transform = `rotate(${angle}deg)`
+        this.flightMarker?.setLngLat(coordinate)
+        if (rawProgress < 1) {
+          this.flightFrame = window.requestAnimationFrame(advance)
+        } else {
+          this.flightFrame = null
+          this.flightCleanupTimer = window.setTimeout(() => {
+            if (this.flightMarker) this.flightMarker.remove()
+            this.flightMarker = null
+            this.flightCleanupTimer = null
+          }, 360)
+        }
+      }
+      this.flightFrame = window.requestAnimationFrame(advance)
     },
   },
 }
@@ -317,32 +492,163 @@ export default {
   padding-bottom: 5rem;
 }
 
-::v-deep .my-atlas-pin {
-  width: 2.1rem;
-  height: 2.7rem;
-  padding: 0;
-  border: 0;
-  border-radius: 50% 50% 50% 0;
-  background: #e6ba68;
-  box-shadow: 0 0.5rem 1.4rem rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  transform: rotate(-45deg);
-  transition:
-    transform 160ms ease,
-    background 160ms ease;
+.my-atlas-year-legend {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 1.9rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.32rem;
+  max-width: min(24rem, calc(100vw - 5rem));
+  pointer-events: none;
 }
 
-::v-deep .my-atlas-pin span {
-  position: absolute;
-  inset: 0.55rem;
+.my-atlas-year-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.28rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: #f3f8f5;
+  background: rgba(8, 18, 20, 0.82);
+  box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(8px);
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.my-atlas-year-legend i {
+  width: 0.48rem;
+  height: 0.48rem;
   border-radius: 50%;
-  background: #142226;
+  box-shadow: 0 0 0.55rem currentColor;
+}
+
+::v-deep .my-atlas-pin {
+  position: relative;
+  width: 2.2rem;
+  height: 2.8rem;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: #f6fbf8;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+::v-deep .my-atlas-pin-shape {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50% 50% 50% 0;
+  background: var(--pin-color);
+  box-shadow:
+    0 0 0 0.32rem color-mix(in srgb, var(--pin-color) 24%, transparent),
+    0 0.5rem 1.4rem rgba(0, 0, 0, 0.46),
+    0 0 1.25rem color-mix(in srgb, var(--pin-color) 58%, transparent);
+  transform: rotate(-45deg);
+}
+
+::v-deep .my-atlas-pin-shape i {
+  position: absolute;
+  inset: 0.52rem;
+  border-radius: 50%;
+  background: #102023;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16);
+}
+
+::v-deep .my-atlas-pin-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.48rem);
+  display: grid;
+  min-width: max-content;
+  padding: 0.38rem 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--pin-color) 58%, transparent);
+  border-radius: 0.62rem;
+  text-align: left;
+  background: rgba(9, 19, 21, 0.9);
+  box-shadow: 0 0.5rem 1.4rem rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(9px);
+  transform: translateX(-50%);
+  transform-origin: bottom center;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+::v-deep .my-atlas-pin-label strong {
+  max-width: 10rem;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::v-deep .my-atlas-pin-label small {
+  color: var(--pin-color);
+  font-size: 0.58rem;
+  font-weight: 800;
 }
 
 ::v-deep .my-atlas-pin:hover,
 ::v-deep .my-atlas-pin:focus-visible,
 ::v-deep .my-atlas-pin.is-selected {
-  background: #fff3d8;
-  transform: rotate(-45deg) scale(1.16);
+  z-index: 4;
+  filter: brightness(1.15);
+  transform: scale(1.16);
+}
+
+::v-deep .my-atlas-pin.is-selected .my-atlas-pin-label {
+  border-color: var(--pin-color);
+  transform: translateX(-50%) scale(1.04);
+}
+
+::v-deep .my-atlas-flight {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  color: #102023;
+  background: #f6cf7d;
+  box-shadow:
+    0 0 0 0.38rem rgba(242, 199, 110, 0.18),
+    0 0 1.4rem rgba(242, 199, 110, 0.8);
+  pointer-events: none;
+}
+
+::v-deep .my-atlas-flight span {
+  display: block;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: transform 80ms linear;
+}
+
+@media (max-width: 640px) {
+  .my-atlas-year-legend {
+    right: 0.55rem;
+    bottom: 1.6rem;
+    max-width: calc(100vw - 4.5rem);
+  }
+
+  ::v-deep .my-atlas-pin-label {
+    padding: 0.3rem 0.42rem;
+  }
+
+  ::v-deep .my-atlas-pin-label strong {
+    max-width: 7.5rem;
+    font-size: 0.66rem;
+  }
 }
 </style>

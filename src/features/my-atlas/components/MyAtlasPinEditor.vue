@@ -263,6 +263,8 @@ export default {
 
 .pin-editor input {
   box-sizing: border-box;
+  height: 2.9rem;
+  margin: 0;
   min-width: 0;
   width: 100%;
   padding: 0.55rem;
@@ -270,6 +272,12 @@ export default {
   border-radius: 0.65rem;
   color: #f4fbf7;
   background: #111f22;
+}
+
+.pin-editor-date-row > button {
+  box-sizing: border-box;
+  height: 2.9rem;
+  white-space: nowrap;
 }
 
 .pin-editor-actions {

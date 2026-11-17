@@ -3,6 +3,7 @@
     <MyAtlasMap
       :places="displayedPlaces"
       :selected-place-id="selectedPlaceId"
+      :playback-active="timelinePlaying"
       @select="selectPlace"
     />
 
@@ -48,7 +49,7 @@
         <div class="my-atlas-public-controls">
           <label>
             <span>Show</span>
-            <select v-model="yearFilter" @change="stopTimeline">
+            <select v-model="yearFilter" @change="resetTimeline">
               <option value="all">Every destination</option>
               <option v-for="year in years" :key="year" :value="String(year)">
                 {{ year }}
@@ -61,10 +62,22 @@
             :disabled="!years.length"
             @click="toggleTimeline"
           >
-            {{ timelinePlaying ? "Pause timeline" : "Play timeline" }}
+            {{ timelineButtonLabel }}
           </button>
           <button type="button" @click="exportStory">Story image</button>
         </div>
+
+        <div v-if="timelineEntry" class="my-atlas-public-timeline">
+          <strong>{{ timelineEntry.place.name }}</strong>
+          <span>
+            {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
+            {{ timelineSequence.length }}
+          </span>
+        </div>
+        <p class="my-atlas-public-route-note">
+          Playback follows visit years. Hops within a year are a visual
+          sequence, not a recorded travel route.
+        </p>
 
         <div v-if="selectedPlace" class="my-atlas-public-selected">
           <button type="button" @click="cyclePlace(-1)">Previous</button>
@@ -111,11 +124,12 @@
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import { fetchPublicAtlas } from "../api/client.mjs"
 import {
+  atlasTimelineSequence,
   atlasStats,
   atlasYears,
   formatVisitedDates,
   placesForYear,
-  placesThroughYear,
+  placesThroughTimelineStep,
 } from "../catalog/atlasInsights.mjs"
 import { formatPlaceLabel } from "../catalog/search.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
@@ -139,7 +153,7 @@ export default {
       selectedPlaceId: "",
       timelinePlaying: false,
       timelineTimer: null,
-      timelineYear: null,
+      timelineIndex: -1,
       yearFilter: "all",
       previousTitle: "",
       robotsMeta: null,
@@ -168,12 +182,14 @@ export default {
       return this.places.length === 1 ? "place" : "places"
     },
     displayedPlaces() {
-      return this.timelineYear
-        ? placesThroughYear(this.places, this.timelineYear)
+      return this.timelineIndex >= 0
+        ? placesThroughTimelineStep(this.timelineSequence, this.timelineIndex)
         : placesForYear(this.places, this.yearFilter)
     },
     filterLabel() {
-      if (this.timelineYear) return `Destinations through ${this.timelineYear}`
+      if (this.timelineEntry) {
+        return `Timeline through ${this.timelineEntry.place.name}, ${this.timelineEntry.year}`
+      }
       if (this.yearFilter === "all") return "All destinations"
       if (this.yearFilter === "undated") return "Destinations with open dates"
       return `Destinations from ${this.yearFilter}`
@@ -194,6 +210,28 @@ export default {
     years() {
       return atlasYears(this.places)
     },
+    timelineSequence() {
+      return atlasTimelineSequence(this.places)
+    },
+    timelineEntry() {
+      return this.timelineSequence[this.timelineIndex] || null
+    },
+    timelineButtonLabel() {
+      if (this.timelinePlaying) return "Pause timeline"
+      if (
+        this.timelineIndex >= 0 &&
+        this.timelineIndex < this.timelineSequence.length - 1
+      ) {
+        return "Resume timeline"
+      }
+      if (
+        this.timelineSequence.length &&
+        this.timelineIndex === this.timelineSequence.length - 1
+      ) {
+        return "Replay timeline"
+      }
+      return "Play timeline"
+    },
   },
   created() {
     this.previousTitle = document.title
@@ -212,7 +250,7 @@ export default {
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
-    window.clearInterval(this.timelineTimer)
+    window.clearTimeout(this.timelineTimer)
     document.title = this.previousTitle
     if (this.createdRobotsMeta) this.robotsMeta?.remove()
     else if (this.previousRobotsContent === null) {
@@ -241,10 +279,12 @@ export default {
       }
     },
     selectPlace(placeId) {
+      if (this.timelinePlaying) this.pauseTimeline()
       this.selectedPlaceId = placeId
     },
     cyclePlace(direction) {
       if (!this.displayedPlaces.length) return
+      if (this.timelinePlaying) this.pauseTimeline()
       const currentIndex = this.displayedPlaces.findIndex(
         place => place.placeId === this.selectedPlaceId
       )
@@ -255,32 +295,50 @@ export default {
         this.displayedPlaces.length
       this.selectedPlaceId = this.displayedPlaces[nextIndex].placeId
     },
-    stopTimeline() {
-      window.clearInterval(this.timelineTimer)
+    pauseTimeline() {
+      window.clearTimeout(this.timelineTimer)
       this.timelineTimer = null
       this.timelinePlaying = false
-      this.timelineYear = null
+    },
+    resetTimeline() {
+      this.pauseTimeline()
+      this.timelineIndex = -1
+    },
+    showTimelineStep(index) {
+      const entry = this.timelineSequence[index]
+      if (!entry) return false
+      this.timelineIndex = index
+      this.selectedPlaceId = entry.place.placeId
+      return true
+    },
+    scheduleTimelineStep() {
+      window.clearTimeout(this.timelineTimer)
+      this.timelineTimer = window.setTimeout(() => {
+        if (!this.timelinePlaying) return
+        const nextIndex = this.timelineIndex + 1
+        if (!this.showTimelineStep(nextIndex)) {
+          this.timelinePlaying = false
+          this.timelineTimer = null
+          return
+        }
+        this.scheduleTimelineStep()
+      }, 4200)
     },
     toggleTimeline() {
       if (this.timelinePlaying) {
-        this.stopTimeline()
+        this.pauseTimeline()
         return
       }
-      if (!this.years.length) return
+      if (!this.timelineSequence.length) return
       this.yearFilter = "all"
-      let index = 0
-      this.timelineYear = this.years[index]
+      if (
+        this.timelineIndex < 0 ||
+        this.timelineIndex >= this.timelineSequence.length - 1
+      ) {
+        this.showTimelineStep(0)
+      }
       this.timelinePlaying = true
-      this.timelineTimer = window.setInterval(() => {
-        index += 1
-        if (index >= this.years.length) {
-          window.clearInterval(this.timelineTimer)
-          this.timelineTimer = null
-          this.timelinePlaying = false
-          return
-        }
-        this.timelineYear = this.years[index]
-      }, 1500)
+      this.scheduleTimelineStep()
     },
     exportStory() {
       downloadMyAtlasStory({
@@ -439,6 +497,29 @@ export default {
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
+}
+
+.my-atlas-public-timeline {
+  display: grid;
+  gap: 0.08rem;
+  margin: 0 0 0.32rem;
+  color: #f0c978;
+}
+
+.my-atlas-public-timeline strong {
+  font-family: "Russo One", sans-serif;
+  font-size: 1.05rem;
+}
+
+.my-atlas-public-timeline span,
+.my-atlas-public-route-note {
+  color: #8fa39c;
+  font-size: 0.6rem;
+}
+
+.my-atlas-public-route-note {
+  margin: 0 0 0.8rem;
+  line-height: 1.45;
 }
 
 .my-atlas-public-selected {

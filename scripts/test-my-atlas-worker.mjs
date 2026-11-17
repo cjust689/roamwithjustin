@@ -13,10 +13,13 @@ import {
 import { getMyAtlasApiBaseUrl } from "../src/features/my-atlas/config/api.mjs"
 import { getMyAtlasTurnstileSiteKey } from "../src/features/my-atlas/config/turnstile.mjs"
 import {
+  atlasTimelineSequence,
   atlasStats,
+  curvedConnectionCoordinates,
   decorativeConnections,
   formatVisitedDate,
   placesForYear,
+  placesThroughTimelineStep,
   placesThroughYear,
 } from "../src/features/my-atlas/catalog/atlasInsights.mjs"
 import { restoreAuth0Session } from "../src/features/my-atlas/auth/session.mjs"
@@ -1332,6 +1335,31 @@ assert.equal(
   assert.equal(placesForYear(places, "undated")[0].name, "United States")
   assert.equal(placesThroughYear(places, 2025).length, 1)
   assert.equal(decorativeConnections(places).length, 2)
+  const sequence = atlasTimelineSequence(places)
+  assert.deepEqual(
+    sequence.map(entry => [entry.place.name, entry.year]),
+    [
+      ["Uvita", 2024],
+      ["Paris", 2026],
+    ]
+  )
+  assert.deepEqual(
+    placesThroughTimelineStep(sequence, 1).map(place => place.name),
+    ["Uvita", "Paris"]
+  )
+  const flight = curvedConnectionCoordinates(
+    places[0].coordinates,
+    places[1].coordinates,
+    25
+  )
+  assert.equal(flight.length, 25)
+  assert.deepEqual(flight[0], places[0].coordinates)
+  assert.ok(
+    Math.abs(flight[flight.length - 1][0] - places[1].coordinates[0]) < 1e-9
+  )
+  assert.ok(
+    Math.abs(flight[flight.length - 1][1] - places[1].coordinates[1]) < 1e-9
+  )
 }
 
 console.log("My Atlas Phase 2A, 2B, and local sharing tests passed.")
