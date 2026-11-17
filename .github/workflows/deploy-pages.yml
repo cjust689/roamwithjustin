@@ -36,6 +36,9 @@ jobs:
         run: npm run build
         env:
           VUE_APP_MAPTILER_KEY: ${{ secrets.MAPTILER_API_KEY }}
+          VUE_APP_GA4_ENABLED: ${{ vars.GA4_ENABLED }}
+          VUE_APP_GA4_DEBUG: ${{ vars.GA4_DEBUG }}
+          VUE_APP_GA4_PAGE_VIEW_MODE: ${{ vars.GA4_PAGE_VIEW_MODE }}
           VUE_APP_ADSENSE_ENABLED: ${{ vars.ADSENSE_ENABLED }}
           VUE_APP_ADSENSE_PRIVACY_READY: ${{ vars.ADSENSE_PRIVACY_READY }}
           VUE_APP_ADSENSE_AUTO_ADS_OFF_CONFIRMED: ${{ vars.ADSENSE_AUTO_ADS_OFF_CONFIRMED }}

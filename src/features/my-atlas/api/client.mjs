@@ -403,6 +403,287 @@ export async function updateMyAtlasSharing({
   })
 }
 
+function validatedPlanningRevision(response) {
+  return revisionFromResponse(response)
+}
+
+export async function fetchMyAtlasPlanning({
+  apiBaseUrl,
+  accessToken,
+  fetchImpl = fetch,
+}) {
+  const wishes = []
+  let cursor = ""
+  let revision = 0
+  do {
+    const query = new URLSearchParams({ limit: "100" })
+    if (cursor) query.set("cursor", cursor)
+    const { response, payload } = await authenticatedJsonRequest({
+      apiBaseUrl,
+      accessToken,
+      path: `/v1/me/bucket-list?${query.toString()}`,
+      fetchImpl,
+    })
+    if (!Array.isArray(payload.wishes)) {
+      throw new MyAtlasApiError("The wishlist response is invalid.", {
+        status: response.status,
+        code: "invalid_response",
+      })
+    }
+    const pageRevision = validatedPlanningRevision(response)
+    if (revision && revision !== pageRevision) {
+      throw new MyAtlasApiError("My Atlas changed while it was loading.", {
+        status: 412,
+        code: "revision_conflict",
+      })
+    }
+    revision = pageRevision
+    wishes.push(...payload.wishes)
+    cursor = typeof payload.nextCursor === "string" ? payload.nextCursor : ""
+  } while (cursor)
+
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/trip-plans",
+    fetchImpl,
+  })
+  if (!Array.isArray(payload.plans) || payload.plans.length > 1) {
+    throw new MyAtlasApiError("The trip-plan response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  const planRevision = validatedPlanningRevision(response)
+  if (revision && revision !== planRevision) {
+    throw new MyAtlasApiError("My Atlas changed while it was loading.", {
+      status: 412,
+      code: "revision_conflict",
+    })
+  }
+  return Object.freeze({
+    revision: planRevision,
+    wishes: Object.freeze(wishes.map(wish => Object.freeze({ ...wish }))),
+    plans: Object.freeze(payload.plans.map(plan => Object.freeze({ ...plan }))),
+  })
+}
+
+export async function createMyAtlasWish({
+  apiBaseUrl,
+  accessToken,
+  value,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/bucket-list",
+    method: "POST",
+    body: value,
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (typeof payload.wish?.wishId !== "string") {
+    throw new MyAtlasApiError("The created wishlist response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    wish: Object.freeze({ ...payload.wish }),
+    revision: validatedPlanningRevision(response),
+  })
+}
+
+export async function updateMyAtlasWish({
+  apiBaseUrl,
+  accessToken,
+  wishId,
+  patch,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: `/v1/me/bucket-list/${encodeURIComponent(wishId)}`,
+    method: "PATCH",
+    body: patch,
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (payload.wish?.wishId !== wishId) {
+    throw new MyAtlasApiError("The updated wishlist response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return validatedPlanningRevision(response)
+}
+
+export async function deleteMyAtlasWish({
+  apiBaseUrl,
+  accessToken,
+  wishId,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: `/v1/me/bucket-list/${encodeURIComponent(wishId)}`,
+    method: "DELETE",
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (payload.deleted !== true) {
+    throw new MyAtlasApiError("The deleted wishlist response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return validatedPlanningRevision(response)
+}
+
+export async function saveMyAtlasPlan({
+  apiBaseUrl,
+  accessToken,
+  planId = "",
+  value,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: planId
+      ? `/v1/me/trip-plans/${encodeURIComponent(planId)}`
+      : "/v1/me/trip-plans",
+    method: planId ? "PATCH" : "POST",
+    body: value,
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (typeof payload.plan?.planId !== "string") {
+    throw new MyAtlasApiError("The saved trip-plan response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    plan: Object.freeze({ ...payload.plan }),
+    revision: validatedPlanningRevision(response),
+  })
+}
+
+export async function keepMyAtlasPlan({
+  apiBaseUrl,
+  accessToken,
+  planId,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: `/v1/me/trip-plans/${encodeURIComponent(planId)}/keep`,
+    method: "POST",
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (payload.plan?.planId !== planId) {
+    throw new MyAtlasApiError("The retained trip-plan response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    plan: Object.freeze({ ...payload.plan }),
+    revision: validatedPlanningRevision(response),
+  })
+}
+
+export async function deleteMyAtlasPlan({
+  apiBaseUrl,
+  accessToken,
+  planId,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: `/v1/me/trip-plans/${encodeURIComponent(planId)}`,
+    method: "DELETE",
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (payload.deleted !== true) {
+    throw new MyAtlasApiError("The deleted trip-plan response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return validatedPlanningRevision(response)
+}
+
+export async function deleteMyAtlasAccount({
+  apiBaseUrl,
+  accessToken,
+  revision,
+  idempotencyKey = newIdempotencyKey(),
+  fetchImpl = fetch,
+}) {
+  const { payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me",
+    method: "DELETE",
+    body: { confirmation: "DELETE MY ATLAS" },
+    revision,
+    idempotencyKey,
+    fetchImpl,
+  })
+  if (payload.deleted !== true) {
+    throw new MyAtlasApiError("The account deletion response is invalid.", {
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({ deleted: true, deletedAt: payload.deletedAt })
+}
+
+export async function fetchMyAtlasAccountExport({
+  apiBaseUrl,
+  accessToken,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/export?format=json",
+    fetchImpl,
+  })
+  if (
+    payload.schemaVersion !== 2 ||
+    !Array.isArray(payload.pins) ||
+    !Array.isArray(payload.wishlist) ||
+    !Array.isArray(payload.plans)
+  ) {
+    throw new MyAtlasApiError("The account export response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return payload
+}
+
 export async function fetchPublicAtlas({
   apiBaseUrl,
   handle,

@@ -12,16 +12,25 @@ const routes = [
   {
     path: "/about",
     name: "About",
+    meta: {
+      analyticsTitle: "About | Roam With Justin",
+    },
     component: () => import("../views/roam/About.vue"),
   },
   {
     path: "/privacy",
     name: "Privacy",
+    meta: {
+      analyticsTitle: "Privacy | Roam With Justin",
+    },
     component: () => import("../views/roam/Privacy.vue"),
   },
   {
     path: "/trips",
     name: "RoamTrips",
+    meta: {
+      analyticsTitle: "Travel Stories | Roam With Justin",
+    },
     component: () => import("../views/roam/RoamTripList.vue"),
   },
   {
@@ -33,22 +42,34 @@ const routes = [
   {
     path: "/gear",
     name: "Gear",
+    meta: {
+      analyticsTitle: "Travel and Photography Gear | Roam With Justin",
+    },
     component: () => import("../views/roam/Gear.vue"),
   },
   {
     path: "/",
     name: "Home",
+    meta: {
+      analyticsTitle: "Roam With Justin",
+    },
     component: () => import("../views/roam/Home.vue"),
   },
 
   {
     path: "/affiliates",
     name: "affiliates",
+    meta: {
+      analyticsTitle: "Affiliates | Roam With Justin",
+    },
     component: () => import("../views/roam/Affiliates.vue"),
   },
   {
     path: "*",
     name: "PageNotFound",
+    meta: {
+      analyticsTitle: "Page not found | Roam With Justin",
+    },
     component: () => import("../views/PageNotFound.vue"),
   },
 ]

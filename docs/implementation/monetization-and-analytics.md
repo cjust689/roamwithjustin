@@ -4,16 +4,22 @@ title: Monetization, Analytics, and Partner Referrals
 kind: implementation
 status: in-progress
 implementation_state: partial
-updated: 2026-11-15
+updated: 2026-11-17
 related:
   - monetization-analytics
+  - ga4-three-day-improvement-roadmap
+  - ga4-tracking-audit-2026-11-17
+  - analytics-event-dictionary
   - gear-system
   - adsense-operations
 supersedes: []
 superseded_by: []
 code_paths:
   - public/index.html
-  - src/utils/tracking.js
+  - src/main.js
+  - src/router/index.js
+  - src/utils/analytics.mjs
+  - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/data/affiliates.js
   - src/config/adsense.mjs
@@ -22,10 +28,13 @@ code_paths:
   - src/views/roam/RoamTripOverview.vue
   - src/features/atlas/config/atlasAdEligibility.mjs
   - src/features/atlas/views/AtlasView.vue
+  - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasDetailPanel.vue
+  - src/content/selectors/projections.mjs
   - src/views/roam/Privacy.vue
   - scripts/validate-adsense-config.mjs
   - scripts/test-atlas-ad-eligibility.mjs
+  - scripts/test-analytics.mjs
   - scripts/lib/adsense-build-env.js
   - scripts/prepare-pages.js
   - .github/workflows/deploy-pages.yml
@@ -34,21 +43,59 @@ verification:
   evidence:
     - npm run adsense:test
     - npm run adsense:validate
+    - npm run analytics:test
+    - npm run content:validate
+    - npm run atlas:test
     - npm run docs:audit
     - npm run lint
     - npm run build
 ---
 
-> **Implementation status:** GA4 loading and existing GearGrid click tracking
-> are present. The first AdSense phase is implemented as a disabled by default,
+> **Implementation status:** GA4 now uses one production-host-only adapter, a
+> strict public event dictionary, and canonical Partner click tracking. The
+> safe default preserves Enhanced Measurement page views, while a tested
+> manual Vue Router mode awaits a coordinated GA4 data-stream setting change.
+> Private My Atlas routes are excluded.
+> The first AdSense phase is implemented as a disabled by default,
 > manually placed story unit with configuration validation, ads.txt generation,
 > a public privacy notice, and the owner supplied publisher verification meta
 > tag. A second, independently disabled guided Atlas unit is implemented with
 > content eligibility and a one-request-per-Journey-tab cap. Live account
-> values and dashboard state remain externally controlled. Canonical partner
-> referral tracking and the later editorial commerce work remain. See the
+> values and dashboard state remain externally controlled. Additional partner
+> placements and the later editorial commerce work remain. See the
 > [as-built analytics document](../architecture/monetization-and-analytics.md)
 > and [AdSense operations guide](../reference/adsense.md).
+
+### GA4 roadmap implementation result, 2026-11-17
+
+- [x] Removed unconditional HTML-shell initialization and moved the single
+  loader into a production-host-only adapter.
+- [x] Preserved automatic Enhanced Measurement as the safe default and added a
+  tested manual router mode whose page locations retain only allowlisted
+  `utm_*` campaign fields.
+- [x] Disabled production-property collection on localhost and unrelated
+  hostnames by default. Added explicit QA enablement, DebugView mode, and a
+  browser opt-out key.
+- [x] Excluded `/my-atlas` routes and private planning state from this GA4
+  phase.
+- [x] Added the primary homepage Atlas CTA and one-sentence map promise.
+- [x] Added allowlisted Atlas entry, load, Journey, destination, story, Maps,
+  and canonical Partner actions without map movement telemetry.
+- [x] Removed hostname-derived GearGrid events, full outbound URL parameters,
+  and mutation of third-party links with incoming campaign UTMs.
+- [x] Added a repository tracking audit, event dictionary, and automated
+  adapter tests.
+- [ ] Choose one page-view owner. Keep automatic mode, or first disable
+  Enhanced Measurement's browser-history page views and then deploy
+  `VUE_APP_GA4_PAGE_VIEW_MODE=manual`.
+- [ ] Deploy and reproduce the expected navigation trace in browser network
+  tools and GA4 DebugView.
+- [ ] Confirm Enhanced Measurement, timezone, hostname and internal-traffic
+  filters, consent requirements, and custom dimensions in the owner account.
+- [ ] Apply consistent incoming UTMs to future Meta and Instagram campaigns,
+  then establish a fixed session-based baseline before comparing results.
+- [ ] Configure a production 200 rewrite for direct SPA routes. The GitHub
+  Pages `404.html` shell remains a routing limitation, not an analytics claim.
 
 ### Phase 1 implementation result
 

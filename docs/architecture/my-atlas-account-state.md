@@ -12,17 +12,23 @@ related:
   - my-atlas-geography
   - my-atlas-private-beta
   - my-atlas-private-beta-implementation
+  - my-atlas-trip-planning
+  - my-atlas-trip-planning-implementation
   - docs-index
 supersedes: []
 superseded_by: []
 code_paths:
   - package.json
   - workers/my-atlas/src/account
+  - workers/my-atlas/src/planning
   - workers/my-atlas/src/public
   - workers/my-atlas/src/catalog/projection.mjs
   - workers/my-atlas/src/registration/objects.mjs
   - workers/my-atlas/src/index.mjs
   - src/features/my-atlas/api/client.mjs
+  - src/features/my-atlas/components/MyAtlasPlanner.vue
+  - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
+  - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
   - src/features/my-atlas/catalog/memory.mjs
@@ -34,14 +40,19 @@ code_paths:
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - src/views/roam/Privacy.vue
   - src/views/roam/Home.vue
   - workers/my-atlas/test/account.test.mjs
+  - workers/my-atlas/test/planning.test.mjs
   - scripts/test-my-atlas-worker.mjs
+  - scripts/test-my-atlas-planning.mjs
 verification:
   state: verified
   evidence:
     - npm run my-atlas:worker:test
     - npm run my-atlas:worker:durable:test
+    - npm run my-atlas:test verified private planning contracts and client-only handoffs
+    - Workers-runtime planning tests verified private wishlist isolation, immutable plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
@@ -84,16 +95,20 @@ verification:
     - Headless Chrome at 390 pixels verified the authenticated custom-pin form, map placement event, rendered placement marker, shared date and memory editor, and zero horizontal overflow
     - Pull requests 87 and 88 passed required validation, merged through protected develop and main, and Pages workflow 44025229521 deployed main merge c54ea44490c05014698ffb2a0cfbcdd076ee12c4
     - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health with the backward-compatible custom-pin API
+    - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, rejected unauthenticated owner reads and deletion with 401, and rejected a foreign origin with 403 after the planning, retention, and account-deletion API deployed
+    - Thirty Workers-runtime tests passed after multi-destination planning, controlled-clock retention, and permanent application-account deletion coverage
     - Live content-addressed chunks 102.9bc646f9.js, 850.f2e2b9be.js, and 102.fa12fe12.css returned 200 with the custom-pin prompt, map event, disclosure, and placement styles
 ---
 
 # My Atlas local profile, pin, and sharing state
 
 Phase 2B has an owner-state API on the same isolated Worker and per-user SQLite
-Durable Object. The Phase 2C slice adds an opt-in public projection, a
-signed-out handle route, and browser owner controls. The backend is deployed to
-isolated staging. The owner verified a real private account and a persisted
-Uvita pin. A public profile has not been verified.
+Durable Object. Phase 2C adds an opt-in public projection, a signed-out handle
+route, and browser owner controls. The planning slice adds application-account
+deletion, private wishlist records, one future plan, retention alarms, and
+browser-only external handoffs. Its backward-compatible API is deployed on the
+isolated staging Worker; the frontend remains on its feature branch pending
+promotion and authenticated acceptance.
 
 ## Owner authorization
 
@@ -114,7 +129,14 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `POST /v1/me/pins` creates one catalog pin or one owner-created custom pin;
 - `PATCH /v1/me/pins/{pinId}` changes its place or optional visit dates;
 - `DELETE /v1/me/pins/{pinId}` removes it;
-- `GET /v1/me/export?format=json|csv` returns the owner's profile and pins.
+- `GET|POST /v1/me/bucket-list` pages or creates private wishlist entries;
+- `PATCH|DELETE /v1/me/bucket-list/{wishId}` edits or removes one entry;
+- `GET|POST /v1/me/trip-plans` reads or creates the single beta plan;
+- `PATCH|DELETE /v1/me/trip-plans/{planId}` replaces or removes that plan;
+- `POST /v1/me/trip-plans/{planId}/keep` explicitly refreshes retention;
+- `GET /v1/me/export?format=json|csv` exports owner state; and
+- `DELETE /v1/me` permanently removes application-owned account data after
+  explicit confirmation.
 
 No owner route accepts a user ID, handle, email, or subject. Even a guessed pin
 ID is resolved only inside the Durable Object selected from the caller's own
@@ -129,18 +151,26 @@ request ID and distinguishes a session renewal problem, transient account or
 identity service failure, and connectivity failure. A transient owner
 bootstrap failure exposes `Retry saved Atlas` without requiring a page reload.
 
-Handle mutation, account deletion, and abuse reporting are not part of this
-slice.
+Handle mutation and abuse reporting are not part of this slice. Permanent
+application-account deletion is implemented, test verified, and deployed to
+isolated staging. It has not been exercised against a real disposable staging
+account and must not be tested by deleting the owner's existing account.
 
 ## Revisions and safe retries
 
-The profile owns one monotonically increasing revision covering profile and pin
-state. Every mutation requires a strong `If-Match: "rev-N"` header and a UUID
+The profile owns one monotonically increasing revision covering profile, pin,
+wishlist, and plan state. Every client mutation requires a strong
+`If-Match: "rev-N"` header and a UUID
 `Idempotency-Key`. The user object serializes each mutation, checks the revision,
 and increments it exactly once. A retry with the same qualified identity,
 action, key, expected revision, and normalized payload returns the stored result.
 A changed request under that operation conflicts. Competing writes against the
 same revision produce one success and one revision conflict.
+
+Retention alarms are internal object events rather than client requests. They
+atomically recheck the stored deadline and advance this same revision when they
+mark or delete a plan. Reads, exports, map handoffs, prompt copies, and passive
+login do not advance retention.
 
 Responses expose the current revision as a strong ETag. Stale mutations return
 HTTP 412 without changing state. Allowed browser origins can read `ETag` and
@@ -195,6 +225,60 @@ another user's object and never becomes a shared catalog choice. Version 1
 does not update a stored custom name or position. The owner can edit its dates
 and memory, or delete and recreate it to relocate or rename it.
 
+## Private wishlist and plan state
+
+Wishlist data uses `wish:` records and a separate uniqueness index inside the
+same owner object. It does not reuse visited `pin:` records and does not enter
+the public projection. Each record stores an owner-qualified ID, a canonical
+place ID or existing normalized custom-place shape, optional normalized note,
+priority, optional desired year, and timestamps. The beta ceiling is 250, and
+list responses page at no more than 100 records.
+
+One `plan:` record may exist in the first slice. It stores title, lifecycle
+status, optional year and note, a start snapshot, an ordered destination list,
+and either last-stop or return-to-start completion. A defensive ceiling of 50
+destinations bounds request and storage abuse without presenting a small
+product limit. A
+snapshot copies the catalog/custom identity, product type, readable geography,
+coordinates, route readiness, catalog revision when applicable, and optional
+source wish ID. Rendering and export never require the source wishlist record,
+so editing or removing a wish cannot rewrite or break an existing plan.
+
+Plan status is `draft`, `saved`, or `archived`. None proves travel. The future
+Mark Visited action remains a separate later owner-confirmed transition that
+must reuse the existing pin lifecycle.
+
+The plan stores `retentionConfirmedAt` and its six-calendar-month expiry. An
+explicit create, replace, or Keep refreshes it. At expiry the per-owner alarm
+marks the record `deletion-pending` and schedules its 30-day `deleteAfter`.
+Grace expiry deletes the plan and its snapshots only. Wishlist entries and
+visited pins remain. The alarm is scheduled when a plan is created, edited, or
+kept, so abandoned accounts do not depend on a later login for cleanup.
+
+The browser constructs external handoffs from saved snapshots. Google Maps
+URLs use `api=1`, preserve order, use no API key, split longer plans into
+continuous legs with no more than three intermediary waypoints per link, and
+reject output over 2,048 characters. Country and
+spot centroids require an entrance or custom coordinate before handoff. Custom
+coordinates require explicit confirmation. AI prompt generation includes
+readable geography only by default and adds coordinates only after a per-copy
+opt-in. Neither handoff calls a platform-owned model or paid route API.
+
+## Permanent application-account deletion
+
+`DELETE /v1/me` requires the verified owner, write permission, a strong current
+revision, a UUID idempotency key, and the exact confirmation phrase. The user
+object first becomes private and `deleting`. The registry then removes its
+active identity assignment, replaces the handle assignment with a nonactive
+nonreusable handle tombstone, and the user object erases profile,
+pins, wishlist, plans, indexes, mutation history, and policy acceptance state.
+A minimal operation tombstone supports an exact retry after a cross-object
+partial failure. It retains no handle, profile, content, or qualified identity.
+The separate handle tombstone retains the formerly public handle and deletion
+time, but no user ID or identity, and public lookup still returns the generic
+404 response.
+This operation does not delete the upstream Google or Auth0 identity.
+
 ## Catalog boundary
 
 Format validation is not geographic validation. Before a create or place-change
@@ -219,12 +303,14 @@ country, region, feature kind, or other geography is inferred from coordinates.
 
 ## Export, sharing, and privacy boundary
 
-JSON export includes the safe profile projection and all pins. CSV export
+JSON export schema 2 includes the safe profile projection, all pins, private
+wishlist records, immutable plan snapshots, and plan retention fields. CSV export
 contains pin ID, stored place ID, optional custom name and coordinates, visited
 years, normalized optional visit dates, and favorite memory. Formula-leading
 cells are apostrophe-neutralized before CSV quoting. Neither format
 contains Auth0 subjects, qualified identity digests, access tokens, invitation
-data, or Durable Object operation records.
+data, or Durable Object operation records. Export is passive and does not
+refresh plan retention.
 
 The authenticated owner screen restores an existing Auth0 session with
 `checkSession`, loads saved state, persists pin additions, date changes, and
@@ -233,7 +319,7 @@ copyable `/my-atlas/{handle}` link only while the profile is public. Access
 tokens remain memory only. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
-the handle, display name, safe place projections, coordinates, optional visit dates,
+the handle, display name, safe visited-place projections, coordinates, optional visit dates,
 derived visited years for compatibility, and nonempty favorite memories.
 Memory is included only after the owner explicitly publishes the whole Atlas.
 Vue renders it through text interpolation rather than HTML insertion. The
@@ -241,6 +327,9 @@ public service fails closed if stored memory no longer satisfies the contract.
 It also fails closed when a stored custom name or position no longer satisfies
 the custom-place contract. Custom fields enter this projection only after the
 owner explicitly publishes the whole Atlas.
+The public object scan is restricted to `pin:` keys. Wishlist entries, plan
+snapshots, private notes, desired years, future dates, and retention metadata
+cannot enter that response even when the visited Atlas is public.
 Internal user IDs, pin IDs, qualified identities, invitations, accepted-policy
 records, timestamps, and mutation history do not enter that response.
 
@@ -346,18 +435,19 @@ private account fields.
 
 ## Deliberately incomplete
 
-The local API still needs handle-change coordination with registry tombstones,
-permanent account deletion and its approved retention contract, abuse reporting
-and moderation, and registration or operator rate-limit enforcement. Public
+The API still needs handle-change coordination with registry tombstones, abuse
+reporting and moderation, and registration or operator rate-limit enforcement.
+Permanent application-account deletion and the six-month plus 30-day plan
+retention contract are implemented and staged, but authenticated deletion still
+requires disposable-account acceptance. Public
 catalog and Atlas reads have a tested weighted limiter boundary and a deployed
 staging binding. Catalog and public Atlas reads have isolated limiter keys, but
 live exhaustion behavior is not yet verified.
 Profile-specific share HTML, a verified public owner profile, and owner
 verification of the corrected save feedback and silent session restoration
-also remain. Planned destinations are a future feature, not an overload of the
-visited pin state. A future planner needs an explicit planned lifecycle,
-exclusion from visited statistics and playback by default, a deliberate
-planned-to-visited transition, and a separate public-sharing decision.
+also remain. Private planned destinations now use an explicit lifecycle and are
+excluded from visited statistics, playback, and public sharing. The separate
+owner-reviewed Mark Visited transition remains unimplemented.
 
 Memory images are deliberately not part of the text-memory release. They need
 a separately reviewed media boundary with an explicit per-pin count, raw-byte

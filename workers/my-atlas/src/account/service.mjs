@@ -43,7 +43,7 @@ function expectedResult(result) {
   return result
 }
 
-function publicProfile(profile) {
+export function publicProfile(profile) {
   return Object.freeze({
     schemaVersion: profile.schemaVersion,
     userId: profile.userId,
@@ -52,6 +52,8 @@ function publicProfile(profile) {
     public: profile.public,
     status: profile.status,
     pinCount: profile.pinCount || 0,
+    wishCount: profile.wishCount || 0,
+    planCount: profile.planCount || 0,
     acceptedTermsVersion: profile.acceptedTermsVersion,
     acceptedPrivacyVersion: profile.acceptedPrivacyVersion,
     acceptedAt: profile.acceptedAt,
@@ -61,7 +63,7 @@ function publicProfile(profile) {
   })
 }
 
-async function ownerContext(environment, identity) {
+export async function ownerContext(environment, identity) {
   const identityDigest = await hashQualifiedIdentity(identity)
   const registry = requireNamespace(environment, "MY_ATLAS_REGISTRY").getByName(
     REGISTRY_OBJECT_NAME
@@ -81,7 +83,7 @@ async function ownerContext(environment, identity) {
   })
 }
 
-async function mutationMetadata(owner, input, action, value) {
+export async function mutationMetadata(owner, input, action, value) {
   return Object.freeze({
     operationDigest: await hashOperatorOperation(
       owner.identityDigest,
@@ -98,7 +100,11 @@ async function mutationMetadata(owner, input, action, value) {
   })
 }
 
-async function assertCatalogPlace(placeId, catalogResolver, environment) {
+export async function assertCatalogPlace(
+  placeId,
+  catalogResolver,
+  environment
+) {
   const resolver =
     typeof catalogResolver === "function"
       ? catalogResolver
@@ -387,9 +393,79 @@ export async function exportMyAtlas({ environment, identity }) {
     await owner.user.exportOwnerState(owner.identityDigest)
   )
   return Object.freeze({
-    schemaVersion: 1,
+    schemaVersion: 2,
     exportedAt: new Date().toISOString(),
     profile: publicProfile(result.profile),
     pins: Object.freeze(result.pins.map(publicOwnerPin)),
+    wishlist: Object.freeze(result.wishes || []),
+    plans: Object.freeze(result.plans || []),
+  })
+}
+
+export async function deleteMyAccount({
+  environment,
+  identity,
+  input,
+  now = new Date().toISOString(),
+}) {
+  const identityDigest = await hashQualifiedIdentity(identity)
+  const operationDigest = await hashOperatorOperation(
+    identityDigest,
+    input.idempotencyKey,
+    "delete-account"
+  )
+  const requestDigest = await sha256(
+    JSON.stringify({
+      action: "delete-account",
+      expectedRevision: input.expectedRevision,
+      confirmation: input.confirmation,
+    })
+  )
+  const registry = requireNamespace(
+    environment,
+    "MY_ATLAS_REGISTRY"
+  ).getByName(REGISTRY_OBJECT_NAME)
+
+  let userId
+  let registryDeleted = false
+  const registration = await registry.getRegistrationByIdentity(identityDigest)
+  if (registration?.ok === true && registration.state === "active") {
+    userId = registration.userId
+  } else {
+    const deletion = expectedResult(
+      await registry.getAccountDeletion(operationDigest, requestDigest)
+    )
+    userId = deletion.userId
+    registryDeleted = true
+  }
+
+  const user = requireNamespace(environment, "MY_ATLAS_USERS").getByName(userId)
+  if (!registryDeleted) {
+    expectedResult(
+      await user.prepareOwnerDeletion({
+        identityDigest,
+        operationDigest,
+        requestDigest,
+        expectedRevision: input.expectedRevision,
+        now,
+      })
+    )
+    expectedResult(
+      await registry.deleteActiveRegistration({
+        userId,
+        identityDigest,
+        operationDigest,
+        requestDigest,
+        now,
+      })
+    )
+  }
+  const completed = expectedResult(
+    await user.finalizeOwnerDeletion({ operationDigest, requestDigest, now })
+  )
+  return Object.freeze({
+    deleted: true,
+    idempotent: registryDeleted || completed.idempotent === true,
+    deletedAt: completed.deletedAt,
   })
 }
