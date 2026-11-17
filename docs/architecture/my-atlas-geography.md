@@ -56,6 +56,9 @@ verification:
     - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
     - Catalog client tests preserve typed status, error code, bounded Retry-After, and request ID details from a failed search
     - Worker routing tests verify separate catalog and public Atlas limiter keys for the same client address
+    - Pull requests 77 and 78 passed their required validation gates; the history-only pull request 79 restored the protected branch ancestry without changing files
+    - Pages workflow 44014283401 deployed main merge 7c2b1a9135ce45a834bf7aadda869460452e55de
+    - Staging Worker f039455e-35bf-4c9d-bd15-c03716e63f72 returned 200 health and a live Yellowstone result from geonames-2026-11-17-spots after limiter-scope deployment
     - Pull requests 73 and 74 passed their required validation gates and merged through develop to main
     - Pages workflow 44009928197 deployed main merge 23d8c96edc00d291a6f3a119c852dfd89f85f846
     - Rclone verified 512 matching geonames-2026-11-17-spots release objects before catalog/current.json was uploaded last
