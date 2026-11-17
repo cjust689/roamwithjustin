@@ -39,6 +39,9 @@ verification:
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
     - npm run build
+    - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
+    - Pull request 114 passed production validation run 44158190178 and merged to main as d6af82bddfaf8bb4e0f4ac61caeade6697c46982
+    - Pages run 44158579421 deployed the typography cleanup, and a live audit found Poppins plus zero Russo One matches across 32 discoverable content-addressed CSS and JavaScript assets
     - Pull requests 105 and 106 passed required validation, merged the compact owner workflow through protected develop and main, and Pages run 44144353792 deployed it successfully
     - Live My Atlas chunk 216.0c437c4d.js returned 200 with the Add destination, Visited destinations, Plan future travel, and direct-finish markers; a live headless render showed the compact signed-out flow
     - npx eslint "src/features/my-atlas/**/*.{js,mjs,vue}" src/router/index.js "scripts/my-atlas/**/*.mjs" scripts/test-my-atlas-place-catalog.mjs
