@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-deprecated-v-on-native-modifier -- Vue 2 RouterLink click tracking uses native listeners. -->
 <template>
   <main class="home">
     <img class="home-background" :src="heroImage" alt="" aria-hidden="true" />
@@ -8,9 +9,21 @@
         <p class="home-brand">Roam With Justin</p>
         <h1 id="home-title">Choose how the journey unfolds.</h1>
         <p class="home-lede">
-          Adventure meets intention&mdash;told through visual stories, hard
+          Adventure meets intention. It is told through visual stories, hard
           earned field notes, and journeys that leave a mark.
         </p>
+        <div class="home-primary-action">
+          <router-link
+            to="/atlas"
+            @click.native="trackAtlasEntry('homepage_primary')"
+          >
+            Explore the Interactive Atlas <span aria-hidden="true">&rarr;</span>
+          </router-link>
+          <p>
+            Explore destinations, photography and field notes directly on the
+            map.
+          </p>
+        </div>
       </section>
 
       <section
@@ -18,7 +31,11 @@
         :class="{ 'has-my-atlas': myAtlasEnabled }"
         aria-label="Ways to explore"
       >
-        <router-link class="journey-card atlas-card" to="/atlas">
+        <router-link
+          class="journey-card atlas-card"
+          to="/atlas"
+          @click.native="trackAtlasEntry('homepage_atlas_card')"
+        >
           <span
             class="journey-card-background"
             :style="{ backgroundImage: `url('${atlasImage}')` }"
@@ -30,7 +47,7 @@
               <span class="journey-pulse" aria-hidden="true"></span>
               Interactive experience
             </span>
-            <strong>Enter the Travel Atlas</strong>
+            <strong>Explore the Interactive Atlas</strong>
             <span class="journey-description">
               Fly across satellite terrain through Utah's red rock parks and
               Puerto Rico's cities, cliffs, waterfalls, and beaches.
@@ -92,6 +109,7 @@
 
 <script>
 import { isMyAtlasGeographicProofEnabled } from "../../features/my-atlas/config/featureFlags.mjs"
+import { trackAtlasOpen } from "../../utils/analytics.mjs"
 
 const heroImages = [
   "/img/roam/default/1.jpg",
@@ -110,6 +128,11 @@ export default {
       myAtlasEnabled: isMyAtlasGeographicProofEnabled(process.env),
       myAtlasImage: "/img/roam/default/4.jpg",
     }
+  },
+  methods: {
+    trackAtlasEntry(entrySurface) {
+      trackAtlasOpen({ entrySurface })
+    },
   },
 }
 </script>
@@ -189,6 +212,52 @@ export default {
   color: rgba(255, 255, 255, 0.76);
   font-size: clamp(1rem, 1.5vw, 1.16rem);
   line-height: 1.65;
+}
+
+.home-primary-action {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.3rem;
+}
+
+.home-primary-action a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  border: 1px solid #f6bd60;
+  border-radius: 999px;
+  padding: 0.8rem 1.15rem;
+  background: #f6bd60;
+  color: #11191d;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    background 180ms ease,
+    transform 180ms ease;
+}
+
+.home-primary-action a:hover,
+.home-primary-action a:focus-visible {
+  background: #ffd889;
+  transform: translateY(-2px);
+}
+
+.home-primary-action a:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.home-primary-action p {
+  max-width: 350px;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.85rem;
+  line-height: 1.45;
 }
 
 .journey-options {
@@ -353,6 +422,16 @@ export default {
     font-size: clamp(3rem, 14vw, 4.7rem);
   }
 
+  .home-primary-action {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .home-primary-action p {
+    max-width: 31rem;
+  }
+
   .journey-options {
     grid-template-columns: 1fr;
     margin-top: 2.25rem;
@@ -389,7 +468,8 @@ export default {
   }
 
   .journey-card-background,
-  .journey-action b {
+  .journey-action b,
+  .home-primary-action a {
     transition: none;
   }
 }

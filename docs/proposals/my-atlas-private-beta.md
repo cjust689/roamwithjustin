@@ -45,11 +45,12 @@ verification:
 > A local Phase 2C slice now adds owner state bootstrap, saved pin controls,
 > explicit publish or unpublish, a safe signed-out Atlas projection, a
 > `/my-atlas/{handle}` viewer, and a weighted public-read limiter boundary. A
-> dry-run-only staging declaration names an isolated catalog bucket and temporary
-> `workers.dev` target. No cloud resource, namespace, object, limiter, hostname,
-> or route is deployed. Handle changes, account deletion, reporting,
-> profile-specific server HTML, moderation, and the invited beta remain
-> unimplemented and are tracked in the linked active implementation document.
+> isolated staging deployment uses a private catalog bucket, SQLite Durable
+> Objects, a weighted limiter, and a temporary `workers.dev` target. Permanent
+> application-account deletion is implemented, tested, and deployed under the
+> linked trip-planning staging slice, but is not owner verified against a
+> disposable account. Handle changes, reporting, profile-specific
+> server HTML, moderation, and the invited beta remain unimplemented.
 
 > **Implementation handoff:** This document supersedes the earlier My Atlas beta V1 proposal at the product-design level. Audit the actual repository and external service configuration before each implementation phase. Do not alter the curated Roam With Justin Atlas or existing media-upload Worker. This is the accepted target, not a claim that every phase already exists.
 >
@@ -269,7 +270,7 @@ Use Turnstile server-side verification for redemption/high-risk actions, strict 
 ### Data behavior and boundaries
 
 - Profile created as `public: false`. Require user-confirmed **Publish My Atlas** after at least one pin; allow immediate private/suspend; default new/empty/disabled profiles to private.
-- Public read must check owner profile status at the authoritative user DO on every request; return 404 for private/suspended/unknown, 410 for deleted **tombstoned handles**; never serve old data from stale KV or edge cache. No profile enumeration endpoint.
+- Public read must check owner profile status at the authoritative user DO on every request; return the same 404 for private, suspended, unknown, and deleted nonactive handles; never serve old data from stale KV or edge cache. Deleted handles remain nonreusable without exposing a distinct public deletion signal. No profile enumeration endpoint.
 - Cache-control for dynamic public JSON and HTML: `private, no-store` (or similarly verified no-cache behavior at every relevant layer). Even with immediate origin revocation, external social platforms may retain previously generated previews; disclose that limitation in privacy information.
 - Allow profile rename, handle update, privacy toggle, pin add/edit/remove, user export (JSON + optional CSV), and permanent account deletion. Owners control only their own data; admin moderation separately authorized.
 - Use `revision`/ETag `If-Match` (or equivalent) for all profile/pin edits to prevent lost updates; return 409/412 with refreshed state on conflicts.
@@ -411,7 +412,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - [ ] Create/read/edit/delete a canonical country or city pin and its optional visited years; dedupe and 300-pin ceiling behave clearly.
 - [ ] Add year to existing pin; country aggregation does not double count a pinned city plus its country.
 - [ ] Profile display name/handle changes work; old handles remain reserved or tombstoned.
-- [ ] Owner can export all data and delete account; account deletion revokes all public data and produces 410 for tombstoned public handles.
+- [x] Owner JSON export includes visited, wishlist, and plan state, and local account deletion revokes public state, erases private owner data, and leaves a nonactive nonreusable handle tombstone. Deployment and disposable-account acceptance remain open.
 
 **Sharing, privacy, safety**
 

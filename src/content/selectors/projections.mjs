@@ -57,6 +57,19 @@ function preferredExternalLink(externalLinks = {}) {
   return { href: "", kind: "" }
 }
 
+function analyticsPartnerLinkType(externalLink) {
+  try {
+    const hostname = new URL(externalLink.href).hostname.toLowerCase()
+    if (hostname === "maps.google.com" || hostname.endsWith(".google.com")) {
+      return "maps"
+    }
+  } catch (error) {
+    return "website"
+  }
+
+  return externalLink.kind === "platform" ? "booking" : "website"
+}
+
 function journeyPreviewCopy(journey) {
   return journey.description || ""
 }
@@ -241,6 +254,7 @@ export function buildTripViewModel(journey) {
             name: partner.name,
             label: partner.label,
             href: externalLink.href,
+            linkType: analyticsPartnerLinkType(externalLink),
             disclosure: partner.disclosure,
           }
         }),
@@ -291,6 +305,7 @@ function atlasActions(place, journey) {
 
   if (place.externalLinks?.maps) {
     actions.push({
+      analyticsType: "maps",
       label: "View on Google Maps",
       href: place.externalLinks.maps,
       type: "external",
@@ -298,6 +313,7 @@ function atlasActions(place, journey) {
   }
   if (place.externalLinks?.official) {
     actions.push({
+      analyticsType: "external",
       label: "Official website",
       href: place.externalLinks.official,
       type: "external",
@@ -305,7 +321,9 @@ function atlasActions(place, journey) {
   }
   if (journey?.slug) {
     actions.push({
+      analyticsType: "story",
       label: "Read the trip story",
+      publicStoryId: journey.id,
       href: "/trips/" + journey.slug,
       type: "internal",
     })

@@ -54,7 +54,17 @@
       </label>
       <label class="check">
         <input v-model="acceptPrivacy" type="checkbox" required />
-        <span>I accept the staging privacy notice.</span>
+        <span>
+          I have read and accept the
+          <a
+            href="/privacy#my-atlas"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="My Atlas privacy and retention notice, opens in a new tab"
+          >
+            My Atlas privacy and retention notice </a
+          >.
+        </span>
       </label>
 
       <div ref="turnstile" class="turnstile" aria-label="Human verification" />
@@ -234,6 +244,12 @@ export default {
 
 .my-atlas-registration .check input {
   margin-top: 0.2rem;
+}
+
+.my-atlas-registration .check a {
+  color: #d8efdf;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
 }
 
 .my-atlas-registration button {

@@ -1,0 +1,1137 @@
+<template>
+  <section
+    class="my-atlas-planner"
+    aria-labelledby="my-atlas-planner-title"
+    :aria-busy="String(pending)"
+  >
+    <div class="planner-heading">
+      <div>
+        <p>Private trip planning beta</p>
+        <h2 id="my-atlas-planner-title">Bucket list and one saved trip</h2>
+      </div>
+      <button
+        type="button"
+        aria-controls="my-atlas-planner-content"
+        :aria-expanded="String(open)"
+        @click="toggleOpen"
+      >
+        {{ open ? "Hide" : "Plan a trip" }}
+      </button>
+    </div>
+
+    <div v-if="open" id="my-atlas-planner-content" class="planner-content">
+      <p class="planner-disclosure">
+        Future destinations stay private and never appear in your shared Visited
+        Atlas. Saved trips require an explicit keep or edit every six months,
+        followed by a 30 day deletion grace period.
+      </p>
+      <p v-if="error" class="planner-error" role="alert">{{ error }}</p>
+      <p v-if="pending" class="planner-status" role="status">
+        Updating your private planner
+      </p>
+
+      <section class="planner-block" aria-labelledby="bucket-list-title">
+        <div class="planner-block-heading">
+          <div>
+            <p id="bucket-list-title">Want to go</p>
+            <span>{{ wishes.length }} of 250 saved</span>
+          </div>
+          <button type="button" :disabled="pending" @click="loadPlanning">
+            Refresh
+          </button>
+        </div>
+
+        <div v-if="searchResults.length" class="planner-search-results">
+          <span>Save a result from the search above</span>
+          <button
+            v-for="place in searchResults"
+            :key="place.placeId"
+            type="button"
+            :disabled="pending || wishPlaceIds.has(place.placeId)"
+            @click="saveCatalogWish(place)"
+          >
+            {{ wishPlaceIds.has(place.placeId) ? "Saved" : "Save" }}
+            {{ place.name }}
+          </button>
+        </div>
+
+        <details class="planner-custom">
+          <summary>Add your own coordinates</summary>
+          <div>
+            <label>
+              <span>Name</span>
+              <input v-model.trim="customName" maxlength="80" type="text" />
+            </label>
+            <label>
+              <span>Longitude</span>
+              <input
+                v-model="customLongitude"
+                type="number"
+                min="-180"
+                max="180"
+                step="0.000001"
+              />
+            </label>
+            <label>
+              <span>Latitude</span>
+              <input
+                v-model="customLatitude"
+                type="number"
+                min="-85.051129"
+                max="85.051129"
+                step="0.000001"
+              />
+            </label>
+            <button type="button" :disabled="pending" @click="saveCustomWish">
+              Save private location
+            </button>
+          </div>
+          <p>
+            You supply this name and position. Confirm road access before using
+            it for directions.
+          </p>
+        </details>
+
+        <p v-if="!wishes.length" class="planner-empty">
+          Search for a place above or save your own coordinates to begin.
+        </p>
+        <ul v-else class="planner-wishes">
+          <li v-for="wish in wishes" :key="wish.wishId">
+            <div>
+              <strong>{{ wish.name }}</strong>
+              <span>{{ locationContext(wish) }}</span>
+              <small>{{ routeReadinessLabel(wish) }}</small>
+            </div>
+            <label>
+              <span>Priority</span>
+              <select v-model="wishDrafts[wish.wishId].priority">
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label>
+              <span>Year</span>
+              <input
+                v-model="wishDrafts[wish.wishId].desiredYear"
+                type="number"
+                :min="currentYear"
+                :max="currentYear + 20"
+                placeholder="Optional"
+              />
+            </label>
+            <label class="planner-note">
+              <span>Private note</span>
+              <input
+                v-model.trim="wishDrafts[wish.wishId].note"
+                type="text"
+                maxlength="255"
+                placeholder="Optional"
+              />
+            </label>
+            <div class="planner-row-actions">
+              <button type="button" :disabled="pending" @click="saveWish(wish)">
+                Save details
+              </button>
+              <button
+                type="button"
+                :disabled="pending"
+                @click="removeWish(wish)"
+              >
+                Remove
+              </button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="planner-block" aria-labelledby="trip-plan-title">
+        <div class="planner-block-heading">
+          <div>
+            <p id="trip-plan-title">Saved trip</p>
+            <span>One plan with an ordered destination list</span>
+          </div>
+        </div>
+
+        <div
+          v-if="plan && plan.retentionState === 'deletion-pending'"
+          class="planner-retention"
+          role="status"
+        >
+          <strong>This trip is marked for deletion.</strong>
+          <span
+            >Keep it by {{ formatDeadline(plan.deleteAfter) }}, or delete it
+            now.</span
+          >
+          <button type="button" :disabled="pending" @click="keepPlan">
+            Keep for another six months
+          </button>
+        </div>
+
+        <template v-if="wishes.length">
+          <label>
+            <span>Trip title</span>
+            <input v-model.trim="planForm.title" maxlength="80" type="text" />
+          </label>
+          <label>
+            <span>Start</span>
+            <select v-model="planForm.startWishId">
+              <option value="" disabled>Choose a saved destination</option>
+              <option
+                v-for="wish in wishes"
+                :key="wish.wishId"
+                :value="wish.wishId"
+              >
+                {{ wish.name }}
+              </option>
+            </select>
+          </label>
+          <label>
+            <span>Optional travel year</span>
+            <input
+              v-model="planForm.desiredYear"
+              type="number"
+              :min="currentYear"
+              :max="currentYear + 20"
+              placeholder="Optional"
+            />
+          </label>
+          <label>
+            <span>Finish</span>
+            <select v-model="planForm.endMode">
+              <option value="last-stop">Finish at last destination</option>
+              <option value="return-to-start">Return to start</option>
+            </select>
+          </label>
+          <label class="planner-note">
+            <span>Private plan note</span>
+            <input
+              v-model.trim="planForm.note"
+              maxlength="255"
+              type="text"
+              placeholder="Optional"
+            />
+          </label>
+
+          <fieldset>
+            <legend>Destinations in chosen order</legend>
+            <label v-for="wish in wishes" :key="wish.wishId">
+              <input
+                type="checkbox"
+                :checked="planForm.stopWishIds.includes(wish.wishId)"
+                :disabled="
+                  !planForm.stopWishIds.includes(wish.wishId) &&
+                  planForm.stopWishIds.length >= maxPlanDestinations
+                "
+                @change="togglePlanStop(wish.wishId)"
+              />
+              <span>{{ wish.name }}</span>
+            </label>
+          </fieldset>
+          <ol class="planner-stop-order">
+            <li v-for="(wishId, index) in planForm.stopWishIds" :key="wishId">
+              <span>{{ wishById(wishId).name }}</span>
+              <button
+                type="button"
+                :disabled="index === 0"
+                :aria-label="`Move ${wishById(wishId).name} earlier`"
+                @click="moveStop(index, -1)"
+              >
+                Up
+              </button>
+              <button
+                type="button"
+                :disabled="index === planForm.stopWishIds.length - 1"
+                :aria-label="`Move ${wishById(wishId).name} later`"
+                @click="moveStop(index, 1)"
+              >
+                Down
+              </button>
+            </li>
+          </ol>
+          <div class="planner-row-actions">
+            <button type="button" :disabled="pending" @click="savePlan">
+              {{ plan ? "Update saved trip" : "Save trip" }}
+            </button>
+            <button
+              v-if="plan"
+              type="button"
+              :disabled="pending"
+              @click="removePlan"
+            >
+              Delete trip
+            </button>
+          </div>
+        </template>
+
+        <div v-if="plan" class="planner-handoffs">
+          <p>
+            Directions preserve your order. My Atlas does not calculate the
+            fastest route, traffic, closures, or road access.
+          </p>
+          <button type="button" @click="prepareDirections">
+            {{
+              mapsLegs.length
+                ? "Refresh Google Maps links"
+                : "Prepare Google Maps links"
+            }}
+          </button>
+          <div v-if="mapsLegs.length" class="planner-map-legs">
+            <p v-if="mapsLegs.length > 1">
+              Google Maps supports fewer stops on mobile, so this trip is split
+              into {{ mapsLegs.length }} continuous legs.
+            </p>
+            <a
+              v-for="(leg, index) in mapsLegs"
+              :key="leg.url"
+              :href="leg.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              :aria-label="`Open ${
+                mapsLegs.length > 1 ? `leg ${index + 1}` : 'directions'
+              } from ${leg.origin} to ${
+                leg.destination
+              } in Google Maps in a new tab`"
+            >
+              Open
+              {{ mapsLegs.length > 1 ? `leg ${index + 1}` : "directions" }}:
+              {{ leg.origin }} to {{ leg.destination }}
+            </a>
+          </div>
+          <label>
+            <input v-model="includePromptCoordinates" type="checkbox" />
+            <span>Include exact coordinates in this AI prompt</span>
+          </label>
+          <button type="button" @click="previewPrompt">
+            Preview AI planning prompt
+          </button>
+          <textarea
+            v-if="promptPreview"
+            :value="promptPreview"
+            aria-label="AI planning prompt preview"
+            rows="10"
+            readonly
+          />
+          <button v-if="promptPreview" type="button" @click="copyPrompt">
+            Copy prompt
+          </button>
+        </div>
+      </section>
+
+      <details class="planner-delete-account">
+        <summary>Delete My Atlas account</summary>
+        <p>
+          This permanently removes your Visited Atlas, private wishlist, saved
+          trip, handle, and app registration. It does not delete your Google or
+          Auth0 identity.
+        </p>
+        <label>
+          <span>Type DELETE MY ATLAS to confirm</span>
+          <input v-model="deleteConfirmation" autocomplete="off" type="text" />
+        </label>
+        <button
+          type="button"
+          :disabled="pending || deleteConfirmation !== 'DELETE MY ATLAS'"
+          @click="deleteAccount"
+        >
+          Permanently delete account
+        </button>
+      </details>
+      <button
+        class="planner-export"
+        type="button"
+        :disabled="pending"
+        @click="exportAccountData"
+      >
+        Download private account data
+      </button>
+      <p class="planner-announcement" aria-live="polite">{{ announcement }}</p>
+    </div>
+  </section>
+</template>
+
+<script>
+import {
+  createMyAtlasWish,
+  deleteMyAtlasAccount,
+  deleteMyAtlasPlan,
+  deleteMyAtlasWish,
+  fetchMyAtlasAccountExport,
+  fetchMyAtlasPlanning,
+  keepMyAtlasPlan,
+  saveMyAtlasPlan,
+  updateMyAtlasWish,
+} from "../api/client.mjs"
+import { getMyAtlasApiAccessToken, logoutFromMyAtlas } from "../auth/auth0"
+import {
+  MAX_PLAN_DESTINATIONS,
+  MyAtlasHandoffError,
+  buildAiPlanningPrompt,
+  buildGoogleMapsDirectionsUrls,
+} from "../planning/handoffs.mjs"
+
+export default {
+  name: "MyAtlasPlanner",
+  props: {
+    apiBaseUrl: { type: String, required: true },
+    revision: { type: Number, required: true },
+    searchResults: { type: Array, default: () => [] },
+  },
+  emits: ["revision-change", "account-deleted"],
+  data() {
+    return {
+      open: false,
+      pending: false,
+      error: "",
+      announcement: "",
+      plannerRevision: this.revision,
+      wishes: [],
+      plan: null,
+      wishDrafts: {},
+      customName: "",
+      customLongitude: "",
+      customLatitude: "",
+      planForm: {
+        title: "",
+        status: "saved",
+        desiredYear: "",
+        note: "",
+        startWishId: "",
+        stopWishIds: [],
+        endMode: "last-stop",
+      },
+      includePromptCoordinates: false,
+      promptPreview: "",
+      mapsLegs: [],
+      deleteConfirmation: "",
+    }
+  },
+  computed: {
+    currentYear() {
+      return new Date().getUTCFullYear()
+    },
+    wishPlaceIds() {
+      return new Set(this.wishes.map(wish => wish.placeId))
+    },
+    maxPlanDestinations() {
+      return MAX_PLAN_DESTINATIONS
+    },
+  },
+  watch: {
+    revision(value) {
+      this.plannerRevision = value
+    },
+  },
+  methods: {
+    async toggleOpen() {
+      this.open = !this.open
+      if (this.open && !this.wishes.length && !this.plan)
+        await this.loadPlanning()
+    },
+    emitRevision(value) {
+      this.plannerRevision = value
+      this.$emit("revision-change", value)
+    },
+    async token() {
+      return getMyAtlasApiAccessToken()
+    },
+    setWishDraft(wish) {
+      this.$set(this.wishDrafts, wish.wishId, {
+        note: wish.note || "",
+        priority: wish.priority || "normal",
+        desiredYear: wish.desiredYear || "",
+      })
+    },
+    syncPlanForm() {
+      if (!this.plan) return
+      this.planForm = {
+        title: this.plan.title,
+        status: this.plan.status,
+        desiredYear: this.plan.desiredYear || "",
+        note: this.plan.note || "",
+        startWishId: this.plan.start.sourceWishId || "",
+        stopWishIds: this.plan.stops
+          .map(stop => stop.sourceWishId)
+          .filter(Boolean),
+        endMode: this.plan.endMode,
+      }
+    },
+    async loadPlanning() {
+      this.pending = true
+      this.error = ""
+      try {
+        const state = await fetchMyAtlasPlanning({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: await this.token(),
+        })
+        this.wishes = state.wishes
+        this.plan = state.plans[0] || null
+        this.wishDrafts = {}
+        this.wishes.forEach(this.setWishDraft)
+        this.emitRevision(state.revision)
+        this.syncPlanForm()
+      } catch (error) {
+        this.error = this.errorMessage(error)
+      } finally {
+        this.pending = false
+      }
+    },
+    errorMessage(error) {
+      if (error?.code === "revision_conflict") {
+        return "Your Atlas changed in another request. Refresh the planner and retry."
+      }
+      if (error?.code === "account_conflict") {
+        return "This change conflicts with saved planner data. Refresh and retry."
+      }
+      return "The private planner could not complete that request. Retry in a moment."
+    },
+    async mutate(action, success) {
+      this.pending = true
+      this.error = ""
+      try {
+        const result = await action(await this.token())
+        if (result?.revision) this.emitRevision(result.revision)
+        await this.loadPlanning()
+        this.announcement = success
+      } catch (error) {
+        this.error = this.errorMessage(error)
+      } finally {
+        this.pending = false
+      }
+    },
+    saveCatalogWish(place) {
+      return this.mutate(
+        token =>
+          createMyAtlasWish({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            value: { placeId: place.placeId, priority: "normal" },
+            revision: this.plannerRevision,
+          }),
+        `${place.name} was added to your private bucket list.`
+      )
+    },
+    saveCustomWish() {
+      const longitude = Number(this.customLongitude)
+      const latitude = Number(this.customLatitude)
+      if (
+        !this.customName ||
+        !Number.isFinite(longitude) ||
+        !Number.isFinite(latitude) ||
+        longitude < -180 ||
+        longitude > 180 ||
+        latitude < -85.051129 ||
+        latitude > 85.051129
+      ) {
+        this.error = "Enter a name and valid longitude and latitude."
+        return
+      }
+      return this.mutate(
+        token =>
+          createMyAtlasWish({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            value: {
+              customPlace: {
+                name: this.customName,
+                coordinates: [longitude, latitude],
+              },
+              priority: "normal",
+            },
+            revision: this.plannerRevision,
+          }),
+        `${this.customName} was added to your private bucket list.`
+      ).then(() => {
+        if (!this.error) {
+          this.customName = ""
+          this.customLongitude = ""
+          this.customLatitude = ""
+        }
+      })
+    },
+    saveWish(wish) {
+      const draft = this.wishDrafts[wish.wishId]
+      return this.mutate(
+        token =>
+          updateMyAtlasWish({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            wishId: wish.wishId,
+            patch: {
+              note: draft.note,
+              priority: draft.priority,
+              desiredYear: draft.desiredYear ? Number(draft.desiredYear) : null,
+            },
+            revision: this.plannerRevision,
+          }).then(revision => ({ revision })),
+        `${wish.name} was updated.`
+      )
+    },
+    removeWish(wish) {
+      if (!window.confirm(`Remove ${wish.name} from your bucket list?`)) return
+      return this.mutate(
+        token =>
+          deleteMyAtlasWish({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            wishId: wish.wishId,
+            revision: this.plannerRevision,
+          }).then(revision => ({ revision })),
+        `${wish.name} was removed. Saved trip snapshots were not changed.`
+      )
+    },
+    wishById(wishId) {
+      return (
+        this.wishes.find(wish => wish.wishId === wishId) || {
+          name: "Unavailable destination",
+        }
+      )
+    },
+    togglePlanStop(wishId) {
+      const stops = [...this.planForm.stopWishIds]
+      const index = stops.indexOf(wishId)
+      if (index >= 0) stops.splice(index, 1)
+      else if (stops.length < MAX_PLAN_DESTINATIONS) stops.push(wishId)
+      this.planForm.stopWishIds = stops
+      this.mapsLegs = []
+    },
+    moveStop(index, offset) {
+      const target = index + offset
+      if (target < 0 || target >= this.planForm.stopWishIds.length) return
+      const stops = [...this.planForm.stopWishIds]
+      const [wishId] = stops.splice(index, 1)
+      stops.splice(target, 0, wishId)
+      this.planForm.stopWishIds = stops
+      this.mapsLegs = []
+    },
+    savePlan() {
+      if (
+        !this.planForm.title ||
+        !this.planForm.startWishId ||
+        !this.planForm.stopWishIds.length
+      ) {
+        this.error = "Choose a title, start, and at least one destination."
+        return
+      }
+      const value = {
+        title: this.planForm.title,
+        status: this.planForm.status,
+        desiredYear: this.planForm.desiredYear
+          ? Number(this.planForm.desiredYear)
+          : null,
+        note: this.planForm.note,
+        startWishId: this.planForm.startWishId,
+        stopWishIds: this.planForm.stopWishIds,
+        endMode: this.planForm.endMode,
+      }
+      return this.mutate(
+        token =>
+          saveMyAtlasPlan({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            planId: this.plan?.planId || "",
+            value,
+            revision: this.plannerRevision,
+          }),
+        "Your private trip was saved."
+      )
+    },
+    keepPlan() {
+      return this.mutate(
+        token =>
+          keepMyAtlasPlan({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            planId: this.plan.planId,
+            revision: this.plannerRevision,
+          }),
+        "Your trip was kept for another six months."
+      )
+    },
+    removePlan() {
+      if (
+        !window.confirm("Delete this saved trip? Your bucket list will remain.")
+      )
+        return
+      return this.mutate(
+        token =>
+          deleteMyAtlasPlan({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            planId: this.plan.planId,
+            revision: this.plannerRevision,
+          }).then(revision => ({ revision })),
+        "The saved trip was deleted."
+      )
+    },
+    prepareDirections() {
+      try {
+        const customIds = this.plan.stops
+          .concat([this.plan.start])
+          .filter(
+            location => location.routeReadiness === "user-coordinate-review"
+          )
+          .map(location => location.placeId)
+        if (
+          customIds.length &&
+          !window.confirm(
+            "Use the custom coordinates you supplied for this Google Maps handoff?"
+          )
+        )
+          return
+        this.mapsLegs = buildGoogleMapsDirectionsUrls(this.plan, {
+          confirmedCoordinatePlaceIds: customIds,
+        })
+        this.announcement =
+          this.mapsLegs.length === 1
+            ? "Your Google Maps directions link is ready."
+            : `${this.mapsLegs.length} Google Maps directions legs are ready.`
+      } catch (error) {
+        this.error =
+          error instanceof MyAtlasHandoffError
+            ? error.message
+            : "Directions could not be prepared."
+      }
+    },
+    previewPrompt() {
+      try {
+        this.promptPreview = buildAiPlanningPrompt(this.plan, {
+          includeCoordinates: this.includePromptCoordinates,
+        })
+      } catch (error) {
+        this.error = "The planning prompt could not be prepared."
+      }
+    },
+    async copyPrompt() {
+      try {
+        await navigator.clipboard.writeText(this.promptPreview)
+        this.announcement = "The AI planning prompt was copied."
+      } catch {
+        this.error =
+          "The browser could not copy this prompt. Select the text and copy it manually."
+      }
+    },
+    async deleteAccount() {
+      if (
+        !window.confirm(
+          "Permanently delete all My Atlas application data? This cannot be undone."
+        )
+      )
+        return
+      this.pending = true
+      this.error = ""
+      try {
+        const storageKey = "rwj:my-atlas:account-deletion-operation:v1"
+        let operation = null
+        try {
+          operation = JSON.parse(window.sessionStorage.getItem(storageKey))
+        } catch {
+          // An invalid local recovery record is replaced below.
+        }
+        if (!operation?.idempotencyKey || !operation?.revision) {
+          operation = {
+            idempotencyKey: window.crypto.randomUUID(),
+            revision: this.plannerRevision,
+          }
+          window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
+        }
+        await deleteMyAtlasAccount({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: await this.token(),
+          revision: operation.revision,
+          idempotencyKey: operation.idempotencyKey,
+        })
+        window.sessionStorage.removeItem(storageKey)
+        this.$emit("account-deleted")
+        logoutFromMyAtlas()
+      } catch (error) {
+        this.error = this.errorMessage(error)
+        this.pending = false
+      }
+    },
+    async exportAccountData() {
+      this.pending = true
+      this.error = ""
+      try {
+        const value = await fetchMyAtlasAccountExport({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: await this.token(),
+        })
+        const blob = new Blob([JSON.stringify(value, null, 2)], {
+          type: "application/json",
+        })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `my-atlas-${new Date().toISOString().slice(0, 10)}.json`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+        this.announcement = "Your private My Atlas data export was downloaded."
+      } catch (error) {
+        this.error = this.errorMessage(error)
+      } finally {
+        this.pending = false
+      }
+    },
+    locationContext(place) {
+      return (
+        [place.admin1Name, place.countryName].filter(Boolean).join(", ") ||
+        place.placeType
+      )
+    },
+    routeReadinessLabel(place) {
+      const labels = {
+        "route-ready": "Ready for a directions handoff",
+        "needs-entrance-selection":
+          "Choose a useful entrance before directions",
+        "user-coordinate-review": "Confirm your coordinates before directions",
+      }
+      return labels[place.routeReadiness] || "Review before directions"
+    },
+    formatDeadline(value) {
+      return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
+        new Date(value)
+      )
+    },
+  },
+}
+</script>
+
+<style scoped>
+.my-atlas-planner {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1.3rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.planner-content {
+  display: grid;
+  gap: 0.8rem;
+}
+.planner-heading,
+.planner-block-heading,
+.planner-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.planner-heading > div,
+.planner-block-heading > div {
+  display: grid;
+  gap: 0.15rem;
+}
+.planner-heading p,
+.planner-block-heading p,
+.planner-heading h2,
+.planner-disclosure,
+.planner-status,
+.planner-error,
+.planner-empty,
+.planner-custom p,
+.planner-retention span,
+.planner-handoffs p,
+.planner-delete-account p {
+  margin: 0;
+}
+.planner-heading p,
+.planner-block-heading p {
+  color: #e6ba68;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+.planner-heading h2 {
+  color: #edf7f2;
+  font-size: 0.9rem;
+}
+.planner-heading button,
+.planner-block button,
+.planner-delete-account button {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.42);
+  border-radius: 0.65rem;
+  color: #f4d38f;
+  background: rgba(230, 186, 104, 0.08);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.planner-export {
+  justify-self: start;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.36);
+  border-radius: 0.65rem;
+  color: #e7cf9b;
+  background: transparent;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.planner-disclosure,
+.planner-status,
+.planner-empty,
+.planner-custom p,
+.planner-handoffs p,
+.planner-delete-account p {
+  color: #93a69f;
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+.planner-error {
+  color: #e6a8a1;
+  font-size: 0.68rem;
+}
+.planner-block {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(230, 186, 104, 0.22);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+.planner-block-heading span {
+  color: #8fa29c;
+  font-size: 0.6rem;
+}
+.planner-search-results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.planner-search-results > span {
+  flex-basis: 100%;
+  color: #aabbb5;
+  font-size: 0.64rem;
+}
+.planner-custom > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+.planner-custom > div label:first-child,
+.planner-custom > div button {
+  grid-column: 1 / -1;
+}
+.planner-custom summary {
+  color: #e6ba68;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+.planner-block label,
+.planner-delete-account label {
+  display: grid;
+  gap: 0.22rem;
+  color: #cbd8d4;
+  font-size: 0.62rem;
+}
+.planner-block input,
+.planner-block select,
+.planner-block textarea,
+.planner-delete-account input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.6rem;
+  color: #edf7f2;
+  background: #111f22;
+  font: inherit;
+}
+.planner-wishes {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.planner-wishes li {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  padding: 0.65rem;
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+.planner-wishes li > div:first-child,
+.planner-note,
+.planner-row-actions {
+  grid-column: 1 / -1;
+}
+.planner-wishes li > div:first-child {
+  display: grid;
+}
+.planner-wishes strong {
+  color: #edf7f2;
+  font-size: 0.72rem;
+}
+.planner-wishes span,
+.planner-wishes small {
+  color: #91a49e;
+  font-size: 0.58rem;
+}
+.planner-wishes small {
+  color: #d4b875;
+}
+.planner-row-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.planner-row-actions button:last-child {
+  color: #d9a09a;
+}
+.planner-retention {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(220, 149, 112, 0.4);
+  border-radius: 0.7rem;
+  background: rgba(130, 65, 45, 0.14);
+}
+.planner-retention strong {
+  color: #f0c193;
+  font-size: 0.72rem;
+}
+.planner-retention span {
+  color: #c9b0a1;
+  font-size: 0.62rem;
+}
+.planner-block fieldset {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+}
+.planner-block legend {
+  color: #e6ba68;
+  font-size: 0.64rem;
+}
+.planner-block fieldset label,
+.planner-handoffs label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.planner-block fieldset input,
+.planner-handoffs input {
+  width: auto;
+}
+.planner-stop-order {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+.planner-stop-order li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.35rem;
+  color: #dce8e4;
+  font-size: 0.66rem;
+}
+.planner-stop-order li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.planner-handoffs {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+.planner-handoffs textarea {
+  resize: vertical;
+  font-size: 0.62rem;
+  line-height: 1.45;
+}
+.planner-map-legs {
+  display: grid;
+  gap: 0.45rem;
+}
+.planner-map-legs a {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.32);
+  border-radius: 0.6rem;
+  color: #f4d38f;
+  font-size: 0.64rem;
+  line-height: 1.4;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+.planner-map-legs a:focus-visible,
+.planner-map-legs a:hover {
+  border-color: rgba(230, 186, 104, 0.72);
+  background: rgba(230, 186, 104, 0.08);
+}
+.planner-delete-account {
+  padding: 0.7rem;
+  border: 1px solid rgba(213, 135, 126, 0.25);
+  border-radius: 0.8rem;
+}
+.planner-delete-account summary {
+  color: #d9a09a;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+.planner-delete-account label {
+  margin: 0.7rem 0;
+}
+.planner-delete-account button {
+  color: #f3c1bb;
+  border-color: rgba(213, 135, 126, 0.45);
+}
+.planner-block button:disabled,
+.planner-delete-account button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.planner-heading button:focus-visible,
+.planner-block button:focus-visible,
+.planner-delete-account button:focus-visible,
+.planner-export:focus-visible,
+.planner-custom summary:focus-visible,
+.planner-delete-account summary:focus-visible {
+  outline: 2px solid #f4d38f;
+  outline-offset: 3px;
+}
+.planner-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+@media (max-width: 480px) {
+  .planner-heading {
+    align-items: start;
+  }
+  .planner-heading button {
+    flex: 0 0 auto;
+  }
+  .planner-wishes li,
+  .planner-custom > div {
+    grid-template-columns: 1fr;
+  }
+  .planner-custom > div label:first-child,
+  .planner-custom > div button {
+    grid-column: 1;
+  }
+}
+</style>

@@ -366,6 +366,15 @@
         </li>
       </ul>
 
+      <MyAtlasPlanner
+        v-if="accountProfile"
+        :api-base-url="apiBaseUrl"
+        :revision="accountProfile.revision"
+        :search-results="searchResults"
+        @revision-change="updatePlanningRevision"
+        @account-deleted="handleAccountDeleted"
+      />
+
       <section class="my-atlas-pins" aria-labelledby="my-atlas-pins-title">
         <div>
           <p>Your destinations</p>
@@ -471,6 +480,7 @@
 <script>
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
+import MyAtlasPlanner from "../components/MyAtlasPlanner.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
 import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
 import placeCatalog from "../data/place-catalog.proof.json"
@@ -494,6 +504,7 @@ import { addDraftPin, removeDraftPin } from "../catalog/pinDraft.mjs"
 import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
 import {
   createMyAtlasPin,
+  deleteMyAtlasAccount,
   deleteMyAtlasPin,
   fetchMyAtlasState,
   registerMyAtlasAccount,
@@ -520,6 +531,7 @@ export default {
   components: {
     MyAtlasMap,
     MyAtlasPinEditor,
+    MyAtlasPlanner,
     MyAtlasRegistrationForm,
     MyAtlasTutorial,
   },
@@ -719,6 +731,17 @@ export default {
     if (this.searchAbortController) this.searchAbortController.abort()
   },
   methods: {
+    updatePlanningRevision(revision) {
+      if (!this.accountProfile || !Number.isSafeInteger(revision)) return
+      this.accountProfile = { ...this.accountProfile, revision }
+    },
+    handleAccountDeleted() {
+      this.accountProfile = null
+      this.accountMissing = true
+      this.pins = []
+      this.selectedPlaceId = ""
+      this.announcement = "Your My Atlas application data was deleted."
+    },
     queuePlaceSearch(value, delay = 350) {
       window.clearTimeout(this.searchTimer)
       if (this.searchAbortController) this.searchAbortController.abort()
@@ -803,6 +826,30 @@ export default {
       this.accountLoadFailed = false
       try {
         const token = await getMyAtlasApiAccessToken()
+        const deletionKey = "rwj:my-atlas:account-deletion-operation:v1"
+        let pendingDeletion = null
+        try {
+          pendingDeletion = JSON.parse(
+            window.sessionStorage.getItem(deletionKey)
+          )
+        } catch {
+          window.sessionStorage.removeItem(deletionKey)
+        }
+        if (
+          pendingDeletion?.idempotencyKey &&
+          Number.isSafeInteger(pendingDeletion.revision)
+        ) {
+          await deleteMyAtlasAccount({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            revision: pendingDeletion.revision,
+            idempotencyKey: pendingDeletion.idempotencyKey,
+          })
+          window.sessionStorage.removeItem(deletionKey)
+          this.handleAccountDeleted()
+          logoutFromMyAtlas()
+          return
+        }
         const state = await fetchMyAtlasState({
           apiBaseUrl: this.apiBaseUrl,
           accessToken: token,

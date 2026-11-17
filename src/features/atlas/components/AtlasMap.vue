@@ -325,6 +325,7 @@ export default {
 
         this.map.on("load", () => {
           this.ready = true
+          this.$emit("ready")
           // Style initialization can re-run MapLibre's compact-state update.
           // Close it again after load so the initial UI is icon-only.
           this.collapseAttribution()
