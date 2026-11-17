@@ -7,6 +7,12 @@
       :playback-active="timelinePlaying"
       @select="selectPin"
     />
+    <MyAtlasTutorial
+      v-if="tutorialOpen"
+      :variant="tutorialVariant"
+      @close="closeTutorial"
+      @complete="completeTutorial"
+    />
 
     <section class="my-atlas-panel" aria-labelledby="my-atlas-title">
       <header>
@@ -17,7 +23,7 @@
       <div class="my-atlas-intro">
         <p>My Atlas by RoamWithJustin.com</p>
         <h1 id="my-atlas-title">Mark the places that shaped your travels.</h1>
-        <p>
+        <p class="my-atlas-intro-copy">
           Search countries and cities, then place them on your map.
           <template v-if="accountProfile">
             Your changes are saved to your private beta account.
@@ -26,6 +32,14 @@
             This local proof does not save or publish your selections.
           </template>
         </p>
+        <div class="my-atlas-intro-actions">
+          <button
+            type="button"
+            @click="openTutorial(accountProfile ? 'account' : 'preview')"
+          >
+            {{ accountProfile ? "Quick start guide" : "See how it works" }}
+          </button>
+        </div>
       </div>
 
       <section v-if="pinnedPlaces.length" class="my-atlas-overview">
@@ -123,7 +137,12 @@
         </div>
       </section>
 
-      <section class="my-atlas-auth" aria-labelledby="my-atlas-auth-title">
+      <section
+        ref="authSection"
+        class="my-atlas-auth"
+        aria-labelledby="my-atlas-auth-title"
+        tabindex="-1"
+      >
         <div>
           <p id="my-atlas-auth-title">Google sign in</p>
           <span v-if="auth.loading">Checking your session</span>
@@ -148,7 +167,12 @@
           v-if="auth.configured && !auth.loading"
           class="my-atlas-auth-actions"
         >
-          <button v-if="!auth.authenticated" type="button" @click="signIn">
+          <button
+            v-if="!auth.authenticated"
+            ref="signInButton"
+            type="button"
+            @click="signIn"
+          >
             Sign in with Google
           </button>
           <template v-else>
@@ -182,6 +206,7 @@
       <label class="my-atlas-search">
         <span>Find a country or city</span>
         <input
+          ref="searchInput"
           v-model="query"
           type="search"
           autocomplete="off"
@@ -340,6 +365,7 @@
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
+import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
 import placeCatalog from "../data/place-catalog.proof.json"
 import {
   atlasTimelineSequence,
@@ -373,12 +399,15 @@ import {
   myAtlasAuthState,
 } from "../auth/auth0"
 
+const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
+
 export default {
   name: "MyAtlasGeographicProof",
   components: {
     MyAtlasMap,
     MyAtlasPinEditor,
     MyAtlasRegistrationForm,
+    MyAtlasTutorial,
   },
   data() {
     return {
@@ -416,6 +445,8 @@ export default {
       registrationPending: false,
       registrationError: "",
       turnstileSiteKey: getMyAtlasTurnstileSiteKey(process.env),
+      tutorialOpen: false,
+      tutorialVariant: "preview",
     }
   },
   computed: {
@@ -628,6 +659,7 @@ export default {
             deprecated: false,
           })
         })
+        this.$nextTick(() => this.showAccountTutorialIfNeeded())
       } catch (error) {
         if (error.status === 404) {
           this.accountMissing = true
@@ -653,6 +685,7 @@ export default {
         this.selectedPlaceId = ""
         this.announcement =
           "Your private Atlas account was created. Add your first destination."
+        this.$nextTick(() => this.openTutorial("account"))
       } catch (error) {
         const messages = {
           invalid_registration:
@@ -833,10 +866,74 @@ export default {
       this.selectedPlaceId = this.displayedPlaces[nextIndex].placeId
     },
     handleKeyboardNavigation(event) {
+      if (this.tutorialOpen) return
       const tag = event.target?.tagName?.toLowerCase()
       if (["input", "select", "textarea", "button"].includes(tag)) return
       if (event.key === "ArrowLeft") this.cyclePin(-1)
       if (event.key === "ArrowRight") this.cyclePin(1)
+    },
+    openTutorial(variant = "preview") {
+      this.tutorialVariant = variant === "account" ? "account" : "preview"
+      this.tutorialOpen = true
+    },
+    closeTutorial() {
+      if (this.tutorialVariant === "account") {
+        this.markAccountTutorialSeen()
+      }
+      this.tutorialOpen = false
+    },
+    completeTutorial() {
+      const variant = this.tutorialVariant
+      this.closeTutorial()
+      this.$nextTick(() => {
+        if (variant === "account") {
+          this.$refs.searchInput?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          })
+          this.$refs.searchInput?.focus()
+          return
+        }
+        const registration = this.$refs.registration?.$el
+        const target = registration || this.$refs.authSection
+        target?.scrollIntoView({ behavior: "smooth", block: "center" })
+        if (!this.auth.authenticated) this.$refs.signInButton?.focus()
+      })
+    },
+    accountTutorialStorageKey() {
+      return this.accountProfile?.handle
+        ? `${ACCOUNT_TUTORIAL_STORAGE_PREFIX}${this.accountProfile.handle}`
+        : ""
+    },
+    accountTutorialSeen() {
+      const key = this.accountTutorialStorageKey()
+      if (!key) return false
+      try {
+        return window.localStorage.getItem(key) === "seen"
+      } catch (error) {
+        return false
+      }
+    },
+    markAccountTutorialSeen() {
+      const key = this.accountTutorialStorageKey()
+      if (!key) return
+      try {
+        window.localStorage.setItem(key, "seen")
+      } catch (error) {
+        // Storage can be unavailable in strict privacy modes.
+      }
+    },
+    showAccountTutorialIfNeeded() {
+      if (
+        !this.accountProfile ||
+        this.accountProfile.revision !== 1 ||
+        Number(this.accountProfile.pinCount || 0) !== 0 ||
+        this.pins.length ||
+        this.accountTutorialSeen()
+      ) {
+        return
+      }
+      this.openTutorial("account")
     },
     pauseTimeline() {
       window.clearTimeout(this.timelineTimer)
@@ -1146,11 +1243,35 @@ export default {
   text-wrap: balance;
 }
 
-.my-atlas-intro > p:last-child {
+.my-atlas-intro-copy {
   margin: 1rem 0 0;
   color: #b2c2bd;
   font-size: 0.88rem;
   line-height: 1.55;
+}
+
+.my-atlas-intro-actions {
+  display: flex;
+  margin-top: 1rem;
+}
+
+.my-atlas-intro-actions button {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(230, 186, 104, 0.5);
+  border-radius: 999px;
+  color: #f7e6bf;
+  background: rgba(230, 186, 104, 0.08);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-intro-actions button:hover,
+.my-atlas-intro-actions button:focus-visible {
+  border-color: #e6ba68;
+  background: rgba(230, 186, 104, 0.14);
+  outline: none;
 }
 
 .my-atlas-search {
@@ -1166,6 +1287,11 @@ export default {
   border: 1px solid rgba(230, 186, 104, 0.24);
   border-radius: 1rem;
   background: rgba(230, 186, 104, 0.06);
+}
+
+.my-atlas-auth:focus {
+  outline: 2px solid rgba(230, 186, 104, 0.45);
+  outline-offset: 0.18rem;
 }
 
 .my-atlas-auth > div:first-child {
