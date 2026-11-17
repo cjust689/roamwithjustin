@@ -40,14 +40,18 @@ verification:
     - Thirty Workers-runtime tests verified wishlist isolation, duplicate rejection, global revision conflicts, immutable snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
     - Client utility tests verified ordered segmented Google Maps output with no more than three intermediary waypoints per leg, custom-coordinate confirmation, the 2,048-character guard, the 50-destination defensive ceiling, and coordinates omitted from AI prompts by default
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, exposed ETag and X-Request-Id, rejected unauthenticated owner reads and deletion with 401, and rejected an unrelated origin with 403
+    - Pull requests 101 and 102 passed required validation and merged through protected develop and main as 3b30d3608b35b23a05460c33aed659392b21b3e6 and 8add555205dcd23314c0e11e1f0a2b4d1038fd54
+    - GitHub Pages run 44128602408 deployed main merge 8add555205dcd23314c0e11e1f0a2b4d1038fd54
+    - Live content-addressed privacy and My Atlas bundles contained the final retention notice, ordered-plan UI, segmented Google Maps links, and permanent account-deletion control
+    - Direct /privacy and /my-atlas requests returned the existing GitHub Pages application fallback with HTTP 404; a direct-route 200 strategy remains unimplemented and is not claimed
 ---
 
 # My Atlas trip planning implementation
 
-The implementation slice is present on `feature/my-atlas-trip-planning`. Its
-backward-compatible API is deployed to the isolated staging Worker. The
-frontend remains on the feature branch and additional external beta invitations
-remain gated on the owner checks below.
+The implementation is deployed for controlled owner testing. Its
+backward-compatible API runs on the isolated staging Worker, and pull requests
+101 and 102 promoted the frontend through protected `develop` and `main`.
+Additional external beta invitations remain gated on the owner checks below.
 
 ## Implemented and test verified
 
@@ -92,7 +96,8 @@ remain gated on the owner checks below.
 ## Partial or not yet verified
 
 - [x] Deploy the backward-compatible Worker to isolated staging.
-- [ ] Deploy or promote the frontend after branch validation.
+- [x] Promote the frontend through protected develop and main pull requests and
+  verify the Pages deployment plus exact live bundle markers.
 - [ ] Run account deletion against a real disposable staging account. The
   authenticated destructive check cannot safely use the owner's existing
   account; automated durable-state erasure and exact retry tests pass.
@@ -111,8 +116,8 @@ remain gated on the owner checks below.
   wishlist records.
 - [x] Segment long Google Maps handoffs into continuous mobile-safe links.
 - [ ] Implement the separate owner-reviewed Mark Visited transition.
-- [ ] Update production routing only after staging acceptance. No apex Worker
-  route is authorized by this implementation.
+- [x] Keep the API on its isolated staging Worker while promoting the
+  feature-gated Pages frontend. No apex Worker route was added.
 
 ## Verified commands
 
@@ -124,7 +129,7 @@ npm run my-atlas:worker:check:staging
 npm run build
 ```
 
-The full production build passed after the managed documentation changes. No
-frontend deployment, pull request, commit, or merge is claimed here. The
-staging Worker deployment and probes are recorded above; disposable-account and
-real-device acceptance remain external owner actions.
+The full production build passed, and the staging Worker plus Pages frontend
+deployments are recorded above. Disposable-account deletion, authenticated
+responsive and accessibility acceptance, and real-device Maps behavior remain
+external owner actions before additional invitations are issued.

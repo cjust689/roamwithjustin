@@ -97,6 +97,9 @@ verification:
     - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health with the backward-compatible custom-pin API
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, rejected unauthenticated owner reads and deletion with 401, and rejected a foreign origin with 403 after the planning, retention, and account-deletion API deployed
     - Thirty Workers-runtime tests passed after multi-destination planning, controlled-clock retention, and permanent application-account deletion coverage
+    - Pull requests 101 and 102 passed required validation and promoted the planning frontend through protected develop and main; Pages run 44128602408 deployed main merge 8add555205dcd23314c0e11e1f0a2b4d1038fd54
+    - Live content-addressed bundles contained the final My Atlas privacy and retention notice, ordered-plan UI, segmented Maps links, and account-deletion control
+    - Direct /privacy and /my-atlas requests still return the GitHub Pages application fallback with HTTP 404, so a direct-route 200 response is not claimed
     - Live content-addressed chunks 102.9bc646f9.js, 850.f2e2b9be.js, and 102.fa12fe12.css returned 200 with the custom-pin prompt, map event, disclosure, and placement styles
 ---
 
@@ -107,8 +110,9 @@ Durable Object. Phase 2C adds an opt-in public projection, a signed-out handle
 route, and browser owner controls. The planning slice adds application-account
 deletion, private wishlist records, one future plan, retention alarms, and
 browser-only external handoffs. Its backward-compatible API is deployed on the
-isolated staging Worker; the frontend remains on its feature branch pending
-promotion and authenticated acceptance.
+isolated staging Worker, and its feature-gated frontend is deployed through
+GitHub Pages. Authenticated owner and real-device acceptance still gate broader
+invitations.
 
 ## Owner authorization
 
