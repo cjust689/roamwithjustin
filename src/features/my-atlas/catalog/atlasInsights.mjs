@@ -52,6 +52,29 @@ export function placesThroughYear(places, year) {
   })
 }
 
+export function atlasTimelineSequence(places) {
+  return Object.freeze(
+    places
+      .map(place => ({
+        place,
+        year: Math.min(...visitedDatesForPlace(place).map(date => date.year)),
+      }))
+      .filter(entry => Number.isInteger(entry.year))
+      .sort(
+        (left, right) =>
+          left.year - right.year ||
+          left.place.name.localeCompare(right.place.name) ||
+          left.place.placeId.localeCompare(right.place.placeId)
+      )
+      .map((entry, index) => Object.freeze({ ...entry, index }))
+  )
+}
+
+export function placesThroughTimelineStep(sequence, index) {
+  if (!Number.isInteger(index) || index < 0) return []
+  return sequence.slice(0, index + 1).map(entry => entry.place)
+}
+
 function radians(value) {
   return (value * Math.PI) / 180
 }
@@ -146,4 +169,28 @@ export function decorativeConnections(places) {
   }
 
   return Object.freeze(edges)
+}
+
+export function curvedConnectionCoordinates(from, to, steps = 48) {
+  const count = Math.max(2, Math.min(160, Math.round(steps)))
+  const [fromLongitude, fromLatitude] = from
+  let [toLongitude, toLatitude] = to
+  if (toLongitude - fromLongitude > 180) toLongitude -= 360
+  if (fromLongitude - toLongitude > 180) toLongitude += 360
+  const longitudeDistance = Math.abs(toLongitude - fromLongitude)
+  const latitudeDistance = Math.abs(toLatitude - fromLatitude)
+  const lift = Math.min(
+    18,
+    2.5 + longitudeDistance * 0.045 + latitudeDistance * 0.025
+  )
+
+  return Array.from({ length: count }, (_value, index) => {
+    const progress = index / (count - 1)
+    return [
+      fromLongitude + (toLongitude - fromLongitude) * progress,
+      fromLatitude +
+        (toLatitude - fromLatitude) * progress +
+        Math.sin(progress * Math.PI) * lift,
+    ]
+  })
 }
