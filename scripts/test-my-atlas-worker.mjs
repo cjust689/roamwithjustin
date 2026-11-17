@@ -146,6 +146,7 @@ async function readJson(response) {
           countryName: "Costa Rica",
           coordinates: [-83.7395, 9.17039],
           visitedYears: [2024],
+          memory: "The tide revealed the whale tail.",
         },
         {
           placeId: "geonames:5843642",
@@ -784,6 +785,7 @@ for (const token of [
       json: {
         placeId: "geonames:3621138",
         visitedDates: [{ year: 2024, month: 3 }, { year: 2026 }],
+        memory: "  Watching the tide\nreshape the whale tail.  ",
       },
     },
     {},
@@ -798,6 +800,7 @@ for (const token of [
             placeId: "geonames:3621138",
             visitedDates: [{ year: 2024, month: 3 }, { year: 2026 }],
             visitedYears: [2024, 2026],
+            memory: "Watching the tide reshape the whale tail.",
           },
         }
       },
@@ -813,6 +816,42 @@ for (const token of [
     { year: 2024, month: 3 },
     { year: 2026 },
   ])
+  assert.equal(
+    captured.input.memory,
+    "Watching the tide reshape the whale tail."
+  )
+}
+
+for (const memory of [
+  "a".repeat(256),
+  "<img src=x onerror=alert(1)>",
+  "direction\u202Eoverride",
+]) {
+  const token = await signToken()
+  let called = false
+  const response = await workerResponse(
+    "/v1/me/pins",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: crypto.randomUUID(),
+      ifMatch: '"rev-1"',
+      json: {
+        placeId: "geonames:3621138",
+        visitedDates: [],
+        memory,
+      },
+    },
+    {},
+    {
+      createMyPin: async () => {
+        called = true
+        throw new Error("Invalid memory must not reach the account service.")
+      },
+    }
+  )
+  assert.equal(response.status, 400)
+  assert.equal(called, false)
 }
 
 {
@@ -831,6 +870,7 @@ for (const token of [
             pinId: "pin_1234567890abcdef12345678",
             placeId: "geonames:3621138",
             visitedYears: [2024, 2026],
+            memory: '=HYPERLINK("https://example.invalid","open")',
           },
         ],
       }),
@@ -838,7 +878,10 @@ for (const token of [
   )
   assert.equal(response.status, 200)
   assert.match(response.headers.get("Content-Type"), /text\/csv/)
-  assert.match(await response.text(), /geonames:3621138/)
+  const csv = await response.text()
+  assert.match(csv, /visitedDates,memory/)
+  assert.match(csv, /geonames:3621138/)
+  assert.match(csv, /"'=HYPERLINK\(""https:\/\/example\.invalid""/)
 }
 
 {
@@ -1176,6 +1219,7 @@ await assert.rejects(
           countryName: "Costa Rica",
           coordinates: [-83.7395, 9.17039],
           visitedYears: [2024],
+          memory: "The tide revealed the whale tail.",
         },
         {
           placeId: "geonames:5843642",
@@ -1212,6 +1256,7 @@ await assert.rejects(
     "https://api.example.com/v1/public/atlases/justin-travels"
   )
   assert.equal(atlas.places[0].name, "Uvita")
+  assert.equal(atlas.places[0].memory, "The tide revealed the whale tail.")
   assert.equal(atlas.places[1].spotKind, "National park")
 }
 
@@ -1224,6 +1269,7 @@ await assert.rejects(
     countryName: "Costa Rica",
     coordinates: [-83.7395, 9.17039],
     visitedYears: [2024],
+    memory: "The tide revealed the whale tail.",
   }
   const state = await fetchMyAtlasState({
     apiBaseUrl: "https://api.example.com",
@@ -1248,11 +1294,13 @@ await assert.rejects(
   })
   assert.equal(state.profile.revision, 2)
   assert.equal(state.pins[0].name, "Uvita")
+  assert.equal(state.pins[0].memory, "The tide revealed the whale tail.")
 
   const created = await createMyAtlasPin({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
     placeId: "geonames:3621138",
+    memory: "A sunrise over the whale tail.",
     revision: 2,
     fetchImpl: async (_url, options) => {
       assert.equal(options.headers.get("If-Match"), '"rev-2"')
@@ -1260,6 +1308,7 @@ await assert.rejects(
       assert.deepEqual(JSON.parse(options.body), {
         placeId: "geonames:3621138",
         visitedDates: [],
+        memory: "A sunrise over the whale tail.",
       })
       return new Response(
         JSON.stringify({
@@ -1267,6 +1316,7 @@ await assert.rejects(
             ...pin,
             visitedYears: [],
             visitedDates: [],
+            memory: "A sunrise over the whale tail.",
           },
         }),
         { status: 201, headers: { ETag: '"rev-3"' } }
@@ -1280,12 +1330,14 @@ await assert.rejects(
     accessToken: "owner-token",
     pinId: pin.pinId,
     visitedDates: [{ year: 2024, month: 6 }],
+    memory: "Horses crossing the beach at low tide.",
     revision: 3,
     fetchImpl: async (_url, options) => {
       assert.equal(options.method, "PATCH")
       assert.equal(options.headers.get("If-Match"), '"rev-3"')
       assert.deepEqual(JSON.parse(options.body), {
         visitedDates: [{ year: 2024, month: 6 }],
+        memory: "Horses crossing the beach at low tide.",
       })
       return new Response(
         JSON.stringify({
@@ -1294,6 +1346,7 @@ await assert.rejects(
             placeId: pin.placeId,
             visitedYears: [2024],
             visitedDates: [{ year: 2024, month: 6 }],
+            memory: "Horses crossing the beach at low tide.",
           },
         }),
         { status: 200, headers: { ETag: '"rev-4"' } }
@@ -1302,6 +1355,7 @@ await assert.rejects(
   })
   assert.equal(updated.revision, 4)
   assert.equal(updated.pin.visitedDates[0].month, 6)
+  assert.equal(updated.pin.memory, "Horses crossing the beach at low tide.")
 
   const published = await updateMyAtlasSharing({
     apiBaseUrl: "https://api.example.com",
@@ -1340,6 +1394,26 @@ await assert.rejects(
     },
   })
   assert.equal(deletedRevision, 6)
+}
+
+{
+  let called = false
+  await assert.rejects(
+    () =>
+      createMyAtlasPin({
+        apiBaseUrl: "https://api.example.com",
+        accessToken: "owner-token",
+        placeId: "geonames:3621138",
+        memory: "<script>alert(1)</script>",
+        revision: 1,
+        fetchImpl: async () => {
+          called = true
+          throw new Error("Unsafe memory must not be sent.")
+        },
+      }),
+    error => error.code === "invalid_memory"
+  )
+  assert.equal(called, false)
 }
 
 {

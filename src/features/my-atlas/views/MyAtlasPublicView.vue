@@ -103,6 +103,9 @@
             <small>{{ formatVisitedDates(selectedPlace) }}</small>
           </div>
           <button type="button" @click="cyclePlace(1)">Next</button>
+          <blockquote v-if="selectedPlace.memory">
+            {{ selectedPlace.memory }}
+          </blockquote>
         </div>
 
         <ul class="my-atlas-public-places">
@@ -111,6 +114,7 @@
               <strong>{{ place.name }}</strong>
               <span>{{ placeLabel(place) }}</span>
               <small>{{ formatVisitedDates(place) }}</small>
+              <q v-if="place.memory">{{ place.memory }}</q>
             </button>
           </li>
         </ul>
@@ -583,6 +587,19 @@ export default {
   color: #d5b979;
 }
 
+.my-atlas-public-selected blockquote {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-left: 2px solid rgba(230, 186, 104, 0.55);
+  color: #dce9e4;
+  text-align: left;
+  background: rgba(230, 186, 104, 0.06);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .my-atlas-public-places {
   display: grid;
   gap: 0.5rem;
@@ -621,6 +638,18 @@ export default {
   align-self: center;
   color: #e6ba68;
   font-size: 0.66rem;
+}
+
+.my-atlas-public-places q {
+  grid-column: 1;
+  max-width: 36ch;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  color: #becdc8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.62rem;
+  quotes: none;
 }
 
 .my-atlas-public-attribution {

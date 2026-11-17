@@ -4,6 +4,7 @@ import {
   projectCatalogPlace,
 } from "../catalog/projection.mjs"
 import { REGISTRY_OBJECT_NAME } from "../registration/service.mjs"
+import { isNormalizedPinMemory } from "../account/memory.mjs"
 
 const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 
@@ -30,6 +31,9 @@ function requireNamespace(environment, name) {
 }
 
 function publicPlace(record, pin) {
+  if (pin.memory !== undefined && !isNormalizedPinMemory(pin.memory)) {
+    throw new PublicAtlasServiceError("A public Atlas memory is invalid.")
+  }
   let place
   try {
     place = projectCatalogPlace(record)
@@ -52,6 +56,7 @@ function publicPlace(record, pin) {
     visitedYears: Object.freeze([
       ...new Set(visitedDates.map(date => date.year)),
     ]),
+    ...(pin.memory ? { memory: pin.memory } : {}),
   })
 }
 

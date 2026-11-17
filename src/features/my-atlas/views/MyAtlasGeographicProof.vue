@@ -135,6 +135,9 @@
           >
             Next
           </button>
+          <blockquote v-if="selectedPlace.memory">
+            {{ selectedPlace.memory }}
+          </blockquote>
         </div>
       </section>
 
@@ -236,7 +239,7 @@
         :pending="accountPending"
         :error="pinEditorError"
         @cancel="closePinEditor"
-        @save="savePinDates"
+        @save="savePinDetails"
       />
 
       <div v-if="searchPending" class="my-atlas-search-state" role="status">
@@ -288,15 +291,16 @@
               <span>{{ place.name }}</span>
               <small>{{ placeLabel(place) }}</small>
               <em>{{ formatVisitedDates(place) }}</em>
+              <q v-if="place.memory">{{ place.memory }}</q>
             </button>
             <button
               class="edit"
               type="button"
               :disabled="accountPending"
-              :aria-label="'Edit visit dates for ' + place.name"
+              :aria-label="'Edit visit details for ' + place.name"
               @click="openExistingPin(place)"
             >
-              Dates
+              Edit
             </button>
             <button
               class="remove"
@@ -321,8 +325,8 @@
           <strong>{{ accountProfile.public ? "Public" : "Private" }}</strong>
         </div>
         <p>
-          Publishing makes your marked places and optional visit dates available
-          to anyone with your link.
+          Publishing makes your marked places, optional visit dates, and
+          favorite memories available to anyone with your link.
         </p>
         <div class="my-atlas-sharing-actions">
           <button
@@ -798,14 +802,14 @@ export default {
       this.pinEditorPin = this.pins.find(pin => pin.placeId === place.placeId)
       this.pinEditorError = ""
     },
-    async savePinDates(visitedDates) {
+    async savePinDetails({ visitedDates, memory }) {
       if (this.pinEditorPin) {
-        await this.updatePlaceDates(this.pinEditorPin, visitedDates)
+        await this.updatePlaceDetails(this.pinEditorPin, visitedDates, memory)
       } else {
-        await this.addPlace(this.pinEditorPlace, visitedDates)
+        await this.addPlace(this.pinEditorPlace, visitedDates, memory)
       }
     },
-    async addPlace(place, visitedDates = []) {
+    async addPlace(place, visitedDates = [], memory = "") {
       if (this.accountProfile) {
         this.accountPending = true
         this.accountError = ""
@@ -816,6 +820,7 @@ export default {
             accessToken: token,
             placeId: place.placeId,
             visitedDates,
+            memory,
             revision: this.accountProfile.revision,
           })
           this.pins = [...this.pins, result.pin]
@@ -842,7 +847,7 @@ export default {
       try {
         this.pins = addDraftPin(this.pins, place.placeId, this.runtimeCatalog)
         this.pins = this.pins.map(pin =>
-          pin.placeId === place.placeId ? { ...pin, visitedDates } : pin
+          pin.placeId === place.placeId ? { ...pin, visitedDates, memory } : pin
         )
         this.selectedPlaceId = place.placeId
         this.query = ""
@@ -852,7 +857,7 @@ export default {
         this.announcement = error.message
       }
     },
-    async updatePlaceDates(pin, visitedDates) {
+    async updatePlaceDetails(pin, visitedDates, memory) {
       if (!this.accountProfile) return
       this.accountPending = true
       this.pinEditorError = ""
@@ -863,6 +868,7 @@ export default {
           accessToken: token,
           pinId: pin.pinId,
           visitedDates,
+          memory,
           revision: this.accountProfile.revision,
         })
         this.pins = this.pins.map(candidate =>
@@ -875,9 +881,9 @@ export default {
           revision: result.revision,
         }
         this.closePinEditor()
-        this.announcement = "Visit dates were updated."
+        this.announcement = "Destination details were updated."
       } catch (error) {
-        this.pinEditorError = "These visit dates could not be saved."
+        this.pinEditorError = "These destination details could not be saved."
       } finally {
         this.accountPending = false
       }
@@ -1306,6 +1312,18 @@ export default {
   color: #d9bd80;
 }
 
+.my-atlas-selected blockquote {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-left: 2px solid rgba(230, 186, 104, 0.55);
+  color: #dce9e4;
+  background: rgba(230, 186, 104, 0.06);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .my-atlas-intro h1 {
   max-width: 10em;
   margin: 0;
@@ -1525,6 +1543,18 @@ export default {
   color: #d3b879;
   font-size: 0.62rem;
   font-style: normal;
+}
+
+.my-atlas-pins q {
+  grid-column: 1;
+  max-width: 36ch;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  color: #b9c9c4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.62rem;
+  quotes: none;
 }
 
 .my-atlas-results b {

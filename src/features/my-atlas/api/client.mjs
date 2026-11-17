@@ -1,4 +1,8 @@
 import { isMyAtlasPlaceType } from "../catalog/placeTypes.mjs"
+import {
+  isNormalizedMyAtlasMemory,
+  normalizeMyAtlasMemory,
+} from "../catalog/memory.mjs"
 
 export class MyAtlasApiError extends Error {
   constructor(
@@ -35,6 +39,7 @@ function normalizedPin(value) {
       : []
   return Object.freeze({
     ...value,
+    memory: typeof value.memory === "string" ? value.memory : "",
     visitedDates: Object.freeze(
       visitedDates.map(date => Object.freeze({ ...date }))
     ),
@@ -58,6 +63,7 @@ function isPublicPlace(value) {
       Array.isArray(value.coordinates) &&
       value.coordinates.length === 2 &&
       value.coordinates.every(Number.isFinite) &&
+      (value.memory === undefined || isNormalizedMyAtlasMemory(value.memory)) &&
       visitedDates &&
       visitedDates.every(isVisitedDate)
   )
@@ -136,6 +142,16 @@ function newIdempotencyKey() {
   return globalThis.crypto.randomUUID()
 }
 
+function validatedMemory(value) {
+  const memory = normalizeMyAtlasMemory(value)
+  if (memory === null) {
+    throw new MyAtlasApiError("Favorite memory is invalid.", {
+      code: "invalid_memory",
+    })
+  }
+  return memory
+}
+
 export async function fetchMyAtlasState({
   apiBaseUrl,
   accessToken,
@@ -209,15 +225,21 @@ export async function createMyAtlasPin({
   accessToken,
   placeId,
   visitedDates = [],
+  memory = "",
   revision,
   fetchImpl = fetch,
 }) {
+  const normalizedMemory = validatedMemory(memory)
   const { response, payload } = await authenticatedJsonRequest({
     apiBaseUrl,
     accessToken,
     path: "/v1/me/pins",
     method: "POST",
-    body: { placeId, visitedDates },
+    body: {
+      placeId,
+      visitedDates,
+      memory: normalizedMemory,
+    },
     revision,
     idempotencyKey: newIdempotencyKey(),
     fetchImpl,
@@ -225,7 +247,8 @@ export async function createMyAtlasPin({
   if (
     typeof payload.pin?.pinId !== "string" ||
     payload.pin.placeId !== placeId ||
-    !isPublicPlace(payload.pin)
+    !isPublicPlace(payload.pin) ||
+    payload.pin.memory !== normalizedMemory
   ) {
     throw new MyAtlasApiError("The created pin response is invalid.", {
       status: response.status,
@@ -243,15 +266,21 @@ export async function updateMyAtlasPin({
   accessToken,
   pinId,
   visitedDates,
+  memory,
   revision,
   fetchImpl = fetch,
 }) {
+  const normalizedMemory =
+    memory === undefined ? undefined : validatedMemory(memory)
   const { response, payload } = await authenticatedJsonRequest({
     apiBaseUrl,
     accessToken,
     path: `/v1/me/pins/${encodeURIComponent(pinId)}`,
     method: "PATCH",
-    body: { visitedDates },
+    body: {
+      ...(visitedDates === undefined ? {} : { visitedDates }),
+      ...(normalizedMemory === undefined ? {} : { memory: normalizedMemory }),
+    },
     revision,
     idempotencyKey: newIdempotencyKey(),
     fetchImpl,
@@ -259,7 +288,8 @@ export async function updateMyAtlasPin({
   if (
     payload.pin?.pinId !== pinId ||
     !Array.isArray(payload.pin.visitedDates) ||
-    !payload.pin.visitedDates.every(isVisitedDate)
+    !payload.pin.visitedDates.every(isVisitedDate) ||
+    !isNormalizedMyAtlasMemory(payload.pin.memory)
   ) {
     throw new MyAtlasApiError("The updated pin response is invalid.", {
       status: response.status,

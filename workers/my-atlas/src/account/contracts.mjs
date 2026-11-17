@@ -3,6 +3,7 @@ import {
   normalizeDisplayName,
   normalizeIdempotencyKey,
 } from "../registration/contracts.mjs"
+import { normalizePinMemory } from "./memory.mjs"
 
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
@@ -120,6 +121,14 @@ function normalizeVisitTiming(value, currentYear) {
   return Object.freeze({ visitedDates, visitedYears })
 }
 
+export function normalizeMemory(value) {
+  const memory = normalizePinMemory(value)
+  if (memory === null) {
+    throw new RegistrationValidationError("Favorite memory is invalid.")
+  }
+  return memory
+}
+
 export function normalizeProfilePatch(value, headers) {
   assertObject(value, new Set(["displayName", "public"]), "Profile patch")
   if (Object.keys(value).length === 0) {
@@ -143,12 +152,13 @@ export function normalizeProfilePatch(value, headers) {
 export function normalizeCreatePin(value, headers, currentYear) {
   assertObject(
     value,
-    new Set(["placeId", "visitedYears", "visitedDates"]),
+    new Set(["placeId", "visitedYears", "visitedDates", "memory"]),
     "Pin"
   )
   return Object.freeze({
     placeId: normalizePlaceId(value.placeId),
     ...normalizeVisitTiming(value, currentYear),
+    memory: normalizeMemory(value.memory === undefined ? "" : value.memory),
     expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
     idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),
   })
@@ -157,7 +167,7 @@ export function normalizeCreatePin(value, headers, currentYear) {
 export function normalizePatchPin(value, pinId, headers, currentYear) {
   assertObject(
     value,
-    new Set(["placeId", "visitedYears", "visitedDates"]),
+    new Set(["placeId", "visitedYears", "visitedDates", "memory"]),
     "Pin patch"
   )
   if (Object.keys(value).length === 0) {
@@ -176,6 +186,9 @@ export function normalizePatchPin(value, pinId, headers, currentYear) {
         : {
             ...normalizeVisitTiming(value, currentYear),
           }),
+      ...(value.memory === undefined
+        ? {}
+        : { memory: normalizeMemory(value.memory) }),
     }),
     expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
     idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),

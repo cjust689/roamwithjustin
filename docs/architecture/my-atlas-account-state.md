@@ -25,6 +25,7 @@ code_paths:
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
+  - src/features/my-atlas/catalog/memory.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
   - src/features/my-atlas/components/MyAtlasTutorial.vue
@@ -63,6 +64,9 @@ verification:
     - Pull requests 77 and 78 passed their required validation gates; Pages workflow 44014283401 deployed main merge 7c2b1a9135ce45a834bf7aadda869460452e55de
     - Staging Worker f039455e-35bf-4c9d-bd15-c03716e63f72 returned 200 health after the owner-bypass and scoped-public-limiter deployment
     - The live content-addressed My Atlas chunk returned 200 and contained Retry saved Atlas, Retry search, rate-limit, and API-session-renewal messages
+    - Favorite-memory contract tests passed Unicode normalization, whitespace folding, 255-code-point and 1,020-byte ceilings, markup and invisible-control rejection, unsafe-storage fail-closed behavior, owner isolation, public projection, and CSV formula neutralization
+    - Twenty-two Workers-runtime tests passed after favorite-memory persistence, update, export, sharing, direct-object validation, and corrupt-public-state coverage were added
+    - Headless Chrome at 390 pixels verified the 255-character editor boundary, blocked markup, normalized line breaks, escaped list and selected-place rendering, successful local save, and zero horizontal overflow
 ---
 
 # My Atlas local profile, pin, and sharing state
@@ -135,12 +139,22 @@ Pins store only:
   month;
 - a derived visited-year list retained for compatibility with schema version 1
   clients and pins;
+- one optional favorite memory stored directly on that owner's pin;
 - creation and update timestamps.
 
 Pins may remain undated. The object maintains a place index to reject duplicate
 destinations and a profile pin count enforcing the 300-pin beta ceiling. A
 profile cannot become public while empty. Deleting its last pin atomically
 makes it private.
+
+Favorite memory is one optional plain-text value per pin, not an independently
+addressable child record. The request boundary normalizes Unicode to NFC,
+folds whitespace to one line, and permits at most 255 Unicode code points and
+1,020 UTF-8 bytes. It rejects markup delimiters, unpaired surrogates, control
+characters, bidirectional overrides, selected invisible formatting characters,
+and Unicode noncharacters. The Durable Object independently requires the
+already normalized value so an internal caller cannot bypass the HTTP contract.
+Legacy pins without the field project an empty memory and require no migration.
 
 Pin IDs are deterministically derived from the internal user ID and canonical
 place ID at creation. Replacing a pin's place preserves its pin ID while moving
@@ -169,8 +183,9 @@ the original ETag correction remains external verification.
 ## Export, sharing, and privacy boundary
 
 JSON export includes the safe profile projection and all pins. CSV export
-contains pin ID, canonical place ID, visited years, and normalized optional
-visit dates. Neither format
+contains pin ID, canonical place ID, visited years, normalized optional visit
+dates, and favorite memory. Formula-leading user text is apostrophe-neutralized
+before CSV quoting. Neither format
 contains Auth0 subjects, qualified identity digests, access tokens, invitation
 data, or Durable Object operation records.
 
@@ -181,8 +196,11 @@ copyable `/my-atlas/{handle}` link only while the profile is public. Access
 tokens remain memory only. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
-the handle, display name, canonical places, coordinates, and optional visit
-dates, plus derived visited years for compatibility.
+the handle, display name, canonical places, coordinates, optional visit dates,
+derived visited years for compatibility, and nonempty favorite memories.
+Memory is included only after the owner explicitly publishes the whole Atlas.
+Vue renders it through text interpolation rather than HTML insertion. The
+public service fails closed if stored memory no longer satisfies the contract.
 Internal user IDs, pin IDs, qualified identities, invitations, accepted-policy
 records, timestamps, and mutation history do not enter that response.
 
@@ -279,3 +297,11 @@ also remain. Planned destinations are a future feature, not an overload of the
 visited pin state. A future planner needs an explicit planned lifecycle,
 exclusion from visited statistics and playback by default, a deliberate
 planned-to-visited transition, and a separate public-sharing decision.
+
+Memory images are deliberately not part of the text-memory release. They need
+a separately reviewed media boundary with an explicit per-pin count, raw-byte
+and decoded-pixel ceilings, file-signature and decoder validation rather than
+extension trust, metadata stripping, server-controlled re-encoding, owner-only
+object keys, authenticated mutation and deletion, private-by-default delivery,
+storage quotas, and abuse and retention procedures. Image bytes must not be
+stored in the profile Durable Object.

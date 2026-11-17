@@ -50,12 +50,39 @@
           Add year
         </button>
       </div>
-      <p v-if="error" class="pin-editor-error" role="alert">{{ error }}</p>
     </div>
+
+    <label class="pin-editor-memory">
+      <span>Favorite memory</span>
+      <small>
+        Optional. Add one plain-text memory for this destination. It appears on
+        your shared Atlas when your Atlas is public.
+      </small>
+      <textarea
+        v-model="memory"
+        rows="3"
+        :maxlength="memoryMaxInputUnits"
+        :aria-invalid="String(Boolean(memoryValidationMessage))"
+        placeholder="What made this place memorable?"
+        @input="memoryError = ''"
+      />
+      <span class="pin-editor-memory-count">
+        {{ memoryCharacterCount }} / {{ memoryMaxCharacters }} characters
+      </span>
+      <span
+        v-if="memoryValidationMessage"
+        class="pin-editor-error"
+        role="alert"
+      >
+        {{ memoryValidationMessage }}
+      </span>
+    </label>
+
+    <p v-if="error" class="pin-editor-error" role="alert">{{ error }}</p>
 
     <div class="pin-editor-actions">
       <button type="button" :disabled="pending" @click="submit">
-        {{ pending ? "Saving" : pin ? "Save years" : "Add to My Atlas" }}
+        {{ pending ? "Saving" : pin ? "Save destination" : "Add to My Atlas" }}
       </button>
       <small v-if="!dates.length && !year">
         You can add this destination without a year.
@@ -69,6 +96,10 @@ import {
   formatVisitedDate,
   visitedDatesForPlace,
 } from "../catalog/atlasInsights.mjs"
+import {
+  MY_ATLAS_MEMORY_MAX_CHARACTERS,
+  normalizeMyAtlasMemory,
+} from "../catalog/memory.mjs"
 
 export default {
   name: "MyAtlasPinEditor",
@@ -102,6 +133,10 @@ export default {
         ...new Set(visitedDatesForPlace(this.pin || {}).map(date => date.year)),
       ].map(year => ({ year })),
       year: "",
+      memory: this.pin?.memory || "",
+      memoryError: "",
+      memoryMaxCharacters: MY_ATLAS_MEMORY_MAX_CHARACTERS,
+      memoryMaxInputUnits: MY_ATLAS_MEMORY_MAX_CHARACTERS * 2,
     }
   },
   computed: {
@@ -112,6 +147,19 @@ export default {
         this.year <= this.currentYear &&
         !this.dates.some(date => date.year === this.year)
       )
+    },
+    memoryCharacterCount() {
+      return Array.from(this.memory).length
+    },
+    memoryValidationMessage() {
+      if (this.memoryError) return this.memoryError
+      if (this.memoryCharacterCount > this.memoryMaxCharacters) {
+        return `Keep your favorite memory to ${this.memoryMaxCharacters} characters.`
+      }
+      if (normalizeMyAtlasMemory(this.memory) === null) {
+        return "Use plain text without markup or invisible formatting controls."
+      }
+      return ""
     },
   },
   methods: {
@@ -134,10 +182,18 @@ export default {
     },
     submit() {
       if (this.year) this.addDraftDate()
-      this.$emit(
-        "save",
-        this.dates.map(date => ({ ...date }))
-      )
+      const memory = normalizeMyAtlasMemory(this.memory)
+      if (memory === null) {
+        this.memoryError =
+          this.memoryCharacterCount > this.memoryMaxCharacters
+            ? `Keep your favorite memory to ${this.memoryMaxCharacters} characters.`
+            : "Use plain text without markup or invisible formatting controls."
+        return
+      }
+      this.$emit("save", {
+        visitedDates: this.dates.map(date => ({ ...date })),
+        memory,
+      })
     },
   },
 }
@@ -198,7 +254,8 @@ export default {
 }
 
 .pin-editor button,
-.pin-editor input {
+.pin-editor input,
+.pin-editor textarea {
   font: inherit;
 }
 
@@ -272,6 +329,55 @@ export default {
   border-radius: 0.65rem;
   color: #f4fbf7;
   background: #111f22;
+}
+
+.pin-editor-memory {
+  display: grid;
+  gap: 0.4rem;
+  color: #b6c6c1;
+  font-size: 0.65rem;
+}
+
+.pin-editor-memory > span:first-child {
+  color: #e6ba68;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.pin-editor-memory small,
+.pin-editor-memory-count {
+  color: #91a59f;
+  line-height: 1.45;
+}
+
+.pin-editor-memory textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 5.5rem;
+  margin: 0;
+  padding: 0.7rem;
+  resize: vertical;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.65rem;
+  color: #f4fbf7;
+  background: #111f22;
+  line-height: 1.5;
+}
+
+.pin-editor-memory textarea:focus {
+  border-color: #e6ba68;
+  box-shadow: 0 0 0 2px rgba(230, 186, 104, 0.16);
+  outline: none;
+}
+
+.pin-editor-memory textarea[aria-invalid="true"] {
+  border-color: #d58f88;
+}
+
+.pin-editor-memory-count {
+  justify-self: end;
 }
 
 .pin-editor-date-row > button {
