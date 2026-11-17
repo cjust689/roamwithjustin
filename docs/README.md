@@ -25,6 +25,7 @@ related:
   - my-atlas-trip-planning-implementation
   - gear-ingestion-affiliate-analytics-ai
   - my-atlas-travel-booking-affiliate-partnerships
+  - affiliate-activation-public-editorial-first-slice
 supersedes:
   - documentation-lifecycle-adoption-brief
   - master-plan-ai-context
@@ -107,6 +108,9 @@ These documents describe future behavior, not available features:
 - [Planning-to-booking partnerships and commerce](proposals/travel-booking-affiliate-partnerships.md),
   whose private-planning prerequisite is implemented while merchant handoffs
   and sponsored placements remain future work
+- [First public editorial affiliate activation](proposals/affiliate-activation-public-editorial.md),
+  a bounded Moab or Utah referral slice that remains gated on at least one
+  owner-verified, placement-approved merchant or ordinary destination link
 
 The [accepted single-row Sheets and Drive target](proposals/single-row-sheets-drive-atlas-publishing.md)
 is partially implemented and tracked by the active implementation document.
