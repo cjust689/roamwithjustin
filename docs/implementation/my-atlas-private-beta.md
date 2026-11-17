@@ -358,6 +358,11 @@ ceiling before inviting external users.
       keeping the current editor and timeline at year precision.
 - [x] Place the active Add destination editor directly below its search control
       and before the remaining catalog results on desktop and mobile.
+- [x] Organize the owner panel into the primary map overview followed by compact
+      account controls and collapsible Add destination, Visited destinations,
+      future-planning, and sharing flows. Existing accounts start with the
+      potentially large flows closed, while an empty account opens Add
+      destination. Expanded destination and planner lists use bounded scrolling.
 - [x] Add a feature-gated homepage discovery card that routes visitors directly
       to My Atlas and remains responsive with the existing Atlas and guide cards.
 - [x] Add an accessible pre-account product walkthrough and a once-per-browser

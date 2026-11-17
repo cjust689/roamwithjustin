@@ -62,17 +62,19 @@ function validatedPlan(
     !Array.isArray(plan.stops) ||
     plan.stops.length < 1 ||
     plan.stops.length > MAX_PLAN_DESTINATIONS ||
-    !["return-to-start", "last-stop"].includes(plan.endMode)
+    !["return-to-start", "last-stop", "selected-end"].includes(plan.endMode) ||
+    (plan.endMode === "selected-end") !== Boolean(plan.end)
   ) {
     throw new MyAtlasHandoffError("The saved plan is invalid.", "invalid_plan")
   }
   const confirmed = new Set(confirmedCoordinatePlaceIds)
   const start = validatedLocation(plan.start)
   const stops = plan.stops.map(validatedLocation)
-  for (const location of [start, ...stops]) {
+  const end = plan.endMode === "selected-end" ? validatedLocation(plan.end) : null
+  for (const location of [start, ...stops, ...(end ? [end] : [])]) {
     assertRouteReady(location, confirmed)
   }
-  return Object.freeze({ start, stops })
+  return Object.freeze({ start, stops, ...(end ? { end } : {}) })
 }
 
 function mapsUrlForNodes(nodes) {
@@ -101,13 +103,14 @@ export function buildGoogleMapsDirectionsUrls(
   plan,
   { confirmedCoordinatePlaceIds = [] } = {}
 ) {
-  const { start, stops } = validatedPlan(plan, {
+  const { start, stops, end } = validatedPlan(plan, {
     confirmedCoordinatePlaceIds,
   })
   const nodes = [
     start,
     ...stops,
     ...(plan.endMode === "return-to-start" ? [start] : []),
+    ...(plan.endMode === "selected-end" ? [end] : []),
   ]
   const maximumNodesPerLeg = MAX_MAPS_WAYPOINTS_PER_LEG + 2
   const legs = []
@@ -159,7 +162,8 @@ export function buildAiPlanningPrompt(plan, { includeCoordinates = false } = {})
     !Array.isArray(plan.stops) ||
     plan.stops.length < 1 ||
     plan.stops.length > MAX_PLAN_DESTINATIONS ||
-    !["return-to-start", "last-stop"].includes(plan.endMode)
+    !["return-to-start", "last-stop", "selected-end"].includes(plan.endMode) ||
+    (plan.endMode === "selected-end") !== Boolean(plan.end)
   ) {
     throw new MyAtlasHandoffError("The saved plan is invalid.", "invalid_plan")
   }
@@ -170,7 +174,9 @@ export function buildAiPlanningPrompt(plan, { includeCoordinates = false } = {})
   const finish =
     plan.endMode === "return-to-start"
       ? `Return to ${start}.`
-      : `Finish at ${stops[stops.length - 1]}.`
+      : plan.endMode === "selected-end"
+        ? `Finish at ${readableLocation(plan.end, includeCoordinates)}.`
+        : `Finish at ${stops[stops.length - 1]}.`
   return [
     "Help me think through a practical driving trip using this chosen order.",
     `Start: ${start}.`,

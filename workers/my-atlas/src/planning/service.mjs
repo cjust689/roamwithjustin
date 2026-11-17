@@ -61,44 +61,123 @@ async function projectWishes(wishes, placeCatalog, environment) {
   return wishes.map(wish => projectWish(wish, recordsByPlaceId.get(wish.placeId)))
 }
 
-function planSnapshot(wish, catalogRevision) {
+function planSnapshot(place, catalogRevision) {
   return Object.freeze({
-    placeId: wish.placeId,
-    placeType: wish.placeType,
-    name: wish.name,
-    ...(wish.countryCode ? { countryCode: wish.countryCode } : {}),
-    ...(wish.admin1Name ? { admin1Name: wish.admin1Name } : {}),
-    ...(wish.countryName ? { countryName: wish.countryName } : {}),
-    ...(wish.spotCategory ? { spotCategory: wish.spotCategory } : {}),
-    ...(wish.spotKind ? { spotKind: wish.spotKind } : {}),
-    coordinates: Object.freeze([...wish.coordinates]),
-    routeReadiness: wish.routeReadiness,
-    ...(wish.placeType === "custom" ? {} : { catalogRevision }),
-    sourceWishId: wish.wishId,
+    placeId: place.placeId,
+    placeType: place.placeType,
+    name: place.name,
+    ...(place.countryCode ? { countryCode: place.countryCode } : {}),
+    ...(place.admin1Name ? { admin1Name: place.admin1Name } : {}),
+    ...(place.countryName ? { countryName: place.countryName } : {}),
+    ...(place.spotCategory ? { spotCategory: place.spotCategory } : {}),
+    ...(place.spotKind ? { spotKind: place.spotKind } : {}),
+    coordinates: Object.freeze([...place.coordinates]),
+    routeReadiness: place.routeReadiness,
+    ...(place.placeType === "custom" ? {} : { catalogRevision }),
+    ...(place.wishId ? { sourceWishId: place.wishId } : {}),
   })
 }
 
-async function snapshotsForPlan(owner, input, placeCatalog, environment) {
-  const uniqueWishIds = [...new Set([input.startWishId, ...input.stopWishIds])]
-  const result = expectedPlanningResult(
-    await owner.user.getOwnerWishesByIds({
-      identityDigest: owner.identityDigest,
-      wishIds: uniqueWishIds,
-    })
+async function customPlaceId(owner, customPlace) {
+  return `custom:${(
+    await sha256(
+      `${owner.userId}\u0000${customPlace.name}\u0000${customPlace.coordinates.join(",")}\u0000custom-place`
+    )
+  ).slice(0, 24)}`
+}
+
+function catalogResolverFor(catalog) {
+  if (typeof catalog.resolve === "function") {
+    return placeId => catalog.resolve(placeId)
+  }
+  return async placeId => (await catalog.resolveMany([placeId]))[0] || null
+}
+
+async function projectPlanLocation(
+  selection,
+  wishesById,
+  owner,
+  catalog,
+  environment
+) {
+  if (selection.wishId) {
+    const wish = wishesById.get(selection.wishId)
+    if (!wish) throw new AccountConflictError("wish_not_found")
+    return wish
+  }
+  if (selection.customPlace) {
+    const place = projectCustomPlace(
+      await customPlaceId(owner, selection.customPlace),
+      selection.customPlace
+    )
+    return Object.freeze({ ...place, routeReadiness: routeReadiness(place) })
+  }
+  const record = await assertCatalogPlace(
+    selection.placeId,
+    catalogResolverFor(catalog),
+    environment
   )
-  const projected = await projectWishes(result.wishes, placeCatalog, environment)
-  const byId = new Map(projected.map(wish => [wish.wishId, wish]))
+  const place = projectCatalogPlace(record)
+  return Object.freeze({ ...place, routeReadiness: routeReadiness(place) })
+}
+
+async function snapshotsForPlan(owner, input, placeCatalog, environment) {
+  const start = input.start || Object.freeze({ wishId: input.startWishId })
+  const end = input.end || null
+  const uniqueWishIds = [
+    ...new Set(
+      [start.wishId, ...input.stopWishIds, end?.wishId].filter(Boolean)
+    ),
+  ]
+  const result = uniqueWishIds.length
+    ? expectedPlanningResult(
+        await owner.user.getOwnerWishesByIds({
+          identityDigest: owner.identityDigest,
+          wishIds: uniqueWishIds,
+        })
+      )
+    : { wishes: [] }
+  const projectedWishes = await projectWishes(
+    result.wishes,
+    placeCatalog,
+    environment
+  )
+  const byId = new Map(projectedWishes.map(wish => [wish.wishId, wish]))
+  const needsDirectCatalog = Boolean(start.placeId || end?.placeId)
+  const catalog =
+    placeCatalog ||
+    (needsDirectCatalog ? new WorkerPlaceCatalog(environment) : null)
+  const projectedStart = await projectPlanLocation(
+    start,
+    byId,
+    owner,
+    catalog,
+    environment
+  )
+  const projectedEnd = end
+    ? await projectPlanLocation(end, byId, owner, catalog, environment)
+    : null
+  const projectedStops = input.stopWishIds.map(wishId => {
+    const wish = byId.get(wishId)
+    if (!wish) throw new AccountConflictError("wish_not_found")
+    return wish
+  })
+  const projected = [projectedStart, ...projectedStops]
+  if (projectedEnd) projected.push(projectedEnd)
   let catalogRevision = "custom-only"
-  if (projected.some(wish => wish.placeType !== "custom")) {
-    const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
-    const manifest = await catalog.manifest()
+  if (projected.some(place => place.placeType !== "custom")) {
+    const manifestCatalog = catalog || new WorkerPlaceCatalog(environment)
+    const manifest = await manifestCatalog.manifest()
     catalogRevision = manifest.catalogRevision
   }
   return Object.freeze({
-    start: planSnapshot(byId.get(input.startWishId), catalogRevision),
+    start: planSnapshot(projectedStart, catalogRevision),
     stops: Object.freeze(
-      input.stopWishIds.map(wishId => planSnapshot(byId.get(wishId), catalogRevision))
+      projectedStops.map(place => planSnapshot(place, catalogRevision))
     ),
+    ...(projectedEnd
+      ? { end: planSnapshot(projectedEnd, catalogRevision) }
+      : {}),
   })
 }
 
@@ -128,11 +207,7 @@ export async function createMyWish({
   const owner = await ownerContext(environment, identity)
   const customPlace = input.customPlace
   const placeId = customPlace
-    ? `custom:${(
-        await sha256(
-          `${owner.userId}\u0000${customPlace.name}\u0000${customPlace.coordinates.join(",")}\u0000custom-place`
-        )
-      ).slice(0, 24)}`
+    ? await customPlaceId(owner, customPlace)
     : input.placeId
   const place = customPlace
     ? projectCustomPlace(placeId, customPlace)

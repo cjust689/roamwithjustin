@@ -29,6 +29,7 @@ import {
   safeMyAtlasReturnPath,
 } from "../src/features/my-atlas/auth/session.mjs"
 import {
+  formatMyAtlasPlaceSearchError,
   MyAtlasPlaceSearchError,
   searchMyAtlasPlaces,
 } from "../src/features/my-atlas/catalog/placeSearchClient.mjs"
@@ -218,6 +219,17 @@ assert.match(authConfiguration.scope, /write:my-atlas/)
 assert.throws(
   () => getMyAtlasAuthConfiguration(authEnvironment, "http://example.com"),
   /requires HTTPS/
+)
+assert.equal(
+  formatMyAtlasPlaceSearchError(
+    new MyAtlasPlaceSearchError("limited", {
+      status: 429,
+      code: "rate_limited",
+      retryAfter: 45,
+      requestId: "search-request",
+    })
+  ),
+  "Search limit reached. Wait about 45 seconds, then retry. Reference: search-request."
 )
 assert.equal(
   buildAuth0ClientOptions(authConfiguration).authorizationParams.audience,

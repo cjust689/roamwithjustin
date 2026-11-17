@@ -7,7 +7,7 @@
     <div class="planner-heading">
       <div>
         <p>Private trip planning beta</p>
-        <h2 id="my-atlas-planner-title">Bucket list and one saved trip</h2>
+        <h2 id="my-atlas-planner-title">Plan future travel</h2>
       </div>
       <button
         type="button"
@@ -41,22 +41,79 @@
           </button>
         </div>
 
-        <div v-if="searchResults.length" class="planner-search-results">
-          <span>Save a result from the search above</span>
-          <button
-            v-for="place in searchResults"
-            :key="place.placeId"
-            type="button"
-            :disabled="pending || wishPlaceIds.has(place.placeId)"
-            @click="saveCatalogWish(place)"
-          >
-            {{ wishPlaceIds.has(place.placeId) ? "Saved" : "Save" }}
-            {{ place.name }}
-          </button>
+        <label class="planner-place-search">
+          <span>Find a country, city, or spot for this trip</span>
+          <input
+            v-model="wishQuery"
+            type="search"
+            autocomplete="off"
+            placeholder="Try Uvita, Yellowstone, or Eiffel Tower"
+            aria-describedby="planner-place-search-help"
+          />
+          <small id="planner-place-search-help">
+            Search the My Atlas catalog. Coordinates appear before you save a
+            destination.
+          </small>
+        </label>
+
+        <div
+          v-if="wishSearchPending"
+          class="planner-search-state"
+          role="status"
+        >
+          Searching My Atlas places
+        </div>
+        <div
+          v-else-if="wishSearchError"
+          class="planner-search-state is-error"
+          role="alert"
+        >
+          <span>{{ wishSearchError }}</span>
+          <button type="button" @click="retryWishSearch">Retry search</button>
+        </div>
+        <p
+          v-else-if="wishQuery.trim().length >= 2 && !wishSearchResults.length"
+          class="planner-search-state"
+          role="status"
+        >
+          No matching country, city, or spot in this catalog.
+        </p>
+        <div v-if="wishSearchResults.length" class="planner-search-results">
+          <span>My Atlas search results</span>
+          <ul>
+            <li v-for="place in wishSearchResults" :key="place.placeId">
+              <article>
+                <span class="planner-search-result-copy">
+                  <strong>{{ place.name }}</strong>
+                  <small>{{ locationContext(place) }}</small>
+                  <small>{{ coordinateLabel(place) }}</small>
+                </span>
+                <b>{{ placeTypeLabel(place) }}</b>
+                <div class="planner-search-actions">
+                  <button
+                    type="button"
+                    :disabled="pending || wishPlaceIds.has(place.placeId)"
+                    @click="saveCatalogWish(place)"
+                  >
+                    {{ wishPlaceIds.has(place.placeId) ? "Saved" : "Save" }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="usePlanLocation('start', place)"
+                  >
+                    Use as start
+                  </button>
+                  <button type="button" @click="usePlanLocation('end', place)">
+                    Use as finish
+                  </button>
+                </div>
+              </article>
+            </li>
+          </ul>
         </div>
 
         <details class="planner-custom">
-          <summary>Add your own coordinates</summary>
+          <summary>Can't find it? Add your own coordinates</summary>
           <div>
             <label>
               <span>Name</span>
@@ -82,9 +139,17 @@
                 step="0.000001"
               />
             </label>
-            <button type="button" :disabled="pending" @click="saveCustomWish">
-              Save private location
-            </button>
+            <div class="planner-custom-actions">
+              <button type="button" :disabled="pending" @click="saveCustomWish">
+                Save private location
+              </button>
+              <button type="button" @click="useCustomPlanLocation('start')">
+                Use as start
+              </button>
+              <button type="button" @click="useCustomPlanLocation('end')">
+                Use as finish
+              </button>
+            </div>
           </div>
           <p>
             You supply this name and position. Confirm road access before using
@@ -93,13 +158,14 @@
         </details>
 
         <p v-if="!wishes.length" class="planner-empty">
-          Search for a place above or save your own coordinates to begin.
+          Search My Atlas or save your own coordinates to begin.
         </p>
         <ul v-else class="planner-wishes">
           <li v-for="wish in wishes" :key="wish.wishId">
             <div>
               <strong>{{ wish.name }}</strong>
               <span>{{ locationContext(wish) }}</span>
+              <span>{{ coordinateLabel(wish) }}</span>
               <small>{{ routeReadinessLabel(wish) }}</small>
             </div>
             <label>
@@ -174,8 +240,8 @@
             <input v-model.trim="planForm.title" maxlength="80" type="text" />
           </label>
           <label>
-            <span>Start</span>
-            <select v-model="planForm.startWishId">
+            <span>Start from a saved destination</span>
+            <select v-model="planForm.startWishId" @change="selectSavedStart">
               <option value="" disabled>Choose a saved destination</option>
               <option
                 v-for="wish in wishes"
@@ -186,6 +252,15 @@
               </option>
             </select>
           </label>
+          <div v-if="planForm.startDirect" class="planner-direct-location">
+            <span>Direct start</span>
+            <strong>{{ planForm.startDirect.name }}</strong>
+            <small>{{ locationContext(planForm.startDirect) }}</small>
+            <small>{{ coordinateLabel(planForm.startDirect) }}</small>
+            <button type="button" @click="clearDirectLocation('start')">
+              Use a saved start instead
+            </button>
+          </div>
           <label>
             <span>Optional travel year</span>
             <input
@@ -201,8 +276,27 @@
             <select v-model="planForm.endMode">
               <option value="last-stop">Finish at last destination</option>
               <option value="return-to-start">Return to start</option>
+              <option value="selected-end">Finish at a selected place</option>
             </select>
           </label>
+          <div
+            v-if="planForm.endMode === 'selected-end'"
+            class="planner-direct-location"
+          >
+            <template v-if="planForm.endDirect">
+              <span>Selected finish</span>
+              <strong>{{ planForm.endDirect.name }}</strong>
+              <small>{{ locationContext(planForm.endDirect) }}</small>
+              <small>{{ coordinateLabel(planForm.endDirect) }}</small>
+              <button type="button" @click="clearDirectLocation('end')">
+                Choose a different finish
+              </button>
+            </template>
+            <p v-else>
+              Choose Use as finish from a My Atlas search result or enter custom
+              coordinates above.
+            </p>
+          </div>
           <label class="planner-note">
             <span>Private plan note</span>
             <input
@@ -364,6 +458,13 @@ import {
 } from "../api/client.mjs"
 import { getMyAtlasApiAccessToken, logoutFromMyAtlas } from "../auth/auth0"
 import {
+  formatMyAtlasPlaceSearchError,
+  searchMyAtlasPlaces,
+} from "../catalog/placeSearchClient.mjs"
+import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
+import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
+import placeCatalog from "../data/place-catalog.proof.json"
+import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
@@ -375,7 +476,6 @@ export default {
   props: {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
-    searchResults: { type: Array, default: () => [] },
   },
   emits: ["revision-change", "account-deleted"],
   data() {
@@ -388,6 +488,17 @@ export default {
       wishes: [],
       plan: null,
       wishDrafts: {},
+      wishQuery: "",
+      wishSearchResults: [],
+      wishSearchPending: false,
+      wishSearchTimer: null,
+      wishSearchRequest: 0,
+      wishSearchAbortController: null,
+      wishSearchError: "",
+      placeSearchEndpoint: getMyAtlasPlaceSearchEndpoint(
+        process.env,
+        window.location.origin
+      ),
       customName: "",
       customLongitude: "",
       customLatitude: "",
@@ -397,8 +508,10 @@ export default {
         desiredYear: "",
         note: "",
         startWishId: "",
+        startDirect: null,
         stopWishIds: [],
         endMode: "last-stop",
+        endDirect: null,
       },
       includePromptCoordinates: false,
       promptPreview: "",
@@ -421,6 +534,15 @@ export default {
     revision(value) {
       this.plannerRevision = value
     },
+    wishQuery(value) {
+      this.queueWishSearch(value)
+    },
+  },
+  // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
+  // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
+  beforeDestroy() {
+    window.clearTimeout(this.wishSearchTimer)
+    if (this.wishSearchAbortController) this.wishSearchAbortController.abort()
   },
   methods: {
     async toggleOpen() {
@@ -443,17 +565,37 @@ export default {
       })
     },
     syncPlanForm() {
-      if (!this.plan) return
+      if (!this.plan) {
+        this.planForm = {
+          title: "",
+          status: "saved",
+          desiredYear: "",
+          note: "",
+          startWishId: "",
+          startDirect: null,
+          stopWishIds: [],
+          endMode: "last-stop",
+          endDirect: null,
+        }
+        return
+      }
       this.planForm = {
         title: this.plan.title,
         status: this.plan.status,
         desiredYear: this.plan.desiredYear || "",
         note: this.plan.note || "",
         startWishId: this.plan.start.sourceWishId || "",
+        startDirect: this.plan.start.sourceWishId
+          ? null
+          : { ...this.plan.start },
         stopWishIds: this.plan.stops
           .map(stop => stop.sourceWishId)
           .filter(Boolean),
         endMode: this.plan.endMode,
+        endDirect:
+          this.plan.endMode === "selected-end" && this.plan.end
+            ? { ...this.plan.end }
+            : null,
       }
     },
     async loadPlanning() {
@@ -485,6 +627,44 @@ export default {
       }
       return "The private planner could not complete that request. Retry in a moment."
     },
+    queueWishSearch(value, delay = 350) {
+      window.clearTimeout(this.wishSearchTimer)
+      if (this.wishSearchAbortController) this.wishSearchAbortController.abort()
+      this.wishSearchResults = []
+      this.wishSearchError = ""
+      const request = ++this.wishSearchRequest
+      if (value.trim().length < 2) {
+        this.wishSearchPending = false
+        return
+      }
+      this.wishSearchPending = true
+      this.wishSearchTimer = window.setTimeout(async () => {
+        this.wishSearchAbortController = new AbortController()
+        try {
+          const results = await searchMyAtlasPlaces({
+            query: value,
+            catalog: placeCatalog,
+            endpoint: this.placeSearchEndpoint,
+            limit: 8,
+            signal: this.wishSearchAbortController.signal,
+          })
+          if (request !== this.wishSearchRequest) return
+          this.wishSearchResults = results
+        } catch (error) {
+          if (error.name === "AbortError" || request !== this.wishSearchRequest)
+            return
+          this.wishSearchError = this.placeSearchErrorMessage(error)
+        } finally {
+          if (request === this.wishSearchRequest) this.wishSearchPending = false
+        }
+      }, delay)
+    },
+    retryWishSearch() {
+      this.queueWishSearch(this.wishQuery, 0)
+    },
+    placeSearchErrorMessage(error) {
+      return formatMyAtlasPlaceSearchError(error)
+    },
     async mutate(action, success) {
       this.pending = true
       this.error = ""
@@ -511,7 +691,7 @@ export default {
         `${place.name} was added to your private bucket list.`
       )
     },
-    saveCustomWish() {
+    customPlanLocation() {
       const longitude = Number(this.customLongitude)
       const latitude = Number(this.customLatitude)
       if (
@@ -524,8 +704,18 @@ export default {
         latitude > 85.051129
       ) {
         this.error = "Enter a name and valid longitude and latitude."
-        return
+        return null
       }
+      return Object.freeze({
+        placeType: "custom",
+        name: this.customName,
+        coordinates: Object.freeze([longitude, latitude]),
+        routeReadiness: "user-coordinate-review",
+      })
+    },
+    saveCustomWish() {
+      const place = this.customPlanLocation()
+      if (!place) return
       return this.mutate(
         token =>
           createMyAtlasWish({
@@ -533,8 +723,8 @@ export default {
             accessToken: token,
             value: {
               customPlace: {
-                name: this.customName,
-                coordinates: [longitude, latitude],
+                name: place.name,
+                coordinates: [...place.coordinates],
               },
               priority: "normal",
             },
@@ -548,6 +738,45 @@ export default {
           this.customLatitude = ""
         }
       })
+    },
+    useCustomPlanLocation(role) {
+      const place = this.customPlanLocation()
+      if (place) this.usePlanLocation(role, place)
+    },
+    usePlanLocation(role, place) {
+      const location = {
+        ...place,
+        coordinates: [...place.coordinates],
+      }
+      if (role === "start") {
+        this.planForm.startWishId = ""
+        this.planForm.startDirect = location
+        this.announcement = `${place.name} will be used as the trip start.`
+      } else {
+        this.planForm.endMode = "selected-end"
+        this.planForm.endDirect = location
+        this.announcement = `${place.name} will be used as the trip finish.`
+      }
+      this.mapsLegs = []
+    },
+    clearDirectLocation(role) {
+      if (role === "start") this.planForm.startDirect = null
+      else this.planForm.endDirect = null
+      this.mapsLegs = []
+    },
+    selectSavedStart() {
+      this.planForm.startDirect = null
+      this.mapsLegs = []
+    },
+    planLocationInput(place) {
+      return place.placeType === "custom"
+        ? {
+            customPlace: {
+              name: place.name,
+              coordinates: [...place.coordinates],
+            },
+          }
+        : { placeId: place.placeId }
     },
     saveWish(wish) {
       const draft = this.wishDrafts[wish.wishId]
@@ -607,10 +836,17 @@ export default {
     savePlan() {
       if (
         !this.planForm.title ||
-        !this.planForm.startWishId ||
+        (!this.planForm.startWishId && !this.planForm.startDirect) ||
         !this.planForm.stopWishIds.length
       ) {
         this.error = "Choose a title, start, and at least one destination."
+        return
+      }
+      if (
+        this.planForm.endMode === "selected-end" &&
+        !this.planForm.endDirect
+      ) {
+        this.error = "Choose a finish from search or custom coordinates."
         return
       }
       const value = {
@@ -620,9 +856,14 @@ export default {
           ? Number(this.planForm.desiredYear)
           : null,
         note: this.planForm.note,
-        startWishId: this.planForm.startWishId,
+        start: this.planForm.startWishId
+          ? { wishId: this.planForm.startWishId }
+          : this.planLocationInput(this.planForm.startDirect),
         stopWishIds: this.planForm.stopWishIds,
         endMode: this.planForm.endMode,
+        ...(this.planForm.endMode === "selected-end"
+          ? { end: this.planLocationInput(this.planForm.endDirect) }
+          : {}),
       }
       return this.mutate(
         token =>
@@ -667,7 +908,10 @@ export default {
     prepareDirections() {
       try {
         const customIds = this.plan.stops
-          .concat([this.plan.start])
+          .concat([
+            this.plan.start,
+            ...(this.plan.endMode === "selected-end" ? [this.plan.end] : []),
+          ])
           .filter(
             location => location.routeReadiness === "user-coordinate-review"
           )
@@ -781,6 +1025,20 @@ export default {
         place.placeType
       )
     },
+    coordinateLabel(place) {
+      if (
+        !Array.isArray(place.coordinates) ||
+        place.coordinates.length !== 2 ||
+        !place.coordinates.every(Number.isFinite)
+      ) {
+        return "Coordinates unavailable"
+      }
+      const [longitude, latitude] = place.coordinates
+      return `Latitude ${latitude.toFixed(5)}, longitude ${longitude.toFixed(5)}`
+    },
+    placeTypeLabel(place) {
+      return formatPlaceTypeLabel(place)
+    },
     routeReadinessLabel(place) {
       const labels = {
         "route-ready": "Ready for a directions handoff",
@@ -802,14 +1060,17 @@ export default {
 <style scoped>
 .my-atlas-planner {
   display: grid;
-  gap: 0.8rem;
-  margin-top: 1.3rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.8rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.025);
 }
 .planner-content {
   display: grid;
   gap: 0.8rem;
+  padding: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 .planner-heading,
 .planner-block-heading,
@@ -818,6 +1079,10 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
+}
+.planner-heading {
+  min-height: 3.75rem;
+  padding: 0 0.8rem;
 }
 .planner-heading > div,
 .planner-block-heading > div {
@@ -902,15 +1167,78 @@ export default {
   color: #8fa29c;
   font-size: 0.6rem;
 }
-.planner-search-results {
+.planner-place-search small {
+  color: #8fa29c;
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+.planner-search-state {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin: 0;
+  color: #9aada7;
+  font-size: 0.64rem;
+}
+.planner-search-state.is-error {
+  color: #e6a8a1;
+}
+.planner-search-results {
+  display: grid;
+  gap: 0.45rem;
+}
+.planner-search-results > span {
+  color: #aabbb5;
+  font-size: 0.64rem;
+}
+.planner-search-results ul {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.planner-search-results article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+.planner-search-result-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+.planner-search-results strong {
+  color: #edf7f2;
+  font-size: 0.7rem;
+}
+.planner-search-results small {
+  color: #91a49e;
+  font-size: 0.56rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.planner-search-results b {
+  color: #d4b875;
+  font-size: 0.56rem;
+  white-space: nowrap;
+}
+.planner-search-actions,
+.planner-custom-actions {
+  display: flex;
+  grid-column: 1 / -1;
   flex-wrap: wrap;
   gap: 0.4rem;
 }
-.planner-search-results > span {
-  flex-basis: 100%;
-  color: #aabbb5;
-  font-size: 0.64rem;
+.planner-search-actions button,
+.planner-custom-actions button {
+  min-height: 2.35rem;
 }
 .planner-custom > div {
   display: grid;
@@ -919,7 +1247,7 @@ export default {
   margin-top: 0.6rem;
 }
 .planner-custom > div label:first-child,
-.planner-custom > div button {
+.planner-custom-actions {
   grid-column: 1 / -1;
 }
 .planner-custom summary {
@@ -951,8 +1279,12 @@ export default {
 .planner-wishes {
   display: grid;
   gap: 0.55rem;
+  max-height: min(52rem, 65vh);
   margin: 0;
-  padding: 0;
+  padding: 0 0.2rem 0 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(230, 186, 104, 0.4) transparent;
   list-style: none;
 }
 .planner-wishes li {
@@ -1006,11 +1338,44 @@ export default {
   color: #c9b0a1;
   font-size: 0.62rem;
 }
+.planner-direct-location {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.3);
+  border-radius: 0.7rem;
+  background: rgba(230, 186, 104, 0.055);
+}
+.planner-direct-location > span {
+  color: #e6ba68;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.56rem;
+  font-weight: 800;
+}
+.planner-direct-location strong {
+  color: #edf7f2;
+  font-size: 0.72rem;
+}
+.planner-direct-location small,
+.planner-direct-location p {
+  margin: 0;
+  color: #91a49e;
+  font-size: 0.58rem;
+  line-height: 1.45;
+}
+.planner-direct-location button {
+  justify-self: start;
+  margin-top: 0.3rem;
+}
 .planner-block fieldset {
   display: grid;
   gap: 0.35rem;
+  max-height: min(36rem, 52vh);
   margin: 0;
   padding: 0.65rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.7rem;
 }
@@ -1031,8 +1396,11 @@ export default {
 .planner-stop-order {
   display: grid;
   gap: 0.35rem;
+  max-height: min(32rem, 48vh);
   margin: 0;
   padding-left: 1.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .planner-stop-order li {
   display: grid;
@@ -1130,7 +1498,7 @@ export default {
     grid-template-columns: 1fr;
   }
   .planner-custom > div label:first-child,
-  .planner-custom > div button {
+  .planner-custom-actions {
     grid-column: 1;
   }
 }

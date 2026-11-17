@@ -14,7 +14,11 @@ export const WISH_ID_PATTERN = /^wish_[a-f0-9]{24}$/
 export const PLAN_ID_PATTERN = /^plan_[a-f0-9]{24}$/
 export const WISH_PRIORITIES = Object.freeze(["low", "normal", "high"])
 export const PLAN_STATUSES = Object.freeze(["draft", "saved", "archived"])
-export const PLAN_END_MODES = Object.freeze(["return-to-start", "last-stop"])
+export const PLAN_END_MODES = Object.freeze([
+  "return-to-start",
+  "last-stop",
+  "selected-end",
+])
 
 function cleanString(value) {
   return typeof value === "string" ? value.trim() : ""
@@ -167,6 +171,33 @@ export function normalizeWishQuery(url) {
   return Object.freeze({ limit, cursor })
 }
 
+function normalizePlanLocation(value, name) {
+  assertObject(
+    value,
+    new Set(["wishId", "placeId", "customPlace"]),
+    name
+  )
+  const supplied = ["wishId", "placeId", "customPlace"].filter(
+    key => value[key] !== undefined
+  )
+  if (supplied.length !== 1) {
+    throw new RegistrationValidationError(
+      `${name} must use one saved, catalog, or custom location.`
+    )
+  }
+  if (value.wishId !== undefined) {
+    return Object.freeze({ wishId: normalizeWishId(value.wishId) })
+  }
+  if (value.placeId !== undefined) {
+    return Object.freeze({ placeId: normalizePlaceId(value.placeId) })
+  }
+  const customPlace = normalizeCustomPlace(value.customPlace)
+  if (!customPlace) {
+    throw new RegistrationValidationError(`${name} custom place is invalid.`)
+  }
+  return Object.freeze({ customPlace })
+}
+
 function normalizePlanBody(value, headers, currentYear) {
   assertObject(
     value,
@@ -176,8 +207,10 @@ function normalizePlanBody(value, headers, currentYear) {
       "desiredYear",
       "note",
       "startWishId",
+      "start",
       "stopWishIds",
       "endMode",
+      "end",
     ]),
     "Trip plan"
   )
@@ -189,7 +222,15 @@ function normalizePlanBody(value, headers, currentYear) {
   if (!PLAN_STATUSES.includes(status)) {
     throw new RegistrationValidationError("Plan status is invalid.")
   }
-  const startWishId = normalizeWishId(value.startWishId)
+  if (value.startWishId !== undefined && value.start !== undefined) {
+    throw new RegistrationValidationError(
+      "Supply one saved or direct plan start."
+    )
+  }
+  const start =
+    value.start !== undefined
+      ? normalizePlanLocation(value.start, "Plan start")
+      : Object.freeze({ wishId: normalizeWishId(value.startWishId) })
   if (
     !Array.isArray(value.stopWishIds) ||
     value.stopWishIds.length < 1 ||
@@ -207,14 +248,24 @@ function normalizePlanBody(value, headers, currentYear) {
   if (!PLAN_END_MODES.includes(endMode)) {
     throw new RegistrationValidationError("Plan end mode is invalid.")
   }
+  const end =
+    value.end === undefined
+      ? null
+      : normalizePlanLocation(value.end, "Plan finish")
+  if ((endMode === "selected-end") !== Boolean(end)) {
+    throw new RegistrationValidationError(
+      "A selected plan finish is required only for the selected finish mode."
+    )
+  }
   return Object.freeze({
     title,
     status,
     desiredYear: normalizeDesiredYear(value.desiredYear, currentYear),
     note: normalizedShortText(value.note, "Plan note"),
-    startWishId,
+    start,
     stopWishIds: Object.freeze(stopWishIds),
     endMode,
+    ...(end ? { end } : {}),
     ...mutationHeaders(headers),
   })
 }
