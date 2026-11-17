@@ -78,7 +78,9 @@ real invitation code or beta identity is tracked in the repository.
 
 Account mutations use a strong profile-revision ETag, `If-Match`, and an
 identity-qualified idempotency key. Pin create and place replacement also
-require an authoritative nondeprecated catalog match with usable coordinates.
+require an authoritative nondeprecated country, city, or curated spot catalog
+match with usable coordinates. Spots use the same caller-derived per-user
+Durable Object and do not add a user-addressed mutation route.
 `npm run my-atlas:catalog:worker` converts the ignored full catalog into
 immutable gzip resolution and search shards plus `catalog/current.json`. The
 staging bucket contains the active `geonames-2026-11-16` release, and live

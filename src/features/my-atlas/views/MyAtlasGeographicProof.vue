@@ -24,7 +24,8 @@
         <p>My Atlas by RoamWithJustin.com</p>
         <h1 id="my-atlas-title">Mark the places that shaped your travels.</h1>
         <p class="my-atlas-intro-copy">
-          Search countries and cities, then place them on your map.
+          Search countries, cities, national parks, and iconic spots, then place
+          them on your map.
           <template v-if="accountProfile">
             Your changes are saved to your private beta account.
           </template>
@@ -57,8 +58,8 @@
             <span>Continents</span>
           </div>
           <div>
-            <strong>{{ visibleStats.capitals }}</strong>
-            <span>Capitals</span>
+            <strong>{{ visibleStats.spots || visibleStats.capitals }}</strong>
+            <span>{{ visibleStats.spots ? "Spots" : "Capitals" }}</span>
           </div>
         </div>
 
@@ -204,13 +205,13 @@
       />
 
       <label class="my-atlas-search">
-        <span>Find a country or city</span>
+        <span>Find a country, city, or spot</span>
         <input
           ref="searchInput"
           v-model="query"
           type="search"
           autocomplete="off"
-          placeholder="Try Uvita or Paris"
+          placeholder="Try Uvita, Yellowstone, or Eiffel Tower"
           aria-describedby="my-atlas-search-help"
         />
         <small id="my-atlas-search-help">
@@ -245,7 +246,7 @@
         class="my-atlas-search-state"
         role="status"
       >
-        No matching country or city in this proof catalog.
+        No matching country, city, or spot in this catalog.
       </div>
       <ul v-if="searchResults.length" class="my-atlas-results">
         <li v-for="place in searchResults" :key="place.placeId">
@@ -256,7 +257,7 @@
           >
             <span>{{ place.name }}</span>
             <small>{{ placeLabel(place) }}</small>
-            <b>{{ place.placeType }}</b>
+            <b>{{ placeTypeLabel(place) }}</b>
           </button>
         </li>
       </ul>
@@ -376,6 +377,7 @@ import {
   placesThroughTimelineStep,
 } from "../catalog/atlasInsights.mjs"
 import { formatPlaceLabel, resolveCatalogPlace } from "../catalog/search.mjs"
+import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
 import { addDraftPin, removeDraftPin } from "../catalog/pinDraft.mjs"
 import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
 import {
@@ -992,6 +994,7 @@ export default {
       this.announcement = "Your Instagram Story image was created."
     },
     formatVisitedDates,
+    placeTypeLabel: formatPlaceTypeLabel,
     async toggleSharing() {
       this.accountPending = true
       this.accountError = ""

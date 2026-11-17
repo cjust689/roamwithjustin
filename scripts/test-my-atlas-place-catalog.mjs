@@ -50,6 +50,7 @@ const options = {
   sourceDirectory: fixture,
   revision: "fixture-2026-11-16",
   sourceSnapshotDate: "2026-11-16",
+  spotSourceFile: path.join(fixture, "spots.json"),
 }
 
 function directoryBucket(directory) {
@@ -207,8 +208,9 @@ assert.deepEqual(
 )
 assert.equal(first.stats.countries, 3)
 assert.equal(first.stats.cities, 5)
+assert.equal(first.stats.spots, 2)
 assert.equal(resolveCatalogPlace(first, "iso-country:AN"), null)
-assert.equal(first.sources.length, 3)
+assert.equal(first.sources.length, 4)
 assert.ok(first.sources.every(source => /^[a-f0-9]{64}$/.test(source.sha256)))
 
 const workerArtifactRoot = fs.mkdtempSync(
@@ -268,6 +270,14 @@ assert.equal(
   (await fixtureWorkerCatalog.search("Costa Rica")).results[0].placeId,
   "iso-country:CR"
 )
+assert.equal(
+  (await fixtureWorkerCatalog.search("Yellowstone")).results[0].placeId,
+  "geonames:5843642"
+)
+assert.equal(
+  (await fixtureWorkerCatalog.search("Eiffel Tower")).results[0].placeId,
+  "geonames:6254976"
+)
 await assert.rejects(() => fixtureWorkerCatalog.search("x"), /between 2 and 80/)
 assert.throws(
   () =>
@@ -315,6 +325,12 @@ assert.equal(
   "iso-country:CR"
 )
 assert.ok(resolveCatalogPlace(first, "iso-country:CR").coordinates)
+const yellowstone = searchPlaceCatalog(first, "Yellowstone National Park")[0]
+assert.equal(yellowstone.placeType, "spot")
+assert.equal(yellowstone.spotCategory, "national-park")
+assert.equal(yellowstone.spotKind, "National park")
+assert.deepEqual(yellowstone.coordinates, [-110.58846, 44.42796])
+assert.equal(searchPlaceCatalog(first, "Eiffel Tower")[0].name, "Eiffel Tower")
 
 const aliasCollisionCatalog = {
   records: [
@@ -356,6 +372,8 @@ assert.throws(
 )
 pins = removeDraftPin(pins, "geonames:3621138")
 assert.deepEqual(pins, [])
+pins = addDraftPin([], "geonames:5843642", first)
+assert.deepEqual(pins, [{ placeId: "geonames:5843642" }])
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "my-atlas-catalog-"))
 const nextSource = path.join(tempRoot, "next")

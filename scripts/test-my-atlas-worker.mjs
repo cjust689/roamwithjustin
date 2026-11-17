@@ -147,6 +147,17 @@ async function readJson(response) {
           coordinates: [-83.7395, 9.17039],
           visitedYears: [2024],
         },
+        {
+          placeId: "geonames:5843642",
+          placeType: "spot",
+          name: "Yellowstone National Park",
+          spotCategory: "national-park",
+          spotKind: "National park",
+          countryCode: "US",
+          countryName: "United States",
+          coordinates: [-110.58846, 44.42796],
+          visitedYears: [2025],
+        },
       ],
     },
     catalog: {
@@ -1141,6 +1152,17 @@ await assert.rejects(
           coordinates: [-83.7395, 9.17039],
           visitedYears: [2024],
         },
+        {
+          placeId: "geonames:5843642",
+          placeType: "spot",
+          name: "Yellowstone National Park",
+          spotCategory: "national-park",
+          spotKind: "National park",
+          countryCode: "US",
+          countryName: "United States",
+          coordinates: [-110.58846, 44.42796],
+          visitedYears: [2025],
+        },
       ],
     },
     catalog: {
@@ -1165,6 +1187,7 @@ await assert.rejects(
     "https://api.example.com/v1/public/atlases/justin-travels"
   )
   assert.equal(atlas.places[0].name, "Uvita")
+  assert.equal(atlas.places[1].spotKind, "National park")
 }
 
 {
@@ -1402,6 +1425,7 @@ assert.equal(
   assert.deepEqual(atlasStats(places), {
     places: 3,
     cities: 2,
+    spots: 0,
     countries: 3,
     continents: 2,
     capitals: 1,
@@ -1410,6 +1434,21 @@ assert.equal(
     latestYear: 2026,
     spanMiles: atlasStats(places).spanMiles,
   })
+  assert.equal(
+    atlasStats([
+      ...places,
+      {
+        placeId: "geonames:5843642",
+        placeType: "spot",
+        name: "Yellowstone National Park",
+        countryCode: "US",
+        continent: "NA",
+        coordinates: [-110.58846, 44.42796],
+        visitedDates: [{ year: 2025 }],
+      },
+    ]).spots,
+    1
+  )
   assert.equal(placesForYear(places, "2024")[0].name, "Uvita")
   assert.equal(formatVisitedDate({ year: 2024, month: 3 }), "2024")
   assert.equal(placesForYear(places, "undated")[0].name, "United States")
