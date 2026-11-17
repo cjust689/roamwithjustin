@@ -77,6 +77,9 @@ verification:
     - Headless Chrome at 390 pixels verified custom-name entry, map click placement, a draggable rendered marker, transition to the shared visit editor, and zero horizontal overflow
     - Map-memory contract tests passed selected-pin, show-all, and empty-memory visibility boundaries
     - Headless Chrome verified full selected-pin memory callouts and the optional all-memory map layer at desktop and 390 pixel mobile widths
+    - Pull requests 95 and 96 passed validation runs 44042472207 and 44042988296, and develop validation run 44042753182 passed
+    - Pages workflow 44043262797 deployed main merge 2dc4133eb63f98c702dd3cd0b6951952853006f8
+    - Live My Atlas JavaScript and CSS chunks returned 200 and contained the map-memory controls, memory-callout sizing, and compact public mobile identity grid
     - Pull requests 87 and 88 passed required validation runs 44024490207 and 44025014014, then merged through develop and main as 0a5e7a4 and c54ea44
     - Develop validation run 44024742154 and Pages deployment 44025229521 succeeded
     - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health after the custom-pin contract deployed
