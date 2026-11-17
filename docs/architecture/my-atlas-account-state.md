@@ -55,6 +55,9 @@ verification:
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
+    - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
+    - Pull request 114 passed production validation run 44158190178 and merged to main as d6af82bddfaf8bb4e0f4ac61caeade6697c46982
+    - Pages run 44158579421 deployed the typography cleanup, and a live audit found Poppins plus zero Russo One matches across 32 discoverable content-addressed CSS and JavaScript assets
     - Protected pull requests 105 and 106 plus Pages run 44144353792 deployed the planner search, direct endpoint, and collapsible owner-flow release; live chunk 216.0c437c4d.js contained all release markers together
     - Workers-runtime planning tests verified private wishlist isolation, immutable wishlist/direct plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
