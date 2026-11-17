@@ -299,6 +299,59 @@ describe("private wishlist and trip planning", () => {
     expect(JSON.stringify(publicState)).not.toContain("Moab")
   })
 
+  it("keeps an unresolved catalog wish removable without accepting it into a plan", async () => {
+    const moab = await createWish(
+      "geonames:5601615",
+      1,
+      "53535353-5454-4555-8565-575757575757"
+    )
+    const unavailableCatalog = {
+      async resolveMany(placeIds) {
+        return placeIds.map(() => null)
+      },
+      async manifest() {
+        return { catalogRevision: "fixture-missing-record" }
+      },
+    }
+
+    const list = await listMyWishes({
+      environment: environment(),
+      identity: IDENTITY,
+      input: { limit: 50, cursor: "" },
+      placeCatalog: unavailableCatalog,
+    })
+    expect(list.wishes).toEqual([
+      expect.objectContaining({
+        wishId: moab.wish.wishId,
+        placeId: "geonames:5601615",
+        placeType: "unavailable",
+        name: "Saved destination unavailable",
+        unavailable: true,
+        routeReadiness: "unavailable",
+      }),
+    ])
+
+    await expect(
+      createMyPlan({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          title: "Unavailable route",
+          status: "saved",
+          desiredYear: 2027,
+          note: "",
+          startWishId: moab.wish.wishId,
+          stopWishIds: [moab.wish.wishId],
+          endMode: "last-stop",
+          expectedRevision: 2,
+          idempotencyKey: "54545454-5555-4666-8777-585858585858",
+        },
+        placeCatalog: unavailableCatalog,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "place_unavailable" })
+  })
+
   it("never projects wishlist or plan data through a published visited Atlas", async () => {
     await createMyPin({
       environment: environment(),

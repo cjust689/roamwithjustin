@@ -30,8 +30,29 @@ function routeReadiness(place) {
   return "needs-entrance-selection"
 }
 
-function projectWish(wish, record) {
-  const place = CUSTOM_PLACE_ID_PATTERN.test(wish.placeId)
+function unavailableCatalogWish(wish) {
+  return Object.freeze({
+    wishId: wish.wishId,
+    placeId: wish.placeId,
+    placeType: "unavailable",
+    name: "Saved destination unavailable",
+    unavailable: true,
+    note: wish.note,
+    priority: wish.priority,
+    desiredYear: wish.desiredYear,
+    routeReadiness: "unavailable",
+    createdAt: wish.createdAt,
+    updatedAt: wish.updatedAt,
+  })
+}
+
+function projectWish(wish, record, { allowUnavailable = false } = {}) {
+  const custom = CUSTOM_PLACE_ID_PATTERN.test(wish.placeId)
+  if (!custom && !record) {
+    if (allowUnavailable) return unavailableCatalogWish(wish)
+    throw new AccountConflictError("place_unavailable")
+  }
+  const place = custom
     ? projectCustomPlace(wish.placeId, wish.customPlace)
     : projectCatalogPlace(record)
   return Object.freeze({
@@ -46,7 +67,12 @@ function projectWish(wish, record) {
   })
 }
 
-async function projectWishes(wishes, placeCatalog, environment) {
+async function projectWishes(
+  wishes,
+  placeCatalog,
+  environment,
+  { allowUnavailable = false } = {}
+) {
   const catalogWishes = wishes.filter(
     wish => !CUSTOM_PLACE_ID_PATTERN.test(wish.placeId)
   )
@@ -58,7 +84,11 @@ async function projectWishes(wishes, placeCatalog, environment) {
   const recordsByPlaceId = new Map(
     catalogWishes.map((wish, index) => [wish.placeId, records[index]])
   )
-  return wishes.map(wish => projectWish(wish, recordsByPlaceId.get(wish.placeId)))
+  return wishes.map(wish =>
+    projectWish(wish, recordsByPlaceId.get(wish.placeId), {
+      allowUnavailable,
+    })
+  )
 }
 
 function planSnapshot(place, catalogRevision) {
@@ -189,7 +219,9 @@ export async function listMyWishes({ environment, identity, input, placeCatalog 
       ...input,
     })
   )
-  const wishes = await projectWishes(result.wishes, placeCatalog, environment)
+  const wishes = await projectWishes(result.wishes, placeCatalog, environment, {
+    allowUnavailable: true,
+  })
   return Object.freeze({
     profile: publicProfile(result.profile),
     wishes: Object.freeze(wishes),

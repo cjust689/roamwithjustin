@@ -4,20 +4,19 @@
     aria-labelledby="my-atlas-planner-title"
     :aria-busy="String(pending)"
   >
-    <div class="planner-heading">
-      <div>
-        <p>Private trip planning beta</p>
-        <h2 id="my-atlas-planner-title">Plan future travel</h2>
-      </div>
-      <button
-        type="button"
-        aria-controls="my-atlas-planner-content"
-        :aria-expanded="String(open)"
-        @click="toggleOpen"
-      >
-        {{ open ? "Hide" : "Plan a trip" }}
-      </button>
-    </div>
+    <button
+      type="button"
+      class="planner-heading"
+      aria-controls="my-atlas-planner-content"
+      :aria-expanded="String(open)"
+      @click="toggleOpen"
+    >
+      <span>
+        <small>Private trip planning beta</small>
+        <strong id="my-atlas-planner-title">Plan future travel</strong>
+      </span>
+      <b>{{ open ? "Hide" : "Plan a trip" }}</b>
+    </button>
 
     <div v-if="open" id="my-atlas-planner-content" class="planner-content">
       <p class="planner-disclosure">
@@ -247,8 +246,9 @@
                 v-for="wish in wishes"
                 :key="wish.wishId"
                 :value="wish.wishId"
+                :disabled="wish.unavailable"
               >
-                {{ wish.name }}
+                {{ wishSelectionLabel(wish) }}
               </option>
             </select>
           </label>
@@ -314,12 +314,13 @@
                 type="checkbox"
                 :checked="planForm.stopWishIds.includes(wish.wishId)"
                 :disabled="
-                  !planForm.stopWishIds.includes(wish.wishId) &&
-                  planForm.stopWishIds.length >= maxPlanDestinations
+                  wish.unavailable ||
+                  (!planForm.stopWishIds.includes(wish.wishId) &&
+                    planForm.stopWishIds.length >= maxPlanDestinations)
                 "
                 @change="togglePlanStop(wish.wishId)"
               />
-              <span>{{ wish.name }}</span>
+              <span>{{ wishSelectionLabel(wish) }}</span>
             </label>
           </fieldset>
           <ol class="planner-stop-order">
@@ -619,13 +620,31 @@ export default {
       }
     },
     errorMessage(error) {
+      const reference = error?.requestId
+        ? ` Reference: ${error.requestId}.`
+        : ""
       if (error?.code === "revision_conflict") {
-        return "Your Atlas changed in another request. Refresh the planner and retry."
+        return `Your Atlas changed in another request. Refresh the planner and retry.${reference}`
       }
       if (error?.code === "account_conflict") {
-        return "This change conflicts with saved planner data. Refresh and retry."
+        return `This change conflicts with saved planner data. Refresh and retry.${reference}`
       }
-      return "The private planner could not complete that request. Retry in a moment."
+      if (error?.code === "catalog_unavailable") {
+        return `The destination catalog is temporarily unavailable. Retry in a moment.${reference}`
+      }
+      if (
+        error?.code === "account_service_unavailable" ||
+        error?.code === "unavailable"
+      ) {
+        return `Your private planner is temporarily unavailable. Retry in a moment.${reference}`
+      }
+      if (error?.code === "rate_limited") {
+        return `The planner is receiving too many requests. Wait a moment, then retry.${reference}`
+      }
+      if (error?.code === "unauthorized") {
+        return `Your My Atlas session needs to be renewed. Sign out, then sign in again.${reference}`
+      }
+      return `The private planner could not complete that request. Retry in a moment.${reference}`
     },
     queueWishSearch(value, delay = 350) {
       window.clearTimeout(this.wishSearchTimer)
@@ -1020,6 +1039,7 @@ export default {
       }
     },
     locationContext(place) {
+      if (place.unavailable) return "Catalog entry unavailable"
       return (
         [place.admin1Name, place.countryName].filter(Boolean).join(", ") ||
         place.placeType
@@ -1045,8 +1065,14 @@ export default {
         "needs-entrance-selection":
           "Choose a useful entrance before directions",
         "user-coordinate-review": "Confirm your coordinates before directions",
+        unavailable: "Remove this entry and add the destination again",
       }
       return labels[place.routeReadiness] || "Review before directions"
+    },
+    wishSelectionLabel(wish) {
+      return wish.unavailable
+        ? `${wish.name} (remove and add again)`
+        : wish.name
     },
     formatDeadline(value) {
       return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
@@ -1081,17 +1107,26 @@ export default {
   gap: 0.6rem;
 }
 .planner-heading {
+  box-sizing: border-box;
+  width: 100%;
   min-height: 3.75rem;
-  padding: 0 0.8rem;
+  padding: 0.72rem 0.8rem;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
 }
-.planner-heading > div,
+.planner-heading > span,
 .planner-block-heading > div {
   display: grid;
   gap: 0.15rem;
+  min-width: 0;
 }
-.planner-heading p,
+.planner-heading small,
 .planner-block-heading p,
-.planner-heading h2,
+.planner-heading strong,
 .planner-disclosure,
 .planner-status,
 .planner-error,
@@ -1102,7 +1137,7 @@ export default {
 .planner-delete-account p {
   margin: 0;
 }
-.planner-heading p,
+.planner-heading small,
 .planner-block-heading p {
   color: #e6ba68;
   text-transform: uppercase;
@@ -1110,11 +1145,28 @@ export default {
   font-size: 0.62rem;
   font-weight: 800;
 }
-.planner-heading h2 {
+.planner-heading strong {
   color: #edf7f2;
-  font-size: 0.9rem;
+  font-size: 0.74rem;
 }
-.planner-heading button,
+.planner-heading b {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(230, 186, 104, 0.34);
+  border-radius: 999px;
+  color: #efc975;
+  background: rgba(230, 186, 104, 0.07);
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+.planner-heading:hover,
+.planner-heading:focus-visible {
+  background: rgba(230, 186, 104, 0.055);
+  outline: none;
+}
+.planner-heading:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(230, 186, 104, 0.55);
+}
 .planner-block button,
 .planner-delete-account button {
   min-height: 2.75rem;
@@ -1470,7 +1522,6 @@ export default {
   cursor: not-allowed;
   opacity: 0.45;
 }
-.planner-heading button:focus-visible,
 .planner-block button:focus-visible,
 .planner-delete-account button:focus-visible,
 .planner-export:focus-visible,
@@ -1487,12 +1538,6 @@ export default {
   clip: rect(0, 0, 0, 0);
 }
 @media (max-width: 480px) {
-  .planner-heading {
-    align-items: start;
-  }
-  .planner-heading button {
-    flex: 0 0 auto;
-  }
   .planner-wishes li,
   .planner-custom > div {
     grid-template-columns: 1fr;

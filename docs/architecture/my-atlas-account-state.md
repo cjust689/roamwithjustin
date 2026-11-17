@@ -242,6 +242,13 @@ place ID or existing normalized custom-place shape, optional normalized note,
 priority, optional desired year, and timestamps. The beta ceiling is 250, and
 list responses page at no more than 100 records.
 
+Wishlist reads re-resolve canonical IDs for current display details. If one
+stored ID is absent from the active catalog, the owner still receives that
+private record as an explicitly unavailable destination with its editable
+planning metadata. This keeps the record removable instead of failing the
+whole planner. Unavailable records cannot be selected for a new or replaced
+plan, so an unresolved place never becomes a route snapshot.
+
 The planner owns an independent country, city, and reviewed-spot search control
 that calls the same public My Atlas catalog endpoint as visited-place search.
 Selecting a result can create a wishlist record from its canonical `placeId`,
@@ -450,6 +457,12 @@ latitude and longitude, and saves the canonical result into the private
 wishlist. Saved wishlist cards repeat those coordinates so the owner can review
 the plan input before using external directions. Custom coordinates remain
 available through a secondary fallback disclosure.
+
+The planner disclosure header uses the same full-width control geometry as the
+other owner workflow sections. Its closed and open states retain the shared
+vertical padding, centered alignment, and compact status pill at desktop and
+phone widths. Planner failures preserve the Worker request ID in owner-facing
+recovery copy when one is available.
 
 An active account also sees `Can't find it? Add a custom pin` directly below
 search. The form can seed its name from the current query, requires a valid
