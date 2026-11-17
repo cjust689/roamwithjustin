@@ -48,41 +48,57 @@
           </div>
         </div>
 
-        <div class="my-atlas-view-controls">
-          <label>
-            <span>Show</span>
-            <select v-model="yearFilter" @change="resetTimeline">
-              <option value="all">Every destination</option>
-              <option v-for="year in years" :key="year" :value="String(year)">
-                {{ year }}
-              </option>
-              <option v-if="atlasStats.undated" value="undated">
-                Date open
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            :disabled="!years.length"
-            @click="toggleTimeline"
-          >
-            {{ timelineButtonLabel }}
-          </button>
-          <button type="button" @click="showConnections = !showConnections">
-            {{ showConnections ? "Hide paths" : "Show paths" }}
-          </button>
+        <button
+          type="button"
+          class="my-atlas-mobile-controls-toggle"
+          :aria-expanded="String(mobileControlsOpen)"
+          aria-controls="my-atlas-map-controls"
+          @click="mobileControlsOpen = !mobileControlsOpen"
+        >
+          <span>Map controls</span>
+          <strong>{{ mobileControlsOpen ? "Hide" : "Show" }}</strong>
+        </button>
+        <div
+          id="my-atlas-map-controls"
+          class="my-atlas-controls-drawer"
+          :class="{ 'is-open': mobileControlsOpen }"
+        >
+          <div class="my-atlas-view-controls">
+            <label>
+              <span>Show</span>
+              <select v-model="yearFilter" @change="resetTimeline">
+                <option value="all">Every destination</option>
+                <option v-for="year in years" :key="year" :value="String(year)">
+                  {{ year }}
+                </option>
+                <option v-if="atlasStats.undated" value="undated">
+                  Date open
+                </option>
+              </select>
+            </label>
+            <button
+              type="button"
+              :disabled="!years.length"
+              @click="toggleTimeline"
+            >
+              {{ timelineButtonLabel }}
+            </button>
+            <button type="button" @click="showConnections = !showConnections">
+              {{ showConnections ? "Hide paths" : "Show paths" }}
+            </button>
+          </div>
+          <p v-if="timelineEntry" class="my-atlas-timeline-year">
+            <strong>{{ timelineEntry.place.name }}</strong>
+            <span>
+              {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
+              {{ timelineSequence.length }}
+            </span>
+          </p>
+          <p class="my-atlas-connections-note">
+            Playback follows visit years. Hops within a year are a visual
+            sequence, not a recorded travel route.
+          </p>
         </div>
-        <p v-if="timelineEntry" class="my-atlas-timeline-year">
-          <strong>{{ timelineEntry.place.name }}</strong>
-          <span>
-            {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
-            {{ timelineSequence.length }}
-          </span>
-        </p>
-        <p class="my-atlas-connections-note">
-          Playback follows visit years. Hops within a year are a visual
-          sequence, not a recorded travel route.
-        </p>
 
         <div v-if="selectedPlace" class="my-atlas-selected">
           <button
@@ -389,6 +405,7 @@ export default {
       timelinePlaying: false,
       timelineTimer: null,
       showConnections: true,
+      mobileControlsOpen: false,
       announcement: "",
       auth: myAtlasAuthState,
       apiAccessVerified: false,
@@ -1026,6 +1043,15 @@ export default {
   gap: 0.45rem;
 }
 
+.my-atlas-controls-drawer {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.my-atlas-mobile-controls-toggle {
+  display: none;
+}
+
 .my-atlas-view-controls label {
   display: grid;
   flex: 1 1 10rem;
@@ -1049,6 +1075,7 @@ export default {
 }
 
 .my-atlas-view-controls select {
+  display: block;
   color: #edf7f2;
   background: #111f22;
 }
@@ -1450,6 +1477,64 @@ export default {
     border-left: 0;
     border-radius: 1.5rem 1.5rem 0 0;
     background: #0a1416;
+  }
+
+  .my-atlas-intro {
+    margin: 1.2rem 0 1rem;
+  }
+
+  .my-atlas-overview {
+    gap: 0.65rem;
+    padding: 0.75rem;
+  }
+
+  .my-atlas-mobile-controls-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid rgba(230, 186, 104, 0.32);
+    border-radius: 0.75rem;
+    color: #edf7f2;
+    background: rgba(230, 186, 104, 0.07);
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .my-atlas-mobile-controls-toggle strong {
+    color: #e6ba68;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.56rem;
+  }
+
+  .my-atlas-controls-drawer {
+    display: none;
+    padding: 0.1rem 0.1rem 0;
+  }
+
+  .my-atlas-controls-drawer.is-open {
+    display: grid;
+  }
+
+  .my-atlas-view-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-atlas-view-controls label {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .my-atlas-view-controls select {
+    width: 100%;
+  }
+
+  .my-atlas-view-controls button {
+    width: 100%;
   }
 
   .my-atlas-selected {
