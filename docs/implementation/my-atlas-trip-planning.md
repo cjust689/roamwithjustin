@@ -42,6 +42,10 @@ verification:
     - Thirty-one Workers-runtime tests verified wishlist isolation, duplicate rejection, global revision conflicts, immutable wishlist and direct endpoint snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
     - Client utility tests verified ordered segmented Google Maps output with no more than three intermediary waypoints per leg, direct selected finishes, custom-coordinate confirmation, the 2,048-character guard, the 50-destination defensive ceiling, and coordinates omitted from AI prompts by default
     - Catalog client tests verified canonical search-result coordinates and the shared rate-limit error presentation used by visited and planner search
+    - Thirty-two Workers-runtime tests verified that an unresolved canonical wish remains visible and removable while plan snapshot creation rejects it
+    - npm run lint and npm run build passed after the planner disclosure spacing and request-reference recovery changes
+    - Local Chromium component-state measurements at 1,264 and 390 CSS pixels verified that the planner disclosure exactly matches the neighboring Add destination header width, height, vertical padding, centered alignment, and zero viewport overflow
+    - Staging Worker version cfd6a48b-03fe-43fb-9e4a-9e4b8022e962 returned 200 health with the production CORS origin and exposed request ID, while its unauthenticated wishlist read returned the required 401
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, exposed ETag and X-Request-Id, rejected unauthenticated owner reads and deletion with 401, and rejected an unrelated origin with 403
     - Staging Worker version f66133bb-6050-4491-ab37-70ab8fee42b3 deployed the backward-compatible direct start/finish contract, returned 200 health with the production CORS origin and X-Request-Id, and rejected an unauthenticated trip-plan read with 401
     - Pull request 105 passed validation run 44143259391 and merged the feature to develop as e8436e94fe6221ad5757c17e1ef830651970f645; develop validation run 44143711352 then succeeded
@@ -57,8 +61,9 @@ verification:
 # My Atlas trip planning implementation
 
 The implementation is deployed for controlled owner testing. Staging
-Worker version `f66133bb-6050-4491-ab37-70ab8fee42b3` now serves the
-backward-compatible direct start and finish contract. Pull requests 105 and 106
+Worker version `cfd6a48b-03fe-43fb-9e4a-9e4b8022e962` now serves the
+backward-compatible direct start and finish contract plus unavailable-wish
+read recovery. Pull requests 105 and 106
 promoted planner-local search, direct endpoint selection, and the compact
 collapsible owner workflow through protected `develop` and `main`. Pages run
 44144353792 and the live content-addressed bundle verify that frontend release.
@@ -113,11 +118,17 @@ Additional external beta invitations remain gated on the owner checks below.
 - [x] The planner starts collapsed within the owner workflow. Its expanded
   wishlist, destination chooser, and ordered-stop collections use bounded
   scrolling so large private lists do not lengthen the whole Atlas panel.
+- [x] A missing canonical catalog record no longer prevents the owner from
+  opening the planner. The unresolved wish remains visible and removable, is
+  disabled as a route choice, and cannot enter a new immutable plan snapshot.
+  Planner errors now retain the Worker request ID, and the planner disclosure
+  uses the same compact full-width spacing as its neighboring workflow cards.
 - [x] Isolated staging Worker version
-  `f66133bb-6050-4491-ab37-70ab8fee42b3` is deployed with the backward-compatible
-  direct endpoint contract and passed health, production-origin CORS, request-ID,
-  and unauthenticated trip-plan probes. The earlier foreign-origin rejection
-  remains covered by automated tests and the prior staged release evidence.
+  `cfd6a48b-03fe-43fb-9e4a-9e4b8022e962` is deployed with the
+  backward-compatible direct endpoint contract and unavailable-wish recovery.
+  It passed health, production-origin CORS, request-ID, and unauthenticated
+  wishlist probes. The earlier foreign-origin rejection remains covered by
+  automated tests and the prior staged release evidence.
 
 ## Partial or not yet verified
 
@@ -129,9 +140,10 @@ Additional external beta invitations remain gated on the owner checks below.
   account; automated durable-state erasure and exact retry tests pass.
 - [ ] Complete authenticated planner layout, keyboard, screen-reader, and
   horizontal-overflow acceptance at desktop and phone widths. Code review and
-  lint cover the new semantics and responsive rules, including the independent
-  planner search, but the local headless renderer failed in its GPU process
-  before producing fresh authenticated visual evidence.
+  lint cover the new semantics and responsive rules, and local component-state
+  measurements verify the corrected disclosure geometry at desktop and phone
+  widths. A real authenticated owner-session review of the full expanded
+  planner still remains.
 - [ ] Verify Google Maps output on Android app/browser, iOS app/browser, and
   desktop. The code enforces the conservative three-intermediary limit, but
   provider behavior remains externally unverified.
