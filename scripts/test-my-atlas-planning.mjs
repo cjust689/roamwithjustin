@@ -1,0 +1,134 @@
+import assert from "node:assert/strict"
+import {
+  MAX_PLAN_DESTINATIONS,
+  MyAtlasHandoffError,
+  buildAiPlanningPrompt,
+  buildGoogleMapsDirectionsUrl,
+  buildGoogleMapsDirectionsUrls,
+} from "../src/features/my-atlas/planning/handoffs.mjs"
+import { normalizeCreatePlan } from "../workers/my-atlas/src/planning/contracts.mjs"
+
+const moab = {
+  placeId: "geonames:5601615",
+  placeType: "city",
+  name: "Moab",
+  admin1Name: "Utah",
+  countryName: "United States",
+  coordinates: [-109.54984, 38.57332],
+  routeReadiness: "route-ready",
+}
+const routeStop = (placeId, name, longitude, latitude) => ({
+  placeId,
+  placeType: "custom",
+  name,
+  countryName: "United States",
+  coordinates: [longitude, latitude],
+  routeReadiness: "user-coordinate-review",
+})
+const plan = {
+  title: "Moab parks",
+  start: moab,
+  stops: [
+    routeStop("custom:111111111111111111111111", "Arches entrance", -109.607, 38.616),
+    routeStop("custom:222222222222222222222222", "Dead Horse Point", -109.739, 38.485),
+    routeStop("custom:333333333333333333333333", "Island in the Sky", -109.866, 38.459),
+  ],
+  endMode: "return-to-start",
+}
+const confirmedCoordinatePlaceIds = plan.stops.map(stop => stop.placeId)
+const url = new URL(
+  buildGoogleMapsDirectionsUrl(plan, { confirmedCoordinatePlaceIds })
+)
+assert.equal(url.origin, "https://www.google.com")
+assert.equal(url.searchParams.get("api"), "1")
+assert.equal(url.searchParams.get("origin"), "38.57332,-109.54984")
+assert.equal(url.searchParams.get("destination"), "38.57332,-109.54984")
+assert.deepEqual(url.searchParams.get("waypoints").split("|"), [
+  "38.616,-109.607",
+  "38.485,-109.739",
+  "38.459,-109.866",
+])
+assert.ok(url.toString().length <= 2048)
+
+assert.throws(
+  () => buildGoogleMapsDirectionsUrl(plan),
+  error =>
+    error instanceof MyAtlasHandoffError &&
+    error.code === "user-coordinate-review"
+)
+
+const prompt = buildAiPlanningPrompt(plan)
+assert.match(prompt, /Moab, Utah, United States/)
+assert.match(prompt, /Arches entrance, United States/)
+assert.doesNotMatch(prompt, /-109\.607|38\.616|custom:/)
+const coordinatePrompt = buildAiPlanningPrompt(plan, {
+  includeCoordinates: true,
+})
+assert.match(coordinatePrompt, /38\.616,-109\.607/)
+
+const longerPlan = {
+  ...plan,
+  stops: Array.from({ length: 8 }, (_, index) =>
+    routeStop(
+      `custom:${String(index + 10).padStart(24, "0")}`,
+      `Stop ${index + 1}`,
+      -109.6 - index / 100,
+      38.6 + index / 100
+    )
+  ),
+  endMode: "last-stop",
+}
+const longerConfirmedIds = longerPlan.stops.map(stop => stop.placeId)
+const legs = buildGoogleMapsDirectionsUrls(longerPlan, {
+  confirmedCoordinatePlaceIds: longerConfirmedIds,
+})
+assert.equal(legs.length, 2)
+assert.equal(legs[0].destination, legs[1].origin)
+for (const leg of legs) {
+  const legUrl = new URL(leg.url)
+  const waypointValue = legUrl.searchParams.get("waypoints")
+  assert.ok(!waypointValue || waypointValue.split("|").length <= 3)
+  assert.ok(leg.url.length <= 2048)
+}
+assert.throws(
+  () =>
+    buildGoogleMapsDirectionsUrl(longerPlan, {
+      confirmedCoordinatePlaceIds: longerConfirmedIds,
+    }),
+  error =>
+    error instanceof MyAtlasHandoffError && error.code === "multiple_legs"
+)
+assert.match(buildAiPlanningPrompt(longerPlan), /8\. Stop 8/)
+
+const wishId = index => `wish_${index.toString(16).padStart(24, "0")}`
+const planHeaders = new Headers({
+  "If-Match": '"rev-1"',
+  "Idempotency-Key": "91919191-9191-4191-8191-919191919191",
+})
+const maximumPlanInput = {
+  title: "Long trip",
+  status: "saved",
+  desiredYear: null,
+  note: "",
+  startWishId: wishId(999),
+  stopWishIds: Array.from({ length: MAX_PLAN_DESTINATIONS }, (_, index) =>
+    wishId(index + 1)
+  ),
+  endMode: "last-stop",
+}
+assert.equal(
+  normalizeCreatePlan(maximumPlanInput, planHeaders, 2026).stopWishIds.length,
+  MAX_PLAN_DESTINATIONS
+)
+assert.throws(() =>
+  normalizeCreatePlan(
+    {
+      ...maximumPlanInput,
+      stopWishIds: [...maximumPlanInput.stopWishIds, wishId(1000)],
+    },
+    planHeaders,
+    2026
+  )
+)
+
+console.log("My Atlas planning handoff tests passed.")

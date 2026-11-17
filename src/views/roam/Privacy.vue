@@ -4,7 +4,7 @@
       <header>
         <span>Site information</span>
         <h1>Privacy and advertising</h1>
-        <p>Effective November 15, 2026</p>
+        <p>Effective November 17, 2026</p>
       </header>
 
       <section>
@@ -16,9 +16,72 @@
           approximate location derived from an internet address.
         </p>
         <p>
-          Atlas favorites and recent places are stored in your browser. They are
-          used to restore your Atlas experience and are not presented as
-          advertising activity.
+          Public Atlas browsing preferences may be stored in your browser. My
+          Atlas sign in and saved account data are described separately below.
+        </p>
+      </section>
+
+      <section id="my-atlas">
+        <h2>My Atlas accounts</h2>
+        <p>
+          My Atlas uses Auth0 and Google for sign in. Roam With Justin stores an
+          internal account identifier, your chosen handle and display name,
+          policy acceptance records, and the places, optional visit years,
+          favorite memories, private wishlist entries, and trip plans that you
+          choose to save. Custom pins and private plans may include coordinates.
+          Access tokens are kept in browser memory rather than permanent browser
+          storage.
+        </p>
+        <p>
+          My Atlas accounts begin private. If you publish your Visited Atlas,
+          your handle, display name, visited places, optional visit years,
+          favorite memories, and custom pin names and positions become available
+          through your public profile link. Wishlist entries, future trip plans,
+          private notes, desired years, and plan retention details are never
+          included in that public profile.
+        </p>
+        <p>
+          Auth0 supports authentication. Cloudflare hosts the application data,
+          account services, and human verification. GeoNames supplies geographic
+          catalog data. Google receives a request only when you sign in through
+          Google or choose to open a prepared Google Maps link. My Atlas account
+          screens are excluded from the site's Google Analytics page and event
+          tracking.
+        </p>
+      </section>
+
+      <section>
+        <h2>Future trip retention</h2>
+        <p>
+          Creating a trip plan, making a substantive edit, or selecting Keep
+          starts a new six calendar month retention period. Signing in, viewing
+          the plan, exporting account data, opening Maps links, or copying a
+          planning prompt does not restart that period.
+        </p>
+        <p>
+          After six months without an explicit save or Keep action, the trip is
+          marked for deletion and the account shows a 30 day review period. You
+          can keep or delete it during that period. When the review period ends,
+          the trip and its saved location snapshots are deleted automatically.
+          Wishlist entries and visited places are not removed by trip expiry.
+        </p>
+      </section>
+
+      <section>
+        <h2>My Atlas deletion and export</h2>
+        <p>
+          A signed in account owner can download private account data and can
+          permanently delete the My Atlas application account. Deletion removes
+          the profile, visited pins, memories, wishlist, trip plan, policy
+          records, and active application registration. It does not delete the
+          owner's Google or Auth0 identity.
+        </p>
+        <p>
+          A minimal record is retained to make an interrupted deletion safe to
+          retry. A separate record reserves the former public handle and its
+          deletion time so it cannot be reassigned accidentally. Those records
+          do not retain the deleted profile, travel content, Google identity, or
+          Auth0 subject.
         </p>
       </section>
 
@@ -68,6 +131,12 @@
           >
             Google's partner sites explanation </a
           >.
+        </p>
+        <p>
+          My Atlas owners can keep the account private, unpublish a shared
+          Atlas, remove individual places, delete wishlist entries and plans,
+          export account data, or permanently delete the application account
+          from the signed in My Atlas screen.
         </p>
       </section>
 

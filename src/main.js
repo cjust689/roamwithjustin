@@ -2,6 +2,7 @@
 import Vue from "vue"
 import App from "./App.vue"
 import router from "./router"
+import { initializeAnalytics } from "./utils/analytics.mjs"
 import "@/styles/materialize.min.css"
 import "@/styles/style.css"
 Vue.config.productionTip = false
@@ -17,3 +18,8 @@ new Vue({
   router,
   render: h => h(App),
 }).$mount("#app")
+initializeAnalytics({
+  env: process.env,
+  nextTick: callback => Vue.nextTick(callback),
+  router,
+})

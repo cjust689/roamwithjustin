@@ -4,12 +4,20 @@ import {
   CUSTOM_PLACE_ID_PATTERN,
   isNormalizedCustomPlace,
 } from "../account/custom-place.mjs"
+import {
+  deletionDeadline,
+  nextRetentionAlarm,
+  retentionDeadline,
+} from "../planning/retention.mjs"
+import { MAX_PLAN_DESTINATIONS } from "../planning/constants.mjs"
 
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
 const HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 const INVITATION_ID_PATTERN = /^inv_[a-f0-9]{24}$/
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
+const WISH_ID_PATTERN = /^wish_[a-f0-9]{24}$/
+const PLAN_ID_PATTERN = /^plan_[a-f0-9]{24}$/
 const PLACE_ID_PATTERN =
   /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|custom:[a-f0-9]{24})$/
 
@@ -81,6 +89,22 @@ function pinKey(pinId) {
 
 function pinPlaceKey(placeId) {
   return `pin-place:${placeId}`
+}
+
+function wishKey(wishId) {
+  return `wish:${wishId}`
+}
+
+function wishPlaceKey(placeId) {
+  return `wish-place:${placeId}`
+}
+
+function planKey(planId) {
+  return `plan:${planId}`
+}
+
+function deletionOperationKey(digest) {
+  return `deletion-operation:${digest}`
 }
 
 function invitationSnapshot(invitation) {
@@ -624,6 +648,94 @@ export class RegistrationRegistryDurableObject extends DurableObject {
     })
   }
 
+  getAccountDeletion(operationDigest, requestDigest) {
+    if (
+      !DIGEST_PATTERN.test(operationDigest) ||
+      !DIGEST_PATTERN.test(requestDigest)
+    ) {
+      return failure("invalid_account_deletion")
+    }
+    const deletion = this.ctx.storage.kv.get(
+      deletionOperationKey(operationDigest)
+    )
+    if (!deletion) return failure("account_deletion_not_found")
+    if (deletion.requestDigest !== requestDigest) {
+      return failure("idempotency_conflict")
+    }
+    return Object.freeze({
+      ok: true,
+      idempotent: true,
+      userId: deletion.userId,
+      deletedAt: deletion.deletedAt,
+    })
+  }
+
+  deleteActiveRegistration(command) {
+    if (
+      !command ||
+      !USER_ID_PATTERN.test(command.userId) ||
+      !DIGEST_PATTERN.test(command.identityDigest) ||
+      !DIGEST_PATTERN.test(command.operationDigest) ||
+      !DIGEST_PATTERN.test(command.requestDigest) ||
+      !validIsoDate(command.now)
+    ) {
+      return failure("invalid_account_deletion")
+    }
+
+    return this.ctx.storage.transactionSync(() => {
+      const deletionKey = deletionOperationKey(command.operationDigest)
+      const existing = this.ctx.storage.kv.get(deletionKey)
+      if (existing) {
+        return existing.requestDigest === command.requestDigest
+          ? Object.freeze({
+              ok: true,
+              idempotent: true,
+              userId: existing.userId,
+              deletedAt: existing.deletedAt,
+            })
+          : failure("idempotency_conflict")
+      }
+
+      const registrationStorageKey = registrationKey(command.userId)
+      const registration = this.ctx.storage.kv.get(registrationStorageKey)
+      if (
+        !registration ||
+        registration.state !== "active" ||
+        registration.identityDigest !== command.identityDigest
+      ) {
+        return failure("registration_not_found")
+      }
+      const identityStorageKey = identityKey(command.identityDigest)
+      const handleStorageKey = handleKey(registration.handle)
+      if (
+        this.ctx.storage.kv.get(identityStorageKey)?.userId !== command.userId ||
+        this.ctx.storage.kv.get(handleStorageKey)?.userId !== command.userId
+      ) {
+        return failure("registration_inconsistent")
+      }
+
+      this.ctx.storage.kv.delete(identityStorageKey)
+      this.ctx.storage.kv.put(handleStorageKey, {
+        schemaVersion: 1,
+        state: "deleted",
+        deletedAt: command.now,
+      })
+      this.ctx.storage.kv.delete(registrationStorageKey)
+      this.ctx.storage.kv.put(deletionKey, {
+        schemaVersion: 1,
+        userId: command.userId,
+        requestDigest: command.requestDigest,
+        deletedAt: command.now,
+      })
+      return Object.freeze({
+        ok: true,
+        idempotent: false,
+        userId: command.userId,
+        deletedAt: command.now,
+      })
+    })
+  }
+
   getInvitationStatus(digest) {
     if (!DIGEST_PATTERN.test(digest)) return failure("invalid_invitation")
     const invitation = this.ctx.storage.kv.get(invitationKey(digest))
@@ -762,6 +874,84 @@ function validStoredPinPlace(value) {
   return value.customPlace === undefined || value.customPlace === null
 }
 
+function validStoredWish(value) {
+  return Boolean(
+    WISH_ID_PATTERN.test(value?.wishId) &&
+      validStoredPinPlace(value) &&
+      isNormalizedPinMemory(value.note) &&
+      ["low", "normal", "high"].includes(value.priority) &&
+      (value.desiredYear === null ||
+        (Number.isInteger(value.desiredYear) &&
+          value.desiredYear >= 2000 &&
+          value.desiredYear <= 2200)) &&
+      validIsoDate(value.createdAt) &&
+      validIsoDate(value.updatedAt)
+  )
+}
+
+function validPlanSnapshot(value) {
+  const optionalStrings = [
+    "countryCode",
+    "admin1Name",
+    "countryName",
+    "spotCategory",
+    "spotKind",
+    "catalogRevision",
+  ]
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      PLACE_ID_PATTERN.test(value.placeId) &&
+      ["country", "city", "spot", "custom"].includes(value.placeType) &&
+      typeof value.name === "string" &&
+      value.name.length > 0 &&
+      value.name.length <= 320 &&
+      Array.isArray(value.coordinates) &&
+      value.coordinates.length === 2 &&
+      value.coordinates.every(Number.isFinite) &&
+      [
+        "route-ready",
+        "needs-entrance-selection",
+        "user-coordinate-review",
+      ].includes(value.routeReadiness) &&
+      optionalStrings.every(
+        key => value[key] === undefined || typeof value[key] === "string"
+      ) &&
+      (value.sourceWishId === undefined ||
+        WISH_ID_PATTERN.test(value.sourceWishId))
+  )
+}
+
+function validStoredPlan(value) {
+  return Boolean(
+    PLAN_ID_PATTERN.test(value?.planId) &&
+      isNormalizedPinMemory(value.title) &&
+      value.title.length > 0 &&
+      Array.from(value.title).length <= 80 &&
+      ["draft", "saved", "archived"].includes(value.status) &&
+      (value.desiredYear === null ||
+        (Number.isInteger(value.desiredYear) &&
+          value.desiredYear >= 2000 &&
+          value.desiredYear <= 2200)) &&
+      isNormalizedPinMemory(value.note) &&
+      validPlanSnapshot(value.start) &&
+      Array.isArray(value.stops) &&
+      value.stops.length >= 1 &&
+      value.stops.length <= MAX_PLAN_DESTINATIONS &&
+      value.stops.every(validPlanSnapshot) &&
+      ["return-to-start", "last-stop"].includes(value.endMode) &&
+      ["active", "deletion-pending"].includes(value.retentionState) &&
+      validIsoDate(value.retentionConfirmedAt) &&
+      validIsoDate(value.retentionExpiresAt) &&
+      (value.retentionState !== "deletion-pending" ||
+        (validIsoDate(value.deletionPendingAt) &&
+          validIsoDate(value.deleteAfter))) &&
+      validIsoDate(value.createdAt) &&
+      validIsoDate(value.updatedAt)
+  )
+}
+
 function ownerProfile(storage, identityDigest) {
   const profile = storage.kv.get("profile")
   if (!profile) return failure("profile_not_found")
@@ -821,6 +1011,8 @@ export class UserProfileDurableObject extends DurableObject {
         public: false,
         status: "active",
         pinCount: 0,
+        wishCount: 0,
+        planCount: 0,
         acceptedTermsVersion: command.termsVersion,
         acceptedPrivacyVersion: command.privacyVersion,
         acceptedAt: command.now,
@@ -1091,6 +1283,557 @@ export class UserProfileDurableObject extends DurableObject {
     })
   }
 
+  listOwnerWishes(command) {
+    if (
+      !command ||
+      !DIGEST_PATTERN.test(command.identityDigest) ||
+      !Number.isInteger(command.limit) ||
+      command.limit < 1 ||
+      command.limit > 100 ||
+      (command.cursor && !WISH_ID_PATTERN.test(command.cursor))
+    ) {
+      return failure("invalid_wish_query")
+    }
+    const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+    if (!owner.ok) return owner
+    const options = { prefix: "wish:", limit: command.limit + 1 }
+    if (command.cursor) options.startAfter = wishKey(command.cursor)
+    const entries = Array.from(
+      this.ctx.storage.kv.list(options),
+      ([, value]) => value
+    )
+    if (entries.some(value => !validStoredWish(value))) {
+      return failure("wishlist_inconsistent")
+    }
+    const truncated = entries.length > command.limit
+    const wishes = entries.slice(0, command.limit)
+    return Object.freeze({
+      ok: true,
+      profile: owner.profile,
+      wishes,
+      nextCursor: truncated ? wishes[wishes.length - 1].wishId : null,
+    })
+  }
+
+  getOwnerWishesByIds(command) {
+    if (
+      !command ||
+      !DIGEST_PATTERN.test(command.identityDigest) ||
+      !Array.isArray(command.wishIds) ||
+      command.wishIds.length < 1 ||
+      command.wishIds.length > MAX_PLAN_DESTINATIONS + 1 ||
+      command.wishIds.some(value => !WISH_ID_PATTERN.test(value))
+    ) {
+      return failure("invalid_wish_query")
+    }
+    const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+    if (!owner.ok) return owner
+    const wishes = command.wishIds.map(id =>
+      this.ctx.storage.kv.get(wishKey(id))
+    )
+    if (wishes.some(value => !value)) return failure("wish_not_found")
+    if (wishes.some(value => !validStoredWish(value))) {
+      return failure("wishlist_inconsistent")
+    }
+    return Object.freeze({ ok: true, profile: owner.profile, wishes })
+  }
+
+  createOwnerWish(command) {
+    if (
+      !validOwnerMutation(command) ||
+      !WISH_ID_PATTERN.test(command.wishId) ||
+      !validStoredPinPlace(command) ||
+      !isNormalizedPinMemory(command.note) ||
+      !["low", "normal", "high"].includes(command.priority) ||
+      (command.desiredYear !== null &&
+        (!Number.isInteger(command.desiredYear) ||
+          command.desiredYear < 2000 ||
+          command.desiredYear > 2200))
+    ) {
+      return failure("invalid_wish")
+    }
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      if ((owner.profile.wishCount || 0) >= 250) {
+        return failure("wish_limit_reached")
+      }
+      if (this.ctx.storage.kv.get(wishPlaceKey(command.placeId))) {
+        return failure("duplicate_wish")
+      }
+      if (this.ctx.storage.kv.get(wishKey(command.wishId))) {
+        return failure("wish_id_collision")
+      }
+      const wish = {
+        schemaVersion: 1,
+        wishId: command.wishId,
+        placeId: command.placeId,
+        ...(command.customPlace ? { customPlace: command.customPlace } : {}),
+        note: command.note,
+        priority: command.priority,
+        desiredYear: command.desiredYear,
+        createdAt: command.now,
+        updatedAt: command.now,
+      }
+      const profile = {
+        ...owner.profile,
+        wishCount: (owner.profile.wishCount || 0) + 1,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(wishKey(wish.wishId), wish)
+      this.ctx.storage.kv.put(wishPlaceKey(wish.placeId), {
+        wishId: wish.wishId,
+      })
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        wish,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  updateOwnerWish(command) {
+    const patch = command?.patch
+    if (
+      !validOwnerMutation(command) ||
+      !WISH_ID_PATTERN.test(command.wishId) ||
+      !patch ||
+      typeof patch !== "object" ||
+      Array.isArray(patch) ||
+      !Object.keys(patch).length ||
+      Object.keys(patch).some(
+        key => !["note", "priority", "desiredYear"].includes(key)
+      ) ||
+      (patch.note !== undefined && !isNormalizedPinMemory(patch.note)) ||
+      (patch.priority !== undefined &&
+        !["low", "normal", "high"].includes(patch.priority)) ||
+      (patch.desiredYear !== undefined &&
+        patch.desiredYear !== null &&
+        (!Number.isInteger(patch.desiredYear) ||
+          patch.desiredYear < 2000 ||
+          patch.desiredYear > 2200))
+    ) {
+      return failure("invalid_wish")
+    }
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const current = this.ctx.storage.kv.get(wishKey(command.wishId))
+      if (!current) return failure("wish_not_found")
+      const wish = { ...current, ...patch, updatedAt: command.now }
+      if (!validStoredWish(wish)) return failure("invalid_wish")
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(wishKey(wish.wishId), wish)
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        wish,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  deleteOwnerWish(command) {
+    if (!validOwnerMutation(command) || !WISH_ID_PATTERN.test(command.wishId)) {
+      return failure("invalid_wish")
+    }
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const wish = this.ctx.storage.kv.get(wishKey(command.wishId))
+      if (!wish) return failure("wish_not_found")
+      const profile = {
+        ...owner.profile,
+        wishCount: Math.max(0, (owner.profile.wishCount || 0) - 1),
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.delete(wishKey(wish.wishId))
+      this.ctx.storage.kv.delete(wishPlaceKey(wish.placeId))
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  listOwnerPlans(identityDigest) {
+    if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
+    const owner = ownerProfile(this.ctx.storage, identityDigest)
+    if (!owner.ok) return owner
+    const plans = Array.from(
+      this.ctx.storage.kv.list({ prefix: "plan:", limit: 2 }),
+      ([, value]) => value
+    )
+    if (plans.length > 1 || plans.some(value => !validStoredPlan(value))) {
+      return failure("plans_inconsistent")
+    }
+    return Object.freeze({ ok: true, profile: owner.profile, plans })
+  }
+
+  async createOwnerPlan(command) {
+    const candidate = {
+      planId: command?.planId,
+      title: command?.title,
+      status: command?.status,
+      desiredYear: command?.desiredYear,
+      note: command?.note,
+      start: command?.start,
+      stops: command?.stops,
+      endMode: command?.endMode,
+      retentionState: "active",
+      retentionConfirmedAt: command?.now,
+      retentionExpiresAt: validIsoDate(command?.now)
+        ? retentionDeadline(command.now)
+        : "",
+      createdAt: command?.now,
+      updatedAt: command?.now,
+    }
+    if (!validOwnerMutation(command) || !validStoredPlan(candidate)) {
+      return failure("invalid_plan")
+    }
+    const result = this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      if ((owner.profile.planCount || 0) >= 1) {
+        return failure("plan_limit_reached")
+      }
+      if (this.ctx.storage.kv.get(planKey(candidate.planId))) {
+        return failure("plan_id_collision")
+      }
+      const profile = {
+        ...owner.profile,
+        planCount: 1,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(planKey(candidate.planId), candidate)
+      this.ctx.storage.kv.put("profile", profile)
+      const stored = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        plan: candidate,
+      })
+      storeMutation(this.ctx.storage, command, stored)
+      return stored
+    })
+    if (result.ok) {
+      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+    }
+    return result
+  }
+
+  async replaceOwnerPlan(command) {
+    if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
+      return failure("invalid_plan")
+    }
+    const result = this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const current = this.ctx.storage.kv.get(planKey(command.planId))
+      if (!current) return failure("plan_not_found")
+      const plan = {
+        ...current,
+        title: command.title,
+        status: command.status,
+        desiredYear: command.desiredYear,
+        note: command.note,
+        start: command.start,
+        stops: command.stops,
+        endMode: command.endMode,
+        retentionState: "active",
+        retentionConfirmedAt: command.now,
+        retentionExpiresAt: retentionDeadline(command.now),
+        updatedAt: command.now,
+      }
+      delete plan.deletionPendingAt
+      delete plan.deleteAfter
+      if (!validStoredPlan(plan)) return failure("invalid_plan")
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(planKey(plan.planId), plan)
+      this.ctx.storage.kv.put("profile", profile)
+      const stored = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        plan,
+      })
+      storeMutation(this.ctx.storage, command, stored)
+      return stored
+    })
+    if (result.ok) {
+      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+    }
+    return result
+  }
+
+  async keepOwnerPlan(command) {
+    if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
+      return failure("invalid_plan")
+    }
+    const result = this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const current = this.ctx.storage.kv.get(planKey(command.planId))
+      if (!current) return failure("plan_not_found")
+      const plan = {
+        ...current,
+        retentionState: "active",
+        retentionConfirmedAt: command.now,
+        retentionExpiresAt: retentionDeadline(command.now),
+        updatedAt: command.now,
+      }
+      delete plan.deletionPendingAt
+      delete plan.deleteAfter
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(planKey(plan.planId), plan)
+      this.ctx.storage.kv.put("profile", profile)
+      const stored = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        plan,
+      })
+      storeMutation(this.ctx.storage, command, stored)
+      return stored
+    })
+    if (result.ok) {
+      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+    }
+    return result
+  }
+
+  async deleteOwnerPlan(command) {
+    if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
+      return failure("invalid_plan")
+    }
+    const result = this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const plan = this.ctx.storage.kv.get(planKey(command.planId))
+      if (!plan) return failure("plan_not_found")
+      const profile = {
+        ...owner.profile,
+        planCount: 0,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.delete(planKey(plan.planId))
+      this.ctx.storage.kv.put("profile", profile)
+      const stored = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+      })
+      storeMutation(this.ctx.storage, command, stored)
+      return stored
+    })
+    if (result.ok) await this.ctx.storage.deleteAlarm()
+    return result
+  }
+
+  async expireOwnerPlans(now = new Date().toISOString()) {
+    if (!validIsoDate(now)) return failure("invalid_plan_expiry")
+    const result = this.ctx.storage.transactionSync(() => {
+      const profile = this.ctx.storage.kv.get("profile")
+      if (!profile || profile.status !== "active") {
+        return Object.freeze({ ok: true, changed: false, nextAlarm: null })
+      }
+      const plans = Array.from(
+        this.ctx.storage.kv.list({ prefix: "plan:", limit: 2 }),
+        ([, value]) => value
+      )
+      if (!plans.length) {
+        return Object.freeze({ ok: true, changed: false, nextAlarm: null })
+      }
+      if (plans.length > 1 || !validStoredPlan(plans[0])) {
+        return failure("plans_inconsistent")
+      }
+      const plan = plans[0]
+      if (plan.retentionState === "active") {
+        const deleteAfter = deletionDeadline(plan.retentionExpiresAt)
+        if (Date.parse(now) >= Date.parse(deleteAfter)) {
+          this.ctx.storage.kv.delete(planKey(plan.planId))
+          this.ctx.storage.kv.put("profile", {
+            ...profile,
+            planCount: 0,
+            revision: profile.revision + 1,
+            updatedAt: now,
+          })
+          return Object.freeze({ ok: true, changed: true, deleted: true, nextAlarm: null })
+        }
+        if (Date.parse(now) >= Date.parse(plan.retentionExpiresAt)) {
+          const pending = {
+            ...plan,
+            retentionState: "deletion-pending",
+            deletionPendingAt: plan.retentionExpiresAt,
+            deleteAfter,
+          }
+          this.ctx.storage.kv.put(planKey(plan.planId), pending)
+          this.ctx.storage.kv.put("profile", {
+            ...profile,
+            revision: profile.revision + 1,
+            updatedAt: now,
+          })
+          return Object.freeze({
+            ok: true,
+            changed: true,
+            deleted: false,
+            nextAlarm: pending.deleteAfter,
+          })
+        }
+      } else if (Date.parse(now) >= Date.parse(plan.deleteAfter)) {
+        this.ctx.storage.kv.delete(planKey(plan.planId))
+        this.ctx.storage.kv.put("profile", {
+          ...profile,
+          planCount: 0,
+          revision: profile.revision + 1,
+          updatedAt: now,
+        })
+        return Object.freeze({ ok: true, changed: true, deleted: true, nextAlarm: null })
+      }
+      return Object.freeze({
+        ok: true,
+        changed: false,
+        nextAlarm: nextRetentionAlarm(plan),
+      })
+    })
+    if (!result.ok) return result
+    if (result.nextAlarm) {
+      await this.ctx.storage.setAlarm(Date.parse(result.nextAlarm))
+    } else {
+      await this.ctx.storage.deleteAlarm()
+    }
+    return result
+  }
+
+  async alarm() {
+    await this.expireOwnerPlans(new Date().toISOString())
+  }
+
+  prepareOwnerDeletion(command) {
+    if (!validOwnerMutation(command)) return failure("invalid_account_deletion")
+    return this.ctx.storage.transactionSync(() => {
+      const profile = this.ctx.storage.kv.get("profile")
+      if (!profile) return failure("profile_not_found")
+      if (profile.identityDigest !== command.identityDigest) {
+        return failure("forbidden")
+      }
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (profile.status !== "active") return failure("profile_not_active")
+      if (profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const deletingProfile = {
+        ...profile,
+        public: false,
+        status: "deleting",
+        revision: profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put("profile", deletingProfile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile: deletingProfile,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  async finalizeOwnerDeletion(command) {
+    if (
+      !command ||
+      !DIGEST_PATTERN.test(command.operationDigest) ||
+      !DIGEST_PATTERN.test(command.requestDigest) ||
+      !validIsoDate(command.now)
+    ) {
+      return failure("invalid_account_deletion")
+    }
+    const tombstone = this.ctx.storage.kv.get("account-deleted")
+    if (tombstone) {
+      return tombstone.operationDigest === command.operationDigest &&
+        tombstone.requestDigest === command.requestDigest
+        ? Object.freeze({ ok: true, idempotent: true, deletedAt: tombstone.deletedAt })
+        : failure("idempotency_conflict")
+    }
+    const profile = this.ctx.storage.kv.get("profile")
+    if (profile && profile.status !== "deleting") {
+      return failure("profile_not_deleting")
+    }
+    await this.ctx.storage.deleteAlarm()
+    await this.ctx.storage.deleteAll()
+    this.ctx.storage.kv.put("account-deleted", {
+      schemaVersion: 1,
+      operationDigest: command.operationDigest,
+      requestDigest: command.requestDigest,
+      deletedAt: command.now,
+    })
+    return Object.freeze({ ok: true, idempotent: false, deletedAt: command.now })
+  }
+
   exportOwnerState(identityDigest) {
     if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
     const owner = ownerProfile(this.ctx.storage, identityDigest)
@@ -1100,7 +1843,35 @@ export class UserProfileDurableObject extends DurableObject {
       ([, value]) => value
     )
     if (pins.length > 300) return failure("pin_limit_inconsistent")
-    return Object.freeze({ ok: true, profile: owner.profile, pins })
+    const wishes = Array.from(
+      this.ctx.storage.kv.list({ prefix: "wish:", limit: 251 }),
+      ([, value]) => value
+    )
+    if (
+      wishes.length > 250 ||
+      wishes.some(value => !validStoredWish(value)) ||
+      wishes.length !== (owner.profile.wishCount || 0)
+    ) {
+      return failure("wishlist_inconsistent")
+    }
+    const plans = Array.from(
+      this.ctx.storage.kv.list({ prefix: "plan:", limit: 2 }),
+      ([, value]) => value
+    )
+    if (
+      plans.length > 1 ||
+      plans.some(value => !validStoredPlan(value)) ||
+      plans.length !== (owner.profile.planCount || 0)
+    ) {
+      return failure("plans_inconsistent")
+    }
+    return Object.freeze({
+      ok: true,
+      profile: owner.profile,
+      pins,
+      wishes,
+      plans,
+    })
   }
 
   getPublicAtlas() {

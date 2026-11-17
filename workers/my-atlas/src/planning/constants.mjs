@@ -1,0 +1,1 @@
+export const MAX_PLAN_DESTINATIONS = 50

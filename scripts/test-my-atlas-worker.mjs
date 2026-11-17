@@ -2,7 +2,11 @@ import assert from "node:assert/strict"
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair } from "jose"
 import {
   createMyAtlasPin,
+  createMyAtlasWish,
+  deleteMyAtlasAccount,
   deleteMyAtlasPin,
+  fetchMyAtlasAccountExport,
+  fetchMyAtlasPlanning,
   fetchPublicAtlas,
   fetchMyAtlasState,
   registerMyAtlasAccount,
@@ -1744,4 +1748,190 @@ assert.equal(
   )
 }
 
-console.log("My Atlas Phase 2A, 2B, and local sharing tests passed.")
+{
+  const token = await signToken()
+  let captured
+  const response = await workerResponse(
+    "/v1/me/bucket-list",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: "30303030-3030-4030-8030-303030303030",
+      ifMatch: '"rev-4"',
+      json: {
+        placeId: "geonames:3621138",
+        note: "Return for the whale tail.",
+        priority: "high",
+        desiredYear: new Date().getUTCFullYear() + 1,
+      },
+    },
+    {},
+    {
+      createMyWish: async options => {
+        captured = options
+        return {
+          created: true,
+          profile: { revision: 5 },
+          wish: {
+            wishId: "wish_1234567890abcdef12345678",
+            placeId: "geonames:3621138",
+          },
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 201)
+  assert.equal(response.headers.get("ETag"), '"rev-5"')
+  assert.equal(captured.input.expectedRevision, 4)
+  assert.equal(captured.input.priority, "high")
+  assert.deepEqual(captured.identity, { issuer: ISSUER, subject: SUBJECT })
+}
+
+{
+  const token = await signToken()
+  let captured
+  const response = await workerResponse(
+    "/v1/me",
+    {
+      method: "DELETE",
+      token,
+      idempotencyKey: "31313131-3131-4131-8131-313131313131",
+      ifMatch: '"rev-7"',
+      json: { confirmation: "DELETE MY ATLAS" },
+    },
+    {},
+    {
+      deleteMyAccount: async options => {
+        captured = options
+        return {
+          deleted: true,
+          idempotent: false,
+          deletedAt: "2026-11-17T15:00:00.000Z",
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.equal((await readJson(response)).deleted, true)
+  assert.deepEqual(captured.input, {
+    confirmation: "DELETE MY ATLAS",
+    expectedRevision: 7,
+    idempotencyKey: "31313131-3131-4131-8131-313131313131",
+  })
+}
+
+{
+  const token = await signToken({ scope: "read:my-atlas" })
+  const response = await workerResponse(
+    "/v1/me",
+    {
+      method: "DELETE",
+      token,
+      idempotencyKey: "32323232-3232-4232-8232-323232323232",
+      ifMatch: '"rev-1"',
+      json: { confirmation: "DELETE MY ATLAS" },
+    },
+    {},
+    {
+      deleteMyAccount: async () => {
+        throw new Error("Read-only access must not reach account deletion.")
+      },
+    }
+  )
+  assert.equal(response.status, 403)
+}
+
+{
+  const calls = []
+  const state = await fetchMyAtlasPlanning({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async url => {
+      calls.push(url)
+      return url.includes("bucket-list")
+        ? new Response(
+            JSON.stringify({
+              wishes: [
+                {
+                  wishId: "wish_1234567890abcdef12345678",
+                  placeId: "geonames:3621138",
+                  name: "Uvita",
+                },
+              ],
+              nextCursor: null,
+            }),
+            { status: 200, headers: { ETag: '"rev-4"' } }
+          )
+        : new Response(JSON.stringify({ plans: [] }), {
+            status: 200,
+            headers: { ETag: '"rev-4"' },
+          })
+    },
+  })
+  assert.equal(state.revision, 4)
+  assert.equal(state.wishes[0].name, "Uvita")
+  assert.equal(calls.length, 2)
+
+  const created = await createMyAtlasWish({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    value: { placeId: "geonames:3621138", priority: "normal" },
+    revision: 4,
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.method, "POST")
+      assert.equal(options.headers.get("If-Match"), '"rev-4"')
+      return new Response(
+        JSON.stringify({
+          wish: {
+            wishId: "wish_1234567890abcdef12345678",
+            placeId: "geonames:3621138",
+          },
+        }),
+        { status: 201, headers: { ETag: '"rev-5"' } }
+      )
+    },
+  })
+  assert.equal(created.revision, 5)
+
+  const exported = await fetchMyAtlasAccountExport({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async () =>
+      new Response(
+        JSON.stringify({
+          schemaVersion: 2,
+          profile: {},
+          pins: [],
+          wishlist: [],
+          plans: [],
+        }),
+        { status: 200, headers: { ETag: '"rev-5"' } }
+      ),
+  })
+  assert.equal(exported.schemaVersion, 2)
+
+  let deletionHeaders
+  await deleteMyAtlasAccount({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    revision: 5,
+    idempotencyKey: "33333333-3333-4333-8333-333333333333",
+    fetchImpl: async (_url, options) => {
+      deletionHeaders = options.headers
+      return new Response(
+        JSON.stringify({
+          deleted: true,
+          deletedAt: "2026-11-17T15:00:00.000Z",
+        }),
+        { status: 200 }
+      )
+    },
+  })
+  assert.equal(deletionHeaders.get("If-Match"), '"rev-5"')
+  assert.equal(
+    deletionHeaders.get("Idempotency-Key"),
+    "33333333-3333-4333-8333-333333333333"
+  )
+}
+
+console.log("My Atlas Worker, sharing, and planning boundary tests passed.")

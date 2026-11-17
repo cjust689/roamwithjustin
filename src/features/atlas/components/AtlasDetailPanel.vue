@@ -1,4 +1,4 @@
-<!-- eslint-disable vue/require-explicit-emits -- Vue 2 uses implicit component events. -->
+<!-- eslint-disable vue/require-explicit-emits, vue/no-deprecated-v-on-native-modifier -- Vue 2 uses implicit component events and native RouterLink listeners. -->
 <template>
   <div class="atlas-detail-root">
     <aside
@@ -240,6 +240,7 @@
                 v-if="action.type === 'internal'"
                 :key="action.label"
                 :to="action.href"
+                @click.native="$emit('action', action)"
               >
                 {{ action.label }}
               </router-link>
@@ -249,6 +250,7 @@
                 :href="action.href"
                 target="_blank"
                 rel="noopener noreferrer"
+                @click="$emit('action', action)"
               >
                 {{ action.label }}
               </a>

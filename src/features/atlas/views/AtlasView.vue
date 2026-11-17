@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-deprecated-v-on-native-modifier -- Vue 2 RouterLink click tracking uses native listeners. -->
 <template>
   <main class="atlas-page">
     <AtlasMap
@@ -8,6 +9,7 @@
       :camera="activeCamera"
       :guided-controls-visible="Boolean(guidedJourney)"
       :journey-travel="guidedTravel"
+      @ready="handleMapReady"
       @select="selectNodeFromMap"
       @camera-change="rememberCamera"
       @manual-interaction="pauseGuidedJourney('map')"
@@ -18,9 +20,17 @@
         <span>RWJ</span>
         <strong>Travel Atlas</strong>
       </a>
-      <AtlasBreadcrumbs :crumbs="breadcrumbs" @select="selectNode" />
+      <AtlasBreadcrumbs
+        :crumbs="breadcrumbs"
+        @select="selectNodeFromBreadcrumbs"
+      />
       <div class="atlas-tools">
-        <router-link v-if="storyHref" class="atlas-story-link" :to="storyHref">
+        <router-link
+          v-if="storyHref"
+          class="atlas-story-link"
+          :to="storyHref"
+          @click.native="trackStoryOpen('atlas_toolbar')"
+        >
           Story
         </router-link>
         <button
@@ -118,7 +128,9 @@
             :key="node.id"
             :class="{ 'is-first-look': node.comingSoon }"
             type="button"
-            @click="selectNode(node.id)"
+            @click="
+              selectNode(node.id, { analyticsSurface: 'journey_explorer' })
+            "
           >
             <span>{{ node.comingSoon ? "First look" : "Explore" }}</span>
             <strong>{{ node.title }}</strong>
@@ -133,7 +145,11 @@
             v-if="resumeNode"
             class="secondary"
             type="button"
-            @click="selectNode(resumeNode.id)"
+            @click="
+              selectNode(resumeNode.id, {
+                analyticsSurface: 'journey_explorer',
+              })
+            "
           >
             Resume {{ resumeNode.title }}
           </button>
@@ -160,7 +176,8 @@
       :show-ad="atlasAdVisible"
       :ad-slot-id="atlasAdSlotId"
       @close="goToParent"
-      @select="selectNode"
+      @select="selectNodeFromDetail"
+      @action="trackAtlasAction"
       @toggle-favorite="toggleFavorite"
     />
 
@@ -204,6 +221,11 @@ import {
   getGuidedJourneyViewModel,
 } from "@/content/selectors/atlas"
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
+import {
+  consumeAtlasEntrySurface,
+  getDeviceCategory,
+  trackAnalyticsEvent,
+} from "@/utils/analytics.mjs"
 
 const worldCamera = {
   // Offset the world view west so both American and European roots remain
@@ -411,6 +433,57 @@ export default {
     document.title = this.previousTitle
   },
   methods: {
+    handleMapReady() {
+      trackAnalyticsEvent("atlas_loaded", {
+        device_category: getDeviceCategory(),
+        entry_surface: consumeAtlasEntrySurface(),
+      })
+    },
+    trackNodeOpen(nodeId, surface) {
+      const node = getAtlasNode(nodeId)
+      if (!node) return
+
+      if (!node.parentId) {
+        trackAnalyticsEvent("atlas_journey_opened", {
+          public_journey_id: node.journeyId || node.id,
+          surface,
+        })
+        return
+      }
+
+      trackAnalyticsEvent("atlas_destination_opened", {
+        content_type: "place",
+        public_destination_id: node.id,
+        surface,
+      })
+    },
+    trackStoryOpen(surface) {
+      if (!this.currentNode?.journeyId) return
+      trackAnalyticsEvent("atlas_story_opened", {
+        public_story_id: this.currentNode.journeyId,
+        surface,
+      })
+    },
+    trackAtlasAction(action) {
+      if (action?.analyticsType === "maps") {
+        trackAnalyticsEvent("maps_handoff_clicked", {
+          content_type: "place",
+          surface: "detail_panel",
+        })
+      } else if (action?.analyticsType === "story") {
+        trackAnalyticsEvent("atlas_story_opened", {
+          public_story_id:
+            action.publicStoryId || this.currentNode?.journeyId || "",
+          surface: "detail_panel",
+        })
+      }
+    },
+    selectNodeFromBreadcrumbs(nodeId) {
+      this.selectNode(nodeId, { analyticsSurface: "breadcrumbs" })
+    },
+    selectNodeFromDetail(nodeId) {
+      this.selectNode(nodeId, { analyticsSurface: "detail_panel" })
+    },
     handleGuidedLayoutChange({ expanded = false, clearance = 0 } = {}) {
       this.guidedPanelExpanded = expanded
       this.guidedPanelClearance = clearance
@@ -448,6 +521,9 @@ export default {
         : { path: "/atlas" }
 
       if ((nodeId || "") === (this.nodeId || "")) return
+      if (nodeId && options.analyticsSurface) {
+        this.trackNodeOpen(nodeId, options.analyticsSurface)
+      }
       this.$router.push(target)
     },
     selectNodeFromMap(nodeId) {
@@ -482,7 +558,10 @@ export default {
       }
 
       this.pendingMapPinNodeId = nodeId
-      this.selectNode(nodeId, { preserveGuided })
+      this.selectNode(nodeId, {
+        analyticsSurface: "map_marker",
+        preserveGuided,
+      })
     },
     requestMapPinExpansion() {
       // AtlasDetailPanel resets when its node changes. Issue the expansion on
@@ -534,7 +613,10 @@ export default {
         duration,
       }
 
-      this.selectNode(target.id, { preserveGuided: true })
+      this.selectNode(target.id, {
+        analyticsSurface: "guided_journey",
+        preserveGuided: true,
+      })
       this.scheduleGuidedArrival(duration)
       this.announcement = `Traveling to ${target.title}, stop ${index + 1} of ${this.guidedJourney.stopCount}`
     },
@@ -656,7 +738,7 @@ export default {
       if (document.hidden) this.pauseGuidedJourney("visibility")
     },
     selectFromSaved(nodeId) {
-      this.selectNode(nodeId)
+      this.selectNode(nodeId, { analyticsSurface: "saved_drawer" })
       this.announcement = `${getAtlasNode(nodeId)?.title || "Place"} opened`
     },
     goToParent() {
@@ -691,7 +773,7 @@ export default {
       if (!destination) return
 
       this.previousSurpriseNodeId = destination.id
-      this.selectNode(destination.id)
+      this.selectNode(destination.id, { analyticsSurface: "surprise" })
       this.announcement = `Surprise destination: ${destination.title}`
     },
     rememberCamera(camera) {

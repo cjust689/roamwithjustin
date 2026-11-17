@@ -12,8 +12,6 @@
       <a
         v-for="item in photoGear"
         :key="item.title"
-        ref="gearLink"
-        :ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
@@ -35,8 +33,6 @@
       <a
         v-for="item in adventureGear"
         :key="item.title"
-        ref="gearLink"
-        :ref-in-for="true"
         :href="item.link"
         class="gallery-card"
         target="_blank"
@@ -56,8 +52,6 @@
 </template>
 
 <script>
-import { trackClickEvent } from "@/utils/tracking"
-
 export default {
   name: "GearGrid",
   data() {
@@ -213,63 +207,6 @@ export default {
         // Add more clothing, shoes, accessories here
       ],
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      const links = this.$refs.gearLink || []
-
-      if (!Array.isArray(links)) return
-
-      links.forEach(link => {
-        let href = link.getAttribute("href")
-        if (!href || href === "#") return
-
-        try {
-          const url = new URL(href, window.location.origin)
-
-          // 👇 Add or update utm_source param
-          if (!url.searchParams.has("utm_source")) {
-            url.searchParams.append("utm_source", "roamwithjustin")
-            link.href = url.toString()
-          }
-
-          const hostname = url.hostname
-          let eventName = "gear_click"
-          let category = "affiliate"
-          let label = (
-            link.querySelector("h3")?.textContent ||
-            link.textContent ||
-            ""
-          ).trim()
-
-          if (hostname.includes("amazon")) {
-            eventName = "amazon_click"
-            category = "amazon"
-          } else if (
-            hostname.includes("djiglobal") ||
-            hostname.includes("dji")
-          ) {
-            eventName = "dji_click"
-            category = "dji"
-          } else if (hostname.includes("sony")) {
-            eventName = "sony_click"
-            category = "sony"
-          }
-
-          link.addEventListener("click", () => {
-            console.log("🔍 Tracking click for:", label, url.toString())
-            trackClickEvent({
-              url: url.toString(),
-              label,
-              category,
-              eventName,
-            })
-          })
-        } catch (err) {
-          console.warn("Invalid link skipped:", href)
-        }
-      })
-    })
   },
 }
 </script>

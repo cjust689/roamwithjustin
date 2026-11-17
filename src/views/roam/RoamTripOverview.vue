@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-deprecated-v-on-native-modifier -- Vue 2 RouterLink click tracking uses native listeners. -->
 <template>
   <main v-if="trip" class="trip-story">
     <section class="story-hero" :aria-labelledby="`story-title-${trip.id}`">
@@ -20,7 +21,11 @@
           <h1 :id="`story-title-${trip.id}`">{{ trip.name }}</h1>
           <p v-if="trip.description">{{ trip.description }}</p>
           <div class="story-hero-actions">
-            <router-link v-if="trip.atlasHref" :to="trip.atlasHref">
+            <router-link
+              v-if="trip.atlasHref"
+              :to="trip.atlasHref"
+              @click.native="trackAtlasEntry"
+            >
               Explore this trip in Atlas
             </router-link>
             <a v-if="trip.hasItinerary" href="#itinerary">
@@ -124,6 +129,7 @@
               :href="partner.href"
               target="_blank"
               rel="noopener noreferrer"
+              @click="trackPartnerClick(partner)"
             >
               <span>{{ partner.label || "Trip resource" }}</span>
               <strong>{{ partner.name }}</strong>
@@ -138,6 +144,7 @@
               :href="route.link"
               target="_blank"
               rel="noopener noreferrer"
+              @click="trackMapsHandoff"
             >
               <span>Route</span>
               {{ route.label }}
@@ -176,6 +183,7 @@
                 v-if="getLocation(entry.ref).atlasExact"
                 class="location-atlas-link"
                 :to="getLocation(entry.ref).atlasHref"
+                @click.native="trackAtlasEntry"
               >
                 View this stop in Atlas
               </router-link>
@@ -417,7 +425,11 @@
           </p>
         </div>
         <div class="handoff-actions">
-          <router-link v-if="trip.atlasHref" :to="trip.atlasHref">
+          <router-link
+            v-if="trip.atlasHref"
+            :to="trip.atlasHref"
+            @click.native="trackAtlasEntry"
+          >
             Open this journey in Atlas
           </router-link>
           <a
@@ -446,6 +458,7 @@ import { adSenseConfig } from "@/config/adsense.mjs"
 import AdSlot from "@/components/AdSlot.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
 import LocationModal from "@/components/LocationModal.vue"
+import { trackAnalyticsEvent, trackAtlasOpen } from "@/utils/analytics.mjs"
 
 export default {
   name: "TripOverview",
@@ -460,6 +473,7 @@ export default {
     return {
       modalOpen: false,
       activeLocation: null,
+      previousTitle: "",
     }
   },
   computed: {
@@ -492,7 +506,42 @@ export default {
         : "Open a place for photographs and field notes, or jump directly to its Atlas pin when that stop has a mapped presentation."
     },
   },
+  watch: {
+    id() {
+      this.updateDocumentTitle()
+    },
+  },
+  mounted() {
+    this.previousTitle = document.title
+    this.updateDocumentTitle()
+  },
+  // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
+  // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
+  beforeDestroy() {
+    document.title = this.previousTitle
+  },
   methods: {
+    trackAtlasEntry() {
+      trackAtlasOpen({ entrySurface: "trip_story" })
+    },
+    trackMapsHandoff() {
+      trackAnalyticsEvent("maps_handoff_clicked", {
+        content_type: "journey",
+        surface: "itinerary_route",
+      })
+    },
+    trackPartnerClick(partner) {
+      trackAnalyticsEvent("partner_click", {
+        link_type: partner.linkType,
+        partner_id: partner.id,
+        placement: "trip_itinerary_partner",
+      })
+    },
+    updateDocumentTitle() {
+      if (this.trip?.name) {
+        document.title = `${this.trip.name} | Roam With Justin`
+      }
+    },
     getLocation(ref) {
       return this.trip.locations.find(location => location.id === ref) || {}
     },

@@ -40,6 +40,7 @@ import {
   AccountConflictError,
   AccountServiceError,
   createMyPin,
+  deleteMyAccount,
   deleteMyPin,
   exportMyAtlas,
   getMyAtlasState,
@@ -48,6 +49,27 @@ import {
   updateMyPin,
   updateMyProfile,
 } from "./account/service.mjs"
+import {
+  normalizeCreatePlan,
+  normalizeCreateWish,
+  normalizeDeleteAccount,
+  normalizeDeleteWish,
+  normalizePatchWish,
+  normalizePlanMutation,
+  normalizeReplacePlan,
+  normalizeWishQuery,
+} from "./planning/contracts.mjs"
+import {
+  createMyPlan,
+  createMyWish,
+  deleteMyPlan,
+  deleteMyWish,
+  keepMyPlan,
+  listMyPlans,
+  listMyWishes,
+  replaceMyPlan,
+  updateMyWish,
+} from "./planning/service.mjs"
 import {
   CatalogConfigurationError,
   CatalogUnavailableError,
@@ -486,9 +508,32 @@ export async function handleRequest(
   const isMyPins = url.pathname === "/v1/me/pins"
   const myPinMatch = url.pathname.match(/^\/v1\/me\/pins\/(pin_[a-f0-9]{24})$/)
   const isMyPin = Boolean(myPinMatch)
+  const isMyWishes = url.pathname === "/v1/me/bucket-list"
+  const myWishMatch = url.pathname.match(
+    /^\/v1\/me\/bucket-list\/(wish_[a-f0-9]{24})$/
+  )
+  const isMyWish = Boolean(myWishMatch)
+  const isMyPlans = url.pathname === "/v1/me/trip-plans"
+  const myPlanMatch = url.pathname.match(
+    /^\/v1\/me\/trip-plans\/(plan_[a-f0-9]{24})$/
+  )
+  const myPlanKeepMatch = url.pathname.match(
+    /^\/v1\/me\/trip-plans\/(plan_[a-f0-9]{24})\/keep$/
+  )
+  const isMyPlan = Boolean(myPlanMatch)
+  const isMyPlanKeep = Boolean(myPlanKeepMatch)
   const isMyExport = url.pathname === "/v1/me/export"
   const isAccountRoute =
-    isMyProfile || isMyAtlasState || isMyPins || isMyPin || isMyExport
+    isMyProfile ||
+    isMyAtlasState ||
+    isMyPins ||
+    isMyPin ||
+    isMyWishes ||
+    isMyWish ||
+    isMyPlans ||
+    isMyPlan ||
+    isMyPlanKeep ||
+    isMyExport
   const isAdminRoute =
     isInvitationIssue ||
     isInvitationRevoke ||
@@ -506,10 +551,15 @@ export async function handleRequest(
     (isInvitationRevoke && request.method !== "POST") ||
     (isPendingRegistrations && request.method !== "GET") ||
     (isReconciliation && request.method !== "POST") ||
-    (isMyProfile && !["GET", "PATCH"].includes(request.method)) ||
+    (isMyProfile && !["GET", "PATCH", "DELETE"].includes(request.method)) ||
     (isMyAtlasState && request.method !== "GET") ||
     (isMyPins && !["GET", "POST"].includes(request.method)) ||
     (isMyPin && !["PATCH", "DELETE"].includes(request.method)) ||
+    (isMyWishes && !["GET", "POST"].includes(request.method)) ||
+    (isMyWish && !["PATCH", "DELETE"].includes(request.method)) ||
+    (isMyPlans && !["GET", "POST"].includes(request.method)) ||
+    (isMyPlan && !["PATCH", "DELETE"].includes(request.method)) ||
+    (isMyPlanKeep && request.method !== "POST") ||
     (isMyExport && request.method !== "GET")
   ) {
     return errorResponse(405, "method_not_allowed", context)
@@ -657,6 +707,18 @@ export async function handleRequest(
           result.profile.revision
         )
       }
+      if (isMyProfile && request.method === "DELETE") {
+        const service = dependencies.deleteMyAccount || deleteMyAccount
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeDeleteAccount(
+            await readJsonBody(request),
+            request.headers
+          ),
+        })
+        return jsonResponse(result, 200, context)
+      }
       if (isMyProfile) {
         const service = dependencies.updateMyProfile || updateMyProfile
         const result = await service({
@@ -745,6 +807,152 @@ export async function handleRequest(
         )
       }
 
+      if (isMyWishes && request.method === "GET") {
+        const service = dependencies.listMyWishes || listMyWishes
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeWishQuery(url),
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          { wishes: result.wishes, nextCursor: result.nextCursor },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyWishes) {
+        const service = dependencies.createMyWish || createMyWish
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeCreateWish(
+            await readJsonBody(request),
+            request.headers,
+            new Date().getUTCFullYear()
+          ),
+          catalogResolver: dependencies.catalogResolver,
+        })
+        return accountJsonResponse(
+          { wish: result.wish },
+          result.created ? 201 : 200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyWish && request.method === "PATCH") {
+        const service = dependencies.updateMyWish || updateMyWish
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizePatchWish(
+            await readJsonBody(request),
+            myWishMatch[1],
+            request.headers,
+            new Date().getUTCFullYear()
+          ),
+        })
+        return accountJsonResponse(
+          { wish: result.wish },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyWish) {
+        const service = dependencies.deleteMyWish || deleteMyWish
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeDeleteWish(myWishMatch[1], request.headers),
+        })
+        return accountJsonResponse(
+          { deleted: true },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+
+      if (isMyPlans && request.method === "GET") {
+        const service = dependencies.listMyPlans || listMyPlans
+        const result = await service({ environment, identity: accountIdentity })
+        return accountJsonResponse(
+          { plans: result.plans },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyPlans) {
+        const service = dependencies.createMyPlan || createMyPlan
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeCreatePlan(
+            await readJsonBody(request),
+            request.headers,
+            new Date().getUTCFullYear()
+          ),
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          { plan: result.plan },
+          result.created ? 201 : 200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyPlanKeep) {
+        const service = dependencies.keepMyPlan || keepMyPlan
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizePlanMutation(myPlanKeepMatch[1], request.headers),
+        })
+        return accountJsonResponse(
+          { plan: result.plan },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyPlan && request.method === "PATCH") {
+        const service = dependencies.replaceMyPlan || replaceMyPlan
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeReplacePlan(
+            await readJsonBody(request),
+            myPlanMatch[1],
+            request.headers,
+            new Date().getUTCFullYear()
+          ),
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          { plan: result.plan },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyPlan) {
+        const service = dependencies.deleteMyPlan || deleteMyPlan
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizePlanMutation(myPlanMatch[1], request.headers),
+        })
+        return accountJsonResponse(
+          { deleted: true },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+
       const format = normalizeExportQuery(url)
       const service = dependencies.exportMyAtlas || exportMyAtlas
       const result = await service({
@@ -822,6 +1030,8 @@ export async function handleRequest(
           "profile_not_found",
           "account_not_active",
           "pin_not_found",
+          "wish_not_found",
+          "plan_not_found",
         ].includes(error.code)
       ) {
         return errorResponse(404, "not_found", context)
