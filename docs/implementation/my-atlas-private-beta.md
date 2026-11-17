@@ -61,6 +61,7 @@ verification:
     - Owner reported that the Uvita pin persisted through reload and a second sign in even though the earlier browser build displayed a false save failure
     - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, chronological destination playback, cumulative reveal, and curved connection tests
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
+    - Headless Chrome verified search, active destination editor, then result-list document and visual order at desktop and 390 pixel mobile widths without horizontal overflow
     - A 390 pixel emulated mobile viewport reported 390 pixel root, body, panel, and input boundaries with no horizontal overflow
     - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
@@ -265,6 +266,8 @@ ceiling before inviting external users.
 - [x] Add an undated state, multiple optional visit years, and year editing
       after pin creation. Retain optional month compatibility in the API while
       keeping the current editor and timeline at year precision.
+- [x] Place the active Add destination editor directly below its search control
+      and before the remaining catalog results on desktop and mobile.
 - [x] Add safe derived statistics, exact year and undated filters,
       chronological destination playback with cumulative reveal, animated
       curved hops, deterministic year-colored pins, destination cycling,
@@ -381,6 +384,11 @@ content-addressed JavaScript and CSS returned 200 and contained the new timeline
 copy, plane marker styles, Add year control, and exact 2.9rem alignment rule.
 This verifies deployment of the tested implementation without claiming an
 authenticated production playback session.
+
+The search interaction was then verified with Uvita at 1084 by 749 and 390 by
+844. In both layouts the search control preceded the active Add destination
+editor, the editor preceded the catalog result list, and the document had no
+horizontal overflow.
 
 ## External references checked
 
