@@ -8,6 +8,11 @@ import { REGISTRY_OBJECT_NAME } from "../registration/service.mjs"
 import { projectCatalogPlace } from "../catalog/projection.mjs"
 import { WorkerPlaceCatalog, createCatalogResolver } from "../catalog/store.mjs"
 import { isNormalizedPinMemory } from "./memory.mjs"
+import {
+  CUSTOM_PLACE_ID_PATTERN,
+  isNormalizedCustomPlace,
+  projectCustomPlace,
+} from "./custom-place.mjs"
 
 export class AccountConflictError extends Error {
   constructor(code) {
@@ -137,11 +142,50 @@ function ownerPinMemory(pin) {
   return pin.memory
 }
 
+function ownerPinPlaceFields(pin) {
+  if (CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)) {
+    if (!isNormalizedCustomPlace(pin.customPlace)) {
+      throw new AccountServiceError()
+    }
+    return Object.freeze({ customPlace: pin.customPlace })
+  }
+  if (pin.customPlace !== undefined && pin.customPlace !== null) {
+    throw new AccountServiceError()
+  }
+  return Object.freeze({})
+}
+
 function publicOwnerPin(pin) {
   return Object.freeze({
     ...pin,
+    ...ownerPinPlaceFields(pin),
     ...publicPinTiming(pin),
     memory: ownerPinMemory(pin),
+  })
+}
+
+async function projectOwnerPins(pins, placeCatalog, environment) {
+  const catalogPins = pins.filter(
+    pin => !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+  )
+  let records = []
+  if (catalogPins.length) {
+    const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
+    records = await catalog.resolveMany(catalogPins.map(pin => pin.placeId))
+  }
+  const recordsByPlaceId = new Map(
+    catalogPins.map((pin, index) => [pin.placeId, records[index]])
+  )
+  return pins.map(pin => {
+    const place = CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+      ? projectCustomPlace(pin.placeId, pin.customPlace)
+      : projectCatalogPlace(recordsByPlaceId.get(pin.placeId))
+    return Object.freeze({
+      pinId: pin.pinId,
+      ...place,
+      ...publicPinTiming(pin),
+      memory: ownerPinMemory(pin),
+    })
   })
 }
 
@@ -158,21 +202,9 @@ export async function getMyAtlasState({ environment, identity, placeCatalog }) {
   const result = expectedResult(
     await owner.user.exportOwnerState(owner.identityDigest)
   )
-  let records = []
-  if (result.pins.length) {
-    const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
-    records = await catalog.resolveMany(result.pins.map(pin => pin.placeId))
-  }
   let pins
   try {
-    pins = result.pins.map((pin, index) =>
-      Object.freeze({
-        pinId: pin.pinId,
-        ...projectCatalogPlace(records[index]),
-        ...publicPinTiming(pin),
-        memory: ownerPinMemory(pin),
-      })
-    )
+    pins = await projectOwnerPins(result.pins, placeCatalog, environment)
   } catch {
     throw new AccountServiceError()
   }
@@ -234,26 +266,35 @@ export async function createMyPin({
 }) {
   const timing = publicPinTiming(input)
   const memory = input.memory === undefined ? "" : input.memory
-  const place = await assertCatalogPlace(
-    input.placeId,
-    catalogResolver,
-    environment
-  )
   const owner = await ownerContext(environment, identity)
+  const customPlace = input.customPlace
+  const placeId = customPlace
+    ? `custom:${(
+        await sha256(
+          `${owner.userId}\u0000${customPlace.name}\u0000${customPlace.coordinates.join(",")}\u0000custom-place`
+        )
+      ).slice(0, 24)}`
+    : input.placeId
+  const place = customPlace
+    ? projectCustomPlace(placeId, customPlace)
+    : await assertCatalogPlace(placeId, catalogResolver, environment)
   const mutation = await mutationMetadata(owner, input, "create-pin", {
-    placeId: input.placeId,
+    placeId,
+    ...(customPlace ? { customPlace } : {}),
     ...timing,
     memory,
   })
-  const pinId = `pin_${(
-    await sha256(`${owner.userId}\u0000${input.placeId}`)
-  ).slice(0, 24)}`
+  const pinId = `pin_${(await sha256(`${owner.userId}\u0000${placeId}`)).slice(
+    0,
+    24
+  )}`
   const result = expectedResult(
     await owner.user.createOwnerPin({
       identityDigest: owner.identityDigest,
       expectedRevision: input.expectedRevision,
       pinId,
-      placeId: input.placeId,
+      placeId,
+      ...(customPlace ? { customPlace } : {}),
       ...timing,
       memory,
       now,
@@ -265,7 +306,7 @@ export async function createMyPin({
     profile: publicProfile(result.profile),
     pin: Object.freeze({
       pinId: result.pin.pinId,
-      ...projectCatalogPlace(place),
+      ...(customPlace ? place : projectCatalogPlace(place)),
       ...publicPinTiming(result.pin),
       memory: ownerPinMemory(result.pin),
     }),
@@ -279,13 +320,14 @@ export async function updateMyPin({
   catalogResolver,
   now = new Date().toISOString(),
 }) {
-  const patch =
+  let patch =
     input.patch.visitedYears !== undefined ||
     input.patch.visitedDates !== undefined
       ? Object.freeze({ ...input.patch, ...publicPinTiming(input.patch) })
       : input.patch
   if (patch.placeId) {
     await assertCatalogPlace(patch.placeId, catalogResolver, environment)
+    patch = Object.freeze({ ...patch, customPlace: null })
   }
   const owner = await ownerContext(environment, identity)
   const mutation = await mutationMetadata(

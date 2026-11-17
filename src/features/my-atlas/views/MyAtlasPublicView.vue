@@ -132,8 +132,8 @@
             {{ attribution.provider }}
           </a>
           <span v-else>{{ attribution.provider }}</span>
-          under {{ attribution.license }}. Map rendering uses MapLibre and the
-          configured tile provider.
+          under {{ attribution.license }}. Custom pins are supplied by the Atlas
+          owner. Map rendering uses MapLibre and the configured tile provider.
         </p>
       </template>
     </section>
@@ -372,6 +372,7 @@ export default {
     },
     formatVisitedDates,
     placeLabel(place) {
+      if (place.placeType === "custom") return "Custom map pin"
       const label = formatPlaceLabel(place)
       return place.placeType === "country"
         ? place.placeId

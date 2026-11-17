@@ -148,7 +148,9 @@ function csvCell(value) {
 }
 
 function exportCsv(result, context) {
-  const rows = ["pinId,placeId,visitedYears,visitedDates,memory"]
+  const rows = [
+    "pinId,placeId,customName,longitude,latitude,visitedYears,visitedDates,memory",
+  ]
   for (const pin of result.pins) {
     const visitedDates = Array.isArray(pin.visitedDates)
       ? pin.visitedDates
@@ -157,6 +159,9 @@ function exportCsv(result, context) {
       [
         pin.pinId,
         pin.placeId,
+        pin.customPlace?.name || "",
+        pin.customPlace?.coordinates?.[0] ?? "",
+        pin.customPlace?.coordinates?.[1] ?? "",
         pin.visitedYears.join("|"),
         visitedDates
           .map(date =>

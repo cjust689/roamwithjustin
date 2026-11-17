@@ -14,6 +14,7 @@ export function normalizeSearchText(value) {
 export function formatPlaceLabel(place) {
   if (!place) return ""
   if (place.placeType === "country") return place.name
+  if (place.placeType === "custom") return `${place.name}, Custom map pin`
 
   return [place.name, place.admin1Name, place.countryName]
     .filter(Boolean)

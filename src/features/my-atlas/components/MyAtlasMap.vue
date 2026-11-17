@@ -17,6 +17,17 @@
         <i :style="{ backgroundColor: item.color }"></i>{{ item.label }}
       </span>
     </div>
+    <div
+      v-if="ready && placementActive"
+      class="my-atlas-placement-help"
+      role="status"
+    >
+      <strong>Place your custom pin</strong>
+      <span v-if="placementCoordinates">
+        Drag the gold pin to refine its position.
+      </span>
+      <span v-else>Click or tap the map to choose its position.</span>
+    </div>
   </section>
 </template>
 
@@ -97,11 +108,20 @@ export default {
       type: Boolean,
       default: false,
     },
+    placementActive: {
+      type: Boolean,
+      default: false,
+    },
+    placementCoordinates: {
+      type: Array,
+      default: null,
+    },
   },
   data() {
     return {
       map: null,
       markers: [],
+      placementMarker: null,
       flightMarker: null,
       flightFrame: null,
       flightStartTimer: null,
@@ -148,6 +168,15 @@ export default {
         this.focusSelectedPlace()
       }
     },
+    placementActive() {
+      this.syncPlacementMarker()
+    },
+    placementCoordinates: {
+      deep: true,
+      handler() {
+        this.syncPlacementMarker()
+      },
+    },
   },
   mounted() {
     this.initializeMap()
@@ -157,6 +186,7 @@ export default {
   beforeDestroy() {
     this.stopFlight()
     this.clearMarkers()
+    this.removePlacementMarker()
     if (this.map) this.map.remove()
   },
   methods: {
@@ -204,8 +234,10 @@ export default {
           }
           this.initializeConnections()
           this.renderMarkers()
+          this.syncPlacementMarker()
           this.showPlacesOverview()
         })
+        this.map.on("click", this.handlePlacementClick)
         this.map.on("moveend", this.renderMarkers)
         this.map.on("error", event => {
           if (!this.ready) this.error = event?.error?.message || "Map failed"
@@ -217,6 +249,100 @@ export default {
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
+    },
+    normalizedPlacementCoordinates(value) {
+      if (
+        !Array.isArray(value) ||
+        value.length !== 2 ||
+        !value.every(Number.isFinite)
+      ) {
+        return null
+      }
+      return value.map(coordinate => {
+        const rounded = Math.round(coordinate * 1_000_000) / 1_000_000
+        return Object.is(rounded, -0) ? 0 : rounded
+      })
+    },
+    emitPlacementCoordinates(value) {
+      const coordinates = this.normalizedPlacementCoordinates(value)
+      if (coordinates) this.$emit("place-custom", coordinates)
+    },
+    handlePlacementClick(event) {
+      if (!this.placementActive) return
+      this.emitPlacementCoordinates([event.lngLat.wrap().lng, event.lngLat.lat])
+    },
+    removePlacementMarker() {
+      if (this.placementMarker) this.placementMarker.remove()
+      this.placementMarker = null
+    },
+    syncPlacementMarker() {
+      if (!this.map || !this.ready) return
+      this.map.getCanvas().style.cursor = this.placementActive
+        ? "crosshair"
+        : ""
+      const coordinates = this.normalizedPlacementCoordinates(
+        this.placementCoordinates
+      )
+      if (!this.placementActive || !coordinates) {
+        this.removePlacementMarker()
+        return
+      }
+      if (this.placementMarker) {
+        this.placementMarker.setLngLat(coordinates)
+        return
+      }
+
+      const element = document.createElement("button")
+      element.type = "button"
+      element.className = "my-atlas-custom-placement-pin"
+      element.setAttribute(
+        "aria-label",
+        "Custom pin position. Drag it, or use arrow keys to adjust it."
+      )
+      element.title = "Drag to position this custom pin"
+      element.addEventListener("click", event => event.stopPropagation())
+      element.addEventListener("keydown", event => {
+        if (!event.key.startsWith("Arrow")) return
+        event.preventDefault()
+        event.stopPropagation()
+        const current = this.placementMarker?.getLngLat()
+        if (!current) return
+        const step = event.shiftKey ? 0.25 : 0.025
+        const longitude =
+          current.lng +
+          (event.key === "ArrowLeft"
+            ? -step
+            : event.key === "ArrowRight"
+              ? step
+              : 0)
+        const latitude =
+          current.lat +
+          (event.key === "ArrowDown"
+            ? -step
+            : event.key === "ArrowUp"
+              ? step
+              : 0)
+        this.emitPlacementCoordinates([
+          Math.max(-180, Math.min(180, longitude)),
+          Math.max(-85.051129, Math.min(85.051129, latitude)),
+        ])
+      })
+
+      this.placementMarker = new maplibregl.Marker({
+        element,
+        anchor: "bottom",
+        draggable: true,
+        rotationAlignment: "viewport",
+        pitchAlignment: "viewport",
+      })
+        .setLngLat(coordinates)
+        .addTo(this.map)
+      this.placementMarker.on("dragend", () => {
+        const coordinate = this.placementMarker?.getLngLat()
+        if (coordinate) {
+          this.emitPlacementCoordinates([coordinate.wrap().lng, coordinate.lat])
+        }
+      })
     },
     collapseInitialAttribution() {
       if (this.attributionCollapsedInitially) return
@@ -628,6 +754,65 @@ export default {
   gap: 0.32rem;
   max-width: min(24rem, calc(100vw - 5rem));
   pointer-events: none;
+}
+
+.my-atlas-placement-help {
+  position: absolute;
+  z-index: 3;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  max-width: min(19rem, calc(100% - 2rem));
+  gap: 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(242, 199, 110, 0.55);
+  border-radius: 0.8rem;
+  color: #edf7f2;
+  background: rgba(8, 17, 19, 0.92);
+  box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.32);
+  font-size: 0.68rem;
+}
+
+.my-atlas-placement-help strong {
+  color: #f2c76e;
+}
+
+.my-atlas-placement-help span {
+  color: #b6c7c1;
+}
+
+::v-deep .my-atlas-custom-placement-pin {
+  width: 2rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: grab;
+}
+
+::v-deep .my-atlas-custom-placement-pin::before {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.1rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 3px solid #f7e4b6;
+  border-radius: 50% 50% 50% 0;
+  background: #e6ba68;
+  box-shadow:
+    0 0 0 5px rgba(230, 186, 104, 0.18),
+    0 0.55rem 1.1rem rgba(0, 0, 0, 0.48);
+  content: "";
+  transform: rotate(-45deg);
+}
+
+::v-deep .my-atlas-custom-placement-pin:active {
+  cursor: grabbing;
+}
+
+::v-deep .my-atlas-custom-placement-pin:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 0.2rem;
 }
 
 .my-atlas-year-legend span {

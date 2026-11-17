@@ -92,6 +92,9 @@ verification:
     - Staging Worker 2fbce736-0799-4235-a7b5-018727e39b64 returned 200 health after the backward-compatible favorite-memory API deployed
     - Pull request 83 merged current develop to main as ea1af7cb5c66301d13bf206f084fbe135fa69097, and Pages workflow 44019105927 succeeded
     - Live content-addressed My Atlas chunks 239.39312812 and 229.528c3c46 returned 200 and contained Favorite memory, Save destination, and the public-sharing disclosure
+    - Twenty-four Workers-runtime tests passed with custom pins stored only in the authenticated owner's object, projected without catalog resolution, shared only with the whole Atlas, and rejected when stored state is corrupt
+    - Browser and Worker contract tests passed strict custom-name and coordinate normalization, server-generated owner-scoped custom IDs, API projection, and formula-safe CSV export
+    - Headless Chrome at 390 pixels verified a Canyonlands custom-name entry, map click placement, rendered draggable marker, transition into the existing date and memory editor, and zero horizontal overflow
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
     - npm run my-atlas:test verified year-only visitor formatting while retaining API compatibility with stored month values
     - Pull request 51 merged to develop as e2b3ae448cfef3fffc01cefb7485f104ce75a956 after its required validation passed
@@ -276,6 +279,11 @@ ceiling before inviting external users.
       deprecated new selections, and pins over the 300 item cap.
 - [x] Run spots through the existing authenticated owner-scoped pin lifecycle
       and safe public projection rather than a separate mutation path.
+- [x] Add an explicit owner-created custom-pin fallback for catalog misses.
+      Bound and normalize the plain-text name and coordinates, generate IDs on
+      the server, store the entry only in the authenticated owner's object,
+      exclude it from inferred geography statistics, and disclose it when the
+      whole Atlas is shared.
 - [x] Preserve removed records as resolvable deprecated identities.
 - [x] Keep the proof disabled by default and enable it only through the
       explicit GitHub repository variable used by validation and Pages.
@@ -495,6 +503,15 @@ destinations could stay grouped. The connection layer exposed its new dark
 underlay and a three-pixel line at 0.94 opacity. The 390 pixel mobile fixture
 retained the overview cluster, absolute marker positioning, and a 390 pixel
 document width with no horizontal overflow.
+
+The owner-created custom-pin path was verified separately with an authenticated
+account fixture at 390 by 844. Entering `Canyonlands National Park`, sending a
+map placement at longitude -109.88016 and latitude 38.32687, and continuing the
+flow rendered the gold draggable marker and then the existing date and favorite
+memory editor with the `Custom map pin` label. The pending payload retained the
+normalized name and coordinates, the placement mode closed after continuing,
+no authentication error appeared, and the root, body, and scroll widths all
+remained 390 pixels.
 
 ## External references checked
 

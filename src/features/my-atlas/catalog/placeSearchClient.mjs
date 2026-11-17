@@ -1,6 +1,4 @@
 import { searchPlaceCatalog } from "./search.mjs"
-import { isMyAtlasPlaceType } from "./placeTypes.mjs"
-
 export class MyAtlasPlaceSearchError extends Error {
   constructor(
     message,
@@ -26,7 +24,7 @@ function isCanonicalPlace(record) {
     record &&
     typeof record.placeId === "string" &&
     /^(?:iso-country:[A-Z]{2}|geonames:\d+)$/.test(record.placeId) &&
-    isMyAtlasPlaceType(record.placeType) &&
+    ["country", "city", "spot"].includes(record.placeType) &&
     typeof record.name === "string" &&
     record.name.length > 0 &&
     (coordinates === null ||

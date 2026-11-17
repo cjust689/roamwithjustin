@@ -159,6 +159,13 @@ async function readJson(response) {
           coordinates: [-110.58846, 44.42796],
           visitedYears: [2025],
         },
+        {
+          placeId: "custom:abcdef1234567890abcdef12",
+          placeType: "custom",
+          name: "York Minster",
+          coordinates: [-1.0819, 53.9623],
+          visitedYears: [2022],
+        },
       ],
     },
     catalog: {
@@ -822,6 +829,80 @@ for (const token of [
   )
 }
 
+{
+  const token = await signToken()
+  let captured
+  const response = await workerResponse(
+    "/v1/me/pins",
+    {
+      method: "POST",
+      token,
+      origin: ALLOWED_ORIGIN,
+      idempotencyKey: "bcbcbcbc-bcbc-4bcb-8bcb-bcbcbcbcbcbc",
+      ifMatch: '"rev-4"',
+      json: {
+        customPlace: {
+          name: "  Krka   National Park  ",
+          coordinates: [15.9721704, 43.8012304],
+        },
+        visitedDates: [{ year: 2025 }],
+      },
+    },
+    {},
+    {
+      createMyPin: async options => {
+        captured = options
+        return {
+          created: true,
+          profile: { revision: 5 },
+          pin: {
+            pinId: "pin_abcdef1234567890abcdef12",
+            placeId: "custom:abcdef1234567890abcdef12",
+            placeType: "custom",
+            name: "Krka National Park",
+            coordinates: [15.97217, 43.80123],
+            visitedDates: [{ year: 2025 }],
+            visitedYears: [2025],
+            memory: "",
+          },
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 201)
+  assert.deepEqual(captured.input.customPlace, {
+    name: "Krka National Park",
+    coordinates: [15.97217, 43.80123],
+  })
+  assert.equal(Object.hasOwn(captured.input, "placeId"), false)
+}
+
+{
+  const token = await signToken()
+  let called = false
+  const response = await workerResponse(
+    "/v1/me/pins",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: "bdbdbdbd-bdbd-4bdb-8bdb-bdbdbdbdbdbd",
+      ifMatch: '"rev-1"',
+      json: {
+        placeId: "geonames:3621138",
+        customPlace: { name: "Uvita", coordinates: [-83.7395, 9.17039] },
+      },
+    },
+    {},
+    {
+      createMyPin: async () => {
+        called = true
+      },
+    }
+  )
+  assert.equal(response.status, 400)
+  assert.equal(called, false)
+}
+
 for (const memory of [
   "a".repeat(256),
   "<img src=x onerror=alert(1)>",
@@ -872,6 +953,16 @@ for (const memory of [
             visitedYears: [2024, 2026],
             memory: '=HYPERLINK("https://example.invalid","open")',
           },
+          {
+            pinId: "pin_abcdef1234567890abcdef12",
+            placeId: "custom:abcdef1234567890abcdef12",
+            customPlace: {
+              name: "=Unsafe custom title",
+              coordinates: [-109.88016, 38.32687],
+            },
+            visitedYears: [2025],
+            memory: "",
+          },
         ],
       }),
     }
@@ -879,8 +970,13 @@ for (const memory of [
   assert.equal(response.status, 200)
   assert.match(response.headers.get("Content-Type"), /text\/csv/)
   const csv = await response.text()
-  assert.match(csv, /visitedDates,memory/)
+  assert.match(
+    csv,
+    /pinId,placeId,customName,longitude,latitude,visitedYears,visitedDates,memory/
+  )
   assert.match(csv, /geonames:3621138/)
+  assert.match(csv, /custom:abcdef1234567890abcdef12/)
+  assert.match(csv, /,'=Unsafe custom title,/)
   assert.match(csv, /"'=HYPERLINK\(""https:\/\/example\.invalid""/)
 }
 
@@ -1232,6 +1328,13 @@ await assert.rejects(
           coordinates: [-110.58846, 44.42796],
           visitedYears: [2025],
         },
+        {
+          placeId: "custom:abcdef1234567890abcdef12",
+          placeType: "custom",
+          name: "York Minster",
+          coordinates: [-1.0819, 53.9623],
+          visitedYears: [2022],
+        },
       ],
     },
     catalog: {
@@ -1258,6 +1361,7 @@ await assert.rejects(
   assert.equal(atlas.places[0].name, "Uvita")
   assert.equal(atlas.places[0].memory, "The tide revealed the whale tail.")
   assert.equal(atlas.places[1].spotKind, "National park")
+  assert.equal(atlas.places[2].placeType, "custom")
 }
 
 {
@@ -1324,6 +1428,44 @@ await assert.rejects(
     },
   })
   assert.equal(created.revision, 3)
+
+  const customCreated = await createMyAtlasPin({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    customPlace: {
+      name: "  Canyonlands   National Park ",
+      coordinates: [-109.8801604, 38.3268704],
+    },
+    visitedDates: [{ year: 2025 }],
+    revision: 3,
+    fetchImpl: async (_url, options) => {
+      assert.deepEqual(JSON.parse(options.body), {
+        customPlace: {
+          name: "Canyonlands National Park",
+          coordinates: [-109.88016, 38.32687],
+        },
+        visitedDates: [{ year: 2025 }],
+        memory: "",
+      })
+      return new Response(
+        JSON.stringify({
+          pin: {
+            pinId: "pin_abcdef1234567890abcdef12",
+            placeId: "custom:abcdef1234567890abcdef12",
+            placeType: "custom",
+            name: "Canyonlands National Park",
+            coordinates: [-109.88016, 38.32687],
+            visitedDates: [{ year: 2025 }],
+            visitedYears: [2025],
+            memory: "",
+          },
+        }),
+        { status: 201, headers: { ETag: '"rev-4"' } }
+      )
+    },
+  })
+  assert.equal(customCreated.revision, 4)
+  assert.equal(customCreated.pin.placeType, "custom")
 
   const updated = await updateMyAtlasPin({
     apiBaseUrl: "https://api.example.com",
@@ -1412,6 +1554,28 @@ await assert.rejects(
         },
       }),
     error => error.code === "invalid_memory"
+  )
+  assert.equal(called, false)
+}
+
+for (const customPlace of [
+  { name: "York <Minster>", coordinates: [-1.0827, 53.9619] },
+  { name: "Arches National Park", coordinates: [-109.6, 91] },
+]) {
+  let called = false
+  await assert.rejects(
+    () =>
+      createMyAtlasPin({
+        apiBaseUrl: "https://api.example.com",
+        accessToken: "owner-token",
+        customPlace,
+        revision: 1,
+        fetchImpl: async () => {
+          called = true
+          throw new Error("Unsafe custom place must not be sent.")
+        },
+      }),
+    error => error.code === "invalid_custom_place"
   )
   assert.equal(called, false)
 }
