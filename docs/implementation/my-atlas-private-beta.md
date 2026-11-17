@@ -62,6 +62,7 @@ verification:
     - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, chronological destination playback, cumulative reveal, and curved connection tests
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified search, active destination editor, then result-list document and visual order at desktop and 390 pixel mobile widths without horizontal overflow
+    - Headless Chrome verified the feature-gated My Atlas homepage card, three-card desktop and stacked mobile layouts, exact /my-atlas navigation, and no horizontal overflow
     - A 390 pixel emulated mobile viewport reported 390 pixel root, body, panel, and input boundaries with no horizontal overflow
     - Staging Worker deployment c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
@@ -268,6 +269,8 @@ ceiling before inviting external users.
       keeping the current editor and timeline at year precision.
 - [x] Place the active Add destination editor directly below its search control
       and before the remaining catalog results on desktop and mobile.
+- [x] Add a feature-gated homepage discovery card that routes visitors directly
+      to My Atlas and remains responsive with the existing Atlas and guide cards.
 - [x] Add safe derived statistics, exact year and undated filters,
       chronological destination playback with cumulative reveal, animated
       curved hops, deterministic year-colored pins, destination cycling,
@@ -389,6 +392,12 @@ The search interaction was then verified with Uvita at 1084 by 749 and 390 by
 844. In both layouts the search control preceded the active Add destination
 editor, the editor preceded the catalog result list, and the document had no
 horizontal overflow.
+
+The feature-enabled homepage was verified with three photographic discovery
+cards at desktop width and a deliberate single-column stack at 390 pixels. All
+mobile cards measured 369 pixels inside the 390 pixel viewport, the document
+had no horizontal overflow, and activating the My Atlas card changed the route
+to `/my-atlas`.
 
 ## External references checked
 
