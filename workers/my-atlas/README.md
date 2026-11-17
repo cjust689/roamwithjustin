@@ -83,8 +83,10 @@ match with usable coordinates. Spots use the same caller-derived per-user
 Durable Object and do not add a user-addressed mutation route.
 `npm run my-atlas:catalog:worker` converts the ignored full catalog into
 immutable gzip resolution and search shards plus `catalog/current.json`. The
-staging bucket contains the active `geonames-2026-11-16` release, and live
-searches verified R2 reads. No production catalog bucket is bound. Release
+staging bucket contains the active `geonames-2026-11-17-spots` release, and
+live country, city, spot, and exact-ID searches verified R2 reads. The intact
+`geonames-2026-11-16` release remains available for reversal. No production
+catalog bucket is bound. Release
 shards must be uploaded and verified before the current manifest is changed.
 The authenticated browser can load saved state,
 persist pin additions and removals, publish or unpublish its Atlas, and copy the
