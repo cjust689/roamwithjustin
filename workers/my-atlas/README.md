@@ -33,6 +33,14 @@ Routes:
 - `GET /v1/me/export?format=json|csv` exports the owner's safe profile and pin
   state.
 
+Owner routes never accept a target user ID. The Worker derives the qualified
+issuer and subject from the verified bearer token, resolves that digest through
+the registry, opens only the assigned per-user Durable Object, and supplies the
+same digest to every object operation. The object rejects a mismatched digest.
+Consequently, guessing another pin ID still queries only the caller's object.
+Automated two-account tests cover isolated reads and exports plus rejected
+cross-owner update and delete attempts.
+
 Run it locally with `npm run my-atlas:worker:dev`. Validate the Worker bundle
 without deploying it with `npm run my-atlas:worker:check`. Cryptographic token
 acceptance and rejection tests run through `npm run my-atlas:worker:test`.

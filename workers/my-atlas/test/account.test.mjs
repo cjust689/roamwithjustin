@@ -26,6 +26,11 @@ const IDENTITY = {
   subject: "google-oauth2|account-owner",
 }
 const USER_ID = "usr_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
+const SECOND_IDENTITY = {
+  issuer: "https://roamwithjustin.us.auth0.com/",
+  subject: "google-oauth2|second-account-owner",
+}
+const SECOND_USER_ID = "usr_cccccccc-cccc-4ccc-8ccc-cccccccccccc"
 
 function environment() {
   return {
@@ -70,6 +75,36 @@ async function registerOwner() {
     now: NOW,
     turnstileVerifier: async () => true,
     userIdFactory: () => USER_ID,
+  })
+}
+
+async function registerSecondOwner() {
+  const inviteCode = "second_account_test_invitation_1234567890"
+  const digest = await hashInviteCode(inviteCode, PEPPER)
+  await registry().issueInvitation({
+    digest,
+    maxUses: 1,
+    createdAt: NOW,
+    expiresAt: EXPIRES,
+  })
+  const input = normalizeRegistrationInput(
+    {
+      inviteCode,
+      handle: "second-owner",
+      displayName: "Second Owner",
+      turnstileToken: "test-turnstile-token",
+      acceptTerms: true,
+      acceptPrivacy: true,
+    },
+    "12121212-1212-4212-8212-121212121212"
+  )
+  return registerBetaAccount({
+    environment: environment(),
+    identity: SECOND_IDENTITY,
+    input,
+    now: NOW,
+    turnstileVerifier: async () => true,
+    userIdFactory: () => SECOND_USER_ID,
   })
 }
 
@@ -212,6 +247,110 @@ describe("private owner profile and pin services", () => {
         now: NOW,
       })
     ).rejects.toMatchObject({ code: "duplicate_place" })
+  })
+
+  it("isolates reads, updates, exports, and deletes between two active owners", async () => {
+    const ownerPin = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: pinInput({
+        placeId: "geonames:3621138",
+        visitedYears: [2024],
+        expectedRevision: 1,
+        idempotencyKey: "13131313-1313-4313-8313-131313131313",
+      }),
+      catalogResolver,
+      now: NOW,
+    })
+    await registerSecondOwner()
+    const secondPin = await createMyPin({
+      environment: environment(),
+      identity: SECOND_IDENTITY,
+      input: pinInput({
+        placeId: "geonames:3621138",
+        visitedYears: [2025],
+        expectedRevision: 1,
+        idempotencyKey: "14141414-1414-4414-8414-141414141414",
+      }),
+      catalogResolver,
+      now: NOW,
+    })
+
+    expect(ownerPin.pin.pinId).not.toBe(secondPin.pin.pinId)
+    expect(
+      await listMyPins({
+        environment: environment(),
+        identity: IDENTITY,
+        input: { limit: 50, cursor: "" },
+      })
+    ).toMatchObject({
+      profile: { userId: USER_ID, pinCount: 1 },
+      pins: [{ pinId: ownerPin.pin.pinId, visitedYears: [2024] }],
+    })
+    expect(
+      await listMyPins({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+        input: { limit: 50, cursor: "" },
+      })
+    ).toMatchObject({
+      profile: { userId: SECOND_USER_ID, pinCount: 1 },
+      pins: [{ pinId: secondPin.pin.pinId, visitedYears: [2025] }],
+    })
+
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+        input: {
+          pinId: ownerPin.pin.pinId,
+          patch: { visitedYears: [2026] },
+          expectedRevision: 2,
+          idempotencyKey: "15151515-1515-4515-8515-151515151515",
+        },
+        catalogResolver,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "pin_not_found" })
+    await expect(
+      deleteMyPin({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+        input: {
+          pinId: ownerPin.pin.pinId,
+          expectedRevision: 2,
+          idempotencyKey: "16161616-1616-4616-8616-161616161616",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "pin_not_found" })
+
+    expect(
+      await exportMyAtlas({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+      })
+    ).toMatchObject({
+      profile: { userId: SECOND_USER_ID, revision: 2 },
+      pins: [{ pinId: secondPin.pin.pinId, visitedYears: [2025] }],
+    })
+    expect(
+      await getMyProfile({
+        environment: environment(),
+        identity: IDENTITY,
+      })
+    ).toMatchObject({
+      profile: { userId: USER_ID, pinCount: 1, revision: 2 },
+    })
+    await expect(
+      getMyProfile({
+        environment: environment(),
+        identity: {
+          issuer: IDENTITY.issuer,
+          subject: "google-oauth2|unregistered-owner",
+        },
+      })
+    ).rejects.toMatchObject({ code: "registration_not_found" })
   })
 
   it("serializes concurrent revision writes and enforces the 300-pin ceiling", async () => {
