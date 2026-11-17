@@ -105,6 +105,7 @@ export default {
       flightCleanupTimer: null,
       ready: false,
       error: "",
+      attributionCollapsedInitially: false,
     }
   },
   computed: {
@@ -174,6 +175,9 @@ export default {
           new maplibregl.AttributionControl({ compact: true }),
           "bottom-right"
         )
+        this.collapseInitialAttribution()
+        this.map.on("styledata", this.collapseInitialAttribution)
+        this.map.on("sourcedata", this.collapseInitialAttribution)
         this.map.addControl(
           new maplibregl.NavigationControl({ visualizePitch: true }),
           "bottom-left"
@@ -208,6 +212,21 @@ export default {
     clearMarkers() {
       this.markers.forEach(marker => marker.remove())
       this.markers = []
+    },
+    collapseInitialAttribution() {
+      if (this.attributionCollapsedInitially) return
+      const attribution = this.$refs.map?.querySelector(
+        ".maplibregl-ctrl-attrib.maplibregl-compact"
+      )
+      if (
+        !attribution ||
+        attribution.classList.contains("maplibregl-attrib-empty")
+      ) {
+        return
+      }
+      attribution.classList.remove("maplibregl-compact-show")
+      attribution.removeAttribute("open")
+      this.attributionCollapsedInitially = true
     },
     connectionGeoJson() {
       const features = this.showConnections
