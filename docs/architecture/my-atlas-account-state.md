@@ -76,6 +76,9 @@ verification:
     - Twenty-four Workers-runtime tests passed after custom-pin persistence, owner-state projection, public projection, catalog bypass, and corrupt-state coverage were added
     - Browser and Worker tests passed strict custom-name and coordinate validation, server-generated custom IDs, normalized API responses, and formula-safe custom CSV fields
     - Headless Chrome at 390 pixels verified the authenticated custom-pin form, map placement event, rendered placement marker, shared date and memory editor, and zero horizontal overflow
+    - Pull requests 87 and 88 passed required validation, merged through protected develop and main, and Pages workflow 44025229521 deployed main merge c54ea44490c05014698ffb2a0cfbcdd076ee12c4
+    - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health with the backward-compatible custom-pin API
+    - Live content-addressed chunks 102.9bc646f9.js, 850.f2e2b9be.js, and 102.fa12fe12.css returned 200 with the custom-pin prompt, map event, disclosure, and placement styles
 ---
 
 # My Atlas local profile, pin, and sharing state

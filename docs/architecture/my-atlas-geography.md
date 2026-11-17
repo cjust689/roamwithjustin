@@ -68,6 +68,10 @@ verification:
     - Twenty-four Workers-runtime tests passed, including owner-created custom-pin persistence, catalog bypass, safe public projection, and corrupt-state failure
     - Browser and Worker contract tests passed bounded custom names, coordinate normalization, owner-scoped identity, API projection, and formula-safe CSV export
     - Headless Chrome at 390 pixels verified custom-name entry, map click placement, a draggable rendered marker, transition to the shared visit editor, and zero horizontal overflow
+    - Pull requests 87 and 88 passed required validation runs 44024490207 and 44025014014, then merged through develop and main as 0a5e7a4 and c54ea44
+    - Develop validation run 44024742154 and Pages deployment 44025229521 succeeded
+    - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health after the custom-pin contract deployed
+    - Live chunks 102.9bc646f9.js, 850.f2e2b9be.js, and 102.fa12fe12.css returned 200 and contained the custom-pin prompt, map placement event, form, and marker styles
 ---
 
 # My Atlas geographic catalog, local proof, and Worker index
