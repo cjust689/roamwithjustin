@@ -180,6 +180,14 @@
             <button type="button" @click="verifyApiAccess">
               Verify API access
             </button>
+            <button
+              v-if="accountLoadFailed"
+              type="button"
+              :disabled="accountPending"
+              @click="loadAccount"
+            >
+              {{ accountPending ? "Loading Atlas" : "Retry saved Atlas" }}
+            </button>
             <button type="button" @click="signOut">Sign out</button>
           </template>
         </div>
@@ -239,7 +247,8 @@
         class="my-atlas-search-state is-error"
         role="alert"
       >
-        {{ searchError }}
+        <span>{{ searchError }}</span>
+        <button type="button" @click="retryPlaceSearch">Retry search</button>
       </div>
       <div
         v-else-if="query.trim().length >= 2 && !searchResults.length"
@@ -444,6 +453,7 @@ export default {
       accountMissing: false,
       accountPending: false,
       accountError: "",
+      accountLoadFailed: false,
       registrationPending: false,
       registrationError: "",
       turnstileSiteKey: getMyAtlasTurnstileSiteKey(process.env),
@@ -558,39 +568,7 @@ export default {
   },
   watch: {
     query(value) {
-      window.clearTimeout(this.searchTimer)
-      if (this.searchAbortController) this.searchAbortController.abort()
-      this.searchResults = []
-      this.searchError = ""
-      if (value.trim().length < 2) {
-        this.searchPending = false
-        return
-      }
-      this.searchPending = true
-      const request = ++this.searchRequest
-      this.searchTimer = window.setTimeout(async () => {
-        this.searchAbortController = new AbortController()
-        try {
-          const results = await searchMyAtlasPlaces({
-            query: value,
-            catalog: placeCatalog,
-            endpoint: this.placeSearchEndpoint,
-            limit: 8,
-            signal: this.searchAbortController.signal,
-          })
-          if (request !== this.searchRequest) return
-          results.forEach(place => {
-            this.$set(this.loadedPlaces, place.placeId, place)
-          })
-          this.searchResults = results
-        } catch (error) {
-          if (error.name === "AbortError" || request !== this.searchRequest)
-            return
-          this.searchError = "Place search is temporarily unavailable."
-        } finally {
-          if (request === this.searchRequest) this.searchPending = false
-        }
-      }, 180)
+      this.queuePlaceSearch(value)
     },
   },
   async created() {
@@ -609,6 +587,63 @@ export default {
     if (this.searchAbortController) this.searchAbortController.abort()
   },
   methods: {
+    queuePlaceSearch(value, delay = 350) {
+      window.clearTimeout(this.searchTimer)
+      if (this.searchAbortController) this.searchAbortController.abort()
+      this.searchResults = []
+      this.searchError = ""
+      const request = ++this.searchRequest
+      if (value.trim().length < 2) {
+        this.searchPending = false
+        return
+      }
+      this.searchPending = true
+      this.searchTimer = window.setTimeout(async () => {
+        this.searchAbortController = new AbortController()
+        try {
+          const results = await searchMyAtlasPlaces({
+            query: value,
+            catalog: placeCatalog,
+            endpoint: this.placeSearchEndpoint,
+            limit: 8,
+            signal: this.searchAbortController.signal,
+          })
+          if (request !== this.searchRequest) return
+          results.forEach(place => {
+            this.$set(this.loadedPlaces, place.placeId, place)
+          })
+          this.searchResults = results
+        } catch (error) {
+          if (error.name === "AbortError" || request !== this.searchRequest)
+            return
+          this.searchError = this.placeSearchErrorMessage(error)
+        } finally {
+          if (request === this.searchRequest) this.searchPending = false
+        }
+      }, delay)
+    },
+    retryPlaceSearch() {
+      this.queuePlaceSearch(this.query, 0)
+    },
+    placeSearchErrorMessage(error) {
+      const reference = error?.requestId
+        ? ` Reference: ${error.requestId}.`
+        : ""
+      if (error?.status === 429 || error?.code === "rate_limited") {
+        const wait = error.retryAfter || 60
+        return `Search limit reached. Wait about ${wait} seconds, then retry.${reference}`
+      }
+      if (
+        error?.status === 503 ||
+        ["catalog_unavailable", "rate_limit_unavailable"].includes(error?.code)
+      ) {
+        return `Place search is temporarily unavailable. Retry in a moment.${reference}`
+      }
+      if (error?.code === "unavailable") {
+        return `Place search could not be reached. Check your connection and retry.${reference}`
+      }
+      return `Place search could not be completed. Please retry.${reference}`
+    },
     signIn() {
       loginToMyAtlas()
     },
@@ -633,6 +668,7 @@ export default {
       if (!this.apiBaseUrl) return
       this.accountPending = true
       this.accountError = ""
+      this.accountLoadFailed = false
       try {
         const token = await getMyAtlasApiAccessToken()
         const state = await fetchMyAtlasState({
@@ -657,6 +693,8 @@ export default {
             countryName: pin.countryName,
             continent: pin.continent,
             featureCode: pin.featureCode,
+            spotCategory: pin.spotCategory,
+            spotKind: pin.spotKind,
             coordinates: pin.coordinates,
             deprecated: false,
           })
@@ -666,11 +704,42 @@ export default {
         if (error.status === 404) {
           this.accountMissing = true
         } else {
-          this.accountError = "Your saved Atlas could not be loaded."
+          this.accountLoadFailed = true
+          this.accountError = this.accountLoadErrorMessage(error)
         }
       } finally {
         this.accountPending = false
       }
+    },
+    accountLoadErrorMessage(error) {
+      const reference = error?.requestId
+        ? ` Reference: ${error.requestId}.`
+        : ""
+      if (
+        error?.status === 401 ||
+        error?.error === "login_required" ||
+        error?.code === "unauthorized"
+      ) {
+        return `Your Google sign in is present, but the API session needs to be renewed. Sign out, then sign in again.${reference}`
+      }
+      if (error?.status === 429 || error?.code === "rate_limited") {
+        return `Your saved Atlas is busy. Wait about a minute, then retry.${reference}`
+      }
+      if (
+        error?.status === 503 ||
+        [
+          "account_service_unavailable",
+          "catalog_unavailable",
+          "identity_provider_unavailable",
+          "rate_limit_unavailable",
+        ].includes(error?.code)
+      ) {
+        return `Your saved Atlas is temporarily unavailable. Retry in a moment.${reference}`
+      }
+      if (error?.code === "unavailable") {
+        return `Your saved Atlas could not be reached. Check your connection and retry.${reference}`
+      }
+      return `Your saved Atlas could not be loaded. Retry without reloading the page.${reference}`
     },
     async registerAccount(registration) {
       this.registrationPending = true
@@ -1382,7 +1451,22 @@ export default {
 }
 
 .my-atlas-search-state.is-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
   color: #e6a8a1;
+}
+
+.my-atlas-search-state.is-error button {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.5);
+  border-radius: 999px;
+  color: #f4cf83;
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .my-atlas-results,

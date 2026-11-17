@@ -202,7 +202,10 @@ async function readJson(response) {
     {
       publicRateLimiter: {
         async limit(input) {
-          assert.deepEqual(input, { key: "192.0.2.10", delta: 1 })
+          assert.deepEqual(input, {
+            key: "public-atlas:192.0.2.10",
+            delta: 1,
+          })
           return { success: false }
         },
       },
@@ -227,9 +230,17 @@ async function readJson(response) {
   }
   const response = await workerResponse(
     "/v1/places/search?q=Uvita&limit=5",
+    { cfConnectingIp: "192.0.2.10" },
     {},
-    {},
-    { placeCatalog }
+    {
+      placeCatalog,
+      publicRateLimiter: {
+        async limit(input) {
+          assert.deepEqual(input, { key: "catalog:192.0.2.10", delta: 2 })
+          return { success: true }
+        },
+      },
+    }
   )
   assert.equal(response.status, 200)
   assert.equal((await readJson(response)).results[0].name, "Uvita")
@@ -613,6 +624,11 @@ for (const token of [
     { token },
     {},
     {
+      publicRateLimiter: {
+        async limit() {
+          throw new Error("Owner state must not use the public limiter")
+        },
+      },
       getMyAtlasState: async options => {
         assert.deepEqual(options.identity, {
           issuer: ISSUER,
@@ -1085,9 +1101,18 @@ await assert.rejects(
     apiBaseUrl: "http://127.0.0.1:8787",
     accessToken: "rejected-token",
     fetchImpl: async () =>
-      new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 }),
+      new Response(
+        JSON.stringify({
+          error: "unauthorized",
+          requestId: "request-auth-rejected",
+        }),
+        { status: 401 }
+      ),
   }),
-  error => error.status === 401 && error.code === "unauthorized"
+  error =>
+    error.status === 401 &&
+    error.code === "unauthorized" &&
+    error.requestId === "request-auth-rejected"
 )
 
 {

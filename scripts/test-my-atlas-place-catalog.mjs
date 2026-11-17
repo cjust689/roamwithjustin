@@ -27,7 +27,10 @@ import {
   hasAuth0RedirectResponse,
   safeMyAtlasReturnPath,
 } from "../src/features/my-atlas/auth/session.mjs"
-import { searchMyAtlasPlaces } from "../src/features/my-atlas/catalog/placeSearchClient.mjs"
+import {
+  MyAtlasPlaceSearchError,
+  searchMyAtlasPlaces,
+} from "../src/features/my-atlas/catalog/placeSearchClient.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../src/features/my-atlas/config/placeSearch.mjs"
 import { createLocalPlaceSearchServer } from "./my-atlas/local-place-search-server.mjs"
 import {
@@ -306,6 +309,35 @@ try {
 } finally {
   await new Promise(resolve => localSearchServer.close(resolve))
 }
+
+await assert.rejects(
+  () =>
+    searchMyAtlasPlaces({
+      query: "Yellowstone",
+      catalog: { records: [] },
+      endpoint: "https://api.example.com/v1/places/search",
+      fetchImpl: async () =>
+        new Response(
+          JSON.stringify({
+            error: "rate_limited",
+            requestId: "request-search-rate-limit",
+          }),
+          {
+            status: 429,
+            headers: {
+              "Content-Type": "application/json",
+              "Retry-After": "60",
+            },
+          }
+        ),
+    }),
+  error =>
+    error instanceof MyAtlasPlaceSearchError &&
+    error.status === 429 &&
+    error.code === "rate_limited" &&
+    error.retryAfter === 60 &&
+    error.requestId === "request-search-rate-limit"
+)
 
 const uvita = searchPlaceCatalog(first, "Uvita Costa Rica")
 assert.equal(uvita.length, 1)

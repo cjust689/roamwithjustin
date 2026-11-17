@@ -1,11 +1,15 @@
 import { isMyAtlasPlaceType } from "../catalog/placeTypes.mjs"
 
 export class MyAtlasApiError extends Error {
-  constructor(message, { status = 0, code = "request_failed" } = {}) {
+  constructor(
+    message,
+    { status = 0, code = "request_failed", requestId = "" } = {}
+  ) {
     super(message)
     this.name = "MyAtlasApiError"
     this.status = status
     this.code = code
+    this.requestId = requestId
   }
 }
 
@@ -117,6 +121,7 @@ async function authenticatedJsonRequest({
     throw new MyAtlasApiError("The My Atlas request was rejected.", {
       status: response.status,
       code: typeof payload.error === "string" ? payload.error : "rejected",
+      requestId: typeof payload.requestId === "string" ? payload.requestId : "",
     })
   }
   return { response, payload }
@@ -426,6 +431,7 @@ export async function verifyMyAtlasApiAccess({
     throw new MyAtlasApiError("The My Atlas API rejected this session.", {
       status: response.status,
       code: typeof body.error === "string" ? body.error : "rejected",
+      requestId: typeof body.requestId === "string" ? body.requestId : "",
     })
   }
 
