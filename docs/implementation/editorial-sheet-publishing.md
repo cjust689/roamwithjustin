@@ -285,6 +285,9 @@ launch the `npm.cmd` shell shim, which avoids the platform `EINVAL` failure
 encountered after a successful generated-content validation. A retry remains
 safe because generated JSON is rolled back on local build failure and existing
 immutable R2 objects and receipts are reused.
+The Git command runner also preserves the leading two-column porcelain status
+code while removing only trailing whitespace. Scope validation therefore sees
+`src/...` exactly and cannot misread a valid generated path as `rc/...`.
 
 ## Experience and Moment model
 

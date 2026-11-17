@@ -31,7 +31,7 @@ export function createCommandRunner(execute = spawnSync) {
     })
     if (result.error) throw result.error
     if (result.status !== 0) throw commandError(command, args, result)
-    return String(result.stdout || "").trim()
+    return String(result.stdout || "").trimEnd()
   }
 }
 

@@ -4,23 +4,44 @@ import os from "node:os"
 import path from "node:path"
 import {
   assertScopedChanges,
+  createCommandRunner,
   publicationFingerprint,
   publishGeneratedPost,
   verifyPublicPublication,
 } from "./lib/editorial-github-publisher.mjs"
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "editorial-github-publisher-"))
+const root = fs.mkdtempSync(
+  path.join(os.tmpdir(), "editorial-github-publisher-")
+)
 try {
   const generatedPath = "src/content/media/generated/records.json"
-  fs.mkdirSync(path.join(root, path.dirname(generatedPath)), { recursive: true })
+  fs.mkdirSync(path.join(root, path.dirname(generatedPath)), {
+    recursive: true,
+  })
   fs.writeFileSync(path.join(root, generatedPath), '{"schemaVersion":1}\n')
-  const firstHash = publicationFingerprint({ sourceRoot: root, paths: [generatedPath] })
-  const secondHash = publicationFingerprint({ sourceRoot: root, paths: [generatedPath] })
+  const firstHash = publicationFingerprint({
+    sourceRoot: root,
+    paths: [generatedPath],
+  })
+  const secondHash = publicationFingerprint({
+    sourceRoot: root,
+    paths: [generatedPath],
+  })
   assert.equal(firstHash, secondHash)
   assert.deepEqual(
     assertScopedChanges(` M ${generatedPath}\n`, [generatedPath]),
     [generatedPath]
   )
+  const porcelainRunner = createCommandRunner(() => ({
+    status: 0,
+    stdout: ` M ${generatedPath}\n`,
+    stderr: "",
+  }))
+  const porcelainStatus = porcelainRunner("git", ["status", "--short"])
+  assert.equal(porcelainStatus, ` M ${generatedPath}`)
+  assert.deepEqual(assertScopedChanges(porcelainStatus, [generatedPath]), [
+    generatedPath,
+  ])
   assert.throws(
     () => assertScopedChanges(" M docs/README.md\n", [generatedPath]),
     /unexpected paths/
@@ -114,9 +135,7 @@ try {
   assert.equal(result.mainMergeSha, "main-merge")
   assert.equal(result.publicVerification.state, "succeeded")
   assert.equal(
-    commands.some(
-      entry => entry.program === "git" && entry.args[0] === "push"
-    ),
+    commands.some(entry => entry.program === "git" && entry.args[0] === "push"),
     true
   )
   const pushesBeforeRetry = commands.filter(
