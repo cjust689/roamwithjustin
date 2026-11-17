@@ -27,6 +27,7 @@ code_paths:
   - src/features/my-atlas/catalog/atlasInsights.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
+  - src/features/my-atlas/components/MyAtlasTutorial.vue
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
@@ -47,6 +48,7 @@ verification:
     - Headless Chrome verified the feature-gated My Atlas homepage card at desktop and 390 pixel mobile widths, with no horizontal overflow and navigation to /my-atlas
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
     - Headless Chrome verified that My Atlas attribution begins as a compact info button and expands on activation without removing provider attribution
+    - Headless Chrome verified the four-step pre-account walkthrough and first-account quick start at 390 pixel mobile and 1200 pixel desktop widths, including completion targets, persistent dismissal, and no horizontal overflow
     - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
     - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
@@ -166,6 +168,17 @@ Graph tags, crawler status behavior, public-directory discovery, and production
 routing are not implemented.
 
 ## Browser presentation
+
+Before account creation, a visible `See how it works` button opens a four-step
+walkthrough covering private-by-default account creation, place entry, optional
+visit years, timeline playback, statistics, and sharing. Its final action moves
+the visitor to Google sign in or the account form. A newly provisioned,
+revision-1 account with no pins receives a separate quick start once per browser.
+Dismissal is stored only in local browser storage, and a permanent quick start
+button can reopen it. Its final action moves keyboard focus to place
+search. Both walkthroughs use an accessible modal with a trapped focus cycle,
+Escape dismissal, scroll locking, focus restoration, reduced-motion handling,
+and a phone-width bottom sheet layout.
 
 Owner and public views derive place, country, continent, capital, date, and map
 span statistics from the safe canonical place projection. They provide exact
