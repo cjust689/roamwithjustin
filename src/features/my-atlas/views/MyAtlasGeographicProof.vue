@@ -165,9 +165,7 @@
           <span v-if="auth.loading">Checking your session</span>
           <template v-else-if="auth.authenticated">
             <strong>{{ authDisplayName }}</strong>
-            <span v-if="accountProfile">
-              Your private beta account is connected.
-            </span>
+            <span v-if="accountProfile"> Connected </span>
             <span v-else>
               Sign in is connected. Use your one-use invitation below to create
               a private beta account.
@@ -193,9 +191,7 @@
             Sign in with Google
           </button>
           <template v-else>
-            <button type="button" @click="verifyApiAccess">
-              Verify API access
-            </button>
+            <button type="button" @click="verifyApiAccess">Verify API</button>
             <button
               v-if="accountLoadFailed"
               type="button"
@@ -228,235 +224,295 @@
         @submit="registerAccount"
       />
 
-      <label class="my-atlas-search">
-        <span>Find a country, city, or spot</span>
-        <input
-          ref="searchInput"
-          v-model="query"
-          type="search"
-          autocomplete="off"
-          placeholder="Try Uvita, Yellowstone, or Eiffel Tower"
-          aria-describedby="my-atlas-search-help"
-        />
-        <small id="my-atlas-search-help">
-          {{ searchHelp }}
-        </small>
-      </label>
-
-      <section
-        v-if="accountProfile"
-        class="my-atlas-custom-place"
-        :class="{ 'is-open': customPlaceOpen }"
-        aria-labelledby="my-atlas-custom-place-title"
-      >
+      <section class="my-atlas-workflow-section my-atlas-add-place">
         <button
-          v-if="!customPlaceOpen"
           type="button"
-          class="my-atlas-custom-place-trigger"
-          :disabled="accountPending"
-          @click="beginCustomPlace"
+          class="my-atlas-section-toggle"
+          :aria-expanded="String(addPlaceOpen)"
+          aria-controls="my-atlas-add-place-content"
+          :disabled="customPlaceOpen || Boolean(pinEditorPlace)"
+          @click="addPlaceOpen = !addPlaceOpen"
         >
-          Can't find it? Add a custom pin
+          <span>
+            <strong id="my-atlas-add-place-title">Add a destination</strong>
+            <small>Search My Atlas or place a custom pin</small>
+          </span>
+          <b>{{ addPlaceOpen ? "Hide" : "Add place" }}</b>
         </button>
-        <template v-else>
-          <div class="my-atlas-custom-place-heading">
-            <div>
-              <p id="my-atlas-custom-place-title">Custom map pin</p>
-              <span>Name the place, then choose its position on the map.</span>
-            </div>
-            <button type="button" @click="cancelCustomPlace">Cancel</button>
-          </div>
-          <label>
-            <span>Place name</span>
+
+        <div
+          v-show="addPlaceOpen"
+          id="my-atlas-add-place-content"
+          class="my-atlas-section-content"
+          aria-labelledby="my-atlas-add-place-title"
+        >
+          <label class="my-atlas-search">
+            <span>Find a country, city, or spot</span>
             <input
-              ref="customNameInput"
-              v-model="customPlaceName"
-              type="text"
-              maxlength="160"
+              ref="searchInput"
+              v-model="query"
+              type="search"
               autocomplete="off"
-              placeholder="Krka National Park"
+              placeholder="Try Uvita, Yellowstone, or Eiffel Tower"
+              aria-describedby="my-atlas-search-help"
             />
-            <small>
-              {{ customPlaceCharacterCount }} of
-              {{ customPlaceMaxCharacters }} characters
-            </small>
-            <small v-if="customPlaceNameError" class="is-error">
-              {{ customPlaceNameError }}
+            <small id="my-atlas-search-help">
+              {{ searchHelp }}
             </small>
           </label>
-          <div class="my-atlas-custom-place-position">
-            <strong>{{
-              customPlaceCoordinates ? "Position selected" : "Position needed"
-            }}</strong>
-            <span v-if="customPlaceCoordinates">
-              {{ customPlaceCoordinates[1].toFixed(4) }},
-              {{ customPlaceCoordinates[0].toFixed(4) }}
-            </span>
-            <span v-else>
-              Click or tap the map. You can then drag the gold pin or adjust it
-              with the arrow keys.
-            </span>
+
+          <section
+            v-if="accountProfile"
+            class="my-atlas-custom-place"
+            :class="{ 'is-open': customPlaceOpen }"
+            aria-labelledby="my-atlas-custom-place-title"
+          >
             <button
-              v-if="!customPlaceCoordinates"
+              v-if="!customPlaceOpen"
               type="button"
-              @click="focusMapForPlacement"
+              class="my-atlas-custom-place-trigger"
+              :disabled="accountPending"
+              @click="beginCustomPlace"
             >
-              Choose on map
+              Can't find it? Add a custom pin
+            </button>
+            <template v-else>
+              <div class="my-atlas-custom-place-heading">
+                <div>
+                  <p id="my-atlas-custom-place-title">Custom map pin</p>
+                  <span
+                    >Name the place, then choose its position on the map.</span
+                  >
+                </div>
+                <button type="button" @click="cancelCustomPlace">Cancel</button>
+              </div>
+              <label>
+                <span>Place name</span>
+                <input
+                  ref="customNameInput"
+                  v-model="customPlaceName"
+                  type="text"
+                  maxlength="160"
+                  autocomplete="off"
+                  placeholder="Krka National Park"
+                />
+                <small>
+                  {{ customPlaceCharacterCount }} of
+                  {{ customPlaceMaxCharacters }} characters
+                </small>
+                <small v-if="customPlaceNameError" class="is-error">
+                  {{ customPlaceNameError }}
+                </small>
+              </label>
+              <div class="my-atlas-custom-place-position">
+                <strong>{{
+                  customPlaceCoordinates
+                    ? "Position selected"
+                    : "Position needed"
+                }}</strong>
+                <span v-if="customPlaceCoordinates">
+                  {{ customPlaceCoordinates[1].toFixed(4) }},
+                  {{ customPlaceCoordinates[0].toFixed(4) }}
+                </span>
+                <span v-else>
+                  Click or tap the map. You can then drag the gold pin or adjust
+                  it with the arrow keys.
+                </span>
+                <button
+                  v-if="!customPlaceCoordinates"
+                  type="button"
+                  @click="focusMapForPlacement"
+                >
+                  Choose on map
+                </button>
+              </div>
+              <p v-if="customPlaceError" class="my-atlas-custom-place-error">
+                {{ customPlaceError }}
+              </p>
+              <p class="my-atlas-custom-place-disclosure">
+                This name and map position are your own entry. They become
+                visible if you share your Atlas publicly.
+              </p>
+              <button
+                type="button"
+                class="my-atlas-custom-place-continue"
+                :disabled="!customPlaceReady || accountPending"
+                @click="continueCustomPlace"
+              >
+                Continue to visit details
+              </button>
+            </template>
+          </section>
+
+          <MyAtlasPinEditor
+            v-if="pinEditorPlace"
+            :key="pinEditorKey"
+            :place="pinEditorPlace"
+            :place-label="placeLabel(pinEditorPlace)"
+            :pin="pinEditorPin"
+            :pending="accountPending"
+            :error="pinEditorError"
+            @cancel="closePinEditor"
+            @save="savePinDetails"
+          />
+
+          <div v-if="searchPending" class="my-atlas-search-state" role="status">
+            Searching places
+          </div>
+          <div
+            v-else-if="searchError"
+            class="my-atlas-search-state is-error"
+            role="alert"
+          >
+            <span>{{ searchError }}</span>
+            <button type="button" @click="retryPlaceSearch">
+              Retry search
             </button>
           </div>
-          <p v-if="customPlaceError" class="my-atlas-custom-place-error">
-            {{ customPlaceError }}
-          </p>
-          <p class="my-atlas-custom-place-disclosure">
-            This name and map position are your own entry. They become visible
-            if you share your Atlas publicly.
-          </p>
-          <button
-            type="button"
-            class="my-atlas-custom-place-continue"
-            :disabled="!customPlaceReady || accountPending"
-            @click="continueCustomPlace"
+          <div
+            v-else-if="query.trim().length >= 2 && !searchResults.length"
+            class="my-atlas-search-state"
+            role="status"
           >
-            Continue to visit details
-          </button>
-        </template>
+            No matching country, city, or spot in this catalog.
+          </div>
+          <ul v-if="searchResults.length" class="my-atlas-results">
+            <li v-for="place in searchResults" :key="place.placeId">
+              <button
+                type="button"
+                :disabled="accountPending"
+                @click="openNewPin(place)"
+              >
+                <span>{{ place.name }}</span>
+                <small>{{ placeLabel(place) }}</small>
+                <b>{{ placeTypeLabel(place) }}</b>
+              </button>
+            </li>
+          </ul>
+        </div>
       </section>
 
-      <MyAtlasPinEditor
-        v-if="pinEditorPlace"
-        :key="pinEditorKey"
-        :place="pinEditorPlace"
-        :place-label="placeLabel(pinEditorPlace)"
-        :pin="pinEditorPin"
-        :pending="accountPending"
-        :error="pinEditorError"
-        @cancel="closePinEditor"
-        @save="savePinDetails"
-      />
-
-      <div v-if="searchPending" class="my-atlas-search-state" role="status">
-        Searching places
-      </div>
-      <div
-        v-else-if="searchError"
-        class="my-atlas-search-state is-error"
-        role="alert"
-      >
-        <span>{{ searchError }}</span>
-        <button type="button" @click="retryPlaceSearch">Retry search</button>
-      </div>
-      <div
-        v-else-if="query.trim().length >= 2 && !searchResults.length"
-        class="my-atlas-search-state"
-        role="status"
-      >
-        No matching country, city, or spot in this catalog.
-      </div>
-      <ul v-if="searchResults.length" class="my-atlas-results">
-        <li v-for="place in searchResults" :key="place.placeId">
-          <button
-            type="button"
-            :disabled="accountPending"
-            @click="openNewPin(place)"
-          >
-            <span>{{ place.name }}</span>
-            <small>{{ placeLabel(place) }}</small>
-            <b>{{ placeTypeLabel(place) }}</b>
-          </button>
-        </li>
-      </ul>
+      <section class="my-atlas-pins my-atlas-workflow-section">
+        <button
+          type="button"
+          class="my-atlas-section-toggle"
+          :aria-expanded="String(visitedOpen)"
+          aria-controls="my-atlas-pins-content"
+          @click="visitedOpen = !visitedOpen"
+        >
+          <span>
+            <strong id="my-atlas-pins-title">Visited destinations</strong>
+            <small>{{ filterLabel }}</small>
+          </span>
+          <b>{{ displayedPlaces.length }}</b>
+        </button>
+        <div
+          v-show="visitedOpen"
+          id="my-atlas-pins-content"
+          class="my-atlas-section-content"
+          aria-labelledby="my-atlas-pins-title"
+        >
+          <p v-if="!pinnedPlaces.length" class="my-atlas-empty">
+            Your first destination will appear here and on the map.
+          </p>
+          <p v-else-if="!displayedPlaces.length" class="my-atlas-empty">
+            No destinations match this view.
+          </p>
+          <ul v-else>
+            <li v-for="place in displayedPlaces" :key="place.placeId">
+              <button type="button" @click="selectPin(place.placeId)">
+                <span>{{ place.name }}</span>
+                <small>{{ placeLabel(place) }}</small>
+                <em>{{ formatVisitedDates(place) }}</em>
+                <q v-if="place.memory">{{ place.memory }}</q>
+              </button>
+              <button
+                class="edit"
+                type="button"
+                :disabled="accountPending"
+                :aria-label="'Edit visit details for ' + place.name"
+                @click="openExistingPin(place)"
+              >
+                Edit
+              </button>
+              <button
+                class="remove"
+                type="button"
+                :disabled="accountPending"
+                :aria-label="'Remove ' + place.name"
+                @click="removePlace(place)"
+              >
+                Remove
+              </button>
+            </li>
+          </ul>
+        </div>
+      </section>
 
       <MyAtlasPlanner
         v-if="accountProfile"
         :api-base-url="apiBaseUrl"
         :revision="accountProfile.revision"
-        :search-results="searchResults"
         @revision-change="updatePlanningRevision"
         @account-deleted="handleAccountDeleted"
       />
 
-      <section class="my-atlas-pins" aria-labelledby="my-atlas-pins-title">
-        <div>
-          <p>Your destinations</p>
-          <strong id="my-atlas-pins-title">{{ displayedPlaces.length }}</strong>
-        </div>
-        <p v-if="!pinnedPlaces.length" class="my-atlas-empty">
-          Your first destination will appear here and on the map.
-        </p>
-        <p v-else-if="!displayedPlaces.length" class="my-atlas-empty">
-          No destinations match this view.
-        </p>
-        <ul v-else>
-          <li v-for="place in displayedPlaces" :key="place.placeId">
-            <button type="button" @click="selectPin(place.placeId)">
-              <span>{{ place.name }}</span>
-              <small>{{ placeLabel(place) }}</small>
-              <em>{{ formatVisitedDates(place) }}</em>
-              <q v-if="place.memory">{{ place.memory }}</q>
-            </button>
-            <button
-              class="edit"
-              type="button"
-              :disabled="accountPending"
-              :aria-label="'Edit visit details for ' + place.name"
-              @click="openExistingPin(place)"
-            >
-              Edit
-            </button>
-            <button
-              class="remove"
-              type="button"
-              :disabled="accountPending"
-              :aria-label="'Remove ' + place.name"
-              @click="removePlace(place)"
-            >
-              Remove
-            </button>
-          </li>
-        </ul>
-      </section>
-
       <section
         v-if="accountProfile"
-        class="my-atlas-sharing"
-        aria-labelledby="my-atlas-sharing-title"
+        class="my-atlas-sharing my-atlas-workflow-section"
       >
-        <div>
-          <p id="my-atlas-sharing-title">Share your Atlas</p>
-          <strong>{{ accountProfile.public ? "Public" : "Private" }}</strong>
+        <button
+          type="button"
+          class="my-atlas-section-toggle"
+          :aria-expanded="String(sharingOpen)"
+          aria-controls="my-atlas-sharing-content"
+          @click="sharingOpen = !sharingOpen"
+        >
+          <span>
+            <strong id="my-atlas-sharing-title">Share and export</strong>
+            <small>Story image and public link controls</small>
+          </span>
+          <b>{{ accountProfile.public ? "Public" : "Private" }}</b>
+        </button>
+        <div
+          v-show="sharingOpen"
+          id="my-atlas-sharing-content"
+          class="my-atlas-section-content my-atlas-sharing-content"
+          aria-labelledby="my-atlas-sharing-title"
+        >
+          <p>
+            Publishing makes your marked places, optional visit dates, and
+            favorite memories available to anyone with your link. Names and
+            positions of your custom pins are included.
+          </p>
+          <div class="my-atlas-sharing-actions">
+            <button
+              type="button"
+              :disabled="
+                accountPending || (!pins.length && !accountProfile.public)
+              "
+              @click="toggleSharing"
+            >
+              {{ accountProfile.public ? "Make private" : "Share my Atlas" }}
+            </button>
+            <button
+              type="button"
+              :disabled="!pinnedPlaces.length"
+              @click="exportStory"
+            >
+              Export Story image
+            </button>
+            <button
+              v-if="accountProfile.public"
+              type="button"
+              :disabled="accountPending"
+              @click="copyShareLink"
+            >
+              Copy link
+            </button>
+          </div>
+          <a v-if="accountProfile.public" :href="shareUrl">{{ shareUrl }}</a>
         </div>
-        <p>
-          Publishing makes your marked places, optional visit dates, and
-          favorite memories available to anyone with your link. Names and
-          positions of your custom pins are included.
-        </p>
-        <div class="my-atlas-sharing-actions">
-          <button
-            type="button"
-            :disabled="
-              accountPending || (!pins.length && !accountProfile.public)
-            "
-            @click="toggleSharing"
-          >
-            {{ accountProfile.public ? "Make private" : "Share my Atlas" }}
-          </button>
-          <button
-            type="button"
-            :disabled="!pinnedPlaces.length"
-            @click="exportStory"
-          >
-            Export Story image
-          </button>
-          <button
-            v-if="accountProfile.public"
-            type="button"
-            :disabled="accountPending"
-            @click="copyShareLink"
-          >
-            Copy link
-          </button>
-        </div>
-        <a v-if="accountProfile.public" :href="shareUrl">{{ shareUrl }}</a>
       </section>
 
       <p class="my-atlas-beta-note">
@@ -501,7 +557,10 @@ import {
   normalizeMyAtlasCustomPlaceName,
 } from "../catalog/customPlace.mjs"
 import { addDraftPin, removeDraftPin } from "../catalog/pinDraft.mjs"
-import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
+import {
+  formatMyAtlasPlaceSearchError,
+  searchMyAtlasPlaces,
+} from "../catalog/placeSearchClient.mjs"
 import {
   createMyAtlasPin,
   deleteMyAtlasAccount,
@@ -567,6 +626,10 @@ export default {
       showConnections: true,
       showMemories: false,
       mobileControlsOpen: false,
+      addPlaceOpen: true,
+      visitedOpen: false,
+      sharingOpen: false,
+      workflowSectionsInitialized: false,
       announcement: "",
       auth: myAtlasAuthState,
       apiAccessVerified: false,
@@ -740,6 +803,10 @@ export default {
       this.accountMissing = true
       this.pins = []
       this.selectedPlaceId = ""
+      this.addPlaceOpen = true
+      this.visitedOpen = false
+      this.sharingOpen = false
+      this.workflowSectionsInitialized = false
       this.announcement = "Your My Atlas application data was deleted."
     },
     queuePlaceSearch(value, delay = 350) {
@@ -781,23 +848,7 @@ export default {
       this.queuePlaceSearch(this.query, 0)
     },
     placeSearchErrorMessage(error) {
-      const reference = error?.requestId
-        ? ` Reference: ${error.requestId}.`
-        : ""
-      if (error?.status === 429 || error?.code === "rate_limited") {
-        const wait = error.retryAfter || 60
-        return `Search limit reached. Wait about ${wait} seconds, then retry.${reference}`
-      }
-      if (
-        error?.status === 503 ||
-        ["catalog_unavailable", "rate_limit_unavailable"].includes(error?.code)
-      ) {
-        return `Place search is temporarily unavailable. Retry in a moment.${reference}`
-      }
-      if (error?.code === "unavailable") {
-        return `Place search could not be reached. Check your connection and retry.${reference}`
-      }
-      return `Place search could not be completed. Please retry.${reference}`
+      return formatMyAtlasPlaceSearchError(error)
     },
     signIn() {
       loginToMyAtlas()
@@ -863,6 +914,12 @@ export default {
           visitedYears: pin.visitedYears,
           memory: pin.memory,
         }))
+        if (!this.workflowSectionsInitialized) {
+          this.addPlaceOpen = this.pins.length === 0
+          this.visitedOpen = false
+          this.sharingOpen = false
+          this.workflowSectionsInitialized = true
+        }
         state.pins.forEach(pin => {
           this.$set(this.loadedPlaces, pin.placeId, {
             placeId: pin.placeId,
@@ -934,6 +991,10 @@ export default {
         this.accountMissing = false
         this.pins = []
         this.selectedPlaceId = ""
+        this.addPlaceOpen = true
+        this.visitedOpen = false
+        this.sharingOpen = false
+        this.workflowSectionsInitialized = true
         this.announcement =
           "Your private Atlas account was created. Add your first destination."
         this.$nextTick(() => this.openTutorial("account"))
@@ -1035,6 +1096,7 @@ export default {
       this.customPlaceError = ""
     },
     openExistingPin(place) {
+      this.addPlaceOpen = true
       this.pinEditorPlace = place
       this.pinEditorPin = this.pins.find(pin => pin.placeId === place.placeId)
       this.pinEditorError = ""
@@ -1090,6 +1152,8 @@ export default {
           this.selectedPlaceId = result.pin.placeId
           this.query = ""
           this.closePinEditor()
+          this.addPlaceOpen = false
+          this.visitedOpen = true
           this.announcement = result.pin.name + " was added to your map."
         } catch (error) {
           this.pinEditorError =
@@ -1109,6 +1173,8 @@ export default {
         this.selectedPlaceId = place.placeId
         this.query = ""
         this.closePinEditor()
+        this.addPlaceOpen = false
+        this.visitedOpen = true
         this.announcement = place.name + " was added to your map."
       } catch (error) {
         this.announcement = error.message
@@ -1226,6 +1292,7 @@ export default {
     completeTutorial() {
       const variant = this.tutorialVariant
       this.closeTutorial()
+      if (variant === "account") this.addPlaceOpen = true
       this.$nextTick(() => {
         if (variant === "account") {
           this.$refs.searchInput?.scrollIntoView({
@@ -1419,8 +1486,7 @@ export default {
   margin: 1.8rem 0 1.35rem;
 }
 
-.my-atlas-intro > p:first-child,
-.my-atlas-pins > div p {
+.my-atlas-intro > p:first-child {
   margin: 0 0 0.35rem;
   color: #e6ba68;
   text-transform: uppercase;
@@ -1635,9 +1701,11 @@ export default {
 
 .my-atlas-auth {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 0.7rem;
   margin: 0 0 1.25rem;
-  padding: 0.9rem;
+  padding: 0.72rem 0.8rem;
   border: 1px solid rgba(230, 186, 104, 0.24);
   border-radius: 1rem;
   background: rgba(230, 186, 104, 0.06);
@@ -1670,6 +1738,7 @@ export default {
 .my-atlas-auth-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.5rem;
 }
 
@@ -1691,11 +1760,90 @@ export default {
 }
 
 .my-atlas-auth .my-atlas-auth-error {
+  grid-column: 1 / -1;
   color: #e6a8a1;
 }
 
 .my-atlas-auth .my-atlas-auth-success {
+  grid-column: 1 / -1;
   color: #9bd3b0;
+}
+
+.my-atlas-workflow-section {
+  margin-top: 0.8rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.my-atlas-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.75rem;
+  padding: 0.72rem 0.8rem;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.my-atlas-section-toggle > span {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.my-atlas-section-toggle strong {
+  color: #edf7f2;
+  font-size: 0.74rem;
+}
+
+.my-atlas-section-toggle small {
+  overflow: hidden;
+  color: #8fa29c;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.58rem;
+}
+
+.my-atlas-section-toggle b {
+  flex: 0 0 auto;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(230, 186, 104, 0.34);
+  border-radius: 999px;
+  color: #efc975;
+  background: rgba(230, 186, 104, 0.07);
+  font-size: 0.6rem;
+  white-space: nowrap;
+}
+
+.my-atlas-section-toggle:hover,
+.my-atlas-section-toggle:focus-visible {
+  background: rgba(230, 186, 104, 0.055);
+  outline: none;
+}
+
+.my-atlas-section-toggle:focus-visible {
+  box-shadow: inset 0 0 0 2px rgba(230, 186, 104, 0.55);
+}
+
+.my-atlas-section-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.68;
+}
+
+.my-atlas-section-content {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .my-atlas-search > span {
@@ -1926,6 +2074,14 @@ export default {
   list-style: none;
 }
 
+.my-atlas-pins ul {
+  max-height: min(52rem, 65vh);
+  padding-right: 0.2rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(230, 186, 104, 0.4) transparent;
+}
+
 .my-atlas-results button,
 .my-atlas-pins li {
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1956,12 +2112,12 @@ export default {
 }
 
 .my-atlas-results span,
-.my-atlas-pins span {
+.my-atlas-pins li span {
   font-weight: 700;
 }
 
 .my-atlas-results small,
-.my-atlas-pins small {
+.my-atlas-pins li small {
   grid-column: 1;
   color: #9eb0aa;
   font-size: 0.7rem;
@@ -1998,20 +2154,7 @@ export default {
 }
 
 .my-atlas-pins {
-  margin-top: 1.3rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.my-atlas-pins > div {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.my-atlas-pins > div strong {
-  color: #e6ba68;
-  font-size: 1.65rem;
+  margin-top: 0.8rem;
 }
 
 .my-atlas-empty {
@@ -2021,17 +2164,7 @@ export default {
 }
 
 .my-atlas-sharing {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1.3rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.my-atlas-sharing > div:first-child {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  margin-top: 0.8rem;
 }
 
 .my-atlas-sharing p,
@@ -2043,10 +2176,12 @@ export default {
   overflow-wrap: anywhere;
 }
 
-.my-atlas-sharing > div:first-child p,
-.my-atlas-sharing > div:first-child strong,
 .my-atlas-sharing a {
   color: #e6ba68;
+}
+
+.my-atlas-sharing-content {
+  gap: 0.75rem;
 }
 
 .my-atlas-sharing-actions {
@@ -2055,7 +2190,7 @@ export default {
   gap: 0.5rem;
 }
 
-.my-atlas-sharing button {
+.my-atlas-sharing-actions button {
   padding: 0.55rem 0.75rem;
   border: 1px solid rgba(230, 186, 104, 0.45);
   border-radius: 0.7rem;
@@ -2133,7 +2268,10 @@ export default {
   .my-atlas-proof {
     display: grid;
     grid-template-rows: minmax(20rem, 54dvh) auto;
-    overflow: visible;
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 
   .my-atlas-proof > :first-child {
@@ -2141,6 +2279,7 @@ export default {
   }
 
   .my-atlas-panel {
+    min-width: 0;
     width: 100%;
     max-width: 100%;
     max-height: none;
@@ -2219,6 +2358,16 @@ export default {
     border-radius: 0.9rem;
     background: rgba(8, 20, 22, 0.96);
     box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.35);
+  }
+}
+
+@media (max-width: 480px) {
+  .my-atlas-auth {
+    grid-template-columns: 1fr;
+  }
+
+  .my-atlas-auth-actions {
+    justify-content: flex-start;
   }
 }
 </style>

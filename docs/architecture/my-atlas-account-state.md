@@ -34,6 +34,7 @@ code_paths:
   - src/features/my-atlas/catalog/memory.mjs
   - src/features/my-atlas/catalog/mapMemory.mjs
   - src/features/my-atlas/catalog/customPlace.mjs
+  - src/features/my-atlas/catalog/placeSearchClient.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
   - src/features/my-atlas/components/MyAtlasTutorial.vue
@@ -46,13 +47,15 @@ code_paths:
   - workers/my-atlas/test/planning.test.mjs
   - scripts/test-my-atlas-worker.mjs
   - scripts/test-my-atlas-planning.mjs
+  - scripts/test-my-atlas-place-catalog.mjs
 verification:
   state: verified
   evidence:
     - npm run my-atlas:worker:test
     - npm run my-atlas:worker:durable:test
-    - npm run my-atlas:test verified private planning contracts and client-only handoffs
-    - Workers-runtime planning tests verified private wishlist isolation, immutable plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
+    - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
+    - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
+    - Workers-runtime planning tests verified private wishlist isolation, immutable wishlist/direct plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
@@ -238,11 +241,23 @@ place ID or existing normalized custom-place shape, optional normalized note,
 priority, optional desired year, and timestamps. The beta ceiling is 250, and
 list responses page at no more than 100 records.
 
+The planner owns an independent country, city, and reviewed-spot search control
+that calls the same public My Atlas catalog endpoint as visited-place search.
+Selecting a result can create a wishlist record from its canonical `placeId`,
+or assign that catalog record directly as the plan start or selected finish.
+The planner displays the catalog latitude and longitude before either action and
+again on the saved wishlist entry. Manual name and coordinate entry remains a
+separate custom-place fallback that supports the same save, start, and finish
+choices.
+
 One `plan:` record may exist in the first slice. It stores title, lifecycle
 status, optional year and note, a start snapshot, an ordered destination list,
-and either last-stop or return-to-start completion. A defensive ceiling of 50
-destinations bounds request and storage abuse without presenting a small
-product limit. A
+and last-stop, return-to-start, or selected-end completion. Start and selected
+end accept exactly one saved-wish, canonical-place, or custom-place selector.
+The service re-resolves canonical IDs, qualifies custom IDs to the owner, and
+stores immutable snapshots without creating wishlist records. A defensive
+ceiling of 50 destinations bounds request and storage abuse without presenting
+a small product limit. A
 snapshot copies the catalog/custom identity, product type, readable geography,
 coordinates, route readiness, catalog revision when applicable, and optional
 source wish ID. Rendering and export never require the source wishlist record,
@@ -416,6 +431,24 @@ current timeline and visitor presentation operate at year precision.
 Selecting a catalog search result opens its Add destination editor immediately
 below the search control. The result list remains below the active editor so
 the selected action is visible before alternate matches.
+
+The signed-in owner panel keeps its travel overview visible, then follows the
+working sequence of Add destination, Visited destinations, Plan future travel,
+and Share and export. Those four flows have independent accessible disclosure
+controls. Existing accounts start with the disclosures closed so large saved
+collections do not dominate the page; empty accounts open Add destination to
+preserve onboarding. Adding a destination closes its entry flow and opens the
+visited list, while editing a visited entry reopens and focuses its editor.
+Visited and planner collections use bounded internal scrolling when expanded.
+The Google account summary remains visible in a compact identity and action row.
+
+The private planner has its own search field rather than depending on the
+visited-place results above it. It uses the shared local or Worker-backed My
+Atlas search client, presents country, city, and reviewed-spot type plus stored
+latitude and longitude, and saves the canonical result into the private
+wishlist. Saved wishlist cards repeat those coordinates so the owner can review
+the plan input before using external directions. Custom coordinates remain
+available through a secondary fallback disclosure.
 
 An active account also sees `Can't find it? Add a custom pin` directly below
 search. The form can seed its name from the current query, requires a valid
