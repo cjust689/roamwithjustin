@@ -42,6 +42,8 @@ verification:
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
     - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, ordered destination playback, cumulative reveal, and curved connection generation
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
+    - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
+    - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
 ---
