@@ -635,7 +635,11 @@ export default {
   transition: transform 80ms linear;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
+  ::v-deep .maplibregl-ctrl-bottom-left {
+    display: none;
+  }
+
   .my-atlas-year-legend {
     right: 0.55rem;
     bottom: 1.6rem;

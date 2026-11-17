@@ -45,6 +45,7 @@ verification:
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
     - Headless Chrome verified the feature-gated My Atlas homepage card at desktop and 390 pixel mobile widths, with no horizontal overflow and navigation to /my-atlas
+    - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
     - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
     - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
@@ -174,6 +175,14 @@ plane over a curved connection before focusing the destination. Reduced motion
 preferences suppress the plane animation. Places within the same year use a
 stable name and ID order for presentation only. The interface states that this
 is a visual sequence rather than a recorded travel route.
+
+At phone widths, owner and public views keep the statistics visible but place
+year filtering, playback, path visibility, and Story export inside an
+accessible map-controls disclosure that is collapsed by default. MapLibre's
+desktop navigation and terrain button stack is hidden at the same breakpoint,
+because the map retains touch pan and zoom gestures. Desktop layouts keep those
+controls expanded and retain the MapLibre button stack. The year selector is
+explicitly restored from the site's legacy hidden-select rule in both layouts.
 
 Map pins use a deterministic color for their earliest visit year, retain a
 visible place and year label, and emphasize the selected destination. A compact
