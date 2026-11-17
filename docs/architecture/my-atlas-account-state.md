@@ -30,6 +30,7 @@ code_paths:
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - src/views/roam/Home.vue
   - workers/my-atlas/test/account.test.mjs
   - scripts/test-my-atlas-worker.mjs
 verification:
@@ -43,6 +44,7 @@ verification:
     - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, ordered destination playback, cumulative reveal, and curved connection generation
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
+    - Headless Chrome verified the feature-gated My Atlas homepage card at desktop and 390 pixel mobile widths, with no horizontal overflow and navigation to /my-atlas
     - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
     - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
@@ -187,6 +189,11 @@ current timeline and visitor presentation operate at year precision.
 Selecting a catalog search result opens its Add destination editor immediately
 below the search control. The result list remains below the active editor so
 the selected action is visible before alternate matches.
+
+When the My Atlas route flag is enabled, the public homepage includes a peer My
+Atlas discovery card alongside the Travel Atlas and travel guides. Its call to
+action routes directly to `/my-atlas`. Disabled builds omit the card together
+with the route, so the homepage cannot expose a dead My Atlas link.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land

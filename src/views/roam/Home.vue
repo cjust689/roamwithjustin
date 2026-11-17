@@ -13,7 +13,11 @@
         </p>
       </section>
 
-      <section class="journey-options" aria-label="Ways to explore">
+      <section
+        class="journey-options"
+        :class="{ 'has-my-atlas': myAtlasEnabled }"
+        aria-label="Ways to explore"
+      >
         <router-link class="journey-card atlas-card" to="/atlas">
           <span
             class="journey-card-background"
@@ -52,6 +56,31 @@
             <span class="journey-action">Browse the guides <b>&rarr;</b></span>
           </span>
         </router-link>
+
+        <router-link
+          v-if="myAtlasEnabled"
+          class="journey-card my-atlas-card"
+          to="/my-atlas"
+        >
+          <span
+            class="journey-card-background"
+            :style="{ backgroundImage: `url('${myAtlasImage}')` }"
+            aria-hidden="true"
+          ></span>
+          <span class="journey-card-shade" aria-hidden="true"></span>
+          <span class="journey-card-content">
+            <span class="journey-label">
+              <span class="journey-pulse" aria-hidden="true"></span>
+              Build your own map
+            </span>
+            <strong>Make My Atlas yours</strong>
+            <span class="journey-description">
+              Pin the countries and cities that shaped your travels, add visit
+              years, then replay and share your map.
+            </span>
+            <span class="journey-action">Start My Atlas <b>&rarr;</b></span>
+          </span>
+        </router-link>
       </section>
 
       <p class="home-footnote">
@@ -62,6 +91,8 @@
 </template>
 
 <script>
+import { isMyAtlasGeographicProofEnabled } from "../../features/my-atlas/config/featureFlags.mjs"
+
 const heroImages = [
   "/img/roam/default/1.jpg",
   "/img/roam/default/4.jpg",
@@ -76,6 +107,8 @@ export default {
       atlasImage: "/img/locations/utah/utah-full.jpg",
       guidesImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
       heroImage: heroImages[Math.floor(Math.random() * heroImages.length)],
+      myAtlasEnabled: isMyAtlasGeographicProofEnabled(process.env),
+      myAtlasImage: "/img/roam/default/4.jpg",
     }
   },
 }
@@ -163,6 +196,10 @@ export default {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
   margin-top: clamp(2rem, 5vh, 3.75rem);
+}
+
+.journey-options.has-my-atlas {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .journey-card {
@@ -321,6 +358,10 @@ export default {
     margin-top: 2.25rem;
   }
 
+  .journey-options.has-my-atlas {
+    grid-template-columns: 1fr;
+  }
+
   .journey-card,
   .journey-card-content {
     min-height: 235px;
@@ -328,6 +369,16 @@ export default {
 
   .home-footnote {
     padding-bottom: 1rem;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1020px) {
+  .journey-options.has-my-atlas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-atlas-card {
+    grid-column: 1 / -1;
   }
 }
 
