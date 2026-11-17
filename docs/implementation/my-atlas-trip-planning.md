@@ -19,6 +19,7 @@ code_paths:
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
+  - src/features/my-atlas/catalog/placeSearchClient.mjs
   - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/views/roam/Privacy.vue
@@ -28,6 +29,7 @@ code_paths:
   - workers/my-atlas/src/registration/objects.mjs
   - workers/my-atlas/test/planning.test.mjs
   - scripts/test-my-atlas-planning.mjs
+  - scripts/test-my-atlas-place-catalog.mjs
 verification:
   state: verified
   evidence:
@@ -37,9 +39,11 @@ verification:
     - npm run my-atlas:worker:check:staging
     - npm run build
     - Wrangler dry run packaged the Worker; its optional user-profile log write reported a sandbox EPERM without failing the package check
-    - Thirty Workers-runtime tests verified wishlist isolation, duplicate rejection, global revision conflicts, immutable snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
-    - Client utility tests verified ordered segmented Google Maps output with no more than three intermediary waypoints per leg, custom-coordinate confirmation, the 2,048-character guard, the 50-destination defensive ceiling, and coordinates omitted from AI prompts by default
+    - Thirty-one Workers-runtime tests verified wishlist isolation, duplicate rejection, global revision conflicts, immutable wishlist and direct endpoint snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
+    - Client utility tests verified ordered segmented Google Maps output with no more than three intermediary waypoints per leg, direct selected finishes, custom-coordinate confirmation, the 2,048-character guard, the 50-destination defensive ceiling, and coordinates omitted from AI prompts by default
+    - Catalog client tests verified canonical search-result coordinates and the shared rate-limit error presentation used by visited and planner search
     - Staging Worker version e7538fcf-b117-4905-9c0e-f8383f3f1bcd returned 200 health with the production origin, exposed ETag and X-Request-Id, rejected unauthenticated owner reads and deletion with 401, and rejected an unrelated origin with 403
+    - Staging Worker version f66133bb-6050-4491-ab37-70ab8fee42b3 deployed the backward-compatible direct start/finish contract, returned 200 health with the production CORS origin and X-Request-Id, and rejected an unauthenticated trip-plan read with 401
     - Pull requests 101 and 102 passed required validation and merged through protected develop and main as 3b30d3608b35b23a05460c33aed659392b21b3e6 and 8add555205dcd23314c0e11e1f0a2b4d1038fd54
     - GitHub Pages run 44128602408 deployed main merge 8add555205dcd23314c0e11e1f0a2b4d1038fd54
     - Live content-addressed privacy and My Atlas bundles contained the final retention notice, ordered-plan UI, segmented Google Maps links, and permanent account-deletion control
@@ -48,10 +52,14 @@ verification:
 
 # My Atlas trip planning implementation
 
-The implementation is deployed for controlled owner testing. Its
-backward-compatible API runs on the isolated staging Worker, and pull requests
-101 and 102 promoted the frontend through protected `develop` and `main`.
-Additional external beta invitations remain gated on the owner checks below.
+The original implementation is deployed for controlled owner testing. Staging
+Worker version `f66133bb-6050-4491-ab37-70ab8fee42b3` now serves the
+backward-compatible direct start and finish contract. Pull requests 101 and 102
+promoted the earlier frontend through protected `develop` and `main`.
+Planner-local search, direct endpoint selection, and the compact collapsible
+owner workflow are implemented and verified in the current source but not yet
+promoted. Additional external beta invitations remain gated on the owner checks
+below.
 
 ## Implemented and test verified
 
@@ -62,9 +70,11 @@ Additional external beta invitations remain gated on the owner checks below.
 - [x] Deterministic owner-scoped wish IDs, duplicate index, 250-entry cap,
   normalized notes, priorities, optional desired year, and 100-record paging.
 - [x] One private plan with an ordered destination list, accessible move
-  controls, lifecycle status, optional year and note, start, and two end modes.
-  The API retains a defensive 50-destination ceiling rather than presenting a
-  three-stop product limit.
+  controls, lifecycle status, optional year and note, and three end modes. A
+  start or selected finish may come directly from the catalog, from private
+  custom coordinates, or from an existing wishlist record. The API retains a
+  defensive 50-destination ceiling rather than presenting a three-stop product
+  limit.
 - [x] Immutable catalog/custom location snapshots with source-wish references,
   route-readiness state, and catalog revision.
 - [x] Account-global ETag, `If-Match`, and idempotency behavior across wishlist,
@@ -81,6 +91,14 @@ Additional external beta invitations remain gated on the owner checks below.
 - [x] Gated Vue owner UI for catalog or coordinate wishlist entry, editing,
   one-plan assembly, reordering, handoffs, retention review, JSON download, and
   account deletion.
+- [x] Independent planner search for canonical countries, cities, and reviewed
+  spots through the shared My Atlas search endpoint. Results and saved wishlist
+  cards expose catalog latitude and longitude; manual coordinates remain the
+  explicit custom-place fallback.
+- [x] Search results and manual coordinates can be assigned directly as the
+  plan start or selected finish without creating a wishlist record. The Worker
+  resolves catalog IDs authoritatively and stores the same immutable snapshot
+  shape used by wishlist-backed plan locations.
 - [x] No paid routing, app-owned AI inference, new telemetry route, public plan,
   ad slot, partner card, or marketing pixel.
 - [x] Public privacy copy now explains My Atlas storage, sharing, service
@@ -89,9 +107,14 @@ Additional external beta invitations remain gated on the owner checks below.
 - [x] Planner controls now expose busy and expanded state, named move controls,
   a labeled prompt preview, explicit new-tab Maps link names, visible keyboard
   focus, wrapped narrow-width actions, and 44-pixel-equivalent action targets.
+- [x] The planner starts collapsed within the owner workflow. Its expanded
+  wishlist, destination chooser, and ordered-stop collections use bounded
+  scrolling so large private lists do not lengthen the whole Atlas panel.
 - [x] Isolated staging Worker version
-  `e7538fcf-b117-4905-9c0e-f8383f3f1bcd` is deployed and passed public health,
-  CORS, foreign-origin rejection, and unauthenticated owner-route probes.
+  `f66133bb-6050-4491-ab37-70ab8fee42b3` is deployed with the backward-compatible
+  direct endpoint contract and passed health, production-origin CORS, request-ID,
+  and unauthenticated trip-plan probes. The earlier foreign-origin rejection
+  remains covered by automated tests and the prior staged release evidence.
 
 ## Partial or not yet verified
 
@@ -103,17 +126,17 @@ Additional external beta invitations remain gated on the owner checks below.
   account; automated durable-state erasure and exact retry tests pass.
 - [ ] Complete authenticated planner layout, keyboard, screen-reader, and
   horizontal-overflow acceptance at desktop and phone widths. Code review and
-  lint cover the new semantics and responsive rules, but the local headless
-  renderer failed in its GPU process before producing fresh visual evidence.
+  lint cover the new semantics and responsive rules, including the independent
+  planner search, but the local headless renderer failed in its GPU process
+  before producing fresh authenticated visual evidence.
 - [ ] Verify Google Maps output on Android app/browser, iOS app/browser, and
   desktop. The code enforces the conservative three-intermediary limit, but
   provider behavior remains externally unverified.
 - [x] Complete public policy copy for future-location retention, private versus
   public state, service providers, export, application deletion, and upstream
   Google/Auth0 identity handling.
-- [ ] Decide whether plan start and end need direct catalog/custom entry. The
-  first slice deliberately selects its start and destinations from saved
-  wishlist records.
+- [x] Plan start and selected finish support direct catalog or custom-coordinate
+  entry. Ordered intermediate destinations remain explicit wishlist choices.
 - [x] Segment long Google Maps handoffs into continuous mobile-safe links.
 - [ ] Implement the separate owner-reviewed Mark Visited transition.
 - [x] Keep the API on its isolated staging Worker while promoting the

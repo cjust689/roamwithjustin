@@ -940,7 +940,12 @@ function validStoredPlan(value) {
       value.stops.length >= 1 &&
       value.stops.length <= MAX_PLAN_DESTINATIONS &&
       value.stops.every(validPlanSnapshot) &&
-      ["return-to-start", "last-stop"].includes(value.endMode) &&
+      ["return-to-start", "last-stop", "selected-end"].includes(
+        value.endMode
+      ) &&
+      (value.endMode === "selected-end"
+        ? validPlanSnapshot(value.end)
+        : value.end === undefined) &&
       ["active", "deletion-pending"].includes(value.retentionState) &&
       validIsoDate(value.retentionConfirmedAt) &&
       validIsoDate(value.retentionExpiresAt) &&
@@ -1321,7 +1326,7 @@ export class UserProfileDurableObject extends DurableObject {
       !DIGEST_PATTERN.test(command.identityDigest) ||
       !Array.isArray(command.wishIds) ||
       command.wishIds.length < 1 ||
-      command.wishIds.length > MAX_PLAN_DESTINATIONS + 1 ||
+      command.wishIds.length > MAX_PLAN_DESTINATIONS + 2 ||
       command.wishIds.some(value => !WISH_ID_PATTERN.test(value))
     ) {
       return failure("invalid_wish_query")
@@ -1512,6 +1517,7 @@ export class UserProfileDurableObject extends DurableObject {
       start: command?.start,
       stops: command?.stops,
       endMode: command?.endMode,
+      ...(command?.end ? { end: command.end } : {}),
       retentionState: "active",
       retentionConfirmedAt: command?.now,
       retentionExpiresAt: validIsoDate(command?.now)
@@ -1583,6 +1589,7 @@ export class UserProfileDurableObject extends DurableObject {
         start: command.start,
         stops: command.stops,
         endMode: command.endMode,
+        ...(command.end ? { end: command.end } : {}),
         retentionState: "active",
         retentionConfirmedAt: command.now,
         retentionExpiresAt: retentionDeadline(command.now),
@@ -1590,6 +1597,7 @@ export class UserProfileDurableObject extends DurableObject {
       }
       delete plan.deletionPendingAt
       delete plan.deleteAfter
+      if (!command.end) delete plan.end
       if (!validStoredPlan(plan)) return failure("invalid_plan")
       const profile = {
         ...owner.profile,

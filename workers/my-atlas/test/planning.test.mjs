@@ -205,6 +205,58 @@ describe("private wishlist and trip planning", () => {
     ])
   })
 
+  it("snapshots direct catalog and custom start or finish locations without creating wishes", async () => {
+    const arches = await createWish(
+      "geonames:5556144",
+      1,
+      "97979797-9797-4797-8797-979797979797"
+    )
+    const created = await createMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        title: "Direct endpoints",
+        status: "saved",
+        desiredYear: 2027,
+        note: "",
+        start: { placeId: "geonames:5601615" },
+        stopWishIds: [arches.wish.wishId],
+        endMode: "selected-end",
+        end: {
+          customPlace: {
+            name: "Private Salt Lake City finish",
+            coordinates: [-111.891, 40.7608],
+          },
+        },
+        expectedRevision: 2,
+        idempotencyKey: "98989898-9898-4898-8898-989898989898",
+      },
+      placeCatalog,
+      now: NOW,
+    })
+
+    expect(created).toMatchObject({
+      profile: { revision: 3, wishCount: 1, planCount: 1 },
+      plan: {
+        start: {
+          placeId: "geonames:5601615",
+          name: "Moab",
+          catalogRevision: "fixture-2026-11-17",
+        },
+        stops: [{ sourceWishId: arches.wish.wishId }],
+        endMode: "selected-end",
+        end: {
+          placeType: "custom",
+          name: "Private Salt Lake City finish",
+          coordinates: [-111.891, 40.7608],
+          routeReadiness: "user-coordinate-review",
+        },
+      },
+    })
+    expect(created.plan.start).not.toHaveProperty("sourceWishId")
+    expect(created.plan.end).not.toHaveProperty("sourceWishId")
+  })
+
   it("uses the account revision, rejects duplicates, and isolates private wishlist state", async () => {
     const moab = await createWish(
       "geonames:5601615",

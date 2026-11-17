@@ -13,6 +13,24 @@ export class MyAtlasPlaceSearchError extends Error {
   }
 }
 
+export function formatMyAtlasPlaceSearchError(error) {
+  const reference = error?.requestId ? ` Reference: ${error.requestId}.` : ""
+  if (error?.status === 429 || error?.code === "rate_limited") {
+    const wait = error.retryAfter || 60
+    return `Search limit reached. Wait about ${wait} seconds, then retry.${reference}`
+  }
+  if (
+    error?.status === 503 ||
+    ["catalog_unavailable", "rate_limit_unavailable"].includes(error?.code)
+  ) {
+    return `Place search is temporarily unavailable. Retry in a moment.${reference}`
+  }
+  if (error?.code === "unavailable") {
+    return `Place search could not be reached. Check your connection and retry.${reference}`
+  }
+  return `Place search could not be completed. Please retry.${reference}`
+}
+
 function retryAfterSeconds(response) {
   const value = Number(response.headers.get("Retry-After") || 0)
   return Number.isInteger(value) && value > 0 && value <= 3600 ? value : 0

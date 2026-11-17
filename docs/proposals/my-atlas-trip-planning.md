@@ -35,9 +35,13 @@ A signed-in owner can privately:
 
 - save, edit, list, and remove wishlist entries for canonical countries,
   cities, reviewed spots, and owner-supplied custom coordinates;
+- search those canonical choices directly inside the planner, review their
+  catalog latitude and longitude, and either save the selected canonical ID or
+  use it directly as the plan start or finish;
 - save one plan containing a start plus an ordered list of immutable destination
   snapshots;
-- finish at the last destination or return to the start;
+- finish at the last destination, return to the start, or finish at a directly
+  selected catalog/custom location;
 - reopen, reorder, edit, explicitly keep, and delete that plan;
 - open a client-built Google Maps directions URL and copy a client-built AI
   planning prompt;
@@ -67,10 +71,13 @@ catalog revision for catalog records, and optional `sourceWishId`. A later
 wishlist edit or deletion cannot mutate or remove a saved snapshot.
 
 The first plan lifecycle is `draft | saved | archived`. Archiving does not prove
-travel and does not bypass retention. Start and destinations are selected from
-the owner's wishlist in this slice. End is `last-stop` or `return-to-start`.
-Direct arbitrary start or end entry, multiple plans, plan duplication, and the
-explicit Mark Visited review remain later work.
+travel and does not bypass retention. Ordered destinations are selected from
+the owner's wishlist. A start or selected finish may reference a wishlist
+record, a canonical catalog place, or owner-supplied custom coordinates. End is
+`last-stop`, `return-to-start`, or `selected-end`. Direct catalog/custom
+endpoints are snapshotted without implicitly adding them to the wishlist.
+Multiple plans, plan duplication, and the explicit Mark Visited review remain
+later work.
 
 Route readiness is `route-ready`, `needs-entrance-selection`, or
 `user-coordinate-review`. Countries and reviewed spots conservatively require

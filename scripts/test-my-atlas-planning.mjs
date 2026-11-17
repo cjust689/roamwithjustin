@@ -100,6 +100,30 @@ assert.throws(
 )
 assert.match(buildAiPlanningPrompt(longerPlan), /8\. Stop 8/)
 
+const directFinish = routeStop(
+  "custom:444444444444444444444444",
+  "Private finish",
+  -111.891,
+  40.7608
+)
+const selectedFinishPlan = {
+  ...plan,
+  stops: [plan.stops[0]],
+  endMode: "selected-end",
+  end: directFinish,
+}
+const selectedFinishUrl = new URL(
+  buildGoogleMapsDirectionsUrl(selectedFinishPlan, {
+    confirmedCoordinatePlaceIds: [
+      plan.stops[0].placeId,
+      directFinish.placeId,
+    ],
+  })
+)
+assert.equal(selectedFinishUrl.searchParams.get("origin"), "38.57332,-109.54984")
+assert.equal(selectedFinishUrl.searchParams.get("destination"), "40.7608,-111.891")
+assert.match(buildAiPlanningPrompt(selectedFinishPlan), /Finish at Private finish/)
+
 const wishId = index => `wish_${index.toString(16).padStart(24, "0")}`
 const planHeaders = new Headers({
   "If-Match": '"rev-1"',
@@ -119,6 +143,40 @@ const maximumPlanInput = {
 assert.equal(
   normalizeCreatePlan(maximumPlanInput, planHeaders, 2026).stopWishIds.length,
   MAX_PLAN_DESTINATIONS
+)
+const directPlanInput = normalizeCreatePlan(
+  {
+    ...maximumPlanInput,
+    startWishId: undefined,
+    start: { placeId: "geonames:5601615" },
+    stopWishIds: [wishId(1)],
+    endMode: "selected-end",
+    end: {
+      customPlace: {
+        name: "Private finish",
+        coordinates: [-111.891, 40.7608],
+      },
+    },
+  },
+  planHeaders,
+  2026
+)
+assert.deepEqual(directPlanInput.start, { placeId: "geonames:5601615" })
+assert.deepEqual(directPlanInput.end, {
+  customPlace: {
+    name: "Private finish",
+    coordinates: [-111.891, 40.7608],
+  },
+})
+assert.throws(() =>
+  normalizeCreatePlan(
+    {
+      ...maximumPlanInput,
+      endMode: "selected-end",
+    },
+    planHeaders,
+    2026
+  )
 )
 assert.throws(() =>
   normalizeCreatePlan(
