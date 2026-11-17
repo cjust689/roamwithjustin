@@ -377,6 +377,9 @@ ceiling before inviting external users.
       connections, responsive layouts, and local 1080 by 1920 Story export.
 - [x] Use the public phone header's available width for a compact handle and
       display-name column plus a right-aligned place-count badge.
+- [x] Use the existing Poppins family throughout My Atlas, including headings,
+      tutorials, authentication feedback, pin editing, public profiles, and
+      Story canvas export, without loading or declaring Russo One.
 - [x] Restore an existing Auth0 browser session after reload without changing
       the memory-only access-token cache.
 - [x] Implement and Workers-runtime test the safe signed-out public Atlas

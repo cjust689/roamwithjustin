@@ -242,7 +242,7 @@ export default {
 .pin-editor-heading h2 {
   margin: 0.2rem 0;
   color: #f4fbf7;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: 1.35rem;
 }
 
