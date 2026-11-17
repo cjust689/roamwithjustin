@@ -259,6 +259,61 @@
       "admin1Code": "00",
       "admin1Name": "",
       "sourceUrl": "https://www.geonames.org/1283416/mount-everest.html"
+    },
+    {
+      "geonameId": "11353080",
+      "name": "Krka",
+      "preferredName": "Krka National Park",
+      "aliases": [
+        "Krka",
+        "Krka National Park",
+        "Nacionalni park Krka",
+        "NP Krka"
+      ],
+      "latitude": 43.86659,
+      "longitude": 15.97893,
+      "featureClass": "L",
+      "featureCode": "RESN",
+      "countryCode": "HR",
+      "admin1Code": "13",
+      "admin1Name": "Šibenik-Knin",
+      "spotCategory": "national-park",
+      "spotKind": "National park",
+      "sourceUrl": "https://www.geonames.org/11353080/krka.html"
+    },
+    {
+      "geonameId": "5536441",
+      "name": "Canyonlands National Park",
+      "aliases": ["Canyonlands", "Canyonlands National Park"],
+      "latitude": 38.3268693,
+      "longitude": -109.8782592,
+      "featureClass": "L",
+      "featureCode": "PRK",
+      "countryCode": "US",
+      "admin1Code": "UT",
+      "admin1Name": "Utah",
+      "spotCategory": "national-park",
+      "spotKind": "National park",
+      "sourceUrl": "https://www.geonames.org/5536441/canyonlands-national-park.html"
+    },
+    {
+      "geonameId": "5768645",
+      "name": "Mount Rushmore",
+      "aliases": [
+        "Mount Rushmore",
+        "Mount Rushmore National Memorial",
+        "Six Grandfathers Mountain"
+      ],
+      "latitude": 43.8802654,
+      "longitude": -103.4588021,
+      "featureClass": "T",
+      "featureCode": "MT",
+      "countryCode": "US",
+      "admin1Code": "SD",
+      "admin1Name": "South Dakota",
+      "spotCategory": "cultural-landmark",
+      "spotKind": "Monument",
+      "sourceUrl": "https://www.geonames.org/5768645/mount-rushmore.html"
     }
   ]
 }
