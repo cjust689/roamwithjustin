@@ -69,6 +69,7 @@ verification:
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
     - Headless Chrome verified the feature-gated My Atlas homepage card at desktop and 390 pixel mobile widths, with no horizontal overflow and navigation to /my-atlas
+    - Headless Chrome at 1280 and 390 pixel widths verified the simplified homepage presents only Travel Atlas and My Atlas discovery cards, each with an eyebrow, title, and action; npm run lint and npm run build passed
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
     - Headless Chrome verified that My Atlas attribution begins as a compact info button and expands on activation without removing provider attribution
     - Headless Chrome verified the four-step pre-account walkthrough and first-account quick start at 390 pixel mobile and 1200 pixel desktop widths, including completion targets, persistent dismissal, and no horizontal overflow
@@ -478,10 +479,14 @@ map, then may drag the marker or use arrow keys before continuing into the same
 date and favorite-memory editor. The form states that this owner-supplied name
 and position become visible if the Atlas is made public.
 
-When the My Atlas route flag is enabled, the public homepage includes a peer My
-Atlas discovery card alongside the Travel Atlas and travel guides. Its call to
-action routes directly to `/my-atlas`. Disabled builds omit the card together
-with the route, so the homepage cannot expose a dead My Atlas link.
+When the My Atlas route flag is enabled, the public homepage presents two
+concise discovery cards: the Travel Atlas and My Atlas. Each keeps only its
+eyebrow, title, and action so the photography carries the exploratory choice.
+Journey guides remain reachable through the Travel Atlas instead of occupying
+a redundant homepage card. The My Atlas action routes directly to `/my-atlas`.
+Disabled builds omit that card together with the route, so the homepage cannot
+expose a dead My Atlas link and the Travel Atlas card expands to the available
+width.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land
