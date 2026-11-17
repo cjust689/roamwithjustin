@@ -41,6 +41,7 @@ verification:
     - npm run my-atlas:worker:durable:test
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
+    - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
     - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, ordered destination playback, cumulative reveal, and curved connection generation
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
@@ -84,6 +85,12 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `PATCH /v1/me/pins/{pinId}` changes its place or optional visit dates;
 - `DELETE /v1/me/pins/{pinId}` removes it;
 - `GET /v1/me/export?format=json|csv` returns the owner's profile and pins.
+
+No owner route accepts a user ID, handle, email, or subject. Even a guessed pin
+ID is resolved only inside the Durable Object selected from the caller's own
+registry assignment. A second active owner can pin the same Place but receives
+a distinct owner-qualified pin ID and cannot read, update, export, or delete the
+first owner's pin. An unregistered verified identity resolves to no account.
 
 Handle mutation, account deletion, and abuse reporting are not part of this
 slice.
