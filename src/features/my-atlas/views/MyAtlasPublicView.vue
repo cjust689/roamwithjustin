@@ -3,6 +3,7 @@
     <MyAtlasMap
       :places="displayedPlaces"
       :selected-place-id="selectedPlaceId"
+      :show-memories="showMemories"
       :playback-active="timelinePlaying"
       @select="selectPlace"
     />
@@ -80,6 +81,14 @@
               {{ timelineButtonLabel }}
             </button>
             <button type="button" @click="exportStory">Story image</button>
+            <button
+              type="button"
+              :aria-pressed="String(showMemories)"
+              :disabled="!visibleMemoryCount"
+              @click="showMemories = !showMemories"
+            >
+              {{ showMemories ? "Hide memories" : "Show all memories" }}
+            </button>
           </div>
 
           <div v-if="timelineEntry" class="my-atlas-public-timeline">
@@ -175,6 +184,7 @@ export default {
       timelineTimer: null,
       timelineIndex: -1,
       yearFilter: "all",
+      showMemories: false,
       mobileControlsOpen: false,
       previousTitle: "",
       robotsMeta: null,
@@ -227,6 +237,9 @@ export default {
     },
     visibleStats() {
       return atlasStats(this.displayedPlaces)
+    },
+    visibleMemoryCount() {
+      return this.displayedPlaces.filter(place => Boolean(place.memory)).length
     },
     years() {
       return atlasYears(this.places)
@@ -695,7 +708,46 @@ export default {
 
   .my-atlas-public-state,
   .my-atlas-public-intro {
-    margin: 1.2rem 0 1rem;
+    margin: 0.9rem 0 0.85rem;
+  }
+
+  .my-atlas-public-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    align-items: end;
+    column-gap: 0.85rem;
+  }
+
+  .my-atlas-public-intro p,
+  .my-atlas-public-intro h1 {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .my-atlas-public-intro p {
+    grid-row: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .my-atlas-public-intro h1 {
+    grid-row: 2;
+    font-size: clamp(1.8rem, 10vw, 2.45rem);
+  }
+
+  .my-atlas-public-intro span {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    align-self: end;
+    margin: 0 0 0.12rem;
+    padding: 0.42rem 0.58rem;
+    border: 1px solid rgba(230, 186, 104, 0.24);
+    border-radius: 999px;
+    color: #d9c58f;
+    background: rgba(230, 186, 104, 0.07);
+    white-space: nowrap;
   }
 
   .my-atlas-public-mobile-controls-toggle {

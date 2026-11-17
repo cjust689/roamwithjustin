@@ -26,6 +26,7 @@ code_paths:
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
   - src/features/my-atlas/catalog/memory.mjs
+  - src/features/my-atlas/catalog/mapMemory.mjs
   - src/features/my-atlas/catalog/customPlace.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
@@ -68,6 +69,9 @@ verification:
     - Favorite-memory contract tests passed Unicode normalization, whitespace folding, 255-code-point and 1,020-byte ceilings, markup and invisible-control rejection, unsafe-storage fail-closed behavior, owner isolation, public projection, and CSV formula neutralization
     - Twenty-two Workers-runtime tests passed after favorite-memory persistence, update, export, sharing, direct-object validation, and corrupt-public-state coverage were added
     - Headless Chrome at 390 pixels verified the 255-character editor boundary, blocked markup, normalized line breaks, escaped list and selected-place rendering, successful local save, and zero horizontal overflow
+    - Map-memory contract tests verified hidden-by-default, selected-pin, show-all, and empty-memory behavior
+    - Headless Chrome verified selected-pin memory callouts and the optional all-memory map layer at desktop and 390 pixel mobile widths
+    - Headless Chrome verified the compact two-column public profile identity header at 390 pixels with the place count occupying the former empty right side and no horizontal overflow
     - Pull requests 82 and 83 promoted the favorite-memory implementation through protected develop and main after validation runs 44018100141, 44018321716, 44018838662, and 44018845869 passed
     - History-only pull request 84 synchronized main into develop without file changes after validation run 44018666432 passed
     - Staging Worker 2fbce736-0799-4235-a7b5-018727e39b64 returned 200 health after the favorite-memory contract deployed
@@ -282,6 +286,11 @@ control, but My Atlas collapses its initially expanded attribution text as soon
 as provider data is available. Activating the info button expands the original
 MapLibre attribution control.
 
+The public phone header uses a compact two-column identity block. The handle
+and display name remain together on the left, while the place count becomes a
+small status badge on the right. This removes the unused half-row without
+changing the desktop profile header or hiding any shared-profile detail.
+
 Map pins use a deterministic color for their earliest visit year, retain a
 visible place and year label, and emphasize the selected destination. Nearby
 pins collapse into a count marker using the same screen-distance grouping model
@@ -295,6 +304,15 @@ enter chronological playback. Curved map connections are a deterministic
 visual treatment over the current pins and do not claim route history. They use
 a dark underlay, soft gold glow, and high-opacity three-pixel dashed line so the
 connections remain legible over satellite imagery.
+
+When a standalone pin has a favorite memory, selecting it reveals the complete
+memory inside that pin's map label. A `Show all memories` control in both owner
+and public views exposes shortened previews for every visible standalone pin
+with a memory, and changes to `Hide memories` while active. The control is
+disabled when the filtered view contains no memories. It starts off on every
+page load, remains inside the existing collapsed phone controls, and does not
+expand memory text inside low-zoom cluster markers. Memory content is assigned
+as DOM text rather than HTML.
 
 The owner editor intentionally asks only for optional visit years. Users may
 record multiple years for repeat visits or leave a destination undated. The API

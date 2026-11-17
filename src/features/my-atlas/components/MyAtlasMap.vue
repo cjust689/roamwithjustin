@@ -44,6 +44,7 @@ import {
   formatVisitedDates,
   visitedDatesForPlace,
 } from "../catalog/atlasInsights.mjs"
+import { shouldShowMyAtlasMapMemory } from "../catalog/mapMemory.mjs"
 
 const CONNECTION_SOURCE = "my-atlas-connections"
 const CLUSTER_MAX_ZOOM = 7.75
@@ -104,6 +105,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    showMemories: {
+      type: Boolean,
+      default: false,
+    },
     playbackActive: {
       type: Boolean,
       default: false,
@@ -159,6 +164,9 @@ export default {
     },
     showConnections() {
       this.renderConnections()
+    },
+    showMemories() {
+      this.renderMarkers()
     },
     playbackActive(active) {
       if (active) {
@@ -475,13 +483,24 @@ export default {
       const element = document.createElement("button")
       element.type = "button"
       element.className = "my-atlas-pin"
-      if (place.placeId === this.selectedPlaceId) {
+      const selected = place.placeId === this.selectedPlaceId
+      const memoryVisible = shouldShowMyAtlasMapMemory(place, {
+        selectedPlaceId: this.selectedPlaceId,
+        showAll: this.showMemories,
+      })
+      if (selected) {
         element.classList.add("is-selected")
       }
+      if (memoryVisible) element.classList.add("has-memory")
       const dateLabel = formatVisitedDates(place)
       const year = firstVisitedYear(place)
       element.style.setProperty("--pin-color", pinColor(year))
-      element.setAttribute("aria-label", `Select ${place.name}, ${dateLabel}`)
+      element.setAttribute(
+        "aria-label",
+        memoryVisible
+          ? `Select ${place.name}, ${dateLabel}. Favorite memory: ${place.memory}`
+          : `Select ${place.name}, ${dateLabel}`
+      )
       element.dataset.placeId = place.placeId
 
       const pin = document.createElement("span")
@@ -494,6 +513,13 @@ export default {
       const dates = document.createElement("small")
       dates.textContent = dateLabel
       label.append(name, dates)
+      if (memoryVisible) {
+        const memory = document.createElement("span")
+        memory.className = "my-atlas-pin-memory"
+        memory.textContent = place.memory
+        memory.title = place.memory
+        label.appendChild(memory)
+      }
       element.append(pin, label)
       element.addEventListener("click", () =>
         this.$emit("select", place.placeId)
@@ -924,6 +950,31 @@ export default {
   font-weight: 800;
 }
 
+::v-deep .my-atlas-pin.has-memory .my-atlas-pin-label {
+  width: min(16rem, calc(100vw - 2rem));
+  min-width: 0;
+}
+
+::v-deep .my-atlas-pin-memory {
+  display: block;
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  color: #dce9e4;
+  font-size: 0.62rem;
+  font-style: italic;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+::v-deep .my-atlas-pin.has-memory:not(.is-selected) .my-atlas-pin-memory {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 ::v-deep .my-atlas-pin:hover,
 ::v-deep .my-atlas-pin:focus-visible,
 ::v-deep .my-atlas-pin.is-selected {
@@ -979,6 +1030,10 @@ export default {
   ::v-deep .my-atlas-pin-label strong {
     max-width: 7.5rem;
     font-size: 0.66rem;
+  }
+
+  ::v-deep .my-atlas-pin.has-memory .my-atlas-pin-label {
+    width: min(13rem, calc(100vw - 1.25rem));
   }
 }
 </style>

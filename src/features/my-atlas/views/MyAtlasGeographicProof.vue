@@ -5,6 +5,7 @@
       :places="displayedPlaces"
       :selected-place-id="selectedPlaceId"
       :show-connections="showConnections"
+      :show-memories="showMemories"
       :playback-active="timelinePlaying"
       :placement-active="customPlaceOpen"
       :placement-coordinates="customPlaceCoordinates"
@@ -104,6 +105,14 @@
             </button>
             <button type="button" @click="showConnections = !showConnections">
               {{ showConnections ? "Hide paths" : "Show paths" }}
+            </button>
+            <button
+              type="button"
+              :aria-pressed="String(showMemories)"
+              :disabled="!visibleMemoryCount"
+              @click="showMemories = !showMemories"
+            >
+              {{ showMemories ? "Hide memories" : "Show all memories" }}
             </button>
           </div>
           <p v-if="timelineEntry" class="my-atlas-timeline-year">
@@ -544,6 +553,7 @@ export default {
       timelinePlaying: false,
       timelineTimer: null,
       showConnections: true,
+      showMemories: false,
       mobileControlsOpen: false,
       announcement: "",
       auth: myAtlasAuthState,
@@ -658,6 +668,9 @@ export default {
     },
     visibleStats() {
       return atlasStats(this.displayedPlaces)
+    },
+    visibleMemoryCount() {
+      return this.displayedPlaces.filter(place => Boolean(place.memory)).length
     },
     years() {
       return atlasYears(this.pinnedPlaces)
@@ -1128,6 +1141,10 @@ export default {
     selectPin(placeId) {
       if (this.timelinePlaying) this.pauseTimeline()
       this.selectedPlaceId = placeId
+      const place = this.displayedPlaces.find(item => item.placeId === placeId)
+      this.announcement = place?.memory
+        ? `${place.name}. Favorite memory is visible on the map.`
+        : `${place?.name || "Destination"} selected.`
     },
     cyclePin(direction) {
       if (!this.displayedPlaces.length) return
