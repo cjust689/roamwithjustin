@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers"
+import { isNormalizedPinMemory } from "../account/memory.mjs"
 
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
@@ -908,7 +909,8 @@ export class UserProfileDurableObject extends DurableObject {
       !validOwnerMutation(command) ||
       !PIN_ID_PATTERN.test(command.pinId) ||
       !PLACE_ID_PATTERN.test(command.placeId) ||
-      !validPinTiming(command)
+      !validPinTiming(command) ||
+      !isNormalizedPinMemory(command.memory)
     ) {
       return failure("invalid_pin")
     }
@@ -932,11 +934,12 @@ export class UserProfileDurableObject extends DurableObject {
       }
 
       const pin = {
-        schemaVersion: 2,
+        schemaVersion: 3,
         pinId: command.pinId,
         placeId: command.placeId,
         visitedYears: command.visitedYears,
         visitedDates: command.visitedDates,
+        memory: command.memory,
         createdAt: command.now,
         updatedAt: command.now,
       }
@@ -970,11 +973,13 @@ export class UserProfileDurableObject extends DurableObject {
       Array.isArray(patch) ||
       Object.keys(patch).length === 0 ||
       Object.keys(patch).some(
-        key => !["placeId", "visitedYears", "visitedDates"].includes(key)
+        key =>
+          !["placeId", "visitedYears", "visitedDates", "memory"].includes(key)
       ) ||
       (patch.placeId !== undefined && !PLACE_ID_PATTERN.test(patch.placeId)) ||
       ((patch.visitedYears !== undefined || patch.visitedDates !== undefined) &&
-        !validPinTiming(patch))
+        !validPinTiming(patch)) ||
+      (patch.memory !== undefined && !isNormalizedPinMemory(patch.memory))
     ) {
       return failure("invalid_pin")
     }
@@ -1000,6 +1005,7 @@ export class UserProfileDurableObject extends DurableObject {
       const pin = {
         ...current,
         ...patch,
+        schemaVersion: 3,
         updatedAt: command.now,
       }
       const profile = {
@@ -1086,7 +1092,13 @@ export class UserProfileDurableObject extends DurableObject {
       this.ctx.storage.kv.list({ prefix: "pin:", limit: 301 }),
       ([, value]) => value
     )
-    if (pins.length > 300 || pins.length !== profile.pinCount) {
+    if (
+      pins.length > 300 ||
+      pins.length !== profile.pinCount ||
+      pins.some(
+        pin => pin.memory !== undefined && !isNormalizedPinMemory(pin.memory)
+      )
+    ) {
       return failure("public_atlas_inconsistent")
     }
     return Object.freeze({
@@ -1100,6 +1112,7 @@ export class UserProfileDurableObject extends DurableObject {
           Object.freeze({
             placeId: pin.placeId,
             ...publicPinTiming(pin),
+            ...(pin.memory ? { memory: pin.memory } : {}),
           })
         )
       ),
