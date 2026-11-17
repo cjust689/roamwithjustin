@@ -81,6 +81,9 @@ verification:
 - [x] Excluded `/my-atlas` routes and private planning state from this GA4
   phase.
 - [x] Added the primary homepage Atlas CTA and one-sentence map promise.
+- [x] Reduced the secondary homepage discovery surface to concise Travel Atlas
+  and feature-gated My Atlas cards. Journey guides remain discoverable through
+  the Atlas rather than a duplicate homepage card.
 - [x] Added allowlisted Atlas entry, load, Journey, destination, story, Maps,
   and canonical Partner actions without map movement telemetry.
 - [x] Removed hostname-derived GearGrid events, full outbound URL parameters,

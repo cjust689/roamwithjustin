@@ -48,29 +48,7 @@
               Interactive experience
             </span>
             <strong>Explore the Interactive Atlas</strong>
-            <span class="journey-description">
-              Fly across satellite terrain through Utah's red rock parks and
-              Puerto Rico's cities, cliffs, waterfalls, and beaches.
-            </span>
             <span class="journey-action">Open the atlas <b>&rarr;</b></span>
-          </span>
-        </router-link>
-
-        <router-link class="journey-card guides-card" to="/trips">
-          <span
-            class="journey-card-background"
-            :style="{ backgroundImage: `url('${guidesImage}')` }"
-            aria-hidden="true"
-          ></span>
-          <span class="journey-card-shade" aria-hidden="true"></span>
-          <span class="journey-card-content">
-            <span class="journey-label">Travel guides</span>
-            <strong>Follow the full journey</strong>
-            <span class="journey-description">
-              Read the itineraries, locations, travel notes, photography, and
-              gear behind each completed trip.
-            </span>
-            <span class="journey-action">Browse the guides <b>&rarr;</b></span>
           </span>
         </router-link>
 
@@ -91,10 +69,6 @@
               Build your own map
             </span>
             <strong>Make My Atlas yours</strong>
-            <span class="journey-description">
-              Pin the countries and cities that shaped your travels, add visit
-              years, then replay and share your map.
-            </span>
             <span class="journey-action">Start My Atlas <b>&rarr;</b></span>
           </span>
         </router-link>
@@ -123,7 +97,6 @@ export default {
   data() {
     return {
       atlasImage: "/img/locations/utah/utah-full.jpg",
-      guidesImage: "/img/locations/puerto-rico/puerto-rico-full.jpg",
       heroImage: heroImages[Math.floor(Math.random() * heroImages.length)],
       myAtlasEnabled: isMyAtlasGeographicProofEnabled(process.env),
       myAtlasImage: "/img/roam/default/4.jpg",
@@ -262,13 +235,13 @@ export default {
 
 .journey-options {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   margin-top: clamp(2rem, 5vh, 3.75rem);
 }
 
 .journey-options.has-my-atlas {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .journey-card {
@@ -338,14 +311,6 @@ export default {
   font-size: clamp(1.9rem, 3vw, 2.7rem);
   font-weight: 500;
   line-height: 1;
-}
-
-.journey-description {
-  max-width: 470px;
-  margin-top: 0.65rem;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  line-height: 1.55;
 }
 
 .journey-action {
@@ -448,16 +413,6 @@ export default {
 
   .home-footnote {
     padding-bottom: 1rem;
-  }
-}
-
-@media (min-width: 761px) and (max-width: 1020px) {
-  .journey-options.has-my-atlas {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .my-atlas-card {
-    grid-column: 1 / -1;
   }
 }
 
