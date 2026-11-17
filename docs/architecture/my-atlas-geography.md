@@ -53,6 +53,9 @@ verification:
     - Curated spot fixtures passed search, draft pin, authenticated persistence, safe public projection, and Story-stat contracts
     - Full geonames-2026-11-17-spots artifact built 256 resolution shards and 256 search shards for 237445 records
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
+    - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
+    - Catalog client tests preserve typed status, error code, bounded Retry-After, and request ID details from a failed search
+    - Worker routing tests verify separate catalog and public Atlas limiter keys for the same client address
     - Pull requests 73 and 74 passed their required validation gates and merged through develop to main
     - Pages workflow 44009928197 deployed main merge 23d8c96edc00d291a6f3a119c852dfd89f85f846
     - Rclone verified 512 matching geonames-2026-11-17-spots release objects before catalog/current.json was uploaded last
@@ -146,6 +149,13 @@ records must also carry a bounded category and human-readable kind. Returned
 canonical records are held in component memory so they can pass the same
 draft-pin validation as bundled records.
 
+The browser waits 350 milliseconds after the latest search edit, cancels an
+older request when the query changes, and invalidates the older response even
+when the query is cleared. A failed request retains HTTP status, error code,
+bounded `Retry-After`, and request ID metadata. The interface distinguishes an
+exhausted search limit from a catalog or network outage and can retry the
+unchanged query without a page reload.
+
 The local endpoint exposes the intended `GET /v1/places/search?q=...` response
 shape against all 237,176 cities, 250 country or territory records, and 19
 reviewed spots. It binds only to `127.0.0.1`, allows only localhost browser
@@ -162,6 +172,13 @@ while normal search omits them. The default local Worker has no catalog R2
 binding. The named staging environment declares an isolated binding, but the
 bucket and objects do not exist until deliberately provisioned and published,
 so cloud routes remain unavailable.
+
+Catalog search and exact resolution use the staging weighted public limiter
+under a `catalog` key scoped to the connecting IP address. Search costs two
+units and exact resolution costs one. Signed-out public Atlas reads use a
+separate `public-atlas` key, so browsing a shared Atlas cannot consume the same
+bucket as place search. Authenticated owner Atlas routes do not use this public
+limiter.
 
 Canonical name matches rank ahead of alias matches. This prevents an airport
 code or alternate name from outranking the actual city, such as the `Moab`

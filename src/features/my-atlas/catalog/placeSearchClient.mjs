@@ -1,6 +1,25 @@
 import { searchPlaceCatalog } from "./search.mjs"
 import { isMyAtlasPlaceType } from "./placeTypes.mjs"
 
+export class MyAtlasPlaceSearchError extends Error {
+  constructor(
+    message,
+    { status = 0, code = "search_failed", retryAfter = 0, requestId = "" } = {}
+  ) {
+    super(message)
+    this.name = "MyAtlasPlaceSearchError"
+    this.status = status
+    this.code = code
+    this.retryAfter = retryAfter
+    this.requestId = requestId
+  }
+}
+
+function retryAfterSeconds(response) {
+  const value = Number(response.headers.get("Retry-After") || 0)
+  return Number.isInteger(value) && value > 0 && value <= 3600 ? value : 0
+}
+
 function isCanonicalPlace(record) {
   const coordinates = record?.coordinates
   return (
@@ -29,28 +48,62 @@ export async function searchMyAtlasPlaces({
     return searchPlaceCatalog(catalog, query, { limit })
   }
   if (typeof fetchImpl !== "function") {
-    throw new Error("Place search is unavailable in this browser.")
+    throw new MyAtlasPlaceSearchError(
+      "Place search is unavailable in this browser.",
+      { code: "unsupported_browser" }
+    )
   }
 
   const requestUrl = new URL(endpoint)
   requestUrl.searchParams.set("q", query)
   requestUrl.searchParams.set("limit", String(limit))
-  const response = await fetchImpl(requestUrl, {
-    method: "GET",
-    headers: { Accept: "application/json" },
-    signal,
-  })
+  let response
+  try {
+    response = await fetchImpl(requestUrl, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      signal,
+    })
+  } catch (error) {
+    if (error?.name === "AbortError") throw error
+    throw new MyAtlasPlaceSearchError("Place search could not be reached.", {
+      code: "unavailable",
+    })
+  }
   if (!response.ok) {
-    throw new Error("Place search request failed.")
+    let payload = {}
+    try {
+      payload = await response.json()
+    } catch {
+      // The status remains authoritative when an error body is unavailable.
+    }
+    throw new MyAtlasPlaceSearchError("Place search request failed.", {
+      status: response.status,
+      code:
+        typeof payload.error === "string" ? payload.error : "search_rejected",
+      retryAfter: retryAfterSeconds(response),
+      requestId: typeof payload.requestId === "string" ? payload.requestId : "",
+    })
   }
 
-  const payload = await response.json()
+  let payload
+  try {
+    payload = await response.json()
+  } catch {
+    throw new MyAtlasPlaceSearchError(
+      "Place search returned an invalid catalog response.",
+      { status: response.status, code: "invalid_response" }
+    )
+  }
   if (
     !payload ||
     !Array.isArray(payload.results) ||
     !payload.results.every(isCanonicalPlace)
   ) {
-    throw new Error("Place search returned an invalid catalog response.")
+    throw new MyAtlasPlaceSearchError(
+      "Place search returned an invalid catalog response.",
+      { status: response.status, code: "invalid_response" }
+    )
   }
 
   return payload.results.slice(0, Math.max(0, Math.min(10, limit)))

@@ -208,6 +208,7 @@ async function publicReadRateLimit({
   environment,
   dependencies,
   context,
+  scope,
   weight = 1,
 }) {
   const limiter =
@@ -217,7 +218,8 @@ async function publicReadRateLimit({
     return errorResponse(500, "service_configuration_error", context)
   }
   try {
-    const clientKey = request.headers.get("CF-Connecting-IP") || "unknown"
+    const clientAddress = request.headers.get("CF-Connecting-IP") || "unknown"
+    const clientKey = `${scope}:${clientAddress}`
     const result = await limiter.limit({ key: clientKey, delta: weight })
     if (result?.success === true) return null
     const response = errorResponse(429, "rate_limited", context)
@@ -403,6 +405,7 @@ export async function handleRequest(
       environment,
       dependencies,
       context,
+      scope: "catalog",
       weight: isPlaceSearch ? 2 : 1,
     })
     if (limited) return limited
@@ -430,6 +433,7 @@ export async function handleRequest(
       environment,
       dependencies,
       context,
+      scope: "public-atlas",
     })
     if (limited) return limited
     try {
