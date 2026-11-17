@@ -31,6 +31,11 @@ import {
   MyAtlasPlaceSearchError,
   searchMyAtlasPlaces,
 } from "../src/features/my-atlas/catalog/placeSearchClient.mjs"
+import {
+  MY_ATLAS_MEMORY_MAX_CHARACTERS,
+  isNormalizedMyAtlasMemory,
+  normalizeMyAtlasMemory,
+} from "../src/features/my-atlas/catalog/memory.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../src/features/my-atlas/config/placeSearch.mjs"
 import { createLocalPlaceSearchServer } from "./my-atlas/local-place-search-server.mjs"
 import {
@@ -55,6 +60,25 @@ const options = {
   sourceSnapshotDate: "2026-11-16",
   spotSourceFile: path.join(fixture, "spots.json"),
 }
+
+assert.equal(
+  normalizeMyAtlasMemory("  Watching the tide\nreshape Uvita.  "),
+  "Watching the tide reshape Uvita."
+)
+assert.equal(
+  normalizeMyAtlasMemory("e\u0301"),
+  "é",
+  "favorite memories must use canonical Unicode"
+)
+assert.equal(
+  Array.from(normalizeMyAtlasMemory("🌊".repeat(255))).length,
+  MY_ATLAS_MEMORY_MAX_CHARACTERS
+)
+assert.equal(normalizeMyAtlasMemory("a".repeat(256)), null)
+assert.equal(normalizeMyAtlasMemory("memory\u202Ehidden"), null)
+assert.equal(normalizeMyAtlasMemory("<script>alert(1)</script>"), null)
+assert.equal(isNormalizedMyAtlasMemory("A safe favorite memory."), true)
+assert.equal(isNormalizedMyAtlasMemory("  needs normalization  "), false)
 
 function directoryBucket(directory) {
   return {

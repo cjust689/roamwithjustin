@@ -111,10 +111,11 @@ async function registerSecondOwner() {
 function pinInput({
   placeId,
   visitedYears = [],
+  memory = "",
   expectedRevision,
   idempotencyKey,
 }) {
-  return { placeId, visitedYears, expectedRevision, idempotencyKey }
+  return { placeId, visitedYears, memory, expectedRevision, idempotencyKey }
 }
 
 const catalogResolver = async placeId =>
@@ -289,6 +290,73 @@ describe("private owner profile and pin services", () => {
     })
   })
 
+  it("stores one owner-scoped favorite memory per pin and rejects unsafe bypasses", async () => {
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: pinInput({
+        placeId: "geonames:3621138",
+        memory: "Watching the tide reshape the whale tail.",
+        expectedRevision: 1,
+        idempotencyKey: "18181818-1818-4818-8818-181818181818",
+      }),
+      catalogResolver,
+      now: NOW,
+    })
+    expect(created.pin.memory).toBe("Watching the tide reshape the whale tail.")
+
+    const updated = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        pinId: created.pin.pinId,
+        patch: { memory: "Horses crossing the beach at low tide." },
+        expectedRevision: 2,
+        idempotencyKey: "19191919-1919-4919-8919-191919191919",
+      },
+      catalogResolver,
+      now: NOW,
+    })
+    expect(updated).toMatchObject({
+      profile: { revision: 3 },
+      pin: { memory: "Horses crossing the beach at low tide." },
+    })
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .pins[0].memory
+    ).toBe("Horses crossing the beach at low tide.")
+
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          pinId: created.pin.pinId,
+          patch: { memory: "<img src=x onerror=alert(1)>" },
+          expectedRevision: 3,
+          idempotencyKey: "20202020-2020-4020-8020-202020202020",
+        },
+        catalogResolver,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "invalid_pin" })
+
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          pinId: created.pin.pinId,
+          patch: { memory: "a".repeat(256) },
+          expectedRevision: 3,
+          idempotencyKey: "21212121-2121-4121-8121-212121212121",
+        },
+        catalogResolver,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "invalid_pin" })
+  })
+
   it("isolates reads, updates, exports, and deletes between two active owners", async () => {
     const ownerPin = await createMyPin({
       environment: environment(),
@@ -344,7 +412,7 @@ describe("private owner profile and pin services", () => {
         identity: SECOND_IDENTITY,
         input: {
           pinId: ownerPin.pin.pinId,
-          patch: { visitedYears: [2026] },
+          patch: { memory: "Attempted cross-owner edit" },
           expectedRevision: 2,
           idempotencyKey: "15151515-1515-4515-8515-151515151515",
         },

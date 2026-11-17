@@ -141,11 +141,14 @@ function accountJsonResponse(body, status, context, revision) {
 
 function csvCell(value) {
   const text = String(value ?? "")
-  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
+  const safeText = /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text
+  return /[",\r\n]/.test(safeText)
+    ? `"${safeText.replaceAll('"', '""')}"`
+    : safeText
 }
 
 function exportCsv(result, context) {
-  const rows = ["pinId,placeId,visitedYears,visitedDates"]
+  const rows = ["pinId,placeId,visitedYears,visitedDates,memory"]
   for (const pin of result.pins) {
     const visitedDates = Array.isArray(pin.visitedDates)
       ? pin.visitedDates
@@ -162,6 +165,7 @@ function exportCsv(result, context) {
               : String(date.year)
           )
           .join("|"),
+        pin.memory || "",
       ]
         .map(csvCell)
         .join(",")

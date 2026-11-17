@@ -1,9 +1,10 @@
 import { env } from "cloudflare:workers"
-import { reset } from "cloudflare:test"
+import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
 import { createMyPin, updateMyProfile } from "../src/account/service.mjs"
 import {
   PublicAtlasNotFoundError,
+  PublicAtlasServiceError,
   getPublicAtlas,
 } from "../src/public/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
@@ -111,6 +112,7 @@ describe("public Atlas projection", () => {
       input: {
         placeId: "geonames:3621138",
         visitedYears: [2024, 2026],
+        memory: "Watching the whale tail emerge as the tide went out.",
         expectedRevision: 1,
         idempotencyKey: "23232323-2323-4232-8232-232323232323",
       },
@@ -156,6 +158,7 @@ describe("public Atlas projection", () => {
             coordinates: [-83.7395, 9.17039],
             visitedDates: [{ year: 2024 }, { year: 2026 }],
             visitedYears: [2024, 2026],
+            memory: "Watching the whale tail emerge as the tide went out.",
           },
         ],
       },
@@ -265,5 +268,57 @@ describe("public Atlas projection", () => {
       spotKind: "National park",
       visitedYears: [2025],
     })
+  })
+
+  it("fails closed when stored public memory no longer satisfies the contract", async () => {
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        placeId: "geonames:3621138",
+        visitedYears: [],
+        memory: "A safe memory before simulated corruption.",
+        expectedRevision: 1,
+        idempotencyKey: "67676767-6767-4767-8767-676767676767",
+      },
+      catalogResolver: async placeId => ({
+        placeId,
+        placeType: "city",
+        name: "Uvita",
+        countryCode: "CR",
+        countryName: "Costa Rica",
+        deprecated: false,
+        coordinates: [-83.7395, 9.17039],
+      }),
+      now: NOW,
+    })
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: 2,
+        idempotencyKey: "68686868-6868-4868-8868-686868686868",
+      },
+      now: NOW,
+    })
+
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    await runInDurableObject(user, (_instance, state) => {
+      const key = `pin:${created.pin.pinId}`
+      const pin = state.storage.kv.get(key)
+      state.storage.kv.put(key, {
+        ...pin,
+        memory: "<script>alert(1)</script>",
+      })
+    })
+
+    await expect(
+      getPublicAtlas({
+        environment: environment(),
+        handle: "public-owner",
+        placeCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasServiceError)
   })
 })

@@ -7,6 +7,7 @@ import {
 import { REGISTRY_OBJECT_NAME } from "../registration/service.mjs"
 import { projectCatalogPlace } from "../catalog/projection.mjs"
 import { WorkerPlaceCatalog, createCatalogResolver } from "../catalog/store.mjs"
+import { isNormalizedPinMemory } from "./memory.mjs"
 
 export class AccountConflictError extends Error {
   constructor(code) {
@@ -130,8 +131,18 @@ function publicPinTiming(pin) {
   })
 }
 
+function ownerPinMemory(pin) {
+  if (pin.memory === undefined) return ""
+  if (!isNormalizedPinMemory(pin.memory)) throw new AccountServiceError()
+  return pin.memory
+}
+
 function publicOwnerPin(pin) {
-  return Object.freeze({ ...pin, ...publicPinTiming(pin) })
+  return Object.freeze({
+    ...pin,
+    ...publicPinTiming(pin),
+    memory: ownerPinMemory(pin),
+  })
 }
 
 export async function getMyProfile({ environment, identity }) {
@@ -159,6 +170,7 @@ export async function getMyAtlasState({ environment, identity, placeCatalog }) {
         pinId: pin.pinId,
         ...projectCatalogPlace(records[index]),
         ...publicPinTiming(pin),
+        memory: ownerPinMemory(pin),
       })
     )
   } catch {
@@ -221,6 +233,7 @@ export async function createMyPin({
   now = new Date().toISOString(),
 }) {
   const timing = publicPinTiming(input)
+  const memory = input.memory === undefined ? "" : input.memory
   const place = await assertCatalogPlace(
     input.placeId,
     catalogResolver,
@@ -230,6 +243,7 @@ export async function createMyPin({
   const mutation = await mutationMetadata(owner, input, "create-pin", {
     placeId: input.placeId,
     ...timing,
+    memory,
   })
   const pinId = `pin_${(
     await sha256(`${owner.userId}\u0000${input.placeId}`)
@@ -241,6 +255,7 @@ export async function createMyPin({
       pinId,
       placeId: input.placeId,
       ...timing,
+      memory,
       now,
       ...mutation,
     })
@@ -252,6 +267,7 @@ export async function createMyPin({
       pinId: result.pin.pinId,
       ...projectCatalogPlace(place),
       ...publicPinTiming(result.pin),
+      memory: ownerPinMemory(result.pin),
     }),
   })
 }
