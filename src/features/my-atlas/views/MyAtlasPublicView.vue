@@ -451,7 +451,7 @@ export default {
 .my-atlas-public-state h1,
 .my-atlas-public-intro h1 {
   margin: 0;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: clamp(2rem, 6vw, 3.2rem);
   line-height: 1;
   text-wrap: balance;
@@ -555,7 +555,7 @@ export default {
 }
 
 .my-atlas-public-timeline strong {
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: 1.05rem;
 }
 

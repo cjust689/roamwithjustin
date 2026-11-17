@@ -195,7 +195,7 @@ export function createMyAtlasStoryCanvas({
   context.font = "700 25px Poppins, Arial, sans-serif"
   context.fillText("MY ATLAS", 62, 82)
   context.fillStyle = "#f4fbf7"
-  context.font = "700 78px 'Russo One', Poppins, Arial, sans-serif"
+  context.font = "700 78px Poppins, Arial, sans-serif"
   context.fillText(displayName || "My travels", 62, 188, 920)
   context.fillStyle = "#a9bbb5"
   context.font = "500 28px Poppins, Arial, sans-serif"

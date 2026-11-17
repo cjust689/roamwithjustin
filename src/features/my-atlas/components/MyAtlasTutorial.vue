@@ -372,7 +372,7 @@ export default {
   right: 1.2rem;
   bottom: 0.35rem;
   color: rgba(255, 255, 255, 0.09);
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: 5.5rem;
   line-height: 1;
 }
@@ -466,7 +466,7 @@ export default {
 .my-atlas-tutorial h2 {
   margin: 0;
   color: #f3faf6;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: clamp(1.8rem, 7vw, 2.65rem);
   line-height: 1;
   text-wrap: balance;

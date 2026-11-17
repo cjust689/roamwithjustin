@@ -74,6 +74,6 @@ export default {
 
 .my-atlas-callback h1 {
   margin: 0.4rem 0 1rem;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
 }
 </style>
