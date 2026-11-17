@@ -177,6 +177,18 @@
         </small>
       </label>
 
+      <MyAtlasPinEditor
+        v-if="pinEditorPlace"
+        :key="pinEditorKey"
+        :place="pinEditorPlace"
+        :place-label="placeLabel(pinEditorPlace)"
+        :pin="pinEditorPin"
+        :pending="accountPending"
+        :error="pinEditorError"
+        @cancel="closePinEditor"
+        @save="savePinDates"
+      />
+
       <div v-if="searchPending" class="my-atlas-search-state" role="status">
         Searching places
       </div>
@@ -207,18 +219,6 @@
           </button>
         </li>
       </ul>
-
-      <MyAtlasPinEditor
-        v-if="pinEditorPlace"
-        :key="pinEditorKey"
-        :place="pinEditorPlace"
-        :place-label="placeLabel(pinEditorPlace)"
-        :pin="pinEditorPin"
-        :pending="accountPending"
-        :error="pinEditorError"
-        @cancel="closePinEditor"
-        @save="savePinDates"
-      />
 
       <section class="my-atlas-pins" aria-labelledby="my-atlas-pins-title">
         <div>
