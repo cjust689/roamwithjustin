@@ -20,6 +20,7 @@ code_paths:
   - src/features/my-atlas/catalog/pinDraft.mjs
   - src/features/my-atlas/catalog/placeTypes.mjs
   - src/features/my-atlas/catalog/customPlace.mjs
+  - src/features/my-atlas/catalog/mapMemory.mjs
   - src/features/my-atlas/config/placeSearch.mjs
   - src/features/my-atlas/config/featureFlags.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
@@ -74,6 +75,8 @@ verification:
     - Twenty-four Workers-runtime tests passed, including owner-created custom-pin persistence, catalog bypass, safe public projection, and corrupt-state failure
     - Browser and Worker contract tests passed bounded custom names, coordinate normalization, owner-scoped identity, API projection, and formula-safe CSV export
     - Headless Chrome at 390 pixels verified custom-name entry, map click placement, a draggable rendered marker, transition to the shared visit editor, and zero horizontal overflow
+    - Map-memory contract tests passed selected-pin, show-all, and empty-memory visibility boundaries
+    - Headless Chrome verified full selected-pin memory callouts and the optional all-memory map layer at desktop and 390 pixel mobile widths
     - Pull requests 87 and 88 passed required validation runs 44024490207 and 44025014014, then merged through develop and main as 0a5e7a4 and c54ea44
     - Develop validation run 44024742154 and Pages deployment 44025229521 succeeded
     - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 returned 200 health after the custom-pin contract deployed
@@ -92,6 +95,12 @@ My Atlas is isolated under src/features/my-atlas. It does not import curated
 Journey, Place, Visit, Experience, Moment, media, or editorial state. Its map
 component reuses only the existing MapLibre style and terrain configuration
 from the curated Atlas.
+
+The map can project a pin's already authorized favorite memory as plain text.
+Selecting a standalone pin reveals its complete memory in that pin's label.
+An explicit owner or visitor control can reveal shortened memory previews for
+all currently visible standalone pins. Compact low-zoom clusters never include
+memory text, so the overview remains legible.
 
 The route is absent unless VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF is exactly
 true. The repository and GitHub Pages workflow do not set that variable, so

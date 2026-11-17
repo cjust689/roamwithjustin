@@ -37,6 +37,7 @@ import {
   isNormalizedMyAtlasMemory,
   normalizeMyAtlasMemory,
 } from "../src/features/my-atlas/catalog/memory.mjs"
+import { shouldShowMyAtlasMapMemory } from "../src/features/my-atlas/catalog/mapMemory.mjs"
 import {
   MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS,
   isNormalizedMyAtlasCustomPlace,
@@ -87,6 +88,25 @@ assert.equal(normalizeMyAtlasMemory("memory\u202Ehidden"), null)
 assert.equal(normalizeMyAtlasMemory("<script>alert(1)</script>"), null)
 assert.equal(isNormalizedMyAtlasMemory("A safe favorite memory."), true)
 assert.equal(isNormalizedMyAtlasMemory("  needs normalization  "), false)
+const memoryPlace = {
+  placeId: "geonames:3621138",
+  memory: "Watching the tide reshape Uvita.",
+}
+assert.equal(shouldShowMyAtlasMapMemory(memoryPlace), false)
+assert.equal(
+  shouldShowMyAtlasMapMemory(memoryPlace, {
+    selectedPlaceId: "geonames:3621138",
+  }),
+  true
+)
+assert.equal(shouldShowMyAtlasMapMemory(memoryPlace, { showAll: true }), true)
+assert.equal(
+  shouldShowMyAtlasMapMemory(
+    { placeId: "geonames:3621138", memory: "" },
+    { showAll: true }
+  ),
+  false
+)
 
 assert.deepEqual(
   normalizeMyAtlasCustomPlace({
