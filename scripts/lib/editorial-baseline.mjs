@@ -16,6 +16,7 @@ export const ATLAS_POST_HEADERS = Object.freeze([
   "Atlas Experience",
   "Moment / Angle",
   "Atlas Notes",
+  "Atlas Story",
   "Travel Date / Range",
   "Atlas Mode",
   "Publish To",
@@ -63,6 +64,16 @@ function stableHash(value) {
 export function postSourceHash(row) {
   const sourceFields = Object.fromEntries(
     [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
+      .sort()
+      .map(header => [header, row?.[header] || ""])
+  )
+  return stableHash(sourceFields)
+}
+
+export function storySourceHash(row) {
+  const sourceFields = Object.fromEntries(
+    [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
+      .filter(header => header !== "Atlas Story")
       .sort()
       .map(header => [header, row?.[header] || ""])
   )

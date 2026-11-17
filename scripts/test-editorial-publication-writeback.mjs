@@ -4,9 +4,11 @@ import {
   AUTOMATION_POST_HEADERS,
   EXISTING_POST_HEADERS,
   postSourceHash,
+  storySourceHash,
 } from "./lib/editorial-baseline.mjs"
 import {
   applyPublicationWriteback,
+  buildAtlasStoryWriteback,
   buildPlaceRegistrationWriteback,
   buildPublicationWriteback,
 } from "./lib/editorial-google-publication.mjs"
@@ -28,6 +30,58 @@ Object.assign(row, {
   post_id: "post-123",
 })
 const expectedSheetSourceHash = postSourceHash(row)
+const storyWriteback = buildAtlasStoryWriteback({
+  sheetId: 123,
+  headers,
+  rows: [row],
+  postId: "post-123",
+  expectedStorySourceHash: storySourceHash(row),
+  story: "The ferry carries us toward Cruz Bay.",
+})
+assert.equal(storyWriteback.requests.length, 1)
+assert.equal(storyWriteback.rowNumber, 2)
+assert.equal(
+  storyWriteback.values["Atlas Story"],
+  "The ferry carries us toward Cruz Bay."
+)
+assert.equal(
+  storyWriteback.requests[0].updateCells.range.startColumnIndex,
+  headers.indexOf("Atlas Story")
+)
+assert.throws(
+  () =>
+    buildAtlasStoryWriteback({
+      sheetId: 123,
+      headers,
+      rows: [{ ...row, Caption: "changed during generation" }],
+      postId: "post-123",
+      expectedStorySourceHash: storySourceHash(row),
+      story: "The ferry carries us toward Cruz Bay.",
+    }),
+  /changed during Atlas Story generation/
+)
+assert.doesNotThrow(() =>
+  buildAtlasStoryWriteback({
+    sheetId: 123,
+    headers,
+    rows: [{ ...row, "Atlas Story": "A prior draft." }],
+    postId: "post-123",
+    expectedStorySourceHash: storySourceHash(row),
+    story: "The ferry carries us toward Cruz Bay.",
+  })
+)
+assert.throws(
+  () =>
+    buildAtlasStoryWriteback({
+      sheetId: 123,
+      headers,
+      rows: [row],
+      postId: "post-123",
+      expectedStorySourceHash: storySourceHash(row),
+      story: "Morning - then the ferry.",
+    }),
+  /dash punctuation/
+)
 const input = {
   sheetId: 123,
   headers,
