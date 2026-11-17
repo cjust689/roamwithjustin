@@ -5,8 +5,21 @@ import { normalizeSearchText } from "../../../src/features/my-atlas/catalog/sear
 
 const sourceFiles = ["countryInfo.txt", "admin1CodesASCII.txt", "cities500.txt"]
 const retiredCountryCodes = new Set(["AN", "CS"])
+const populatedPlaceFeatureCodes = new Set([
+  "PPL",
+  "PPLA",
+  "PPLA2",
+  "PPLA3",
+  "PPLA4",
+  "PPLA5",
+  "PPLC",
+])
 const spotFeatures = Object.freeze({
   "L.PRK": Object.freeze({ category: "national-park", kind: "National park" }),
+  "L.RESN": Object.freeze({
+    category: "natural-landmark",
+    kind: "Natural landmark",
+  }),
   "S.AMTH": Object.freeze({
     category: "cultural-landmark",
     kind: "Amphitheater",
@@ -35,6 +48,18 @@ const spotFeatures = Object.freeze({
     category: "natural-landmark",
     kind: "Mountain",
   }),
+})
+const spotKindsByCategory = Object.freeze({
+  "national-park": new Set(["National park"]),
+  "cultural-landmark": new Set([
+    "Amphitheater",
+    "Archaeological site",
+    "Historic ruins",
+    "Historic site",
+    "Monument",
+    "Pyramid",
+  ]),
+  "natural-landmark": new Set(["Mountain", "Natural landmark", "Waterfall"]),
 })
 
 function readLines(file) {
@@ -102,7 +127,9 @@ function parseCities(file) {
       if (columns.length < 19) {
         throw new Error("Invalid cities500 row: " + line)
       }
-      if (columns[6] !== "P") return null
+      if (columns[6] !== "P" || !populatedPlaceFeatureCodes.has(columns[7])) {
+        return null
+      }
       const latitude = number(columns[4], Number.NaN)
       const longitude = number(columns[5], Number.NaN)
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -140,6 +167,15 @@ function parseSpots(file) {
   const seen = new Set()
   return value.records.map(record => {
     const featureKey = `${record.featureClass}.${record.featureCode}`
+    const defaultClassification = spotFeatures[featureKey]
+    const hasCategoryOverride = typeof record.spotCategory === "string"
+    const hasKindOverride = typeof record.spotKind === "string"
+    const spotCategory = hasCategoryOverride
+      ? record.spotCategory
+      : defaultClassification?.category
+    const spotKind = hasKindOverride
+      ? record.spotKind
+      : defaultClassification?.kind
     if (
       !/^[1-9][0-9]{0,11}$/.test(record.geonameId) ||
       seen.has(record.geonameId) ||
@@ -154,7 +190,9 @@ function parseSpots(file) {
       record.longitude < -180 ||
       record.longitude > 180 ||
       !/^[A-Z]{2}$/.test(record.countryCode) ||
-      !spotFeatures[featureKey] ||
+      !defaultClassification ||
+      hasCategoryOverride !== hasKindOverride ||
+      !spotKindsByCategory[spotCategory]?.has(spotKind) ||
       typeof record.sourceUrl !== "string" ||
       record.sourceUrl !==
         `https://www.geonames.org/${record.geonameId}/${new URL(record.sourceUrl).pathname.split("/").filter(Boolean)[1]}`
@@ -172,8 +210,8 @@ function parseSpots(file) {
           : record.name.trim(),
       name: record.name.trim(),
       sourceSnapshotDate: value.sourceSnapshotDate,
-      spotCategory: spotFeatures[featureKey].category,
-      spotKind: spotFeatures[featureKey].kind,
+      spotCategory,
+      spotKind,
     }
   })
 }

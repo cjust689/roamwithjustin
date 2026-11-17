@@ -3,3 +3,6 @@
 2988507	Paris	Paris	Paris,París,Pariž	48.85341	2.3488	P	PPLC	FR		11	75	751	75056	2138551		42	Europe/Paris	2026-02-23
 4140963	Washington	Washington	District of Columbia,Washington,Washington DC	38.89511	-77.03637	P	PPLC	US		DC	001			689545	7	6	America/New_York	2026-06-12
 4717560	Paris	Paris	Paris,Paris Texas	33.66094	-95.55551	P	PPLA2	US		TX	277			24782	183	190	America/Chicago	2025-11-24
+9990001	North Paris	North Paris	North Paris	33.7	-95.5	P	PPLX	US		TX	277			1200			America/Chicago	2026-11-17
+9990002	Paris Locality	Paris Locality	Paris Locality	33.71	-95.51	P	PPLL	US		TX	277			900			America/Chicago	2026-11-17
+9990003	Paris Settlement	Paris Settlement	Paris Settlement	33.72	-95.52	P	STLMT	US		TX	277			700			America/Chicago	2026-11-17
