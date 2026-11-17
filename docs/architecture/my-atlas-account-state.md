@@ -60,6 +60,9 @@ verification:
     - API client tests preserve the Worker request ID on rejected authenticated requests
     - Worker routing tests prove that owner state bootstrap bypasses the public catalog and shared Atlas limiter
     - Headless Chrome at 390 pixels verified in-place recovery from a simulated catalog 429 without reloading or losing the signed-in screen
+    - Pull requests 77 and 78 passed their required validation gates; Pages workflow 44014283401 deployed main merge 7c2b1a9135ce45a834bf7aadda869460452e55de
+    - Staging Worker f039455e-35bf-4c9d-bd15-c03716e63f72 returned 200 health after the owner-bypass and scoped-public-limiter deployment
+    - The live content-addressed My Atlas chunk returned 200 and contained Retry saved Atlas, Retry search, rate-limit, and API-session-renewal messages
 ---
 
 # My Atlas local profile, pin, and sharing state
