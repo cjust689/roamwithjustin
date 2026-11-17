@@ -57,6 +57,9 @@ verification:
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
     - Staging Worker e20404c5-0250-47f0-88af-2d0db14983ee returned 200 health and resolved a canonical spot after the verified manifest switch
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
+    - API client tests preserve the Worker request ID on rejected authenticated requests
+    - Worker routing tests prove that owner state bootstrap bypasses the public catalog and shared Atlas limiter
+    - Headless Chrome at 390 pixels verified in-place recovery from a simulated catalog 429 without reloading or losing the signed-in screen
 ---
 
 # My Atlas local profile, pin, and sharing state
@@ -93,6 +96,13 @@ ID is resolved only inside the Durable Object selected from the caller's own
 registry assignment. A second active owner can pin the same Place but receives
 a distinct owner-qualified pin ID and cannot read, update, export, or delete the
 first owner's pin. An unregistered verified identity resolves to no account.
+
+Owner routes do not pass through the public catalog and shared Atlas weighted
+limiter. A public search 429 therefore cannot directly prevent
+`GET /v1/me/atlas` from loading. The browser preserves a rejected API request's
+request ID and distinguishes a session renewal problem, transient account or
+identity service failure, and connectivity failure. A transient owner
+bootstrap failure exposes `Retry saved Atlas` without requiring a page reload.
 
 Handle mutation, account deletion, and abuse reporting are not part of this
 slice.
@@ -258,7 +268,8 @@ The local API still needs handle-change coordination with registry tombstones,
 permanent account deletion and its approved retention contract, abuse reporting
 and moderation, and registration or operator rate-limit enforcement. Public
 catalog and Atlas reads have a tested weighted limiter boundary and a deployed
-staging binding, but live exhaustion behavior is not yet verified.
+staging binding. Catalog and public Atlas reads have isolated limiter keys, but
+live exhaustion behavior is not yet verified.
 Profile-specific share HTML, a verified public owner profile, and owner
 verification of the corrected save feedback and silent session restoration
 also remain. Planned destinations are a future feature, not an overload of the
