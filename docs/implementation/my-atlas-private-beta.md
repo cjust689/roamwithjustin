@@ -95,6 +95,10 @@ verification:
     - Twenty-four Workers-runtime tests passed with custom pins stored only in the authenticated owner's object, projected without catalog resolution, shared only with the whole Atlas, and rejected when stored state is corrupt
     - Browser and Worker contract tests passed strict custom-name and coordinate normalization, server-generated owner-scoped custom IDs, API projection, and formula-safe CSV export
     - Headless Chrome at 390 pixels verified a Canyonlands custom-name entry, map click placement, rendered draggable marker, transition into the existing date and memory editor, and zero horizontal overflow
+    - Pull request 87 passed validation run 44024490207 and merged to develop as 0a5e7a439e6e16df55b930214dee112df907a415; develop validation run 44024742154 then succeeded
+    - Staging Worker version 9fa931b5-f32f-4df2-a84e-8a0516f83951 deployed before the frontend and returned 200 health
+    - Pull request 88 passed production validation run 44025014014 and merged to main as c54ea44490c05014698ffb2a0cfbcdd076ee12c4
+    - Pages workflow 44025229521 succeeded, and live chunks 102.9bc646f9.js, 850.f2e2b9be.js, and 102.fa12fe12.css returned 200 with the custom-pin UI, map event, disclosure, and marker styles
     - Headless Chrome generated a 1080 by 1920 Story PNG with the bundled Natural Earth land silhouette and correctly aligned Uvita and Paris pins
     - npm run my-atlas:test verified year-only visitor formatting while retaining API compatibility with stored month values
     - Pull request 51 merged to develop as e2b3ae448cfef3fffc01cefb7485f104ce75a956 after its required validation passed
