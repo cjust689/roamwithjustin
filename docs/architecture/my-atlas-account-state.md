@@ -371,6 +371,10 @@ routing are not implemented.
 
 ## Browser presentation
 
+My Atlas uses the site's existing Poppins family for interface copy, headings,
+tutorials, authentication feedback, pin editing, public profiles, and locally
+rendered Story text. The application does not request or declare Russo One.
+
 Before account creation, a visible `See how it works` button opens a four-step
 walkthrough covering private-by-default account creation, place entry, optional
 visit years, timeline playback, statistics, and sharing. Its final action moves

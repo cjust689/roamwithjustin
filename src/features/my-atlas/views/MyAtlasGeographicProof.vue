@@ -1590,7 +1590,7 @@ export default {
   gap: 0.12rem;
   margin: 0;
   color: #f0c978;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: 1.25rem;
 }
 
@@ -1657,7 +1657,7 @@ export default {
 .my-atlas-intro h1 {
   max-width: 10em;
   margin: 0;
-  font-family: "Russo One", sans-serif;
+  font-family: "Poppins", system-ui, sans-serif;
   font-size: clamp(2rem, 6vw, 3.2rem);
   line-height: 0.98;
   text-wrap: balance;
