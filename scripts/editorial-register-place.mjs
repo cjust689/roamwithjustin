@@ -10,6 +10,7 @@ import {
   buildCanonicalCatalog,
   postSourceHash,
 } from "./lib/editorial-baseline.mjs"
+import { resolveNpmInvocation } from "./lib/editorial-command.mjs"
 import {
   createGitHubClient,
   loadGitHubCredential,
@@ -295,8 +296,8 @@ async function main() {
   try {
     replaceGeography(plan.records)
     runNode("scripts/validate-content.js")
-    const npm = process.platform === "win32" ? "npm.cmd" : "npm"
-    run(npm, ["run", "build"])
+    const npm = resolveNpmInvocation(["run", "build"])
+    run(npm.command, npm.args)
   } catch (error) {
     fs.writeFileSync(geographyPath, original)
     throw new Error(

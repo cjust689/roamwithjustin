@@ -18,6 +18,7 @@ import {
   planEditorialCompilation,
   serializeEditorialRecords,
 } from "./lib/editorial-content-compiler.mjs"
+import { resolveNpmInvocation } from "./lib/editorial-command.mjs"
 import {
   createGitHubClient,
   loadGitHubCredential,
@@ -715,8 +716,8 @@ async function main() {
       media: appliedPlan.media,
       editorial: appliedPlan.editorial,
     })
-    const npm = process.platform === "win32" ? "npm.cmd" : "npm"
-    run(npm, ["run", "build"])
+    const npm = resolveNpmInvocation(["run", "build"])
+    run(npm.command, npm.args)
   } catch (error) {
     fs.writeFileSync(mediaRecordsPath, originalMedia)
     fs.writeFileSync(editorialRecordsPath, originalEditorial)

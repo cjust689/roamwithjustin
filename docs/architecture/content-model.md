@@ -56,6 +56,7 @@ code_paths:
   - scripts/editorial-register-place.mjs
   - scripts/lib/editorial-place-registration.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-command.mjs
   - scripts/lib/editorial-public-copy.mjs
   - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-google-publication.mjs

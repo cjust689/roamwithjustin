@@ -24,6 +24,7 @@ code_paths:
   - scripts/editorial-publish.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-command.mjs
   - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-github-publisher.mjs
   - scripts/test-editorial-google.mjs

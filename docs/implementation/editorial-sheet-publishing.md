@@ -29,6 +29,7 @@ code_paths:
   - scripts/editorial-github-publish.mjs
   - scripts/lib/editorial-baseline.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-command.mjs
   - scripts/lib/editorial-public-copy.mjs
   - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-github.mjs
@@ -41,6 +42,7 @@ code_paths:
   - scripts/lib/editorial-publication-plan.mjs
   - scripts/lib/editorial-place-registration.mjs
   - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-command.mjs
   - scripts/test-editorial-place-registration.mjs
   - scripts/test-editorial-story-generator.mjs
   - src/content/experiences/index.mjs
@@ -276,6 +278,13 @@ deletion and non-fast-forward updates. The hardened ruleset requires the
 `validate` check and permits only merge commits, preserving branch and merge
 history for reversal. The publisher refuses to start a new post when
 `develop` and `main` have different source trees.
+
+On Windows, local validation and isolated-worktree validation invoke the real
+`npm-cli.js` through the active Node executable. They do not ask `spawnSync` to
+launch the `npm.cmd` shell shim, which avoids the platform `EINVAL` failure
+encountered after a successful generated-content validation. A retry remains
+safe because generated JSON is rolled back on local build failure and existing
+immutable R2 objects and receipts are reused.
 
 ## Experience and Moment model
 
