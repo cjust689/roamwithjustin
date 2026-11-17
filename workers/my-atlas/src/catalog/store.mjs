@@ -168,12 +168,19 @@ function validPlaceRecord(record, manifest) {
   return Boolean(
     record &&
       PLACE_ID_PATTERN.test(record.placeId) &&
-      ["country", "city"].includes(record.placeType) &&
+      ["country", "city", "spot"].includes(record.placeType) &&
       typeof record.name === "string" &&
       record.name.length > 0 &&
       record.name.length <= 512 &&
       record.catalogRevision === manifest.catalogRevision &&
       typeof record.deprecated === "boolean" &&
+      (record.placeType !== "spot" ||
+        (typeof record.spotCategory === "string" &&
+          record.spotCategory.length > 0 &&
+          record.spotCategory.length <= 64 &&
+          typeof record.spotKind === "string" &&
+          record.spotKind.length > 0 &&
+          record.spotKind.length <= 64)) &&
       (record.coordinates === null ||
         (Array.isArray(record.coordinates) &&
           record.coordinates.length === 2 &&

@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-17
 related:
   - my-atlas-registration
   - my-atlas-api-authentication
@@ -43,6 +43,7 @@ verification:
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
+    - Workers-runtime tests verified that a spot persists only through its authenticated owner's object and projects only its safe canonical spot fields
     - npm run my-atlas:test verified optional month and year dates, legacy year compatibility, session restoration, statistics, filtering, ordered destination playback, cumulative reveal, and curved connection generation
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
@@ -131,6 +132,11 @@ Pin IDs are deterministically derived from the internal user ID and canonical
 place ID at creation. Replacing a pin's place preserves its pin ID while moving
 the uniqueness index.
 
+The canonical place may be a country, city, or reviewed spot. A spot does not
+create a second ownership model or mutation route. It is resolved through the
+same authoritative catalog and stored inside the same caller-derived per-user
+Durable Object as every other pin.
+
 ## Catalog boundary
 
 Format validation is not geographic validation. Before a create or place-change
@@ -188,8 +194,8 @@ search. Both walkthroughs use an accessible modal with a trapped focus cycle,
 Escape dismissal, scroll locking, focus restoration, reduced-motion handling,
 and a phone-width bottom sheet layout.
 
-Owner and public views derive place, country, continent, capital, date, and map
-span statistics from the safe canonical place projection. They provide exact
+Owner and public views derive place, spot, country, continent, capital, date,
+and map span statistics from the safe canonical place projection. They provide exact
 year and undated filters, chronological destination playback, keyboard and
 button cycling, and mobile layouts. Playback reveals dated destinations
 cumulatively, moves the camera between successive destinations, and animates a

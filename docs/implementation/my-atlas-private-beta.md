@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-17
 related:
   - my-atlas-authentication
   - my-atlas-api-authentication
@@ -45,6 +45,7 @@ verification:
     - Owner reported successful Google sign in, callback return, and audience-scoped API access verification in the local browser proof
     - Local cities500 search returned canonical Salt Lake City, Miami, Moab, and Uvita results
     - Headless Chrome searched and pinned Salt Lake City through the full local catalog endpoint
+    - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Ephemeral-RSA tests accepted an exact-issuer and exact-audience access token and rejected ID-token audiences, wrong issuer or audience, expired, unsigned, HS256, wrong-type, and under-permissioned tokens
     - Local Wrangler GET /health returned 200 and protected GET /v1/auth/check without a token returned 401
     - npm run my-atlas:serve exposed the Vue proof, isolated Worker, and catalog search on loopback ports 8080, 8787, and 8788
@@ -53,7 +54,7 @@ verification:
     - Workers-runtime account tests passed concurrent revision control, idempotent pin retries, duplicate prevention, the 300-pin ceiling, pagination, update, deletion, export, and empty-profile privacy
     - A two-account Workers-runtime test passed distinct owner-qualified pin IDs, isolated lists and exports, rejected cross-owner update and delete attempts, preserved the victim account, and rejected an unregistered identity
     - API boundary tests passed read-only delete rejection, absent user-addressed mutation routes, rejected client-supplied user IDs, and token-derived delete identity
-    - Eighteen Workers-runtime tests passed, including private-by-default public lookup, safe-field projection, explicit publication, immediate unpublication, and batched catalog resolution
+    - Twenty Workers-runtime tests passed, including private-by-default public lookup, safe-field projection, explicit publication, immediate unpublication, spot persistence and projection, and batched catalog resolution
     - Versioned Worker catalog tests passed deterministic artifact generation, exact resolution, bounded search, runtime gzip decoding, revision mismatch rejection, and deprecated-record preservation
     - Full geonames-2026-11-16 local artifact built 256 resolution shards and 256 search shards for 237426 records
     - Local Wrangler POST /v1/beta/register without a token returned 401
@@ -106,8 +107,8 @@ media-upload Worker.
 | Repository preflight                      | Verified                                       | Vue 2.6, Vue Router 3 history mode, GitHub Pages fallback, curated Atlas coupling, map configuration, and upload-only Worker were inspected in source.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | DNS and live route preflight              | Partial, externally observed                   | Apex and www resolve to Cloudflare addresses. Root returned 200 through Cloudflare on 2026-11-16. Atlas and My Atlas returned a hydrated-app 404 status. api and share names did not resolve. Dashboard route and origin settings remain owner-console verification.                                                                                                                                                                                                                                                                                                                       |
 | GeoNames rights                           | Verified against provider documentation        | GeoNames publishes the dump under CC BY 4.0, requests attribution, permits commercial use, and describes cities500 as cities over 500 population or administrative seats.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Geographic proof                          | Implemented and test verified                  | Deterministic importer, stable IDs, append-preserving deprecation, normalized search, disambiguation, bounded draft pins, and a separate MapLibre proof exist. A loopback-only development search server lets the browser query the ignored full cities500 source without bundling or committing it.                                                                                                                                                                                                                                                                                          |
-| Versioned Worker catalog                  | Implemented and staging verified               | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The owner verified all 512 immutable `geonames-2026-11-16` shards with rclone before uploading the manifest last. Live staging health and R2-backed searches for Uvita and Salt Lake City returned 200 with that revision. The complete remote inventory remains owner-verified rather than independently enumerated by the repository environment.                                                                                                                        |
+| Geographic proof                          | Implemented and test verified                  | Deterministic importer, stable IDs, append-preserving deprecation, normalized search, disambiguation, bounded draft pins, and a separate MapLibre proof exist. A reviewed GeoNames-backed spot source adds national parks, cultural landmarks, and natural landmarks as a third destination type. The same search, pin, optional year, timeline, statistics, sharing, and Story export flow now accepts them. A loopback-only development search server lets the browser query the ignored full source without bundling or committing it. |
+| Versioned Worker catalog                  | Implemented and staging verified; spot release local only | The full catalog compiles into immutable gzip resolution and query-prefix shards plus a current manifest. The active staging bucket remains the owner-verified `geonames-2026-11-16` release. The local `geonames-2026-11-17-spots` candidate contains 250 countries, 237,176 cities, and 19 spots across 512 shards. Yellowstone National Park, the Eiffel Tower, and Machu Picchu resolve locally. Its shards and manifest have not been uploaded, and no live spot search is claimed. |
 | Production frontend route                 | Deployed and rendered verified                 | The My Atlas route exists only when VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF equals true. Pull requests 51 and 52 promoted the explicit repository-variable wiring, and Pages run 43969999089 deployed it. Pull requests 55 and 56 then promoted the cinematic timeline through both protected validation gates, successful develop workflow 43987307324, and Pages workflow 43987868552. Headless Chrome rendered the expected production heading, Google sign-in section, and branding. Live content-addressed chunks contain the new timeline and year-editor behavior. Direct deep links still return the known Pages fallback HTTP 404 before client rendering, so server share HTML and crawler behavior remain future work. This does not create a Cloudflare apex Worker route or move the API out of isolated staging. |
 | Auth0 browser client                      | Implemented and owner verified locally         | The owner supplied the public tenant domain, SPA client ID, and exact API audience. The Vue 2 client implements Google redirect login, callback completion, logout, audience-scoped access-token acquisition, and silent restoration of an existing Auth0 session after reload. Tokens remain memory only. The owner reported successful sign in, callback return, identity display, token acquisition, and a genuine Worker round trip. Owner verification of silent reload after the latest client build remains. |
 | Worker authentication boundary            | Phase 2A implemented and staging verified      | A separate Worker verifies RS256 signatures through Auth0 JWKS, exact issuer and API audience, time claims, token type, and `read:my-atlas`. Mutations additionally require `write:my-atlas`; user-addressed mutation paths do not exist and client-supplied ownership fields are rejected. The staging `workers.dev` deployment returned Phase 2C health, rejected an unauthenticated protected request with 401, allowed the exact production origin, and rejected an unrelated origin. The owner also verified a genuine Auth0 API-audience access token through the live Worker. The default environment remains undeployed with no production route.                                                                            |
@@ -152,6 +153,13 @@ Its extracted files are recorded by hash in generated catalogs. Uvita resolves
 to geonames:3621138. Paris, France resolves to geonames:2988507 and Paris,
 Texas resolves to geonames:4717560.
 
+A committed reviewed source adds 19 GeoNames spots, including national parks,
+cultural landmarks, and natural landmarks across six continents. The importer
+validates each stable numeric ID, official feature code, coordinate, country,
+alias set, and direct GeoNames source URL. This bounded review path avoids
+turning every small park, building, mountain, or raw feature into a product
+search result.
+
 The full benchmark is recorded in the as-built geography document. The result
 blocks bundling all cities500 records into Vue. Phase 2 should build a compact
 search index or versioned partitions and expose bounded queries from the
@@ -170,6 +178,10 @@ resolver. Its full local artifact is ignored. The staging binding is declared
 and dry-run verified. The owner created the isolated staging bucket, verified
 all 512 immutable release objects with rclone, uploaded the manifest last, and
 live staging searches resolved Uvita and Salt Lake City.
+
+The spot-inclusive `geonames-2026-11-17-spots` candidate was built locally as
+256 resolution shards and 256 search shards. It remains unpublished, so the
+active staging manifest continues to resolve the city-and-country release.
 
 ### Auth0 and authorization
 
@@ -234,11 +246,15 @@ ceiling before inviting external users.
 - [x] Reproducibly import countryInfo, admin1 codes, and cities500.
 - [x] Record source hashes, revision, source date, and CC BY 4.0 attribution.
 - [x] Use ISO country IDs and GeoNames populated-place IDs.
+- [x] Add a reviewed GeoNames spot source and the stable `spot` place type for
+      national parks, cultural landmarks, and natural landmarks.
 - [x] Search Uvita, Paris, and Paris Texas with disambiguated labels.
 - [x] Render selected catalog coordinates with an isolated MapLibre component
       using the unchanged configured map style and terrain.
 - [x] Reject arbitrary coordinates, unsupported IDs, duplicate pins,
       deprecated new selections, and pins over the 300 item cap.
+- [x] Run spots through the existing authenticated owner-scoped pin lifecycle
+      and safe public projection rather than a separate mutation path.
 - [x] Preserve removed records as resolvable deprecated identities.
 - [x] Keep the proof disabled by default and enable it only through the
       explicit GitHub repository variable used by validation and Pages.
@@ -300,6 +316,8 @@ ceiling before inviting external users.
       successful live manifest and shard reads for Uvita and Salt Lake City.
       The owner separately verified all 512 release objects with rclone before
       uploading the manifest last.
+- [ ] Publish and verify all 512 immutable `geonames-2026-11-17-spots` objects,
+      then update the staging `catalog/current.json` manifest last.
 - [x] Pass automated concurrency, authorization, cross-owner isolation, stale
       revision, privacy, and retry tests.
 

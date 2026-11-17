@@ -211,7 +211,13 @@ export function createMyAtlasStoryCanvas({
   drawStat(context, 60, 1390, stats.places, "Places")
   drawStat(context, 306, 1390, stats.countries, "Countries")
   drawStat(context, 552, 1390, stats.continents, "Continents")
-  drawStat(context, 798, 1390, stats.capitals, "Capitals")
+  drawStat(
+    context,
+    798,
+    1390,
+    stats.spots || stats.capitals,
+    stats.spots ? "Spots" : "Capitals"
+  )
 
   context.fillStyle = "#f4fbf7"
   context.font = "700 34px Poppins, Arial, sans-serif"

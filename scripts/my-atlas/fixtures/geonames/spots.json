@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "sourceProvider": "GeoNames",
+  "sourceSnapshotDate": "2026-11-17",
+  "records": [
+    {
+      "geonameId": "5843642",
+      "name": "Yellowstone National Park",
+      "aliases": ["Yellowstone National Park"],
+      "latitude": 44.42796,
+      "longitude": -110.58846,
+      "featureClass": "L",
+      "featureCode": "PRK",
+      "countryCode": "US",
+      "admin1Code": "WY",
+      "admin1Name": "Wyoming",
+      "sourceUrl": "https://www.geonames.org/5843642/yellowstone-national-park.html"
+    },
+    {
+      "geonameId": "6254976",
+      "name": "Tour Eiffel",
+      "preferredName": "Eiffel Tower",
+      "aliases": ["Eiffel Tower", "Tour Eiffel"],
+      "latitude": 48.85832,
+      "longitude": 2.29452,
+      "featureClass": "S",
+      "featureCode": "MNMT",
+      "countryCode": "FR",
+      "admin1Code": "11",
+      "admin1Name": "Île-de-France",
+      "sourceUrl": "https://www.geonames.org/6254976/tour-eiffel.html"
+    }
+  ]
+}

@@ -117,15 +117,28 @@ function pinInput({
   return { placeId, visitedYears, expectedRevision, idempotencyKey }
 }
 
-const catalogResolver = async placeId => ({
-  placeId,
-  placeType: placeId.startsWith("iso-country:") ? "country" : "city",
-  name: placeId.startsWith("iso-country:") ? "Costa Rica" : "Uvita",
-  countryCode: "CR",
-  countryName: "Costa Rica",
-  deprecated: false,
-  coordinates: [-83.7395, 9.17039],
-})
+const catalogResolver = async placeId =>
+  placeId === "geonames:5843642"
+    ? {
+        placeId,
+        placeType: "spot",
+        name: "Yellowstone National Park",
+        spotCategory: "national-park",
+        spotKind: "National park",
+        countryCode: "US",
+        countryName: "United States",
+        deprecated: false,
+        coordinates: [-110.58846, 44.42796],
+      }
+    : {
+        placeId,
+        placeType: placeId.startsWith("iso-country:") ? "country" : "city",
+        name: placeId.startsWith("iso-country:") ? "Costa Rica" : "Uvita",
+        countryCode: "CR",
+        countryName: "Costa Rica",
+        deprecated: false,
+        coordinates: [-83.7395, 9.17039],
+      }
 
 beforeEach(async () => {
   await reset()
@@ -247,6 +260,33 @@ describe("private owner profile and pin services", () => {
         now: NOW,
       })
     ).rejects.toMatchObject({ code: "duplicate_place" })
+  })
+
+  it("persists and projects a curated spot through the standard pin flow", async () => {
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: pinInput({
+        placeId: "geonames:5843642",
+        visitedYears: [2025],
+        expectedRevision: 1,
+        idempotencyKey: "12121212-3434-4567-8567-121212121212",
+      }),
+      catalogResolver,
+      now: NOW,
+    })
+    expect(created).toMatchObject({
+      created: true,
+      profile: { revision: 2, pinCount: 1 },
+      pin: {
+        placeId: "geonames:5843642",
+        placeType: "spot",
+        name: "Yellowstone National Park",
+        spotCategory: "national-park",
+        spotKind: "National park",
+        visitedYears: [2025],
+      },
+    })
   })
 
   it("isolates reads, updates, exports, and deletes between two active owners", async () => {
