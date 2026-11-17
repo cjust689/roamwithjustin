@@ -54,6 +54,9 @@ verification:
     - Full geonames-2026-11-16 Worker artifact built 256 resolution shards and 256 search shards for 237426 records
     - Curated spot fixtures passed search, draft pin, authenticated persistence, safe public projection, and Story-stat contracts
     - Full geonames-2026-11-17-spots artifact built 256 resolution shards and 256 search shards for 237445 records
+    - Full geonames-2026-11-17-reviewed-spots artifact built 256 resolution shards and 256 search shards for 237448 records, including 225569 selectable populated places and 11607 append-preserved deprecated records
+    - Catalog tests reject PPLX sections, populated localities, and settlement records from new search while preserving prior identities as deprecated exact-resolution records
+    - Catalog and Worker-artifact tests resolve Krka National Park and Canyonlands as National park, and Mount Rushmore as Monument, from reviewed product classifications
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
     - Catalog client tests preserve typed status, error code, bounded Retry-After, and request ID details from a failed search
@@ -126,6 +129,10 @@ landmarks from official GeoNames records. It is intentionally reviewed and
 bounded instead of importing every park, building, mountain, and feature in
 the worldwide dump. Each entry carries its GeoNames ID, feature code,
 coordinates, aliases, country hierarchy, and direct GeoNames source URL.
+Reviewed entries may explicitly override the source feature's product category
+and result label. This presents Krka as a National park even though GeoNames
+codes it as a nature reserve, and Mount Rushmore as a Monument even though
+GeoNames codes it as a mountain.
 
 Countries use IDs such as iso-country:CR. Populated places use IDs such as
 geonames:3621138. Curated spots use the same stable GeoNames identity, for
@@ -163,7 +170,7 @@ excluded from new search by default.
 
 The bundled fallback proof catalog contains 250 current GeoNames country or
 territory records, the current GeoNames records for Uvita, Costa Rica, Paris,
-France, and Paris, Texas, and 19 reviewed spots across six continents. It is a
+France, and Paris, Texas, and 22 reviewed spots across six continents. It is a
 development fallback, not a worldwide production catalog.
 
 When `VUE_APP_MY_ATLAS_PLACE_SEARCH_URL` is configured, the browser issues a
@@ -182,8 +189,8 @@ exhausted search limit from a catalog or network outage and can retry the
 unchanged query without a page reload.
 
 The local endpoint exposes the intended `GET /v1/places/search?q=...` response
-shape against all 237,176 cities, 250 country or territory records, and 19
-reviewed spots. It binds only to `127.0.0.1`, allows only localhost browser
+shape against 225,569 selectable populated places, 250 country or territory
+records, and 22 reviewed spots. It binds only to `127.0.0.1`, allows only localhost browser
 origins, accepts only GET and OPTIONS, bounds query and result sizes, and sends
 no-store responses. It is a development reference, not the production Worker,
 an invitation API, or a persistence service.
@@ -209,9 +216,13 @@ Canonical name matches rank ahead of alias matches. This prevents an airport
 code or alternate name from outranking the actual city, such as the `Moab`
 alias on another GeoNames populated place outranking Moab, Utah.
 
-The importer excludes the withdrawn AN and CS codes. It retains GeoNames' XK
-record as an explicit source exception pending the later product decision on a
-fixed country and territory denominator.
+The importer excludes the withdrawn AN and CS codes. It accepts only GeoNames
+`PPL`, `PPLA`, `PPLA2`, `PPLA3`, `PPLA4`, `PPLA5`, and `PPLC` populated-place
+feature codes for new city and town choices. It explicitly excludes `PPLX`
+sections of populated places plus locality, settlement, abandoned, historical,
+religious, destroyed, and other subdivision-style records. It retains
+GeoNames' XK record as an explicit source exception pending the later product
+decision on a fixed country and territory denominator.
 
 Draft pin creation accepts only a current country, city, or spot catalog ID. It
 rejects arbitrary coordinate IDs, deprecated records, duplicate destinations,
@@ -241,12 +252,14 @@ migration rather than silent reassignment.
 
 ## Measured full-catalog boundary
 
-The 2026-11-16 cities500 snapshot plus the reviewed 2026-11-17 spot source
-produced 237,176 city records, 250 country or territory records, and 19 spot
-records. The deterministic combined JSON benchmark must be regenerated
-whenever the importer changes. The verified spot-inclusive artifact is
-168,799,990 bytes. Full-catalog searches resolved Yellowstone National Park,
-the Eiffel Tower, and Machu Picchu to their expected stable IDs and spot kinds.
+The 2026-11-16 cities500 snapshot plus the reviewed 2026-11-17 spot source now
+produces 225,569 selectable populated places, 250 country or territory records,
+and 22 spot records. The append-preserving successor also retains 11,607 prior
+city identities as deprecated, for 237,448 total records. The deterministic
+combined JSON benchmark must be regenerated whenever the importer changes. The
+verified reviewed-spots artifact is 170,928,071 bytes. Full-catalog searches
+resolved Krka National Park, Canyonlands National Park, and Mount Rushmore to
+their expected stable IDs and reviewed result types.
 
 That artifact is intentionally excluded from Git. It is too large for the
 initial browser bundle. The loopback development server proves full-source
@@ -261,20 +274,22 @@ only the normalized names relevant to their shard. Identical inputs produce
 byte-identical files; attempting to change an existing revision fails instead
 of overwriting it.
 
-The full `geonames-2026-11-17-spots` local build contains 256 resolution shards
-and 256 search shards for 237,445 records. Resolution shards total 28,748,654
-compressed bytes, and search shards total 92,321,905 compressed bytes. The
-largest resolution shard is 123,423 bytes compressed. The largest search shard
-is 2,248,074 bytes compressed. The Worker enforces 16 MiB compressed and 64 MiB
-decoded object limits.
+The full `geonames-2026-11-17-reviewed-spots` local build contains 256
+resolution shards and 256 search shards for 237,448 records. Resolution shards
+total 28,817,885 compressed bytes, and search shards total 89,039,693 compressed
+bytes. The largest resolution shard is 123,703 bytes compressed. The largest
+search shard is 2,159,866 bytes compressed. The Worker enforces 16 MiB
+compressed and 64 MiB decoded object limits.
 
 Cold local directory-backed checks returned Uvita, Salt Lake City, Miami,
 Paris, and Paris, Texas from the full artifact in approximately 39 to 242
 milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
-The spot-inclusive local artifact remains ignored under
-`.state/my-atlas/worker-catalog-spots`. All 512 immutable release shards were
+The reviewed successor artifact remains ignored under
+`.state/my-atlas/worker-catalog-reviewed-spots`. It is locally verified but has
+not yet replaced the staging manifest. The deployed spot-inclusive artifact
+remains ignored under `.state/my-atlas/worker-catalog-spots`. All 512 immutable release shards were
 uploaded to the isolated staging bucket and rclone reported 512 matching files
 with zero differences before `catalog/current.json` was uploaded last. The
 staging Worker now resolves `geonames-2026-11-17-spots`. The earlier

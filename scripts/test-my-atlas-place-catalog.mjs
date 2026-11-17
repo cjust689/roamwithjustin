@@ -13,6 +13,7 @@ import {
   addDraftPin,
   removeDraftPin,
 } from "../src/features/my-atlas/catalog/pinDraft.mjs"
+import { formatPlaceTypeLabel } from "../src/features/my-atlas/catalog/placeTypes.mjs"
 import { isMyAtlasGeographicProofEnabled } from "../src/features/my-atlas/config/featureFlags.mjs"
 import {
   getMyAtlasAuthConfiguration,
@@ -268,10 +269,13 @@ assert.deepEqual(
   repeat,
   "identical inputs must produce identical output"
 )
-assert.equal(first.stats.countries, 3)
+assert.equal(first.stats.countries, 4)
 assert.equal(first.stats.cities, 5)
-assert.equal(first.stats.spots, 2)
+assert.equal(first.stats.spots, 5)
 assert.equal(resolveCatalogPlace(first, "iso-country:AN"), null)
+assert.equal(resolveCatalogPlace(first, "geonames:9990001"), null)
+assert.equal(resolveCatalogPlace(first, "geonames:9990002"), null)
+assert.equal(resolveCatalogPlace(first, "geonames:9990003"), null)
 assert.equal(first.sources.length, 4)
 assert.ok(first.sources.every(source => /^[a-f0-9]{64}$/.test(source.sha256)))
 
@@ -339,6 +343,18 @@ assert.equal(
 assert.equal(
   (await fixtureWorkerCatalog.search("Eiffel Tower")).results[0].placeId,
   "geonames:6254976"
+)
+assert.equal(
+  (await fixtureWorkerCatalog.search("Krka National Park")).results[0].spotKind,
+  "National park"
+)
+assert.equal(
+  (await fixtureWorkerCatalog.search("Canyonlands")).results[0].spotKind,
+  "National park"
+)
+assert.equal(
+  (await fixtureWorkerCatalog.search("Mount Rushmore")).results[0].spotKind,
+  "Monument"
 )
 await assert.rejects(() => fixtureWorkerCatalog.search("x"), /between 2 and 80/)
 assert.throws(
@@ -422,6 +438,23 @@ assert.equal(yellowstone.spotCategory, "national-park")
 assert.equal(yellowstone.spotKind, "National park")
 assert.deepEqual(yellowstone.coordinates, [-110.58846, 44.42796])
 assert.equal(searchPlaceCatalog(first, "Eiffel Tower")[0].name, "Eiffel Tower")
+const krka = searchPlaceCatalog(first, "Krka National Park")[0]
+assert.equal(krka.placeId, "geonames:11353080")
+assert.equal(krka.spotCategory, "national-park")
+assert.equal(krka.spotKind, "National park")
+const canyonlands = searchPlaceCatalog(first, "Canyonlands")[0]
+assert.equal(canyonlands.placeId, "geonames:5536441")
+assert.equal(canyonlands.spotKind, "National park")
+const mountRushmore = searchPlaceCatalog(first, "Mount Rushmore")[0]
+assert.equal(mountRushmore.placeId, "geonames:5768645")
+assert.equal(mountRushmore.spotCategory, "cultural-landmark")
+assert.equal(mountRushmore.spotKind, "Monument")
+assert.equal(formatPlaceTypeLabel(krka), "National park")
+assert.equal(formatPlaceTypeLabel(canyonlands), "National park")
+assert.equal(formatPlaceTypeLabel(mountRushmore), "Monument")
+assert.equal(searchPlaceCatalog(first, "North Paris").length, 0)
+assert.equal(searchPlaceCatalog(first, "Paris Locality").length, 0)
+assert.equal(searchPlaceCatalog(first, "Paris Settlement").length, 0)
 
 const aliasCollisionCatalog = {
   records: [
