@@ -1,6 +1,72 @@
 {
   "schemaVersion": 1,
-  "experiences": [],
-  "moments": [],
-  "batches": []
+  "experiences": [
+    {
+      "id": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "slug": "la-fortuna-airbnb",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-la-fortuna-costa-rica",
+      "placeId": "la-fortuna-costa-rica",
+      "title": "La Fortuna Airbnb",
+      "summary": "",
+      "sortOrder": 0,
+      "visibility": "published",
+      "sourceOwner": "sheet"
+    }
+  ],
+  "moments": [
+    {
+      "id": "moment-1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "postId": "1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "title": "Drive to La Fortuna Airbnb",
+      "notes": "I expect the rental price to go up with insurance. I don’t expect it to double. Between the customs queue at SJO, finding the Avis shuttle, and sorting out the rental, getting on the road takes some doing. Then we head toward La Fortuna, where a short distance on the map still means a long drive.\n\nClimbing into the mountains around San José, we move through rain, breaks in the rain, and dense fog. We’re genuinely in the clouds. The change from the bottom to the higher stretches is part of what makes the drive so good. Before reaching the Airbnb around eight, we stop for food at a small outdoor restaurant and meet locals who introduce us to Costa Rican moonshine. Not bad, honestly. As a Midwest native, I’ve had homemade grain alcohol that was considerably less convincing.\n\nAt the Airbnb, rooms surround a central open air courtyard and pool, with a swing hanging over the water. There are natural wood accents everywhere and a hot tub surrounded by jungle. It’s far enough off the road to feel tucked away. I wish we had more time here: just a few hours tonight and the next day to take it in before heading to Bajos del Toro with our guide, Marcos.",
+      "travelDate": "05/29/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-a6bde57b3590-001",
+        "image-costa-rica-2025-bee01e5253e5-002",
+        "image-costa-rica-2025-59bbab123454-003",
+        "video-costa-rica-2025-5776c9df76c8-001"
+      ],
+      "sourceHash": "6174ae6d271f5e37b1f82f7dc74e721e7101fc38f24366079613eb5d08800191"
+    }
+  ],
+  "batches": [
+    {
+      "id": "editorial-1470fee1-5194-4e49-8cd2-4dfeb6d2f49d-edccfef5101ccafe",
+      "postId": "1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "sourceHash": "edccfef5101ccafe7d5784b77c761c01d0863947fbe6d27648ae2cbe9d5eec73",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "momentId": "moment-1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56",
+        "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-a6bde57b3590-001",
+        "image-costa-rica-2025-bee01e5253e5-002",
+        "image-costa-rica-2025-59bbab123454-003",
+        "video-costa-rica-2025-5776c9df76c8-001"
+      ]
+    },
+    {
+      "id": "editorial-1470fee1-5194-4e49-8cd2-4dfeb6d2f49d-6174ae6d271f5e37",
+      "postId": "1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "sourceHash": "6174ae6d271f5e37b1f82f7dc74e721e7101fc38f24366079613eb5d08800191",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "momentId": "moment-1470fee1-5194-4e49-8cd2-4dfeb6d2f49d",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56",
+        "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-a6bde57b3590-001",
+        "image-costa-rica-2025-bee01e5253e5-002",
+        "image-costa-rica-2025-59bbab123454-003",
+        "video-costa-rica-2025-5776c9df76c8-001"
+      ]
+    }
+  ]
 }

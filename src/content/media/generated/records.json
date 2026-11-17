@@ -4984,6 +4984,127 @@
         "byteSize": 1957785,
         "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-a6bde57b3590-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/la-fortuna-costa-rica/media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56/la-fortuna-costa-rica-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "a6bde57b3590847ae98c8a53370a85b1c4a8c6410aa9f4a44a79ba712545be42",
+        "byteSize": 472701,
+        "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-bee01e5253e5-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/la-fortuna-costa-rica/media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56/la-fortuna-costa-rica-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "bee01e5253e541e07ff657e34d31d5408a6d45909c4a25c6636ae3315457e5fe",
+        "byteSize": 947149,
+        "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-59bbab123454-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/la-fortuna-costa-rica/media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56/la-fortuna-costa-rica-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 2048
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "59bbab1234544e50959bf45cd4337d9fa3c95252ae04723f22bb0417c43a1722",
+        "byteSize": 761081,
+        "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-5776c9df76c8-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/la-fortuna-costa-rica/media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31/la-fortuna-costa-rica-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "5776c9df76c835d2d7d55b4cbffe25af19be8b46076f33d6532a5458856017bf",
+        "byteSize": 83499849,
+        "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
+      }
     }
   ],
   "placements": [
@@ -7144,6 +7265,58 @@
       "sortOrder": 84,
       "publicationSequence": 17,
       "batchId": "media-miami-2026-miami-south-beach-d4ec637ec53cc427"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-la-fortuna-costa-rica-image-costa-rica-2025-a6bde57b3590-001",
+      "assetId": "image-costa-rica-2025-a6bde57b3590-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-la-fortuna-costa-rica",
+      "placeId": "la-fortuna-costa-rica",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 18,
+      "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-la-fortuna-costa-rica-image-costa-rica-2025-bee01e5253e5-002",
+      "assetId": "image-costa-rica-2025-bee01e5253e5-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-la-fortuna-costa-rica",
+      "placeId": "la-fortuna-costa-rica",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 18,
+      "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-la-fortuna-costa-rica-image-costa-rica-2025-59bbab123454-003",
+      "assetId": "image-costa-rica-2025-59bbab123454-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-la-fortuna-costa-rica",
+      "placeId": "la-fortuna-costa-rica",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 18,
+      "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-la-fortuna-costa-rica-video-costa-rica-2025-5776c9df76c8-001",
+      "assetId": "video-costa-rica-2025-5776c9df76c8-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-la-fortuna-costa-rica",
+      "placeId": "la-fortuna-costa-rica",
+      "experienceId": "experience-costa-rica-2025-la-fortuna-airbnb",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 19,
+      "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
     }
   ],
   "batches": [
@@ -7522,6 +7695,34 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "2616654ee0a440c46c153b0e0c66de9b38a78b2e24c64b65bf056e641d550ee9"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-la-fortuna-costa-rica-f8aa0bc54bab4e56",
+      "sequence": 18,
+      "manifestSha256": "bc68c0e248a8069c303f7741a536dba508453bcfb8c430f2abb3fe4abc2b4d76",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-a6bde57b3590-001",
+        "image-costa-rica-2025-bee01e5253e5-002",
+        "image-costa-rica-2025-59bbab123454-003"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "8b549e2a9774f6f1c4166dc732b3ffd05844b1ac9beaa9b792b046f03352757e"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31",
+      "sequence": 19,
+      "manifestSha256": "122e26583750ea0b3595364a913ef466eee549725e1d994f656cb1a38f7af5f1",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-5776c9df76c8-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "805fdb777ba0c1ad5788225528b06a4dba467e6240134d257b4ead5c6780166f"
       }
     }
   ]
