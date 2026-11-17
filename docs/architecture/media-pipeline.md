@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-16
+updated: 2026-11-17
 related:
   - content-model
   - journey-media-ingestion
@@ -24,6 +24,7 @@ code_paths:
   - scripts/editorial-publish.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-github-publisher.mjs
   - scripts/test-editorial-google.mjs
   - workers/media-upload/src/index.mjs
@@ -42,6 +43,7 @@ verification:
     - npm run media:worker:check
     - npm run content:validate
     - npm run build
+    - owner-authenticated Drive video snapshot and Worker R2 integrity receipt on 2026-11-17
 ---
 
 # Media pipeline
@@ -153,16 +155,19 @@ maximum part size are configurable through `MAX_VIDEO_UPLOAD_BYTES` and
 `MAX_MULTIPART_PART_BYTES`. Automatic quality-changing compression is
 intentionally absent.
 
-The Worker source and bundle are locally verified. Deployment state in the
-owner's Cloudflare account and the credentials available to the new
-single-command publisher remain externally unverified.
+The Worker source and bundle are locally verified. The single-command publisher
+created one `worker-r2-integrity-v2` receipt for an owner-authorized Costa Rica
+video on 2026-11-17. That proves the configured upload path for that object,
+not a complete Sheet-to-production publication.
 
 ## Sheet and Git publication orchestration
 
-`editorial:publish -- --preview` downloads a hash-addressed private Drive
-snapshot, partitions images and MP4s, invokes `media:prepare`, runs mandatory
-receipt-free ingestion planning, and composes the proposed Experience and
-Moment diff. It never uploads or changes tracked content.
+`editorial:publish -- --preview` inventories the Drive folder and, when the row
+names an Experience, regenerates the reviewed `Atlas Story` before downloading
+a hash-addressed private snapshot. It then partitions images and MP4s, invokes
+`media:prepare`, runs mandatory receipt-free ingestion planning, and composes
+the proposed Experience and Moment diff. Preview writes only the guarded Story
+cell. It never uploads, changes tracked content, calls GitHub, or deploys.
 
 One editorial Drive folder may contain any mixture of direct JPEG, PNG, and
 MP4 files. The publisher preserves that single-folder authoring workflow and
@@ -182,8 +187,10 @@ failure.
 The Git portion is externally proven: the integration itself passed the
 `develop` and `main` validation jobs, deployed through Pages run 43800514937,
 and produced the expected rendered Journey page. Both target branches now
-require the strict `validate` context and merge commits. The remaining live
-proof is a row-backed Drive download and R2 upload, not the Git or Pages path.
+require the strict `validate` context and merge commits. An owner-authenticated
+row-backed Drive download and one R2 video upload are now locally proven. The
+remaining live proof is completion of generated content, Git, Pages, and final
+Sheet write-back stages for that row.
 
 ## Not implemented
 

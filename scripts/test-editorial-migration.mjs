@@ -56,7 +56,7 @@ const plan = buildPostsMigration({
 assert.deepEqual(plan.summary, {
   eligibleRows: 2,
   ignoredRows: 1,
-  visibleHeadersAdded: 8,
+  visibleHeadersAdded: 9,
   automationHeadersAdded: 16,
   postIdsAssigned: 2,
   atlasModesDefaultedOff: 2,
@@ -64,7 +64,7 @@ assert.deepEqual(plan.summary, {
   atlasPlacesBackfilled: 0,
   requestCount: plan.requests.length,
 })
-assert.equal(plan.finalHeaders.length, 32)
+assert.equal(plan.finalHeaders.length, 33)
 assert.deepEqual(plan.finalHeaders, [
   ...EXISTING_POST_HEADERS,
   ...ATLAS_POST_HEADERS,
@@ -72,7 +72,7 @@ assert.deepEqual(plan.finalHeaders, [
 ])
 assert.deepEqual(
   plan.requests.find(request => request.appendDimension)?.appendDimension,
-  { sheetId: 87724606, dimension: "COLUMNS", length: 6 }
+  { sheetId: 87724606, dimension: "COLUMNS", length: 7 }
 )
 assert.equal(
   plan.requests.filter(request => request.addProtectedRange).length,
@@ -118,7 +118,7 @@ const migratedRows = rows.map((row, index) => ({
 }))
 const noOp = buildPostsMigration({
   sheetId: 87724606,
-  gridColumnCount: 32,
+  gridColumnCount: 33,
   gridRowCount: 1000,
   headers: migratedHeaders,
   rows: migratedRows,
@@ -191,7 +191,7 @@ const liveHeaders = [
 ]
 const liveUpgrade = buildPostsMigration({
   sheetId: 87724606,
-  gridColumnCount: 31,
+  gridColumnCount: 32,
   gridRowCount: 1000,
   headers: liveHeaders,
   rows: [
@@ -210,7 +210,7 @@ const liveUpgrade = buildPostsMigration({
         startRowIndex: 0,
         endRowIndex: 10,
         startColumnIndex: 0,
-        endColumnIndex: 31,
+        endColumnIndex: 32,
       },
       columnProperties: liveHeaders.map((columnName, columnIndex) => ({
         columnIndex,
@@ -236,7 +236,7 @@ assert.equal(
   0
 )
 const tableUpdate = liveUpgrade.requests.find(request => request.updateTable)
-assert.equal(tableUpdate.updateTable.table.range.endColumnIndex, 32)
+assert.equal(tableUpdate.updateTable.table.range.endColumnIndex, 33)
 assert.deepEqual(
   tableUpdate.updateTable.table.columnProperties
     .find(property => property.columnName === "Publish To")
