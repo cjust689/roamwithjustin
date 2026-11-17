@@ -23,6 +23,8 @@ related:
   - my-atlas-private-beta-implementation
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
+  - gear-ingestion-affiliate-analytics-ai
+  - my-atlas-travel-booking-affiliate-partnerships
 supersedes:
   - documentation-lifecycle-adoption-brief
   - master-plan-ai-context
@@ -99,6 +101,12 @@ These documents describe future behavior, not available features:
   accepted and locally implemented as a first private slice
 - [Three-day GA4 improvement roadmap](proposals/ga4-three-day-improvement-roadmap.md),
   accepted and locally implemented through its first public measurement slice
+- [Gear ingestion, affiliate, analytics, and optional AI expansion](proposals/gear-ingestion-affiliate-analytics-ai.md),
+  partially implemented through the canonical Gear and Usage foundation; the
+  first verified product/image vertical slice remains future work
+- [Planning-to-booking partnerships and commerce](proposals/travel-booking-affiliate-partnerships.md),
+  whose private-planning prerequisite is implemented while merchant handoffs
+  and sponsored placements remain future work
 
 The [accepted single-row Sheets and Drive target](proposals/single-row-sheets-drive-atlas-publishing.md)
 is partially implemented and tracked by the active implementation document.
