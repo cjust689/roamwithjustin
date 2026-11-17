@@ -49,6 +49,7 @@ verification:
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
     - Headless Chrome verified that My Atlas attribution begins as a compact info button and expands on activation without removing provider attribution
     - Headless Chrome verified the four-step pre-account walkthrough and first-account quick start at 390 pixel mobile and 1200 pixel desktop widths, including completion targets, persistent dismissal, and no horizontal overflow
+    - Headless Chrome verified that overview pins use screen-distance clusters, cluster activation expands nearby destinations into standalone pins, and timeline marker anchors remain within one pixel of their projected coordinates at desktop and 390 pixel mobile widths
     - Pull requests 55 and 56, their required validation gates, develop workflow 43987307324, and Pages workflow 43987868552 succeeded
     - Live content-addressed production chunks returned 200 and contained the timeline copy, plane marker styles, Add year control, and exact 2.9rem alignment rule
     - Staging Worker c1923a3b-2a8f-47a8-acd0-cf033ea49790 returned 200 health and exposed ETag and X-Request-Id to the allowed localhost origin
@@ -203,11 +204,18 @@ as provider data is available. Activating the info button expands the original
 MapLibre attribution control.
 
 Map pins use a deterministic color for their earliest visit year, retain a
-visible place and year label, and emphasize the selected destination. A compact
-year legend uses the same colors. Undated destinations remain visible and
-filterable but do not enter chronological playback. Curved map connections are
-a deterministic visual treatment over the current pins and do not claim route
-history.
+visible place and year label, and emphasize the selected destination. Nearby
+pins collapse into a count marker using the same screen-distance grouping model
+as the primary Atlas, with smaller phone spacing. The selected destination
+always remains precise. Activating a group frames its destinations, and zooming
+past the My Atlas overview threshold releases them into standalone pins. Marker
+elements retain MapLibre's absolute positioning so their bottom anchors remain
+on the projected coordinates during playback. A compact year legend uses the
+same colors. Undated destinations remain visible and filterable but do not
+enter chronological playback. Curved map connections are a deterministic
+visual treatment over the current pins and do not claim route history. They use
+a dark underlay, soft gold glow, and high-opacity three-pixel dashed line so the
+connections remain legible over satellite imagery.
 
 The owner editor intentionally asks only for optional visit years. Users may
 record multiple years for repeat visits or leave a destination undated. The API
