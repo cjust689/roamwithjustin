@@ -109,6 +109,14 @@
           leave this site. Affiliate or paid relationships are disclosed near
           the relevant recommendation when they apply.
         </p>
+        <p>
+          A public travel story may offer Expedia travel options. The Expedia
+          banner script is not requested until you choose to load those options.
+          At that point, Expedia and its affiliate attribution provider may
+          receive browser, device, network, referral, and interaction details
+          under their own privacy practices. My Atlas private account and plan
+          data are not supplied to this travel tool.
+        </p>
       </section>
 
       <section>

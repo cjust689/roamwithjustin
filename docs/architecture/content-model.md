@@ -5,10 +5,11 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-16
+updated: 2026-11-17
 related:
   - media-pipeline
   - gear-system
+  - lodging-partner-operations
 supersedes:
   - atlas-asset-architecture-brief
 superseded_by: []
@@ -93,9 +94,14 @@ design and migration narrative is preserved in the
 - **Places** own stable geographic identity, coordinates, hierarchy, category,
   description, and destination links.
 - **Journeys** own a particular trip, ordered Visits, itinerary chapters,
-  lodging, narrative, and contextual Media usages.
-- **Partners** own reusable provider/operator identities and disclosure-safe
-  external links.
+  lodging context, narrative, and contextual Media usages.
+- **Partners** own reusable provider, lodging, operator, or merchant identity,
+  disclosure-safe external links, and the stable slug used for public referral
+  measurement. Journey lodging points to these records through `partnerId`
+  rather than duplicating property URLs.
+- **Commercial offers** own an approved public placement and provider-specific
+  tracking configuration. They reference a Partner and do not replace the
+  Partner, Journey, or private planning models.
 - **Atlas presentation** owns map-only grouping, camera, root, and relationship
   choices. It does not replace Place or Journey identity.
 

@@ -45,13 +45,13 @@ export const usviStJohn2025Journey = Object.freeze({
   ],
   lodging: [
     {
+      partnerId: "oceana-villa-st-john",
       name: "Oceana Villa",
       location: "Great Cruz Bay, St. John",
       nights: null,
       blurb:
         "Our vacation rental home base overlooking Great Cruz Bay. The roosters, breakfasts on the patio, steady breeze, and broad water view gave the mornings their own rhythm before we went anywhere.",
       image: null,
-      link: "https://oceanastjohn.com/",
       verificationNotes:
         "The creator-supplied spelling and Great Cruz Bay description match the current Oceana Villa site. No availability, accessibility, or sponsorship claim is asserted.",
     },

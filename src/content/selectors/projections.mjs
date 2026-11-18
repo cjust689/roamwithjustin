@@ -5,7 +5,10 @@ import {
   journeyRecords,
 } from "../journeys/index.mjs"
 import { getPlace } from "../places/index.mjs"
-import { getPartner } from "../partners/index.mjs"
+import {
+  getJourneyCommercialOffers,
+  getPartner,
+} from "../partners/index.mjs"
 import { getJourneyGear } from "./gear.mjs"
 import { getJourneyExperienceViews } from "./experiences.mjs"
 import {
@@ -47,6 +50,9 @@ function preferredExternalLink(externalLinks = {}) {
   if (externalLinks.official) {
     return { href: externalLinks.official, kind: "official" }
   }
+  if (externalLinks.directory) {
+    return { href: externalLinks.directory, kind: "directory" }
+  }
   if (externalLinks.platform) {
     return { href: externalLinks.platform, kind: "platform" }
   }
@@ -68,6 +74,38 @@ function analyticsPartnerLinkType(externalLink) {
   }
 
   return externalLink.kind === "platform" ? "booking" : "website"
+}
+
+function journeyLodgingView(stay) {
+  const partner = getPartner(stay.partnerId)
+  const externalLink = preferredExternalLink(partner?.externalLinks)
+
+  return {
+    ...stay,
+    id: partner?.id || stay.partnerId || "",
+    name: partner?.name || stay.name,
+    image: resolveLodgingImage(stay.image),
+    link: externalLink.href,
+    linkType: analyticsPartnerLinkType(externalLink),
+    disclosure: partner?.disclosure || "",
+  }
+}
+
+function journeyCommercialOfferViews(journey) {
+  if (journey.publicationStatus !== "published") return []
+
+  return getJourneyCommercialOffers(journey.id).flatMap(offer => {
+    const partner = getPartner(offer.partnerId)
+    if (!partner) return []
+
+    return [
+      {
+        ...offer,
+        partnerName: partner.name,
+        disclosure: partner.disclosure,
+      },
+    ]
+  })
 }
 
 function journeyPreviewCopy(journey) {
@@ -231,10 +269,8 @@ export function buildTripViewModel(journey) {
     experiences,
     travelNotes: [...(journey.travelNotes || [])],
     tips: [...(journey.tips || [])],
-    lodging: (journey.lodging || []).map(stay => ({
-      ...stay,
-      image: resolveLodgingImage(stay.image),
-    })),
+    lodging: (journey.lodging || []).map(journeyLodgingView),
+    commercialOffers: journeyCommercialOfferViews(journey),
     locations,
     itineraryMode: journey.itineraryMode || "days",
     days: (journey.days || []).map(day => ({
