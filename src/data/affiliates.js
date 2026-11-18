@@ -15,13 +15,6 @@ export const affiliates = {
       description: "Mens Dayware Clothing",
     },
     {
-      id: "booking",
-      name: "Booking.com  ",
-      logo: "/img/affiliates/booking.png",
-      link: "https://www.booking.com/index.html?aid=yourid",
-      description: "Book your next stay through Booking.com using my link!",
-    },
-    {
       id: "cressi",
       name: "Cressi",
       logo: "https://www.cressiusa.com/pagine/ico/android-icon-192x192.png",

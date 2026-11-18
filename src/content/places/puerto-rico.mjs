@@ -277,6 +277,8 @@ export const puertoRicoPlaces = Object.freeze([
     description:
       "Container architecture, a long pool, and open mountain views turn this Moca Airbnb from a practical base into one of the trip's real locations.",
     externalLinks: {
+      directory:
+        "https://www.discoverpuertorico.com/profile/hacienda-florecer/16790",
       maps: "https://www.google.com/maps?q=18.3882008,-67.0752792",
     },
     verificationNotes:

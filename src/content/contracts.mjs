@@ -70,12 +70,15 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {string} name
  * @property {"operator"|string} kind
  * @property {string} label Short public label such as Restaurant or Charter operator.
- * @property {{official?: string, platform?: string, maps?: string}} externalLinks
+ * @property {{official?: string, directory?: string, platform?: string, maps?: string}} externalLinks
  * @property {string} relationship Describes the real Journey relationship.
  * @property {string} disclosure Prevents a provider link from implying sponsorship or affiliation.
  *
  * Journey day records may reference `partnerIds`. Selectors resolve those IDs
  * into public links so business identity does not get duplicated in stories.
+ * Journey lodging records reference a lodging Partner through `partnerId` for
+ * the same reason. Commercial offers are separate placement records that point
+ * back to one Partner and never replace its stable identity.
  */
 
 // Registries reject duplicate or missing IDs as soon as content is imported,

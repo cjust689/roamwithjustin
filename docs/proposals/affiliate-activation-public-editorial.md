@@ -2,8 +2,8 @@
 id: affiliate-activation-public-editorial-first-slice
 title: Roam With Justin - Affiliate Activation and Public Destination Referral Implementation
 kind: proposal
-status: proposed
-implementation_state: none
+status: in-progress
+implementation_state: partial
 created: 2026-11-17
 updated: 2026-11-17
 related:
@@ -15,13 +15,39 @@ related:
   - gear-ingestion-affiliate-analytics-ai
 supersedes: []
 superseded_by: []
-code_paths: []
+code_paths:
+  - src/content/partners/index.mjs
+  - src/content/selectors/projections.mjs
+  - src/components/TravelPlanningOffers.vue
+  - src/services/expediaBanners.mjs
+  - src/views/roam/RoamTripOverview.vue
+  - src/views/roam/Privacy.vue
+  - scripts/audit-lodging-links.mjs
+  - scripts/test-commercial-content.mjs
 verification:
-  state: unverified
-  evidence: []
+  state: verified
+  evidence:
+    - npm run commerce:test
+    - npm run lodging:audit
+    - npm run content:validate
+    - npm run analytics:test
 ---
 
 # Roam With Justin: Affiliate Activation and First Measurable Booking Referrals
+
+> **Implementation status, November 17, 2026:** The bounded source slice is
+> implemented locally from the owner's supplied Expedia banner code. Utah 2025
+> has one disclosed, visitor-activated block with stays and flights banners,
+> unique Pubrefs, canonical Partner data, lodging URL auditing, and existing
+> GA4 `partner_click` semantics. No deployment or dashboard verification has
+> occurred. Expedia program eligibility, rendered production destinations,
+> attribution, privacy copy, and responsive accessibility remain owner or
+> external acceptance work. This proposal stays active until those checks are
+> complete.
+
+> The audit also identifies the published `La Fortuna Airbnb` Experience as an
+> owner URL candidate. It is not linked or represented as a bookable property
+> until its exact property or listing URL is supplied.
 
 ## Codex implementation brief | Audit first; ship a small public-editorial vertical slice
 
@@ -228,7 +254,12 @@ Example *only if real links are verified*:
 - Use semantic anchors, accessible names, focus indicators, touch-friendly controls, keyboard support, and safe external navigation. Prefer `rel="sponsored"` for commission/paid links, plus `noopener` when opening new tabs; apply `noreferrer`/`referrerpolicy` only after confirming merchant attribution requirements. Ordinary editorial links need not be marked sponsored solely because they leave the site.
 - Do not block navigation on the success of a GA4 event.
 - Keep photos and media tied to the existing canonical registry; **no new external image scraping** for partner graphics. Plain text links are acceptable.
-- Respect existing consent, restrictions and content requirements. Do not load third-party embedded booking widgets, trackers, or cookies merely to display this block.
+- Respect existing consent, restrictions and content requirements. The
+  owner-supplied Expedia banner is the bounded exception: its fixed external
+  script loads only after an explicit visitor action, with near-placement
+  disclosure and an accurate privacy notice. Do not add other third-party
+  booking widgets, trackers, or automatic script loads without a separate
+  review.
 
 ---
 

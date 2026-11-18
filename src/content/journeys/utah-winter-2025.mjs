@@ -58,35 +58,27 @@ export const utahWinter2025Journey = Object.freeze({
   gearHighlights: [
     {
       name: "Sony FX30",
-      link: "https://amzn.to/sony-fx30-affiliate",
     },
     {
       name: "Sony A6700",
-      link: "https://amzn.to/sony-fx30-affiliate",
     },
     {
       name: "DJI ACTION 5 Pro",
-      link: "https://amzn.to/sony-fx30-affiliate",
     },
     {
       name: "DJI Air 3",
-      link: "https://amzn.to/dji-air-3-affiliate",
     },
     {
       name: "DJI Avata 2",
-      link: "https://amzn.to/dji-air-3-affiliate",
     },
     {
       name: "Tamron 35-150mm",
-      link: "https://amzn.to/tamron-17-70-affiliate",
     },
     {
       name: "Tamron 17-70mm",
-      link: "https://amzn.to/tamron-17-70-affiliate",
     },
     {
       name: "PGYTECH OneMo 2 Backpack",
-      link: "https://amzn.to/grayl-geopress-affiliate",
     },
   ],
   travelNotes: [
@@ -103,6 +95,7 @@ export const utahWinter2025Journey = Object.freeze({
   ],
   lodging: [
     {
+      partnerId: "montego-bay-hotel-casino-resort",
       name: "Montego Bay Hotel Casino Resort",
       location: "Wendover, UT",
       nights: 1,
@@ -111,9 +104,9 @@ export const utahWinter2025Journey = Object.freeze({
         provider: "external",
         url: "https://www.wendoverfun.com/library/images/backgrounds/mb-romanza-1.jpg",
       },
-      link: "https://www.wendoverfun.com/",
     },
     {
+      partnerId: "hyatt-place-moab",
       name: "Hyatt Place Moab",
       location: "Moab, UT",
       nights: 2,
@@ -123,9 +116,9 @@ export const utahWinter2025Journey = Object.freeze({
         provider: "external",
         url: "https://images.trvl-media.com/lodging/25000000/24420000/24413400/24413369/5bc5ea10.jpg?impolicy=resizecrop&rw=1200&ra=fit",
       },
-      link: "https://www.hyatt.com/hyatt-place/en-US/slczm-hyatt-place-moab",
     },
     {
+      partnerId: "hyatt-centric-park-city",
       name: "Hyatt Centric Park City",
       location: "Park City, UT",
       nights: 2,
@@ -135,7 +128,6 @@ export const utahWinter2025Journey = Object.freeze({
         provider: "external",
         url: "https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2014/09/21/1639/SLCPC-P085-Aerial.jpg/SLCPC-P085-Aerial.16x9.jpg",
       },
-      link: "https://www.hyatt.com/en-US/hotel/utah/hyatt-centric-park-city/parkc",
     },
   ],
   // Visit descriptions hold the lived scene; summaries provide a compact personal beat for cards and Atlas stops.

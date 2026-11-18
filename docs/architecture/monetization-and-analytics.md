@@ -13,6 +13,8 @@ related:
   - analytics-event-dictionary
   - gear-system
   - adsense-operations
+  - lodging-partner-operations
+  - affiliate-activation-public-editorial-first-slice
 supersedes: []
 superseded_by: []
 code_paths:
@@ -23,10 +25,12 @@ code_paths:
   - src/utils/analytics.mjs
   - src/views/roam/Home.vue
   - src/components/GearGrid.vue
+  - src/components/TravelPlanningOffers.vue
   - src/data/affiliates.js
   - src/views/roam/Affiliates.vue
   - src/config/adsense.mjs
   - src/services/adsense.mjs
+  - src/services/expediaBanners.mjs
   - src/components/AdSlot.vue
   - src/views/roam/RoamTripOverview.vue
   - src/features/atlas/config/atlasAdEligibility.mjs
@@ -34,7 +38,10 @@ code_paths:
   - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasDetailPanel.vue
   - src/content/selectors/projections.mjs
+  - src/content/partners/index.mjs
   - src/views/roam/Privacy.vue
+  - scripts/audit-lodging-links.mjs
+  - scripts/test-commercial-content.mjs
   - scripts/validate-adsense-config.mjs
   - scripts/test-atlas-ad-eligibility.mjs
   - scripts/test-analytics.mjs
@@ -47,6 +54,8 @@ verification:
     - npm run adsense:test
     - npm run adsense:validate
     - npm run analytics:test
+    - npm run commerce:test
+    - npm run lodging:audit
     - npm run content:validate
     - npm run atlas:test
     - npm run docs:audit
@@ -87,6 +96,18 @@ received event data require external owner verification.
   hostname-derived gear events, full-URL parameters, and third-party UTM
   mutation were removed; ordinary outbound anchors remain available to GA4
   Enhanced Measurement when enabled in the property.
+- Six current lodging records resolve their public URLs through canonical
+  lodging Partners. Journey stay cards emit the same `partner_click` contract
+  with the stable property slug, `trip_lodging` placement, and public Journey
+  context. The lodging audit exposes current URLs and fails on missing,
+  duplicated, or maps-only references. It also reports published lodging-like
+  Experiences that still require an exact owner URL; `La Fortuna Airbnb` is
+  the current candidate.
+- The published Utah 2025 Journey can show the two exact owner-supplied
+  Expedia banner configurations for stays and flights. Their unique Pubrefs
+  distinguish placements in provider reporting. The external Expedia script
+  loads only after the visitor activates the disclosed planning block, and a
+  retry replaces rather than duplicates the loader.
 - Affiliate-disclosure UI exists in the banner, Gear, About, Affiliates, and
   Journey gear presentation.
 - A legacy affiliate page reads partner cards from
@@ -132,6 +153,10 @@ received event data require external owner verification.
 - No consent manager is implemented. The local opt-out and browser privacy
   signals do not substitute for a policy and jurisdiction appropriate consent
   platform.
+- Expedia program status, rendered production banners, provider-side Pubref
+  attribution, commission eligibility, and GA4 receipt remain externally
+  unverified. The new privacy wording and placement disclosure require owner
+  review before deployment.
 - GitHub Pages still serves direct SPA routes through a `404.html` fallback. A
   direct `/atlas` request may therefore retain HTTP 404 status even though the
   client app hydrates. A production 200 rewrite remains a separate hosting
@@ -139,9 +164,10 @@ received event data require external owner verification.
 - Exactly one page-view owner must be active. Manual mode is not production
   ready until the GA4 data stream's automatic browser-history page views are
   disabled and the expected trace is externally verified.
-- `src/data/affiliates.js` contains manually maintained records, including a
-  placeholder Booking.com affiliate identifier. Those entries require owner
-  review and are not evidence of active agreements.
+- `src/data/affiliates.js` still contains manually maintained partner records.
+  The placeholder Booking.com identifier has been removed, and source
+  validation rejects the known placeholder commerce URL shapes. Remaining
+  records still require owner review and are not evidence of active agreements.
 - Repository inspection cannot confirm GA4 admin configuration, received
   production events, AdSense approval, or affiliate account status.
 

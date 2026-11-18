@@ -12,6 +12,8 @@ related:
   - analytics-event-dictionary
   - gear-system
   - adsense-operations
+  - lodging-partner-operations
+  - affiliate-activation-public-editorial-first-slice
 supersedes: []
 superseded_by: []
 code_paths:
@@ -21,9 +23,11 @@ code_paths:
   - src/utils/analytics.mjs
   - src/views/roam/Home.vue
   - src/components/GearGrid.vue
+  - src/components/TravelPlanningOffers.vue
   - src/data/affiliates.js
   - src/config/adsense.mjs
   - src/services/adsense.mjs
+  - src/services/expediaBanners.mjs
   - src/components/AdSlot.vue
   - src/views/roam/RoamTripOverview.vue
   - src/features/atlas/config/atlasAdEligibility.mjs
@@ -31,7 +35,10 @@ code_paths:
   - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasDetailPanel.vue
   - src/content/selectors/projections.mjs
+  - src/content/partners/index.mjs
   - src/views/roam/Privacy.vue
+  - scripts/audit-lodging-links.mjs
+  - scripts/test-commercial-content.mjs
   - scripts/validate-adsense-config.mjs
   - scripts/test-atlas-ad-eligibility.mjs
   - scripts/test-analytics.mjs
@@ -44,6 +51,8 @@ verification:
     - npm run adsense:test
     - npm run adsense:validate
     - npm run analytics:test
+    - npm run commerce:test
+    - npm run lodging:audit
     - npm run content:validate
     - npm run atlas:test
     - npm run docs:audit
@@ -67,6 +76,32 @@ verification:
 > placements and the later editorial commerce work remain. See the
 > [as-built analytics document](../architecture/monetization-and-analytics.md)
 > and [AdSense operations guide](../reference/adsense.md).
+
+### Public affiliate activation implementation result, 2026-11-17
+
+- [x] Promoted every current Journey lodging URL into one canonical lodging
+  Partner and replaced duplicate Journey URLs with stable `partnerId`
+  references.
+- [x] Added a lodging inventory command with readable and JSON output. It
+  validates six stays, their stable tracking slugs, and their website or
+  reviewed directory URLs. It separately identifies the published `La Fortuna
+  Airbnb` Experience as requiring an exact owner-supplied URL before it can be
+  promoted into structured lodging.
+- [x] Added two Expedia commercial offers to the existing Partner registry
+  using the exact owner-supplied campaign reference and unique Utah stays and
+  flights Pubrefs.
+- [x] Added one disclosed public Utah Journey planning block. It loads the
+  fixed Expedia script only after explicit visitor activation and retries
+  without retaining a duplicate loader.
+- [x] Reused `partner_click` for lodging and affiliate actions, with stable
+  Partner IDs and public Journey context. No full outbound URL or private My
+  Atlas data enters the custom event.
+- [x] Added factual Expedia script behavior to the public privacy notice.
+- [ ] Owner review of the disclosure and privacy copy.
+- [ ] Deploy and verify Expedia banner rendering, destinations, Pubref
+  attribution, program eligibility, and GA4 receipt in external dashboards.
+- [ ] Complete mobile, desktop, keyboard, and screen reader QA on the deployed
+  public Journey.
 
 ### GA4 roadmap implementation result, 2026-11-17
 

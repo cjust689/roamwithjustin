@@ -331,7 +331,7 @@
         <div class="lodging-grid">
           <article
             v-for="stay in trip.lodging"
-            :key="stay.name"
+            :key="stay.id"
             class="lodging-card"
           >
             <img
@@ -354,6 +354,8 @@
                 :href="stay.link"
                 target="_blank"
                 rel="noopener noreferrer"
+                :title="stay.disclosure || null"
+                @click="trackLodgingClick(stay)"
               >
                 View stay &nearr;
               </a>
@@ -361,6 +363,13 @@
           </article>
         </div>
       </section>
+
+      <TravelPlanningOffers
+        v-if="trip.commercialOffers.length"
+        class="story-shell"
+        :journey-id="trip.journeyId"
+        :offers="trip.commercialOffers"
+      />
 
       <section v-if="trip.hasFieldNotes" class="story-shell story-details-grid">
         <article v-if="trip.gearHighlights.length" class="story-detail-card">
@@ -458,11 +467,17 @@ import { adSenseConfig } from "@/config/adsense.mjs"
 import AdSlot from "@/components/AdSlot.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
 import LocationModal from "@/components/LocationModal.vue"
+import TravelPlanningOffers from "@/components/TravelPlanningOffers.vue"
 import { trackAnalyticsEvent, trackAtlasOpen } from "@/utils/analytics.mjs"
 
 export default {
   name: "TripOverview",
-  components: { AdSlot, HeroCarousel, LocationModal },
+  components: {
+    AdSlot,
+    HeroCarousel,
+    LocationModal,
+    TravelPlanningOffers,
+  },
   props: {
     id: {
       type: String,
@@ -535,6 +550,15 @@ export default {
         link_type: partner.linkType,
         partner_id: partner.id,
         placement: "trip_itinerary_partner",
+        public_journey_id: this.trip.journeyId,
+      })
+    },
+    trackLodgingClick(stay) {
+      trackAnalyticsEvent("partner_click", {
+        link_type: stay.linkType,
+        partner_id: stay.id,
+        placement: "trip_lodging",
+        public_journey_id: this.trip.journeyId,
       })
     },
     updateDocumentTitle() {
