@@ -47,7 +47,11 @@ export function formatMyAtlasPlannerError(error) {
   if (error?.code === "not_found") {
     return `That saved planner item is no longer available. Refresh the planner and retry.${reference}`
   }
-  if (["invalid_request", "invalid_registration", "rejected"].includes(error?.code)) {
+  if (
+    ["invalid_request", "invalid_registration", "rejected"].includes(
+      error?.code
+    )
+  ) {
     return `The planner could not save that selection. Reload the page and retry.${reference}`
   }
   return `The private planner could not complete that request. Retry in a moment.${reference}`
@@ -56,6 +60,11 @@ export function formatMyAtlasPlannerError(error) {
 export function formatMyAtlasPlannerRefreshError(error) {
   const reference = requestReference(error)
   return `Your change was saved, but the planner could not refresh its latest state. Select Refresh before making another change.${reference}`
+}
+
+export function formatMyAtlasPlannerConflictRecovered(error) {
+  const reference = requestReference(error)
+  return `Your Atlas changed in another request. The latest account version is loaded, and your itinerary draft was kept where possible. Review it, then save again.${reference}`
 }
 
 export function formatMyAtlasPlanLoadError(error) {

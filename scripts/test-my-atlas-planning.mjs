@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import fs from "node:fs"
 import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
@@ -12,6 +13,7 @@ import {
 } from "../workers/my-atlas/src/planning/contracts.mjs"
 import {
   formatMyAtlasPlanLoadError,
+  formatMyAtlasPlannerConflictRecovered,
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../src/features/my-atlas/planning/errors.mjs"
@@ -32,6 +34,10 @@ assert.match(
   /change was saved.*Refresh.*refresh-123/
 )
 assert.match(
+  formatMyAtlasPlannerConflictRecovered({ requestId: "conflict-123" }),
+  /latest account version.*itinerary draft.*save again.*conflict-123/
+)
+assert.match(
   formatMyAtlasPlannerError({
     code: "duplicate_wish",
     requestId: "duplicate-123",
@@ -50,6 +56,29 @@ assert.match(
   formatMyAtlasPlanLoadError({ requestId: "plan-load-123" }),
   /bucket list loaded.*saved trip could not be loaded.*plan-load-123/
 )
+
+const plannerComponent = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/components/MyAtlasPlanner.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
+assert.match(plannerComponent, /class="planner-itinerary-card"/)
+assert.match(plannerComponent, /aria-label="Saved trip itinerary"/)
+assert.match(plannerComponent, /aria-controls="planner-trip-editor"/)
+assert.match(plannerComponent, /aria-controls="planner-directions-panel"/)
+assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
+assert.match(plannerComponent, /planHasUnsavedChanges/)
+assert.match(
+  plannerComponent,
+  /error\?\.code === "revision_conflict"[\s\S]*preservePlanDraft: true/
+)
+assert.match(
+  plannerComponent,
+  /if \(preservePlanDraft\) this\.reconcilePlanDraft\(\)/
+)
+assert.doesNotMatch(plannerComponent, /Find flights|Find stays/)
 
 const moab = {
   placeId: "geonames:5601615",

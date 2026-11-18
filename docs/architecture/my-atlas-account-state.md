@@ -14,6 +14,8 @@ related:
   - my-atlas-private-beta-implementation
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
+  - my-atlas-trip-planner-ux-routes-flights-lodging
+  - my-atlas-trip-planner-phase-0-2026-11-18
   - docs-index
 supersedes: []
 superseded_by: []
@@ -55,6 +57,7 @@ verification:
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
+    - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
     - Pull request 114 passed production validation run 44158190178 and merged to main as d6af82bddfaf8bb4e0f4ac61caeade6697c46982
     - Pages run 44158579421 deployed the typography cleanup, and a live audit found Poppins plus zero Russo One matches across 32 discoverable content-addressed CSS and JavaScript assets
@@ -509,6 +512,27 @@ latitude and longitude, and saves the canonical result into the private
 wishlist. Saved wishlist cards repeat those coordinates so the owner can review
 the plan input before using external directions. Custom coordinates remain
 available through a secondary fallback disclosure.
+
+When a saved plan exists, the private planner now presents that plan before its
+editing forms. The readable itinerary distinguishes the start, every numbered
+stop, and the effective finish, including return-to-start and final-stop
+semantics. It shows the title, optional year and note, current wishlist-note
+previews when their source wishes still exist, and a saved or unsaved state.
+Large itineraries retain bounded scrolling. Destination management and the
+complete editor begin collapsed for existing plans; empty planners open the
+builder. Accessible Up and Down controls remain the canonical reorder path.
+
+Directions and the privacy-filtered planning prompt are the only active
+next-action panels, and only one is expanded at a time. Flights and stays are
+not displayed as inactive promises. The Maps builder, storage contract,
+retention behavior, API fields, and public projection are unchanged by this
+presentation phase.
+
+If a mutation is rejected with `revision_conflict`, the browser does not replay
+it. It reads the latest account revision, preserves the local itinerary draft
+where its wishlist references remain valid, and requires the owner to review
+and explicitly save again. This recovery keeps the Worker's optimistic
+concurrency protection intact.
 
 The planner disclosure header uses the same full-width control geometry as the
 other owner workflow sections. Its closed and open states retain the shared

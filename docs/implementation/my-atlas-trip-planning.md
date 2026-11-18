@@ -8,6 +8,8 @@ created: 2026-11-17
 updated: 2026-11-18
 related:
   - my-atlas-trip-planning
+  - my-atlas-trip-planner-ux-routes-flights-lodging
+  - my-atlas-trip-planner-phase-0-2026-11-18
   - my-atlas-private-beta-implementation
   - my-atlas-account-state
   - my-atlas-registration
@@ -36,6 +38,10 @@ verification:
   evidence:
     - npm run my-atlas:test
     - npm run lint
+    - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
+    - Revision-conflict recovery tests verify request-reference copy while the client reloads the latest revision, preserves the itinerary draft where possible, and requires an explicit retry instead of replaying a mutation
+    - docs/audits/assets/my-atlas-planner-phase1-desktop.png
+    - docs/audits/assets/my-atlas-planner-phase1-mobile.png
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
@@ -175,6 +181,18 @@ remains.
       one revision and idempotency operation, and leaves the wishlist and saved
       plan unchanged. The browser requires a final confirmation and warns when the
       owner's Atlas is already public.
+- [x] Planner presentation Phase 1 makes the saved plan the primary readable
+      object with a distinct start, numbered stops, finish, title, year, plan
+      note, current wishlist-note previews, and saved versus unsaved state.
+      Destination management and the full editor start collapsed for an
+      existing plan, while an empty planner opens the trip builder. Existing
+      Directions and planning-prompt handoffs use mutually exclusive next-action
+      panels. No Flights or Stays action appears before those capabilities exist.
+- [x] A rejected stale mutation still relies on the Worker `If-Match` boundary
+      and is never automatically replayed. The browser fetches the latest account
+      revision, preserves the local itinerary draft where possible, and asks the
+      owner to review and explicitly save again. Successful wishlist mutations
+      also stop replacing an unrelated unsaved plan draft during their refresh.
 
 ## Partial or not yet verified
 
@@ -211,6 +229,16 @@ remains.
       Worker version `538823a4-0333-4b71-9825-1647acf8e832` is deployed and its
       unauthenticated health probe passed. Local client, Worker boundary, and
       Durable Object tests pass; owner-session acceptance remains.
+- [ ] Complete authenticated owner acceptance of the Phase 1 readable itinerary
+      at desktop and phone widths, including keyboard and screen-reader review.
+      No deployment or authenticated visual acceptance is claimed by the local
+      implementation.
+- [ ] Implement Phase 2 as a separate UI-only directions change: ephemeral
+      endpoint and stop inclusion, Maps modes, one-place search, and mixed-mode
+      splitting without account writes or retention refresh.
+- [ ] Implement stable itinerary node IDs, persisted logistics, private map
+      overlay, neutral flight and stay helpers, and any commercial activation
+      only through their separately reviewed later phases.
 
 ## Verified commands
 
