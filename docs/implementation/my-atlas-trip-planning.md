@@ -48,6 +48,10 @@ verification:
     - Wishlist retry tests verified that a repeated owner and Place create returns the existing Wish without changing revision or count; API boundary tests verified safe duplicate, limit, unavailable-place, and invalid-input codes
     - Partial planning-load tests verified that a valid wishlist and revision remain available when the companion saved-trip request fails, including its safe request reference
     - Staging Worker version 538823a4-0333-4b71-9825-1647acf8e832 deployed the wishlist retry, partial-load API support, and Mark Visited boundary; its health endpoint returned 200 with the production CORS origin, exposed X-Request-Id, and no-store response policy
+    - Pull request 129 passed validation run 44309523090 and merged the recovery to develop as c2eda023041550e50476c2226dfe604236faf1be; develop validation run 44309859960 then succeeded
+    - Pull request 130 passed production validation run 44310230836 and merged to main as 5925c8e6c2d46334441ec03d56939654147d6dd9
+    - Pages workflow 44310533617 built and deployed main merge 5925c8e6c2d46334441ec03d56939654147d6dd9 successfully
+    - Live content-addressed chunk 931.ec2a4758.js returned 200 and contained the targeted bucket-list-loaded and saved-trip-unavailable recovery message
     - Thirty-two Workers-runtime tests verified that an unresolved canonical wish remains visible and removable while plan snapshot creation rejects it
     - npm run lint and npm run build passed after the planner disclosure spacing and request-reference recovery changes
     - Local Chromium component-state measurements at 1,264 and 390 CSS pixels verified that the planner disclosure exactly matches the neighboring Add destination header width, height, vertical padding, centered alignment, and zero viewport overflow
@@ -79,9 +83,11 @@ recovery and compact disclosure correction through protected `develop` and
 frontend release.
 Additional external beta invitations remain gated on the owner checks below.
 The 2026-11-18 wishlist retry and Mark Visited Worker changes are deployed to
-isolated staging as version `538823a4-0333-4b71-9825-1647acf8e832`. The
-partial-load frontend correction remains pending protected branch promotion and
-authenticated owner acceptance.
+isolated staging as version `538823a4-0333-4b71-9825-1647acf8e832`. Pull
+requests 129 and 130 promoted the partial-load frontend correction through
+protected `develop` and `main`. Pages run 44310533617 and live chunk
+931.ec2a4758.js verify the production release. Authenticated owner acceptance
+remains.
 
 ## Implemented and test verified
 
@@ -197,8 +203,8 @@ authenticated owner acceptance.
 - [x] Segment long Google Maps handoffs into continuous mobile-safe links.
 - [x] Implement the separate owner-reviewed Mark Visited transition. Local
       Worker, service, contract, client, and durable-state tests pass. The Worker
-      is deployed to isolated staging; frontend promotion and authenticated owner
-      acceptance are not yet claimed.
+      is deployed to isolated staging and the frontend is deployed through
+      protected `main`; authenticated owner acceptance is not yet claimed.
 - [x] Keep the API on its isolated staging Worker while promoting the
       feature-gated Pages frontend. No apex Worker route was added.
 - [ ] Authenticate the 2026-11-18 wishlist retry correction against staging.
