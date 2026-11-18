@@ -414,7 +414,7 @@ function validatedPlanningRevision(response) {
   return revisionFromResponse(response)
 }
 
-export async function fetchMyAtlasPlanning({
+async function fetchMyAtlasPlanningAttempt({
   apiBaseUrl,
   accessToken,
   allowPartial = false,
@@ -489,6 +489,28 @@ export async function fetchMyAtlasPlanning({
       planError: error,
     })
   }
+}
+
+export async function fetchMyAtlasPlanning(options) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const state = await fetchMyAtlasPlanningAttempt(options)
+      if (
+        attempt === 0 &&
+        state.planError?.code === "revision_conflict"
+      ) {
+        continue
+      }
+      return state
+    } catch (error) {
+      if (attempt === 0 && error?.code === "revision_conflict") continue
+      throw error
+    }
+  }
+  throw new MyAtlasApiError("My Atlas changed while it was loading.", {
+    status: 412,
+    code: "revision_conflict",
+  })
 }
 
 export async function createMyAtlasWish({
