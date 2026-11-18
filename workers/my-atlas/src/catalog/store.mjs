@@ -79,10 +79,33 @@ function assertTemplate(value, suffix) {
 }
 
 function assertManifest(value) {
+  const versionOneSearch =
+    value?.artifactVersion === 1 &&
+    value.searchShards?.algorithm === "sha256-normalized-query-prefix" &&
+    value.searchShards?.prefixCharacters === 2 &&
+    Number.isInteger(value.searchShards?.hexLength) &&
+    value.searchShards.hexLength >= 1 &&
+    value.searchShards.hexLength <= 4
+  const versionTwoSearch =
+    value?.artifactVersion === 2 &&
+    value.searchShards?.algorithm === "sha256-normalized-query-prefix-v2" &&
+    Array.isArray(value.searchShards?.prefixCharacters) &&
+    value.searchShards.prefixCharacters.length > 0 &&
+    value.searchShards.prefixCharacters.length <= 4 &&
+    value.searchShards.prefixCharacters.every(
+      (length, index, lengths) =>
+        Number.isInteger(length) &&
+        length >= 4 &&
+        length <= 12 &&
+        (index === 0 || length > lengths[index - 1])
+    ) &&
+    Number.isInteger(value.searchShards?.hexLength) &&
+    value.searchShards.hexLength >= 3 &&
+    value.searchShards.hexLength <= 16
   if (
     !value ||
     value.schemaVersion !== 1 ||
-    value.artifactVersion !== 1 ||
+    ![1, 2].includes(value.artifactVersion) ||
     typeof value.catalogRevision !== "string" ||
     !/^[a-z0-9][a-z0-9._-]{0,127}$/i.test(value.catalogRevision) ||
     value.encoding !== "gzip" ||
@@ -91,11 +114,7 @@ function assertManifest(value) {
     value.recordShards.hexLength < 1 ||
     value.recordShards.hexLength > 4 ||
     !assertTemplate(value.recordShards?.keyTemplate, ".json.gz") ||
-    value.searchShards?.algorithm !== "sha256-normalized-query-prefix" ||
-    value.searchShards?.prefixCharacters !== 2 ||
-    !Number.isInteger(value.searchShards?.hexLength) ||
-    value.searchShards.hexLength < 1 ||
-    value.searchShards.hexLength > 4 ||
+    (!versionOneSearch && !versionTwoSearch) ||
     !assertTemplate(value.searchShards?.keyTemplate, ".json.gz") ||
     typeof value.attribution?.provider !== "string" ||
     typeof value.attribution?.license !== "string"
@@ -319,18 +338,27 @@ export class WorkerPlaceCatalog {
 
   async search(query, { limit = 8 } = {}) {
     const normalizedQuery = normalizeCatalogSearchText(query)
-    if (normalizedQuery.length < 2 || normalizedQuery.length > 80) {
+    const manifest = await this.manifest()
+    const prefixLengths = Array.isArray(manifest.searchShards.prefixCharacters)
+      ? manifest.searchShards.prefixCharacters
+      : [manifest.searchShards.prefixCharacters]
+    const queryCharacters = [...normalizedQuery]
+    const minimumCharacters = prefixLengths[0]
+    if (
+      queryCharacters.length < minimumCharacters ||
+      queryCharacters.length > 80
+    ) {
       throw new CatalogValidationError(
-        "Search query must contain between 2 and 80 normalized characters."
+        `Search query must contain between ${minimumCharacters} and 80 normalized characters.`
       )
     }
     if (!Number.isInteger(limit) || limit < 1 || limit > 10) {
       throw new CatalogValidationError("Search limit must be between 1 and 10.")
     }
-    const manifest = await this.manifest()
-    const prefix = [...normalizedQuery.split(" ")[0]]
-      .slice(0, manifest.searchShards.prefixCharacters)
-      .join("")
+    const prefixLength = [...prefixLengths]
+      .reverse()
+      .find(length => queryCharacters.length >= length)
+    const prefix = queryCharacters.slice(0, prefixLength).join("")
     const shard = (await sha256(prefix)).slice(
       0,
       manifest.searchShards.hexLength

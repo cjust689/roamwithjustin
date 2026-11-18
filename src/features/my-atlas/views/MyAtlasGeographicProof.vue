@@ -372,7 +372,7 @@
             </button>
           </div>
           <div
-            v-else-if="query.trim().length >= 2 && !searchResults.length"
+            v-else-if="query.trim().length >= 4 && !searchResults.length"
             class="my-atlas-search-state"
             role="status"
           >
@@ -733,9 +733,7 @@ export default {
       return `${this.pinEditorPlace?.placeId || "none"}:${this.pinEditorPin?.pinId || "new"}`
     },
     searchHelp() {
-      return this.placeSearchEndpoint
-        ? "Enter at least two characters."
-        : "Enter at least two characters."
+      return "Enter at least four characters."
     },
     shareUrl() {
       return this.accountProfile
@@ -868,7 +866,7 @@ export default {
       this.searchResults = []
       this.searchError = ""
       const request = ++this.searchRequest
-      if (value.trim().length < 2) {
+      if (value.trim().length < 4) {
         this.searchPending = false
         return
       }

@@ -394,7 +394,7 @@
           </div>
           <p
             v-else-if="
-              wishQuery.trim().length >= 2 && !wishSearchResults.length
+              wishQuery.trim().length >= 4 && !wishSearchResults.length
             "
             class="planner-search-state"
             role="status"
@@ -1397,7 +1397,7 @@ export default {
       this.wishSearchResults = []
       this.wishSearchError = ""
       const request = ++this.wishSearchRequest
-      if (value.trim().length < 2) {
+      if (value.trim().length < 4) {
         this.wishSearchPending = false
         return
       }

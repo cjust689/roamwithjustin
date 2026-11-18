@@ -54,11 +54,12 @@ function object(bytes) {
   }
 }
 
-async function fixtureEnvironment() {
+async function fixtureEnvironment({ artifactVersion = 2 } = {}) {
   const releasePrefix = `catalog/releases/${REVISION}`
+  const modern = artifactVersion === 2
   const manifest = {
     schemaVersion: 1,
-    artifactVersion: 1,
+    artifactVersion,
     catalogRevision: REVISION,
     sourceSnapshotDate: "2026-11-16",
     attribution: { provider: "GeoNames", license: "CC BY 4.0" },
@@ -70,14 +71,17 @@ async function fixtureEnvironment() {
       keyTemplate: `${releasePrefix}/records/{shard}.json.gz`,
     },
     searchShards: {
-      algorithm: "sha256-normalized-query-prefix",
-      prefixCharacters: 2,
-      hexLength: 2,
+      algorithm: modern
+        ? "sha256-normalized-query-prefix-v2"
+        : "sha256-normalized-query-prefix",
+      prefixCharacters: modern ? [4, 6] : 2,
+      hexLength: modern ? 3 : 2,
       keyTemplate: `${releasePrefix}/search/{shard}.json.gz`,
     },
   }
   const recordShard = (await sha256(PLACE.placeId)).slice(0, 2)
-  const searchShard = (await sha256("uv")).slice(0, 2)
+  const searchPrefix = modern ? "uvita " : "uv"
+  const searchShard = (await sha256(searchPrefix)).slice(0, modern ? 3 : 2)
   const values = new Map([
     [
       "catalog/current.json",
@@ -129,6 +133,16 @@ describe("versioned Worker place catalog", () => {
       results: [{ placeId: PLACE.placeId, name: "Uvita" }],
     })
     expect((await catalog.search("Miami")).results).toEqual([])
+  })
+
+  it("continues to read the previous catalog manifest during activation", async () => {
+    const catalog = new WorkerPlaceCatalog(
+      await fixtureEnvironment({ artifactVersion: 1 })
+    )
+    expect((await catalog.search("Uvita")).results[0]).toMatchObject({
+      placeId: PLACE.placeId,
+      name: "Uvita",
+    })
   })
 
   it("fails closed for missing bindings or mismatched shard revisions", async () => {

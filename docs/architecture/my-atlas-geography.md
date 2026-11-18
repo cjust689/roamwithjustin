@@ -65,6 +65,11 @@ verification:
     - Rclone reported 512 matching geonames-2026-11-17-reviewed-spots release objects with zero differences before catalog/current.json was uploaded last
     - Rclone reported 512 matching geonames-2026-11-18-reviewed-utah release objects with zero differences before catalog/current.json was uploaded last
     - Production-origin staging searches returned Torrey, Hanksville, and Capitol Reef National Park from geonames-2026-11-18-reviewed-utah after manifest activation
+    - Resource-limit reproduction returned platform-generated 503 responses without application CORS headers for Atlanta, Torrey, Capitol Reef, and Hanksville against the two-character search index
+    - Full geonames-2026-11-18-reviewed-utah-search-v2 artifact built 256 resolution shards and 4096 four-or-six-character search shards for 237451 records
+    - Rclone reported 4352 matching geonames-2026-11-18-reviewed-utah-search-v2 release objects with zero differences before catalog/current.json was updated last
+    - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d accepted the previous and optimized manifests during activation
+    - Production-origin staging searches returned HTTP 200 with CORS and request IDs for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose from geonames-2026-11-18-reviewed-utah-search-v2
     - Pull requests 133 and 134 passed validation runs 44316400839 and 44317077225, develop validation run 44316716233 passed, and Pages run 44317427615 deployed main merge d799e961b6aedcfd2e3dfbe4224446350ab482c9
     - Live chunk 894.461d6b6a.js returned 200 and contained geonames-2026-11-18-reviewed-utah-proof, Capitol Reef National Park, Torrey, and Hanksville
     - Production-origin live searches returned Krka National Park and Canyonlands as National park and Mount Rushmore as Monument from geonames-2026-11-17-reviewed-spots; Coolbinia returned no search result while its prior PPLX ID resolved as deprecated
@@ -95,9 +100,10 @@ verification:
 
 # My Atlas geographic catalog, local proof, and Worker index
 
-This document describes the implemented Phase 1 geographic proof and the local
-Phase 2B versioned Worker catalog. It does not claim that the isolated catalog
-bucket, Worker, persistence, sharing, or a public beta is deployed.
+This document describes the implemented geographic proof and the isolated
+staging Worker catalog. The public site uses the staging API for the controlled
+private beta, but this does not establish a production API route or general
+public-beta approval.
 
 ## Runtime boundary
 
@@ -229,12 +235,12 @@ an invitation API, or a persistence service.
 The isolated Worker now implements the same public bounded search route plus
 `GET /v1/places/{placeId}` against immutable versioned artifacts. Search reads
 one manifest and one query-prefix shard. Exact resolution reads one manifest
-and one place-ID hash shard. Search rejects normalized queries outside 2 to 80
-characters and limits results to ten. Resolution preserves deprecated records,
-while normal search omits them. The default local Worker has no catalog R2
-binding. The named staging environment declares an isolated binding, but the
-bucket and objects do not exist until deliberately provisioned and published,
-so cloud routes remain unavailable.
+and one place-ID hash shard. The optimized manifest rejects normalized queries
+outside 4 to 80 characters and limits results to ten. The Worker retains read
+compatibility with the earlier two-character manifest for safe activation and
+reversal. Resolution preserves deprecated records, while normal search omits
+them. The default local Worker has no catalog R2 binding. The named staging
+environment binds the isolated, provisioned catalog bucket.
 
 Catalog search and exact resolution use the staging weighted public limiter
 under a `catalog` key scoped to the connecting IP address. Search costs two
@@ -298,31 +304,37 @@ coverage but performs an in-memory linear search.
 
 The Worker artifact command transforms that catalog into immutable gzip
 objects under `catalog/releases/{revision}` plus a small
-`catalog/current.json` pointer. Place IDs use 256 SHA-256 prefix shards. Search
-uses 256 SHA-256 shards keyed by the first two normalized characters of the
-query or indexed name token. Search objects contain compact result records and
-only the normalized names relevant to their shard. Identical inputs produce
-byte-identical files; attempting to change an existing revision fails instead
-of overwriting it.
+`catalog/current.json` pointer. Place IDs use 256 SHA-256 prefix shards. The
+optimized search format indexes four-character and six-character normalized
+query or name-token prefixes across 4,096 hash shards. Longer queries select
+the six-character index, reducing unrelated candidates before decoding and
+ranking. Search objects contain compact result records and only the normalized
+names relevant to their shard. Identical inputs produce byte-identical files;
+attempting to change an existing revision fails instead of overwriting it.
 
-The full `geonames-2026-11-18-reviewed-utah` local build contains 256
-resolution shards and 256 search shards for 237,451 records. Resolution shards
-total 28,811,032 compressed bytes, and search shards total 89,022,573 compressed
-bytes. The largest resolution shard is 123,678 bytes compressed. The largest
-search shard is 2,159,484 bytes compressed. The Worker enforces 16 MiB
-compressed and 64 MiB decoded object limits.
+The active `geonames-2026-11-18-reviewed-utah-search-v2` local build contains
+256 resolution shards and 4,096 search shards for 237,451 records. Resolution
+shards total 28,847,551 compressed bytes, and search shards total 176,024,123
+compressed bytes. The largest resolution shard is 123,829 bytes compressed.
+The largest search shard is 1,178,992 bytes compressed. Measured query shards
+for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose decoded to
+approximately 0.23 to 0.66 MiB rather than the prior multi-megabyte request
+objects. The Worker still enforces 16 MiB compressed and 64 MiB decoded object
+limits.
 
 Cold local directory-backed checks returned Uvita, Salt Lake City, Miami,
 Paris, and Paris, Texas from the full artifact in approximately 39 to 242
 milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
-The reviewed artifact remains ignored under
-`.state/my-atlas/worker-catalog-reviewed-utah`. All 512 immutable release shards
-were uploaded to the isolated staging bucket and rclone reported 512 matching
-files with zero differences before `catalog/current.json` was uploaded last.
-The staging Worker now resolves `geonames-2026-11-18-reviewed-utah`. The earlier
-`geonames-2026-11-16`, `geonames-2026-11-17-spots`, and
+The optimized artifact remains ignored under
+`.state/my-atlas/worker-catalog-reviewed-utah-search-v2`. All 4,352 immutable
+release shards were uploaded to the isolated staging bucket and rclone reported
+4,352 matching files with zero differences before `catalog/current.json` was
+updated last. The staging Worker now resolves
+`geonames-2026-11-18-reviewed-utah-search-v2`. The earlier
+`geonames-2026-11-18-reviewed-utah`, `geonames-2026-11-16`,
+`geonames-2026-11-17-spots`, and
 `geonames-2026-11-17-reviewed-spots` releases remain intact for reversal. The
 editorial media bucket and uploader remain outside this boundary.
 

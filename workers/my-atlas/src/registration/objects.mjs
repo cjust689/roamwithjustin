@@ -1488,11 +1488,17 @@ export class UserProfileDurableObject extends DurableObject {
       if (!owner.ok) return owner
       const existing = existingMutation(this.ctx.storage, command)
       if (existing) return existing
+      const wish = this.ctx.storage.kv.get(wishKey(command.wishId))
+      if (!wish) {
+        return Object.freeze({
+          ok: true,
+          idempotent: true,
+          profile: owner.profile,
+        })
+      }
       if (owner.profile.revision !== command.expectedRevision) {
         return failure("revision_conflict")
       }
-      const wish = this.ctx.storage.kv.get(wishKey(command.wishId))
-      if (!wish) return failure("wish_not_found")
       const profile = {
         ...owner.profile,
         wishCount: Math.max(0, (owner.profile.wishCount || 0) - 1),
