@@ -58,27 +58,21 @@ export const puertoRico2024Journey = Object.freeze({
   gearHighlights: [
     {
       name: "Sony FX30",
-      link: "https://amzn.to/sony-fx30-affiliate",
     },
     {
       name: "Sony A6700",
-      link: "https://amzn.to/sony-fx30-affiliate",
     },
     {
       name: "DJI Air 3",
-      link: "https://amzn.to/dji-air-3-affiliate",
     },
     {
       name: "Sirui Sniper 75mm f/1.2",
-      link: "https://amzn.to/tamron-17-70-affiliate",
     },
     {
       name: "Tamron 17-70mm",
-      link: "https://amzn.to/tamron-17-70-affiliate",
     },
     {
       name: "PGYTECH OneMo 2 Backpack",
-      link: "https://amzn.to/grayl-geopress-affiliate",
     },
   ],
   travelNotes: [
@@ -95,6 +89,7 @@ export const puertoRico2024Journey = Object.freeze({
   ],
   lodging: [
     {
+      partnerId: "don-rafa-boutique-hotel",
       name: "Don Rafa Boutique Hotel",
       location: "San Juan",
       nights: 2,
@@ -104,9 +99,9 @@ export const puertoRico2024Journey = Object.freeze({
         assetId: "image-puerto-rico-pxl-20240804-023431011",
         role: "lodging",
       },
-      link: "https://donrafaboutiquehotel.com/",
     },
     {
+      partnerId: "hacienda-florecer-moca",
       name: "Hacienda Florecer",
       location: "Moca",
       nights: 3,
@@ -116,7 +111,6 @@ export const puertoRico2024Journey = Object.freeze({
         assetId: "image-puerto-rico-puerto-rico-hacienda",
         role: "lodging",
       },
-      link: "https://www.google.com/maps?q=18.3882008,-67.0752792",
     },
   ],
   // Visit descriptions hold the lived scene; summaries keep each card and Atlas stop concise.

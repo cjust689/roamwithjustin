@@ -33,6 +33,38 @@ function collectRawLocalPaths(value, found = new Set()) {
   return found
 }
 
+function validatePublicCommercePlaceholders() {
+  const sourceRoots = [
+    "components",
+    "content",
+    "data",
+    "features",
+    "views",
+  ].map(directory => path.join(projectRoot, "src", directory))
+  const placeholderPattern =
+    /aid=yourid|https:\/\/amzn\.to\/[^\s"']*-affiliate|(?:href|link)\s*(?:=|:)\s*["']#["']/i
+  const pending = [...sourceRoots]
+  while (pending.length) {
+    const current = pending.pop()
+    fs.readdirSync(current, { withFileTypes: true }).forEach(entry => {
+      const absolutePath = path.join(current, entry.name)
+      if (entry.isDirectory()) {
+        pending.push(absolutePath)
+        return
+      }
+      if (!/\.(?:js|mjs|vue)$/.test(entry.name)) return
+      const source = fs.readFileSync(absolutePath, "utf8")
+      if (placeholderPattern.test(source)) {
+        report(
+          'Public commerce source "' +
+            path.relative(projectRoot, absolutePath) +
+            '" contains a placeholder action'
+        )
+      }
+    })
+  }
+}
+
 const editorialWorkflowLanguage =
   /\b(?:coming soon|confirmed|unconfirmed|verified|unverified|placeholder|in progress|pending|not confirmed|needs verification|date to be confirmed)\b|\bstill being\b|\bremain(?:s|ing)? (?:unverified|open)\b|\b(?:the creator|editorial order|media review)\b/i
 
@@ -59,15 +91,12 @@ function validateTripPublicCopy(trip) {
     "costLevel",
     "bestTimeToGo",
   ].forEach(field => validatePublicCopy(trip[field], owner + " " + field))
-  ;[...(trip.travelNotes || []), ...(trip.tips || [])].forEach(
-    (value, index) => validatePublicCopy(value, owner + " note " + index)
+  ;[...(trip.travelNotes || []), ...(trip.tips || [])].forEach((value, index) =>
+    validatePublicCopy(value, owner + " note " + index)
   )
   ;(trip.lodging || []).forEach((stay, index) => {
     ;["name", "location", "blurb"].forEach(field =>
-      validatePublicCopy(
-        stay[field],
-        owner + " lodging " + index + " " + field
-      )
+      validatePublicCopy(stay[field], owner + " lodging " + index + " " + field)
     )
   })
   ;(trip.locations || []).forEach((location, index) => {
@@ -161,8 +190,8 @@ function validateTripPublicCopy(trip) {
 
 function validateAtlasPublicCopy(node) {
   const owner = 'Atlas node "' + node.id + '"'
-  ;["title", "eyebrow", "category", "summary", "personalNote"].forEach(
-    field => validatePublicCopy(node[field], owner + " " + field)
+  ;["title", "eyebrow", "category", "summary", "personalNote"].forEach(field =>
+    validatePublicCopy(node[field], owner + " " + field)
   )
 }
 
@@ -248,6 +277,7 @@ function validateAtlasView(node, contracts) {
 }
 
 async function main() {
+  validatePublicCommercePlaceholders()
   const [
     contracts,
     mediaModule,
@@ -413,7 +443,9 @@ async function main() {
   experienceModule.experienceRecords.forEach(experience => {
     const owner = 'Experience "' + experience.id + '"'
     if (!journeyModule.getJourney(experience.journeyId)) {
-      report(owner + ' references unknown Journey "' + experience.journeyId + '"')
+      report(
+        owner + ' references unknown Journey "' + experience.journeyId + '"'
+      )
     }
     if (experience.visitId) {
       const visit = journeyModule.getJourneyVisitById(
@@ -428,7 +460,9 @@ async function main() {
   experienceModule.momentRecords.forEach(moment => {
     const owner = 'Moment "' + moment.id + '"'
     if (!experienceModule.getExperience(moment.experienceId)) {
-      report(owner + ' references unknown Experience "' + moment.experienceId + '"')
+      report(
+        owner + ' references unknown Experience "' + moment.experienceId + '"'
+      )
     }
     ;(moment.mediaAssetIds || []).forEach(assetId => {
       if (!mediaModule.getMediaAsset(assetId)) {
@@ -526,6 +560,50 @@ async function main() {
     }
   })
 
+  const commercialPublisherReferences = new Set()
+  partnerModule.commercialOfferRecords.forEach(offer => {
+    const owner = 'Commercial offer "' + offer.id + '"'
+    const partner = partnerModule.getPartner(offer.partnerId)
+    if (!partner) {
+      report(owner + ' references unknown partner "' + offer.partnerId + '"')
+    }
+    if (!journeyModule.getJourney(offer.journeyId)) {
+      report(owner + ' references unknown Journey "' + offer.journeyId + '"')
+    }
+    if (offer.kind !== "affiliate-banner" || offer.linkType !== "affiliate") {
+      report(owner + " has unsupported commercial behavior")
+    }
+    if (offer.allowedSurface !== "public-journey") {
+      report(owner + " is not restricted to a public Journey")
+    }
+    if (offer.isEnabled !== true) {
+      report(owner + " is present but not explicitly enabled")
+    }
+
+    const banner = offer.banner || {}
+    if (
+      banner.program !== "us-expedia" ||
+      banner.network !== "pz" ||
+      banner.layout !== "leaderboard" ||
+      !["stays", "flights"].includes(banner.product)
+    ) {
+      report(owner + " has an unsupported Expedia banner configuration")
+    }
+    if (!/^[a-zA-Z0-9]{6,40}$/.test(banner.campaignReference || "")) {
+      report(owner + " has an invalid campaign reference")
+    }
+    if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(banner.publisherReference || "")) {
+      report(owner + " has an invalid publisher reference")
+    } else if (commercialPublisherReferences.has(banner.publisherReference)) {
+      report(
+        owner +
+          ' duplicates publisher reference "' +
+          banner.publisherReference +
+          '"'
+      )
+    } else commercialPublisherReferences.add(banner.publisherReference)
+  })
+
   const journeySlugs = new Set()
   let visitCount = 0
   journeyModule.journeyRecords.forEach(journey => {
@@ -588,13 +666,32 @@ async function main() {
       usage => validateMediaUsage(usage, owner, mediaModule)
     )
     ;(journey.lodging || []).forEach(stay => {
-      if (!/^https:\/\//i.test(stay.link || "")) {
-        report(owner + ' lodging "' + stay.name + '" is missing a valid link')
+      const lodgingOwner = owner + ' lodging "' + stay.name + '"'
+      const partner = partnerModule.getPartner(stay.partnerId)
+      if (!partner) {
+        report(lodgingOwner + ' references unknown Partner "' + stay.partnerId + '"')
+      } else {
+        if (partner.kind !== "lodging") {
+          report(lodgingOwner + " must reference a lodging Partner")
+        }
+        if (partner.name !== stay.name) {
+          report(lodgingOwner + " does not match its canonical Partner name")
+        }
+        const website =
+          partner.externalLinks?.official ||
+          partner.externalLinks?.directory ||
+          partner.externalLinks?.platform
+        if (!/^https:\/\//i.test(website || "")) {
+          report(lodgingOwner + " is missing a property website or directory URL")
+        }
+      }
+      if (Object.prototype.hasOwnProperty.call(stay, "link")) {
+        report(lodgingOwner + " duplicates its canonical Partner URL")
       }
       if (stay.image?.assetId) {
         validateMediaUsage(
           stay.image,
-          owner + ' lodging "' + stay.name + '"',
+          lodgingOwner,
           mediaModule
         )
       } else if (stay.image && !/^https:\/\//i.test(stay.image.url || "")) {
@@ -834,13 +931,13 @@ async function main() {
     const journey = journeyModule.getJourney(rootNode.journeyId)
     if (journey && rootNode.title !== journey.title) {
       report(
-        'Atlas root "' + rootId + '" does not use its year-specific Journey title'
+        'Atlas root "' +
+          rootId +
+          '" does not use its year-specific Journey title'
       )
     }
     if (journey && rootNode.eyebrow !== journey.dateRange?.label) {
-      report(
-        'Atlas root "' + rootId + '" does not use its Journey date label'
-      )
+      report('Atlas root "' + rootId + '" does not use its Journey date label')
     }
   })
 
@@ -986,10 +1083,7 @@ async function main() {
     "san-jose-costa-rica",
   ]
 
-  const expectedUtah2026GuidedOrder = [
-    "utah-2026-zion",
-    "utah-2026-park-city",
-  ]
+  const expectedUtah2026GuidedOrder = ["utah-2026-zion", "utah-2026-park-city"]
 
   const puertoRico = completeAtlasViews.find(node => node.id === "puerto-rico")
   const orderedPuertoRico = projections
