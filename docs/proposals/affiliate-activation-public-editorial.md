@@ -36,14 +36,17 @@ verification:
 # Roam With Justin: Affiliate Activation and First Measurable Booking Referrals
 
 > **Implementation status, November 17, 2026:** The bounded source slice is
-> implemented locally from the owner's supplied Expedia banner code. Utah 2025
-> has one disclosed, visitor-activated block with stays and flights banners,
-> unique Pubrefs, canonical Partner data, lodging URL auditing, and existing
-> GA4 `partner_click` semantics. No deployment or dashboard verification has
-> occurred. Expedia program eligibility, rendered production destinations,
-> attribution, privacy copy, and responsive accessibility remain owner or
-> external acceptance work. This proposal stays active until those checks are
-> complete.
+> deployed from the owner's supplied Expedia banner code. Utah 2025 has one
+> disclosed, visitor-activated block with stays and flights banners, unique
+> Pubrefs, canonical Partner data, lodging URL auditing, and existing direct
+> Partner `partner_click` semantics. Protected pull requests 123 and 124,
+> production merge `898d801`, Pages run `44210436840`, and a live browser check
+> verify the visitor gate plus both provider iframes. Expedia program status,
+> final destinations, provider-side attribution, privacy copy, and responsive
+> accessibility remain owner or external acceptance work. Banner interactions
+> occur inside cross-origin Expedia iframes and therefore rely on Pubrefs, not
+> fabricated first-party GA4 clicks. This proposal stays active until the
+> remaining checks are complete.
 
 > The audit also identifies the published `La Fortuna Airbnb` Experience as an
 > owner URL candidate. It is not linked or represented as a bookable property

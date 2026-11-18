@@ -89,7 +89,10 @@ The Expedia Utah banners use the owner-supplied campaign reference. Each has a
 unique `publisherReference` such as `rwj-utah-winter-2025-stays`. Expedia calls
 this a Pubref and uses it for publisher reporting from click through booking.
 The public component does not load Expedia's script until a visitor explicitly
-chooses to see the options.
+chooses to see the options. Expedia renders the resulting offers in
+cross-origin iframes, so their clicks cannot be observed as truthful local
+`partner_click` events. Use Pubref reporting for those banners. Direct Partner
+and lodging anchors remain eligible for the first-party event.
 
 When adding a new Expedia placement:
 
@@ -100,6 +103,6 @@ When adding a new Expedia placement:
    plan data.
 4. Restrict the offer to a substantive public editorial Journey. Do not place
    it in My Atlas, the immersive map, a gallery, or a lightbox.
-5. Confirm the rendered destination and click attribution in the Expedia and
-   GA4 dashboards after deployment. Repository tests cannot verify either
-   external system.
+5. Confirm the rendered destination and Pubref attribution in Expedia after
+   deployment. Verify GA4 separately for direct Partner links. Repository tests
+   cannot verify either external system.
