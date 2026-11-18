@@ -63,6 +63,8 @@ verification:
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
     - Thirty-four Workers-runtime tests passed after absent-Wish deletion became an idempotent no-op that preserves revision and count
     - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d deployed the absent-Wish reconciliation and backward-compatible optimized catalog reader
+    - Pull requests 145 and 146 promoted the absent-Wish and bounded-search release through protected develop and main; history-only pull request 147 restored current main ancestry before production promotion
+    - Pages run 44369566126 succeeded for main merge 1758fea1681ff72ec0e9423f2a06f4fb07d5e13b, and live chunk 885.9c3d6805.js returned 200 with the four-character search boundary
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
     - npm run build
@@ -130,6 +132,15 @@ production merge `01c8a83e54b14f4cec3a47ac26b82b9804dad62f`.
 Content-addressed chunks 944.dfa848dd.js and 327.9488c543.js contain the exact
 release markers. Authenticated owner interaction and visual acceptance remain
 external work.
+
+Pull requests 145 and 146 promoted the bounded catalog search index, the
+four-character browser search boundary, and idempotent already-absent Wish
+deletion through protected `develop` and `main`. History-only pull request 147
+restored the current `main` ancestry before production promotion. Pages run
+44369566126 deployed production merge
+`1758fea1681ff72ec0e9423f2a06f4fb07d5e13b`, and live chunk
+885.9c3d6805.js contains the browser boundary. Authenticated owner verification
+of the private wishlist read and stale-delete path remains external.
 
 ## Implemented and test verified
 
