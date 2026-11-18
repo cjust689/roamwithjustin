@@ -1,7 +1,19 @@
 const GOOGLE_MAPS_DIRECTIONS_URL = "https://www.google.com/maps/dir/"
+const GOOGLE_MAPS_SEARCH_URL = "https://www.google.com/maps/search/"
 const MAX_MAPS_URL_LENGTH = 2048
 const MAX_MAPS_WAYPOINTS_PER_LEG = 3
 export const MAX_PLAN_DESTINATIONS = 50
+export const GOOGLE_MAPS_TRAVEL_MODES = Object.freeze([
+  "driving",
+  "walking",
+  "bicycling",
+  "transit",
+])
+export const ROUTE_HANDOFF_MODES = Object.freeze([
+  ...GOOGLE_MAPS_TRAVEL_MODES,
+  "fly",
+  "ferry",
+])
 
 export class MyAtlasHandoffError extends Error {
   constructor(message, code) {
@@ -53,10 +65,7 @@ function assertRouteReady(location, confirmedCoordinatePlaceIds) {
   )
 }
 
-function validatedPlan(
-  plan,
-  { confirmedCoordinatePlaceIds = [] } = {}
-) {
+function validatedPlanShape(plan) {
   if (
     !plan ||
     !Array.isArray(plan.stops) ||
@@ -67,17 +76,33 @@ function validatedPlan(
   ) {
     throw new MyAtlasHandoffError("The saved plan is invalid.", "invalid_plan")
   }
-  const confirmed = new Set(confirmedCoordinatePlaceIds)
   const start = validatedLocation(plan.start)
   const stops = plan.stops.map(validatedLocation)
-  const end = plan.endMode === "selected-end" ? validatedLocation(plan.end) : null
+  const end =
+    plan.endMode === "selected-end" ? validatedLocation(plan.end) : null
+  return Object.freeze({ start, stops, ...(end ? { end } : {}) })
+}
+
+function validatedPlan(plan, { confirmedCoordinatePlaceIds = [] } = {}) {
+  const { start, stops, end } = validatedPlanShape(plan)
+  const confirmed = new Set(confirmedCoordinatePlaceIds)
   for (const location of [start, ...stops, ...(end ? [end] : [])]) {
     assertRouteReady(location, confirmed)
   }
   return Object.freeze({ start, stops, ...(end ? { end } : {}) })
 }
 
-function mapsUrlForNodes(nodes) {
+function validatedMapsMode(mode) {
+  if (!GOOGLE_MAPS_TRAVEL_MODES.includes(mode)) {
+    throw new MyAtlasHandoffError(
+      "The selected Google Maps travel mode is invalid.",
+      "invalid_travel_mode"
+    )
+  }
+  return mode
+}
+
+function mapsUrlForNodes(nodes, mode = "driving") {
   const origin = nodes[0]
   const destination = nodes[nodes.length - 1]
   const waypoints = nodes.slice(1, -1)
@@ -85,7 +110,7 @@ function mapsUrlForNodes(nodes) {
   url.searchParams.set("api", "1")
   url.searchParams.set("origin", coordinateText(origin))
   url.searchParams.set("destination", coordinateText(destination))
-  url.searchParams.set("travelmode", "driving")
+  url.searchParams.set("travelmode", validatedMapsMode(mode))
   if (waypoints.length) {
     url.searchParams.set("waypoints", waypoints.map(coordinateText).join("|"))
   }
@@ -133,10 +158,7 @@ export function buildGoogleMapsDirectionsUrls(
   return Object.freeze(legs)
 }
 
-export function buildGoogleMapsDirectionsUrl(
-  plan,
-  options = {}
-) {
+export function buildGoogleMapsDirectionsUrl(plan, options = {}) {
   const legs = buildGoogleMapsDirectionsUrls(plan, options)
   if (legs.length !== 1) {
     throw new MyAtlasHandoffError(
@@ -145,6 +167,252 @@ export function buildGoogleMapsDirectionsUrl(
     )
   }
   return legs[0].url
+}
+
+function samePhysicalLocation(first, second) {
+  return (
+    first.location.placeId === second.location.placeId ||
+    (first.location.coordinates[0] === second.location.coordinates[0] &&
+      first.location.coordinates[1] === second.location.coordinates[1])
+  )
+}
+
+function stopPointKey(stop, index) {
+  return `stop:${stop.sourceWishId || stop.placeId || index}`
+}
+
+export function buildPlanRoutePoints(plan) {
+  const { start, stops, end } = validatedPlanShape(plan)
+  const stopPoints = stops.map((location, index) =>
+    Object.freeze({
+      pointKey: stopPointKey(location, index),
+      kind: "stop",
+      position: index + 1,
+      isFinish: plan.endMode === "last-stop" && index === stops.length - 1,
+      location,
+    })
+  )
+  return Object.freeze([
+    Object.freeze({
+      pointKey: "start",
+      kind: "start",
+      position: 0,
+      isFinish: false,
+      location: start,
+    }),
+    ...stopPoints,
+    ...(plan.endMode === "return-to-start"
+      ? [
+          Object.freeze({
+            pointKey: "finish",
+            kind: "finish",
+            position: stops.length + 1,
+            isFinish: true,
+            location: start,
+          }),
+        ]
+      : []),
+    ...(plan.endMode === "selected-end"
+      ? [
+          Object.freeze({
+            pointKey: "finish",
+            kind: "finish",
+            position: stops.length + 1,
+            isFinish: true,
+            location: end,
+          }),
+        ]
+      : []),
+  ])
+}
+
+export function routePairKey(firstPoint, secondPoint) {
+  if (!firstPoint?.pointKey || !secondPoint?.pointKey) {
+    throw new MyAtlasHandoffError(
+      "A route pair is not valid.",
+      "invalid_route_pair"
+    )
+  }
+  return `${firstPoint.pointKey}>${secondPoint.pointKey}`
+}
+
+function collapsedRoutePoints(points) {
+  const collapsed = []
+  for (const point of points) {
+    const prior = collapsed[collapsed.length - 1]
+    if (!prior || !samePhysicalLocation(prior, point)) collapsed.push(point)
+  }
+  return collapsed
+}
+
+export function buildPlanRoutePairs(
+  points,
+  { defaultMode = "driving", pairModes = {} } = {}
+) {
+  validatedMapsMode(defaultMode)
+  if (!Array.isArray(points)) {
+    throw new MyAtlasHandoffError(
+      "Route points are invalid.",
+      "invalid_route_points"
+    )
+  }
+  const routePoints = collapsedRoutePoints(points)
+  const pairs = []
+  for (let index = 0; index < routePoints.length - 1; index += 1) {
+    const from = routePoints[index]
+    const to = routePoints[index + 1]
+    const pairKey = routePairKey(from, to)
+    const explicit = Object.prototype.hasOwnProperty.call(pairModes, pairKey)
+    const mode = explicit ? pairModes[pairKey] : defaultMode
+    if (!ROUTE_HANDOFF_MODES.includes(mode)) {
+      throw new MyAtlasHandoffError(
+        "A route leg travel mode is invalid.",
+        "invalid_travel_mode"
+      )
+    }
+    pairs.push(
+      Object.freeze({
+        pairKey,
+        from,
+        to,
+        mode,
+        explicit,
+      })
+    )
+  }
+  return Object.freeze({
+    routePoints: Object.freeze(routePoints),
+    pairs: Object.freeze(pairs),
+  })
+}
+
+function mapsSearchUrl(point, confirmedCoordinatePlaceIds) {
+  const location = validatedLocation(point.location)
+  const customCoordinates = location.routeReadiness === "user-coordinate-review"
+  if (customCoordinates) {
+    assertRouteReady(location, confirmedCoordinatePlaceIds)
+  }
+  const query = customCoordinates
+    ? coordinateText(location)
+    : readableLocation(location, false)
+  const url = new URL(GOOGLE_MAPS_SEARCH_URL)
+  url.searchParams.set("api", "1")
+  url.searchParams.set("query", query)
+  const result = url.toString()
+  if (result.length > MAX_MAPS_URL_LENGTH) {
+    throw new MyAtlasHandoffError(
+      "This Google Maps search link is too long.",
+      "url_too_long"
+    )
+  }
+  return result
+}
+
+function directionsActions(nodes, mode, confirmedCoordinatePlaceIds) {
+  nodes.forEach(node =>
+    assertRouteReady(node.location, confirmedCoordinatePlaceIds)
+  )
+  const maximumNodesPerLeg = MAX_MAPS_WAYPOINTS_PER_LEG + 2
+  const actions = []
+  for (let startIndex = 0; startIndex < nodes.length - 1; ) {
+    const endIndex = Math.min(
+      startIndex + maximumNodesPerLeg - 1,
+      nodes.length - 1
+    )
+    const actionNodes = nodes.slice(startIndex, endIndex + 1)
+    actions.push(
+      Object.freeze({
+        kind: "directions",
+        mode,
+        url: mapsUrlForNodes(
+          actionNodes.map(node => node.location),
+          mode
+        ),
+        origin: actionNodes[0].location.name,
+        destination: actionNodes[actionNodes.length - 1].location.name,
+        stopCount: actionNodes.length - 1,
+        pointKeys: Object.freeze(actionNodes.map(node => node.pointKey)),
+      })
+    )
+    startIndex = endIndex
+  }
+  return actions
+}
+
+export function buildGoogleMapsRouteHandoffs(
+  plan,
+  {
+    includedPointKeys,
+    defaultMode = "driving",
+    pairModes = {},
+    confirmedCoordinatePlaceIds = [],
+  } = {}
+) {
+  const points = buildPlanRoutePoints(plan)
+  const included =
+    includedPointKeys === undefined ? null : new Set(includedPointKeys)
+  const selectedPoints = points.filter(
+    point => included === null || included.has(point.pointKey)
+  )
+  const { routePoints, pairs } = buildPlanRoutePairs(selectedPoints, {
+    defaultMode,
+    pairModes,
+  })
+  const confirmed = new Set(confirmedCoordinatePlaceIds)
+  const actions = []
+
+  if (routePoints.length === 1) {
+    const point = routePoints[0]
+    actions.push(
+      Object.freeze({
+        kind: "search",
+        url: mapsSearchUrl(point, confirmed),
+        location: point.location.name,
+        pointKey: point.pointKey,
+      })
+    )
+  }
+
+  let currentMode = ""
+  let currentNodes = []
+  const flushDirections = () => {
+    if (currentNodes.length > 1) {
+      actions.push(...directionsActions(currentNodes, currentMode, confirmed))
+    }
+    currentMode = ""
+    currentNodes = []
+  }
+
+  for (const pair of pairs) {
+    if (pair.mode === "fly" || pair.mode === "ferry") {
+      flushDirections()
+      actions.push(
+        Object.freeze({
+          kind: "boundary",
+          mode: pair.mode,
+          origin: pair.from.location.name,
+          destination: pair.to.location.name,
+          pairKey: pair.pairKey,
+        })
+      )
+      continue
+    }
+    if (currentMode && currentMode !== pair.mode) flushDirections()
+    if (!currentMode) {
+      currentMode = pair.mode
+      currentNodes = [pair.from, pair.to]
+    } else {
+      currentNodes.push(pair.to)
+    }
+  }
+  flushDirections()
+
+  return Object.freeze({
+    points: Object.freeze(selectedPoints),
+    routePoints,
+    pairs,
+    actions: Object.freeze(actions),
+  })
 }
 
 function readableLocation(location, includeCoordinates) {
@@ -156,7 +424,10 @@ function readableLocation(location, includeCoordinates) {
   return includeCoordinates ? `${label} (${coordinateText(location)})` : label
 }
 
-export function buildAiPlanningPrompt(plan, { includeCoordinates = false } = {}) {
+export function buildAiPlanningPrompt(
+  plan,
+  { includeCoordinates = false } = {}
+) {
   if (
     !plan ||
     !Array.isArray(plan.stops) ||
