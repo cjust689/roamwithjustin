@@ -19,6 +19,7 @@ import {
 } from "./lib/editorial-google-drive.mjs"
 import {
   normalizeSheetValues,
+  readNamedSheet,
   readPostsSheet,
   resolveSheetTitle,
 } from "./lib/editorial-google-sheets.mjs"
@@ -231,6 +232,36 @@ assert.equal(sheet.rows[0].Location, "Split")
 assert.throws(
   () => normalizeSheetValues([["Location", "Location"]]),
   /duplicate header/
+)
+
+const gearSheet = await readNamedSheet({
+  auth: null,
+  spreadsheetId: "sheet-id",
+  range: "Gear",
+  sheetLabel: "Gear",
+  sheetsApi: {
+    spreadsheets: {
+      values: {
+        batchGet: async () => ({
+          data: {
+            valueRanges: [
+              {
+                values: [
+                  ["Workflow", "Gear ID"],
+                  ["Preview", "test-camera"],
+                ],
+              },
+            ],
+          },
+        }),
+      },
+    },
+  },
+})
+assert.equal(gearSheet.rows[0]["Gear ID"], "test-camera")
+assert.throws(
+  () => normalizeSheetValues([["Gear ID", "Gear ID"]], "Gear"),
+  /Gear sheet contains duplicate header/
 )
 
 const sheetRestCalls = []

@@ -369,6 +369,7 @@
               target="_blank"
               :rel="item.rel || 'noopener noreferrer'"
               :title="item.disclosure || null"
+              @click="trackGearClick(item)"
             >
               {{ item.name }} <span>&nearr;</span>
             </a>
@@ -376,9 +377,12 @@
               {{ item.name }}
             </span>
           </div>
-          <p v-if="hasAffiliateGear" class="gear-disclosure">
-            Some gear links are affiliate links. They may support Roam With
-            Justin at no additional cost to you.
+          <p
+            v-for="disclosure in gearAffiliateDisclosures"
+            :key="disclosure"
+            class="gear-disclosure"
+          >
+            {{ disclosure }}
           </p>
         </article>
 
@@ -452,6 +456,7 @@ import AdSlot from "@/components/AdSlot.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
 import LocationModal from "@/components/LocationModal.vue"
 import TravelPlanningOffers from "@/components/TravelPlanningOffers.vue"
+import commercialLinks from "@/content/commercial-links.js"
 import { trackAnalyticsEvent, trackAtlasOpen } from "@/utils/analytics.mjs"
 
 export default {
@@ -487,6 +492,19 @@ export default {
     },
     hasAffiliateGear() {
       return this.trip?.gearHighlights.some(item => item.affiliate) || false
+    },
+    gearAffiliateDisclosures() {
+      const disclosures = [
+        ...new Set(
+          (this.trip?.gearHighlights || [])
+            .filter(item => item.affiliate && item.disclosure)
+            .map(item => item.disclosure)
+        ),
+      ]
+      if (disclosures.length || !this.hasAffiliateGear) return disclosures
+      return [
+        "Some gear links are affiliate links. They may support Roam With Justin at no additional cost to you.",
+      ]
     },
     storyAdEligible() {
       return Boolean(
@@ -530,20 +548,32 @@ export default {
       })
     },
     trackPartnerClick(partner) {
-      trackAnalyticsEvent("partner_click", {
-        link_type: partner.linkType,
-        partner_id: partner.id,
+      const parameters = commercialLinks.buildPartnerClickParameters({
+        linkType: partner.linkType,
+        partnerId: partner.id,
         placement: "trip_itinerary_partner",
-        public_journey_id: this.trip.journeyId,
+        publicJourneyId: this.trip.journeyId,
       })
+      if (parameters) trackAnalyticsEvent("partner_click", parameters)
     },
     trackLodgingClick(stay) {
-      trackAnalyticsEvent("partner_click", {
-        link_type: stay.linkType,
-        partner_id: stay.id,
+      const parameters = commercialLinks.buildPartnerClickParameters({
+        linkType: stay.linkType,
+        partnerId: stay.id,
         placement: "trip_lodging",
-        public_journey_id: this.trip.journeyId,
+        publicJourneyId: this.trip.journeyId,
       })
+      if (parameters) trackAnalyticsEvent("partner_click", parameters)
+    },
+    trackGearClick(item) {
+      const parameters = commercialLinks.buildPartnerClickParameters({
+        linkType: item.linkType,
+        partnerId: item.partnerId,
+        placement: "trip_gear",
+        gearId: item.gearId,
+        publicJourneyId: this.trip.journeyId,
+      })
+      if (parameters) trackAnalyticsEvent("partner_click", parameters)
     },
     updateDocumentTitle() {
       if (this.trip?.name) {

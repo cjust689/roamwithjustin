@@ -22,6 +22,14 @@ const context = {
     },
   ],
   media: [{ id: "image-usvi-usvi", kind: "image" }],
+  partners: [
+    {
+      id: "test-affiliate",
+      relationship: "affiliate-program",
+      commercialHosts: ["example.com"],
+    },
+  ],
+  approvedGearTrackingRulePartnerIds: [],
 }
 
 const emptyRecords = {
@@ -67,6 +75,11 @@ assert.strictEqual(firstPlan.changed, true)
 assert.deepStrictEqual(firstPlan.summary.created, ["confirmed-test-mask"])
 assert.strictEqual(firstPlan.summary.linked.length, 1)
 assert.strictEqual(firstPlan.records.items[0].links[0].verified, true)
+assert.strictEqual(firstPlan.records.items[0].links[0].trackingMode, "none")
+assert.deepStrictEqual(firstPlan.records.items[0].links[0].allowedSurfaces, [
+  "public-gear",
+  "public-journey",
+])
 
 const repeatPlan = planGearIngestion({
   document,
@@ -262,6 +275,196 @@ const unknownCaptureGear = validateGearRecords(emptyRecords, {
 assert(
   unknownCaptureGear.errors.some(error =>
     error.includes('unknown capture gear "not-in-catalog"')
+  )
+)
+
+const exactCustomUrl =
+  "https://shop.example.com/product/test?campaign=owner-supplied&token=abc123"
+const affiliateDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "usvi-st-john-2025",
+    items: [
+      {
+        gearId: "affiliate-test-item",
+        name: "Affiliate test item",
+        category: "other",
+        usageType: "used",
+        links: [
+          {
+            kind: "retailer",
+            label: "Shop test merchant",
+            url: exactCustomUrl,
+            affiliate: true,
+            verified: true,
+            partnerId: "test-affiliate",
+            linkType: "affiliate",
+            isCustomTracked: true,
+            allowedSurfaces: ["public-gear", "public-journey"],
+          },
+        ],
+      },
+    ],
+  }),
+  "affiliate-fixture.json"
+)
+const affiliatePlan = planGearIngestion({
+  document: affiliateDocument,
+  journeyId: "usvi-st-john-2025",
+  records: emptyRecords,
+  context,
+})
+assert.deepStrictEqual(affiliatePlan.errors, [])
+assert.equal(affiliatePlan.records.items[0].links[0].url, exactCustomUrl)
+assert.equal(affiliatePlan.records.items[0].links[0].trackingMode, "custom")
+assert.equal(
+  affiliatePlan.records.items[0].links[0].partnerId,
+  "test-affiliate"
+)
+
+const automaticRuleDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "usvi-st-john-2025",
+    items: [
+      {
+        gearId: "automatic-rule-test-item",
+        name: "Automatic rule test item",
+        category: "other",
+        usageType: "used",
+        links: [
+          {
+            url: "https://example.com/product/test",
+            affiliate: true,
+            verified: true,
+            partnerId: "test-affiliate",
+            isCustomTracked: false,
+          },
+        ],
+      },
+    ],
+  }),
+  "automatic-rule-fixture.json"
+)
+const automaticRulePlan = planGearIngestion({
+  document: automaticRuleDocument,
+  journeyId: "usvi-st-john-2025",
+  records: emptyRecords,
+  context,
+})
+assert(
+  automaticRulePlan.errors.some(error =>
+    error.includes("no configured approved tracking rule")
+  )
+)
+
+const missingPartnerDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "usvi-st-john-2025",
+    items: [
+      {
+        gearId: "missing-partner-test-item",
+        name: "Missing partner test item",
+        category: "other",
+        usageType: "used",
+        links: [
+          {
+            url: "https://example.com/product/test",
+            affiliate: true,
+            verified: true,
+            trackingMode: "custom",
+          },
+        ],
+      },
+    ],
+  }),
+  "missing-partner-fixture.json"
+)
+const missingPartnerPlan = planGearIngestion({
+  document: missingPartnerDocument,
+  journeyId: "usvi-st-john-2025",
+  records: emptyRecords,
+  context,
+})
+assert(
+  missingPartnerPlan.errors.some(error =>
+    error.includes("needs partnerId for an affiliate link")
+  )
+)
+
+const unapprovedHostDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "usvi-st-john-2025",
+    items: [
+      {
+        gearId: "wrong-host-test-item",
+        name: "Wrong host test item",
+        category: "other",
+        usageType: "used",
+        links: [
+          {
+            url: "https://unrelated.example.net/product/test",
+            affiliate: true,
+            verified: true,
+            partnerId: "test-affiliate",
+            trackingMode: "custom",
+          },
+        ],
+      },
+    ],
+  }),
+  "wrong-host-fixture.json"
+)
+const unapprovedHostPlan = planGearIngestion({
+  document: unapprovedHostDocument,
+  journeyId: "usvi-st-john-2025",
+  records: emptyRecords,
+  context,
+})
+assert(
+  unapprovedHostPlan.errors.some(error =>
+    error.includes('host is not approved for Partner "test-affiliate"')
+  )
+)
+
+const ambiguousBooleanDocument = parseGearSource(
+  JSON.stringify({
+    schemaVersion: 1,
+    journeyId: "usvi-st-john-2025",
+    items: [
+      {
+        gearId: "ambiguous-boolean-test-item",
+        name: "Ambiguous boolean test item",
+        category: "other",
+        usageType: "used",
+        links: [
+          {
+            url: "https://example.com/product/test",
+            affiliate: "false",
+            verified: "true",
+          },
+        ],
+      },
+    ],
+  }),
+  "ambiguous-boolean-fixture.json"
+)
+const ambiguousBooleanPlan = planGearIngestion({
+  document: ambiguousBooleanDocument,
+  journeyId: "usvi-st-john-2025",
+  records: emptyRecords,
+  context,
+})
+assert(
+  ambiguousBooleanPlan.errors.some(error =>
+    error.includes('field "affiliate" must be true, false, or unknown')
+  )
+)
+assert(
+  ambiguousBooleanPlan.errors.some(error =>
+    error.includes('field "verified" must be true, false, or unknown')
   )
 )
 

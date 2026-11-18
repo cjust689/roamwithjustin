@@ -128,14 +128,17 @@ async function importContent(relativePath) {
 }
 
 async function loadContext() {
-  const [journeyModule, mediaModule] = await Promise.all([
+  const [journeyModule, mediaModule, partnerModule] = await Promise.all([
     importContent("src/content/journeys/index.mjs"),
     importContent("src/content/media/index.mjs"),
+    importContent("src/content/partners/index.mjs"),
   ])
 
   return {
     journeys: journeyModule.journeyRecords,
     media: mediaModule.mediaRecords,
+    partners: partnerModule.partnerRecords,
+    approvedGearTrackingRulePartnerIds: [],
   }
 }
 

@@ -2,16 +2,18 @@
 id: gear-ingestion-affiliate-analytics-ai
 title: Roam With Justin - Gear Ingestion, Product Images, Affiliate Links, Analytics and Optional AI
 kind: proposal
-status: proposed
+status: in-progress
 implementation_state: partial
 created: 2026-11-17
 updated: 2026-11-17
 related:
   - gear-system
   - gear-ingestion-cli
+  - gear-publishing-implementation
   - media-pipeline
   - content-model
   - monetization-analytics
+  - gear-affiliate-readiness-2026-11-17
 supersedes: []
 superseded_by: []
 code_paths:
@@ -29,13 +31,23 @@ verification:
 
 **For Codex / implementing agent.** This is a proposal for the remaining Gear
 workflow, not implementation evidence. The canonical Gear and Usage ingestor,
-selectors, Journey projection, and validation are already implemented and
+selectors, Journey projection, validation, registry-backed Gear page, Partner
+link integration, and shared `partner_click` path are implemented and
 documented in [Gear registry and Journey usage](../architecture/gear.md). The
-generated registry is empty, Gear image publication and optional AI enrichment
-remain unimplemented, and the public Gear page still uses legacy hardcoded
-data. Review the current source, managed documentation, and actual
-account/affiliate settings before editing code. Adapt this proposal to the
-verified baseline instead of creating a competing model.
+generated registry is empty. Gear image publication, a real product slice,
+automatic merchant adapters, and optional AI enrichment remain unimplemented.
+Review the current source, managed documentation, and actual account and
+affiliate settings before editing code. Adapt this proposal to the verified
+baseline instead of creating a competing model.
+
+The completed Phase 0 repository decisions are recorded in the
+[Gear and affiliate readiness audit](../audits/gear-affiliate-readiness-2026-11-17.md).
+Phase 1 is partial: exact custom URLs now fail closed through canonical Partner
+and permitted-host validation, `isCustomTracked` maps to one canonical tracking
+mode, and public Gear actions reuse existing analytics. No sample product was
+fabricated. A creator-owned product image, exact product identity, firsthand
+usage, and approved merchant destination are still required for the first real
+record.
 
 ## 0. Product objective and non-negotiables
 

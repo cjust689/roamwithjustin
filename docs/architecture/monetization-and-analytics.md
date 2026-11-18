@@ -23,6 +23,7 @@ code_paths:
   - src/main.js
   - src/router/index.js
   - src/utils/analytics.mjs
+  - src/content/commercial-links.js
   - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/components/TravelPlanningOffers.vue
@@ -96,6 +97,12 @@ received event data require external owner verification.
   hostname-derived gear events, full-URL parameters, and third-party UTM
   mutation were removed; ordinary outbound anchors remain available to GA4
   Enhanced Measurement when enabled in the property.
+- Canonical Gear links use the same Partner identity, link-type vocabulary,
+  client adapter, and event. The shared parameter builder may add only the
+  public `gear_id` and public Journey context. It never includes a destination
+  URL or private state. Affiliate Gear links also require an explicit
+  tracking mode and permitted merchant host before they can enter generated
+  content. No provider-specific automatic Gear rule is configured.
 - Six current lodging records resolve their public URLs through canonical
   lodging Partners. Journey stay cards emit the same `partner_click` contract
   with the stable property slug, `trip_lodging` placement, and public Journey

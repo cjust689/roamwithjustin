@@ -72,6 +72,7 @@ export const MEDIA_PROVIDERS = Object.freeze(["local", "r2"])
  * @property {string} label Short public label such as Restaurant or Charter operator.
  * @property {{official?: string, directory?: string, platform?: string, maps?: string}} externalLinks
  * @property {string} relationship Describes the real Journey relationship.
+ * @property {string[]} [commercialHosts] Explicit destination hosts permitted for commission-bearing links.
  * @property {string} disclosure Prevents a provider link from implying sponsorship or affiliation.
  *
  * Journey day records may reference `partnerIds`. Selectors resolve those IDs
