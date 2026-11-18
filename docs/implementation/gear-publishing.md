@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - gear-system
   - gear-ingestion-cli
@@ -42,6 +42,11 @@ verification:
     - npm run docs:audit
     - npm run lint
     - npm run build
+    - pull request 157 and validation run 44406793123
+    - develop validation run 44407203277
+    - pull request 158 and validation run 44407591044
+    - Pages run 44407947707 for production merge 58aa42a280775d6efeb150f9b6eec8339be1dcda
+    - live https://roamwithjustin.com/gear rendered and bundle markers verified 2026-11-18
 ---
 
 # Gear publishing implementation
@@ -78,6 +83,25 @@ with an original image into a repeatable publishing workflow.
   qualification.
 - [x] Canonical Amazon Associates Partner identity and bounded host allowlist
   for complete owner-generated URLs. No automatic Amazon tag rule is active.
+
+## Production release, 2026-11-18
+
+- [x] Pull request 157 promoted commit
+  `85e4d667732036458bd72cbbe6de18eafe86bf03` to `develop` after validation
+  run 44406793123 succeeded.
+- [x] The resulting `develop` merge
+  `70e795c3a9727d2b7594b99eaf4e8964e40b3e68` passed validation run
+  44407203277.
+- [x] Pull request 158 promoted that protected `develop` state to `main`
+  after validation run 44407591044 succeeded.
+- [x] Pages run 44407947707 built and deployed production merge
+  `58aa42a280775d6efeb150f9b6eec8339be1dcda`.
+- [x] Exact live verification rendered `https://roamwithjustin.com/gear`, found
+  `Gear I use`, `No gear notes yet`, and the visitor-facing empty-state copy,
+  and confirmed the obsolete workflow phrase was absent.
+- [x] Exact deployed bundle verification found the Amazon Associates disclosure,
+  `partner_click`, and `gear_catalog` markers. This establishes deployed code,
+  not an observed GA4 event or Amazon conversion.
 
 ## First real product gate
 
