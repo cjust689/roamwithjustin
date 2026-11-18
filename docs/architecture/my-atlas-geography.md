@@ -70,6 +70,11 @@ verification:
     - Rclone reported 4352 matching geonames-2026-11-18-reviewed-utah-search-v2 release objects with zero differences before catalog/current.json was updated last
     - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d accepted the previous and optimized manifests during activation
     - Production-origin staging searches returned HTTP 200 with CORS and request IDs for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose from geonames-2026-11-18-reviewed-utah-search-v2
+    - Full geonames-2026-11-18-reviewed-utah-catalog-v3 artifact built 4096 resolution shards and 4096 four-or-six-character search shards for 237451 records
+    - The six owner-reported wishlist IDs resolved through five catalog-v3 shards totaling 212348 decoded bytes and 265 candidate records, down from approximately 3.45 MiB across the prior unique resolution shards
+    - Rclone reported 8192 matching geonames-2026-11-18-reviewed-utah-catalog-v3 release objects with zero differences before catalog/current.json was updated last
+    - Staging Worker version 5234f470-dfc9-4d4c-af2b-3dbb922f0a9a deployed an explicit 30000 ms CPU limit plus persisted invocation logs before catalog-v3 activation
+    - Production-origin staging reads returned HTTP 200 with CORS and request IDs for health, Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and exact Uvita resolution from geonames-2026-11-18-reviewed-utah-catalog-v3
     - Pull request 145 passed validation run 44367937370 and merged the resource fix to develop as 3443d1a010830ab33d3e029eceafa7bd91a83f61; develop validation run 44368309406 then succeeded
     - History-only pull request 147 passed validation run 44368814693 and merged current main ancestry to develop as d10038be1abd2992c9100c1cd6eabcd8b53740ad; develop validation run 44369190504 then succeeded
     - Pull request 146 merged the validated develop head to main as 1758fea1681ff72ec0e9423f2a06f4fb07d5e13b, and Pages run 44369566126 built and deployed it successfully
@@ -308,7 +313,9 @@ coverage but performs an in-memory linear search.
 
 The Worker artifact command transforms that catalog into immutable gzip
 objects under `catalog/releases/{revision}` plus a small
-`catalog/current.json` pointer. Place IDs use 256 SHA-256 prefix shards. The
+`catalog/current.json` pointer. Active exact place resolution uses 4,096
+SHA-256 prefix shards. The runtime still accepts earlier manifests with 256
+resolution shards for safe reversal. The
 optimized search format indexes four-character and six-character normalized
 query or name-token prefixes across 4,096 hash shards. Longer queries select
 the six-character index, reducing unrelated candidates before decoding and
@@ -316,11 +323,14 @@ ranking. Search objects contain compact result records and only the normalized
 names relevant to their shard. Identical inputs produce byte-identical files;
 attempting to change an existing revision fails instead of overwriting it.
 
-The active `geonames-2026-11-18-reviewed-utah-search-v2` local build contains
-256 resolution shards and 4,096 search shards for 237,451 records. Resolution
-shards total 28,847,551 compressed bytes, and search shards total 176,024,123
-compressed bytes. The largest resolution shard is 123,829 bytes compressed.
-The largest search shard is 1,178,992 bytes compressed. Measured query shards
+The active `geonames-2026-11-18-reviewed-utah-catalog-v3` local build contains
+4,096 resolution shards and 4,096 search shards for 237,451 records. Resolution
+shards total 34,786,476 compressed bytes, and search shards total 176,042,273
+compressed bytes. The largest resolution shard is 14,126 bytes compressed.
+The largest search shard is 1,179,090 bytes compressed. The six saved wishlist
+IDs reported during the incident resolve through five unique resolution shards
+containing 265 candidate records and 212,348 decoded bytes, rather than parsing
+approximately 3.45 MiB across the prior unique resolution shards. Measured query shards
 for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose decoded to
 approximately 0.23 to 0.66 MiB rather than the prior multi-megabyte request
 objects. The Worker still enforces 16 MiB compressed and 64 MiB decoded object
@@ -331,12 +341,15 @@ Paris, and Paris, Texas from the full artifact in approximately 39 to 242
 milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
-The optimized artifact remains ignored under
-`.state/my-atlas/worker-catalog-reviewed-utah-search-v2`. All 4,352 immutable
+The active optimized artifact remains ignored under
+`.state/my-atlas/worker-catalog-reviewed-utah-catalog-v3`. All 8,192 immutable
 release shards were uploaded to the isolated staging bucket and rclone reported
-4,352 matching files with zero differences before `catalog/current.json` was
-updated last. The staging Worker now resolves
-`geonames-2026-11-18-reviewed-utah-search-v2`. The earlier
+8,192 matching files with zero differences before `catalog/current.json` was
+updated last. Staging Worker `5234f470-dfc9-4d4c-af2b-3dbb922f0a9a` sets a
+30,000 millisecond request CPU limit and persists invocation logs for diagnosis.
+The staging Worker now resolves
+`geonames-2026-11-18-reviewed-utah-catalog-v3`. The earlier
+`geonames-2026-11-18-reviewed-utah-search-v2`,
 `geonames-2026-11-18-reviewed-utah`, `geonames-2026-11-16`,
 `geonames-2026-11-17-spots`, and
 `geonames-2026-11-17-reviewed-spots` releases remain intact for reversal. The
