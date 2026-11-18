@@ -6,7 +6,50 @@ import {
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrls,
 } from "../src/features/my-atlas/planning/handoffs.mjs"
-import { normalizeCreatePlan } from "../workers/my-atlas/src/planning/contracts.mjs"
+import {
+  normalizeCreatePlan,
+  normalizeMarkPlanVisited,
+} from "../workers/my-atlas/src/planning/contracts.mjs"
+import {
+  formatMyAtlasPlanLoadError,
+  formatMyAtlasPlannerError,
+  formatMyAtlasPlannerRefreshError,
+} from "../src/features/my-atlas/planning/errors.mjs"
+
+assert.match(
+  formatMyAtlasPlannerError({ code: "insufficient_permissions" }),
+  /Sign out, then sign in again/
+)
+assert.match(
+  formatMyAtlasPlannerError({
+    code: "invalid_response",
+    requestId: "request-123",
+  }),
+  /unexpected API response.*request-123/
+)
+assert.match(
+  formatMyAtlasPlannerRefreshError({ requestId: "refresh-123" }),
+  /change was saved.*Refresh.*refresh-123/
+)
+assert.match(
+  formatMyAtlasPlannerError({
+    code: "duplicate_wish",
+    requestId: "duplicate-123",
+  }),
+  /already in your private bucket list.*duplicate-123/
+)
+assert.match(
+  formatMyAtlasPlannerError({ code: "wishlist_limit_reached" }),
+  /reached its current limit/
+)
+assert.match(
+  formatMyAtlasPlannerError({ code: "place_unavailable" }),
+  /no longer available in the current catalog/
+)
+assert.match(
+  formatMyAtlasPlanLoadError({ requestId: "plan-load-123" }),
+  /bucket list loaded.*saved trip could not be loaded.*plan-load-123/
+)
 
 const moab = {
   placeId: "geonames:5601615",
@@ -29,9 +72,24 @@ const plan = {
   title: "Moab parks",
   start: moab,
   stops: [
-    routeStop("custom:111111111111111111111111", "Arches entrance", -109.607, 38.616),
-    routeStop("custom:222222222222222222222222", "Dead Horse Point", -109.739, 38.485),
-    routeStop("custom:333333333333333333333333", "Island in the Sky", -109.866, 38.459),
+    routeStop(
+      "custom:111111111111111111111111",
+      "Arches entrance",
+      -109.607,
+      38.616
+    ),
+    routeStop(
+      "custom:222222222222222222222222",
+      "Dead Horse Point",
+      -109.739,
+      38.485
+    ),
+    routeStop(
+      "custom:333333333333333333333333",
+      "Island in the Sky",
+      -109.866,
+      38.459
+    ),
   ],
   endMode: "return-to-start",
 }
@@ -114,15 +172,21 @@ const selectedFinishPlan = {
 }
 const selectedFinishUrl = new URL(
   buildGoogleMapsDirectionsUrl(selectedFinishPlan, {
-    confirmedCoordinatePlaceIds: [
-      plan.stops[0].placeId,
-      directFinish.placeId,
-    ],
+    confirmedCoordinatePlaceIds: [plan.stops[0].placeId, directFinish.placeId],
   })
 )
-assert.equal(selectedFinishUrl.searchParams.get("origin"), "38.57332,-109.54984")
-assert.equal(selectedFinishUrl.searchParams.get("destination"), "40.7608,-111.891")
-assert.match(buildAiPlanningPrompt(selectedFinishPlan), /Finish at Private finish/)
+assert.equal(
+  selectedFinishUrl.searchParams.get("origin"),
+  "38.57332,-109.54984"
+)
+assert.equal(
+  selectedFinishUrl.searchParams.get("destination"),
+  "40.7608,-111.891"
+)
+assert.match(
+  buildAiPlanningPrompt(selectedFinishPlan),
+  /Finish at Private finish/
+)
 
 const wishId = index => `wish_${index.toString(16).padStart(24, "0")}`
 const planHeaders = new Headers({
@@ -184,6 +248,40 @@ assert.throws(() =>
       ...maximumPlanInput,
       stopWishIds: [...maximumPlanInput.stopWishIds, wishId(1000)],
     },
+    planHeaders,
+    2026
+  )
+)
+
+const markedVisits = normalizeMarkPlanVisited(
+  {
+    visits: [
+      {
+        stopIndex: 1,
+        visitedDates: [{ year: 2025, month: 2 }],
+        memory: "Snow over the red rock.",
+      },
+    ],
+  },
+  "plan_1234567890abcdef12345678",
+  planHeaders,
+  2026
+)
+assert.deepEqual(markedVisits.visits[0], {
+  stopIndex: 1,
+  visitedDates: [{ year: 2025, month: 2 }],
+  visitedYears: [2025],
+  memory: "Snow over the red rock.",
+})
+assert.throws(() =>
+  normalizeMarkPlanVisited(
+    {
+      visits: [
+        { stopIndex: 0, visitedDates: [], memory: "" },
+        { stopIndex: 0, visitedDates: [], memory: "" },
+      ],
+    },
+    "plan_1234567890abcdef12345678",
     planHeaders,
     2026
   )

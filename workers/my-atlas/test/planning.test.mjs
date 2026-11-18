@@ -15,6 +15,7 @@ import {
   keepMyPlan,
   listMyPlans,
   listMyWishes,
+  markMyPlanVisited,
   updateMyWish,
 } from "../src/planning/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
@@ -257,7 +258,7 @@ describe("private wishlist and trip planning", () => {
     expect(created.plan.end).not.toHaveProperty("sourceWishId")
   })
 
-  it("uses the account revision, rejects duplicates, and isolates private wishlist state", async () => {
+  it("uses the account revision, reuses duplicate places, and isolates private wishlist state", async () => {
     const moab = await createWish(
       "geonames:5601615",
       1,
@@ -268,19 +269,18 @@ describe("private wishlist and trip planning", () => {
       profile: { revision: 2, wishCount: 1 },
       wish: { name: "Moab", routeReadiness: "route-ready" },
     })
+    const duplicate = await createWish(
+      "geonames:5601615",
+      1,
+      "52525252-5252-4252-8252-525252525252"
+    )
+    expect(duplicate).toMatchObject({
+      created: false,
+      profile: { revision: 2, wishCount: 1 },
+      wish: { wishId: moab.wish.wishId, name: "Moab" },
+    })
     await expect(
-      createWish(
-        "geonames:5601615",
-        2,
-        "52525252-5252-4252-8252-525252525252"
-      )
-    ).rejects.toMatchObject({ code: "duplicate_wish" })
-    await expect(
-      createWish(
-        "geonames:5556144",
-        1,
-        "53535353-5353-4353-8353-535353535353"
-      )
+      createWish("geonames:5556144", 1, "53535353-5353-4353-8353-535353535353")
     ).rejects.toMatchObject({ code: "revision_conflict" })
 
     const list = await listMyWishes({
@@ -295,7 +295,10 @@ describe("private wishlist and trip planning", () => {
 
     const user = env.MY_ATLAS_USERS.getByName(USER_ID)
     const publicState = await user.getPublicAtlas()
-    expect(publicState).toMatchObject({ ok: false, error: "public_atlas_not_found" })
+    expect(publicState).toMatchObject({
+      ok: false,
+      error: "public_atlas_not_found",
+    })
     expect(JSON.stringify(publicState)).not.toContain("Moab")
   })
 
@@ -501,6 +504,120 @@ describe("private wishlist and trip planning", () => {
     })
   })
 
+  it("atomically marks only selected plan stops visited and preserves planning state", async () => {
+    const moab = await createWish(
+      "geonames:5601615",
+      1,
+      "66666666-6666-4666-8666-666666666666"
+    )
+    const uvita = await createWish(
+      "geonames:3621138",
+      2,
+      "67676767-6767-4676-8676-676767676767"
+    )
+    const arches = await createWish(
+      "geonames:5556144",
+      3,
+      "68686868-6868-4686-8686-686868686868"
+    )
+    const created = await createMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        title: "Costa Rica and Utah review",
+        status: "saved",
+        desiredYear: 2027,
+        note: "",
+        startWishId: moab.wish.wishId,
+        stopWishIds: [uvita.wish.wishId, arches.wish.wishId],
+        endMode: "last-stop",
+        expectedRevision: 4,
+        idempotencyKey: "69696969-6969-4696-8696-696969696969",
+      },
+      placeCatalog,
+      now: NOW,
+    })
+    const input = {
+      planId: created.plan.planId,
+      visits: [
+        {
+          stopIndex: 1,
+          visitedDates: [{ year: 2025, month: 2 }],
+          visitedYears: [2025],
+          memory: "Snow over the red rock.",
+        },
+      ],
+      expectedRevision: 5,
+      idempotencyKey: "70707070-7070-4070-8070-707070707070",
+    }
+    const marked = await markMyPlanVisited({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      placeCatalog,
+      now: NOW,
+    })
+    expect(marked).toMatchObject({
+      created: true,
+      profile: { revision: 6, pinCount: 1, wishCount: 3, planCount: 1 },
+      pins: [
+        {
+          placeId: "geonames:5556144",
+          name: "Arches National Park",
+          visitedDates: [{ year: 2025, month: 2 }],
+          memory: "Snow over the red rock.",
+        },
+      ],
+    })
+    expect(
+      await markMyPlanVisited({
+        environment: environment(),
+        identity: IDENTITY,
+        input,
+        placeCatalog,
+        now: NOW,
+      })
+    ).toMatchObject({ created: false, profile: { revision: 6, pinCount: 1 } })
+
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.pins).toEqual([
+      expect.objectContaining({ placeId: "geonames:5556144" }),
+    ])
+    expect(exported.wishlist).toHaveLength(3)
+    expect(exported.plans).toEqual([
+      expect.objectContaining({
+        planId: created.plan.planId,
+        stops: [
+          expect.objectContaining({ placeId: "geonames:3621138" }),
+          expect.objectContaining({ placeId: "geonames:5556144" }),
+        ],
+      }),
+    ])
+
+    await expect(
+      markMyPlanVisited({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          ...input,
+          expectedRevision: 6,
+          idempotencyKey: "70707070-7171-4171-8171-717171717171",
+        },
+        placeCatalog,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "duplicate_place" })
+    expect(
+      await listMyPlans({ environment: environment(), identity: IDENTITY })
+    ).toMatchObject({
+      profile: { revision: 6 },
+      plans: [{ planId: created.plan.planId }],
+    })
+  })
+
   it("marks inactive plans pending, keeps explicitly, and expires without deleting wishes", async () => {
     const moab = await createWish(
       "geonames:5601615",
@@ -534,7 +651,10 @@ describe("private wishlist and trip planning", () => {
       await user.expireOwnerPlans("2027-05-17T15:00:00.000Z")
     ).toMatchObject({ changed: true, deleted: false })
 
-    let plans = await listMyPlans({ environment: environment(), identity: IDENTITY })
+    let plans = await listMyPlans({
+      environment: environment(),
+      identity: IDENTITY,
+    })
     expect(plans).toMatchObject({
       profile: { revision: 5 },
       plans: [
@@ -566,7 +686,10 @@ describe("private wishlist and trip planning", () => {
     expect(
       await user.expireOwnerPlans("2027-12-21T15:00:00.000Z")
     ).toMatchObject({ changed: true, deleted: true })
-    plans = await listMyPlans({ environment: environment(), identity: IDENTITY })
+    plans = await listMyPlans({
+      environment: environment(),
+      identity: IDENTITY,
+    })
     expect(plans).toMatchObject({
       profile: { revision: 7, wishCount: 2, planCount: 0 },
       plans: [],
@@ -598,7 +721,9 @@ describe("private wishlist and trip planning", () => {
     await expect(
       getMyProfile({ environment: environment(), identity: IDENTITY })
     ).rejects.toMatchObject({ code: "registration_not_found" })
-    expect(await registry().getActiveRegistrationByHandle("planner-owner")).toEqual({
+    expect(
+      await registry().getActiveRegistrationByHandle("planner-owner")
+    ).toEqual({
       ok: false,
       error: "registration_not_found",
     })

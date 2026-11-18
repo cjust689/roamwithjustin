@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - my-atlas-registration
   - my-atlas-api-authentication
@@ -262,6 +262,35 @@ again on the saved wishlist entry. Manual name and coordinate entry remains a
 separate custom-place fallback that supports the same save, start, and finish
 choices.
 
+Wishlist creation is idempotent by owner and Place as well as by an exact
+operation retry. If a repeated create targets a Place already in that owner's
+bucket list, the Durable Object returns the existing Wish without changing the
+revision or count, even when the no-op retry carries the pre-save revision. It
+never creates a second record. The browser incorporates
+the returned Wish before requesting refreshed planning state, so a successful
+write followed by a transient refresh failure still disables the repeated Save
+action and accurately reports that the change was saved. Safe duplicate,
+catalog availability, and wishlist-limit conflicts have specific public error
+codes and recovery copy; internal consistency failures remain generic.
+
+The browser keeps an unsaved direct start or finish selection while the owner
+saves the first wishlist destination, and it presents that selection immediately
+even when the ordered-destination list is still empty. A mutation response and
+the follow-up state refresh are treated as separate outcomes. Once a write has
+returned a valid revision, a transient refresh failure is reported as a saved
+change that needs Refresh, never as a rejected write. Auth scope, session,
+configuration, catalog, revision, and invalid-response errors retain the safe
+Worker request reference and present recovery guidance without exposing account
+data.
+
+Wishlist and saved-trip reads are presented as separate availability domains.
+If the bucket-list pages load with a valid revision but the companion saved-trip
+request fails, the browser retains and renders the private destinations, their
+editing controls, and the wishlist revision. It disables the saved-trip editor
+and shows a targeted retry message with the safe Worker request reference. A
+trip-plan failure no longer discards an otherwise valid wishlist response or
+misstates that the entire private planner failed.
+
 One `plan:` record may exist in the first slice. It stores title, lifecycle
 status, optional year and note, a start snapshot, an ordered destination list,
 and last-stop, return-to-start, or selected-end completion. Start and selected
@@ -275,9 +304,18 @@ coordinates, route readiness, catalog revision when applicable, and optional
 source wish ID. Rendering and export never require the source wishlist record,
 so editing or removing a wish cannot rewrite or break an existing plan.
 
-Plan status is `draft`, `saved`, or `archived`. None proves travel. The future
-Mark Visited action remains a separate later owner-confirmed transition that
-must reuse the existing pin lifecycle.
+Plan status is `draft`, `saved`, or `archived`. None proves travel. The separate
+owner-confirmed Mark Visited action accepts selected stop indexes from the
+current immutable plan snapshot. Each selection may add an optional year,
+month, and favorite memory. `POST /v1/me/trip-plans/{planId}/visited` requires
+write permission, the current strong revision, and a UUID idempotency key. The
+service revalidates canonical places, derives owner-scoped deterministic pin
+IDs, and sends one bounded batch to the owner's Durable Object. The object
+rechecks the current plan and stop indexes, rejects duplicate places or pin ID
+collisions, and creates every selected pin in one transaction with one profile
+revision. It does not edit or remove the plan or wishlist. An exact retry is
+idempotent. When sharing is already public, the new pins enter the existing
+public projection only after the owner confirms the browser review action.
 
 The plan stores `retentionConfirmedAt` and its six-calendar-month expiry. An
 explicit create, replace, or Keep refreshes it. At expiry the per-owner alarm
@@ -509,8 +547,10 @@ live exhaustion behavior is not yet verified.
 Profile-specific share HTML, a verified public owner profile, and owner
 verification of the corrected save feedback and silent session restoration
 also remain. Private planned destinations now use an explicit lifecycle and are
-excluded from visited statistics, playback, and public sharing. The separate
-owner-reviewed Mark Visited transition remains unimplemented.
+excluded from visited statistics, playback, and public sharing until the owner
+selects and confirms stops through Mark Visited. The Mark Visited code and
+durable-state behavior are locally test verified, but its Worker deployment and
+authenticated owner acceptance are not yet claimed.
 
 Memory images are deliberately not part of the text-memory release. They need
 a separately reviewed media boundary with an explicit per-pin count, raw-byte

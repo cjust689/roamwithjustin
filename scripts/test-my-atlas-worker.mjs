@@ -9,6 +9,7 @@ import {
   fetchMyAtlasPlanning,
   fetchPublicAtlas,
   fetchMyAtlasState,
+  markMyAtlasPlanVisited,
   registerMyAtlasAccount,
   updateMyAtlasPin,
   updateMyAtlasSharing,
@@ -688,6 +689,33 @@ for (const token of [
   )
   assert.equal(response.status, 404)
   assert.equal((await readJson(response)).error, "not_found")
+}
+
+for (const [internalCode, status, publicCode] of [
+  ["duplicate_wish", 409, "duplicate_wish"],
+  ["wish_limit_reached", 409, "wishlist_limit_reached"],
+  ["place_unavailable", 409, "place_unavailable"],
+  ["invalid_wish", 400, "invalid_request"],
+]) {
+  const token = await signToken()
+  const response = await workerResponse(
+    "/v1/me/bucket-list",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: "edededed-eded-4ded-8ded-edededededed",
+      ifMatch: '"rev-1"',
+      json: { placeId: "geonames:3621138", priority: "normal" },
+    },
+    {},
+    {
+      createMyWish: async () => {
+        throw new AccountConflictError(internalCode)
+      },
+    }
+  )
+  assert.equal(response.status, status)
+  assert.equal((await readJson(response)).error, publicCode)
 }
 
 {
@@ -1791,6 +1819,62 @@ assert.equal(
   const token = await signToken()
   let captured
   const response = await workerResponse(
+    "/v1/me/trip-plans/plan_1234567890abcdef12345678/visited",
+    {
+      method: "POST",
+      token,
+      idempotencyKey: "33333333-3434-4343-8343-343434343434",
+      ifMatch: '"rev-5"',
+      json: {
+        visits: [
+          {
+            stopIndex: 1,
+            visitedDates: [{ year: 2025, month: 2 }],
+            memory: "Snow over the red rock.",
+          },
+        ],
+      },
+    },
+    {},
+    {
+      markMyPlanVisited: async options => {
+        captured = options
+        return {
+          created: true,
+          profile: { revision: 6 },
+          pins: [
+            {
+              pinId: "pin_1234567890abcdef12345678",
+              placeId: "geonames:5556144",
+              placeType: "spot",
+              name: "Arches National Park",
+              countryCode: "US",
+              countryName: "United States",
+              coordinates: [-109.5925, 38.7225],
+              visitedDates: [{ year: 2025, month: 2 }],
+              visitedYears: [2025],
+              memory: "Snow over the red rock.",
+            },
+          ],
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 201)
+  assert.equal(response.headers.get("ETag"), '"rev-6"')
+  assert.equal(captured.input.planId, "plan_1234567890abcdef12345678")
+  assert.deepEqual(captured.input.visits[0], {
+    stopIndex: 1,
+    visitedDates: [{ year: 2025, month: 2 }],
+    visitedYears: [2025],
+    memory: "Snow over the red rock.",
+  })
+}
+
+{
+  const token = await signToken()
+  let captured
+  const response = await workerResponse(
     "/v1/me",
     {
       method: "DELETE",
@@ -1872,6 +1956,41 @@ assert.equal(
   assert.equal(state.wishes[0].name, "Uvita")
   assert.equal(calls.length, 2)
 
+  const partialState = await fetchMyAtlasPlanning({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    allowPartial: true,
+    fetchImpl: async url =>
+      url.includes("bucket-list")
+        ? new Response(
+            JSON.stringify({
+              wishes: [
+                {
+                  wishId: "wish_1234567890abcdef12345678",
+                  placeId: "geonames:3621138",
+                  name: "Uvita",
+                },
+              ],
+            }),
+            { status: 200, headers: { ETag: '"rev-4"' } }
+          )
+        : new Response(
+            JSON.stringify({
+              error: "account_conflict",
+              requestId: "plan-load-123",
+            }),
+            {
+              status: 409,
+              headers: { "X-Request-Id": "plan-load-123" },
+            }
+          ),
+  })
+  assert.equal(partialState.revision, 4)
+  assert.equal(partialState.wishes[0].name, "Uvita")
+  assert.deepEqual(partialState.plans, [])
+  assert.equal(partialState.planError.code, "account_conflict")
+  assert.equal(partialState.planError.requestId, "plan-load-123")
+
   const created = await createMyAtlasWish({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
@@ -1892,6 +2011,43 @@ assert.equal(
     },
   })
   assert.equal(created.revision, 5)
+
+  const marked = await markMyAtlasPlanVisited({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    planId: "plan_1234567890abcdef12345678",
+    visits: [{ stopIndex: 0, visitedDates: [{ year: 2025 }], memory: "" }],
+    revision: 5,
+    fetchImpl: async (url, options) => {
+      assert.equal(
+        url,
+        "https://api.example.com/v1/me/trip-plans/plan_1234567890abcdef12345678/visited"
+      )
+      assert.equal(options.headers.get("If-Match"), '"rev-5"')
+      assert.equal(options.method, "POST")
+      return new Response(
+        JSON.stringify({
+          pins: [
+            {
+              pinId: "pin_1234567890abcdef12345678",
+              placeId: "geonames:5556144",
+              placeType: "spot",
+              name: "Arches National Park",
+              countryCode: "US",
+              countryName: "United States",
+              coordinates: [-109.5925, 38.7225],
+              visitedDates: [{ year: 2025 }],
+              visitedYears: [2025],
+              memory: "",
+            },
+          ],
+        }),
+        { status: 201, headers: { ETag: '"rev-6"' } }
+      )
+    },
+  })
+  assert.equal(marked.revision, 6)
+  assert.equal(marked.pins[0].name, "Arches National Park")
 
   const exported = await fetchMyAtlasAccountExport({
     apiBaseUrl: "https://api.example.com",
