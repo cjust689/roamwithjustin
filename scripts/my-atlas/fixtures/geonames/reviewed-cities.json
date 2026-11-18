@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "sourceProvider": "GeoNames",
+  "sourceSnapshotDate": "2026-11-18",
+  "records": [
+    {
+      "geonameId": "5548595",
+      "name": "Torrey",
+      "asciiName": "Torrey",
+      "aliases": ["Torrey", "Torrey, Utah"],
+      "latitude": 38.29887,
+      "longitude": -111.41907,
+      "featureClass": "P",
+      "featureCode": "PPL",
+      "countryCode": "US",
+      "admin1Code": "UT",
+      "population": 182,
+      "sourceUrl": "https://www.geonames.org/5548595/torrey.html"
+    },
+    {
+      "geonameId": "5540148",
+      "name": "Hanksville",
+      "asciiName": "Hanksville",
+      "aliases": ["Hanksville", "Hanksville, Utah"],
+      "latitude": 38.37304,
+      "longitude": -110.71404,
+      "featureClass": "P",
+      "featureCode": "PPL",
+      "countryCode": "US",
+      "admin1Code": "UT",
+      "population": 212,
+      "sourceUrl": "https://www.geonames.org/5540148/hanksville.html"
+    }
+  ]
+}

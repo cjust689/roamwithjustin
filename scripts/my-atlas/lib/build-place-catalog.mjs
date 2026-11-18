@@ -153,6 +153,94 @@ function parseCities(file) {
     .filter(Boolean)
 }
 
+function parseReviewedCities(file) {
+  if (!file) return []
+  const value = JSON.parse(fs.readFileSync(file, "utf8"))
+  if (
+    value?.schemaVersion !== 1 ||
+    value.sourceProvider !== "GeoNames" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value.sourceSnapshotDate) ||
+    !Array.isArray(value.records)
+  ) {
+    throw new Error("Invalid reviewed GeoNames city source: " + file)
+  }
+  const seen = new Set()
+  return value.records.map(record => {
+    if (
+      !/^[1-9][0-9]{0,11}$/.test(record.geonameId) ||
+      seen.has(record.geonameId) ||
+      typeof record.name !== "string" ||
+      !record.name.trim() ||
+      (record.asciiName !== undefined &&
+        typeof record.asciiName !== "string") ||
+      !Array.isArray(record.aliases) ||
+      !record.aliases.every(alias => typeof alias === "string") ||
+      !Number.isFinite(record.latitude) ||
+      record.latitude < -90 ||
+      record.latitude > 90 ||
+      !Number.isFinite(record.longitude) ||
+      record.longitude < -180 ||
+      record.longitude > 180 ||
+      record.featureClass !== "P" ||
+      !populatedPlaceFeatureCodes.has(record.featureCode) ||
+      !/^[A-Z]{2}$/.test(record.countryCode) ||
+      typeof record.admin1Code !== "string" ||
+      !Number.isInteger(record.population) ||
+      record.population < 0 ||
+      typeof record.sourceUrl !== "string" ||
+      record.sourceUrl !==
+        `https://www.geonames.org/${record.geonameId}/${new URL(record.sourceUrl).pathname.split("/").filter(Boolean)[1]}`
+    ) {
+      throw new Error(
+        `Invalid reviewed GeoNames city record: ${record.geonameId || "unknown"}`
+      )
+    }
+    seen.add(record.geonameId)
+    return {
+      geonameId: record.geonameId,
+      name: record.name.trim(),
+      asciiName:
+        record.asciiName?.trim() ||
+        record.name
+          .trim()
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, ""),
+      aliases: record.aliases,
+      latitude: record.latitude,
+      longitude: record.longitude,
+      featureClass: record.featureClass,
+      featureCode: record.featureCode,
+      countryCode: record.countryCode,
+      admin1Code: record.admin1Code,
+      population: record.population,
+      modified: value.sourceSnapshotDate,
+      sourceUrl: record.sourceUrl,
+      sourceSnapshotDate: value.sourceSnapshotDate,
+    }
+  })
+}
+
+function mergeCities(cities, reviewedCities) {
+  const byId = new Map(cities.map(city => [city.geonameId, city]))
+  reviewedCities.forEach(city => {
+    const existing = byId.get(city.geonameId)
+    if (existing) {
+      if (
+        existing.countryCode !== city.countryCode ||
+        existing.featureClass !== city.featureClass ||
+        existing.featureCode !== city.featureCode
+      ) {
+        throw new Error(
+          `Reviewed GeoNames city conflicts with cities500: ${city.geonameId}`
+        )
+      }
+      return
+    }
+    byId.set(city.geonameId, city)
+  })
+  return [...byId.values()]
+}
+
 function parseSpots(file) {
   if (!file) return []
   const value = JSON.parse(fs.readFileSync(file, "utf8"))
@@ -316,6 +404,12 @@ function cityRecord(city, countries, admin1, revision) {
       featureClass: city.featureClass,
       featureCode: city.featureCode,
       modified: city.modified,
+      ...(city.sourceUrl
+        ? {
+            sourceUrl: city.sourceUrl,
+            retrieved: city.sourceSnapshotDate,
+          }
+        : {}),
     },
     catalogRevision: revision,
     deprecated: false,
@@ -407,7 +501,11 @@ function mergePrevious(records, previousCatalog, revision) {
   return [...currentById.values()]
 }
 
-function sourceManifest(sourceDirectory, spotSourceFile) {
+function sourceManifest(
+  sourceDirectory,
+  spotSourceFile,
+  reviewedCitySourceFile
+) {
   return [
     ...sourceFiles.map(fileName => ({
       fileName,
@@ -415,6 +513,14 @@ function sourceManifest(sourceDirectory, spotSourceFile) {
     })),
     ...(spotSourceFile
       ? [{ fileName: path.basename(spotSourceFile), file: spotSourceFile }]
+      : []),
+    ...(reviewedCitySourceFile
+      ? [
+          {
+            fileName: path.basename(reviewedCitySourceFile),
+            file: reviewedCitySourceFile,
+          },
+        ]
       : []),
   ].map(({ fileName, file }) => {
     const stat = fs.statSync(file)
@@ -433,6 +539,7 @@ export function buildPlaceCatalog({
   includePlaceIds = [],
   previousCatalog = null,
   spotSourceFile = "",
+  reviewedCitySourceFile = "",
 }) {
   if (!sourceDirectory || !revision || !sourceSnapshotDate) {
     throw new Error(
@@ -452,7 +559,12 @@ export function buildPlaceCatalog({
     countriesList.map(country => [country.iso2, country])
   )
   const admin1 = parseAdmin1(path.join(sourceDirectory, "admin1CodesASCII.txt"))
-  const cities = parseCities(path.join(sourceDirectory, "cities500.txt"))
+  const cities = mergeCities(
+    parseCities(path.join(sourceDirectory, "cities500.txt")),
+    parseReviewedCities(
+      reviewedCitySourceFile ? path.resolve(reviewedCitySourceFile) : ""
+    )
+  )
   const spots = parseSpots(spotSourceFile ? path.resolve(spotSourceFile) : "")
   const selectedIds = new Set(includePlaceIds.map(String))
   const selectedCities = selectedIds.size
@@ -463,7 +575,8 @@ export function buildPlaceCatalog({
   )
   if (missingIds.length) {
     throw new Error(
-      "GeoNames IDs not found in cities500: " + missingIds.join(", ")
+      "GeoNames IDs not found in cities500 or reviewed cities: " +
+        missingIds.join(", ")
     )
   }
 
@@ -490,15 +603,19 @@ export function buildPlaceCatalog({
     },
     selection: selectedIds.size
       ? {
-          mode: "proof-subset-plus-curated-spots",
+          mode: "proof-subset-plus-reviewed-places",
           cityIds: [...selectedIds].sort(),
           spotIds: spots.map(spot => spot.geonameId).sort(),
         }
       : {
-          mode: "all-cities500-plus-curated-spots",
+          mode: "all-cities500-plus-reviewed-places",
           spotIds: spots.map(spot => spot.geonameId).sort(),
         },
-    sources: sourceManifest(sourceDirectory, spotSourceFile),
+    sources: sourceManifest(
+      sourceDirectory,
+      spotSourceFile,
+      reviewedCitySourceFile
+    ),
     stats: {
       countries: records.filter(record => record.placeType === "country")
         .length,

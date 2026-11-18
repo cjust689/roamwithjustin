@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - my-atlas-authentication
   - my-atlas-api-authentication
@@ -51,6 +51,10 @@ verification:
     - A noninteractive Auth0 connection check redirected the configured SPA to accounts.google.com
     - Owner reported successful Google sign in, callback return, and audience-scoped API access verification in the local browser proof
     - Local cities500 search returned canonical Salt Lake City, Miami, Moab, and Uvita results
+    - Reviewed-city fixture and full-artifact searches returned Torrey and Hanksville as cities while rejecting PPLX reviewed entries
+    - Full geonames-2026-11-18-reviewed-utah artifact built 256 record and 256 search shards for 237451 records and resolved Capitol Reef National Park as a National park
+    - Rclone verified all 512 geonames-2026-11-18-reviewed-utah release objects before manifest activation, and production-origin staging searches returned Torrey, Hanksville, and Capitol Reef on that revision
+    - API client tests retried one failed authenticated GET and made only one attempt for a failed mutation
     - Headless Chrome searched and pinned Salt Lake City through the full local catalog endpoint
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Ephemeral-RSA tests accepted an exact-issuer and exact-audience access token and rejected ID-token audiences, wrong issuer or audience, expired, unsigned, HS256, wrong-type, and under-permissioned tokens
@@ -308,6 +312,12 @@ ceiling before inviting external users.
       Canyonlands National Park, and Mount Rushmore with reviewed result types,
       and exclude PPLX and other subdivision-style populated-place codes from
       new search while preserving previously issued IDs as deprecated.
+- [x] Add a separate bounded reviewed-city source for useful populated places
+      below the cities500 threshold, initially Torrey and Hanksville, while
+      retaining the same supported feature-code boundary and explicitly
+      rejecting PPLX entries.
+- [x] Add Capitol Reef National Park to the reviewed spot catalog with its
+      canonical GeoNames identity and National park product classification.
 - [x] Search Uvita, Paris, and Paris Texas with disambiguated labels.
 - [x] Render selected catalog coordinates with an isolated MapLibre component
       using the unchanged configured map style and terrain.
@@ -401,6 +411,8 @@ ceiling before inviting external users.
 - [x] Isolate catalog and public Atlas rate-limit keys, keep authenticated
       owner bootstrap outside that limiter, and add in-place search and saved
       Atlas recovery with actionable error and request-reference messages.
+- [x] Retry authenticated browser GET requests once after a pre-response
+      network rejection while leaving every mutation at one automatic attempt.
 - [x] Verify the owner-reported isolated staging bucket publication through
       successful live manifest and shard reads for Uvita and Salt Lake City.
       The owner separately verified all 512 release objects with rclone before
@@ -410,6 +422,10 @@ ceiling before inviting external users.
 - [x] Publish and verify all 512 immutable
       `geonames-2026-11-17-reviewed-spots` objects, then update the staging
       manifest last and verify reviewed types plus deprecated PPLX resolution.
+- [x] Publish and verify all 512 immutable
+      `geonames-2026-11-18-reviewed-utah` objects, update the staging manifest
+      last, and verify Torrey, Hanksville, and Capitol Reef from the production
+      origin.
 - [x] Pass automated concurrency, authorization, cross-owner isolation, stale
       revision, privacy, and retry tests.
 

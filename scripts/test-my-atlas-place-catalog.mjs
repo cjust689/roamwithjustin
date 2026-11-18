@@ -69,6 +69,7 @@ const options = {
   revision: "fixture-2026-11-16",
   sourceSnapshotDate: "2026-11-16",
   spotSourceFile: path.join(fixture, "spots.json"),
+  reviewedCitySourceFile: path.join(fixture, "reviewed-cities.json"),
 }
 
 assert.equal(
@@ -302,13 +303,13 @@ assert.deepEqual(
   "identical inputs must produce identical output"
 )
 assert.equal(first.stats.countries, 4)
-assert.equal(first.stats.cities, 5)
-assert.equal(first.stats.spots, 5)
+assert.equal(first.stats.cities, 7)
+assert.equal(first.stats.spots, 6)
 assert.equal(resolveCatalogPlace(first, "iso-country:AN"), null)
 assert.equal(resolveCatalogPlace(first, "geonames:9990001"), null)
 assert.equal(resolveCatalogPlace(first, "geonames:9990002"), null)
 assert.equal(resolveCatalogPlace(first, "geonames:9990003"), null)
-assert.equal(first.sources.length, 4)
+assert.equal(first.sources.length, 5)
 assert.ok(first.sources.every(source => /^[a-f0-9]{64}$/.test(source.sha256)))
 
 const workerArtifactRoot = fs.mkdtempSync(
@@ -484,6 +485,16 @@ assert.equal(mountRushmore.spotKind, "Monument")
 assert.equal(formatPlaceTypeLabel(krka), "National park")
 assert.equal(formatPlaceTypeLabel(canyonlands), "National park")
 assert.equal(formatPlaceTypeLabel(mountRushmore), "Monument")
+const torrey = searchPlaceCatalog(first, "Torrey Utah")[0]
+assert.equal(torrey.placeId, "geonames:5548595")
+assert.equal(torrey.placeType, "city")
+assert.equal(torrey.admin1Name, "Utah")
+const hanksville = searchPlaceCatalog(first, "Hanksville")[0]
+assert.equal(hanksville.placeId, "geonames:5540148")
+assert.equal(hanksville.placeType, "city")
+const capitolReef = searchPlaceCatalog(first, "Capitol Reef")[0]
+assert.equal(capitolReef.placeId, "geonames:5536448")
+assert.equal(capitolReef.spotKind, "National park")
 assert.equal(searchPlaceCatalog(first, "North Paris").length, 0)
 assert.equal(searchPlaceCatalog(first, "Paris Locality").length, 0)
 assert.equal(searchPlaceCatalog(first, "Paris Settlement").length, 0)
@@ -594,6 +605,29 @@ assert.throws(
       previousCatalog: first,
     }),
   /Catalog identity country changed/
+)
+
+const invalidReviewedCitySource = path.join(
+  tempRoot,
+  "invalid-reviewed-cities.json"
+)
+const invalidReviewedCities = JSON.parse(
+  fs.readFileSync(options.reviewedCitySourceFile, "utf8")
+)
+invalidReviewedCities.records[0].featureCode = "PPLX"
+fs.writeFileSync(
+  invalidReviewedCitySource,
+  JSON.stringify(invalidReviewedCities),
+  "utf8"
+)
+assert.throws(
+  () =>
+    buildPlaceCatalog({
+      ...options,
+      revision: "fixture-invalid-reviewed-city",
+      reviewedCitySourceFile: invalidReviewedCitySource,
+    }),
+  /Invalid reviewed GeoNames city record: 5548595/
 )
 
 fs.rmSync(tempRoot, { recursive: true, force: true })
