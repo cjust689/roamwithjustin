@@ -1486,6 +1486,40 @@ await assert.rejects(
   })
   assert.equal(created.revision, 3)
 
+  const yellowstoneCreated = await createMyAtlasPin({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    placeId: "geonames:5843642",
+    visitedDates: [{ year: 2025 }],
+    revision: 3,
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.headers.get("If-Match"), '"rev-3"')
+      return new Response(
+        JSON.stringify({
+          pin: {
+            pinId: "pin_abcdefabcdefabcdefabcdef",
+            placeId: "geonames:5843642",
+            placeType: "spot",
+            name: "Yellowstone National Park",
+            countryCode: "US",
+            countryName: "United States",
+            continent: "NA",
+            spotCategory: "national-park",
+            spotKind: "National park",
+            coordinates: [-110.58846, 44.42796],
+            visitedDates: [{ year: 2025 }],
+            visitedYears: [2025],
+            memory: "",
+          },
+        }),
+        { status: 201, headers: { ETag: '"rev-4"' } }
+      )
+    },
+  })
+  assert.equal(yellowstoneCreated.pin.placeType, "spot")
+  assert.equal(yellowstoneCreated.pin.spotKind, "National park")
+  assert.equal(yellowstoneCreated.revision, 4)
+
   let writeAttempts = 0
   await assert.rejects(
     () =>
@@ -1997,6 +2031,28 @@ assert.equal(
   assert.equal(state.revision, 4)
   assert.equal(state.wishes[0].name, "Uvita")
   assert.equal(calls.length, 2)
+
+  let revisionRaceCalls = 0
+  const recoveredState = await fetchMyAtlasPlanning({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async url => {
+      revisionRaceCalls += 1
+      const isWishlist = url.includes("bucket-list")
+      const firstAttempt = revisionRaceCalls <= 2
+      const revision = firstAttempt && isWishlist ? 4 : 5
+      return new Response(
+        JSON.stringify(
+          isWishlist
+            ? { wishes: [], nextCursor: null }
+            : { plans: [] }
+        ),
+        { status: 200, headers: { ETag: `"rev-${revision}"` } }
+      )
+    },
+  })
+  assert.equal(revisionRaceCalls, 4)
+  assert.equal(recoveredState.revision, 5)
 
   const partialState = await fetchMyAtlasPlanning({
     apiBaseUrl: "https://api.example.com",

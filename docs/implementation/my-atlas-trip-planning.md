@@ -58,7 +58,11 @@ verification:
     - Live content-addressed chunk 417.972f66bc.js returned 200 and contained Saved, refresh needed, the route-choice introduction, Fly separate handoff, the save receipt, and Your itinerary together
     - docs/audits/assets/my-atlas-directions-phase2-desktop.png
     - docs/audits/assets/my-atlas-directions-phase2-mobile.png
-    - Revision-conflict recovery tests verify request-reference copy while the client reloads the latest revision, preserves the itinerary draft where possible, and requires an explicit retry instead of replaying a mutation
+    - Revision-conflict recovery tests verify monotonic browser revision state, one complete read retry when wishlist and plan ETags differ, and one safe mutation retry only after an explicit HTTP 412 confirms no write occurred
+    - Catalog and API client tests resolve Yellowstone National Park from its immutable record shard as a reviewed spot and accept its complete created-pin response
+    - Owner-view source assertions verify authoritative account refresh before a stale-write retry and a bounded phone profile control with explicit focus treatment
+    - A live-page containment check at 432 CSS pixels applied the corrected scoped rules to the production component structure: the focused profile control measured 397 by 38.5 CSS pixels, remained inside the 432-pixel document, and no longer inherited the legacy navigation background, shadow, 56-pixel line height, or pill radius
+    - Source assertions verify the signed-in overview exposes Plan a trip on desktop and mobile, closes competing destination panels, opens the existing planner, scrolls it into view, and focuses its disclosure heading
     - docs/audits/assets/my-atlas-planner-phase1-desktop.png
     - docs/audits/assets/my-atlas-planner-phase1-mobile.png
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
@@ -251,11 +255,12 @@ of the private wishlist read and stale-delete path remains external.
       leads with start, ordered stops, and finish, nests the Want to go list,
       hides empty itinerary chrome, and opens trip naming and persistence in a
       modal only after the route has a start, at least one stop, and a finish.
-- [x] A rejected stale mutation still relies on the Worker `If-Match` boundary
-      and is never automatically replayed. The browser fetches the latest account
-      revision, preserves the local itinerary draft where possible, and asks the
-      owner to review and explicitly save again. Successful wishlist mutations
-      also stop replacing an unrelated unsaved plan draft during their refresh.
+- [x] A rejected stale mutation still relies on the Worker `If-Match` boundary.
+      The browser treats revisions as monotonic, fetches the latest account state
+      after an explicit HTTP 412, preserves the local itinerary draft where
+      possible, and retries the intended write once. Network failures and second
+      conflicts are not replayed. Successful wishlist mutations also stop
+      replacing an unrelated unsaved plan draft during their refresh.
 - [x] Directions Phase 2 adds browser-only start, stop, and finish inclusion,
       a visible Drive, Transit, Walk, or Bike default, reviewed per-pair
       overrides, mixed-mode splitting, one-point Maps search, and Fly or Ferry

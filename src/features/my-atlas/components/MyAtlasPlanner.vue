@@ -1031,7 +1031,6 @@ import {
 } from "../planning/handoffs.mjs"
 import {
   formatMyAtlasPlanLoadError,
-  formatMyAtlasPlannerConflictRecovered,
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../planning/errors.mjs"
@@ -1264,7 +1263,9 @@ export default {
   },
   watch: {
     revision(value) {
-      this.plannerRevision = value
+      if (Number.isSafeInteger(value) && value > this.plannerRevision) {
+        this.plannerRevision = value
+      }
     },
     wishQuery(value) {
       this.queueWishSearch(value)
@@ -1290,6 +1291,18 @@ export default {
     this.$emit("planner-state-change", { active: false, route: [] })
   },
   methods: {
+    async revealPlanner() {
+      if (!this.open) await this.toggleOpen()
+      await this.$nextTick()
+      const reduceMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      this.$el.scrollIntoView({
+        behavior: reduceMotion ? "auto" : "smooth",
+        block: "start",
+      })
+      this.$el.querySelector(".planner-heading")?.focus({ preventScroll: true })
+    },
     async toggleOpen() {
       this.open = !this.open
       if (this.open && !this.planningLoaded && !this.pending) {
@@ -1322,6 +1335,9 @@ export default {
       this.nextActionOpen = this.nextActionOpen === action ? "" : action
     },
     emitRevision(value) {
+      if (!Number.isSafeInteger(value) || value <= this.plannerRevision) {
+        return
+      }
       this.plannerRevision = value
       this.$emit("revision-change", value)
     },
@@ -1538,8 +1554,8 @@ export default {
     ) {
       this.pending = true
       this.error = ""
-      try {
-        const result = await action(await this.token())
+      const applyMutation = async accessToken => {
+        const result = await action(accessToken)
         if (result?.revision) this.emitRevision(result.revision)
         if (applyResult) applyResult(result)
         this.announcement = success
@@ -1556,16 +1572,29 @@ export default {
           refreshed: refresh.ok && !refresh.planError,
           result,
         }
+      }
+      try {
+        const accessToken = await this.token()
+        return await applyMutation(accessToken)
       } catch (error) {
         if (error?.code === "revision_conflict") {
           const refresh = await this.loadPlanning({
             preservePlanDraft: true,
             reportError: false,
           })
-          this.error =
-            refresh.ok && !refresh.planError
-              ? formatMyAtlasPlannerConflictRecovered(error)
-              : this.errorMessage(error)
+          if (refresh.ok && !refresh.planError) {
+            try {
+              return await applyMutation(await this.token())
+            } catch (retryError) {
+              this.error = this.errorMessage(retryError)
+              return {
+                saved: false,
+                refreshed: false,
+                error: retryError,
+              }
+            }
+          }
+          this.error = this.errorMessage(error)
         } else {
           this.error = this.errorMessage(error)
         }

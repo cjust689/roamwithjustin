@@ -117,6 +117,35 @@ assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-profile-menu"/)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /openAtlasPanel\('visited'\)/)
+assert.match(ownerView, /class="my-atlas-planner-action"/)
+assert.match(
+  ownerView,
+  /async openPlanner\(\)[\s\S]*this\.\$refs\.planner\?\.revealPlanner\(\)/
+)
+assert.match(
+  plannerComponent,
+  /async revealPlanner\(\)[\s\S]*scrollIntoView[\s\S]*planner-heading/
+)
+assert.match(
+  ownerView,
+  /revision <= this\.accountProfile\.revision[\s\S]*withAccountRevisionRetry/
+)
+assert.match(
+  ownerView,
+  /error\?\.code !== "revision_conflict"[\s\S]*refreshAccountState/
+)
+assert.match(
+  ownerView,
+  /\.my-atlas-profile-button:focus[\s\S]*background: rgba\(230, 186, 104, 0\.14\)/
+)
+assert.match(
+  ownerView,
+  /\.my-atlas-account \{[\s\S]*height: auto;[\s\S]*background: transparent;[\s\S]*box-shadow: none;[\s\S]*line-height: 1\.2;/
+)
+assert.match(
+  ownerView,
+  /\.my-atlas-profile-button strong,[\s\S]*\.my-atlas-profile-button small \{[\s\S]*line-height: 1\.2;/
+)
 assert.doesNotMatch(ownerView, /<strong id="my-atlas-sharing-title">/)
 assert.doesNotMatch(ownerView, /<p>My Atlas by RoamWithJustin\.com<\/p>/)
 assert.match(plannerComponent, /buildGoogleMapsRouteHandoffs\(this\.plan/)
@@ -155,6 +184,10 @@ assert.doesNotMatch(
 assert.match(
   plannerComponent,
   /error\?\.code === "revision_conflict"[\s\S]*preservePlanDraft: true/
+)
+assert.match(
+  plannerComponent,
+  /value <= this\.plannerRevision[\s\S]*return await applyMutation/
 )
 assert.match(
   plannerComponent,

@@ -205,6 +205,10 @@ Responses expose the current revision as a strong ETag. Stale mutations return
 HTTP 412 without changing state. Allowed browser origins can read `ETag` and
 `X-Request-Id` through `Access-Control-Expose-Headers`. This is required for
 the browser to accept the new revision after a successful cross-origin write.
+Browser revision state is monotonic. A planning read that began before a pin or
+profile write cannot replace a newer revision after it finishes. If the two
+planning reads observe different revisions, the client repeats the complete
+read once so wishlist and saved-plan state come from one account version.
 
 ## Pin state
 
@@ -446,8 +450,10 @@ removals through revisioned mutations, changes visibility, and exposes a
 copyable `/my-atlas/{handle}` link only while the profile is public. Access
 tokens remain memory only. Authenticated GET requests receive one immediate
 retry when the browser rejects the network request before any HTTP response.
-Mutations are never automatically replayed, so revision and idempotency
-semantics remain explicit. The signed-out Vue
+Mutation network failures are never automatically replayed. An explicit HTTP
+412 is different because the Worker confirms that no write occurred. For that
+response only, the browser refreshes authoritative account state and retries
+the intended write once with the newer revision. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
 the handle, display name, safe visited-place projections, coordinates, optional visit dates,
@@ -555,8 +561,16 @@ controls. Existing accounts start with the disclosures closed so large saved
 collections do not dominate the page; empty accounts open Add destination to
 preserve onboarding. Adding a destination closes its entry flow and opens the
 visited list, while editing a visited entry reopens and focuses its editor.
+The overview also exposes a signed-in Plan a trip action. It closes competing
+destination panels, opens the existing private planner, scrolls its disclosure
+into the desktop panel viewport, and moves keyboard focus to its heading.
 Visited and planner collections use bounded internal scrolling when expanded.
 The Google account summary remains visible in a compact identity and action row.
+At phone width the row uses a bounded rectangular profile control, resets the
+desktop negative margin, and contains the legacy global navigation and button
+rules. Its background, height, shadow, line height, radius, and focus color are
+scoped explicitly so focus remains legible without covering the travel
+overview.
 
 The private planner has its own search field rather than depending on the
 visited-place results above it. It uses the shared local or Worker-backed My
@@ -589,11 +603,12 @@ coordinates before confirmation. It then shows only the generated Maps search
 or direction links and nonlink flight or ferry boundaries. Reloading the view
 discards these export choices.
 
-If a mutation is rejected with `revision_conflict`, the browser does not replay
-it. It reads the latest account revision, preserves the local itinerary draft
-where its wishlist references remain valid, and requires the owner to review
-and explicitly save again. This recovery keeps the Worker's optimistic
-concurrency protection intact.
+If a mutation is rejected with `revision_conflict`, the browser reads the latest
+account revision, preserves the local itinerary draft where its wishlist
+references remain valid, and retries the same intended mutation once. A second
+conflict is shown with recovery guidance and is not replayed. This recovery is
+limited to an explicit Worker rejection that confirms no state change, so the
+optimistic concurrency boundary remains intact.
 
 The planner disclosure header uses the same full-width control geometry as the
 other owner workflow sections. Its closed and open states retain the shared

@@ -354,6 +354,11 @@ assert.equal(
   (await fixtureWorkerCatalog.resolve("geonames:3621138")).name,
   "Uvita"
 )
+const resolvedYellowstone = await fixtureWorkerCatalog.resolve(
+  "geonames:5843642"
+)
+assert.equal(resolvedYellowstone.placeType, "spot")
+assert.equal(resolvedYellowstone.spotKind, "National park")
 assert.equal(await fixtureWorkerCatalog.resolve("geonames:999999999"), null)
 const workerParis = await fixtureWorkerCatalog.search("Paris", { limit: 8 })
 assert.equal(workerParis.catalogRevision, options.revision)

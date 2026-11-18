@@ -154,7 +154,11 @@
           </blockquote>
         </div>
 
-        <div class="my-atlas-overview-actions" aria-label="Atlas actions">
+        <div
+          class="my-atlas-overview-actions"
+          :class="{ 'has-planner-action': accountProfile }"
+          aria-label="Atlas actions"
+        >
           <button
             type="button"
             :class="{ 'is-active': addPlaceOpen }"
@@ -173,6 +177,17 @@
             @click="openAtlasPanel('visited')"
           >
             Visited <b>{{ pinnedPlaces.length }}</b>
+          </button>
+          <button
+            v-if="accountProfile"
+            type="button"
+            class="my-atlas-planner-action"
+            :class="{ 'is-active': plannerActive }"
+            :aria-expanded="String(plannerActive)"
+            aria-controls="my-atlas-planner-content"
+            @click="openPlanner"
+          >
+            Plan a trip
           </button>
         </div>
       </section>
@@ -488,6 +503,7 @@
 
       <MyAtlasPlanner
         v-if="accountProfile"
+        ref="planner"
         :api-base-url="apiBaseUrl"
         :pins="pins"
         :profile-public="accountProfile.public"
@@ -792,8 +808,21 @@ export default {
       this.profileMenuOpen = false
       if (nextAdd) this.$nextTick(() => this.$refs.searchInput?.focus())
     },
+    async openPlanner() {
+      this.addPlaceOpen = false
+      this.visitedOpen = false
+      this.profileMenuOpen = false
+      await this.$nextTick()
+      await this.$refs.planner?.revealPlanner()
+    },
     updatePlanningRevision(revision) {
-      if (!this.accountProfile || !Number.isSafeInteger(revision)) return
+      if (
+        !this.accountProfile ||
+        !Number.isSafeInteger(revision) ||
+        revision <= this.accountProfile.revision
+      ) {
+        return
+      }
       this.accountProfile = { ...this.accountProfile, revision }
     },
     handlePlannerPinsCreated(pins) {
@@ -845,6 +874,56 @@ export default {
       this.plannerRoute = []
       this.workflowSectionsInitialized = false
       this.announcement = "Your My Atlas application data was deleted."
+    },
+    applyAccountState(state, { initializeWorkflow = false } = {}) {
+      this.accountProfile = state.profile
+      this.accountMissing = false
+      this.pins = state.pins.map(pin => ({
+        pinId: pin.pinId,
+        placeId: pin.placeId,
+        visitedDates: pin.visitedDates,
+        visitedYears: pin.visitedYears,
+        memory: pin.memory,
+      }))
+      if (initializeWorkflow && !this.workflowSectionsInitialized) {
+        this.addPlaceOpen = false
+        this.visitedOpen = false
+        this.profileMenuOpen = false
+        this.workflowSectionsInitialized = true
+      }
+      state.pins.forEach(pin => {
+        this.$set(this.loadedPlaces, pin.placeId, {
+          placeId: pin.placeId,
+          placeType: pin.placeType,
+          name: pin.name,
+          countryCode: pin.countryCode,
+          admin1Name: pin.admin1Name,
+          countryName: pin.countryName,
+          continent: pin.continent,
+          featureCode: pin.featureCode,
+          spotCategory: pin.spotCategory,
+          spotKind: pin.spotKind,
+          coordinates: pin.coordinates,
+          deprecated: false,
+        })
+      })
+    },
+    async refreshAccountState(accessToken) {
+      const state = await fetchMyAtlasState({
+        apiBaseUrl: this.apiBaseUrl,
+        accessToken,
+      })
+      this.applyAccountState(state)
+      return state
+    },
+    async withAccountRevisionRetry(accessToken, action) {
+      try {
+        return await action(this.accountProfile.revision)
+      } catch (error) {
+        if (error?.code !== "revision_conflict") throw error
+        const state = await this.refreshAccountState(accessToken)
+        return action(state.profile.revision)
+      }
     },
     queuePlaceSearch(value, delay = 350) {
       window.clearTimeout(this.searchTimer)
@@ -942,37 +1021,7 @@ export default {
           apiBaseUrl: this.apiBaseUrl,
           accessToken: token,
         })
-        this.accountProfile = state.profile
-        this.accountMissing = false
-        this.pins = state.pins.map(pin => ({
-          pinId: pin.pinId,
-          placeId: pin.placeId,
-          visitedDates: pin.visitedDates,
-          visitedYears: pin.visitedYears,
-          memory: pin.memory,
-        }))
-        if (!this.workflowSectionsInitialized) {
-          this.addPlaceOpen = false
-          this.visitedOpen = false
-          this.profileMenuOpen = false
-          this.workflowSectionsInitialized = true
-        }
-        state.pins.forEach(pin => {
-          this.$set(this.loadedPlaces, pin.placeId, {
-            placeId: pin.placeId,
-            placeType: pin.placeType,
-            name: pin.name,
-            countryCode: pin.countryCode,
-            admin1Name: pin.admin1Name,
-            countryName: pin.countryName,
-            continent: pin.continent,
-            featureCode: pin.featureCode,
-            spotCategory: pin.spotCategory,
-            spotKind: pin.spotKind,
-            coordinates: pin.coordinates,
-            deprecated: false,
-          })
-        })
+        this.applyAccountState(state, { initializeWorkflow: true })
         this.$nextTick(() => this.showAccountTutorialIfNeeded())
       } catch (error) {
         if (error.status === 404) {
@@ -1156,16 +1205,18 @@ export default {
         this.accountError = ""
         try {
           const token = await getMyAtlasApiAccessToken()
-          const result = await createMyAtlasPin({
-            apiBaseUrl: this.apiBaseUrl,
-            accessToken: token,
-            ...(place.placeType === "custom" && this.pendingCustomPlace
-              ? { customPlace: this.pendingCustomPlace }
-              : { placeId: place.placeId }),
-            visitedDates,
-            memory,
-            revision: this.accountProfile.revision,
-          })
+          const result = await this.withAccountRevisionRetry(token, revision =>
+            createMyAtlasPin({
+              apiBaseUrl: this.apiBaseUrl,
+              accessToken: token,
+              ...(place.placeType === "custom" && this.pendingCustomPlace
+                ? { customPlace: this.pendingCustomPlace }
+                : { placeId: place.placeId }),
+              visitedDates,
+              memory,
+              revision,
+            })
+          )
           this.pins = [...this.pins, result.pin]
           this.accountProfile = {
             ...this.accountProfile,
@@ -1193,10 +1244,15 @@ export default {
           this.visitedOpen = true
           this.announcement = result.pin.name + " was added to your map."
         } catch (error) {
+          const reference = error?.requestId
+            ? ` Reference: ${error.requestId}.`
+            : ""
           this.pinEditorError =
             error.code === "revision_conflict"
-              ? "Your Atlas changed in another request. Reload and retry."
-              : "This destination could not be added."
+              ? `Your Atlas changed again while saving. Retry once.${reference}`
+              : error.code === "place_unavailable"
+                ? `This catalog destination is temporarily unavailable.${reference}`
+                : `This destination could not be added.${reference}`
         } finally {
           this.accountPending = false
         }
@@ -1223,14 +1279,16 @@ export default {
       this.pinEditorError = ""
       try {
         const token = await getMyAtlasApiAccessToken()
-        const result = await updateMyAtlasPin({
-          apiBaseUrl: this.apiBaseUrl,
-          accessToken: token,
-          pinId: pin.pinId,
-          visitedDates,
-          memory,
-          revision: this.accountProfile.revision,
-        })
+        const result = await this.withAccountRevisionRetry(token, revision =>
+          updateMyAtlasPin({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            pinId: pin.pinId,
+            visitedDates,
+            memory,
+            revision,
+          })
+        )
         this.pins = this.pins.map(candidate =>
           candidate.pinId === pin.pinId
             ? { ...candidate, ...result.pin }
@@ -1256,12 +1314,16 @@ export default {
         this.accountError = ""
         try {
           const token = await getMyAtlasApiAccessToken()
-          const revision = await deleteMyAtlasPin({
-            apiBaseUrl: this.apiBaseUrl,
-            accessToken: token,
-            pinId: pin.pinId,
-            revision: this.accountProfile.revision,
-          })
+          const revision = await this.withAccountRevisionRetry(
+            token,
+            currentRevision =>
+              deleteMyAtlasPin({
+                apiBaseUrl: this.apiBaseUrl,
+                accessToken: token,
+                pinId: pin.pinId,
+                revision: currentRevision,
+              })
+          )
           this.pins = this.pins.filter(item => item.pinId !== pin.pinId)
           this.accountProfile = {
             ...this.accountProfile,
@@ -1446,12 +1508,17 @@ export default {
       this.accountError = ""
       try {
         const token = await getMyAtlasApiAccessToken()
-        this.accountProfile = await updateMyAtlasSharing({
-          apiBaseUrl: this.apiBaseUrl,
-          accessToken: token,
-          public: !this.accountProfile.public,
-          revision: this.accountProfile.revision,
-        })
+        const publish = !this.accountProfile.public
+        this.accountProfile = await this.withAccountRevisionRetry(
+          token,
+          revision =>
+            updateMyAtlasSharing({
+              apiBaseUrl: this.apiBaseUrl,
+              accessToken: token,
+              public: publish,
+              revision,
+            })
+        )
         this.announcement = this.accountProfile.public
           ? "Your Atlas is now available through your share link."
           : "Your Atlas is private."
@@ -1566,6 +1633,10 @@ export default {
   gap: 0.45rem;
   padding-top: 0.7rem;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.my-atlas-overview-actions.has-planner-action {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .my-atlas-overview-actions button {
@@ -1796,11 +1867,18 @@ export default {
 
 .my-atlas-account {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  justify-content: flex-end;
+  justify-items: end;
+  width: 100%;
+  height: auto;
   min-height: 2.75rem;
   margin: -0.65rem 0 0.85rem;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+  line-height: 1.2;
 }
 
 .my-atlas-account:focus {
@@ -1834,20 +1912,32 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
+  box-sizing: border-box;
+  width: min(100%, 18rem);
   max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 0.85rem;
   color: #edf7f2;
   background: rgba(230, 186, 104, 0.08);
+  appearance: none;
+  line-height: 1.2;
 }
 
 .my-atlas-profile-button > span {
   display: grid;
   min-width: 0;
+  line-height: 1.2;
   text-align: left;
 }
 
 .my-atlas-profile-button strong,
 .my-atlas-profile-button small {
+  display: block;
   overflow: hidden;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1862,6 +1952,16 @@ export default {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.54rem;
+}
+
+.my-atlas-sign-in:focus,
+.my-atlas-sign-in:focus-visible,
+.my-atlas-profile-button:focus,
+.my-atlas-profile-button:focus-visible {
+  border-color: #e6ba68;
+  background: rgba(230, 186, 104, 0.14);
+  outline: 2px solid rgba(230, 186, 104, 0.35);
+  outline-offset: 0.12rem;
 }
 
 .my-atlas-profile-menu {
@@ -2502,17 +2602,31 @@ export default {
 
 @media (max-width: 480px) {
   .my-atlas-account {
-    justify-content: stretch;
+    justify-items: stretch;
+    min-height: 0;
+    margin: 0 0 0.85rem;
   }
 
   .my-atlas-sign-in,
   .my-atlas-profile-button {
     width: 100%;
+    height: auto;
+    min-height: 2.75rem;
+    border-radius: 0.85rem;
+    transform: none;
   }
 
   .my-atlas-profile-menu {
     grid-template-columns: 1fr;
     width: 100%;
+  }
+
+  .my-atlas-overview-actions.has-planner-action {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-atlas-planner-action {
+    grid-column: 1 / -1;
   }
 }
 </style>
