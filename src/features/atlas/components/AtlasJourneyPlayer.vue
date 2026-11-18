@@ -15,7 +15,6 @@
         aria-label="Expand guided journey controls"
         @click="setCollapsed(false)"
       >
-        <span>{{ compactEyebrow }}</span>
         <strong>{{ compactTitle }}</strong>
         <b class="atlas-guided-expand" aria-hidden="true">&#8964;</b>
       </button>
@@ -40,7 +39,6 @@
     <template v-else>
       <header>
         <div>
-          <span>Guided journey</span>
           <strong>{{ journey.title }}</strong>
         </div>
         <div class="atlas-guided-header-actions">
@@ -191,17 +189,6 @@ export default {
       if (!this.journey?.stopCount) return 0
       return (this.displayPosition / this.journey.stopCount) * 100
     },
-    compactEyebrow() {
-      if (this.status === "idle") return "Guided journey"
-      if (this.status === "complete") return "Journey complete"
-      if (this.status === "traveling") {
-        return `Traveling · stop ${this.displayPosition} of ${this.journey.stopCount}`
-      }
-      if (this.status === "paused-travel") {
-        return `Journey paused · stop ${this.displayPosition} of ${this.journey.stopCount}`
-      }
-      return `Paused at stop ${this.displayPosition} of ${this.journey.stopCount}`
-    },
     compactTitle() {
       return this.currentStop?.title || this.journey.title
     },
@@ -329,18 +316,10 @@ export default {
   transform: translateY(-50%);
 }
 
-.atlas-guided-summary span {
-  color: #f6bd60;
-  font-size: 0.67rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .atlas-guided-summary strong {
   overflow: hidden;
   width: 100%;
-  margin-top: 0.08rem;
+  margin-top: 0;
   font-size: 0.86rem;
   text-align: left;
   text-overflow: ellipsis;
@@ -384,7 +363,6 @@ export default {
   flex-direction: column;
 }
 
-.atlas-guided header span,
 .atlas-guided-stop span {
   color: #f6bd60;
   font-size: 0.72rem;

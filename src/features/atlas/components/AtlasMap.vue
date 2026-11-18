@@ -692,7 +692,6 @@ export default {
       const index = this.previewCounts[node.id] || 0
       const card = document.createElement("article")
       const content = document.createElement("div")
-      const eyebrow = document.createElement("span")
       const title = document.createElement("strong")
       const summary = document.createElement("p")
 
@@ -706,10 +705,9 @@ export default {
       } else {
         this.previewCounts[node.id] = 0
       }
-      eyebrow.textContent = node.eyebrow
       title.textContent = node.title
       summary.textContent = node.summary
-      content.append(eyebrow, title, summary)
+      content.append(title, summary)
       card.append(content)
 
       this.popup = new maplibregl.Popup({

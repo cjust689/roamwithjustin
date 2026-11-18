@@ -15,10 +15,8 @@
           &larr; All travel stories
         </router-link>
         <div class="story-hero-copy">
-          <span class="story-eyebrow">
-            {{ `Travel story / ${trip.dates}` }}
-          </span>
           <h1 :id="`story-title-${trip.id}`">{{ trip.name }}</h1>
+          <p class="story-date">{{ trip.dates }}</p>
           <p v-if="trip.description">{{ trip.description }}</p>
           <div class="story-hero-actions">
             <router-link
@@ -63,7 +61,6 @@
         id="journey-preview"
         class="story-shell journey-preview"
       >
-        <span class="story-eyebrow">Places on this journey</span>
         <h2>Explore {{ trip.name }} by place.</h2>
 
         <div
@@ -85,13 +82,6 @@
         class="story-shell itinerary-section"
       >
         <header class="section-intro">
-          <span class="story-eyebrow">
-            {{
-              trip.itineraryMode === "chapters"
-                ? "Experience chapters"
-                : "The route, day by day"
-            }}
-          </span>
           <h2>Inside the journey</h2>
           <p>
             {{ itineraryIntroduction }}
@@ -198,7 +188,6 @@
         class="story-shell experience-section"
       >
         <header class="section-intro compact">
-          <span class="story-eyebrow">Stories within the journey</span>
           <h2>Experiences and moments</h2>
         </header>
 
@@ -275,7 +264,6 @@
       >
         <header class="section-intro compact">
           <div>
-            <span class="story-eyebrow">Latest media</span>
             <h2>Photography and video</h2>
           </div>
           <p>
@@ -325,7 +313,6 @@
         class="story-shell story-support-section"
       >
         <header class="section-intro compact">
-          <span class="story-eyebrow">Where we reset</span>
           <h2>Where we stayed</h2>
         </header>
         <div class="lodging-grid">
@@ -373,7 +360,6 @@
 
       <section v-if="trip.hasFieldNotes" class="story-shell story-details-grid">
         <article v-if="trip.gearHighlights.length" class="story-detail-card">
-          <span class="story-eyebrow">Field kit</span>
           <h2>Gear highlights</h2>
           <div class="gear-list">
             <a
@@ -400,7 +386,6 @@
           v-if="trip.tips.length || trip.travelNotes.length"
           class="story-detail-card"
         >
-          <span class="story-eyebrow">Before you go</span>
           <h2>Tips and notes</h2>
           <div class="notes-grid">
             <div>
@@ -426,7 +411,6 @@
         class="story-shell atlas-handoff"
       >
         <div>
-          <span class="story-eyebrow">Change perspective</span>
           <h2>See how the story moves across the map.</h2>
           <p>
             Continue geographically through the same canonical stops, route,
@@ -763,7 +747,6 @@ export default {
   text-shadow: 0 8px 40px rgba(0, 0, 0, 0.38);
 }
 
-.story-eyebrow,
 .story-facts dt,
 .day-heading > span,
 .day-heading p,
@@ -778,12 +761,19 @@ export default {
 
 .story-hero h1 {
   max-width: 900px;
-  margin: 0.65rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(3.6rem, 9vw, 8.5rem);
   font-weight: 500;
   letter-spacing: -0.065em;
   line-height: 0.88;
+}
+
+.story-hero-copy > .story-date {
+  margin-top: 0.85rem;
+  color: #f6bd60;
+  font-size: 0.86rem !important;
+  font-weight: 700;
 }
 
 .story-hero-copy > p {
@@ -869,7 +859,7 @@ export default {
 
 .journey-preview h2 {
   max-width: 780px;
-  margin: 0.55rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(2.2rem, 6vw, 4.5rem);
   font-weight: 500;
@@ -922,14 +912,10 @@ export default {
   margin-bottom: clamp(2.5rem, 6vw, 5rem);
 }
 
-.section-intro .story-eyebrow {
-  grid-column: 1;
-}
-
 .section-intro h2,
 .story-detail-card h2,
 .atlas-handoff h2 {
-  margin: 0.55rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(2.7rem, 6vw, 5rem);
   font-weight: 500;

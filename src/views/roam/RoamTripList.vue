@@ -2,7 +2,6 @@
   <main class="story-library">
     <section class="library-intro">
       <div>
-        <span class="eyebrow">Travel stories and field notes</span>
         <h1>Follow the journey beyond the pin.</h1>
       </div>
       <div class="intro-copy">
@@ -95,7 +94,6 @@ export default {
   padding-bottom: clamp(2.5rem, 6vw, 5rem);
 }
 
-.eyebrow,
 .story-status,
 .story-body > span {
   color: #f6bd60;
@@ -107,7 +105,7 @@ export default {
 
 .library-intro h1 {
   max-width: 760px;
-  margin: 0.75rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 7vw, 6.5rem);
   font-weight: 500;

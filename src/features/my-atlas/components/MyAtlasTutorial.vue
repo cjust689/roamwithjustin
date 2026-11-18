@@ -35,7 +35,6 @@
 
       <div class="my-atlas-tutorial-copy">
         <div class="my-atlas-tutorial-meta">
-          <span>{{ currentStep.eyebrow }}</span>
           <small>Step {{ stepIndex + 1 }} of {{ steps.length }}</small>
         </div>
         <h2 id="my-atlas-tutorial-title" ref="title" tabindex="-1">
@@ -86,14 +85,12 @@
 const tutorials = Object.freeze({
   preview: Object.freeze([
     Object.freeze({
-      eyebrow: "A personal travel map",
       title: "See your travels take shape.",
       body: "My Atlas turns the places you have visited into a map you can explore, replay, and share when you choose.",
       points: Object.freeze(["Private by default", "Visit years are optional"]),
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Build your Atlas",
       title: "Add places one at a time.",
       body: "Search for a country, city, national park, or iconic spot, choose the right match, and add it to your Atlas. Add one or more visit years, or leave the date open.",
       points: Object.freeze([
@@ -103,7 +100,6 @@ const tutorials = Object.freeze({
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Explore your history",
       title: "Watch your map grow.",
       body: "Filter by year, move through destinations, and play a timeline that reveals how your Atlas grew. Paths are visual connections, not a recorded route.",
       points: Object.freeze([
@@ -113,7 +109,6 @@ const tutorials = Object.freeze({
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Save it when ready",
       title: "Your account begins private.",
       body: "Sign in with Google, use your invitation, and create your private Atlas. Nothing becomes public unless you choose to share it.",
       points: Object.freeze([
@@ -125,7 +120,6 @@ const tutorials = Object.freeze({
   ]),
   account: Object.freeze([
     Object.freeze({
-      eyebrow: "Your quick start",
       title: "Your private Atlas is ready.",
       body: "Begin with any place that matters to you. Your account stays private while you build and refine your map.",
       points: Object.freeze([
@@ -135,7 +129,6 @@ const tutorials = Object.freeze({
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Add a destination",
       title: "Search, choose, and mark it.",
       body: "Use the place search, choose the correct result, then add an optional visit year. You can edit years later or record repeat visits.",
       points: Object.freeze([
@@ -145,7 +138,6 @@ const tutorials = Object.freeze({
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Use your map",
       title: "Explore every angle.",
       body: "Open Map controls to filter by year, show or hide paths, and play your timeline. Select a pin or use Previous and Next to move through destinations.",
       points: Object.freeze([
@@ -155,7 +147,6 @@ const tutorials = Object.freeze({
       action: "",
     }),
     Object.freeze({
-      eyebrow: "Make it yours",
       title: "Share only when it feels ready.",
       body: "Export a Story image whenever you like. If you want others to explore your Atlas, turn on sharing and copy your personal link.",
       points: Object.freeze([
@@ -449,7 +440,7 @@ export default {
 .my-atlas-tutorial-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 1rem;
   color: #e6ba68;
   text-transform: uppercase;

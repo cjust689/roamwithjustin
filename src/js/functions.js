@@ -19,15 +19,15 @@ export const getRandom = inputArray => {
 
 export const randomQuote = () => {
   const quoteArray = [
-    `"Not all those who wander are lost." — J.R.R. Tolkien`,
-    `"The real voyage of discovery consists not in seeking new landscapes, but in having new eyes." — Marcel Proust`,
-    `"Collect moments, not things." — Unknown`,
-    `"Photography is the pause button of life." — Ty Holland`,
-    `"The best stories are the ones we live." — Roam with Justin`,
-    `"In the end, we only regret the chances we didn’t take." — Lewis Carroll (attributed)`,
-    `"It’s not about the destination. It’s about the feeling you carry home." — Roam with Justin`,
-    `"Take only pictures, leave only footprints." — Unknown`,
-    `"We travel not to escape life, but for life not to escape us." — Unknown`,
+    `"Not all those who wander are lost." Author: J.R.R. Tolkien`,
+    `"The real voyage of discovery consists not in seeking new landscapes, but in having new eyes." Author: Marcel Proust`,
+    `"Collect moments, not things." Author: Unknown`,
+    `"Photography is the pause button of life." Author: Ty Holland`,
+    `"The best stories are the ones we live." Author: Roam with Justin`,
+    `"In the end, we only regret the chances we didn’t take." Author: Lewis Carroll (attributed)`,
+    `"It’s not about the destination. It’s about the feeling you carry home." Author: Roam with Justin`,
+    `"Take only pictures, leave only footprints." Author: Unknown`,
+    `"We travel not to escape life, but for life not to escape us." Author: Unknown`,
   ]
 
   const random = getRandom(quoteArray)

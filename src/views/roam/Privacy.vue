@@ -2,7 +2,6 @@
   <main class="privacy-page">
     <article>
       <header>
-        <span>Site information</span>
         <h1>Privacy and advertising</h1>
         <p>Effective November 17, 2026</p>
       </header>
@@ -196,16 +195,8 @@ export default {
   padding-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
-.privacy-page header span {
-  color: #f6bd60;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
 .privacy-page h1 {
-  margin: 0.65rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 500;

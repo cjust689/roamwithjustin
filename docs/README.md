@@ -132,6 +132,11 @@ completely, then reconcile the relevant owner-supplied travel context against
 canonical source and registered media. The framework governs voice and pacing;
 it never turns an unverified detail into fact.
 
+Public interface copy also avoids Unicode dash punctuation and redundant
+decorative labels above headings. Small labels are reserved for functional
+context that is not otherwise visible, such as dates, state, category, or
+controls. `npm run content:validate` enforces those source-level boundaries.
+
 - [Living Atlas content strategy](reference/atlas-content-strategy.md)
 - [R2 video delivery](reference/r2-video-delivery.md)
 - [AdSense manual placement and activation](reference/adsense.md)

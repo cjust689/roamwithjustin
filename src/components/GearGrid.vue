@@ -2,7 +2,6 @@
   <main class="gear-grid container">
     <Banner v-if="hasAffiliateLinks" />
     <header>
-      <p class="eyebrow">Creator tested</p>
       <h1 class="page-title">Gear I use</h1>
       <p class="subtitle">
         Products appear here only after their identity, firsthand use, image,
@@ -80,15 +79,6 @@ export default {
 header {
   max-width: 44rem;
   margin-bottom: 2.5rem;
-}
-
-.eyebrow {
-  margin: 0 0 0.45rem;
-  color: #e6ba68;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .page-title {

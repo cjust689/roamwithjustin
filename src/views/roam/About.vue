@@ -5,20 +5,20 @@
         <h4>About</h4>
         <p>
           <span class="yellow-text">Roam with Justin</span> began as a personal
-          journey — one that started in college with my first camera and a
-          couple of Photoshop classes. What began as a creative outlet quickly
-          turned into a passion for storytelling through visuals.
+          journey that started in college with my first camera and a couple of
+          Photoshop classes. What began as a creative outlet quickly turned into
+          a passion for storytelling through visuals.
         </p>
 
         <p>
           I’ve always been driven by curiosity and a love for the way light,
           movement, and people tell stories. Whether it’s a still moment in the
           middle of a rainforest or a fleeting glance in a city street, I’m
-          drawn to the awe in the world — and the people who feel it.
+          drawn to the awe in the world and the people who feel it.
         </p>
 
         <p>
-          This platform isn’t about showing off a destination — it’s about
+          This platform isn’t about showing off a destination. It’s about
           capturing the soul of a moment and helping others feel like they’re
           part of the story. Through travel guides, photo essays, and cinematic
           reels, I aim to inspire others to explore more intentionally, notice
@@ -27,7 +27,7 @@
 
         <p>
           <span class="yellow-text">Roam with Justin</span> is where adventure
-          meets reflection — one frame at a time.
+          meets reflection, one frame at a time.
         </p>
 
         <h5>
@@ -35,10 +35,10 @@
           behind.”
         </h5>
         <p>
-          Roam with Justin is a passion project — built on curiosity, love of
-          the journey, and a whole lot of caffeine. If you enjoy my work, you
-          can support it by exploring some of the gear I actually use. A few
-          links on this site are affiliate links, which means I may earn a small
+          Roam with Justin is a passion project built on curiosity, love of the
+          journey, and a whole lot of caffeine. If you enjoy my work, you can
+          support it by exploring some of the gear I actually use. A few links
+          on this site are affiliate links, which means I may earn a small
           commission if you buy through them. It costs you nothing extra, but it
           helps keep the wheels turning.
         </p>

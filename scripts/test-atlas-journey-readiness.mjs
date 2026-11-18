@@ -25,6 +25,7 @@ assert.match(
   detailPanel,
   /More places, stories, photographs, and\s+films will be added over time\./
 )
-assert.match(detailPanel, /`First look \/ \$\{this\.node\.eyebrow\}`/)
+assert.doesNotMatch(detailPanel, /displayEyebrow/)
+assert.doesNotMatch(detailPanel, /child\.eyebrow/)
 
 console.log("Atlas Journey readiness copy tests passed.")

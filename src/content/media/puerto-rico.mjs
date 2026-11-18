@@ -328,7 +328,7 @@ export const puertoRicoMedia = Object.freeze([
       placeId: "arte-aguadilla",
       capturedAt: null,
     },
-    defaultAlt: "ARTe – Aguadilla Rooftop Experience travel photograph",
+    defaultAlt: "ARTe Aguadilla Rooftop Experience travel photograph",
   },
   {
     id: "image-puerto-rico-cueva-del-indio",
@@ -746,7 +746,7 @@ export const puertoRicoMedia = Object.freeze([
       placeId: "arte-aguadilla",
       capturedAt: null,
     },
-    defaultAlt: "ARTe – Aguadilla Rooftop Experience travel photograph",
+    defaultAlt: "ARTe Aguadilla Rooftop Experience travel photograph",
   },
   {
     id: "image-puerto-rico-puerto-rico-crash-boat",

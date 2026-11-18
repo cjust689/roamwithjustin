@@ -59,6 +59,7 @@ verification:
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
+    - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
     - Pull request 137 passed validation run 44347357469 and merged the planner redesign to develop as eecbc6590d47d526a376525c18e1e6399f95bbc2; develop validation run 44347715150 then succeeded
     - Pull request 138 reused that successful validation and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages run 44348107246 built and deployed the production merge successfully
@@ -83,7 +84,6 @@ verification:
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
     - Headless Chrome verified the feature-gated My Atlas homepage card at desktop and 390 pixel mobile widths, with no horizontal overflow and navigation to /my-atlas
-    - Headless Chrome at 1280 and 390 pixel widths verified the simplified homepage presents only Travel Atlas and My Atlas discovery cards, each with an eyebrow, title, and action; npm run lint and npm run build passed
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
     - Headless Chrome verified that My Atlas attribution begins as a compact info button and expands on activation without removing provider attribution
     - Headless Chrome verified the four-step pre-account walkthrough and first-account quick start at 390 pixel mobile and 1200 pixel desktop widths, including completion targets, persistent dismissal, and no horizontal overflow
@@ -609,8 +609,9 @@ date and favorite-memory editor. The form states that this owner-supplied name
 and position become visible if the Atlas is made public.
 
 When the My Atlas route flag is enabled, the public homepage presents two
-concise discovery cards: the Travel Atlas and My Atlas. Each keeps only its
-eyebrow, title, and action so the photography carries the exploratory choice.
+concise discovery cards: the Travel Atlas and My Atlas. Each uses a direct
+title and action so the photography carries the exploratory choice without a
+redundant decorative label.
 Journey guides remain reachable through the Travel Atlas instead of occupying
 a redundant homepage card. The My Atlas action routes directly to `/my-atlas`.
 Disabled builds omit that card together with the route, so the homepage cannot
