@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - gear-system
   - gear-ingestion-cli
@@ -34,14 +34,18 @@ verification:
     - npm run analytics:test
     - npm run content:validate
     - npm run docs:audit
+    - pull requests 157 and 158
+    - Pages run 44407947707
+    - live Gear page and deployed bundle verification 2026-11-18
 ---
 
 # Gear and affiliate readiness audit, 2026-11-17
 
 This audit reconciles the Gear ingestion, affiliate activation, and optional AI
-proposals against current source. It records repository behavior only. It does
+proposals against current source. The implemented foundation was promoted to
+production on 2026-11-18 through protected pull requests 157 and 158. It does
 not establish approval in any affiliate program, ownership of a product,
-rights to a product image, received GA4 events, or a production deployment.
+rights to a product image, received GA4 events, or affiliate conversions.
 
 ## Repository decisions
 
@@ -74,6 +78,12 @@ rights to a product image, received GA4 events, or a production deployment.
 - Registered Amazon Associates as an owner-supplied affiliate Partner with
   `amazon.com`, `amzn.to`, and `a.co` as permitted hosts. The exact supplied URL
   remains unchanged and no automatic tag resolver is active.
+- Promoted the implementation through validation runs 44406793123,
+  44407203277, and 44407591044. Pages run 44407947707 deployed production
+  merge `58aa42a280775d6efeb150f9b6eec8339be1dcda`.
+- Verified the rendered production Gear empty state and exact deployed bundle
+  markers for the Amazon Associates disclosure, `partner_click`, and
+  `gear_catalog`. This does not claim a received analytics event or conversion.
 
 ## Remaining gates for the first real product
 
