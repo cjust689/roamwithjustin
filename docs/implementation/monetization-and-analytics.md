@@ -104,9 +104,15 @@ verification:
 - [x] Added factual Expedia script behavior to the public privacy notice.
 - [x] Promoted through protected pull requests 123 and 124. Feature,
   `develop`, and production checks passed. Pages run `44210436840` deployed
-  production merge `898d801`. Live browser verification confirmed the
-  visitor gate, disclosure, script source, two rendered provider iframes,
-  campaign reference, and distinct stays and flights Pubrefs.
+  production merge `898d801`. The first post-deployment activation check
+  correctly found that the provider script downloaded but left the banners
+  empty because its DOM ready listener was registered after the page was ready.
+- [x] Corrective pull requests 125 and 126 passed feature, `develop`, and
+  production validation. Pages run `44213345541` deployed production merge
+  `37761c8`. A new isolated live-browser session verified zero Expedia requests
+  before activation, one exact provider script after activation, two visible
+  `728x90` provider iframes, campaign reference `1101l6yKm4`, distinct stays
+  and flights Pubrefs, and no loading error.
 - [ ] Owner review of the disclosure and privacy copy.
 - [ ] Verify final Expedia destinations, Pubref attribution, program
   eligibility, and commissions in the provider dashboard. Verify direct
