@@ -4,6 +4,7 @@ export const EXPEDIA_BANNER_SCRIPT_URL =
 
 export function loadExpediaBannerScript({
   documentObject = typeof document === "undefined" ? null : document,
+  windowObject = typeof window === "undefined" ? null : window,
 } = {}) {
   if (!documentObject?.createElement) {
     return Promise.reject(new Error("Expedia banners require a browser document."))
@@ -18,7 +19,23 @@ export function loadExpediaBannerScript({
     script.className = "eg-affiliate-banners-script"
     script.src = EXPEDIA_BANNER_SCRIPT_URL
     script.async = true
-    script.onload = () => resolve(script)
+    script.onload = () => {
+      try {
+        const bannerState = windowObject?.eg?.affiliate?.banners
+        if (
+          documentObject.readyState !== "loading" &&
+          bannerState?.initialized &&
+          !bannerState.loaded &&
+          typeof windowObject.dispatchEvent === "function"
+        ) {
+          const EventConstructor = windowObject.Event || Event
+          windowObject.dispatchEvent(new EventConstructor("DOMContentLoaded"))
+        }
+        resolve(script)
+      } catch {
+        reject(new Error("Expedia travel options could not be initialized."))
+      }
+    }
     script.onerror = () =>
       reject(new Error("Expedia travel options could not be loaded."))
 

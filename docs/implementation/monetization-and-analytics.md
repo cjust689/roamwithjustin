@@ -92,14 +92,26 @@ verification:
   flights Pubrefs.
 - [x] Added one disclosed public Utah Journey planning block. It loads the
   fixed Expedia script only after explicit visitor activation and retries
-  without retaining a duplicate loader.
-- [x] Reused `partner_click` for lodging and affiliate actions, with stable
-  Partner IDs and public Journey context. No full outbound URL or private My
-  Atlas data enters the custom event.
+  without retaining a duplicate loader. A compatibility adapter invokes the
+  provider's one-time DOM ready callback when the visitor loads it after the
+  page is already ready.
+- [x] Reused `partner_click` for lodging and observable direct Partner actions,
+  with stable Partner IDs and public Journey context. Expedia banner actions
+  remain inside provider-controlled cross-origin iframes and use their exact
+  campaign reference plus unique Pubrefs instead of fabricated local click
+  telemetry. No full outbound URL or private My Atlas data enters the custom
+  event.
 - [x] Added factual Expedia script behavior to the public privacy notice.
+- [x] Promoted through protected pull requests 123 and 124. Feature,
+  `develop`, and production checks passed. Pages run `44210436840` deployed
+  production merge `898d801`. Live browser verification confirmed the
+  visitor gate, disclosure, script source, two rendered provider iframes,
+  campaign reference, and distinct stays and flights Pubrefs.
 - [ ] Owner review of the disclosure and privacy copy.
-- [ ] Deploy and verify Expedia banner rendering, destinations, Pubref
-  attribution, program eligibility, and GA4 receipt in external dashboards.
+- [ ] Verify final Expedia destinations, Pubref attribution, program
+  eligibility, and commissions in the provider dashboard. Verify direct
+  lodging `partner_click` events separately in GA4; cross-origin banner clicks
+  are not locally observable.
 - [ ] Complete mobile, desktop, keyboard, and screen reader QA on the deployed
   public Journey.
 

@@ -107,7 +107,15 @@ received event data require external owner verification.
   Expedia banner configurations for stays and flights. Their unique Pubrefs
   distinguish placements in provider reporting. The external Expedia script
   loads only after the visitor activates the disclosed planning block, and a
-  retry replaces rather than duplicates the loader.
+  retry replaces rather than duplicates the loader. Expedia's current loader
+  waits for a `window` DOM ready event even when it is requested after the page
+  is ready, so the adapter invokes that provider callback once after the
+  visitor-authorized script initializes. The provider then renders each offer
+  inside a cross-origin iframe.
+- Cross-origin Expedia banner clicks cannot be observed truthfully as local
+  `partner_click` events. Their campaign reference and unique Pubrefs own
+  provider attribution. Direct lodging and Partner anchors continue to emit
+  `partner_click` through the shared first-party adapter.
 - Affiliate-disclosure UI exists in the banner, Gear, About, Affiliates, and
   Journey gear presentation.
 - A legacy affiliate page reads partner cards from
@@ -153,10 +161,13 @@ received event data require external owner verification.
 - No consent manager is implemented. The local opt-out and browser privacy
   signals do not substitute for a policy and jurisdiction appropriate consent
   platform.
-- Expedia program status, rendered production banners, provider-side Pubref
-  attribution, commission eligibility, and GA4 receipt remain externally
-  unverified. The new privacy wording and placement disclosure require owner
-  review before deployment.
+- Production merge `898d801` and Pages run `44210436840` deployed the Utah
+  block. A live headless-browser check verified that the disclosed button
+  precedes all Expedia requests, then the exact script creates stays and
+  flights iframes carrying campaign reference `1101l6yKm4` and their distinct
+  Pubrefs. Expedia program status, final click destinations, provider-side
+  attribution, commission eligibility, and disclosure/privacy acceptance
+  remain externally unverified.
 - GitHub Pages still serves direct SPA routes through a `404.html` fallback. A
   direct `/atlas` request may therefore retain HTTP 404 status even though the
   client app hydrates. A production 200 rewrite remains a separate hosting
