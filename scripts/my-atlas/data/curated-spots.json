@@ -4,6 +4,21 @@
   "sourceSnapshotDate": "2026-11-17",
   "records": [
     {
+      "geonameId": "5536448",
+      "name": "Capitol Reef National Park",
+      "aliases": ["Capitol Reef", "Capitol Reef National Park"],
+      "latitude": 38.367,
+      "longitude": -111.2615,
+      "featureClass": "L",
+      "featureCode": "PRK",
+      "countryCode": "US",
+      "admin1Code": "UT",
+      "admin1Name": "Utah",
+      "spotCategory": "national-park",
+      "spotKind": "National park",
+      "sourceUrl": "https://www.geonames.org/5536448/capitol-reef-national-park.html"
+    },
+    {
       "geonameId": "5843642",
       "name": "Yellowstone National Park",
       "aliases": ["Yellowstone National Park"],

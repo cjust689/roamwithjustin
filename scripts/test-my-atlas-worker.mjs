@@ -1432,6 +1432,31 @@ await assert.rejects(
   assert.equal(state.pins[0].name, "Uvita")
   assert.equal(state.pins[0].memory, "The tide revealed the whale tail.")
 
+  let readAttempts = 0
+  const retriedState = await fetchMyAtlasState({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async () => {
+      readAttempts += 1
+      if (readAttempts === 1) throw new TypeError("transient network error")
+      return new Response(
+        JSON.stringify({
+          profile: {
+            handle: "justin-travels",
+            displayName: "Justin Traveler",
+            public: false,
+            pinCount: 1,
+            revision: 2,
+          },
+          pins: [pin],
+        }),
+        { status: 200, headers: { ETag: '"rev-2"' } }
+      )
+    },
+  })
+  assert.equal(readAttempts, 2)
+  assert.equal(retriedState.profile.revision, 2)
+
   const created = await createMyAtlasPin({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
@@ -1460,6 +1485,23 @@ await assert.rejects(
     },
   })
   assert.equal(created.revision, 3)
+
+  let writeAttempts = 0
+  await assert.rejects(
+    () =>
+      createMyAtlasPin({
+        apiBaseUrl: "https://api.example.com",
+        accessToken: "owner-token",
+        placeId: "geonames:3621138",
+        revision: 3,
+        fetchImpl: async () => {
+          writeAttempts += 1
+          throw new TypeError("network error")
+        },
+      }),
+    error => error.code === "unavailable"
+  )
+  assert.equal(writeAttempts, 1)
 
   const customCreated = await createMyAtlasPin({
     apiBaseUrl: "https://api.example.com",

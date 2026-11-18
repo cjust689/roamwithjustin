@@ -9,6 +9,11 @@ const defaultSpotSource = path.join(
   "data",
   "curated-spots.json"
 )
+const defaultReviewedCitySource = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "data",
+  "reviewed-cities.json"
+)
 
 function usage() {
   return [
@@ -24,6 +29,7 @@ function usage() {
     "  --previous <catalog.json>",
     "  --include-place-id <GeoNames ID> (repeatable or comma separated)",
     "  --spot-source <curated-spots.json>",
+    "  --reviewed-city-source <reviewed-cities.json>",
   ].join("\n")
 }
 
@@ -39,6 +45,8 @@ function parseArgs(argv) {
     else if (argument === "--source-date") options.sourceSnapshotDate = value
     else if (argument === "--previous") options.previous = value
     else if (argument === "--spot-source") options.spotSourceFile = value
+    else if (argument === "--reviewed-city-source")
+      options.reviewedCitySourceFile = value
     else if (argument === "--include-place-id") {
       options.includePlaceIds.push(
         ...String(value || "")
@@ -66,6 +74,9 @@ try {
     ...options,
     previousCatalog,
     spotSourceFile: path.resolve(options.spotSourceFile || defaultSpotSource),
+    reviewedCitySourceFile: path.resolve(
+      options.reviewedCitySourceFile || defaultReviewedCitySource
+    ),
   })
   const output = path.resolve(options.output)
   fs.mkdirSync(path.dirname(output), { recursive: true })

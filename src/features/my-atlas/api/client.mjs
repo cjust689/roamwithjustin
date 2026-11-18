@@ -121,17 +121,24 @@ async function authenticatedJsonRequest({
   if (idempotencyKey) headers.set("Idempotency-Key", idempotencyKey)
 
   let response
-  try {
-    response = await fetchImpl(`${apiBaseUrl}${path}`, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-      cache: "no-store",
-    })
-  } catch {
-    throw new MyAtlasApiError("The My Atlas API could not be reached.", {
-      code: "unavailable",
-    })
+  const request = {
+    method,
+    headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+    cache: "no-store",
+  }
+  const attempts = method === "GET" ? 2 : 1
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      response = await fetchImpl(`${apiBaseUrl}${path}`, request)
+      break
+    } catch {
+      if (attempt === attempts - 1) {
+        throw new MyAtlasApiError("The My Atlas API could not be reached.", {
+          code: "unavailable",
+        })
+      }
+    }
   }
   let payload = {}
   try {
