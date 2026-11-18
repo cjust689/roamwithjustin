@@ -51,11 +51,34 @@ assert.equal(
 )
 
 const scripts = new Map()
+const dispatchedEvents = []
+const windowObject = {
+  Event: class BrowserEvent {
+    constructor(type) {
+      this.type = type
+    }
+  },
+  dispatchEvent(event) {
+    dispatchedEvents.push(event.type)
+    this.eg.affiliate.banners.loaded = true
+  },
+  eg: {
+    affiliate: {
+      banners: {
+        initialized: false,
+        loaded: false,
+      },
+    },
+  },
+}
 const target = {
   appendChild(script) {
     script.parentNode = target
     scripts.set(script.id, script)
-    queueMicrotask(() => script.onload())
+    queueMicrotask(() => {
+      windowObject.eg.affiliate.banners.initialized = true
+      script.onload()
+    })
   },
   removeChild(script) {
     scripts.delete(script.id)
@@ -64,6 +87,7 @@ const target = {
 }
 const documentObject = {
   body: target,
+  readyState: "complete",
   createElement(tagName) {
     assert.equal(tagName, "script")
     return {}
@@ -73,14 +97,21 @@ const documentObject = {
   },
 }
 
-const firstScript = await loadExpediaBannerScript({ documentObject })
+const firstScript = await loadExpediaBannerScript({ documentObject, windowObject })
 assert.equal(firstScript.id, EXPEDIA_BANNER_SCRIPT_ID)
 assert.equal(firstScript.src, EXPEDIA_BANNER_SCRIPT_URL)
 assert.equal(firstScript.className, "eg-affiliate-banners-script")
 assert.equal(firstScript.async, true)
+assert.deepEqual(dispatchedEvents, ["DOMContentLoaded"])
+assert.equal(windowObject.eg.affiliate.banners.loaded, true)
 
-const secondScript = await loadExpediaBannerScript({ documentObject })
+const secondScript = await loadExpediaBannerScript({ documentObject, windowObject })
 assert.notEqual(secondScript, firstScript)
 assert.equal(scripts.size, 1, "banner retries must keep only one loader")
+assert.deepEqual(
+  dispatchedEvents,
+  ["DOMContentLoaded"],
+  "an initialized Expedia banner must not receive a duplicate ready event"
+)
 
 console.log("Commercial content tests passed.")

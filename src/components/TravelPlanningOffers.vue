@@ -48,7 +48,6 @@
         v-for="offer in offers"
         :key="offer.id"
         class="travel-offers__banner"
-        @click.capture="trackOfferClick($event, offer)"
       >
         <span>{{
           offer.banner.product === "stays" ? "Stays" : "Flights"
@@ -73,7 +72,6 @@
 
 <script>
 import { loadExpediaBannerScript } from "@/services/expediaBanners.mjs"
-import { trackAnalyticsEvent } from "@/utils/analytics.mjs"
 
 export default {
   name: "TravelPlanningOffers",
@@ -92,13 +90,7 @@ export default {
       activated: false,
       loading: false,
       loadError: false,
-      linkObserver: null,
     }
-  },
-  // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
-  // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
-  beforeDestroy() {
-    this.linkObserver?.disconnect()
   },
   methods: {
     activateOffers() {
@@ -108,45 +100,13 @@ export default {
       this.loading = true
       this.loadError = false
       this.$nextTick(async () => {
-        this.observeRenderedLinks()
         try {
           await loadExpediaBannerScript()
-          this.secureRenderedLinks()
         } catch (error) {
           this.loadError = true
         } finally {
           this.loading = false
         }
-      })
-    },
-    observeRenderedLinks() {
-      if (this.linkObserver || typeof MutationObserver === "undefined") return
-
-      this.linkObserver = new MutationObserver(this.secureRenderedLinks)
-      this.linkObserver.observe(this.$el, { childList: true, subtree: true })
-    },
-    secureRenderedLinks() {
-      this.$el
-        .querySelectorAll(".eg-affiliate-banners a[href]")
-        .forEach(anchor => {
-          const relationships = new Set(
-            String(anchor.getAttribute("rel") || "")
-              .split(/\s+/)
-              .filter(Boolean)
-          )
-          relationships.add("sponsored")
-          relationships.add("noopener")
-          anchor.setAttribute("rel", Array.from(relationships).join(" "))
-        })
-    },
-    trackOfferClick(event, offer) {
-      if (!event.target?.closest?.("a[href]")) return
-
-      trackAnalyticsEvent("partner_click", {
-        link_type: offer.linkType,
-        partner_id: offer.partnerId,
-        placement: offer.id,
-        public_journey_id: this.journeyId,
       })
     },
   },
