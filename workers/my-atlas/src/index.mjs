@@ -54,6 +54,7 @@ import {
   normalizeCreateWish,
   normalizeDeleteAccount,
   normalizeDeleteWish,
+  normalizeMarkPlanVisited,
   normalizePatchWish,
   normalizePlanMutation,
   normalizeReplacePlan,
@@ -67,6 +68,7 @@ import {
   keepMyPlan,
   listMyPlans,
   listMyWishes,
+  markMyPlanVisited,
   replaceMyPlan,
   updateMyWish,
 } from "./planning/service.mjs"
@@ -520,8 +522,12 @@ export async function handleRequest(
   const myPlanKeepMatch = url.pathname.match(
     /^\/v1\/me\/trip-plans\/(plan_[a-f0-9]{24})\/keep$/
   )
+  const myPlanVisitedMatch = url.pathname.match(
+    /^\/v1\/me\/trip-plans\/(plan_[a-f0-9]{24})\/visited$/
+  )
   const isMyPlan = Boolean(myPlanMatch)
   const isMyPlanKeep = Boolean(myPlanKeepMatch)
+  const isMyPlanVisited = Boolean(myPlanVisitedMatch)
   const isMyExport = url.pathname === "/v1/me/export"
   const isAccountRoute =
     isMyProfile ||
@@ -533,6 +539,7 @@ export async function handleRequest(
     isMyPlans ||
     isMyPlan ||
     isMyPlanKeep ||
+    isMyPlanVisited ||
     isMyExport
   const isAdminRoute =
     isInvitationIssue ||
@@ -560,6 +567,7 @@ export async function handleRequest(
     (isMyPlans && !["GET", "POST"].includes(request.method)) ||
     (isMyPlan && !["PATCH", "DELETE"].includes(request.method)) ||
     (isMyPlanKeep && request.method !== "POST") ||
+    (isMyPlanVisited && request.method !== "POST") ||
     (isMyExport && request.method !== "GET")
   ) {
     return errorResponse(405, "method_not_allowed", context)
@@ -918,6 +926,26 @@ export async function handleRequest(
           result.profile.revision
         )
       }
+      if (isMyPlanVisited) {
+        const service = dependencies.markMyPlanVisited || markMyPlanVisited
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeMarkPlanVisited(
+            await readJsonBody(request),
+            myPlanVisitedMatch[1],
+            request.headers,
+            new Date().getUTCFullYear()
+          ),
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          { pins: result.pins },
+          result.created ? 201 : 200,
+          context,
+          result.profile.revision
+        )
+      }
       if (isMyPlan && request.method === "PATCH") {
         const service = dependencies.replaceMyPlan || replaceMyPlan
         const result = await service({
@@ -1023,6 +1051,18 @@ export async function handleRequest(
     if (error instanceof AccountConflictError) {
       if (error.code === "revision_conflict") {
         return errorResponse(412, "revision_conflict", context)
+      }
+      if (error.code === "duplicate_wish") {
+        return errorResponse(409, "duplicate_wish", context)
+      }
+      if (error.code === "wish_limit_reached") {
+        return errorResponse(409, "wishlist_limit_reached", context)
+      }
+      if (error.code === "place_unavailable") {
+        return errorResponse(409, "place_unavailable", context)
+      }
+      if (error.code === "invalid_wish") {
+        return errorResponse(400, "invalid_request", context)
       }
       if (
         [

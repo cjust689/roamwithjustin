@@ -4,7 +4,9 @@ import {
 } from "../registration/contracts.mjs"
 import {
   normalizeExpectedRevision,
+  normalizeMemory,
   normalizePlaceId,
+  normalizeVisitTiming,
 } from "../account/contracts.mjs"
 import { normalizePinMemory } from "../account/memory.mjs"
 import { normalizeCustomPlace } from "../account/custom-place.mjs"
@@ -33,7 +35,11 @@ function assertObject(value, allowedKeys, name) {
   }
 }
 
-function normalizedShortText(value, name, { required = false, maximum = 255 } = {}) {
+function normalizedShortText(
+  value,
+  name,
+  { required = false, maximum = 255 } = {}
+) {
   if (value === undefined && !required) return ""
   const normalized = normalizePinMemory(value)
   if (
@@ -126,7 +132,9 @@ export function normalizePatchWish(value, wishId, headers, currentYear) {
     "Wishlist item patch"
   )
   if (!Object.keys(value).length) {
-    throw new RegistrationValidationError("Wishlist item patch cannot be empty.")
+    throw new RegistrationValidationError(
+      "Wishlist item patch cannot be empty."
+    )
   }
   return Object.freeze({
     wishId: normalizeWishId(wishId),
@@ -139,7 +147,9 @@ export function normalizePatchWish(value, wishId, headers, currentYear) {
         : { priority: normalizePriority(value.priority) }),
       ...(value.desiredYear === undefined
         ? {}
-        : { desiredYear: normalizeDesiredYear(value.desiredYear, currentYear) }),
+        : {
+            desiredYear: normalizeDesiredYear(value.desiredYear, currentYear),
+          }),
     }),
     ...mutationHeaders(headers),
   })
@@ -172,11 +182,7 @@ export function normalizeWishQuery(url) {
 }
 
 function normalizePlanLocation(value, name) {
-  assertObject(
-    value,
-    new Set(["wishId", "placeId", "customPlace"]),
-    name
-  )
+  assertObject(value, new Set(["wishId", "placeId", "customPlace"]), name)
   const supplied = ["wishId", "placeId", "customPlace"].filter(
     key => value[key] !== undefined
   )
@@ -284,6 +290,48 @@ export function normalizeReplacePlan(value, planId, headers, currentYear) {
 export function normalizePlanMutation(planId, headers) {
   return Object.freeze({
     planId: normalizePlanId(planId),
+    ...mutationHeaders(headers),
+  })
+}
+
+export function normalizeMarkPlanVisited(value, planId, headers, currentYear) {
+  assertObject(value, new Set(["visits"]), "Visited plan stops")
+  if (
+    !Array.isArray(value.visits) ||
+    value.visits.length < 1 ||
+    value.visits.length > MAX_PLAN_DESTINATIONS
+  ) {
+    throw new RegistrationValidationError(
+      `Choose between one and ${MAX_PLAN_DESTINATIONS} visited plan stops.`
+    )
+  }
+  const visits = value.visits.map(visit => {
+    assertObject(
+      visit,
+      new Set(["stopIndex", "visitedYears", "visitedDates", "memory"]),
+      "Visited plan stop"
+    )
+    if (
+      !Number.isInteger(visit.stopIndex) ||
+      visit.stopIndex < 0 ||
+      visit.stopIndex >= MAX_PLAN_DESTINATIONS
+    ) {
+      throw new RegistrationValidationError("Visited plan stop is invalid.")
+    }
+    return Object.freeze({
+      stopIndex: visit.stopIndex,
+      ...normalizeVisitTiming(visit, currentYear),
+      memory: normalizeMemory(visit.memory === undefined ? "" : visit.memory),
+    })
+  })
+  if (new Set(visits.map(visit => visit.stopIndex)).size !== visits.length) {
+    throw new RegistrationValidationError(
+      "Each plan stop may be marked visited only once."
+    )
+  }
+  return Object.freeze({
+    planId: normalizePlanId(planId),
+    visits: Object.freeze(visits),
     ...mutationHeaders(headers),
   })
 }

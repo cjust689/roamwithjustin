@@ -708,7 +708,8 @@ export class RegistrationRegistryDurableObject extends DurableObject {
       const identityStorageKey = identityKey(command.identityDigest)
       const handleStorageKey = handleKey(registration.handle)
       if (
-        this.ctx.storage.kv.get(identityStorageKey)?.userId !== command.userId ||
+        this.ctx.storage.kv.get(identityStorageKey)?.userId !==
+          command.userId ||
         this.ctx.storage.kv.get(handleStorageKey)?.userId !== command.userId
       ) {
         return failure("registration_inconsistent")
@@ -1362,14 +1363,32 @@ export class UserProfileDurableObject extends DurableObject {
       if (!owner.ok) return owner
       const existing = existingMutation(this.ctx.storage, command)
       if (existing) return existing
+      const existingPlace = this.ctx.storage.kv.get(
+        wishPlaceKey(command.placeId)
+      )
+      if (existingPlace) {
+        const existingWish = this.ctx.storage.kv.get(
+          wishKey(existingPlace.wishId)
+        )
+        if (
+          !existingWish ||
+          !validStoredWish(existingWish) ||
+          existingWish.placeId !== command.placeId
+        ) {
+          return failure("wishlist_inconsistent")
+        }
+        return Object.freeze({
+          ok: true,
+          idempotent: true,
+          profile: owner.profile,
+          wish: existingWish,
+        })
+      }
       if (owner.profile.revision !== command.expectedRevision) {
         return failure("revision_conflict")
       }
       if ((owner.profile.wishCount || 0) >= 250) {
         return failure("wish_limit_reached")
-      }
-      if (this.ctx.storage.kv.get(wishPlaceKey(command.placeId))) {
-        return failure("duplicate_wish")
       }
       if (this.ctx.storage.kv.get(wishKey(command.wishId))) {
         return failure("wish_id_collision")
@@ -1561,7 +1580,9 @@ export class UserProfileDurableObject extends DurableObject {
       return stored
     })
     if (result.ok) {
-      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+      await this.ctx.storage.setAlarm(
+        Date.parse(result.plan.retentionExpiresAt)
+      )
     }
     return result
   }
@@ -1616,7 +1637,9 @@ export class UserProfileDurableObject extends DurableObject {
       return stored
     })
     if (result.ok) {
-      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+      await this.ctx.storage.setAlarm(
+        Date.parse(result.plan.retentionExpiresAt)
+      )
     }
     return result
   }
@@ -1661,9 +1684,112 @@ export class UserProfileDurableObject extends DurableObject {
       return stored
     })
     if (result.ok) {
-      await this.ctx.storage.setAlarm(Date.parse(result.plan.retentionExpiresAt))
+      await this.ctx.storage.setAlarm(
+        Date.parse(result.plan.retentionExpiresAt)
+      )
     }
     return result
+  }
+
+  markOwnerPlanVisited(command) {
+    if (
+      !validOwnerMutation(command) ||
+      !PLAN_ID_PATTERN.test(command.planId) ||
+      !Array.isArray(command.pins) ||
+      command.pins.length < 1 ||
+      command.pins.length > MAX_PLAN_DESTINATIONS ||
+      command.pins.some(
+        pin =>
+          !Number.isInteger(pin?.stopIndex) ||
+          pin.stopIndex < 0 ||
+          pin.stopIndex >= MAX_PLAN_DESTINATIONS ||
+          !PIN_ID_PATTERN.test(pin.pinId) ||
+          !validStoredPinPlace(pin) ||
+          !validPinTiming(pin) ||
+          !isNormalizedPinMemory(pin.memory)
+      ) ||
+      new Set(command.pins.map(pin => pin.stopIndex)).size !==
+        command.pins.length ||
+      new Set(command.pins.map(pin => pin.placeId)).size !== command.pins.length
+    ) {
+      return failure("invalid_plan_visit")
+    }
+
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const plan = this.ctx.storage.kv.get(planKey(command.planId))
+      if (!plan || !validStoredPlan(plan)) return failure("plan_not_found")
+      if ((owner.profile.pinCount || 0) + command.pins.length > 300) {
+        return failure("pin_limit_reached")
+      }
+
+      for (const candidate of command.pins) {
+        const stop = plan.stops[candidate.stopIndex]
+        if (!stop || stop.placeId !== candidate.placeId) {
+          return failure("plan_stop_mismatch")
+        }
+        if (CUSTOM_PLACE_ID_PATTERN.test(candidate.placeId)) {
+          if (
+            stop.placeType !== "custom" ||
+            candidate.customPlace.name !== stop.name ||
+            candidate.customPlace.coordinates.some(
+              (coordinate, index) => coordinate !== stop.coordinates[index]
+            )
+          ) {
+            return failure("plan_stop_mismatch")
+          }
+        }
+        if (this.ctx.storage.kv.get(pinPlaceKey(candidate.placeId))) {
+          return failure("duplicate_place")
+        }
+        if (this.ctx.storage.kv.get(pinKey(candidate.pinId))) {
+          return failure("pin_id_collision")
+        }
+      }
+
+      const pins = command.pins.map(candidate =>
+        Object.freeze({
+          schemaVersion: 4,
+          pinId: candidate.pinId,
+          placeId: candidate.placeId,
+          ...(candidate.customPlace
+            ? { customPlace: candidate.customPlace }
+            : {}),
+          visitedYears: candidate.visitedYears,
+          visitedDates: candidate.visitedDates,
+          memory: candidate.memory,
+          createdAt: command.now,
+          updatedAt: command.now,
+        })
+      )
+      const profile = {
+        ...owner.profile,
+        pinCount: (owner.profile.pinCount || 0) + pins.length,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      pins.forEach(pin => {
+        this.ctx.storage.kv.put(pinKey(pin.pinId), pin)
+        this.ctx.storage.kv.put(pinPlaceKey(pin.placeId), {
+          pinId: pin.pinId,
+        })
+      })
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        pins: Object.freeze(pins),
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
   }
 
   async deleteOwnerPlan(command) {
@@ -1728,7 +1854,12 @@ export class UserProfileDurableObject extends DurableObject {
             revision: profile.revision + 1,
             updatedAt: now,
           })
-          return Object.freeze({ ok: true, changed: true, deleted: true, nextAlarm: null })
+          return Object.freeze({
+            ok: true,
+            changed: true,
+            deleted: true,
+            nextAlarm: null,
+          })
         }
         if (Date.parse(now) >= Date.parse(plan.retentionExpiresAt)) {
           const pending = {
@@ -1758,7 +1889,12 @@ export class UserProfileDurableObject extends DurableObject {
           revision: profile.revision + 1,
           updatedAt: now,
         })
-        return Object.freeze({ ok: true, changed: true, deleted: true, nextAlarm: null })
+        return Object.freeze({
+          ok: true,
+          changed: true,
+          deleted: true,
+          nextAlarm: null,
+        })
       }
       return Object.freeze({
         ok: true,
@@ -1824,7 +1960,11 @@ export class UserProfileDurableObject extends DurableObject {
     if (tombstone) {
       return tombstone.operationDigest === command.operationDigest &&
         tombstone.requestDigest === command.requestDigest
-        ? Object.freeze({ ok: true, idempotent: true, deletedAt: tombstone.deletedAt })
+        ? Object.freeze({
+            ok: true,
+            idempotent: true,
+            deletedAt: tombstone.deletedAt,
+          })
         : failure("idempotency_conflict")
     }
     const profile = this.ctx.storage.kv.get("profile")
@@ -1839,7 +1979,11 @@ export class UserProfileDurableObject extends DurableObject {
       requestDigest: command.requestDigest,
       deletedAt: command.now,
     })
-    return Object.freeze({ ok: true, idempotent: false, deletedAt: command.now })
+    return Object.freeze({
+      ok: true,
+      idempotent: false,
+      deletedAt: command.now,
+    })
   }
 
   exportOwnerState(identityDigest) {

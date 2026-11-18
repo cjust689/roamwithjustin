@@ -452,8 +452,11 @@
       <MyAtlasPlanner
         v-if="accountProfile"
         :api-base-url="apiBaseUrl"
+        :pins="pins"
+        :profile-public="accountProfile.public"
         :revision="accountProfile.revision"
         @revision-change="updatePlanningRevision"
+        @pins-created="handlePlannerPinsCreated"
         @account-deleted="handleAccountDeleted"
       />
 
@@ -797,6 +800,42 @@ export default {
     updatePlanningRevision(revision) {
       if (!this.accountProfile || !Number.isSafeInteger(revision)) return
       this.accountProfile = { ...this.accountProfile, revision }
+    },
+    handlePlannerPinsCreated(pins) {
+      if (!Array.isArray(pins) || !this.accountProfile) return
+      pins.forEach(pin => {
+        if (!this.pins.some(candidate => candidate.pinId === pin.pinId)) {
+          this.pins = [
+            ...this.pins,
+            {
+              pinId: pin.pinId,
+              placeId: pin.placeId,
+              visitedDates: pin.visitedDates,
+              visitedYears: pin.visitedYears,
+              memory: pin.memory,
+            },
+          ]
+        }
+        this.$set(this.loadedPlaces, pin.placeId, {
+          placeId: pin.placeId,
+          placeType: pin.placeType,
+          name: pin.name,
+          countryCode: pin.countryCode,
+          admin1Name: pin.admin1Name,
+          countryName: pin.countryName,
+          continent: pin.continent,
+          featureCode: pin.featureCode,
+          spotCategory: pin.spotCategory,
+          spotKind: pin.spotKind,
+          coordinates: pin.coordinates,
+          deprecated: false,
+        })
+      })
+      this.accountProfile = {
+        ...this.accountProfile,
+        pinCount: this.pins.length,
+      }
+      this.visitedOpen = true
     },
     handleAccountDeleted() {
       this.accountProfile = null

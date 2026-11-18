@@ -211,7 +211,12 @@ async function snapshotsForPlan(owner, input, placeCatalog, environment) {
   })
 }
 
-export async function listMyWishes({ environment, identity, input, placeCatalog }) {
+export async function listMyWishes({
+  environment,
+  identity,
+  input,
+  placeCatalog,
+}) {
   const owner = await ownerContext(environment, identity)
   const result = expectedPlanningResult(
     await owner.user.listOwnerWishes({
@@ -270,10 +275,7 @@ export async function createMyWish({
   return Object.freeze({
     created: !result.idempotent,
     profile: publicProfile(result.profile),
-    wish: projectWish(
-      result.wish,
-      customPlace ? undefined : place
-    ),
+    wish: projectWish(result.wish, customPlace ? undefined : place),
   })
 }
 
@@ -352,12 +354,18 @@ async function writePlan({
   replace,
 }) {
   const owner = await ownerContext(environment, identity)
-  const snapshots = await snapshotsForPlan(owner, input, placeCatalog, environment)
+  const snapshots = await snapshotsForPlan(
+    owner,
+    input,
+    placeCatalog,
+    environment
+  )
   const planId = replace
     ? input.planId
-    : `plan_${(
-        await sha256(`${owner.userId}\u0000first-private-plan`)
-      ).slice(0, 24)}`
+    : `plan_${(await sha256(`${owner.userId}\u0000first-private-plan`)).slice(
+        0,
+        24
+      )}`
   const value = {
     planId,
     title: input.title,
@@ -391,11 +399,19 @@ async function writePlan({
 }
 
 export async function createMyPlan(options) {
-  return writePlan({ ...options, now: options.now || new Date().toISOString(), replace: false })
+  return writePlan({
+    ...options,
+    now: options.now || new Date().toISOString(),
+    replace: false,
+  })
 }
 
 export async function replaceMyPlan(options) {
-  return writePlan({ ...options, now: options.now || new Date().toISOString(), replace: true })
+  return writePlan({
+    ...options,
+    now: options.now || new Date().toISOString(),
+    replace: true,
+  })
 }
 
 async function mutatePlan({ environment, identity, input, now, action }) {
@@ -423,9 +439,102 @@ async function mutatePlan({ environment, identity, input, now, action }) {
 }
 
 export async function keepMyPlan(options) {
-  return mutatePlan({ ...options, now: options.now || new Date().toISOString(), action: "keep" })
+  return mutatePlan({
+    ...options,
+    now: options.now || new Date().toISOString(),
+    action: "keep",
+  })
 }
 
 export async function deleteMyPlan(options) {
-  return mutatePlan({ ...options, now: options.now || new Date().toISOString(), action: "delete" })
+  return mutatePlan({
+    ...options,
+    now: options.now || new Date().toISOString(),
+    action: "delete",
+  })
+}
+
+export async function markMyPlanVisited({
+  environment,
+  identity,
+  input,
+  placeCatalog,
+  now = new Date().toISOString(),
+}) {
+  const owner = await ownerContext(environment, identity)
+  const plansResult = expectedPlanningResult(
+    await owner.user.listOwnerPlans(owner.identityDigest)
+  )
+  const plan = plansResult.plans.find(
+    candidate => candidate.planId === input.planId
+  )
+  if (!plan) throw new AccountConflictError("plan_not_found")
+
+  const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
+  const resolver = catalogResolverFor(catalog)
+  const pins = []
+  const projectedPlaces = new Map()
+  for (const visit of input.visits) {
+    const stop = plan.stops[visit.stopIndex]
+    if (!stop) throw new AccountConflictError("plan_stop_not_found")
+    const customPlace =
+      stop.placeType === "custom"
+        ? Object.freeze({
+            name: stop.name,
+            coordinates: Object.freeze([...stop.coordinates]),
+          })
+        : null
+    const place = customPlace
+      ? projectCustomPlace(stop.placeId, customPlace)
+      : await assertCatalogPlace(stop.placeId, resolver, environment)
+    projectedPlaces.set(stop.placeId, place)
+    pins.push(
+      Object.freeze({
+        stopIndex: visit.stopIndex,
+        pinId: `pin_${(
+          await sha256(`${owner.userId}\u0000${stop.placeId}`)
+        ).slice(0, 24)}`,
+        placeId: stop.placeId,
+        ...(customPlace ? { customPlace } : {}),
+        visitedYears: visit.visitedYears,
+        visitedDates: visit.visitedDates,
+        memory: visit.memory,
+      })
+    )
+  }
+
+  const mutation = await mutationMetadata(
+    owner,
+    input,
+    `mark-plan-visited:${input.planId}`,
+    { planId: input.planId, pins }
+  )
+  const result = expectedPlanningResult(
+    await owner.user.markOwnerPlanVisited({
+      identityDigest: owner.identityDigest,
+      expectedRevision: input.expectedRevision,
+      planId: input.planId,
+      pins,
+      now,
+      ...mutation,
+    })
+  )
+  return Object.freeze({
+    created: !result.idempotent,
+    profile: publicProfile(result.profile),
+    pins: Object.freeze(
+      result.pins.map(pin => {
+        const place = projectedPlaces.get(pin.placeId)
+        return Object.freeze({
+          pinId: pin.pinId,
+          ...(pin.customPlace ? place : projectCatalogPlace(place)),
+          visitedDates: Object.freeze(
+            pin.visitedDates.map(date => Object.freeze({ ...date }))
+          ),
+          visitedYears: Object.freeze([...pin.visitedYears]),
+          memory: pin.memory,
+        })
+      })
+    ),
+  })
 }
