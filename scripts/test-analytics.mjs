@@ -290,6 +290,7 @@ assert.equal(
 )
 assert.equal(
   trackAnalyticsEvent("partner_click", {
+    gear_id: "confirmed-test-camera",
     link_type: "website",
     partner_id: "nates-custom-charters",
     placement: "trip_itinerary_partner",

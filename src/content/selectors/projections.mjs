@@ -130,7 +130,9 @@ function journeyGearHighlights(journey, canonicalGear) {
     link: item.primaryLink?.url || "",
     rel: item.primaryLink?.rel || "noopener noreferrer",
     affiliate: Boolean(item.primaryLink?.affiliate),
-    disclosure: item.primaryLink?.affiliate ? "Affiliate link" : "",
+    partnerId: item.primaryLink?.partnerId || "",
+    linkType: item.primaryLink?.linkType || "website",
+    disclosure: item.primaryLink?.disclosure || "",
     canonical: true,
   }))
   const canonicalNames = new Set(

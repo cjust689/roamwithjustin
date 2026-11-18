@@ -4,8 +4,8 @@
     <header>
       <h1 class="page-title">Gear I use</h1>
       <p class="subtitle">
-        Products appear here only after their identity, firsthand use, image,
-        and destination link have been reviewed.
+        Camera and travel gear from my trips, with original photographs and
+        firsthand notes.
       </p>
     </header>
 
@@ -30,18 +30,27 @@
               :href="link.url"
               target="_blank"
               :rel="link.rel"
+              :title="link.disclosure || null"
+              @click="trackGearLink(item, link)"
             >
               {{ link.label || "View product" }}
             </a>
           </div>
+          <p
+            v-for="disclosure in item.affiliateDisclosures"
+            :key="disclosure"
+            class="gear-link-disclosure"
+          >
+            {{ disclosure }}
+          </p>
         </div>
       </article>
     </div>
     <section v-else class="gear-empty" aria-labelledby="gear-empty-title">
-      <h2 id="gear-empty-title">Field notes are being prepared</h2>
+      <h2 id="gear-empty-title">No gear notes yet</h2>
       <p>
-        This page will open as creator verified products, original photographs,
-        and honest trip notes are added to the Gear catalog.
+        Products will appear here with original photographs and firsthand trip
+        notes.
       </p>
     </section>
   </main>
@@ -49,7 +58,9 @@
 
 <script>
 import { getGearCatalog } from "@/content/selectors/gear.mjs"
+import commercialLinks from "@/content/commercial-links.js"
 import Banner from "@/components/Banner.vue"
+import { trackAnalyticsEvent } from "@/utils/analytics.mjs"
 
 export default {
   name: "GearGrid",
@@ -64,6 +75,17 @@ export default {
       return this.gear.some(item =>
         item.links.some(link => link.affiliate === true)
       )
+    },
+  },
+  methods: {
+    trackGearLink(item, link) {
+      const parameters = commercialLinks.buildPartnerClickParameters({
+        partnerId: link.partnerId,
+        linkType: link.linkType,
+        placement: "gear_catalog",
+        gearId: item.id,
+      })
+      if (parameters) trackAnalyticsEvent("partner_click", parameters)
     },
   },
 }
@@ -138,6 +160,12 @@ header {
 .card-content p {
   color: #aeb9b7;
   line-height: 1.55;
+}
+
+.card-content .gear-link-disclosure {
+  margin: 0.75rem 0 0;
+  color: #c9d0ce;
+  font-size: 0.76rem;
 }
 
 .gear-actions {

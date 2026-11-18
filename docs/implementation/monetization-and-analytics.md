@@ -11,6 +11,7 @@ related:
   - ga4-tracking-audit-2026-11-17
   - analytics-event-dictionary
   - gear-system
+  - gear-affiliate-readiness-2026-11-17
   - adsense-operations
   - lodging-partner-operations
   - affiliate-activation-public-editorial-first-slice
@@ -21,6 +22,7 @@ code_paths:
   - src/main.js
   - src/router/index.js
   - src/utils/analytics.mjs
+  - src/content/commercial-links.js
   - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/components/TravelPlanningOffers.vue
@@ -121,6 +123,26 @@ verification:
 - [ ] Complete mobile, desktop, keyboard, and screen reader QA on the deployed
   public Journey.
 
+### Gear commercial-link reconciliation, 2026-11-17
+
+- [x] Reused canonical Partner IDs and the existing `partner_click` event for
+  Gear instead of introducing Gear-specific merchant or analytics systems.
+- [x] Added one shared commercial parameter builder for Journey partners,
+  lodging, the Gear catalog, and canonical Journey Gear actions.
+- [x] Added optional public `gear_id` context while keeping URLs, tokenized
+  query strings, private My Atlas state, and free-form copy outside analytics.
+- [x] Made affiliate Gear ingestion fail closed on missing Partner identity,
+  affiliate relationship, explicit tracking mode, permitted public surface,
+  or permitted destination host.
+- [x] Preserved complete `custom` URLs unchanged and rejected
+  `approved-rule` input when no provider-specific Gear resolver exists.
+- [ ] Add a real product only after exact identity, firsthand usage, original
+  image rights, and an official or approved tracked destination are supplied.
+- [ ] Implement the separate Gear image prepare, receipt, upload, and publish
+  adapter. The current supported media command remains Journey-bound.
+- [ ] Verify one rendered Gear action and exactly one consent-allowed
+  `partner_click` in a deployed browser session and GA4 DebugView.
+
 ### GA4 roadmap implementation result, 2026-11-17
 
 - [x] Removed unconditional HTML-shell initialization and moved the single
@@ -140,7 +162,8 @@ verification:
 - [x] Added allowlisted Atlas entry, load, Journey, destination, story, Maps,
   and canonical Partner actions without map movement telemetry.
 - [x] Removed hostname-derived GearGrid events, full outbound URL parameters,
-  and mutation of third-party links with incoming campaign UTMs.
+  and mutation of third-party links with incoming campaign UTMs. Canonical
+  Gear Partner actions now reuse the shared strict event contract.
 - [x] Added a repository tracking audit, event dictionary, and automated
   adapter tests.
 - [ ] Choose one page-view owner. Keep automatic mode, or first disable

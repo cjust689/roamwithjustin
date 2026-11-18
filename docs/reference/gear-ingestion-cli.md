@@ -7,6 +7,8 @@ implementation_state: complete
 updated: 2026-11-14
 related:
   - gear-system
+  - gear-sheet-workflow
+  - gear-affiliate-readiness-2026-11-17
 supersedes:
   - gear-ingestion-architecture-brief
 superseded_by: []
@@ -29,10 +31,20 @@ visit, and lets selectors expose it to the existing trip view. It accepts a
 small constrained Markdown document or strict JSON and performs deterministic,
 idempotent upserts.
 
+For spreadsheet authoring, use the generated workbook and Google Sheet path in
+[Gear Sheet workflow](gear-sheet-workflow.md). Both entry points use the same
+canonical validator and generated registry.
+
 It does not upload files, scrape retailers, invent product identities, edit
 Journey narratives, or publish example gear. The generated registry starts
 empty because no gear item in the architecture brief was confirmed as real
 input for this pipeline.
+
+Merchant identity and analytics reuse the canonical Partner system. The
+ingestor never generates a universal affiliate suffix. A complete custom
+tracked URL is retained unchanged only after its Partner relationship and
+destination host pass validation. Automatic rules fail closed unless a
+provider-specific rule has been configured and tested.
 
 ## Quick start
 
@@ -147,7 +159,19 @@ JSON uses the same normalized fields:
       "visibility": "draft",
       "visitId": null,
       "mediaAssetIds": [],
-      "links": []
+      "links": [
+        {
+          "kind": "manufacturer",
+          "label": "Manufacturer website",
+          "url": "https://example.com/product",
+          "affiliate": false,
+          "verified": true,
+          "partnerId": null,
+          "linkType": "website",
+          "trackingMode": "none",
+          "allowedSurfaces": ["public-gear", "public-journey"]
+        }
+      ]
     }
   ]
 }
@@ -167,9 +191,17 @@ JSON uses the same normalized fields:
 | `mediaAssetIds`                                 | Optional canonical Media IDs that visibly depict the item. This is not camera/lens EXIF attribution.            |
 | `imageAssetId`                                  | Optional creator-owned image from the canonical Media registry used as the product visual.                      |
 | `website`                                       | Optional manufacturer URL. It must use HTTPS.                                                                   |
+| `websitePartnerId`                              | Optional canonical Partner ID when the ordinary website action should use shared Partner analytics.            |
 | `websiteVerified`                               | Must be explicitly `true` before the website link can appear publicly.                                          |
 | `affiliateUrl`                                  | Optional creator-supplied affiliate URL. Never generated or scraped.                                            |
+| `affiliatePartnerId`                            | Required canonical Partner ID for the convenience affiliate fields.                                             |
+| `affiliateTrackingMode`                         | `custom` for an issued complete URL, or `approved-rule` only when a provider adapter exists.                     |
 | `affiliateVerified`                             | Must be explicitly `true`; public links receive `rel="sponsored"`.                                              |
+| `links[].partnerId`                             | Canonical Partner identity. Required for affiliate links and optional for ordinary commercial links.             |
+| `links[].linkType`                              | Existing analytics vocabulary such as `website`, `booking`, or `affiliate`.                                     |
+| `links[].trackingMode`                          | Canonical `custom`, `approved-rule`, or `none` state.                                                            |
+| `links[].isCustomTracked`                       | Input-only compatibility flag. `true` maps to `custom`; `false` maps to `approved-rule`.                         |
+| `links[].allowedSurfaces`                       | One or both of `public-gear` and `public-journey`.                                                               |
 | `notes`                                         | Journey-specific firsthand context, not universal product copy.                                                 |
 | `whyItWorked`, `limitations`, `wouldBringAgain` | Optional contextual editorial fields.                                                                           |
 
@@ -193,11 +225,24 @@ Draft and review records remain available to selectors with
 `packed`, `considered`, and `recommended` are stored distinctly and are not
 silently presented as gear actually used.
 
-The public Journey selector merges canonical entries into the existing
-`gearHighlights` presentation. The older free-text Journey arrays and the
-hardcoded `/gear` page are compatibility data only; add all new trip-specific
-gear through this ingestor. Migrate legacy products only after their exact
-identity, usage, image rights, and outbound links have been reviewed.
+The public Gear page and Journey selector both read canonical entries. Older
+free-text Journey `gearHighlights` remain a compatibility fallback only; add
+all new trip-specific gear through this ingestor. Migrate legacy product names
+only after their exact identity, usage, image rights, Partner relationship,
+and outbound links have been reviewed.
+
+## Commercial link rules
+
+- An affiliate link requires a canonical Partner whose relationship is
+  `affiliate-program` and whose explicit `commercialHosts` allow the URL host.
+- `trackingMode: custom` preserves the supplied URL, including its query
+  string. The ingestor does not append, remove, or reorder tracking values.
+- `trackingMode: approved-rule` is rejected until that Partner has an explicit
+  tested resolver. There are currently no approved Gear resolvers.
+- Nonaffiliate links must use `trackingMode: none`. They may remain ordinary
+  official links and do not imply a commission.
+- Public Gear and Journey clicks with a Partner ID reuse the existing strict
+  `partner_click` event. The native link does not depend on analytics.
 
 ## Idempotence and generated output
 
@@ -243,8 +288,9 @@ showing a camera does not mean that camera is visible in the photograph.
 
 ## Current boundaries
 
-- The repository does not yet have a canonical Experience registry, so a
-  non-null `experienceId` is rejected rather than accepted without validation.
+- The Gear ingestor does not yet integrate the canonical Experience registry,
+  so a non-null `experienceId` is rejected rather than accepted without
+  validation.
 - Removal is intentionally not implemented. Unlinking must become an explicit,
   previewable operation that never deletes shared Gear.
 - The CLI does not upload product images or other files to Cloudflare R2.
