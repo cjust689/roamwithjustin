@@ -2,13 +2,15 @@
   <main class="my-atlas-proof">
     <MyAtlasMap
       ref="atlasMap"
-      :places="displayedPlaces"
+      :places="plannerActive ? [] : displayedPlaces"
       :selected-place-id="selectedPlaceId"
       :show-connections="showConnections"
       :show-memories="showMemories"
       :playback-active="timelinePlaying"
       :placement-active="customPlaceOpen"
       :placement-coordinates="customPlaceCoordinates"
+      :planner-active="plannerActive"
+      :planner-route="plannerRoute"
       @select="selectPin"
       @place-custom="setCustomPlaceCoordinates"
     />
@@ -456,6 +458,7 @@
         :profile-public="accountProfile.public"
         :revision="accountProfile.revision"
         @revision-change="updatePlanningRevision"
+        @planner-state-change="handlePlannerStateChange"
         @pins-created="handlePlannerPinsCreated"
         @account-deleted="handleAccountDeleted"
       />
@@ -646,6 +649,8 @@ export default {
       turnstileSiteKey: getMyAtlasTurnstileSiteKey(process.env),
       tutorialOpen: false,
       tutorialVariant: "preview",
+      plannerActive: false,
+      plannerRoute: [],
     }
   },
   computed: {
@@ -797,6 +802,13 @@ export default {
     if (this.searchAbortController) this.searchAbortController.abort()
   },
   methods: {
+    handlePlannerStateChange(state) {
+      const active = state?.active === true
+      this.plannerActive = active
+      this.plannerRoute =
+        active && Array.isArray(state?.route) ? state.route : []
+      if (active && this.timelinePlaying) this.pauseTimeline()
+    },
     updatePlanningRevision(revision) {
       if (!this.accountProfile || !Number.isSafeInteger(revision)) return
       this.accountProfile = { ...this.accountProfile, revision }
@@ -845,6 +857,8 @@ export default {
       this.addPlaceOpen = true
       this.visitedOpen = false
       this.sharingOpen = false
+      this.plannerActive = false
+      this.plannerRoute = []
       this.workflowSectionsInitialized = false
       this.announcement = "Your My Atlas application data was deleted."
     },
