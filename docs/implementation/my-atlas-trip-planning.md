@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - my-atlas-trip-planning
   - my-atlas-private-beta-implementation
@@ -20,6 +20,7 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/catalog/placeSearchClient.mjs
+  - src/features/my-atlas/planning/errors.mjs
   - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/views/roam/Privacy.vue
@@ -35,13 +36,18 @@ verification:
   evidence:
     - npm run my-atlas:test
     - npm run lint
+    - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
     - npm run build
     - Wrangler dry run packaged the Worker; its optional user-profile log write reported a sandbox EPERM without failing the package check
-    - Thirty-one Workers-runtime tests verified wishlist isolation, duplicate rejection, global revision conflicts, immutable wishlist and direct endpoint snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
+    - Thirty-one Workers-runtime tests verified wishlist isolation, duplicate-place indexing, global revision conflicts, immutable wishlist and direct endpoint snapshots, a four-destination plan, controlled-clock retention, plan-only expiry, and permanent account erasure
     - Client utility tests verified ordered segmented Google Maps output with no more than three intermediary waypoints per leg, direct selected finishes, custom-coordinate confirmation, the 2,048-character guard, the 50-destination defensive ceiling, and coordinates omitted from AI prompts by default
     - Catalog client tests verified canonical search-result coordinates and the shared rate-limit error presentation used by visited and planner search
+    - Focused client tests verified permission, invalid-response, and saved-write refresh-failure guidance; npm run lint and npm run build passed with the direct-selection receipt and draft-preservation flow
+    - Wishlist retry tests verified that a repeated owner and Place create returns the existing Wish without changing revision or count; API boundary tests verified safe duplicate, limit, unavailable-place, and invalid-input codes
+    - Partial planning-load tests verified that a valid wishlist and revision remain available when the companion saved-trip request fails, including its safe request reference
+    - Staging Worker version 538823a4-0333-4b71-9825-1647acf8e832 deployed the wishlist retry, partial-load API support, and Mark Visited boundary; its health endpoint returned 200 with the production CORS origin, exposed X-Request-Id, and no-store response policy
     - Thirty-two Workers-runtime tests verified that an unresolved canonical wish remains visible and removable while plan snapshot creation rejects it
     - npm run lint and npm run build passed after the planner disclosure spacing and request-reference recovery changes
     - Local Chromium component-state measurements at 1,264 and 390 CSS pixels verified that the planner disclosure exactly matches the neighboring Add destination header width, height, vertical padding, centered alignment, and zero viewport overflow
@@ -72,94 +78,133 @@ recovery and compact disclosure correction through protected `develop` and
 `main`. Pages run 44154348301 and live chunk 515.27a58f3d.js verify the current
 frontend release.
 Additional external beta invitations remain gated on the owner checks below.
+The 2026-11-18 wishlist retry and Mark Visited Worker changes are deployed to
+isolated staging as version `538823a4-0333-4b71-9825-1647acf8e832`. The
+partial-load frontend correction remains pending protected branch promotion and
+authenticated owner acceptance.
 
 ## Implemented and test verified
 
 - [x] Permanent owner account deletion route, explicit confirmation, revision
-  guard, registry and handle cleanup, per-user erasure, and exact retry
-  tombstone.
+      guard, registry and handle cleanup, per-user erasure, and exact retry
+      tombstone.
 - [x] Owner-only wishlist CRUD for catalog and existing custom-place shapes.
 - [x] Deterministic owner-scoped wish IDs, duplicate index, 250-entry cap,
-  normalized notes, priorities, optional desired year, and 100-record paging.
+      normalized notes, priorities, optional desired year, and 100-record paging.
+- [x] Repeated creation of an existing owner and Place Wish returns that Wish
+      idempotently without increasing the count or revision. The browser stores
+      a successful create response before refreshing, and safe wishlist
+      conflicts now expose actionable public codes instead of the generic
+      account conflict.
+- [x] A saved-trip read failure no longer suppresses a successfully loaded
+      bucket list. The owner can view and edit saved destinations while the
+      saved-trip editor stays disabled behind a targeted retry message.
 - [x] One private plan with an ordered destination list, accessible move
-  controls, lifecycle status, optional year and note, and three end modes. A
-  start or selected finish may come directly from the catalog, from private
-  custom coordinates, or from an existing wishlist record. The API retains a
-  defensive 50-destination ceiling rather than presenting a three-stop product
-  limit.
+      controls, lifecycle status, optional year and note, and three end modes. A
+      start or selected finish may come directly from the catalog, from private
+      custom coordinates, or from an existing wishlist record. The API retains a
+      defensive 50-destination ceiling rather than presenting a three-stop product
+      limit.
 - [x] Immutable catalog/custom location snapshots with source-wish references,
-  route-readiness state, and catalog revision.
+      route-readiness state, and catalog revision.
 - [x] Account-global ETag, `If-Match`, and idempotency behavior across wishlist,
-  plan, Keep, and deletion writes.
+      plan, Keep, Mark Visited, and deletion writes.
 - [x] Six-calendar-month retention, 30-day deletion grace, visible Keep/Delete
-  review, per-owner alarm scheduling, and automatic plan-only expiry.
+      review, per-owner alarm scheduling, and automatic plan-only expiry.
 - [x] Client-only Google Maps URL and privacy-filtered AI prompt builders.
-  Longer plans become continuous Maps legs with at most three intermediary
-  waypoints per link for the conservative mobile-browser boundary.
+      Longer plans become continuous Maps legs with at most three intermediary
+      waypoints per link for the conservative mobile-browser boundary.
 - [x] JSON export schema 2 including visited pins, wishlist, plans, snapshots,
-  and retention state.
+      and retention state.
 - [x] Existing public projection continues enumerating only `pin:` keys; tests
-  prove private wishlist text does not enter an empty public response.
+      prove private wishlist text does not enter an empty public response.
 - [x] Gated Vue owner UI for catalog or coordinate wishlist entry, editing,
-  one-plan assembly, reordering, handoffs, retention review, JSON download, and
-  account deletion.
+      one-plan assembly, reordering, handoffs, retention review, JSON download, and
+      account deletion.
 - [x] Independent planner search for canonical countries, cities, and reviewed
-  spots through the shared My Atlas search endpoint. Results and saved wishlist
-  cards expose catalog latitude and longitude; manual coordinates remain the
-  explicit custom-place fallback.
+      spots through the shared My Atlas search endpoint. Results and saved wishlist
+      cards expose catalog latitude and longitude; manual coordinates remain the
+      explicit custom-place fallback.
 - [x] Search results and manual coordinates can be assigned directly as the
-  plan start or selected finish without creating a wishlist record. The Worker
-  resolves catalog IDs authoritatively and stores the same immutable snapshot
-  shape used by wishlist-backed plan locations.
+      plan start or selected finish without creating a wishlist record. The Worker
+      resolves catalog IDs authoritatively and stores the same immutable snapshot
+      shape used by wishlist-backed plan locations.
+- [x] Direct start and finish selections now show an immediate receipt beside
+      search, remain visible in the trip editor before any wishlist entry exists,
+      and survive saving the first route destination. Planner mutations distinguish
+      a rejected write from a successful write followed by a failed refresh, and
+      permission, session, configuration, and invalid-response failures now provide
+      specific recovery guidance while retaining the Worker request reference.
 - [x] No paid routing, app-owned AI inference, new telemetry route, public plan,
-  ad slot, partner card, or marketing pixel.
+      ad slot, partner card, or marketing pixel.
 - [x] Public privacy copy now explains My Atlas storage, sharing, service
-  providers, plan retention, export, application-account deletion, and the
-  limited deletion tombstones. Registration links directly to that notice.
+      providers, plan retention, export, application-account deletion, and the
+      limited deletion tombstones. Registration links directly to that notice.
 - [x] Planner controls now expose busy and expanded state, named move controls,
-  a labeled prompt preview, explicit new-tab Maps link names, visible keyboard
-  focus, wrapped narrow-width actions, and 44-pixel-equivalent action targets.
+      a labeled prompt preview, explicit new-tab Maps link names, visible keyboard
+      focus, wrapped narrow-width actions, and 44-pixel-equivalent action targets.
 - [x] The planner starts collapsed within the owner workflow. Its expanded
-  wishlist, destination chooser, and ordered-stop collections use bounded
-  scrolling so large private lists do not lengthen the whole Atlas panel.
+      wishlist, destination chooser, and ordered-stop collections use bounded
+      scrolling so large private lists do not lengthen the whole Atlas panel.
 - [x] A missing canonical catalog record no longer prevents the owner from
-  opening the planner. The unresolved wish remains visible and removable, is
-  disabled as a route choice, and cannot enter a new immutable plan snapshot.
-  Planner errors now retain the Worker request ID, and the planner disclosure
-  uses the same compact full-width spacing as its neighboring workflow cards.
+      opening the planner. The unresolved wish remains visible and removable, is
+      disabled as a route choice, and cannot enter a new immutable plan snapshot.
+      Planner errors now retain the Worker request ID, and the planner disclosure
+      uses the same compact full-width spacing as its neighboring workflow cards.
 - [x] Isolated staging Worker version
-  `cfd6a48b-03fe-43fb-9e4a-9e4b8022e962` is deployed with the
-  backward-compatible direct endpoint contract and unavailable-wish recovery.
-  It passed health, production-origin CORS, request-ID, and unauthenticated
-  wishlist probes. The earlier foreign-origin rejection remains covered by
-  automated tests and the prior staged release evidence.
+      `cfd6a48b-03fe-43fb-9e4a-9e4b8022e962` is deployed with the
+      backward-compatible direct endpoint contract and unavailable-wish recovery.
+      It passed health, production-origin CORS, request-ID, and unauthenticated
+      wishlist probes. The earlier foreign-origin rejection remains covered by
+      automated tests and the prior staged release evidence.
+- [x] Isolated staging Worker version
+      `538823a4-0333-4b71-9825-1647acf8e832` is deployed with idempotent
+      duplicate Wish recovery, partial planning-load API support, and the Mark
+      Visited boundary. Its health probe returned 200 with the production CORS
+      origin and an exposed request ID.
+- [x] Owner-reviewed Mark Visited converts only selected saved-plan stops into
+      visited pins. Each selected stop accepts an optional year, month, and
+      favorite memory. The server validates the current immutable snapshots,
+      rejects existing visited places, writes the selected pins atomically under
+      one revision and idempotency operation, and leaves the wishlist and saved
+      plan unchanged. The browser requires a final confirmation and warns when the
+      owner's Atlas is already public.
 
 ## Partial or not yet verified
 
 - [x] Deploy the backward-compatible Worker to isolated staging.
 - [x] Promote the frontend through protected develop and main pull requests and
-  verify the Pages deployment plus exact live bundle markers.
+      verify the Pages deployment plus exact live bundle markers.
 - [ ] Run account deletion against a real disposable staging account. The
-  authenticated destructive check cannot safely use the owner's existing
-  account; automated durable-state erasure and exact retry tests pass.
+      authenticated destructive check cannot safely use the owner's existing
+      account; automated durable-state erasure and exact retry tests pass.
 - [ ] Complete authenticated planner layout, keyboard, screen-reader, and
-  horizontal-overflow acceptance at desktop and phone widths. Code review and
-  lint cover the new semantics and responsive rules, and local component-state
-  measurements verify the corrected disclosure geometry at desktop and phone
-  widths. A real authenticated owner-session review of the full expanded
-  planner still remains.
+      horizontal-overflow acceptance at desktop and phone widths. Code review and
+      lint cover the new semantics and responsive rules, and local component-state
+      measurements verify the corrected disclosure geometry at desktop and phone
+      widths. Focused client tests cover the new error distinctions, while the
+      search-to-start, search-to-finish, and first wishlist-save state flow passed
+      lint and the production compile. A real authenticated owner-session review
+      of the full expanded planner still remains.
 - [ ] Verify Google Maps output on Android app/browser, iOS app/browser, and
-  desktop. The code enforces the conservative three-intermediary limit, but
-  provider behavior remains externally unverified.
+      desktop. The code enforces the conservative three-intermediary limit, but
+      provider behavior remains externally unverified.
 - [x] Complete public policy copy for future-location retention, private versus
-  public state, service providers, export, application deletion, and upstream
-  Google/Auth0 identity handling.
+      public state, service providers, export, application deletion, and upstream
+      Google/Auth0 identity handling.
 - [x] Plan start and selected finish support direct catalog or custom-coordinate
-  entry. Ordered intermediate destinations remain explicit wishlist choices.
+      entry. Ordered intermediate destinations remain explicit wishlist choices.
 - [x] Segment long Google Maps handoffs into continuous mobile-safe links.
-- [ ] Implement the separate owner-reviewed Mark Visited transition.
+- [x] Implement the separate owner-reviewed Mark Visited transition. Local
+      Worker, service, contract, client, and durable-state tests pass. The Worker
+      is deployed to isolated staging; frontend promotion and authenticated owner
+      acceptance are not yet claimed.
 - [x] Keep the API on its isolated staging Worker while promoting the
-  feature-gated Pages frontend. No apex Worker route was added.
+      feature-gated Pages frontend. No apex Worker route was added.
+- [ ] Authenticate the 2026-11-18 wishlist retry correction against staging.
+      Worker version `538823a4-0333-4b71-9825-1647acf8e832` is deployed and its
+      unauthenticated health probe passed. Local client, Worker boundary, and
+      Durable Object tests pass; owner-session acceptance remains.
 
 ## Verified commands
 

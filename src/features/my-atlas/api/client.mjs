@@ -410,6 +410,7 @@ function validatedPlanningRevision(response) {
 export async function fetchMyAtlasPlanning({
   apiBaseUrl,
   accessToken,
+  allowPartial = false,
   fetchImpl = fetch,
 }) {
   const wishes = []
@@ -442,30 +443,45 @@ export async function fetchMyAtlasPlanning({
     cursor = typeof payload.nextCursor === "string" ? payload.nextCursor : ""
   } while (cursor)
 
-  const { response, payload } = await authenticatedJsonRequest({
-    apiBaseUrl,
-    accessToken,
-    path: "/v1/me/trip-plans",
-    fetchImpl,
-  })
-  if (!Array.isArray(payload.plans) || payload.plans.length > 1) {
-    throw new MyAtlasApiError("The trip-plan response is invalid.", {
-      status: response.status,
-      code: "invalid_response",
+  try {
+    const { response, payload } = await authenticatedJsonRequest({
+      apiBaseUrl,
+      accessToken,
+      path: "/v1/me/trip-plans",
+      fetchImpl,
+    })
+    if (!Array.isArray(payload.plans) || payload.plans.length > 1) {
+      throw new MyAtlasApiError("The trip-plan response is invalid.", {
+        status: response.status,
+        code: "invalid_response",
+        requestId: response.headers.get("X-Request-Id") || "",
+      })
+    }
+    const planRevision = validatedPlanningRevision(response)
+    if (revision && revision !== planRevision) {
+      throw new MyAtlasApiError("My Atlas changed while it was loading.", {
+        status: 412,
+        code: "revision_conflict",
+        requestId: response.headers.get("X-Request-Id") || "",
+      })
+    }
+    return Object.freeze({
+      revision: planRevision,
+      wishes: Object.freeze(wishes.map(wish => Object.freeze({ ...wish }))),
+      plans: Object.freeze(
+        payload.plans.map(plan => Object.freeze({ ...plan }))
+      ),
+      planError: null,
+    })
+  } catch (error) {
+    if (!allowPartial) throw error
+    return Object.freeze({
+      revision,
+      wishes: Object.freeze(wishes.map(wish => Object.freeze({ ...wish }))),
+      plans: Object.freeze([]),
+      planError: error,
     })
   }
-  const planRevision = validatedPlanningRevision(response)
-  if (revision && revision !== planRevision) {
-    throw new MyAtlasApiError("My Atlas changed while it was loading.", {
-      status: 412,
-      code: "revision_conflict",
-    })
-  }
-  return Object.freeze({
-    revision: planRevision,
-    wishes: Object.freeze(wishes.map(wish => Object.freeze({ ...wish }))),
-    plans: Object.freeze(payload.plans.map(plan => Object.freeze({ ...plan }))),
-  })
 }
 
 export async function createMyAtlasWish({
@@ -605,6 +621,42 @@ export async function keepMyAtlasPlan({
   }
   return Object.freeze({
     plan: Object.freeze({ ...payload.plan }),
+    revision: validatedPlanningRevision(response),
+  })
+}
+
+export async function markMyAtlasPlanVisited({
+  apiBaseUrl,
+  accessToken,
+  planId,
+  visits,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: `/v1/me/trip-plans/${encodeURIComponent(planId)}/visited`,
+    method: "POST",
+    body: { visits },
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (
+    !Array.isArray(payload.pins) ||
+    payload.pins.length !== visits.length ||
+    payload.pins.some(
+      pin => typeof pin.pinId !== "string" || !isPublicPlace(pin)
+    )
+  ) {
+    throw new MyAtlasApiError("The visited-plan response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    pins: Object.freeze(payload.pins.map(normalizedPin)),
     revision: validatedPlanningRevision(response),
   })
 }

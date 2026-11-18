@@ -102,7 +102,7 @@ export function normalizeVisitedDates(value, currentYear) {
   )
 }
 
-function normalizeVisitTiming(value, currentYear) {
+export function normalizeVisitTiming(value, currentYear) {
   if (value.visitedYears !== undefined && value.visitedDates !== undefined) {
     throw new RegistrationValidationError(
       "Supply visited dates or legacy visited years, not both."
