@@ -31,6 +31,7 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/planning/handoffs.mjs
+  - src/features/my-atlas/planning/mapProjection.mjs
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
   - src/features/my-atlas/catalog/memory.mjs
@@ -266,11 +267,14 @@ plan, so an unresolved place never becomes a route snapshot.
 The planner owns an independent country, city, and reviewed-spot search control
 that calls the same public My Atlas catalog endpoint as visited-place search.
 Selecting a result can create a wishlist record from its canonical `placeId`,
-or assign that catalog record directly as the plan start or selected finish.
-The planner displays the catalog latitude and longitude before either action and
-again on the saved wishlist entry. Manual name and coordinate entry remains a
-separate custom-place fallback that supports the same save, start, and finish
-choices.
+assign that catalog record directly as the plan start or selected finish, or
+add it to the ordered trip draft. Adding a trip stop creates or reuses the
+private Wish required by the version 1 plan contract, then immediately appends
+the returned Wish ID to the local ordered draft. Saving only to the wishlist
+remains a separate action. The planner displays the catalog latitude and
+longitude before any action and again on the saved wishlist entry. Manual name
+and coordinate entry remains a separate custom-place fallback that supports the
+same save, trip-stop, start, and finish choices.
 
 Wishlist creation is idempotent by owner and Place as well as by an exact
 operation retry. If a repeated create targets a Place already in that owner's
@@ -292,6 +296,18 @@ change that needs Refresh, never as a rejected write. Auth scope, session,
 configuration, catalog, revision, and invalid-response errors retain the safe
 Worker request reference and present recovery guidance without exposing account
 data.
+
+The browser eagerly reads wishlist and saved-plan state when the authenticated
+planner mounts. Its collapsed heading names the current saved plan when one
+exists. Opening the planner switches the existing MapLibre instance from the
+visited Atlas projection to a private in-memory route projection. That
+projection shows a distinct start, ordered stop numbers, and finish, combines
+roles that share one coordinate, fits the camera to the draft, and draws
+schematic connections only. The parent map projection receives only display
+geography and coordinates, not private Wish notes, IDs, or timestamps. Closing
+or destroying the planner restores the visited projection. Draft route data
+never enters the public pin projection, analytics, or storage before an
+explicit plan save.
 
 A successful plan create, replacement, or Keep response immediately becomes
 the browser's last confirmed plan snapshot before the companion read begins. If
