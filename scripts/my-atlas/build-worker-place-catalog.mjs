@@ -11,6 +11,9 @@ function usage() {
     "Required:",
     "  --catalog <versioned catalog.json>",
     "  --output-dir <artifact directory>",
+    "",
+    "Optional:",
+    "  --revision <immutable artifact revision>",
   ].join("\n")
 }
 
@@ -22,6 +25,7 @@ function parseArgs(argv) {
     if (argument === "--help" || argument === "-h") options.help = true
     else if (argument === "--catalog") options.catalog = value
     else if (argument === "--output-dir") options.outputDirectory = value
+    else if (argument === "--revision") options.artifactRevision = value
     else throw new Error(`Unknown argument: ${argument}`)
     if (argument.startsWith("--") && argument !== "--help") index += 1
   }
@@ -43,6 +47,7 @@ export function main(argv = process.argv.slice(2)) {
   const manifest = buildWorkerPlaceCatalogArtifacts({
     catalog,
     outputDirectory: path.resolve(options.outputDirectory),
+    artifactRevision: options.artifactRevision,
   })
   console.log(
     `Built ${manifest.catalogRevision}: ${manifest.recordShards.count} record shards, ${manifest.searchShards.count} search shards, ${manifest.shardStats.recordCompressedBytes + manifest.shardStats.searchCompressedBytes} compressed bytes.`

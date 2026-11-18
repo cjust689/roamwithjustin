@@ -61,6 +61,8 @@ verification:
     - docs/audits/assets/my-atlas-planner-phase1-desktop.png
     - docs/audits/assets/my-atlas-planner-phase1-mobile.png
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
+    - Thirty-four Workers-runtime tests passed after absent-Wish deletion became an idempotent no-op that preserves revision and count
+    - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d deployed the absent-Wish reconciliation and backward-compatible optimized catalog reader
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
     - npm run build
@@ -142,6 +144,9 @@ external work.
       a successful create response before refreshing, and safe wishlist
       conflicts now expose actionable public codes instead of the generic
       account conflict.
+- [x] Repeated deletion of an already-absent owner Wish returns the current
+      profile revision without changing state, including when the retry carries
+      the pre-delete revision. Existing records still enforce `If-Match`.
 - [x] A saved-trip read failure no longer suppresses a successfully loaded
       bucket list. The owner can view and edit saved destinations while the
       saved-trip editor stays disabled behind a targeted retry message.

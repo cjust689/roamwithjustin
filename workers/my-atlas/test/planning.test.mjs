@@ -488,6 +488,19 @@ describe("private wishlist and trip planning", () => {
       },
       now: NOW,
     })
+    const alreadyRemoved = await deleteMyWish({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        wishId: arches.wish.wishId,
+        expectedRevision: 5,
+        idempotencyKey: "65656565-6565-4565-8565-656565656566",
+      },
+      now: NOW,
+    })
+    expect(alreadyRemoved).toMatchObject({
+      profile: { revision: 6, wishCount: 1 },
+    })
 
     const plans = await listMyPlans({
       environment: environment(),

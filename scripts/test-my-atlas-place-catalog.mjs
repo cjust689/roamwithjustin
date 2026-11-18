@@ -389,7 +389,10 @@ assert.equal(
   (await fixtureWorkerCatalog.search("Mount Rushmore")).results[0].spotKind,
   "Monument"
 )
-await assert.rejects(() => fixtureWorkerCatalog.search("x"), /between 2 and 80/)
+await assert.rejects(
+  () => fixtureWorkerCatalog.search("xxx"),
+  /between 4 and 80/
+)
 assert.throws(
   () =>
     new WorkerPlaceCatalog({
