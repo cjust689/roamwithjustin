@@ -88,7 +88,6 @@
         @click="toggleWelcome"
       >
         <span class="atlas-welcome-toggle-copy">
-          <small>Explore journeys</small>
           <strong>
             {{
               welcomeExpanded
@@ -109,7 +108,6 @@
         class="atlas-welcome-content"
       >
         <div class="atlas-welcome-intro">
-          <span>Explore through a photographer's eyes</span>
           <h1>The journey starts with a place.</h1>
           <p>
             Open a mapped journey for its route, stories, photographs, and
@@ -969,15 +967,6 @@ export default {
   gap: 0.15rem;
 }
 
-.atlas-welcome-toggle-copy small,
-.atlas-welcome-intro > span {
-  color: #f6bd60;
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
 .atlas-welcome-toggle-copy strong {
   overflow: hidden;
   font-size: 0.88rem;
@@ -1025,7 +1014,7 @@ export default {
 
 .atlas-welcome-intro h1 {
   max-width: 100%;
-  margin: 0.35rem 0 0.7rem;
+  margin: 0 0 0.7rem;
   font-family: Georgia, serif;
   font-size: clamp(2.25rem, 4.4vw, 3.6rem);
   font-weight: 500;

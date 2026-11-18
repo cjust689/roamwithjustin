@@ -47,6 +47,7 @@ verification:
     - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
     - Planner-coherence tests verify direct Add to trip wiring, visible save requirements, eager planning reads, parent map-mode switching, start and stop and finish route projection, selected-finish omission until chosen, and shared-coordinate role preservation
     - npm run my-atlas:test, npm run lint, npm run docs:audit, and npm run build passed for the planner-coherence slice
+    - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, nested wishlist, readiness-gated trip-details dialog, and zero horizontal overflow
     - Pull request 141 passed validation run 44358088143 and merged to develop as e514e6d06bcb011cfabd0f2fe68b77144213e8cb; develop validation run 44358509804 then succeeded
     - Pull request 142 passed production validation run 44358862563 and merged to main as 01c8a83e54b14f4cec3a47ac26b82b9804dad62f
     - Pages workflow 44359227708 built and deployed the production coherence merge successfully
@@ -244,6 +245,12 @@ of the private wishlist read and stale-delete path remains external.
       existing plan, while an empty planner opens the trip builder. Existing
       Directions and planning-prompt handoffs use mutually exclusive next-action
       panels. No Flights or Stays action appears before those capabilities exist.
+- [x] The owner page now uses progressive disclosure around that planner. Sign in
+      or the signed-in profile menu occupies one compact account control, while
+      Add destination and Visited are attached to the Atlas overview. The planner
+      leads with start, ordered stops, and finish, nests the Want to go list,
+      hides empty itinerary chrome, and opens trip naming and persistence in a
+      modal only after the route has a start, at least one stop, and a finish.
 - [x] A rejected stale mutation still relies on the Worker `If-Match` boundary
       and is never automatically replayed. The browser fetches the latest account
       revision, preserves the local itinerary draft where possible, and asks the

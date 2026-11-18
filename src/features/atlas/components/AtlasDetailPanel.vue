@@ -35,7 +35,6 @@
           <img v-if="node.image" :src="node.image" alt="" />
           <span v-else class="atlas-dock-placeholder" aria-hidden="true"></span>
           <span>
-            <small>{{ displayEyebrow }}</small>
             <strong>{{ node.title }}</strong>
           </span>
           <span class="atlas-dock-toggle" aria-hidden="true">
@@ -109,7 +108,6 @@
             {{ isFavorite ? "Saved" : "Save" }}
           </button>
           <div class="atlas-detail-title">
-            <span>{{ displayEyebrow }}</span>
             <h1>{{ node.title }}</h1>
             <p>{{ node.category }}</p>
           </div>
@@ -163,7 +161,7 @@
                 aria-hidden="true"
               ></span>
               <span
-                ><small>Stop {{ childIndex + 1 }} · {{ child.eyebrow }}</small
+                ><small>Stop {{ childIndex + 1 }}</small
                 >{{ child.title }}</span
               >
               <span aria-hidden="true">&rarr;</span>
@@ -393,11 +391,6 @@ export default {
     }
   },
   computed: {
-    displayEyebrow() {
-      return this.node.comingSoon && !this.node.parentId
-        ? `First look / ${this.node.eyebrow}`
-        : this.node.eyebrow
-    },
     guidedClearanceStyle() {
       if (!this.guidedControlsExpanded || !this.guidedControlsClearance) {
         return null
@@ -883,7 +876,6 @@ export default {
   left: 1.25rem;
 }
 
-.atlas-detail-title span,
 .atlas-note span,
 .atlas-section-heading span {
   color: #f6bd60;
@@ -1372,17 +1364,6 @@ export default {
     min-width: 0;
     flex-direction: column;
     gap: 0.18rem;
-  }
-
-  .atlas-dock-place small {
-    overflow: hidden;
-    color: #f6bd60;
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.13em;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    white-space: nowrap;
   }
 
   .atlas-dock-place strong {

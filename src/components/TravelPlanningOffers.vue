@@ -6,7 +6,6 @@
     aria-labelledby="travel-offers-title"
   >
     <div class="travel-offers__copy">
-      <span>Travel planning</span>
       <h2 id="travel-offers-title">Planning your own Utah journey?</h2>
       <p>
         Explore Expedia options for stays or flights when you are ready to
@@ -132,7 +131,6 @@ export default {
     #11191d;
 }
 
-.travel-offers__copy > span,
 .travel-offers__banner > span {
   color: #f6bd60;
   font-size: 0.68rem;
@@ -142,7 +140,7 @@ export default {
 }
 
 .travel-offers h2 {
-  margin: 0.55rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(2rem, 4vw, 3.3rem);
   font-weight: 500;

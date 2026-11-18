@@ -12,7 +12,6 @@
       @click="toggleOpen"
     >
       <span>
-        <small>Private trip planning beta</small>
         <strong id="my-atlas-planner-title">
           {{ plan ? plan.title : "Plan future travel" }}
         </strong>
@@ -32,12 +31,12 @@
       </p>
 
       <section
+        v-if="plan"
         class="planner-itinerary-card"
         aria-labelledby="planner-itinerary-title"
       >
         <div v-if="plan" class="planner-itinerary-heading">
           <div>
-            <small>Your itinerary</small>
             <h3 id="planner-itinerary-title">{{ plan.title }}</h3>
             <p>
               {{ plan.stops.length }}
@@ -104,18 +103,17 @@
               :disabled="!planStateAvailable"
               :aria-expanded="String(planEditorOpen)"
               aria-controls="planner-trip-editor"
-              @click="planEditorOpen = !planEditorOpen"
+              @click="openPlanDetails"
             >
-              {{ planEditorOpen ? "Close editor" : "Edit itinerary" }}
+              Edit itinerary
             </button>
-            <button type="button" @click="wishlistOpen = true">
-              Add destinations
+            <button type="button" @click="focusRouteBuilder">
+              Change route
             </button>
           </div>
 
           <div class="planner-next-actions">
             <div>
-              <small>Next steps</small>
               <strong>Use your saved order</strong>
             </div>
             <div class="planner-next-action-buttons">
@@ -319,28 +317,17 @@
             </button>
           </div>
         </template>
-
-        <div v-else class="planner-itinerary-empty">
-          <small>Your itinerary</small>
-          <h3 id="planner-itinerary-title">Build your first trip</h3>
-          <p>
-            Save a destination, choose where to start, then put your stops in
-            the order you want to travel.
-          </p>
-          <button type="button" @click="openTripBuilder">
-            Choose destinations
-          </button>
-        </div>
       </section>
 
       <section
+        ref="routeBuilder"
         class="planner-block planner-wishlist-block"
         aria-labelledby="bucket-list-title"
       >
         <div class="planner-block-heading">
           <div>
-            <p id="bucket-list-title">Want to go</p>
-            <span>{{ wishes.length }} of 250 saved</span>
+            <h3 id="bucket-list-title">Build your itinerary</h3>
+            <span>Choose a start, stops, and finish</span>
           </div>
           <div class="planner-block-actions">
             <button type="button" :disabled="pending" @click="loadPlanning">
@@ -352,18 +339,18 @@
               aria-controls="planner-wishlist-content"
               @click="wishlistOpen = !wishlistOpen"
             >
-              {{ wishlistOpen ? "Hide" : "Manage" }}
+              {{
+                wishlistOpen
+                  ? "Hide want to go"
+                  : `Want to go (${wishes.length})`
+              }}
             </button>
           </div>
         </div>
 
-        <div
-          v-if="wishlistOpen"
-          id="planner-wishlist-content"
-          class="planner-collapsible-content"
-        >
+        <div id="planner-wishlist-content" class="planner-collapsible-content">
           <label class="planner-place-search">
-            <span>Find a country, city, or spot for this trip</span>
+            <span>Find a start, destination, or finish</span>
             <input
               v-model="wishQuery"
               type="search"
@@ -473,8 +460,8 @@
               <strong>{{ planForm.endDirect.name }}</strong>
             </p>
             <small>
-              These selections are ready in the saved trip form below. Save at
-              least one destination to build the ordered route.
+              These selections are ready in the route below. Add at least one
+              destination between the start and finish.
             </small>
           </div>
 
@@ -542,88 +529,184 @@
             </p>
           </details>
 
-          <p v-if="!wishes.length" class="planner-empty">
-            Search My Atlas or save your own coordinates to begin.
-          </p>
-          <ul v-else class="planner-wishes">
-            <li v-for="wish in wishes" :key="wish.wishId">
+          <div v-if="wishlistOpen" class="planner-saved-wishes">
+            <p v-if="!wishes.length" class="planner-empty">
+              Search My Atlas or save your own coordinates to begin.
+            </p>
+            <ul v-else class="planner-wishes">
+              <li v-for="wish in wishes" :key="wish.wishId">
+                <div>
+                  <strong>{{ wish.name }}</strong>
+                  <span>{{ locationContext(wish) }}</span>
+                  <span>{{ coordinateLabel(wish) }}</span>
+                  <small>{{ routeReadinessLabel(wish) }}</small>
+                </div>
+                <div class="planner-wish-route-actions">
+                  <button
+                    type="button"
+                    :disabled="wish.unavailable || !planStateAvailable"
+                    @click="useSavedPlanLocation('start', wish)"
+                  >
+                    Use as start
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="wish.unavailable || !planStateAvailable"
+                    @click="togglePlanStop(wish.wishId)"
+                  >
+                    {{
+                      planForm.stopWishIds.includes(wish.wishId)
+                        ? "Remove stop"
+                        : "Add stop"
+                    }}
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="wish.unavailable || !planStateAvailable"
+                    @click="useSavedPlanLocation('end', wish)"
+                  >
+                    Use as finish
+                  </button>
+                </div>
+                <label>
+                  <span>Priority</span>
+                  <select v-model="wishDrafts[wish.wishId].priority">
+                    <option value="low">Low</option>
+                    <option value="normal">Normal</option>
+                    <option value="high">High</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Year</span>
+                  <input
+                    v-model="wishDrafts[wish.wishId].desiredYear"
+                    type="number"
+                    :min="currentYear"
+                    :max="currentYear + 20"
+                    placeholder="Optional"
+                  />
+                </label>
+                <label class="planner-note">
+                  <span>Private note</span>
+                  <input
+                    v-model.trim="wishDrafts[wish.wishId].note"
+                    type="text"
+                    maxlength="255"
+                    placeholder="Optional"
+                  />
+                </label>
+                <div class="planner-row-actions">
+                  <button
+                    type="button"
+                    :disabled="pending"
+                    @click="saveWish(wish)"
+                  >
+                    Save details
+                  </button>
+                  <button
+                    type="button"
+                    :disabled="pending"
+                    @click="removeWish(wish)"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <section class="planner-draft-route" aria-label="Itinerary route">
+            <div class="planner-draft-route-heading">
               <div>
-                <strong>{{ wish.name }}</strong>
-                <span>{{ locationContext(wish) }}</span>
-                <span>{{ coordinateLabel(wish) }}</span>
-                <small>{{ routeReadinessLabel(wish) }}</small>
+                <strong>
+                  {{
+                    routeDraftReady ? "Ready for trip details" : "Keep building"
+                  }}
+                </strong>
               </div>
-              <label>
-                <span>Priority</span>
-                <select v-model="wishDrafts[wish.wishId].priority">
-                  <option value="low">Low</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High</option>
-                </select>
-              </label>
-              <label>
-                <span>Year</span>
-                <input
-                  v-model="wishDrafts[wish.wishId].desiredYear"
-                  type="number"
-                  :min="currentYear"
-                  :max="currentYear + 20"
-                  placeholder="Optional"
-                />
-              </label>
-              <label class="planner-note">
-                <span>Private note</span>
-                <input
-                  v-model.trim="wishDrafts[wish.wishId].note"
-                  type="text"
-                  maxlength="255"
-                  placeholder="Optional"
-                />
-              </label>
-              <div class="planner-row-actions">
+              <span>{{ planForm.stopWishIds.length }} stops</span>
+            </div>
+            <ol>
+              <li :class="{ 'is-missing': !planStartLocation }">
+                <b>S</b>
+                <span>
+                  <small>Start</small>
+                  <strong>{{
+                    planStartLocation
+                      ? planStartLocation.name
+                      : "Choose a start"
+                  }}</strong>
+                </span>
+              </li>
+              <li
+                v-for="(stop, index) in planStopLocations"
+                :key="`${stop.placeId}-${index}`"
+              >
+                <b>{{ index + 1 }}</b>
+                <span>
+                  <small>Stop {{ index + 1 }}</small>
+                  <strong>{{ stop.name }}</strong>
+                </span>
                 <button
                   type="button"
-                  :disabled="pending"
-                  @click="saveWish(wish)"
-                >
-                  Save details
-                </button>
-                <button
-                  type="button"
-                  :disabled="pending"
-                  @click="removeWish(wish)"
+                  :aria-label="`Remove ${stop.name} from this trip`"
+                  @click="togglePlanStop(stop.wishId)"
                 >
                   Remove
                 </button>
-              </div>
-            </li>
-          </ul>
+              </li>
+              <li :class="{ 'is-missing': !planFinishLocation }">
+                <b>F</b>
+                <span>
+                  <small>Finish</small>
+                  <strong>{{
+                    planFinishLocation
+                      ? planFinishLocation.name
+                      : "Choose a finish"
+                  }}</strong>
+                </span>
+              </li>
+            </ol>
+            <label class="planner-finish-mode">
+              <span>Finish behavior</span>
+              <select v-model="planForm.endMode">
+                <option value="last-stop">Finish at last stop</option>
+                <option value="return-to-start">Return to start</option>
+                <option value="selected-end">Use selected finish</option>
+              </select>
+            </label>
+            <p v-if="!routeDraftReady" class="planner-route-guidance">
+              Choose a start and at least one destination. The last stop can be
+              the finish, or select a separate finish from search.
+            </p>
+            <button
+              v-else
+              type="button"
+              class="planner-review-trip"
+              @click="openPlanDetails"
+            >
+              {{ plan ? "Review itinerary changes" : "Add trip details" }}
+            </button>
+          </section>
         </div>
       </section>
 
-      <section class="planner-block" aria-labelledby="trip-plan-title">
+      <section
+        v-if="planEditorOpen"
+        ref="planDialog"
+        class="planner-block planner-plan-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="trip-plan-title"
+        tabindex="-1"
+        @keydown.esc.stop="closePlanDetails"
+      >
         <div class="planner-block-heading">
           <div>
-            <p id="trip-plan-title">
-              {{ plan ? "Itinerary details" : "Create itinerary" }}
-            </p>
-            <span>
-              {{
-                plan
-                  ? "Change the trip only when you are ready to save"
-                  : "One private plan with an ordered destination list"
-              }}
-            </span>
+            <h3 id="trip-plan-title">Trip details</h3>
+            <span>Review the route, name it, then save</span>
           </div>
-          <button
-            v-if="plan"
-            type="button"
-            :aria-expanded="String(planEditorOpen)"
-            aria-controls="planner-trip-editor"
-            @click="planEditorOpen = !planEditorOpen"
-          >
-            {{ planEditorOpen ? "Close" : "Edit" }}
-          </button>
+          <button type="button" @click="closePlanDetails">Close</button>
         </div>
 
         <p v-if="planLoadError" class="planner-error" role="alert">
@@ -650,7 +733,7 @@
         </div>
 
         <div
-          v-if="planStateAvailable && (planEditorOpen || !plan)"
+          v-if="planStateAvailable"
           id="planner-trip-editor"
           class="planner-plan-editor"
         >
@@ -801,14 +884,6 @@
             </button>
           </div>
         </div>
-
-        <p
-          v-else-if="planStateAvailable && plan"
-          class="planner-editor-collapsed"
-        >
-          Your saved itinerary is shown above. Open the editor when you want to
-          change its title, endpoints, stops, order, year, or private note.
-        </p>
 
         <details v-if="plan" class="planner-mark-visited">
           <summary>Mark trip stops visited</summary>
@@ -1066,6 +1141,23 @@ export default {
         .map(wishId => this.wishes.find(wish => wish.wishId === wishId))
         .filter(Boolean)
     },
+    planFinishLocation() {
+      if (this.planForm.endMode === "selected-end") {
+        return this.planForm.endDirect
+      }
+      if (this.planForm.endMode === "return-to-start") {
+        return this.planStartLocation
+      }
+      return this.planStopLocations[this.planStopLocations.length - 1] || null
+    },
+    routeDraftReady() {
+      return Boolean(
+        this.planStateAvailable &&
+          this.planStartLocation &&
+          this.planStopLocations.length &&
+          this.planFinishLocation
+      )
+    },
     plannerMapRoute() {
       return buildPlannerMapRoute({
         start: this.planStartLocation,
@@ -1203,7 +1295,7 @@ export default {
       if (this.open && !this.planningLoaded && !this.pending) {
         await this.loadPlanning()
         this.wishlistOpen = !this.plan
-        this.planEditorOpen = !this.plan
+        this.planEditorOpen = false
       }
     },
     emitPlannerState() {
@@ -1212,9 +1304,19 @@ export default {
         route: this.open ? this.plannerMapRoute : [],
       })
     },
-    openTripBuilder() {
-      this.wishlistOpen = true
+    focusRouteBuilder() {
+      this.$refs.routeBuilder?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    },
+    openPlanDetails() {
+      if (!this.plan && !this.routeDraftReady) return
       this.planEditorOpen = true
+      this.$nextTick(() => this.$refs.planDialog?.focus())
+    },
+    closePlanDetails() {
+      this.planEditorOpen = false
     },
     toggleNextAction(action) {
       this.nextActionOpen = this.nextActionOpen === action ? "" : action
@@ -1497,13 +1599,13 @@ export default {
     },
     forgetSavedPlan() {
       this.plan = null
+      this.planEditorOpen = false
       this.syncPlanForm()
       this.syncVisitDrafts()
       this.syncDirectionsPreferences()
     },
     appendPlanStop(wish) {
       this.error = ""
-      this.planEditorOpen = true
       if (!wish?.wishId || wish.unavailable) {
         this.error = "That destination is not available for this trip."
         return false
@@ -1650,6 +1752,17 @@ export default {
           " Save at least one destination before saving the trip."
       }
       this.clearPreparedDirections()
+    },
+    useSavedPlanLocation(role, wish) {
+      if (!wish?.wishId || wish.unavailable) return
+      if (role === "start") {
+        this.planForm.startWishId = wish.wishId
+        this.planForm.startDirect = null
+        this.announcement = `${wish.name} will be used as the trip start.`
+        this.clearPreparedDirections()
+        return
+      }
+      this.usePlanLocation("end", wish)
     },
     clearDirectLocation(role) {
       if (role === "start") this.planForm.startDirect = null
@@ -2466,8 +2579,7 @@ export default {
 .planner-block-heading > .planner-block-actions {
   display: flex;
 }
-.planner-heading small,
-.planner-block-heading p,
+.planner-block-heading h3,
 .planner-heading strong,
 .planner-disclosure,
 .planner-status,
@@ -2479,13 +2591,12 @@ export default {
 .planner-delete-account p {
   margin: 0;
 }
-.planner-heading small,
-.planner-block-heading p {
-  color: #e6ba68;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.62rem;
-  font-weight: 800;
+.planner-block-heading h3 {
+  margin: 0;
+  color: #edf7f2;
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.25;
 }
 .planner-heading strong {
   color: #edf7f2;
@@ -2556,6 +2667,130 @@ export default {
   border: 1px solid rgba(230, 186, 104, 0.22);
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.035);
+}
+.planner-plan-dialog {
+  position: fixed;
+  top: 5vh;
+  left: 50%;
+  z-index: 30;
+  box-sizing: border-box;
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: translateX(-50%);
+  border-color: rgba(230, 186, 104, 0.52);
+  background: #0d1b1e;
+  box-shadow:
+    0 0 0 100vmax rgba(2, 8, 9, 0.78),
+    0 1.5rem 4rem rgba(0, 0, 0, 0.5);
+}
+.planner-plan-dialog:focus {
+  outline: 2px solid rgba(230, 186, 104, 0.62);
+  outline-offset: 0.2rem;
+}
+.planner-saved-wishes {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+.planner-wish-route-actions {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.planner-draft-route {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(230, 186, 104, 0.32);
+  border-radius: 0.8rem;
+  background: rgba(230, 186, 104, 0.045);
+}
+.planner-draft-route-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+.planner-draft-route-heading > div,
+.planner-draft-route li > span {
+  display: grid;
+  gap: 0.08rem;
+}
+.planner-draft-route-heading small,
+.planner-draft-route li small {
+  color: #d4b875;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.52rem;
+  font-weight: 800;
+}
+.planner-draft-route-heading strong,
+.planner-draft-route li strong {
+  color: #edf7f2;
+  font-size: 0.68rem;
+}
+.planner-draft-route-heading > span {
+  color: #9bada7;
+  font-size: 0.58rem;
+}
+.planner-draft-route ol {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.planner-draft-route li {
+  display: grid;
+  grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.6rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+.planner-draft-route li > b {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  border-radius: 50%;
+  color: #132023;
+  background: #e6ba68;
+  font-size: 0.58rem;
+}
+.planner-draft-route li.is-missing {
+  border: 1px dashed rgba(230, 186, 104, 0.3);
+  background: transparent;
+}
+.planner-draft-route li.is-missing > b {
+  color: #d4b875;
+  background: rgba(230, 186, 104, 0.1);
+}
+.planner-draft-route li > button {
+  min-height: 2.1rem;
+  color: #d9a09a;
+}
+.planner-finish-mode {
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 0.8fr);
+  align-items: center;
+}
+.planner-route-guidance {
+  margin: 0;
+  color: #9bada7;
+  font-size: 0.61rem;
+  line-height: 1.5;
+}
+.planner-review-trip {
+  justify-self: start;
+  color: #132023 !important;
+  background: #e6ba68 !important;
 }
 .planner-block-heading span {
   color: #8fa29c;
@@ -3030,6 +3265,14 @@ export default {
   .planner-wishes li,
   .planner-custom > div {
     grid-template-columns: 1fr;
+  }
+  .planner-wish-route-actions,
+  .planner-finish-mode {
+    grid-template-columns: 1fr;
+  }
+  .planner-plan-dialog {
+    top: 1rem;
+    max-height: calc(100dvh - 2rem);
   }
   .planner-custom > div label:first-child,
   .planner-custom-actions {
