@@ -81,6 +81,8 @@ verification:
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
     - API client tests preserve the Worker request ID on rejected authenticated requests
     - API client tests retry an authenticated GET once after a browser network rejection and prove mutation requests still make only one attempt
+    - Pull requests 133 and 134 passed their required validation checks, develop validation run 44316716233 passed, and Pages run 44317427615 deployed main merge d799e961b6aedcfd2e3dfbe4224446350ab482c9
+    - Live chunk 894.461d6b6a.js returned 200 and its compiled API client used two attempts only for GET while retaining one attempt for every mutation
     - Worker routing tests prove that owner state bootstrap bypasses the public catalog and shared Atlas limiter
     - Headless Chrome at 390 pixels verified in-place recovery from a simulated catalog 429 without reloading or losing the signed-in screen
     - Pull requests 77 and 78 passed their required validation gates; Pages workflow 44014283401 deployed main merge 7c2b1a9135ce45a834bf7aadda869460452e55de

@@ -65,6 +65,8 @@ verification:
     - Rclone reported 512 matching geonames-2026-11-17-reviewed-spots release objects with zero differences before catalog/current.json was uploaded last
     - Rclone reported 512 matching geonames-2026-11-18-reviewed-utah release objects with zero differences before catalog/current.json was uploaded last
     - Production-origin staging searches returned Torrey, Hanksville, and Capitol Reef National Park from geonames-2026-11-18-reviewed-utah after manifest activation
+    - Pull requests 133 and 134 passed validation runs 44316400839 and 44317077225, develop validation run 44316716233 passed, and Pages run 44317427615 deployed main merge d799e961b6aedcfd2e3dfbe4224446350ab482c9
+    - Live chunk 894.461d6b6a.js returned 200 and contained geonames-2026-11-18-reviewed-utah-proof, Capitol Reef National Park, Torrey, and Hanksville
     - Production-origin live searches returned Krka National Park and Canyonlands as National park and Mount Rushmore as Monument from geonames-2026-11-17-reviewed-spots; Coolbinia returned no search result while its prior PPLX ID resolved as deprecated
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
