@@ -73,6 +73,8 @@ verification:
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
     - Workers-runtime planning tests verified that deleting an already-absent owner Wish is an idempotent no-op that returns the current revision instead of a stale not-found failure
     - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d deployed the idempotent absent-Wish deletion behavior
+    - Pull requests 145 and 146 promoted the absent-Wish and bounded-search release through protected develop and main as 3443d1a010830ab33d3e029eceafa7bd91a83f61 and 1758fea1681ff72ec0e9423f2a06f4fb07d5e13b
+    - Pages run 44369566126 succeeded, and live chunk 885.9c3d6805.js returned 200 with the four-character browser search boundary
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication

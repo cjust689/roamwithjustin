@@ -56,6 +56,8 @@ verification:
     - Rclone verified all 512 geonames-2026-11-18-reviewed-utah release objects before manifest activation, and production-origin staging searches returned Torrey, Hanksville, and Capitol Reef on that revision
     - Rclone verified 4352 matching geonames-2026-11-18-reviewed-utah-search-v2 release objects with zero differences before manifest activation
     - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d returned HTTP 200 with production-origin CORS and request IDs for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose after optimized-manifest activation
+    - Pull requests 145 and 146 promoted the optimized-search release through protected develop and main; history-only pull request 147 restored current main ancestry before production promotion
+    - Pages run 44369566126 succeeded for main merge 1758fea1681ff72ec0e9423f2a06f4fb07d5e13b, and live chunk 885.9c3d6805.js returned 200 with the four-character search boundary
     - API client tests retried one failed authenticated GET and made only one attempt for a failed mutation
     - Pull requests 133 and 134 passed validation runs 44316400839 and 44317077225, develop validation run 44316716233 passed, and Pages run 44317427615 deployed main merge d799e961b6aedcfd2e3dfbe4224446350ab482c9
     - Live chunk 894.461d6b6a.js returned 200 and contained the reviewed Utah fallback catalog plus the compiled GET-only two-attempt request boundary

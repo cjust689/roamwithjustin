@@ -70,6 +70,10 @@ verification:
     - Rclone reported 4352 matching geonames-2026-11-18-reviewed-utah-search-v2 release objects with zero differences before catalog/current.json was updated last
     - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d accepted the previous and optimized manifests during activation
     - Production-origin staging searches returned HTTP 200 with CORS and request IDs for Atlanta, Torrey, Capitol Reef, Hanksville, Uvita, and San Jose from geonames-2026-11-18-reviewed-utah-search-v2
+    - Pull request 145 passed validation run 44367937370 and merged the resource fix to develop as 3443d1a010830ab33d3e029eceafa7bd91a83f61; develop validation run 44368309406 then succeeded
+    - History-only pull request 147 passed validation run 44368814693 and merged current main ancestry to develop as d10038be1abd2992c9100c1cd6eabcd8b53740ad; develop validation run 44369190504 then succeeded
+    - Pull request 146 merged the validated develop head to main as 1758fea1681ff72ec0e9423f2a06f4fb07d5e13b, and Pages run 44369566126 built and deployed it successfully
+    - Live content-addressed chunk 885.9c3d6805.js returned 200 and contained the four-character search boundary
     - Pull requests 133 and 134 passed validation runs 44316400839 and 44317077225, develop validation run 44316716233 passed, and Pages run 44317427615 deployed main merge d799e961b6aedcfd2e3dfbe4224446350ab482c9
     - Live chunk 894.461d6b6a.js returned 200 and contained geonames-2026-11-18-reviewed-utah-proof, Capitol Reef National Park, Torrey, and Hanksville
     - Production-origin live searches returned Krka National Park and Canyonlands as National park and Mount Rushmore as Monument from geonames-2026-11-17-reviewed-spots; Coolbinia returned no search result while its prior PPLX ID resolved as deprecated
