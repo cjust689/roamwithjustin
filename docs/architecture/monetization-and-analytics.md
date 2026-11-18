@@ -162,12 +162,15 @@ received event data require external owner verification.
   signals do not substitute for a policy and jurisdiction appropriate consent
   platform.
 - Production merge `898d801` and Pages run `44210436840` deployed the Utah
-  block. A live headless-browser check verified that the disclosed button
-  precedes all Expedia requests, then the exact script creates stays and
-  flights iframes carrying campaign reference `1101l6yKm4` and their distinct
-  Pubrefs. Expedia program status, final click destinations, provider-side
-  attribution, commission eligibility, and disclosure/privacy acceptance
-  remain externally unverified.
+  block, but live activation exposed Expedia's post-DOM-ready initialization
+  requirement. Corrective pull requests 125 and 126, production merge
+  `37761c8`, and Pages run `44213345541` deployed the compatibility adapter. A
+  new isolated live-browser session then verified that the disclosed button
+  precedes all Expedia requests and, without a manual compatibility action,
+  creates visible `728x90` stays and flights iframes carrying campaign
+  reference `1101l6yKm4` and their distinct Pubrefs. Expedia program status,
+  final click destinations, provider-side attribution, commission eligibility,
+  and disclosure/privacy acceptance remain externally unverified.
 - GitHub Pages still serves direct SPA routes through a `404.html` fallback. A
   direct `/atlas` request may therefore retain HTTP 404 status even though the
   client app hydrates. A production 200 rewrite remains a separate hosting
