@@ -46,7 +46,11 @@ verification:
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
     - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
     - Planner-coherence tests verify direct Add to trip wiring, visible save requirements, eager planning reads, parent map-mode switching, start and stop and finish route projection, selected-finish omission until chosen, and shared-coordinate role preservation
-    - npm run my-atlas:test, npm run lint, npm run docs:audit, and npm run build passed for the local planner-coherence slice
+    - npm run my-atlas:test, npm run lint, npm run docs:audit, and npm run build passed for the planner-coherence slice
+    - Pull request 141 passed validation run 44358088143 and merged to develop as e514e6d06bcb011cfabd0f2fe68b77144213e8cb; develop validation run 44358509804 then succeeded
+    - Pull request 142 passed production validation run 44358862563 and merged to main as 01c8a83e54b14f4cec3a47ac26b82b9804dad62f
+    - Pages workflow 44359227708 built and deployed the production coherence merge successfully
+    - Live content-addressed chunks 944.dfa848dd.js and 327.9488c543.js returned 200 and together contained Add to trip, Before this trip can be saved, Your private draft route, and Open trip
     - Pull request 137 passed validation run 44347357469 and merged to develop as eecbc6590d47d526a376525c18e1e6399f95bbc2; develop validation run 44347715150 then succeeded
     - Pull request 138 passed with the validated develop head and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages workflow 44348107246 built and deployed main merge 61e5542885238c5816f5289a93c3bc20af2481ec successfully
@@ -117,10 +121,13 @@ Pages run 44348107246 deployed production merge
 417.972f66bc.js contains the exact release markers. No Worker deployment was
 required because this release changes no server or persistence contract.
 
-The current local coherence slice adds direct Add to trip behavior, visible
-save requirements, eager authenticated planning reads, and the private draft
-map overlay. It remains undeployed until it is promoted through the protected
-branches and verified in an authenticated owner session.
+Pull requests 141 and 142 promoted direct Add to trip behavior, visible save
+requirements, eager authenticated planning reads, and the private draft map
+overlay through protected `develop` and `main`. Pages run 44359227708 deployed
+production merge `01c8a83e54b14f4cec3a47ac26b82b9804dad62f`.
+Content-addressed chunks 944.dfa848dd.js and 327.9488c543.js contain the exact
+release markers. Authenticated owner interaction and visual acceptance remain
+external work.
 
 ## Implemented and test verified
 

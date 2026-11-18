@@ -83,8 +83,8 @@ private-plan sharing is authorized by this proposal.
 ## Current implementation state
 
 Phases 1 and 2 are implemented, locally verified, and deployed. A subsequent
-local planner-coherence slice also implements the presentation portion of Phase
-4 against the version 1 unique-stop contract. Search can add a result directly
+planner-coherence slice also implements the presentation portion of Phase 4
+against the version 1 unique-stop contract. Search can add a result directly
 to the ordered draft by creating or reusing its private Wish, save requirements
 remain visible, planning state loads when the component mounts, and the existing
 MapLibre instance switches between visited and private draft projections. The
@@ -101,10 +101,11 @@ retention, export, public projection, analytics, or commerce contract changed.
 Pull requests 137 and 138 promoted the release through protected `develop` and
 `main`, and Pages run 44348107246 deployed production merge
 `61e5542885238c5816f5289a93c3bc20af2481ec`. Authenticated owner acceptance and
-real-device Google Maps checks remain external work. Phase 3, the stable-node
-portion of Phase 4, and Phases 5 through 7 remain unimplemented. The local
-coherence slice is not described as deployed until its release is promoted and
-verified separately.
+real-device Google Maps checks remain external work. Pull requests 141 and 142
+then promoted the coherence slice, and Pages run 44359227708 deployed main merge
+`01c8a83e54b14f4cec3a47ac26b82b9804dad62f`. Live chunks 944.dfa848dd.js and
+327.9488c543.js contain its exact interface markers. Phase 3, the stable-node
+portion of Phase 4, and Phases 5 through 7 remain unimplemented.
 
 ## Phase 1 contract
 

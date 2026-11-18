@@ -63,6 +63,8 @@ verification:
     - Pull request 138 reused that successful validation and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages run 44348107246 built and deployed the production merge successfully
     - Live content-addressed chunk 417.972f66bc.js returned 200 and contained the readable itinerary, ephemeral route-mode controls, and saved-plan refresh recovery markers together
+    - Pull requests 141 and 142 passed validation runs 44358088143 and 44358862563, merged through protected develop and main, and Pages run 44359227708 deployed main merge 01c8a83e54b14f4cec3a47ac26b82b9804dad62f
+    - Live content-addressed chunks 944.dfa848dd.js and 327.9488c543.js returned 200 and together contained the direct trip action, save-requirement, private map-overlay, and restored-trip heading markers
     - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
     - Pull request 114 passed production validation run 44158190178 and merged to main as d6af82bddfaf8bb4e0f4ac61caeade6697c46982
     - Pages run 44158579421 deployed the typography cleanup, and a live audit found Poppins plus zero Russo One matches across 32 discoverable content-addressed CSS and JavaScript assets
