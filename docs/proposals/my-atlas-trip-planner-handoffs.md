@@ -10,6 +10,7 @@ related:
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
   - my-atlas-trip-planner-phase-0-2026-11-18
+  - my-atlas-directions-phase-2-2026-11-18
   - my-atlas-travel-booking-affiliate-partnerships
   - affiliate-activation-public-editorial-first-slice
   - monetization-analytics
@@ -78,6 +79,20 @@ private-plan sharing is authorized by this proposal.
    an explicit decision before any private-planner analytics. Free utility
    remains available without commerce.
 
+## Current implementation state
+
+Phases 1 and 2 are implemented and locally verified. Phase 2 keeps point
+inclusion, the default Maps mode, per-pair overrides, and prepared links in
+browser component memory only. One retained point becomes a Maps place search.
+Compatible adjacent pairs are grouped by mode and segmented at the existing
+three-waypoint boundary. Fly and Ferry split those groups without creating a
+road route or provider link. No Worker, API, storage, retention, export, public
+projection, analytics, or commerce contract changed.
+
+This local state is not deployed. Authenticated owner acceptance and real-device
+Google Maps checks remain external work. Phases 3 through 7 remain
+unimplemented.
+
 ## Phase 1 contract
 
 Phase 1 changes browser presentation only. It introduces no Worker route,
@@ -118,8 +133,10 @@ planner routes unless separately authorized and documented.
 
 ## Verification still required
 
-- Authenticated desktop and phone review of the readable Phase 1 itinerary.
-- Keyboard and screen-reader review of collapsed controls and reordering.
+- Authenticated desktop and phone review of the readable itinerary and
+  ephemeral directions controls.
+- Keyboard and screen-reader review of collapsed controls, reordering, point
+  inclusion, and mode selection.
 - Real-device Google Maps verification on Android, iOS, and desktop.
 - Each later phase's API, export, deletion, retention, isolation, and public
   projection regression matrix before that phase can ship.

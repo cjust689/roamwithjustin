@@ -133,37 +133,150 @@
             class="planner-handoffs planner-next-action-panel"
           >
             <p>
-              Directions preserve your saved order. My Atlas does not calculate
-              the fastest route, traffic, closures, or road access.
+              Choose the points and travel modes for this export. These choices
+              stay in this browser view and do not change your saved trip.
             </p>
-            <button type="button" @click="prepareDirections">
+
+            <label class="planner-directions-default">
+              <span>Default Maps mode</span>
+              <select
+                v-model="directionsDefaultMode"
+                @change="clearPreparedDirections"
+              >
+                <option value="driving">Drive</option>
+                <option value="transit">Transit</option>
+                <option value="walking">Walk</option>
+                <option value="bicycling">Bike</option>
+              </select>
+            </label>
+
+            <fieldset class="planner-directions-points">
+              <legend>Points in this export</legend>
+              <label v-for="point in directionsPoints" :key="point.pointKey">
+                <input
+                  v-model="directionsIncludedPointKeys"
+                  type="checkbox"
+                  :value="point.pointKey"
+                  @change="clearPreparedDirections"
+                />
+                <span>
+                  <strong>{{ routePointLabel(point) }}</strong>
+                  <small>{{ point.location.name }}</small>
+                </span>
+              </label>
+            </fieldset>
+
+            <div class="planner-route-preview" aria-live="polite">
+              <span>Export preview</span>
+              <strong v-if="directionsSelectedPoints.length">
+                {{ directionsPreview }}
+              </strong>
+              <strong v-else>Choose at least one point.</strong>
+              <small v-if="directionsCustomPoints.length">
+                Exact custom coordinates will be shown for confirmation before a
+                Maps link is prepared.
+              </small>
+            </div>
+
+            <div v-if="directionsPairs.length" class="planner-route-modes">
+              <p>How will you travel on each retained leg?</p>
+              <label v-for="pair in directionsPairs" :key="pair.pairKey">
+                <span>
+                  <strong>
+                    {{ pair.from.location.name }} to
+                    {{ pair.to.location.name }}
+                  </strong>
+                  <small v-if="!pair.explicit">
+                    Uses default: {{ routeModeLabel(pair.mode) }}
+                  </small>
+                </span>
+                <select
+                  :value="directionsPairModes[pair.pairKey] || ''"
+                  @change="
+                    setDirectionsPairMode(pair.pairKey, $event.target.value)
+                  "
+                >
+                  <option value="">
+                    Use default ({{ routeModeLabel(directionsDefaultMode) }})
+                  </option>
+                  <option value="driving">Drive</option>
+                  <option value="transit">Transit</option>
+                  <option value="walking">Walk</option>
+                  <option value="bicycling">Bike</option>
+                  <option value="fly">Fly, separate handoff</option>
+                  <option value="ferry">Ferry, separate handoff</option>
+                </select>
+              </label>
+            </div>
+
+            <p v-if="directionsSelectedPoints.length === 1">
+              One point will open as a Google Maps place search.
+            </p>
+            <p v-else-if="!directionsSelectedPoints.length">
+              No Google Maps link will be prepared until a point is selected.
+            </p>
+            <p v-else>
+              My Atlas preserves this order. It does not optimize the route,
+              calculate traffic, or confirm road access.
+            </p>
+
+            <button
+              type="button"
+              :disabled="!directionsSelectedPoints.length"
+              @click="prepareDirections"
+            >
               {{
-                mapsLegs.length
-                  ? "Refresh Google Maps links"
-                  : "Prepare Google Maps links"
+                routeHandoffs.length
+                  ? "Refresh route handoffs"
+                  : "Prepare route handoffs"
               }}
             </button>
-            <div v-if="mapsLegs.length" class="planner-map-legs">
-              <p v-if="mapsLegs.length > 1">
-                Google Maps supports fewer stops on mobile, so this trip is
-                split into {{ mapsLegs.length }} continuous routes.
+
+            <div v-if="routeHandoffs.length" class="planner-map-legs">
+              <p v-if="directionsRouteCount > 1">
+                This export is split into {{ directionsRouteCount }} ordered
+                Google Maps routes.
               </p>
-              <a
-                v-for="(leg, index) in mapsLegs"
-                :key="leg.url"
-                :href="leg.url"
-                target="_blank"
-                rel="noopener noreferrer"
-                :aria-label="`Open ${
-                  mapsLegs.length > 1 ? `route ${index + 1}` : 'directions'
-                } from ${leg.origin} to ${
-                  leg.destination
-                } in Google Maps in a new tab`"
+              <template v-for="(handoff, index) in routeHandoffs">
+                <a
+                  v-if="handoff.url"
+                  :key="handoff.url"
+                  :href="handoff.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :aria-label="routeHandoffAriaLabel(handoff, index)"
+                >
+                  {{ routeHandoffLabel(handoff, index) }}
+                </a>
+                <div
+                  v-else
+                  :key="handoff.pairKey"
+                  class="planner-route-boundary"
+                >
+                  <strong>
+                    {{ routeModeLabel(handoff.mode) }}: {{ handoff.origin }} to
+                    {{ handoff.destination }}
+                  </strong>
+                  <span>
+                    This leg is kept separate from Google Maps directions.
+                    Search for this flight or ferry separately.
+                  </span>
+                </div>
+              </template>
+            </div>
+
+            <div
+              v-if="directionsCustomPoints.length"
+              class="planner-coordinate-preview"
+            >
+              <span>Custom points in this export</span>
+              <small
+                v-for="point in directionsCustomPoints"
+                :key="point.pointKey"
               >
-                Open
-                {{ mapsLegs.length > 1 ? `route ${index + 1}` : "directions" }}:
-                {{ leg.origin }} to {{ leg.destination }}
-              </a>
+                {{ point.location.name }}:
+                {{ coordinateLabel(point.location) }}
+              </small>
             </div>
           </div>
 
@@ -781,7 +894,9 @@ import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
-  buildGoogleMapsDirectionsUrls,
+  buildGoogleMapsRouteHandoffs,
+  buildPlanRoutePairs,
+  buildPlanRoutePoints,
 } from "../planning/handoffs.mjs"
 import {
   formatMyAtlasPlanLoadError,
@@ -841,7 +956,11 @@ export default {
       },
       includePromptCoordinates: false,
       promptPreview: "",
-      mapsLegs: [],
+      directionsDefaultMode: "driving",
+      directionsIncludedPointKeys: [],
+      directionsPairModes: {},
+      directionsPlanKey: "",
+      routeHandoffs: [],
       visitDrafts: {},
       monthNames: [
         "January",
@@ -901,6 +1020,48 @@ export default {
     planHasUnsavedChanges() {
       if (!this.plan) return false
       return this.planFormSignature() !== this.savedPlanSignature()
+    },
+    directionsPoints() {
+      return this.plan ? buildPlanRoutePoints(this.plan) : []
+    },
+    directionsSelectedPoints() {
+      const included = new Set(this.directionsIncludedPointKeys)
+      return this.directionsPoints.filter(point => included.has(point.pointKey))
+    },
+    directionsRouteProjection() {
+      return buildPlanRoutePairs(this.directionsSelectedPoints, {
+        defaultMode: this.directionsDefaultMode,
+        pairModes: this.directionsPairModes,
+      })
+    },
+    directionsPairs() {
+      return this.directionsRouteProjection.pairs
+    },
+    directionsPreview() {
+      return this.directionsRouteProjection.routePoints
+        .map(point => point.location.name)
+        .join(" > ")
+    },
+    directionsCustomPoints() {
+      const routePoints = this.directionsRouteProjection.routePoints
+      let relevant = routePoints.length === 1 ? routePoints : []
+      if (routePoints.length > 1) {
+        relevant = this.directionsPairs
+          .filter(pair => !["fly", "ferry"].includes(pair.mode))
+          .flatMap(pair => [pair.from, pair.to])
+      }
+      const unique = new Map(
+        relevant
+          .filter(
+            point => point.location.routeReadiness === "user-coordinate-review"
+          )
+          .map(point => [point.pointKey, point])
+      )
+      return [...unique.values()]
+    },
+    directionsRouteCount() {
+      return this.routeHandoffs.filter(handoff => handoff.kind === "directions")
+        .length
     },
   },
   watch: {
@@ -1055,6 +1216,22 @@ export default {
       })
       this.visitDrafts = drafts
     },
+    syncDirectionsPreferences() {
+      const points = this.plan ? buildPlanRoutePoints(this.plan) : []
+      const planKey = JSON.stringify(
+        points.map(point => [
+          point.pointKey,
+          point.location.placeId,
+          point.location.coordinates,
+        ])
+      )
+      if (planKey === this.directionsPlanKey) return
+      this.directionsPlanKey = planKey
+      this.directionsDefaultMode = "driving"
+      this.directionsIncludedPointKeys = points.map(point => point.pointKey)
+      this.directionsPairModes = {}
+      this.routeHandoffs = []
+    },
     async loadPlanning({ preservePlanDraft = false, reportError = true } = {}) {
       this.pending = true
       if (reportError) this.error = ""
@@ -1076,6 +1253,7 @@ export default {
         if (preservePlanDraft) this.reconcilePlanDraft()
         else this.syncPlanForm()
         this.syncVisitDrafts()
+        this.syncDirectionsPreferences()
         return { ok: true }
       } catch (error) {
         if (reportError) this.error = this.errorMessage(error)
@@ -1266,16 +1444,16 @@ export default {
         this.announcement +=
           " Save at least one destination before saving the trip."
       }
-      this.mapsLegs = []
+      this.clearPreparedDirections()
     },
     clearDirectLocation(role) {
       if (role === "start") this.planForm.startDirect = null
       else this.planForm.endDirect = null
-      this.mapsLegs = []
+      this.clearPreparedDirections()
     },
     selectSavedStart() {
       this.planForm.startDirect = null
-      this.mapsLegs = []
+      this.clearPreparedDirections()
     },
     planLocationInput(place) {
       return place.placeType === "custom"
@@ -1333,7 +1511,7 @@ export default {
       if (index >= 0) stops.splice(index, 1)
       else if (stops.length < MAX_PLAN_DESTINATIONS) stops.push(wishId)
       this.planForm.stopWishIds = stops
-      this.mapsLegs = []
+      this.clearPreparedDirections()
     },
     moveStop(index, offset) {
       const target = index + offset
@@ -1342,7 +1520,7 @@ export default {
       const [wishId] = stops.splice(index, 1)
       stops.splice(target, 0, wishId)
       this.planForm.stopWishIds = stops
-      this.mapsLegs = []
+      this.clearPreparedDirections()
     },
     savePlan() {
       if (
@@ -1488,31 +1666,92 @@ export default {
         this.pending = false
       }
     },
+    clearPreparedDirections() {
+      this.routeHandoffs = []
+    },
+    setDirectionsPairMode(pairKey, mode) {
+      if (mode) this.$set(this.directionsPairModes, pairKey, mode)
+      else this.$delete(this.directionsPairModes, pairKey)
+      this.clearPreparedDirections()
+    },
+    routePointLabel(point) {
+      if (point.kind === "start") return "Include start"
+      if (point.kind === "finish") return "Include finish"
+      return point.isFinish
+        ? `Include stop ${point.position} and finish`
+        : `Include stop ${point.position}`
+    },
+    routeModeLabel(mode) {
+      const labels = {
+        driving: "Drive",
+        walking: "Walk",
+        bicycling: "Bike",
+        transit: "Transit",
+        fly: "Fly",
+        ferry: "Ferry",
+      }
+      return labels[mode] || "Travel"
+    },
+    routeHandoffNumber(index) {
+      return this.routeHandoffs
+        .slice(0, index + 1)
+        .filter(handoff => handoff.kind === "directions").length
+    },
+    routeHandoffLabel(handoff, index) {
+      if (handoff.kind === "search") {
+        return `Open ${handoff.location} in Google Maps`
+      }
+      const route =
+        this.directionsRouteCount > 1
+          ? `route ${this.routeHandoffNumber(index)}`
+          : "directions"
+      return `Open ${route}: ${handoff.origin} to ${
+        handoff.destination
+      } · ${this.routeModeLabel(handoff.mode)}`
+    },
+    routeHandoffAriaLabel(handoff, index) {
+      return `${this.routeHandoffLabel(
+        handoff,
+        index
+      )} in a new Google Maps tab`
+    },
     prepareDirections() {
       try {
-        const customIds = this.plan.stops
-          .concat([
-            this.plan.start,
-            ...(this.plan.endMode === "selected-end" ? [this.plan.end] : []),
-          ])
-          .filter(
-            location => location.routeReadiness === "user-coordinate-review"
-          )
-          .map(location => location.placeId)
+        const customIds = this.directionsCustomPoints.map(
+          point => point.location.placeId
+        )
         if (
           customIds.length &&
           !window.confirm(
-            "Use the custom coordinates you supplied for this Google Maps handoff?"
+            "Use the exact custom coordinates shown in this panel for the Google Maps handoff?"
           )
         )
           return
-        this.mapsLegs = buildGoogleMapsDirectionsUrls(this.plan, {
+        const result = buildGoogleMapsRouteHandoffs(this.plan, {
+          includedPointKeys: this.directionsIncludedPointKeys,
+          defaultMode: this.directionsDefaultMode,
+          pairModes: this.directionsPairModes,
           confirmedCoordinatePlaceIds: customIds,
         })
-        this.announcement =
-          this.mapsLegs.length === 1
-            ? "Your Google Maps directions link is ready."
-            : `${this.mapsLegs.length} Google Maps directions legs are ready.`
+        this.routeHandoffs = result.actions
+        const linkCount = this.routeHandoffs.filter(
+          handoff => handoff.url
+        ).length
+        const boundaryCount = this.routeHandoffs.length - linkCount
+        this.announcement = [
+          linkCount
+            ? `${linkCount} Google Maps ${
+                linkCount === 1 ? "handoff is" : "handoffs are"
+              } ready.`
+            : "No Google Maps handoff is needed for these modes.",
+          boundaryCount
+            ? `${boundaryCount} separate travel ${
+                boundaryCount === 1 ? "leg needs" : "legs need"
+              } a flight or ferry handoff.`
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ")
       } catch (error) {
         this.error =
           error instanceof MyAtlasHandoffError
@@ -1855,6 +2094,137 @@ export default {
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.025);
+}
+.planner-directions-default,
+.planner-directions-points label,
+.planner-route-modes label {
+  color: #cbd8d4;
+  font-size: 0.62rem;
+}
+.planner-directions-default {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(7.5rem, 0.55fr);
+  align-items: center;
+  gap: 0.65rem;
+}
+.planner-itinerary-card select {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.6rem;
+  color: #edf7f2;
+  background: #111f22;
+  font: inherit;
+}
+.planner-directions-points {
+  display: grid;
+  gap: 0.35rem;
+  max-height: min(24rem, 42vh);
+  margin: 0;
+  padding: 0.65rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+}
+.planner-directions-points legend {
+  padding: 0 0.2rem;
+  color: #e6ba68;
+  font-size: 0.64rem;
+}
+.planner-directions-points label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem;
+  min-height: 2.35rem;
+  padding: 0.32rem 0.1rem;
+}
+.planner-directions-points input {
+  width: auto;
+  margin-top: 0.2rem;
+}
+.planner-directions-points label > span,
+.planner-route-modes label > span {
+  display: grid;
+  gap: 0.08rem;
+  min-width: 0;
+}
+.planner-directions-points strong,
+.planner-route-modes strong {
+  color: #dce8e4;
+  font-size: 0.64rem;
+}
+.planner-directions-points small,
+.planner-route-modes small {
+  color: #8fa29c;
+  font-size: 0.56rem;
+}
+.planner-route-preview,
+.planner-coordinate-preview {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.28);
+  border-radius: 0.7rem;
+  background: rgba(230, 186, 104, 0.045);
+}
+.planner-route-preview span,
+.planner-coordinate-preview > span {
+  color: #d4b875;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.54rem;
+  font-weight: 800;
+}
+.planner-route-preview strong {
+  color: #edf7f2;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.planner-route-preview small,
+.planner-coordinate-preview small {
+  color: #9bada7;
+  font-size: 0.56rem;
+  line-height: 1.45;
+}
+.planner-route-modes {
+  display: grid;
+  gap: 0.45rem;
+}
+.planner-route-modes > p {
+  color: #dce8e4;
+}
+.planner-route-modes label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8.75rem, 0.7fr);
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.65rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+.planner-route-boundary {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(132, 172, 191, 0.32);
+  border-radius: 0.6rem;
+  background: rgba(80, 125, 145, 0.08);
+}
+.planner-route-boundary strong {
+  color: #bddbe2;
+  font-size: 0.64rem;
+}
+.planner-route-boundary span {
+  color: #91a9ae;
+  font-size: 0.57rem;
+  line-height: 1.45;
 }
 .planner-itinerary-empty button {
   justify-self: start;
@@ -2383,6 +2753,7 @@ export default {
   border-color: rgba(213, 135, 126, 0.45);
 }
 .planner-block button:disabled,
+.planner-itinerary-card button:disabled,
 .planner-delete-account button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
@@ -2429,6 +2800,10 @@ export default {
   }
   .planner-block-heading {
     align-items: flex-start;
+  }
+  .planner-directions-default,
+  .planner-route-modes label {
+    grid-template-columns: 1fr;
   }
   .planner-wishes li,
   .planner-custom > div {

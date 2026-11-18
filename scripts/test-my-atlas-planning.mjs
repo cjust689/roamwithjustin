@@ -1,11 +1,16 @@
 import assert from "node:assert/strict"
 import fs from "node:fs"
 import {
+  GOOGLE_MAPS_TRAVEL_MODES,
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrls,
+  buildGoogleMapsRouteHandoffs,
+  buildPlanRoutePairs,
+  buildPlanRoutePoints,
+  routePairKey,
 } from "../src/features/my-atlas/planning/handoffs.mjs"
 import {
   normalizeCreatePlan,
@@ -70,6 +75,17 @@ assert.match(plannerComponent, /aria-controls="planner-trip-editor"/)
 assert.match(plannerComponent, /aria-controls="planner-directions-panel"/)
 assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
 assert.match(plannerComponent, /planHasUnsavedChanges/)
+assert.match(plannerComponent, /v-model="directionsIncludedPointKeys"/)
+assert.match(plannerComponent, /v-model="directionsDefaultMode"/)
+assert.match(plannerComponent, /buildGoogleMapsRouteHandoffs\(this\.plan/)
+const localDirectionPreferenceMethods = plannerComponent.match(
+  /clearPreparedDirections\(\) \{[\s\S]*?routePointLabel\(point\) \{/
+)?.[0]
+assert.ok(localDirectionPreferenceMethods)
+assert.doesNotMatch(
+  localDirectionPreferenceMethods,
+  /client\.|mutate|loadPlanning|savePlan/
+)
 assert.match(
   plannerComponent,
   /error\?\.code === "revision_conflict"[\s\S]*preservePlanDraft: true/
@@ -186,6 +202,171 @@ assert.throws(
     error instanceof MyAtlasHandoffError && error.code === "multiple_legs"
 )
 assert.match(buildAiPlanningPrompt(longerPlan), /8\. Stop 8/)
+
+assert.deepEqual(GOOGLE_MAPS_TRAVEL_MODES, [
+  "driving",
+  "walking",
+  "bicycling",
+  "transit",
+])
+
+const routePoints = buildPlanRoutePoints(plan)
+assert.deepEqual(
+  routePoints.map(point => point.pointKey),
+  [
+    "start",
+    "stop:custom:111111111111111111111111",
+    "stop:custom:222222222222222222222222",
+    "stop:custom:333333333333333333333333",
+    "finish",
+  ]
+)
+assert.equal(routePoints.at(-1).location, plan.start)
+
+const stopsOnlyExport = buildGoogleMapsRouteHandoffs(plan, {
+  includedPointKeys: routePoints
+    .filter(point => point.kind === "stop")
+    .map(point => point.pointKey),
+  confirmedCoordinatePlaceIds,
+})
+assert.equal(stopsOnlyExport.actions.length, 1)
+assert.equal(stopsOnlyExport.actions[0].kind, "directions")
+assert.equal(stopsOnlyExport.actions[0].origin, "Arches entrance")
+assert.equal(stopsOnlyExport.actions[0].destination, "Island in the Sky")
+assert.equal(
+  new URL(stopsOnlyExport.actions[0].url).searchParams.get("travelmode"),
+  "driving"
+)
+assert.equal(
+  new URL(stopsOnlyExport.actions[0].url).searchParams.get("waypoints"),
+  "38.485,-109.739"
+)
+
+const transitExport = buildGoogleMapsRouteHandoffs(plan, {
+  includedPointKeys: routePoints
+    .filter(point => point.kind === "stop")
+    .map(point => point.pointKey),
+  defaultMode: "transit",
+  confirmedCoordinatePlaceIds,
+})
+assert.equal(
+  new URL(transitExport.actions[0].url).searchParams.get("travelmode"),
+  "transit"
+)
+
+const bridgedPoints = [routePoints[0], routePoints[2], routePoints[4]]
+const oldPairKey = routePairKey(routePoints[0], routePoints[1])
+const bridgedPairs = buildPlanRoutePairs(bridgedPoints, {
+  defaultMode: "transit",
+  pairModes: { [oldPairKey]: "walking" },
+})
+assert.equal(bridgedPairs.pairs[0].mode, "transit")
+assert.equal(bridgedPairs.pairs[0].explicit, false)
+
+const onePointExport = buildGoogleMapsRouteHandoffs(plan, {
+  includedPointKeys: ["start"],
+})
+assert.equal(onePointExport.actions.length, 1)
+assert.equal(onePointExport.actions[0].kind, "search")
+assert.equal(
+  new URL(onePointExport.actions[0].url).searchParams.get("query"),
+  "Moab, Utah, United States"
+)
+assert.deepEqual(
+  buildGoogleMapsRouteHandoffs(plan, { includedPointKeys: [] }).actions,
+  []
+)
+
+const samePlaceLoopExport = buildGoogleMapsRouteHandoffs(plan, {
+  includedPointKeys: ["start", "finish"],
+})
+assert.equal(samePlaceLoopExport.routePoints.length, 1)
+assert.equal(samePlaceLoopExport.actions[0].kind, "search")
+
+const longRoutePoints = buildPlanRoutePoints(longerPlan)
+const longRouteExport = buildGoogleMapsRouteHandoffs(longerPlan, {
+  confirmedCoordinatePlaceIds: longerConfirmedIds,
+})
+assert.equal(longRouteExport.actions.length, 2)
+assert.equal(longRouteExport.actions[0].kind, "directions")
+assert.equal(longRouteExport.actions[1].kind, "directions")
+assert.equal(
+  longRouteExport.actions[0].pointKeys.at(-1),
+  longRouteExport.actions[1].pointKeys[0]
+)
+assert.deepEqual(
+  longRouteExport.routePoints.map(point => point.pointKey),
+  longRoutePoints.map(point => point.pointKey)
+)
+for (const action of longRouteExport.actions) {
+  const actionUrl = new URL(action.url)
+  const waypoints = actionUrl.searchParams.get("waypoints")
+  assert.ok(!waypoints || waypoints.split("|").length <= 3)
+  assert.ok(action.url.length <= 2048)
+}
+
+const mixedModePairKeys = Object.fromEntries(
+  routePoints
+    .slice(0, -1)
+    .map((point, index) => [
+      routePairKey(point, routePoints[index + 1]),
+      ["driving", "fly", "walking", "bicycling"][index],
+    ])
+)
+const mixedModeExport = buildGoogleMapsRouteHandoffs(plan, {
+  pairModes: mixedModePairKeys,
+  confirmedCoordinatePlaceIds,
+})
+assert.deepEqual(
+  mixedModeExport.actions.map(action => [action.kind, action.mode]),
+  [
+    ["directions", "driving"],
+    ["boundary", "fly"],
+    ["directions", "walking"],
+    ["directions", "bicycling"],
+  ]
+)
+assert.equal(
+  new URL(mixedModeExport.actions[2].url).searchParams.get("travelmode"),
+  "walking"
+)
+assert.equal(
+  new URL(mixedModeExport.actions[3].url).searchParams.get("travelmode"),
+  "bicycling"
+)
+for (const action of mixedModeExport.actions.filter(action => action.url)) {
+  assert.doesNotMatch(action.url, /Moab parks|custom%3A|custom:/)
+}
+
+const ferryBoundary = buildGoogleMapsRouteHandoffs(plan, {
+  includedPointKeys: [routePoints[0].pointKey, routePoints[1].pointKey],
+  pairModes: {
+    [routePairKey(routePoints[0], routePoints[1])]: "ferry",
+  },
+})
+assert.deepEqual(
+  ferryBoundary.actions.map(action => [action.kind, action.mode]),
+  [["boundary", "ferry"]]
+)
+
+assert.throws(
+  () =>
+    buildGoogleMapsRouteHandoffs(plan, {
+      defaultMode: "train",
+      confirmedCoordinatePlaceIds,
+    }),
+  error =>
+    error instanceof MyAtlasHandoffError && error.code === "invalid_travel_mode"
+)
+assert.throws(
+  () =>
+    buildGoogleMapsRouteHandoffs(plan, {
+      includedPointKeys: [routePoints[1].pointKey],
+    }),
+  error =>
+    error instanceof MyAtlasHandoffError &&
+    error.code === "user-coordinate-review"
+)
 
 const directFinish = routeStop(
   "custom:444444444444444444444444",

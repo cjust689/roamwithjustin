@@ -339,6 +339,18 @@ coordinates require explicit confirmation. AI prompt generation includes
 readable geography only by default and adds coordinates only after a per-copy
 opt-in. Neither handoff calls a platform-owned model or paid route API.
 
+The directions presentation can include or exclude saved route points without
+changing the saved plan. Drive, Transit, Walk, and Bike are supported as a
+visible default and as adjacent-pair overrides. Consecutive pairs with the same
+Maps-compatible mode form one route group before conservative segmentation.
+Fly and Ferry end a Maps group and render as separate boundaries without a
+provider link. One retained physical point creates a readable Maps place
+search, while zero points create no action. Adjacent duplicate physical points
+collapse so a start and finish at the same place do not create a zero-distance
+route. Newly adjacent points use the visible default and cannot inherit an
+unrelated old override. These preferences and generated actions are component
+memory only: they produce no account write and do not refresh plan retention.
+
 ## Permanent application-account deletion
 
 `DELETE /v1/me` requires the verified owner, write permission, a strong current
@@ -527,6 +539,14 @@ next-action panels, and only one is expanded at a time. Flights and stays are
 not displayed as inactive promises. The Maps builder, storage contract,
 retention behavior, API fields, and public projection are unchanged by this
 presentation phase.
+
+Within Directions, the owner can choose which saved points enter the export,
+set a Drive, Transit, Walk, or Bike default, and review each resulting adjacent
+pair. An explicit Fly or Ferry choice separates that pair from Google Maps
+directions. The panel previews the retained order and any exact custom
+coordinates before confirmation. It then shows only the generated Maps search
+or direction links and nonlink flight or ferry boundaries. Reloading the view
+discards these export choices.
 
 If a mutation is rejected with `revision_conflict`, the browser does not replay
 it. It reads the latest account revision, preserves the local itinerary draft
