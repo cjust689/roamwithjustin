@@ -80,6 +80,7 @@ verification:
     - Staging Worker e20404c5-0250-47f0-88af-2d0db14983ee returned 200 health and resolved a canonical spot after the verified manifest switch
     - Owner reported that the Uvita pin persisted through reload and a new sign in before the save-response correction was deployed
     - API client tests preserve the Worker request ID on rejected authenticated requests
+    - API client tests retry an authenticated GET once after a browser network rejection and prove mutation requests still make only one attempt
     - Worker routing tests prove that owner state bootstrap bypasses the public catalog and shared Atlas limiter
     - Headless Chrome at 390 pixels verified in-place recovery from a simulated catalog 429 without reloading or losing the signed-in screen
     - Pull requests 77 and 78 passed their required validation gates; Pages workflow 44014283401 deployed main merge 7c2b1a9135ce45a834bf7aadda869460452e55de
@@ -385,7 +386,10 @@ The authenticated owner screen restores an existing Auth0 session with
 `checkSession`, loads saved state, persists pin additions, date changes, and
 removals through revisioned mutations, changes visibility, and exposes a
 copyable `/my-atlas/{handle}` link only while the profile is public. Access
-tokens remain memory only. The signed-out Vue
+tokens remain memory only. Authenticated GET requests receive one immediate
+retry when the browser rejects the network request before any HTTP response.
+Mutations are never automatically replayed, so revision and idempotency
+semantics remain explicit. The signed-out Vue
 view reads `GET /v1/public/atlases/{handle}`. The registry resolves only active
 handles, and the user object returns a deliberately smaller projection containing
 the handle, display name, safe visited-place projections, coordinates, optional visit dates,

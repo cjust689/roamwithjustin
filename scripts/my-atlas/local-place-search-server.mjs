@@ -12,6 +12,11 @@ const defaultSpotSource = path.join(
   "data",
   "curated-spots.json"
 )
+const defaultReviewedCitySource = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "data",
+  "reviewed-cities.json"
+)
 
 function parseArgs(argv) {
   const options = {}
@@ -32,6 +37,7 @@ function sourceIdentity(sourceDirectory) {
   const hash = crypto.createHash("sha256")
   hash.update(fs.readFileSync(cityFile))
   hash.update(fs.readFileSync(defaultSpotSource))
+  hash.update(fs.readFileSync(defaultReviewedCitySource))
   const sourceSnapshotDate = stat.mtime.toISOString().slice(0, 10)
   return {
     sourceSnapshotDate,
@@ -134,6 +140,7 @@ export function buildLocalPlaceSearchCatalog(sourceDirectory) {
     revision: identity.revision,
     sourceSnapshotDate: identity.sourceSnapshotDate,
     spotSourceFile: defaultSpotSource,
+    reviewedCitySourceFile: defaultReviewedCitySource,
   })
 }
 

@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - my-atlas-authentication
   - my-atlas-account-state
@@ -28,6 +28,7 @@ code_paths:
   - src/features/my-atlas/data/place-catalog.proof.json
   - scripts/my-atlas/build-place-catalog.mjs
   - scripts/my-atlas/data/curated-spots.json
+  - scripts/my-atlas/data/reviewed-cities.json
   - scripts/my-atlas/build-worker-place-catalog.mjs
   - scripts/my-atlas/local-place-search-server.mjs
   - scripts/my-atlas/lib/build-place-catalog.mjs
@@ -56,10 +57,14 @@ verification:
     - Curated spot fixtures passed search, draft pin, authenticated persistence, safe public projection, and Story-stat contracts
     - Full geonames-2026-11-17-spots artifact built 256 resolution shards and 256 search shards for 237445 records
     - Full geonames-2026-11-17-reviewed-spots artifact built 256 resolution shards and 256 search shards for 237448 records, including 225569 selectable populated places and 11607 append-preserved deprecated records
+    - Full geonames-2026-11-18-reviewed-utah artifact built 256 resolution shards and 256 search shards for 237451 records, including 225571 selectable populated places, 23 reviewed spots, and 11607 append-preserved deprecated records
+    - Local shard-backed searches resolved Torrey and Hanksville as cities and Capitol Reef National Park as a National park from geonames-2026-11-18-reviewed-utah
     - Catalog tests reject PPLX sections, populated localities, and settlement records from new search while preserving prior identities as deprecated exact-resolution records
     - Catalog and Worker-artifact tests resolve Krka National Park and Canyonlands as National park, and Mount Rushmore as Monument, from reviewed product classifications
     - Pull requests 91 and 92 passed validation runs 44031806025 and 44032270298, develop validation run 44032062160 passed, and Pages workflow 44032453669 deployed main merge 44c7811cb07085ad3d01a9661766d687a716469b
     - Rclone reported 512 matching geonames-2026-11-17-reviewed-spots release objects with zero differences before catalog/current.json was uploaded last
+    - Rclone reported 512 matching geonames-2026-11-18-reviewed-utah release objects with zero differences before catalog/current.json was uploaded last
+    - Production-origin staging searches returned Torrey, Hanksville, and Capitol Reef National Park from geonames-2026-11-18-reviewed-utah after manifest activation
     - Production-origin live searches returned Krka National Park and Canyonlands as National park and Mount Rushmore as Monument from geonames-2026-11-17-reviewed-spots; Coolbinia returned no search result while its prior PPLX ID resolved as deprecated
     - Headless Chrome searched Yellowstone National Park, displayed its National park type, and opened its Add destination editor without horizontal overflow at desktop and 390 pixel widths
     - Headless Chrome at 390 pixels received a simulated 429 with Retry-After and request ID, retried the unchanged query in place, and rendered the recovered result without reloading
@@ -113,10 +118,11 @@ Without an active beta account, the browser proof stores draft selections in
 Vue component memory only and refreshing clears them. With an authenticated
 active account, the Phase 2C browser loads and persists pins through the Worker.
 The isolated staging Worker, R2 catalog, Durable Object namespaces, and limiter
-are deployed. Live searches for Krka National Park, Canyonlands National Park,
-and Mount Rushmore returned the active `geonames-2026-11-17-reviewed-spots`
-revision with their reviewed result types. Coolbinia, a prior `PPLX` record,
-returned no new-search result while exact resolution preserved it as
+are deployed. The active `geonames-2026-11-18-reviewed-utah` revision returns
+Torrey and Hanksville as cities and Capitol Reef as a National park. The prior
+reviewed release also verified Krka National Park, Canyonlands National Park,
+and Mount Rushmore with their reviewed result types. Coolbinia, a prior `PPLX`
+record, returned no new-search result while exact resolution preserved it as
 deprecated. No production API route or public profile has been verified.
 
 An active account may also create an explicitly labeled custom pin when a
@@ -149,6 +155,13 @@ Reviewed entries may explicitly override the source feature's product category
 and result label. This presents Krka as a National park even though GeoNames
 codes it as a nature reserve, and Mount Rushmore as a Monument even though
 GeoNames codes it as a mountain.
+
+The separate reviewed `scripts/my-atlas/data/reviewed-cities.json` source adds
+specific useful towns that fall below the `cities500` population boundary.
+Each entry must still be a supported GeoNames populated-place feature and pass
+the same identity, coordinate, country, and source-URL validation. It does not
+admit neighborhoods, city sections, localities, or an unbounded small-town
+import. Torrey and Hanksville are the first reviewed supplements.
 
 Countries use IDs such as iso-country:CR. Populated places use IDs such as
 geonames:3621138. Curated spots use the same stable GeoNames identity, for
@@ -186,8 +199,8 @@ excluded from new search by default.
 
 The bundled fallback proof catalog contains 250 current GeoNames country or
 territory records, the current GeoNames records for Uvita, Costa Rica, Paris,
-France, and Paris, Texas, and 22 reviewed spots across six continents. It is a
-development fallback, not a worldwide production catalog.
+France, Paris, Texas, Torrey, and Hanksville, plus 23 reviewed spots across six
+continents. It is a development fallback, not a worldwide production catalog.
 
 When `VUE_APP_MY_ATLAS_PLACE_SEARCH_URL` is configured, the browser issues a
 bounded search request instead. It accepts at most ten records and rejects
@@ -205,8 +218,8 @@ exhausted search limit from a catalog or network outage and can retry the
 unchanged query without a page reload.
 
 The local endpoint exposes the intended `GET /v1/places/search?q=...` response
-shape against 225,569 selectable populated places, 250 country or territory
-records, and 22 reviewed spots. It binds only to `127.0.0.1`, allows only localhost browser
+shape against 225,571 selectable populated places, 250 country or territory
+records, and 23 reviewed spots. It binds only to `127.0.0.1`, allows only localhost browser
 origins, accepts only GET and OPTIONS, bounds query and result sizes, and sends
 no-store responses. It is a development reference, not the production Worker,
 an invitation API, or a persistence service.
@@ -268,14 +281,14 @@ migration rather than silent reassignment.
 
 ## Measured full-catalog boundary
 
-The 2026-11-16 cities500 snapshot plus the reviewed 2026-11-17 spot source now
-produces 225,569 selectable populated places, 250 country or territory records,
-and 22 spot records. The append-preserving successor also retains 11,607 prior
-city identities as deprecated, for 237,448 total records. The deterministic
-combined JSON benchmark must be regenerated whenever the importer changes. The
-verified reviewed-spots artifact is 170,928,071 bytes. Full-catalog searches
-resolved Krka National Park, Canyonlands National Park, and Mount Rushmore to
-their expected stable IDs and reviewed result types.
+The 2026-11-16 cities500 snapshot plus the reviewed 2026-11-18 city and spot
+sources produce 225,571 selectable populated places, 250 country or territory
+records, and 23 spot records. The append-preserving successor also retains
+11,607 prior city identities as deprecated, for 237,451 total records. The
+deterministic combined JSON benchmark must be regenerated whenever the
+importer changes. The verified reviewed-Utah artifact is 170,693,035 bytes.
+Full-catalog searches resolved Torrey and Hanksville as cities and Capitol Reef
+National Park as a National park with their expected stable IDs.
 
 That artifact is intentionally excluded from Git. It is too large for the
 initial browser bundle. The loopback development server proves full-source
@@ -290,11 +303,11 @@ only the normalized names relevant to their shard. Identical inputs produce
 byte-identical files; attempting to change an existing revision fails instead
 of overwriting it.
 
-The full `geonames-2026-11-17-reviewed-spots` local build contains 256
-resolution shards and 256 search shards for 237,448 records. Resolution shards
-total 28,817,885 compressed bytes, and search shards total 89,039,693 compressed
-bytes. The largest resolution shard is 123,703 bytes compressed. The largest
-search shard is 2,159,866 bytes compressed. The Worker enforces 16 MiB
+The full `geonames-2026-11-18-reviewed-utah` local build contains 256
+resolution shards and 256 search shards for 237,451 records. Resolution shards
+total 28,811,032 compressed bytes, and search shards total 89,022,573 compressed
+bytes. The largest resolution shard is 123,678 bytes compressed. The largest
+search shard is 2,159,484 bytes compressed. The Worker enforces 16 MiB
 compressed and 64 MiB decoded object limits.
 
 Cold local directory-backed checks returned Uvita, Salt Lake City, Miami,
@@ -303,13 +316,13 @@ milliseconds on the owner's workstation. These are development measurements,
 not production R2 latency claims.
 
 The reviewed artifact remains ignored under
-`.state/my-atlas/worker-catalog-reviewed-spots`. All 512 immutable release
-shards were uploaded to the isolated staging bucket and rclone reported 512
-matching files with zero differences before `catalog/current.json` was uploaded
-last. The staging Worker now resolves
-`geonames-2026-11-17-reviewed-spots`. The earlier `geonames-2026-11-16` and
-`geonames-2026-11-17-spots` releases remain intact for reversal. The editorial
-media bucket and uploader remain outside this boundary.
+`.state/my-atlas/worker-catalog-reviewed-utah`. All 512 immutable release shards
+were uploaded to the isolated staging bucket and rclone reported 512 matching
+files with zero differences before `catalog/current.json` was uploaded last.
+The staging Worker now resolves `geonames-2026-11-18-reviewed-utah`. The earlier
+`geonames-2026-11-16`, `geonames-2026-11-17-spots`, and
+`geonames-2026-11-17-reviewed-spots` releases remain intact for reversal. The
+editorial media bucket and uploader remain outside this boundary.
 
 ## License boundary
 
