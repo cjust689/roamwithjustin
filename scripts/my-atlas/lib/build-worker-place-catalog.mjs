@@ -6,7 +6,8 @@ import { normalizeSearchText } from "../../../src/features/my-atlas/catalog/sear
 
 const SCHEMA_VERSION = 1
 const RECORD_SHARD_HEX_LENGTH = 2
-const SEARCH_SHARD_HEX_LENGTH = 2
+const SEARCH_SHARD_HEX_LENGTH = 3
+const SEARCH_PREFIX_CHARACTERS = Object.freeze([4, 6])
 
 function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex")
@@ -19,7 +20,7 @@ function gzipJson(value) {
   })
 }
 
-function publicSearchRecord(record) {
+function publicSearchRecord(record, catalogRevision) {
   return {
     placeId: record.placeId,
     placeType: record.placeType,
@@ -36,18 +37,25 @@ function publicSearchRecord(record) {
     coordinateKind: record.coordinateKind,
     population: record.population || 0,
     source: record.source,
-    catalogRevision: record.catalogRevision,
+    catalogRevision,
     deprecated: Boolean(record.deprecated),
   }
 }
 
 function queryPrefixes(value) {
   const normalized = normalizeSearchText(value)
-  if (normalized.length < 2) return []
-  const tokens = normalized.split(" ").filter(token => token.length >= 2)
+  if ([...normalized].length < SEARCH_PREFIX_CHARACTERS[0]) return []
+  const tokens = normalized
+    .split(" ")
+    .filter(token => [...token].length >= SEARCH_PREFIX_CHARACTERS[0])
   return [
     ...new Set(
-      [normalized, ...tokens].map(item => [...item].slice(0, 2).join(""))
+      [normalized, ...tokens].flatMap(item => {
+        const characters = [...item]
+        return SEARCH_PREFIX_CHARACTERS.filter(
+          length => characters.length >= length
+        ).map(length => characters.slice(0, length).join(""))
+      })
     ),
   ]
 }
@@ -59,15 +67,21 @@ function recordSearchNames(record) {
     ...(Array.isArray(record.searchNames) ? record.searchNames : []),
   ]
     .map(normalizeSearchText)
-    .filter(value => value.length >= 2)
+    .filter(value => [...value].length >= SEARCH_PREFIX_CHARACTERS[0])
 }
 
-function addSearchCandidate(shards, shard, record, searchName) {
+function addSearchCandidate(
+  shards,
+  shard,
+  record,
+  searchName,
+  catalogRevision
+) {
   if (!shards.has(shard)) shards.set(shard, new Map())
   const candidates = shards.get(shard)
   if (!candidates.has(record.placeId)) {
     candidates.set(record.placeId, {
-      record: publicSearchRecord(record),
+      record: publicSearchRecord(record, catalogRevision),
       searchNames: new Set(),
     })
   }
@@ -89,7 +103,11 @@ function writeGzipShard(outputDirectory, key, payload) {
   return encoded.length
 }
 
-export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
+export function buildWorkerPlaceCatalogArtifacts({
+  catalog,
+  outputDirectory,
+  artifactRevision = "",
+}) {
   if (
     !catalog ||
     catalog.schemaVersion !== 1 ||
@@ -101,7 +119,10 @@ export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
   }
   if (!outputDirectory) throw new Error("outputDirectory is required")
 
-  const revision = catalog.catalogRevision
+  const revision = artifactRevision || catalog.catalogRevision
+  if (!/^[a-z0-9][a-z0-9._-]{0,127}$/i.test(revision)) {
+    throw new Error("A valid artifact revision is required")
+  }
   const releasePrefix = `catalog/releases/${revision}`
   const recordShards = new Map()
   const searchShards = new Map()
@@ -115,7 +136,13 @@ export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
     for (const searchName of recordSearchNames(record)) {
       for (const prefix of queryPrefixes(searchName)) {
         const searchShard = sha256(prefix).slice(0, SEARCH_SHARD_HEX_LENGTH)
-        addSearchCandidate(searchShards, searchShard, record, searchName)
+        addSearchCandidate(
+          searchShards,
+          searchShard,
+          record,
+          searchName,
+          revision
+        )
       }
     }
   }
@@ -137,9 +164,9 @@ export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
       {
         schemaVersion: SCHEMA_VERSION,
         catalogRevision: revision,
-        records: records.sort((left, right) =>
-          left.placeId.localeCompare(right.placeId)
-        ),
+        records: records
+          .map(record => ({ ...record, catalogRevision: revision }))
+          .sort((left, right) => left.placeId.localeCompare(right.placeId)),
       }
     )
     shardStats.recordShards += 1
@@ -178,7 +205,7 @@ export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
 
   const manifest = {
     schemaVersion: SCHEMA_VERSION,
-    artifactVersion: 1,
+    artifactVersion: 2,
     catalogRevision: revision,
     sourceSnapshotDate: catalog.sourceSnapshotDate,
     attribution: catalog.attribution,
@@ -192,8 +219,8 @@ export function buildWorkerPlaceCatalogArtifacts({ catalog, outputDirectory }) {
       count: shardStats.recordShards,
     },
     searchShards: {
-      algorithm: "sha256-normalized-query-prefix",
-      prefixCharacters: 2,
+      algorithm: "sha256-normalized-query-prefix-v2",
+      prefixCharacters: SEARCH_PREFIX_CHARACTERS,
       hexLength: SEARCH_SHARD_HEX_LENGTH,
       keyTemplate: `${releasePrefix}/search/{shard}.json.gz`,
       count: shardStats.searchShards,

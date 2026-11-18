@@ -71,6 +71,8 @@ verification:
     - Protected pull requests 105 and 106 plus Pages run 44144353792 deployed the planner search, direct endpoint, and collapsible owner-flow release; live chunk 216.0c437c4d.js contained all release markers together
     - Workers-runtime planning tests verified private wishlist isolation, immutable wishlist/direct plan snapshots, controlled-clock retention and plan-only expiry, and permanent application-account deletion
     - Workers-runtime tests verified revision conflicts under concurrent writes, idempotent retries, duplicate prevention, and the 300-pin ceiling
+    - Workers-runtime planning tests verified that deleting an already-absent owner Wish is an idempotent no-op that returns the current revision instead of a stale not-found failure
+    - Staging Worker version 2b35b3f4-8c5e-42de-b37e-93b83aa1291d deployed the idempotent absent-Wish deletion behavior
     - Workers-runtime tests verified pagination, pin update and deletion, JSON export, publication gating, and automatic privacy for an empty profile
     - A two-account Workers-runtime test verified distinct pin IDs and isolated reads, exports, updates, and deletes even when both owners pin the same canonical Place
     - Workers-runtime tests verified private-by-default public lookup, safe-field projection, explicit publication, and immediate unpublication
@@ -288,6 +290,12 @@ write followed by a transient refresh failure still disables the repeated Save
 action and accurately reports that the change was saved. Safe duplicate,
 catalog availability, and wishlist-limit conflicts have specific public error
 codes and recovery copy; internal consistency failures remain generic.
+
+Wishlist deletion is also outcome-idempotent inside the authenticated owner's
+Durable Object. If a refreshed or retried interface asks to remove a Wish that
+is already absent, the object returns the current profile revision without
+changing state. Existing Wishes still require the supplied account revision,
+so this reconciliation path does not weaken concurrent-write protection.
 
 The browser keeps an unsaved direct start or finish selection while the owner
 saves the first wishlist destination, and it presents that selection immediately
