@@ -43,6 +43,10 @@ verification:
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
     - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
+    - Pull request 137 passed validation run 44347357469 and merged to develop as eecbc6590d47d526a376525c18e1e6399f95bbc2; develop validation run 44347715150 then succeeded
+    - Pull request 138 passed with the validated develop head and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
+    - Pages workflow 44348107246 built and deployed main merge 61e5542885238c5816f5289a93c3bc20af2481ec successfully
+    - Live content-addressed chunk 417.972f66bc.js returned 200 and contained Saved, refresh needed, the route-choice introduction, Fly separate handoff, the save receipt, and Your itinerary together
     - docs/audits/assets/my-atlas-directions-phase2-desktop.png
     - docs/audits/assets/my-atlas-directions-phase2-mobile.png
     - Revision-conflict recovery tests verify request-reference copy while the client reloads the latest revision, preserves the itinerary draft where possible, and requires an explicit retry instead of replaying a mutation
@@ -100,6 +104,14 @@ requests 129 and 130 promoted the partial-load frontend correction through
 protected `develop` and `main`. Pages run 44310533617 and live chunk
 931.ec2a4758.js verify the production release. Authenticated owner acceptance
 remains.
+
+Pull requests 137 and 138 promoted the readable saved itinerary, the resilient
+post-save snapshot, and the browser-only mixed-mode Maps handoffs through
+protected `develop` and `main`. Develop validation run 44347715150 passed.
+Pages run 44348107246 deployed production merge
+`61e5542885238c5816f5289a93c3bc20af2481ec`, and live chunk
+417.972f66bc.js contains the exact release markers. No Worker deployment was
+required because this release changes no server or persistence contract.
 
 ## Implemented and test verified
 
@@ -249,11 +261,11 @@ remains.
       Durable Object tests pass; owner-session acceptance remains.
 - [ ] Complete authenticated owner acceptance of the Phase 1 readable itinerary
       at desktop and phone widths, including keyboard and screen-reader review.
-      No deployment or authenticated visual acceptance is claimed by the local
-      implementation.
+      The frontend is deployed; authenticated visual acceptance is not yet
+      claimed.
 - [x] Implement Phase 2 as a separate UI-only directions change: ephemeral
       endpoint and stop inclusion, Maps modes, one-place search, and mixed-mode
-      splitting without account writes or retention refresh. Local component
+      splitting without account writes or retention refresh. Compiled component
       evidence verifies zero horizontal overflow at 1,280 and 390 CSS pixels;
       authenticated and real-device acceptance remain open above.
 - [ ] Implement stable itinerary node IDs, persisted logistics, private map
