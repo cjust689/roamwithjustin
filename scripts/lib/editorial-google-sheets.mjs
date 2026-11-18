@@ -110,7 +110,7 @@ export async function readSheetStructure({
   return { ...properties, tables: sheet.tables || [] }
 }
 
-export function normalizeSheetValues(values = []) {
+export function normalizeSheetValues(values = [], sheetLabel = "Posts") {
   if (!values.length) return { headers: [], rows: [] }
 
   const headers = values[0].map(value => String(value || "").trim())
@@ -119,12 +119,12 @@ export function normalizeSheetValues(values = []) {
   )
   if (duplicates.length) {
     throw new Error(
-      `Posts sheet contains duplicate header(s): ${[...new Set(duplicates)].join(", ")}`
+      `${sheetLabel} sheet contains duplicate header(s): ${[...new Set(duplicates)].join(", ")}`
     )
   }
   if (headers.some(header => !header)) {
     throw new Error(
-      "Posts sheet contains a blank header inside the requested range"
+      `${sheetLabel} sheet contains a blank header inside the requested range`
     )
   }
 
@@ -140,19 +140,35 @@ export function normalizeSheetValues(values = []) {
   }
 }
 
+export async function readNamedSheet({
+  auth,
+  spreadsheetId,
+  range,
+  sheetLabel = range,
+  sheetsApi = null,
+}) {
+  const api = sheetsApi || createSheetsApi(auth)
+  const response = await api.spreadsheets.values.batchGet({
+    spreadsheetId,
+    ranges: [quoteSheetName(range)],
+    majorDimension: "ROWS",
+    valueRenderOption: "FORMATTED_VALUE",
+  })
+  const values = response.data?.valueRanges?.[0]?.values || []
+  return normalizeSheetValues(values, sheetLabel)
+}
+
 export async function readPostsSheet({
   auth,
   spreadsheetId,
   postsRange = "Posts",
   sheetsApi = null,
 }) {
-  const api = sheetsApi || createSheetsApi(auth)
-  const response = await api.spreadsheets.values.batchGet({
+  return readNamedSheet({
+    auth,
     spreadsheetId,
-    ranges: [quoteSheetName(postsRange)],
-    majorDimension: "ROWS",
-    valueRenderOption: "FORMATTED_VALUE",
+    range: postsRange,
+    sheetLabel: "Posts",
+    sheetsApi,
   })
-  const values = response.data?.valueRanges?.[0]?.values || []
-  return normalizeSheetValues(values)
 }

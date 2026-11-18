@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import commercialLinks from "../src/content/commercial-links.js"
 import { auditLodgingRecords } from "./audit-lodging-links.mjs"
 import { getJourney } from "../src/content/journeys/index.mjs"
 import {
@@ -40,6 +41,51 @@ assert.equal(
   offers.length
 )
 assert.equal(getPartner(offers[0].partnerId)?.id, "expedia")
+const amazonAssociates = getPartner("amazon-associates")
+assert.equal(amazonAssociates?.relationship, "affiliate-program")
+assert.deepEqual(amazonAssociates?.commercialHosts, [
+  "amazon.com",
+  "amzn.to",
+  "a.co",
+])
+assert.equal(
+  amazonAssociates?.disclosure,
+  "As an Amazon Associate I earn from qualifying purchases."
+)
+
+assert.deepEqual(
+  commercialLinks.buildPartnerClickParameters({
+    partnerId: "test-merchant",
+    linkType: "affiliate",
+    placement: "gear_catalog",
+    gearId: "test-camera",
+    publicJourneyId: "test-journey-2026",
+  }),
+  {
+    partner_id: "test-merchant",
+    link_type: "affiliate",
+    placement: "gear_catalog",
+    gear_id: "test-camera",
+    public_journey_id: "test-journey-2026",
+  }
+)
+assert.equal(
+  commercialLinks.buildPartnerClickParameters({
+    partnerId: "Display name with spaces",
+    linkType: "affiliate",
+    placement: "gear_catalog",
+  }),
+  null
+)
+assert.equal(
+  commercialLinks.buildPartnerClickParameters({
+    partnerId: "test-merchant",
+    linkType: "affiliate",
+    placement: "gear_catalog",
+    gearId: "Display name with spaces",
+  }),
+  null
+)
 
 const trip = buildTripViewModel(getJourney("utah-winter-2025"))
 assert.equal(trip.commercialOffers.length, 2)

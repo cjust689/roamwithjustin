@@ -150,8 +150,22 @@ const registry = createIdRegistry(
       },
       evidenceStatus: "owner-supplied",
       relationship: "affiliate-program",
+      commercialHosts: ["expedia.com", "expediagroup.com"],
       disclosure:
         "Roam With Justin may earn a commission from qualifying bookings made through Expedia affiliate tools, at no additional cost to the traveler.",
+    },
+    {
+      id: "amazon-associates",
+      name: "Amazon",
+      kind: "retailer",
+      label: "Online retailer",
+      externalLinks: {
+        official: "https://www.amazon.com/",
+      },
+      evidenceStatus: "owner-supplied",
+      relationship: "affiliate-program",
+      commercialHosts: ["amazon.com", "amzn.to", "a.co"],
+      disclosure: "As an Amazon Associate I earn from qualifying purchases.",
     },
   ],
   "Partner registry"

@@ -36,6 +36,7 @@ const eventContracts = Object.freeze({
   partner_click: {
     required: ["partner_id", "link_type", "placement"],
     optional: [
+      "gear_id",
       "experience_id",
       "public_destination_id",
       "public_journey_id",

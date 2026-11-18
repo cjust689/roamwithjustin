@@ -1,5 +1,6 @@
 const path = require("path")
 const gearContract = require("../../src/content/gear/contract.js")
+const commercialLinks = require("../../src/content/commercial-links.js")
 
 const gearIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const inputItemKeys = new Set([
@@ -32,10 +33,26 @@ const inputItemKeys = new Set([
   "visibility",
   "website",
   "websiteLabel",
+  "websitePartnerId",
   "websiteVerified",
   "affiliateUrl",
   "affiliateLabel",
+  "affiliatePartnerId",
+  "affiliateTrackingMode",
   "affiliateVerified",
+])
+
+const inputLinkKeys = new Set([
+  "kind",
+  "label",
+  "url",
+  "affiliate",
+  "verified",
+  "partnerId",
+  "linkType",
+  "trackingMode",
+  "isCustomTracked",
+  "allowedSurfaces",
 ])
 
 function isUnknown(value) {
@@ -209,9 +226,12 @@ function normalizeLinks(source, owner, errors) {
     "links",
     "website",
     "websiteLabel",
+    "websitePartnerId",
     "websiteVerified",
     "affiliateUrl",
     "affiliateLabel",
+    "affiliatePartnerId",
+    "affiliateTrackingMode",
     "affiliateVerified",
   ]
   if (!hasAny(source, linkFields)) return undefined
@@ -221,13 +241,73 @@ function normalizeLinks(source, owner, errors) {
       errors.push(`${owner} field "links" must be an array`)
       return []
     }
-    return source.links.map(link => ({
-      kind: nullable(link?.kind) || "retailer",
-      label: nullable(link?.label) || "View product",
-      url: nullable(link?.url),
-      affiliate: Boolean(link?.affiliate),
-      verified: Boolean(link?.verified),
-    }))
+    return source.links.map((link, index) => {
+      const linkOwner = `${owner} link ${index + 1}`
+      if (!link || Array.isArray(link) || typeof link !== "object") {
+        errors.push(`${linkOwner} must be an object`)
+        return {
+          kind: "retailer",
+          label: "View product",
+          url: null,
+          affiliate: false,
+          verified: false,
+          partnerId: null,
+          linkType: "website",
+          trackingMode: "none",
+          allowedSurfaces: [...commercialLinks.GEAR_SURFACES],
+        }
+      }
+      Object.keys(link).forEach(field => {
+        if (!inputLinkKeys.has(field)) {
+          errors.push(`${linkOwner} has unknown field "${field}"`)
+        }
+      })
+
+      const affiliate = Object.prototype.hasOwnProperty.call(link, "affiliate")
+        ? booleanValue(link.affiliate, "affiliate", linkOwner, errors)
+        : false
+      const verified = Object.prototype.hasOwnProperty.call(link, "verified")
+        ? booleanValue(link.verified, "verified", linkOwner, errors)
+        : false
+      let trackingMode = nullable(link.trackingMode)
+      if (
+        Object.prototype.hasOwnProperty.call(link, "trackingMode") &&
+        Object.prototype.hasOwnProperty.call(link, "isCustomTracked")
+      ) {
+        errors.push(
+          `${linkOwner} must use trackingMode or isCustomTracked, not both`
+        )
+      } else if (
+        Object.prototype.hasOwnProperty.call(link, "isCustomTracked")
+      ) {
+        const isCustomTracked = booleanValue(
+          link.isCustomTracked,
+          "isCustomTracked",
+          linkOwner,
+          errors
+        )
+        if (isCustomTracked !== null) {
+          trackingMode = isCustomTracked ? "custom" : "approved-rule"
+        }
+      }
+
+      return {
+        kind: nullable(link.kind) || "retailer",
+        label: nullable(link.label) || "View product",
+        url: nullable(link.url),
+        affiliate: affiliate ?? false,
+        verified: verified ?? false,
+        partnerId: nullable(link.partnerId),
+        linkType:
+          nullable(link.linkType) ||
+          (affiliate === true ? "affiliate" : "website"),
+        trackingMode:
+          trackingMode || (affiliate === true ? null : "none"),
+        allowedSurfaces: asList(link.allowedSurfaces).length
+          ? asList(link.allowedSurfaces)
+          : [...commercialLinks.GEAR_SURFACES],
+      }
+    })
   }
 
   const links = []
@@ -235,23 +315,51 @@ function normalizeLinks(source, owner, errors) {
   const affiliateUrl = nullable(source.affiliateUrl)
 
   if (website) {
+    const websiteVerified = Object.prototype.hasOwnProperty.call(
+      source,
+      "websiteVerified"
+    )
+      ? booleanValue(
+          source.websiteVerified,
+          "websiteVerified",
+          owner,
+          errors
+        )
+      : false
     links.push({
       kind: "manufacturer",
       label: nullable(source.websiteLabel) || "Manufacturer website",
       url: website,
       affiliate: false,
-      verified: Boolean(source.websiteVerified),
+      verified: websiteVerified ?? false,
+      partnerId: nullable(source.websitePartnerId),
+      linkType: "website",
+      trackingMode: "none",
+      allowedSurfaces: [...commercialLinks.GEAR_SURFACES],
     })
   }
   if (affiliateUrl) {
+    const affiliateVerified = Object.prototype.hasOwnProperty.call(
+      source,
+      "affiliateVerified"
+    )
+      ? booleanValue(
+          source.affiliateVerified,
+          "affiliateVerified",
+          owner,
+          errors
+        )
+      : false
     links.push({
-      kind: /amazon|amzn/i.test(affiliateUrl)
-        ? "amazon-associates"
-        : "affiliate",
+      kind: "affiliate",
       label: nullable(source.affiliateLabel) || "View product",
       url: affiliateUrl,
       affiliate: true,
-      verified: Boolean(source.affiliateVerified),
+      verified: affiliateVerified ?? false,
+      partnerId: nullable(source.affiliatePartnerId),
+      linkType: "affiliate",
+      trackingMode: nullable(source.affiliateTrackingMode),
+      allowedSurfaces: [...commercialLinks.GEAR_SURFACES],
     })
   }
 
@@ -472,6 +580,12 @@ function validateGearRecords(records, context = {}) {
   const journeyById = new Map(
     (context.journeys || []).map(item => [item.id, item])
   )
+  const partnerById = new Map(
+    (context.partners || []).map(item => [item.id, item])
+  )
+  const approvedGearTrackingRulePartnerIds = new Set(
+    context.approvedGearTrackingRulePartnerIds || []
+  )
   const itemById = new Map()
   const identityOwners = new Map()
 
@@ -541,10 +655,18 @@ function validateGearRecords(records, context = {}) {
     })
     ;(item?.links || []).forEach((link, index) => {
       const linkOwner = `${owner} link ${index + 1}`
-      if (!link?.kind || !link?.label) {
+      if (
+        typeof link?.kind !== "string" ||
+        !link.kind.trim() ||
+        typeof link?.label !== "string" ||
+        !link.label.trim()
+      ) {
         errors.push(`${linkOwner} needs kind and label`)
       }
-      if (!/^https:\/\//i.test(link?.url || "")) {
+      if (
+        typeof link?.url !== "string" ||
+        !/^https:\/\//i.test(link.url)
+      ) {
         errors.push(`${linkOwner} must use a verified HTTPS URL`)
       }
       if (
@@ -552,6 +674,95 @@ function validateGearRecords(records, context = {}) {
         typeof link?.verified !== "boolean"
       ) {
         errors.push(`${linkOwner} needs affiliate and verified booleans`)
+      }
+      if (!commercialLinks.LINK_TYPES.includes(link?.linkType)) {
+        errors.push(`${linkOwner} has unsupported linkType "${link?.linkType}"`)
+      }
+      if (!commercialLinks.TRACKING_MODES.includes(link?.trackingMode)) {
+        errors.push(
+          `${linkOwner} has unsupported trackingMode "${link?.trackingMode}"`
+        )
+      }
+      if (
+        !Array.isArray(link?.allowedSurfaces) ||
+        !link.allowedSurfaces.length ||
+        link.allowedSurfaces.some(
+          surface => !commercialLinks.GEAR_SURFACES.includes(surface)
+        )
+      ) {
+        errors.push(`${linkOwner} has invalid allowedSurfaces`)
+      }
+
+      const partner = link?.partnerId
+        ? partnerById.get(link.partnerId)
+        : null
+      if (link?.partnerId && !partner) {
+        errors.push(
+          `${linkOwner} references unknown Partner "${link.partnerId}"`
+        )
+      }
+      if (
+        link?.partnerId !== null &&
+        link?.partnerId !== undefined &&
+        typeof link.partnerId !== "string"
+      ) {
+        errors.push(`${linkOwner} partnerId must be a string or null`)
+      }
+      if (link?.affiliate) {
+        if (!link.partnerId) {
+          errors.push(`${linkOwner} needs partnerId for an affiliate link`)
+        }
+        if (link.linkType !== "affiliate") {
+          errors.push(`${linkOwner} affiliate links must use linkType affiliate`)
+        }
+        if (!["custom", "approved-rule"].includes(link.trackingMode)) {
+          errors.push(
+            `${linkOwner} affiliate links require custom or approved-rule trackingMode`
+          )
+        }
+        if (partner && partner.relationship !== "affiliate-program") {
+          errors.push(
+            `${linkOwner} Partner "${partner.id}" is not an approved affiliate program`
+          )
+        }
+        if (
+          link.trackingMode === "approved-rule" &&
+          !approvedGearTrackingRulePartnerIds.has(link.partnerId)
+        ) {
+          errors.push(
+            `${linkOwner} has no configured approved tracking rule for Partner "${link.partnerId || "unknown"}"`
+          )
+        }
+        if (partner) {
+          let hostname = ""
+          try {
+            hostname = new URL(link.url).hostname.toLowerCase()
+          } catch (error) {
+            hostname = ""
+          }
+          const allowedHosts = partner.commercialHosts || []
+          if (
+            !hostname ||
+            !allowedHosts.some(
+              host => hostname === host || hostname.endsWith(`.${host}`)
+            )
+          ) {
+            errors.push(
+              `${linkOwner} host is not approved for Partner "${partner.id}"`
+            )
+          }
+        }
+      } else {
+        if (link?.trackingMode !== "none") {
+          errors.push(
+            `${linkOwner} non-affiliate links must use trackingMode none`
+          )
+        }
+        if (link?.linkType === "affiliate") {
+          errors.push(
+            `${linkOwner} non-affiliate links cannot use linkType affiliate`
+          )
+        }
       }
     })
     if (item?.imageAssetId) {

@@ -434,6 +434,8 @@ async function main() {
     {
       journeys: journeyModule.journeyRecords,
       media: mediaModule.mediaRecords,
+      partners: partnerModule.partnerRecords,
+      approvedGearTrackingRulePartnerIds: [],
     }
   )
   gearValidation.errors.forEach(report)
@@ -591,6 +593,20 @@ async function main() {
     })
     if (!partner.disclosure) {
       report(owner + " is missing its relationship disclosure")
+    }
+    if (
+      partner.relationship === "affiliate-program" &&
+      (!Array.isArray(partner.commercialHosts) ||
+        !partner.commercialHosts.length ||
+        partner.commercialHosts.some(
+          host =>
+            typeof host !== "string" ||
+            !/^[a-z0-9.-]+$/.test(host) ||
+            host.startsWith(".") ||
+            host.endsWith(".")
+        ))
+    ) {
+      report(owner + " needs explicit commercialHosts")
     }
   })
 

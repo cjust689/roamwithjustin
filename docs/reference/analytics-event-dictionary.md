@@ -20,6 +20,8 @@ code_paths:
   - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasDetailPanel.vue
   - src/views/roam/RoamTripOverview.vue
+  - src/content/commercial-links.js
+  - src/components/GearGrid.vue
   - src/components/TravelPlanningOffers.vue
   - src/content/selectors/projections.mjs
   - scripts/test-analytics.mjs
@@ -46,7 +48,7 @@ be summed with the custom events.
 | `atlas_journey_opened` | A visitor intentionally opens a public top-level Journey | `public_journey_id`, `surface` |
 | `atlas_story_opened` | A visitor opens a public Journey story from the Atlas | `public_story_id`, `surface` |
 | `maps_handoff_clicked` | A visitor explicitly chooses a public Google Maps route or Place action | `content_type`, `surface` |
-| `partner_click` | A visitor activates a canonical partner action in published editorial content | `partner_id`, `link_type`, `placement`; optional `experience_id`, `public_destination_id`, or `public_journey_id` |
+| `partner_click` | A visitor activates a canonical partner action in published editorial content | `partner_id`, `link_type`, `placement`; optional `gear_id`, `experience_id`, `public_destination_id`, or `public_journey_id` |
 
 ## Controlled values
 
@@ -65,6 +67,7 @@ No event may contain Auth0 subjects, email, precise visitor location, full
 outbound URLs, arbitrary or tokenized URL query strings, private pin IDs,
 private destinations,
 memories, bucket-list entries, plans, future travel dates, or free-form notes.
+`gear_id` is accepted only as a stable public canonical product identifier.
 All `/my-atlas` routes are excluded from GA4 collection in this phase,
 including the OAuth callback.
 

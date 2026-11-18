@@ -5,6 +5,7 @@ import {
   getGearItem,
 } from "../gear/index.mjs"
 import { getMediaAsset } from "../media/index.mjs"
+import { getPartner } from "../partners/index.mjs"
 import { resolveMediaReference } from "./media.mjs"
 
 function isPublishedUsage(usage) {
@@ -19,15 +20,24 @@ function isPublishedItem(item) {
   return item?.verificationStatus === "verified"
 }
 
-function publicLinks(item) {
+function publicLinks(item, surface) {
   return (item.links || [])
-    .filter(link => link.verified && /^https:\/\//i.test(link.url || ""))
-    .map(link => ({
-      ...link,
-      rel: link.affiliate
-        ? "sponsored noopener noreferrer"
-        : "noopener noreferrer",
-    }))
+    .filter(
+      link =>
+        link.verified &&
+        /^https:\/\//i.test(link.url || "") &&
+        (link.allowedSurfaces || []).includes(surface)
+    )
+    .map(link => {
+      const partner = link.partnerId ? getPartner(link.partnerId) : null
+      return {
+        ...link,
+        disclosure: partner?.disclosure || "",
+        rel: link.affiliate
+          ? "sponsored noopener noreferrer"
+          : "noopener noreferrer",
+      }
+    })
 }
 
 function uniqueById(items) {
@@ -37,11 +47,11 @@ function uniqueById(items) {
   )
 }
 
-function gearView(item, usage = []) {
+function gearView(item, usage = [], surface = "public-gear") {
   const image = item.imageAssetId
     ? resolveMediaReference({ assetId: item.imageAssetId })
     : null
-  const links = publicLinks(item)
+  const links = publicLinks(item, surface)
   const orderedUsage = [...usage].sort(
     (left, right) =>
       Number(Boolean(right.featured)) - Number(Boolean(left.featured)) ||
@@ -61,6 +71,13 @@ function gearView(item, usage = []) {
     imageAlt: image?.alt || item.name,
     links: Object.freeze(links),
     primaryLink: links[0] || null,
+    affiliateDisclosures: Object.freeze([
+      ...new Set(
+        links
+          .filter(link => link.affiliate && link.disclosure)
+          .map(link => link.disclosure)
+      ),
+    ]),
     notes: leadUsage?.notes || "",
     whyItWorked: leadUsage?.whyItWorked || "",
     limitations: leadUsage?.limitations || "",
@@ -87,7 +104,7 @@ function selectUsage(predicate, options = {}) {
     .map(([gearId, usage]) => {
       const item = getGearItem(gearId)
       if (!item || (!includeDrafts && !isPublishedItem(item))) return null
-      return gearView(item, usage)
+      return gearView(item, usage, options.surface || "public-journey")
     })
     .filter(Boolean)
     .sort(
@@ -105,7 +122,7 @@ export function getGearItemView(gearId, options = {}) {
       record.gearId === gearId &&
       (options.includeDrafts || isPublishedUsage(record))
   )
-  return gearView(item, usage)
+  return gearView(item, usage, options.surface || "public-gear")
 }
 
 export function getGearCatalog(options = {}) {
@@ -115,21 +132,30 @@ export function getGearCatalog(options = {}) {
 }
 
 export function getJourneyGear(journeyId, options = {}) {
-  return selectUsage(usage => usage.journeyId === journeyId, options)
+  return selectUsage(usage => usage.journeyId === journeyId, {
+    ...options,
+    surface: "public-journey",
+  })
 }
 
 export function getVisitGear(visitId, options = {}) {
-  return selectUsage(usage => usage.visitId === visitId, options)
+  return selectUsage(usage => usage.visitId === visitId, {
+    ...options,
+    surface: "public-journey",
+  })
 }
 
 export function getExperienceGear(experienceId, options = {}) {
-  return selectUsage(usage => usage.experienceId === experienceId, options)
+  return selectUsage(usage => usage.experienceId === experienceId, {
+    ...options,
+    surface: "public-journey",
+  })
 }
 
 export function getMediaGear(assetId, options = {}) {
   const visibleGear = selectUsage(
     usage => (usage.mediaAssetIds || []).includes(assetId),
-    options
+    { ...options, surface: "public-journey" }
   )
   const media = getMediaAsset(assetId)
   const captureGearIds = uniqueById(
@@ -140,7 +166,9 @@ export function getMediaGear(assetId, options = {}) {
     ].map(getGearItem)
   )
   const captureGear = captureGearIds
-    .map(item => getGearItemView(item.id, options))
+    .map(item =>
+      getGearItemView(item.id, { ...options, surface: "public-journey" })
+    )
     .filter(Boolean)
 
   return Object.freeze({

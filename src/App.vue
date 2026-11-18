@@ -7,8 +7,6 @@
       <!-- Show different headers depending on the route -->
       <component :is="currentHeader" />
       <div id="main-content">
-        <!-- Only show banner if not on root or about -->
-        <Banner v-if="showBanner" />
         <!-- Keep the route mounted directly so the footer does not jump while
              lazy route chunks exchange during navigation. -->
         <router-view />
@@ -19,26 +17,17 @@
 </template>
 
 <script>
-import Banner from "./components/Banner.vue"
 import VueFooter from "./components/Footer.vue"
 import RoamHeader from "./components/RoamHeader.vue"
 export default {
   name: "App",
   components: {
-    Banner,
     VueFooter,
     RoamHeader,
   },
   computed: {
     currentHeader() {
       return RoamHeader
-    },
-    showBanner() {
-      const hiddenRoutes = ["/", "/about", "/affiliates", "/privacy"]
-      return (
-        !hiddenRoutes.includes(this.$route.path) &&
-        !this.$route.path.startsWith("/trips")
-      )
     },
   },
 }
