@@ -1,6 +1,5 @@
 <template>
   <aside class="support-note" aria-label="Affiliate disclosure">
-    <span>Independent field notes</span>
     <p>
       Some gear links are affiliate links. They support the work at no extra
       cost to you.
@@ -28,13 +27,6 @@ export default {
   color: rgba(255, 255, 255, 0.62);
   font-family: "Poppins", sans-serif;
   font-size: 0.72rem;
-}
-
-.support-note span {
-  color: #f6bd60;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
 .support-note p {

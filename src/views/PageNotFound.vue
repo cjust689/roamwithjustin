@@ -8,7 +8,6 @@
     />
     <div class="not-found-glow" aria-hidden="true"></div>
     <section>
-      <span>404 / Route not found</span>
       <h1>This trail ends here.</h1>
       <p>
         The page may have moved, but the journey is still waiting. Return to the
@@ -76,16 +75,8 @@ export default {
   text-align: center;
 }
 
-.not-found section > span {
-  color: #f6bd60;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
 .not-found h1 {
-  margin: 0.7rem 0 0;
+  margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(3.4rem, 10vw, 7rem);
   font-weight: 500;

@@ -5,7 +5,7 @@ import zlib from "node:zlib"
 import { normalizeSearchText } from "../../../src/features/my-atlas/catalog/search.mjs"
 
 const SCHEMA_VERSION = 1
-const RECORD_SHARD_HEX_LENGTH = 2
+const RECORD_SHARD_HEX_LENGTH = 3
 const SEARCH_SHARD_HEX_LENGTH = 3
 const SEARCH_PREFIX_CHARACTERS = Object.freeze([4, 6])
 

@@ -57,6 +57,7 @@ function object(bytes) {
 async function fixtureEnvironment({ artifactVersion = 2 } = {}) {
   const releasePrefix = `catalog/releases/${REVISION}`
   const modern = artifactVersion === 2
+  const recordShardHexLength = modern ? 3 : 2
   const manifest = {
     schemaVersion: 1,
     artifactVersion,
@@ -67,7 +68,7 @@ async function fixtureEnvironment({ artifactVersion = 2 } = {}) {
     releasePrefix,
     recordShards: {
       algorithm: "sha256-place-id",
-      hexLength: 2,
+      hexLength: recordShardHexLength,
       keyTemplate: `${releasePrefix}/records/{shard}.json.gz`,
     },
     searchShards: {
@@ -79,7 +80,10 @@ async function fixtureEnvironment({ artifactVersion = 2 } = {}) {
       keyTemplate: `${releasePrefix}/search/{shard}.json.gz`,
     },
   }
-  const recordShard = (await sha256(PLACE.placeId)).slice(0, 2)
+  const recordShard = (await sha256(PLACE.placeId)).slice(
+    0,
+    recordShardHexLength
+  )
   const searchPrefix = modern ? "uvita " : "uv"
   const searchShard = (await sha256(searchPrefix)).slice(0, modern ? 3 : 2)
   const values = new Map([

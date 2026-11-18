@@ -6,7 +6,6 @@
 
     <div class="home-shell">
       <section class="home-intro" aria-labelledby="home-title">
-        <p class="home-brand">Roam With Justin</p>
         <h1 id="home-title">Choose how the journey unfolds.</h1>
         <p class="home-lede">
           Adventure meets intention. It is told through visual stories, hard
@@ -43,10 +42,6 @@
           ></span>
           <span class="journey-card-shade" aria-hidden="true"></span>
           <span class="journey-card-content">
-            <span class="journey-label">
-              <span class="journey-pulse" aria-hidden="true"></span>
-              Interactive experience
-            </span>
             <strong>Explore the Interactive Atlas</strong>
             <span class="journey-action">Open the atlas <b>&rarr;</b></span>
           </span>
@@ -64,10 +59,6 @@
           ></span>
           <span class="journey-card-shade" aria-hidden="true"></span>
           <span class="journey-card-content">
-            <span class="journey-label">
-              <span class="journey-pulse" aria-hidden="true"></span>
-              Build your own map
-            </span>
             <strong>Make My Atlas yours</strong>
             <span class="journey-action">Start My Atlas <b>&rarr;</b></span>
           </span>
@@ -155,18 +146,11 @@ export default {
   text-shadow: 0 4px 32px rgba(0, 0, 0, 0.48);
 }
 
-.home-brand,
-.journey-label,
 .home-footnote {
   font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.17em;
   text-transform: uppercase;
-}
-
-.home-brand {
-  margin: 0 0 0.7rem;
-  color: #f6bd60;
 }
 
 .home-intro h1 {
@@ -287,22 +271,6 @@ export default {
   padding: clamp(1.35rem, 3vw, 2rem);
 }
 
-.journey-label {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: #f6bd60;
-}
-
-.journey-pulse {
-  width: 0.48rem;
-  height: 0.48rem;
-  border-radius: 50%;
-  background: #f6bd60;
-  box-shadow: 0 0 0 0 rgba(246, 189, 96, 0.65);
-  animation: journey-pulse 2.4s infinite;
-}
-
 .journey-card strong {
   max-width: 410px;
   margin-top: auto;
@@ -367,15 +335,6 @@ export default {
   }
 }
 
-@keyframes journey-pulse {
-  70% {
-    box-shadow: 0 0 0 0.55rem rgba(246, 189, 96, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(246, 189, 96, 0);
-  }
-}
-
 @media (max-width: 760px) {
   .home-shell {
     align-content: start;
@@ -417,8 +376,7 @@ export default {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .home-background,
-  .journey-pulse {
+  .home-background {
     animation: none;
   }
 

@@ -1,7 +1,6 @@
 <template>
   <main class="my-atlas-callback">
     <section aria-labelledby="my-atlas-callback-title">
-      <p>My Atlas private beta</p>
       <h1 id="my-atlas-callback-title">{{ title }}</h1>
       <p>{{ message }}</p>
       <router-link v-if="failed" to="/my-atlas">Return to My Atlas</router-link>
@@ -67,13 +66,12 @@ export default {
   background: #0a1416;
 }
 
-.my-atlas-callback section > p:first-child,
 .my-atlas-callback a {
   color: #e6ba68;
 }
 
 .my-atlas-callback h1 {
-  margin: 0.4rem 0 1rem;
+  margin: 0 0 1rem;
   font-family: "Poppins", system-ui, sans-serif;
 }
 </style>

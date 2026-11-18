@@ -2,8 +2,8 @@
   <div class="affiliate-page container">
     <h1>Support the Journey</h1>
     <p class="intro">
-      Some links here are affiliate links — purchases made through them help
-      fund my adventures, at no extra cost to you.
+      Some links here are affiliate links. Purchases made through them help fund
+      my adventures at no extra cost to you.
     </p>
 
     <!-- Partner Cards -->

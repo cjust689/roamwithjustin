@@ -37,10 +37,7 @@
             class="atlas-saved-placeholder"
             aria-hidden="true"
           ></span>
-          <span class="atlas-saved-copy"
-            ><small>{{ node.eyebrow }}</small
-            >{{ node.title }}</span
-          >
+          <span class="atlas-saved-copy">{{ node.title }}</span>
         </button>
       </section>
 
@@ -125,8 +122,7 @@ export default {
   gap: 0.3rem;
 }
 
-.atlas-saved header span,
-.atlas-saved-card small {
+.atlas-saved header span {
   color: #f6bd60;
   font-size: 0.68rem;
   font-weight: 800;

@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - media-pipeline
   - gear-system
@@ -222,7 +222,11 @@ their foreign keys, projections, and the absence of retired legacy
 authorities. It also rejects dash punctuation and editorial
 workflow phrases in the Journey and Atlas copy that the selectors expose to
 visitors. Technical IDs, slugs, URLs, and internal notes are outside that prose
-rule. `npm run build` runs content validation first.
+rule. The same validator scans public source under `src` and `public`, rejects
+Unicode dash punctuation, and rejects decorative eyebrow or kicker treatments
+in Vue components. Functional labels such as dates, form state, map controls,
+and account status remain allowed when they supply information that the heading
+does not. `npm run build` runs content validation first.
 
 ## Editorial baseline catalog
 

@@ -65,6 +65,39 @@ function validatePublicCommercePlaceholders() {
   }
 }
 
+function validatePublicSourceStyle() {
+  const pending = [
+    path.join(projectRoot, "src"),
+    path.join(projectRoot, "public"),
+  ]
+  while (pending.length) {
+    const current = pending.pop()
+    fs.readdirSync(current, { withFileTypes: true }).forEach(entry => {
+      const absolutePath = path.join(current, entry.name)
+      if (entry.isDirectory()) {
+        pending.push(absolutePath)
+        return
+      }
+      if (!/\.(?:css|html|js|json|mjs|scss|vue)$/.test(entry.name)) return
+
+      const source = fs.readFileSync(absolutePath, "utf8")
+      const relativePath = path.relative(projectRoot, absolutePath)
+      if (/[\u2013\u2014]/u.test(source)) {
+        report(
+          'Public source "' + relativePath + '" uses Unicode dash punctuation'
+        )
+      }
+      if (/\.vue$/.test(entry.name) && /\b(?:eyebrow|kicker)\b/i.test(source)) {
+        report(
+          'Public component "' +
+            relativePath +
+            '" uses a decorative eyebrow or kicker treatment'
+        )
+      }
+    })
+  }
+}
+
 const editorialWorkflowLanguage =
   /\b(?:coming soon|confirmed|unconfirmed|verified|unverified|placeholder|in progress|pending|not confirmed|needs verification|date to be confirmed)\b|\bstill being\b|\bremain(?:s|ing)? (?:unverified|open)\b|\b(?:the creator|editorial order|media review)\b/i
 
@@ -278,6 +311,7 @@ function validateAtlasView(node, contracts) {
 
 async function main() {
   validatePublicCommercePlaceholders()
+  validatePublicSourceStyle()
   const [
     contracts,
     mediaModule,
