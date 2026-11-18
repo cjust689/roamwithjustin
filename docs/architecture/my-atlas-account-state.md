@@ -14,6 +14,8 @@ related:
   - my-atlas-private-beta-implementation
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
+  - my-atlas-trip-planner-ux-routes-flights-lodging
+  - my-atlas-trip-planner-phase-0-2026-11-18
   - docs-index
 supersedes: []
 superseded_by: []
@@ -55,6 +57,7 @@ verification:
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
+    - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
     - Pull request 114 passed production validation run 44158190178 and merged to main as d6af82bddfaf8bb4e0f4ac61caeade6697c46982
     - Pages run 44158579421 deployed the typography cleanup, and a live audit found Poppins plus zero Russo One matches across 32 discoverable content-addressed CSS and JavaScript assets
@@ -286,6 +289,15 @@ configuration, catalog, revision, and invalid-response errors retain the safe
 Worker request reference and present recovery guidance without exposing account
 data.
 
+A successful plan create, replacement, or Keep response immediately becomes
+the browser's last confirmed plan snapshot before the companion read begins. If
+that follow-up trip-plan read fails while the bucket list still loads, the
+browser retains and displays the confirmed snapshot, labels it as needing a
+refresh, and disables plan editing until a complete read succeeds. A successful
+delete response clears the local plan immediately, so the same partial-read
+path cannot resurrect a deleted snapshot. This fallback changes no stored
+state and never substitutes for the Worker's revision checks.
+
 Wishlist and saved-trip reads are presented as separate availability domains.
 If the bucket-list pages load with a valid revision but the companion saved-trip
 request fails, the browser retains and renders the private destinations, their
@@ -335,6 +347,18 @@ spot centroids require an entrance or custom coordinate before handoff. Custom
 coordinates require explicit confirmation. AI prompt generation includes
 readable geography only by default and adds coordinates only after a per-copy
 opt-in. Neither handoff calls a platform-owned model or paid route API.
+
+The directions presentation can include or exclude saved route points without
+changing the saved plan. Drive, Transit, Walk, and Bike are supported as a
+visible default and as adjacent-pair overrides. Consecutive pairs with the same
+Maps-compatible mode form one route group before conservative segmentation.
+Fly and Ferry end a Maps group and render as separate boundaries without a
+provider link. One retained physical point creates a readable Maps place
+search, while zero points create no action. Adjacent duplicate physical points
+collapse so a start and finish at the same place do not create a zero-distance
+route. Newly adjacent points use the visible default and cannot inherit an
+unrelated old override. These preferences and generated actions are component
+memory only: they produce no account write and do not refresh plan retention.
 
 ## Permanent application-account deletion
 
@@ -509,6 +533,35 @@ latitude and longitude, and saves the canonical result into the private
 wishlist. Saved wishlist cards repeat those coordinates so the owner can review
 the plan input before using external directions. Custom coordinates remain
 available through a secondary fallback disclosure.
+
+When a saved plan exists, the private planner now presents that plan before its
+editing forms. The readable itinerary distinguishes the start, every numbered
+stop, and the effective finish, including return-to-start and final-stop
+semantics. It shows the title, optional year and note, current wishlist-note
+previews when their source wishes still exist, and a saved or unsaved state.
+Large itineraries retain bounded scrolling. Destination management and the
+complete editor begin collapsed for existing plans; empty planners open the
+builder. Accessible Up and Down controls remain the canonical reorder path.
+
+Directions and the privacy-filtered planning prompt are the only active
+next-action panels, and only one is expanded at a time. Flights and stays are
+not displayed as inactive promises. The Maps builder, storage contract,
+retention behavior, API fields, and public projection are unchanged by this
+presentation phase.
+
+Within Directions, the owner can choose which saved points enter the export,
+set a Drive, Transit, Walk, or Bike default, and review each resulting adjacent
+pair. An explicit Fly or Ferry choice separates that pair from Google Maps
+directions. The panel previews the retained order and any exact custom
+coordinates before confirmation. It then shows only the generated Maps search
+or direction links and nonlink flight or ferry boundaries. Reloading the view
+discards these export choices.
+
+If a mutation is rejected with `revision_conflict`, the browser does not replay
+it. It reads the latest account revision, preserves the local itinerary draft
+where its wishlist references remain valid, and requires the owner to review
+and explicitly save again. This recovery keeps the Worker's optimistic
+concurrency protection intact.
 
 The planner disclosure header uses the same full-width control geometry as the
 other owner workflow sections. Its closed and open states retain the shared

@@ -8,6 +8,9 @@ created: 2026-11-17
 updated: 2026-11-18
 related:
   - my-atlas-trip-planning
+  - my-atlas-trip-planner-ux-routes-flights-lodging
+  - my-atlas-trip-planner-phase-0-2026-11-18
+  - my-atlas-directions-phase-2-2026-11-18
   - my-atlas-private-beta-implementation
   - my-atlas-account-state
   - my-atlas-registration
@@ -36,6 +39,15 @@ verification:
   evidence:
     - npm run my-atlas:test
     - npm run lint
+    - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
+    - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
+    - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
+    - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
+    - docs/audits/assets/my-atlas-directions-phase2-desktop.png
+    - docs/audits/assets/my-atlas-directions-phase2-mobile.png
+    - Revision-conflict recovery tests verify request-reference copy while the client reloads the latest revision, preserves the itinerary draft where possible, and requires an explicit retry instead of replaying a mutation
+    - docs/audits/assets/my-atlas-planner-phase1-desktop.png
+    - docs/audits/assets/my-atlas-planner-phase1-mobile.png
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
     - npm run my-atlas:worker:check
     - npm run my-atlas:worker:check:staging
@@ -175,6 +187,30 @@ remains.
       one revision and idempotency operation, and leaves the wishlist and saved
       plan unchanged. The browser requires a final confirmation and warns when the
       owner's Atlas is already public.
+- [x] Planner presentation Phase 1 makes the saved plan the primary readable
+      object with a distinct start, numbered stops, finish, title, year, plan
+      note, current wishlist-note previews, and saved versus unsaved state.
+      Destination management and the full editor start collapsed for an
+      existing plan, while an empty planner opens the trip builder. Existing
+      Directions and planning-prompt handoffs use mutually exclusive next-action
+      panels. No Flights or Stays action appears before those capabilities exist.
+- [x] A rejected stale mutation still relies on the Worker `If-Match` boundary
+      and is never automatically replayed. The browser fetches the latest account
+      revision, preserves the local itinerary draft where possible, and asks the
+      owner to review and explicitly save again. Successful wishlist mutations
+      also stop replacing an unrelated unsaved plan draft during their refresh.
+- [x] Directions Phase 2 adds browser-only start, stop, and finish inclusion,
+      a visible Drive, Transit, Walk, or Bike default, reviewed per-pair
+      overrides, mixed-mode splitting, one-point Maps search, and Fly or Ferry
+      boundaries. Longer Maps groups retain the conservative three-waypoint
+      segmentation. Custom coordinates remain previewed and confirmation
+      gated. These controls do not write account state or refresh retention.
+- [x] A successful plan save or Keep response now displays its confirmed plan
+      snapshot before the companion planning read. If only that follow-up plan
+      read fails, the itinerary remains visible as `Saved, refresh needed` and
+      editing stays disabled until Refresh succeeds. Successful deletion clears
+      the local plan immediately. The Worker, revision, and persistence
+      contracts are unchanged.
 
 ## Partial or not yet verified
 
@@ -211,6 +247,18 @@ remains.
       Worker version `538823a4-0333-4b71-9825-1647acf8e832` is deployed and its
       unauthenticated health probe passed. Local client, Worker boundary, and
       Durable Object tests pass; owner-session acceptance remains.
+- [ ] Complete authenticated owner acceptance of the Phase 1 readable itinerary
+      at desktop and phone widths, including keyboard and screen-reader review.
+      No deployment or authenticated visual acceptance is claimed by the local
+      implementation.
+- [x] Implement Phase 2 as a separate UI-only directions change: ephemeral
+      endpoint and stop inclusion, Maps modes, one-place search, and mixed-mode
+      splitting without account writes or retention refresh. Local component
+      evidence verifies zero horizontal overflow at 1,280 and 390 CSS pixels;
+      authenticated and real-device acceptance remain open above.
+- [ ] Implement stable itinerary node IDs, persisted logistics, private map
+      overlay, neutral flight and stay helpers, and any commercial activation
+      only through their separately reviewed later phases.
 
 ## Verified commands
 
