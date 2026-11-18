@@ -63,6 +63,9 @@ verification:
     - Owner-view source assertions verify authoritative account refresh before a stale-write retry and a bounded phone profile control with explicit focus treatment
     - A live-page containment check at 432 CSS pixels applied the corrected scoped rules to the production component structure: the focused profile control measured 397 by 38.5 CSS pixels, remained inside the 432-pixel document, and no longer inherited the legacy navigation background, shadow, 56-pixel line height, or pill radius
     - Source assertions verify the signed-in overview exposes Plan a trip on desktop and mobile, closes competing destination panels, opens the existing planner, scrolls it into view, and focuses its disclosure heading
+    - Pull request 153 passed validation run 44401070493 and merged to develop as 8ef9e32650012f50ea5ab1752e45b71d129c0707; develop validation run 44401457014 then succeeded
+    - Pull request 154 passed production validation run 44401842472 and merged to main as 5f6c64d37074ea547c3dd75215dab6bb6fd63706
+    - Pages run 44402230386 deployed the production merge, and live chunk 571.b9f0d996.js returned 200 with the new stale-save recovery, unavailable-catalog, and Plan a trip markers together
     - docs/audits/assets/my-atlas-planner-phase1-desktop.png
     - docs/audits/assets/my-atlas-planner-phase1-mobile.png
     - Thirty-three Workers-runtime tests verified atomic selected-stop conversion, exact retry, duplicate prevention, planning-state preservation, and account-global revision behavior
@@ -146,6 +149,15 @@ restored the current `main` ancestry before production promotion. Pages run
 `1758fea1681ff72ec0e9423f2a06f4fb07d5e13b`, and live chunk
 885.9c3d6805.js contains the browser boundary. Authenticated owner verification
 of the private wishlist read and stale-delete path remains external.
+
+Pull requests 153 and 154 promoted monotonic browser revisions, one safe
+explicit-412 write retry, Yellowstone spot creation coverage, contained phone
+profile styling, and direct overview access to the private planner through
+protected `develop` and `main`. Validation runs 44401070493, 44401457014, and
+44401842472 succeeded. Pages run 44402230386 deployed production merge
+`5f6c64d37074ea547c3dd75215dab6bb6fd63706`, and live chunk
+571.b9f0d996.js returned 200 with the exact recovery and planner markers.
+Authenticated owner interaction remains external acceptance.
 
 ## Implemented and test verified
 

@@ -64,6 +64,8 @@ verification:
     - Pull request 138 reused that successful validation and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages run 44348107246 built and deployed the production merge successfully
     - Live content-addressed chunk 417.972f66bc.js returned 200 and contained the readable itinerary, ephemeral route-mode controls, and saved-plan refresh recovery markers together
+    - Pull requests 153 and 154 passed validation runs 44401070493 and 44401842472, merged through protected develop and main, and develop validation run 44401457014 succeeded
+    - Pages run 44402230386 deployed main merge 5f6c64d37074ea547c3dd75215dab6bb6fd63706; live chunk 571.b9f0d996.js returned 200 with the new stale-save recovery, unavailable-catalog, and Plan a trip markers together
     - Pull requests 141 and 142 passed validation runs 44358088143 and 44358862563, merged through protected develop and main, and Pages run 44359227708 deployed main merge 01c8a83e54b14f4cec3a47ac26b82b9804dad62f
     - Live content-addressed chunks 944.dfa848dd.js and 327.9488c543.js returned 200 and together contained the direct trip action, save-requirement, private map-overlay, and restored-trip heading markers
     - Pull request 113 passed validation run 44157428344 and merged the Poppins-only typography cleanup to develop as d12bf24b8b7e02a950811c9d91b3020948c5d0a8; develop validation run 44157761385 then succeeded
