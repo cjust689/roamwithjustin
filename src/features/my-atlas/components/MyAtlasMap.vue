@@ -1,5 +1,10 @@
 <template>
-  <section class="my-atlas-map-shell" aria-label="Personal travel map">
+  <section
+    class="my-atlas-map-shell"
+    :aria-label="
+      plannerActive ? 'Private trip planning map' : 'Personal travel map'
+    "
+  >
     <div
       ref="map"
       class="my-atlas-map"
@@ -15,6 +20,16 @@
     <div v-if="ready && yearLegend.length" class="my-atlas-year-legend">
       <span v-for="item in yearLegend" :key="item.label">
         <i :style="{ backgroundColor: item.color }"></i>{{ item.label }}
+      </span>
+    </div>
+    <div v-if="ready && plannerActive" class="my-atlas-planner-map-status">
+      <strong>Trip planner</strong>
+      <span>
+        {{
+          plannerRoute.length
+            ? "Your private draft route"
+            : "Add a start or destination to begin"
+        }}
       </span>
     </div>
     <div
@@ -121,6 +136,14 @@ export default {
       type: Array,
       default: null,
     },
+    plannerActive: {
+      type: Boolean,
+      default: false,
+    },
+    plannerRoute: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -139,6 +162,7 @@ export default {
   },
   computed: {
     yearLegend() {
+      if (this.plannerActive) return []
       const years = atlasYears(this.places).map(year => ({
         label: String(year),
         color: pinColor(year),
@@ -155,7 +179,24 @@ export default {
       handler() {
         this.renderConnections()
         this.renderMarkers()
-        if (!this.playbackActive) this.showPlacesOverview()
+        if (!this.playbackActive && !this.plannerActive) {
+          this.showPlacesOverview()
+        }
+      },
+    },
+    plannerActive() {
+      this.stopFlight()
+      this.renderConnections()
+      this.renderMarkers()
+      this.showCurrentOverview()
+    },
+    plannerRoute: {
+      deep: true,
+      handler() {
+        if (!this.plannerActive) return
+        this.renderConnections()
+        this.renderMarkers()
+        this.showPlannerOverview()
       },
     },
     selectedPlaceId(current, previous) {
@@ -243,7 +284,7 @@ export default {
           this.initializeConnections()
           this.renderMarkers()
           this.syncPlacementMarker()
-          this.showPlacesOverview()
+          this.showCurrentOverview()
         })
         this.map.on("click", this.handlePlacementClick)
         this.map.on("moveend", this.renderMarkers)
@@ -368,22 +409,48 @@ export default {
       this.attributionCollapsedInitially = true
     },
     connectionGeoJson() {
-      const features = this.showConnections
-        ? decorativeConnections(this.places).map(edge => {
+      const plannerFeatures = this.plannerActive
+        ? this.plannerRoute.slice(0, -1).flatMap((node, index) => {
+            const next = this.plannerRoute[index + 1]
+            if (!next) return []
+            if (
+              node.location.coordinates[0] === next.location.coordinates[0] &&
+              node.location.coordinates[1] === next.location.coordinates[1]
+            ) {
+              return []
+            }
             return {
               type: "Feature",
-              properties: {},
+              properties: { planner: true },
               geometry: {
                 type: "LineString",
                 coordinates: curvedConnectionCoordinates(
-                  edge.from.coordinates,
-                  edge.to.coordinates,
-                  25
+                  node.location.coordinates,
+                  next.location.coordinates,
+                  35
                 ),
               },
             }
           })
         : []
+      const visitedFeatures =
+        !this.plannerActive && this.showConnections
+          ? decorativeConnections(this.places).map(edge => {
+              return {
+                type: "Feature",
+                properties: { planner: false },
+                geometry: {
+                  type: "LineString",
+                  coordinates: curvedConnectionCoordinates(
+                    edge.from.coordinates,
+                    edge.to.coordinates,
+                    25
+                  ),
+                },
+              }
+            })
+          : []
+      const features = this.plannerActive ? plannerFeatures : visitedFeatures
       return { type: "FeatureCollection", features }
     },
     initializeConnections() {
@@ -451,15 +518,49 @@ export default {
         },
         firstLabelLayer
       )
+      this.syncConnectionAppearance()
     },
     renderConnections() {
       if (!this.map || !this.ready) return
       this.initializeConnections()
       this.map.getSource(CONNECTION_SOURCE)?.setData(this.connectionGeoJson())
+      this.syncConnectionAppearance()
+    },
+    syncConnectionAppearance() {
+      if (!this.map || !this.ready) return
+      const opacity = this.plannerActive ? 0.58 : 0.3
+      const width = this.plannerActive ? 11 : 9
+      const lineWidth = this.plannerActive ? 4 : 3
+      const dash = this.plannerActive ? [2.4, 1.05] : [1.5, 1.8]
+      this.map.setPaintProperty(
+        "my-atlas-connections-glow",
+        "line-opacity",
+        opacity
+      )
+      this.map.setPaintProperty(
+        "my-atlas-connections-glow",
+        "line-width",
+        width
+      )
+      this.map.setPaintProperty(
+        "my-atlas-connections-line",
+        "line-width",
+        lineWidth
+      )
+      this.map.setPaintProperty(
+        "my-atlas-connections-line",
+        "line-dasharray",
+        dash
+      )
     },
     renderMarkers() {
       if (!this.map || !this.ready) return
       this.clearMarkers()
+
+      if (this.plannerActive) {
+        this.renderPlannerMarkers()
+        return
+      }
 
       const markerPlaces = this.places.map(place => ({
         ...place,
@@ -478,6 +579,56 @@ export default {
         if (group.isCluster) this.addClusterMarker(group)
         else this.addPlaceMarker(group.nodes[0])
       })
+    },
+    renderPlannerMarkers() {
+      const groups = new Map()
+      this.plannerRoute.forEach(node => {
+        const key = node.location.coordinates.join(",")
+        const group = groups.get(key) || {
+          coordinates: node.location.coordinates,
+          nodes: [],
+        }
+        group.nodes.push(node)
+        groups.set(key, group)
+      })
+      groups.forEach(group => this.addPlannerMarker(group))
+    },
+    addPlannerMarker(group) {
+      const element = document.createElement("div")
+      const marker = document.createElement("span")
+      const markerText = document.createElement("strong")
+      const label = document.createElement("span")
+      const name = document.createElement("strong")
+      const role = document.createElement("small")
+      const roles = group.nodes.map(node => {
+        if (node.role === "start") return "Start"
+        if (node.role === "finish") return "Finish"
+        return `Stop ${node.label}`
+      })
+      const names = [...new Set(group.nodes.map(node => node.location.name))]
+
+      element.className = "my-atlas-plan-pin"
+      element.setAttribute("role", "img")
+      element.setAttribute(
+        "aria-label",
+        `${roles.join(" and ")}: ${names.join(", ")}`
+      )
+      if (group.nodes.some(node => node.role === "start")) {
+        element.classList.add("has-start")
+      }
+      if (group.nodes.some(node => node.role === "finish")) {
+        element.classList.add("has-finish")
+      }
+
+      marker.className = "my-atlas-plan-pin-shape"
+      markerText.textContent = group.nodes.map(node => node.label).join("/")
+      marker.appendChild(markerText)
+      label.className = "my-atlas-plan-pin-label"
+      name.textContent = names.join(" / ")
+      role.textContent = roles.join(" · ")
+      label.append(name, role)
+      element.append(marker, label)
+      this.addMarker(element, group.coordinates)
     },
     addPlaceMarker(place) {
       const element = document.createElement("button")
@@ -586,6 +737,58 @@ export default {
         duration: reducedMotion ? 0 : 800,
         pitch: 18,
         bearing: 0,
+        essential: false,
+      })
+    },
+    showCurrentOverview() {
+      if (this.plannerActive) this.showPlannerOverview()
+      else this.showPlacesOverview()
+    },
+    showPlannerOverview() {
+      if (!this.map || !this.ready) return
+      const coordinates = [
+        ...new Map(
+          this.plannerRoute.map(node => [
+            node.location.coordinates.join(","),
+            node.location.coordinates,
+          ])
+        ).values(),
+      ]
+      const reducedMotion = window.matchMedia?.(
+        "(prefers-reduced-motion: reduce)"
+      ).matches
+      if (!coordinates.length) {
+        this.map.easeTo({
+          ...worldCamera,
+          duration: reducedMotion ? 0 : 500,
+          essential: false,
+        })
+        return
+      }
+      if (coordinates.length === 1) {
+        this.map.flyTo({
+          center: coordinates[0],
+          zoom: 5.2,
+          pitch: 24,
+          bearing: 0,
+          duration: reducedMotion ? 0 : 650,
+          essential: false,
+        })
+        return
+      }
+      const bounds = coordinates.reduce(
+        (current, coordinate) => current.extend(coordinate),
+        new maplibregl.LngLatBounds(coordinates[0], coordinates[0])
+      )
+      this.map.fitBounds(bounds, {
+        padding:
+          window.innerWidth <= 720
+            ? { top: 90, right: 56, bottom: 80, left: 56 }
+            : { top: 100, right: 100, bottom: 100, left: 500 },
+        maxZoom: 6.4,
+        pitch: 20,
+        bearing: 0,
+        duration: reducedMotion ? 0 : 700,
         essential: false,
       })
     },
@@ -780,6 +983,35 @@ export default {
   gap: 0.32rem;
   max-width: min(24rem, calc(100vw - 5rem));
   pointer-events: none;
+}
+
+.my-atlas-planner-map-status {
+  position: absolute;
+  z-index: 3;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: 0.12rem;
+  max-width: min(18rem, calc(100% - 2rem));
+  padding: 0.62rem 0.78rem;
+  border: 1px solid rgba(242, 199, 110, 0.52);
+  border-radius: 0.75rem;
+  color: #edf7f2;
+  background: rgba(8, 17, 19, 0.9);
+  box-shadow: 0 0.7rem 1.8rem rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.my-atlas-planner-map-status strong {
+  color: #f2c76e;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.62rem;
+}
+
+.my-atlas-planner-map-status span {
+  color: #b6c7c1;
+  font-size: 0.6rem;
 }
 
 .my-atlas-placement-help {
@@ -988,6 +1220,90 @@ export default {
   transform: translateX(-50%) scale(1.04);
 }
 
+::v-deep .my-atlas-plan-pin {
+  position: absolute;
+  width: 2.55rem;
+  height: 3rem;
+  overflow: visible;
+  color: #102023;
+  pointer-events: none;
+}
+
+::v-deep .my-atlas-plan-pin-shape {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border: 3px solid #fff2cf;
+  border-radius: 50% 50% 50% 0;
+  background: #e6ba68;
+  box-shadow:
+    0 0 0 0.4rem rgba(230, 186, 104, 0.2),
+    0 0.65rem 1.5rem rgba(0, 0, 0, 0.52),
+    0 0 1.5rem rgba(242, 199, 110, 0.7);
+  transform: rotate(-45deg);
+}
+
+::v-deep .my-atlas-plan-pin.has-start .my-atlas-plan-pin-shape {
+  background: #58d1c9;
+  box-shadow:
+    0 0 0 0.4rem rgba(88, 209, 201, 0.2),
+    0 0.65rem 1.5rem rgba(0, 0, 0, 0.52),
+    0 0 1.5rem rgba(88, 209, 201, 0.7);
+}
+
+::v-deep .my-atlas-plan-pin.has-finish .my-atlas-plan-pin-shape {
+  border-color: #ffd4ca;
+  background: #f08a72;
+}
+
+::v-deep .my-atlas-plan-pin.has-start.has-finish .my-atlas-plan-pin-shape {
+  border-color: #fff2cf;
+  background: linear-gradient(135deg, #58d1c9 0 50%, #f08a72 50% 100%);
+}
+
+::v-deep .my-atlas-plan-pin-shape strong {
+  max-width: 2.15rem;
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: rotate(45deg);
+}
+
+::v-deep .my-atlas-plan-pin-label {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.55rem);
+  display: grid;
+  min-width: max-content;
+  gap: 0.08rem;
+  padding: 0.4rem 0.52rem;
+  border: 1px solid rgba(242, 199, 110, 0.52);
+  border-radius: 0.62rem;
+  color: #edf7f2;
+  text-align: left;
+  background: rgba(7, 16, 18, 0.94);
+  box-shadow: 0 0.5rem 1.4rem rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(9px);
+  transform: translateX(-50%);
+}
+
+::v-deep .my-atlas-plan-pin-label strong {
+  max-width: 11rem;
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::v-deep .my-atlas-plan-pin-label small {
+  color: #f2c76e;
+  font-size: 0.57rem;
+  font-weight: 800;
+}
+
 ::v-deep .my-atlas-flight {
   position: relative;
   z-index: 5;
@@ -1023,6 +1339,12 @@ export default {
     max-width: calc(100vw - 4.5rem);
   }
 
+  .my-atlas-planner-map-status {
+    top: 0.65rem;
+    right: 0.65rem;
+    max-width: calc(100% - 1.3rem);
+  }
+
   ::v-deep .my-atlas-pin-label {
     padding: 0.3rem 0.42rem;
   }
@@ -1034,6 +1356,10 @@ export default {
 
   ::v-deep .my-atlas-pin.has-memory .my-atlas-pin-label {
     width: min(13rem, calc(100vw - 1.25rem));
+  }
+
+  ::v-deep .my-atlas-plan-pin-label strong {
+    max-width: 7.5rem;
   }
 }
 </style>

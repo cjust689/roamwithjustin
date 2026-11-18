@@ -22,6 +22,7 @@ import {
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../src/features/my-atlas/planning/errors.mjs"
+import { buildPlannerMapRoute } from "../src/features/my-atlas/planning/mapProjection.mjs"
 
 assert.match(
   formatMyAtlasPlannerError({ code: "insufficient_permissions" }),
@@ -69,6 +70,20 @@ const plannerComponent = fs.readFileSync(
   ),
   "utf8"
 )
+const mapComponent = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/components/MyAtlasMap.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
+const ownerView = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/views/MyAtlasGeographicProof.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
 assert.match(plannerComponent, /class="planner-itinerary-card"/)
 assert.match(plannerComponent, /aria-label="Saved trip itinerary"/)
 assert.match(plannerComponent, /aria-controls="planner-trip-editor"/)
@@ -77,6 +92,18 @@ assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
 assert.match(plannerComponent, /planHasUnsavedChanges/)
 assert.match(plannerComponent, /v-model="directionsIncludedPointKeys"/)
 assert.match(plannerComponent, /v-model="directionsDefaultMode"/)
+assert.match(plannerComponent, />\s*Add to trip\s*</)
+assert.match(plannerComponent, /addCatalogPlaceToPlan\(place\)/)
+assert.match(plannerComponent, /appendPlanStop\(result\?\.wish\)/)
+assert.match(plannerComponent, /planSaveRequirements/)
+assert.match(plannerComponent, /:disabled="pending \|\| !planSaveReady"/)
+assert.match(plannerComponent, /planner-state-change/)
+assert.match(plannerComponent, /mounted\(\) \{[\s\S]*loadPlanning/)
+assert.match(mapComponent, /plannerActive/)
+assert.match(mapComponent, /renderPlannerMarkers/)
+assert.match(mapComponent, /showPlannerOverview/)
+assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
+assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(plannerComponent, /buildGoogleMapsRouteHandoffs\(this\.plan/)
 assert.match(
   plannerComponent,
@@ -162,6 +189,37 @@ const plan = {
   ],
   endMode: "return-to-start",
 }
+const plannerRoute = buildPlannerMapRoute({
+  start: { ...moab, note: "Private route note", wishId: "wish_private" },
+  stops: plan.stops,
+  endMode: "return-to-start",
+})
+assert.deepEqual(
+  plannerRoute.map(node => [
+    node.key,
+    node.role,
+    node.label,
+    node.location.name,
+  ]),
+  [
+    ["start", "start", "S", "Moab"],
+    ["stop:0", "stop", "1", "Arches entrance"],
+    ["stop:1", "stop", "2", "Dead Horse Point"],
+    ["stop:2", "stop", "3", "Island in the Sky"],
+    ["finish", "finish", "F", "Moab"],
+  ]
+)
+assert.equal("note" in plannerRoute[0].location, false)
+assert.equal("wishId" in plannerRoute[0].location, false)
+assert.equal(
+  buildPlannerMapRoute({
+    start: moab,
+    stops: plan.stops.slice(0, 1),
+    endMode: "selected-end",
+    end: null,
+  }).some(node => node.role === "finish"),
+  false
+)
 const confirmedCoordinatePlaceIds = plan.stops.map(stop => stop.placeId)
 const url = new URL(
   buildGoogleMapsDirectionsUrl(plan, { confirmedCoordinatePlaceIds })

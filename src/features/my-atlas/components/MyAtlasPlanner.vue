@@ -13,9 +13,11 @@
     >
       <span>
         <small>Private trip planning beta</small>
-        <strong id="my-atlas-planner-title">Plan future travel</strong>
+        <strong id="my-atlas-planner-title">
+          {{ plan ? plan.title : "Plan future travel" }}
+        </strong>
       </span>
-      <b>{{ open ? "Hide" : "Plan a trip" }}</b>
+      <b>{{ open ? "Hide" : plan ? "Open trip" : "Plan a trip" }}</b>
     </button>
 
     <div v-if="open" id="my-atlas-planner-content" class="planner-content">
@@ -413,10 +415,29 @@
                   <div class="planner-search-actions">
                     <button
                       type="button"
+                      :disabled="
+                        pending ||
+                        !planStateAvailable ||
+                        planStopPlaceIds.has(place.placeId)
+                      "
+                      @click="addCatalogPlaceToPlan(place)"
+                    >
+                      {{
+                        planStopPlaceIds.has(place.placeId)
+                          ? "In trip"
+                          : "Add to trip"
+                      }}
+                    </button>
+                    <button
+                      type="button"
                       :disabled="pending || wishPlaceIds.has(place.placeId)"
                       @click="saveCatalogWish(place)"
                     >
-                      {{ wishPlaceIds.has(place.placeId) ? "Saved" : "Save" }}
+                      {{
+                        wishPlaceIds.has(place.placeId)
+                          ? "In wishlist"
+                          : "Save to wishlist"
+                      }}
                     </button>
                     <button
                       type="button"
@@ -485,6 +506,13 @@
                 />
               </label>
               <div class="planner-custom-actions">
+                <button
+                  type="button"
+                  :disabled="pending || !planStateAvailable"
+                  @click="addCustomWishToPlan"
+                >
+                  Add to trip
+                </button>
                 <button
                   type="button"
                   :disabled="pending"
@@ -740,8 +768,27 @@
               </button>
             </li>
           </ol>
+          <div
+            v-if="planSaveRequirements.length"
+            class="planner-save-requirements"
+            role="status"
+          >
+            <strong>Before this trip can be saved</strong>
+            <ul>
+              <li
+                v-for="requirement in planSaveRequirements"
+                :key="requirement"
+              >
+                {{ requirement }}
+              </li>
+            </ul>
+          </div>
           <div class="planner-row-actions">
-            <button type="button" :disabled="pending" @click="savePlan">
+            <button
+              type="button"
+              :disabled="pending || !planSaveReady"
+              @click="savePlan"
+            >
               {{ plan ? "Update saved trip" : "Save trip" }}
             </button>
             <button
@@ -913,6 +960,7 @@ import {
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../planning/errors.mjs"
+import { buildPlannerMapRoute } from "../planning/mapProjection.mjs"
 
 export default {
   name: "MyAtlasPlanner",
@@ -922,10 +970,16 @@ export default {
     pins: { type: Array, default: () => [] },
     profilePublic: { type: Boolean, default: false },
   },
-  emits: ["revision-change", "pins-created", "account-deleted"],
+  emits: [
+    "revision-change",
+    "pins-created",
+    "account-deleted",
+    "planner-state-change",
+  ],
   data() {
     return {
       open: false,
+      planningLoaded: false,
       wishlistOpen: false,
       planEditorOpen: false,
       nextActionOpen: "",
@@ -994,6 +1048,49 @@ export default {
     },
     wishPlaceIds() {
       return new Set(this.wishes.map(wish => wish.placeId))
+    },
+    planStopPlaceIds() {
+      return new Set(
+        this.planForm.stopWishIds
+          .map(wishId => this.wishes.find(wish => wish.wishId === wishId))
+          .filter(Boolean)
+          .map(wish => wish.placeId)
+      )
+    },
+    planStartLocation() {
+      if (this.planForm.startDirect) return this.planForm.startDirect
+      return this.wishes.find(wish => wish.wishId === this.planForm.startWishId)
+    },
+    planStopLocations() {
+      return this.planForm.stopWishIds
+        .map(wishId => this.wishes.find(wish => wish.wishId === wishId))
+        .filter(Boolean)
+    },
+    plannerMapRoute() {
+      return buildPlannerMapRoute({
+        start: this.planStartLocation,
+        stops: this.planStopLocations,
+        endMode: this.planForm.endMode,
+        end: this.planForm.endDirect,
+      })
+    },
+    planSaveRequirements() {
+      const requirements = []
+      if (!this.planForm.title) requirements.push("Add a trip title.")
+      if (!this.planStartLocation) requirements.push("Choose a trip start.")
+      if (!this.planForm.stopWishIds.length) {
+        requirements.push("Add at least one destination to the trip.")
+      }
+      if (
+        this.planForm.endMode === "selected-end" &&
+        !this.planForm.endDirect
+      ) {
+        requirements.push("Choose the selected finish.")
+      }
+      return requirements
+    },
+    planSaveReady() {
+      return this.planStateAvailable && !this.planSaveRequirements.length
     },
     maxPlanDestinations() {
       return MAX_PLAN_DESTINATIONS
@@ -1080,21 +1177,40 @@ export default {
     wishQuery(value) {
       this.queueWishSearch(value)
     },
+    open() {
+      this.emitPlannerState()
+    },
+    plannerMapRoute: {
+      deep: true,
+      handler() {
+        if (this.open) this.emitPlannerState()
+      },
+    },
+  },
+  mounted() {
+    this.loadPlanning({ reportError: false })
   },
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
     window.clearTimeout(this.wishSearchTimer)
     if (this.wishSearchAbortController) this.wishSearchAbortController.abort()
+    this.$emit("planner-state-change", { active: false, route: [] })
   },
   methods: {
     async toggleOpen() {
       this.open = !this.open
-      if (this.open && !this.wishes.length && !this.plan) {
+      if (this.open && !this.planningLoaded && !this.pending) {
         await this.loadPlanning()
         this.wishlistOpen = !this.plan
         this.planEditorOpen = !this.plan
       }
+    },
+    emitPlannerState() {
+      this.$emit("planner-state-change", {
+        active: this.open,
+        route: this.open ? this.plannerMapRoute : [],
+      })
     },
     openTripBuilder() {
       this.wishlistOpen = true
@@ -1259,6 +1375,7 @@ export default {
         this.wishDrafts = {}
         this.wishes.forEach(this.setWishDraft)
         this.emitRevision(state.revision)
+        this.planningLoaded = true
         if (preservePlanDraft) this.reconcilePlanDraft()
         else this.syncPlanForm()
         this.syncVisitDrafts()
@@ -1384,6 +1501,52 @@ export default {
       this.syncVisitDrafts()
       this.syncDirectionsPreferences()
     },
+    appendPlanStop(wish) {
+      this.error = ""
+      this.planEditorOpen = true
+      if (!wish?.wishId || wish.unavailable) {
+        this.error = "That destination is not available for this trip."
+        return false
+      }
+      if (this.planForm.stopWishIds.includes(wish.wishId)) {
+        this.announcement = `${wish.name} is already in this trip.`
+        return true
+      }
+      if (this.planForm.stopWishIds.length >= MAX_PLAN_DESTINATIONS) {
+        this.error = `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        return false
+      }
+      this.planForm.stopWishIds = [...this.planForm.stopWishIds, wish.wishId]
+      this.clearPreparedDirections()
+      this.announcement = `${wish.name} was added to the trip.`
+      return true
+    },
+    addCatalogPlaceToPlan(place) {
+      const existingWish = this.wishes.find(
+        wish => wish.placeId === place.placeId
+      )
+      if (existingWish) {
+        this.appendPlanStop(existingWish)
+        return
+      }
+      return this.mutate(
+        token =>
+          createMyAtlasWish({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            value: { placeId: place.placeId, priority: "normal" },
+            revision: this.plannerRevision,
+          }),
+        `${place.name} was added to your trip and private wishlist.`,
+        {
+          preservePlanDraft: true,
+          applyResult: result => {
+            this.rememberCreatedWish(result)
+            this.appendPlanStop(result?.wish)
+          },
+        }
+      )
+    },
     saveCatalogWish(place) {
       return this.mutate(
         token =>
@@ -1422,7 +1585,7 @@ export default {
         routeReadiness: "user-coordinate-review",
       })
     },
-    saveCustomWish() {
+    persistCustomWish({ addToPlan = false } = {}) {
       const place = this.customPlanLocation()
       if (!place) return
       return this.mutate(
@@ -1439,10 +1602,15 @@ export default {
             },
             revision: this.plannerRevision,
           }),
-        `${this.customName} was added to your private bucket list.`,
+        addToPlan
+          ? `${this.customName} was added to your trip and private wishlist.`
+          : `${this.customName} was added to your private bucket list.`,
         {
           preservePlanDraft: true,
-          applyResult: result => this.rememberCreatedWish(result),
+          applyResult: result => {
+            this.rememberCreatedWish(result)
+            if (addToPlan) this.appendPlanStop(result?.wish)
+          },
         }
       ).then(outcome => {
         if (outcome?.saved) {
@@ -1451,6 +1619,12 @@ export default {
           this.customLatitude = ""
         }
       })
+    },
+    saveCustomWish() {
+      return this.persistCustomWish()
+    },
+    addCustomWishToPlan() {
+      return this.persistCustomWish({ addToPlan: true })
     },
     useCustomPlanLocation(role) {
       const place = this.customPlanLocation()
@@ -1554,19 +1728,8 @@ export default {
       this.clearPreparedDirections()
     },
     savePlan() {
-      if (
-        !this.planForm.title ||
-        (!this.planForm.startWishId && !this.planForm.startDirect) ||
-        !this.planForm.stopWishIds.length
-      ) {
-        this.error = "Choose a title, start, and at least one destination."
-        return
-      }
-      if (
-        this.planForm.endMode === "selected-end" &&
-        !this.planForm.endDirect
-      ) {
-        this.error = "Choose a finish from search or custom coordinates."
+      if (this.planSaveRequirements.length) {
+        this.error = `Before saving: ${this.planSaveRequirements.join(" ")}`
         return
       }
       const value = {
@@ -2676,6 +2839,25 @@ export default {
 .planner-stop-order li > span {
   min-width: 0;
   overflow-wrap: anywhere;
+}
+.planner-save-requirements {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.24);
+  border-radius: 0.7rem;
+  color: #aabbb5;
+  background: rgba(230, 186, 104, 0.045);
+  font-size: 0.62rem;
+}
+.planner-save-requirements strong {
+  color: #efc975;
+}
+.planner-save-requirements ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding-left: 1rem;
 }
 .planner-handoffs {
   display: grid;

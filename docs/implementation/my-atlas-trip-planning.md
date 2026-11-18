@@ -20,11 +20,13 @@ superseded_by: []
 code_paths:
   - package.json
   - src/features/my-atlas/api/client.mjs
+  - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/catalog/placeSearchClient.mjs
   - src/features/my-atlas/planning/errors.mjs
   - src/features/my-atlas/planning/handoffs.mjs
+  - src/features/my-atlas/planning/mapProjection.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/views/roam/Privacy.vue
   - workers/my-atlas/src/account/service.mjs
@@ -43,6 +45,8 @@ verification:
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
     - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
+    - Planner-coherence tests verify direct Add to trip wiring, visible save requirements, eager planning reads, parent map-mode switching, start and stop and finish route projection, selected-finish omission until chosen, and shared-coordinate role preservation
+    - npm run my-atlas:test, npm run lint, npm run docs:audit, and npm run build passed for the local planner-coherence slice
     - Pull request 137 passed validation run 44347357469 and merged to develop as eecbc6590d47d526a376525c18e1e6399f95bbc2; develop validation run 44347715150 then succeeded
     - Pull request 138 passed with the validated develop head and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages workflow 44348107246 built and deployed main merge 61e5542885238c5816f5289a93c3bc20af2481ec successfully
@@ -113,6 +117,11 @@ Pages run 44348107246 deployed production merge
 417.972f66bc.js contains the exact release markers. No Worker deployment was
 required because this release changes no server or persistence contract.
 
+The current local coherence slice adds direct Add to trip behavior, visible
+save requirements, eager authenticated planning reads, and the private draft
+map overlay. It remains undeployed until it is promoted through the protected
+branches and verified in an authenticated owner session.
+
 ## Implemented and test verified
 
 - [x] Permanent owner account deletion route, explicit confirmation, revision
@@ -159,6 +168,12 @@ required because this release changes no server or persistence contract.
       plan start or selected finish without creating a wishlist record. The Worker
       resolves catalog IDs authoritatively and stores the same immutable snapshot
       shape used by wishlist-backed plan locations.
+- [x] Search results and manual coordinates expose a direct Add to trip path.
+      It creates or reuses the private Wish required by the existing Worker
+      contract, appends the returned Wish ID to the ordered draft immediately,
+      and keeps Save to wishlist as a distinct action. Save requirements remain
+      visible beside the disabled action, so a missing title, start, destination,
+      or selected finish cannot look like an ignored click.
 - [x] Direct start and finish selections now show an immediate receipt beside
       search, remain visible in the trip editor before any wishlist entry exists,
       and survive saving the first route destination. Planner mutations distinguish
@@ -223,6 +238,14 @@ required because this release changes no server or persistence contract.
       editing stays disabled until Refresh succeeds. Successful deletion clears
       the local plan immediately. The Worker, revision, and persistence
       contracts are unchanged.
+- [x] The authenticated component now loads planning state when it mounts and
+      names the current saved trip in its collapsed heading. Opening it replaces
+      visited-map pins with a private draft overlay on the existing MapLibre
+      instance. Start, ordered stops, and finish have distinct markers, shared
+      coordinates combine their roles, schematic connections strengthen the
+      route, and closing the planner restores the visited Atlas. The overlay is
+      browser-only and changes no Worker, storage, export, public projection,
+      analytics, or retention contract.
 
 ## Partial or not yet verified
 
@@ -268,9 +291,11 @@ required because this release changes no server or persistence contract.
       splitting without account writes or retention refresh. Compiled component
       evidence verifies zero horizontal overflow at 1,280 and 390 CSS pixels;
       authenticated and real-device acceptance remain open above.
-- [ ] Implement stable itinerary node IDs, persisted logistics, private map
-      overlay, neutral flight and stay helpers, and any commercial activation
-      only through their separately reviewed later phases.
+- [ ] Implement stable itinerary node IDs, persisted logistics, schema-backed
+      map occurrence identity, neutral flight and stay helpers, and any
+      commercial activation only through their separately reviewed later
+      phases. The current private overlay intentionally uses the unique-stop
+      version 1 draft and does not imply road geometry.
 
 ## Verified commands
 

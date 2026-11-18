@@ -20,6 +20,7 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/planning/handoffs.mjs
+  - src/features/my-atlas/planning/mapProjection.mjs
   - src/features/my-atlas/api/client.mjs
   - workers/my-atlas/src/planning/contracts.mjs
   - workers/my-atlas/src/planning/service.mjs
@@ -81,19 +82,29 @@ private-plan sharing is authorized by this proposal.
 
 ## Current implementation state
 
-Phases 1 and 2 are implemented, locally verified, and deployed. Phase 2 keeps point
-inclusion, the default Maps mode, per-pair overrides, and prepared links in
-browser component memory only. One retained point becomes a Maps place search.
-Compatible adjacent pairs are grouped by mode and segmented at the existing
-three-waypoint boundary. Fly and Ferry split those groups without creating a
-road route or provider link. No Worker, API, storage, retention, export, public
-projection, analytics, or commerce contract changed.
+Phases 1 and 2 are implemented, locally verified, and deployed. A subsequent
+local planner-coherence slice also implements the presentation portion of Phase
+4 against the version 1 unique-stop contract. Search can add a result directly
+to the ordered draft by creating or reusing its private Wish, save requirements
+remain visible, planning state loads when the component mounts, and the existing
+MapLibre instance switches between visited and private draft projections. The
+draft overlay shows start, ordered stops, finish, and schematic connections. It
+does not provide stable schema node identity or road geometry.
+
+Phase 2 keeps point inclusion, the default Maps mode, per-pair overrides, and
+prepared links in browser component memory only. One retained point becomes a
+Maps place search. Compatible adjacent pairs are grouped by mode and segmented
+at the existing three-waypoint boundary. Fly and Ferry split those groups
+without creating a road route or provider link. No Worker, API, storage,
+retention, export, public projection, analytics, or commerce contract changed.
 
 Pull requests 137 and 138 promoted the release through protected `develop` and
 `main`, and Pages run 44348107246 deployed production merge
 `61e5542885238c5816f5289a93c3bc20af2481ec`. Authenticated owner acceptance and
-real-device Google Maps checks remain external work. Phases 3 through 7 remain
-unimplemented.
+real-device Google Maps checks remain external work. Phase 3, the stable-node
+portion of Phase 4, and Phases 5 through 7 remain unimplemented. The local
+coherence slice is not described as deployed until its release is promoted and
+verified separately.
 
 ## Phase 1 contract
 
