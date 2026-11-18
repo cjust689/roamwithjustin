@@ -42,6 +42,7 @@ verification:
     - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
+    - Saved-plan source assertions verify the mutation response is rendered immediately, a partial companion read retains that confirmed snapshot, and a successful deletion clears it without waiting for refresh
     - docs/audits/assets/my-atlas-directions-phase2-desktop.png
     - docs/audits/assets/my-atlas-directions-phase2-mobile.png
     - Revision-conflict recovery tests verify request-reference copy while the client reloads the latest revision, preserves the itinerary draft where possible, and requires an explicit retry instead of replaying a mutation
@@ -204,6 +205,12 @@ remains.
       boundaries. Longer Maps groups retain the conservative three-waypoint
       segmentation. Custom coordinates remain previewed and confirmation
       gated. These controls do not write account state or refresh retention.
+- [x] A successful plan save or Keep response now displays its confirmed plan
+      snapshot before the companion planning read. If only that follow-up plan
+      read fails, the itinerary remains visible as `Saved, refresh needed` and
+      editing stays disabled until Refresh succeeds. Successful deletion clears
+      the local plan immediately. The Worker, revision, and persistence
+      contracts are unchanged.
 
 ## Partial or not yet verified
 

@@ -78,6 +78,30 @@ assert.match(plannerComponent, /planHasUnsavedChanges/)
 assert.match(plannerComponent, /v-model="directionsIncludedPointKeys"/)
 assert.match(plannerComponent, /v-model="directionsDefaultMode"/)
 assert.match(plannerComponent, /buildGoogleMapsRouteHandoffs\(this\.plan/)
+assert.match(
+  plannerComponent,
+  /if \(this\.planStateAvailable\) this\.plan = state\.plans\[0\] \|\| null/
+)
+assert.doesNotMatch(
+  plannerComponent,
+  /this\.plan = this\.planStateAvailable \? state\.plans\[0\] \|\| null : null/
+)
+assert.match(
+  plannerComponent,
+  /const refreshError = refresh\.ok \? refresh\.planError : refresh\.error/
+)
+assert.match(
+  plannerComponent,
+  /rememberSavedPlan\(result\) \{[\s\S]*?this\.plan = plan[\s\S]*?syncPlanForm\(\)/
+)
+assert.match(
+  plannerComponent,
+  /Your private trip was saved\.[\s\S]*?applyResult: result => this\.rememberSavedPlan\(result\)/
+)
+assert.match(
+  plannerComponent,
+  /The saved trip was deleted\.[\s\S]*?applyResult: \(\) => this\.forgetSavedPlan\(\)/
+)
 const localDirectionPreferenceMethods = plannerComponent.match(
   /clearPreparedDirections\(\) \{[\s\S]*?routePointLabel\(point\) \{/
 )?.[0]

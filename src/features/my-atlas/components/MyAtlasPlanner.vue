@@ -47,9 +47,17 @@
           </div>
           <span
             class="planner-save-state"
-            :class="{ 'is-dirty': planHasUnsavedChanges }"
+            :class="{
+              'is-dirty': planHasUnsavedChanges || !planStateAvailable,
+            }"
           >
-            {{ planHasUnsavedChanges ? "Unsaved changes" : "Saved" }}
+            {{
+              !planStateAvailable
+                ? "Saved, refresh needed"
+                : planHasUnsavedChanges
+                  ? "Unsaved changes"
+                  : "Saved"
+            }}
           </span>
         </div>
 
@@ -91,6 +99,7 @@
           <div class="planner-itinerary-actions">
             <button
               type="button"
+              :disabled="!planStateAvailable"
               :aria-expanded="String(planEditorOpen)"
               aria-controls="planner-trip-editor"
               @click="planEditorOpen = !planEditorOpen"
@@ -1246,7 +1255,7 @@ export default {
         this.planLoadError = state.planError
           ? formatMyAtlasPlanLoadError(state.planError)
           : ""
-        this.plan = this.planStateAvailable ? state.plans[0] || null : null
+        if (this.planStateAvailable) this.plan = state.plans[0] || null
         this.wishDrafts = {}
         this.wishes.forEach(this.setWishDraft)
         this.emitRevision(state.revision)
@@ -1254,7 +1263,7 @@ export default {
         else this.syncPlanForm()
         this.syncVisitDrafts()
         this.syncDirectionsPreferences()
-        return { ok: true }
+        return { ok: true, planError: state.planError }
       } catch (error) {
         if (reportError) this.error = this.errorMessage(error)
         return { ok: false, error }
@@ -1319,19 +1328,25 @@ export default {
           preservePlanDraft,
           reportError: false,
         })
-        if (!refresh.ok) {
-          this.error = formatMyAtlasPlannerRefreshError(refresh.error)
+        const refreshError = refresh.ok ? refresh.planError : refresh.error
+        if (refreshError) {
+          this.error = formatMyAtlasPlannerRefreshError(refreshError)
         }
-        return { saved: true, refreshed: refresh.ok, result }
+        return {
+          saved: true,
+          refreshed: refresh.ok && !refresh.planError,
+          result,
+        }
       } catch (error) {
         if (error?.code === "revision_conflict") {
           const refresh = await this.loadPlanning({
             preservePlanDraft: true,
             reportError: false,
           })
-          this.error = refresh.ok
-            ? formatMyAtlasPlannerConflictRecovered(error)
-            : this.errorMessage(error)
+          this.error =
+            refresh.ok && !refresh.planError
+              ? formatMyAtlasPlannerConflictRecovered(error)
+              : this.errorMessage(error)
         } else {
           this.error = this.errorMessage(error)
         }
@@ -1352,6 +1367,22 @@ export default {
         this.wishes = [...this.wishes, wish]
       }
       this.setWishDraft(wish)
+    },
+    rememberSavedPlan(result) {
+      const plan = result?.plan
+      if (!plan?.planId || !Array.isArray(plan.stops)) return
+      this.plan = plan
+      this.planStateAvailable = true
+      this.planLoadError = ""
+      this.syncPlanForm()
+      this.syncVisitDrafts()
+      this.syncDirectionsPreferences()
+    },
+    forgetSavedPlan() {
+      this.plan = null
+      this.syncPlanForm()
+      this.syncVisitDrafts()
+      this.syncDirectionsPreferences()
     },
     saveCatalogWish(place) {
       return this.mutate(
@@ -1563,7 +1594,10 @@ export default {
             value,
             revision: this.plannerRevision,
           }),
-        "Your private trip was saved."
+        "Your private trip was saved.",
+        {
+          applyResult: result => this.rememberSavedPlan(result),
+        }
       ).then(outcome => {
         if (outcome?.saved) this.planEditorOpen = false
         return outcome
@@ -1578,7 +1612,10 @@ export default {
             planId: this.plan.planId,
             revision: this.plannerRevision,
           }),
-        "Your trip was kept for another six months."
+        "Your trip was kept for another six months.",
+        {
+          applyResult: result => this.rememberSavedPlan(result),
+        }
       )
     },
     removePlan() {
@@ -1594,7 +1631,10 @@ export default {
             planId: this.plan.planId,
             revision: this.plannerRevision,
           }).then(revision => ({ revision })),
-        "The saved trip was deleted."
+        "The saved trip was deleted.",
+        {
+          applyResult: () => this.forgetSavedPlan(),
+        }
       )
     },
     async markVisited() {

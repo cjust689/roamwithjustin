@@ -289,6 +289,15 @@ configuration, catalog, revision, and invalid-response errors retain the safe
 Worker request reference and present recovery guidance without exposing account
 data.
 
+A successful plan create, replacement, or Keep response immediately becomes
+the browser's last confirmed plan snapshot before the companion read begins. If
+that follow-up trip-plan read fails while the bucket list still loads, the
+browser retains and displays the confirmed snapshot, labels it as needing a
+refresh, and disables plan editing until a complete read succeeds. A successful
+delete response clears the local plan immediately, so the same partial-read
+path cannot resurrect a deleted snapshot. This fallback changes no stored
+state and never substitutes for the Worker's revision checks.
+
 Wishlist and saved-trip reads are presented as separate availability domains.
 If the bucket-list pages load with a valid revision but the companion saved-trip
 request fails, the browser retains and renders the private destinations, their
