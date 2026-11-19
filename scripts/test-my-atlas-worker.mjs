@@ -4,6 +4,7 @@ import {
   createMyAtlasPin,
   createMyAtlasWish,
   deleteMyAtlasAccount,
+  deleteMyAtlasAccountWithRevisionRecovery,
   deleteMyAtlasPin,
   fetchMyAtlasImage,
   fetchMyAtlasAccountExport,
@@ -2367,6 +2368,69 @@ assert.equal(
   assert.equal(
     deletionHeaders.get("Idempotency-Key"),
     "33333333-3333-4333-8333-333333333333"
+  )
+
+  const recoveredDeletionCalls = []
+  let recoveredDeletionRevision = 0
+  const recoveredDeletion = await deleteMyAtlasAccountWithRevisionRecovery({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    revision: 5,
+    idempotencyKey: "34343434-3434-4434-8434-343434343434",
+    onRevision: revision => {
+      recoveredDeletionRevision = revision
+    },
+    fetchImpl: async (url, options) => {
+      recoveredDeletionCalls.push({
+        url,
+        method: options.method,
+        revision: options.headers.get("If-Match"),
+        idempotencyKey: options.headers.get("Idempotency-Key"),
+      })
+      if (options.method === "GET") {
+        return new Response(
+          JSON.stringify({
+            profile: {
+              handle: "owner",
+              displayName: "Owner",
+              public: false,
+              revision: 7,
+            },
+          }),
+          { status: 200, headers: { ETag: '"rev-7"' } }
+        )
+      }
+      if (recoveredDeletionCalls.length === 1) {
+        return new Response(
+          JSON.stringify({
+            error: "revision_conflict",
+            requestId: "delete-conflict-123",
+          }),
+          { status: 412 }
+        )
+      }
+      return new Response(
+        JSON.stringify({
+          deleted: true,
+          deletedAt: "2026-11-19T18:00:00.000Z",
+        }),
+        { status: 200 }
+      )
+    },
+  })
+  assert.equal(recoveredDeletion.deleted, true)
+  assert.equal(recoveredDeletionRevision, 7)
+  assert.deepEqual(
+    recoveredDeletionCalls.map(call => [call.method, call.revision]),
+    [
+      ["DELETE", '"rev-5"'],
+      ["GET", null],
+      ["DELETE", '"rev-7"'],
+    ]
+  )
+  assert.equal(
+    recoveredDeletionCalls[0].idempotencyKey,
+    recoveredDeletionCalls[2].idempotencyKey
   )
 }
 
