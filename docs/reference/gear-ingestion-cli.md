@@ -296,8 +296,9 @@ showing a camera does not mean that camera is visible in the photograph.
 - The record ingestor does not upload product images or other files to
   Cloudflare R2. `gear:upload` is the separate receipt-backed image command.
 - `gear:prepare` can create a reviewed local Gear image package and
-  `gear:upload` can verify or upload it, but the record ingestor does not
-  consume the receipt until a canonical publication adapter is implemented.
+  `gear:upload` can verify or upload it. `gear:publish-image` separately
+  verifies the receipt and updates one existing item plus the canonical Media
+  composition. The record ingestor never consumes image packages implicitly.
 - Uploading an image to R2 does not register Gear or Media by itself.
 - The CLI does not commit, push, or deploy. `--build` only validates the local
   production build.

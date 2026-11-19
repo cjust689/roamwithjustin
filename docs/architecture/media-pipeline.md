@@ -18,11 +18,13 @@ code_paths:
   - scripts/optimize-images.js
   - scripts/lib/image-normalization.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-image-publication.mjs
   - scripts/ingest-media.js
   - scripts/cull-media.js
   - scripts/lib/media-ingestion.js
   - scripts/lib/media-culling.js
   - scripts/upload-media.js
+  - scripts/publish-gear-image.mjs
   - scripts/editorial-publish.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
@@ -32,6 +34,7 @@ code_paths:
   - workers/media-upload/wrangler.jsonc
   - src/content/media/index.mjs
   - src/content/media/generated/records.json
+  - src/content/gear/generated/images.json
   - src/content/editorial/generated/records.json
   - src/content/selectors/media.mjs
   - src/content/selectors/projections.mjs
@@ -90,7 +93,10 @@ primitive is also reused by the local Gear image preparer. That command emits
 Gear-specific WebP derivatives and a manifest without creating Media records
 or Journey placements. The Gear upload adapter reuses the shared immutable
 transport, while the Journey and Gear validators retain their separate
-manifest contracts. `media:ingest` still accepts only Journey media.
+manifest contracts. After receipt and card review, `gear:publish-image`
+registers one stable Gear image asset and its responsive immutable renditions
+in a generated Gear-owned shard that the canonical Media registry composes.
+It creates no placement. `media:ingest` still accepts only Journey media.
 
 ## Publication and generated state
 
