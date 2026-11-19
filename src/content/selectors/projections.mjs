@@ -112,6 +112,71 @@ function journeyPreviewCopy(journey) {
   return journey.description || ""
 }
 
+function hasPublishedJourneyStory(journey) {
+  if (!journey?.slug || journey.publicationStatus !== "published") return false
+
+  const hasJourneyChapters = (journey.days || []).some(
+    day => day?.summary || day?.visits?.length
+  )
+  const hasPublishedExperience = getJourneyExperienceViews(journey.id).length > 0
+
+  return hasJourneyChapters || hasPublishedExperience
+}
+
+function journeyChapterViews(journey) {
+  return (journey?.days || []).map((day, index) => ({
+    id: `${journey.id}-chapter-${index + 1}`,
+    position: index + 1,
+    label: day.label,
+    summary: day.summary || "",
+    visitIds: (day.visits || [])
+      .map(entry => entry.visitId)
+      .filter(Boolean),
+  }))
+}
+
+function atlasStoryRelationships(journey, visit) {
+  if (!visit || !hasPublishedJourneyStory(journey)) {
+    return { storyChapters: [], storyExperiences: [] }
+  }
+
+  return {
+    // A Visit may appear in several Journey chapters. Keep every explicit
+    // occurrence instead of collapsing the relationship to a single day.
+    storyChapters: journeyChapterViews(journey)
+      .filter(chapter => chapter.visitIds.includes(visit.id))
+      .map(({ visitIds, ...chapter }) => chapter),
+    // Experiences are stop-specific only when their canonical record owns
+    // both the matching Visit and Place IDs.
+    storyExperiences: getJourneyExperienceViews(journey.id)
+      .filter(
+        experience =>
+          experience.visitId === visit.id &&
+          experience.placeId === visit.placeId
+      )
+      .map(experience => ({
+        id: `experience-${experience.slug}`,
+        title: experience.title,
+        summary: experience.summary,
+      })),
+  }
+}
+
+function atlasStoryLead(journey) {
+  if (!hasPublishedJourneyStory(journey)) return null
+
+  const hero = resolveMediaReference(journey.hero)
+
+  return {
+    title: journey.title,
+    excerpt: journey.description || "",
+    image: hero?.src || "",
+    imageAlt: hero?.alt || `${journey.title} story photograph`,
+    href: `/trips/${journey.slug}`,
+    publicStoryId: journey.id,
+  }
+}
+
 function publicTaxonomyLabel(value) {
   if (!value) return ""
   return value
@@ -242,6 +307,7 @@ export function buildTripViewModel(journey) {
   const gear = getJourneyGear(journey.id)
   const gearHighlights = journeyGearHighlights(journey, gear)
   const experiences = getJourneyExperienceViews(journey.id)
+  const chapters = journeyChapterViews(journey)
 
   return {
     id: journey.slug,
@@ -275,7 +341,9 @@ export function buildTripViewModel(journey) {
     commercialOffers: journeyCommercialOfferViews(journey),
     locations,
     itineraryMode: journey.itineraryMode || "days",
-    days: (journey.days || []).map(day => ({
+    days: (journey.days || []).map((day, index) => ({
+      id: chapters[index].id,
+      position: chapters[index].position,
       label: day.label,
       summary: day.summary,
       locations: (day.visits || []).map(entry => ({
@@ -329,10 +397,34 @@ export function addTripAtlasNavigation(trip, atlasNodes = []) {
       const exactNode = journeyNodes.find(
         node => node.placeId === location.canonicalId
       )
+      const storyChapters = trip.days
+        .filter(day =>
+          day.locations.some(entry => entry.ref === location.id)
+        )
+        .map(day => ({
+          id: day.id,
+          position: day.position,
+          label: day.label,
+          summary: day.summary || "",
+        }))
+      const storyExperiences = trip.experiences
+        .filter(
+          experience =>
+            experience.visitId === location.visitId &&
+            experience.placeId === location.canonicalId
+        )
+        .map(experience => ({
+          id: `experience-${experience.slug}`,
+          title: experience.title,
+          summary: experience.summary,
+        }))
       return {
         ...location,
         atlasExact: Boolean(exactNode),
+        atlasNodeId: exactNode?.id || "",
         atlasHref: exactNode ? `/atlas/${exactNode.id}` : atlasHref,
+        storyChapters,
+        storyExperiences,
       }
     }),
   }
@@ -357,10 +449,10 @@ function atlasActions(place, journey) {
       type: "external",
     })
   }
-  if (journey?.slug) {
+  if (hasPublishedJourneyStory(journey)) {
     actions.push({
       analyticsType: "story",
-      label: "Read the trip story",
+      label: "Explore the story",
       publicStoryId: journey.id,
       href: "/trips/" + journey.slug,
       type: "internal",
@@ -403,6 +495,7 @@ export function buildAtlasNodeView(presentation) {
   const useJourneyIdentity =
     isJourneyRoot || Boolean(presentation.useJourneyIdentity)
   const isInternalPreviewLabel = presentation.eyebrow === "Coming soon"
+  const storyRelationships = atlasStoryRelationships(journey, visit)
 
   return {
     id: presentation.id,
@@ -429,6 +522,9 @@ export function buildAtlasNodeView(presentation) {
     personalNote,
     image: hero?.src || "",
     media,
+    storyLead: isJourneyRoot ? atlasStoryLead(journey) : null,
+    storyTitle: hasPublishedJourneyStory(journey) ? journey.title : "",
+    ...storyRelationships,
     childIds: [],
     relatedIds: [...(presentation.relatedIds || [])],
     actions: atlasActions(place, journey),

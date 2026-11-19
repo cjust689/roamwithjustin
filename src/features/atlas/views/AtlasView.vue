@@ -1,6 +1,12 @@
 <!-- eslint-disable vue/no-deprecated-v-on-native-modifier -- Vue 2 RouterLink click tracking uses native listeners. -->
 <template>
-  <main class="atlas-page">
+  <main
+    class="atlas-page"
+    :class="{
+      'is-reading': storyMode,
+      'has-detail': currentNode && !storyMode,
+    }"
+  >
     <AtlasMap
       ref="atlasMap"
       :nodes="visibleNodes"
@@ -25,13 +31,21 @@
         @select="selectNodeFromBreadcrumbs"
       />
       <div class="atlas-tools">
-        <router-link
-          v-if="storyHref"
+        <button
+          v-if="storyAvailable && !storyMode"
           class="atlas-story-link"
-          :to="storyHref"
-          @click.native="trackStoryOpen('atlas_toolbar')"
+          type="button"
+          @click="openStory('atlas_toolbar')"
         >
           Story
+        </button>
+        <router-link
+          v-if="myAtlasEnabled"
+          class="atlas-my-atlas-link"
+          to="/my-atlas"
+          aria-label="Open My Atlas"
+        >
+          My Atlas
         </router-link>
         <button
           class="atlas-surprise"
@@ -58,7 +72,7 @@
     </header>
 
     <AtlasJourneyPlayer
-      v-if="guidedJourney"
+      v-if="guidedJourney && !storyMode"
       :journey="guidedJourney"
       :status="guidedStatus"
       :current-index="guidedIndex"
@@ -159,11 +173,14 @@
     </section>
 
     <AtlasDetailPanel
-      v-if="currentNode"
+      v-if="currentNode && !storyMode"
+      ref="detailPanel"
       :node="currentNode"
       :children="childNodes"
       :related="relatedNodes"
+      :adjacent-stops="adjacentStops"
       :is-favorite="favorites.includes(currentNode.id)"
+      :saved-count="favoriteNodes.length"
       :expand-request="mapPinExpandRequest"
       :collapse-request="detailCollapseRequest"
       :guided-presentation="
@@ -176,7 +193,20 @@
       @close="goToParent"
       @select="selectNodeFromDetail"
       @action="trackAtlasAction"
+      @open-story="openStory('detail_panel')"
+      @open-story-section="openStory('stop_story_preview', $event)"
       @toggle-favorite="toggleFavorite"
+    />
+
+    <AtlasStoryReader
+      v-if="currentNode && storyMode && storyTrip"
+      ref="storyReader"
+      :trip="storyTrip"
+      :initial-scroll="readerScrollPositions[currentNode.id] || 0"
+      :initial-section-id="readerSectionId"
+      @close="closeStory"
+      @scroll-position="rememberReaderScroll"
+      @show-stop="showStoryStop"
     />
 
     <div class="atlas-provider-note">
@@ -201,7 +231,9 @@ import AtlasDetailPanel from "../components/AtlasDetailPanel.vue"
 import AtlasJourneyPlayer from "../components/AtlasJourneyPlayer.vue"
 import AtlasMap from "../components/AtlasMap.vue"
 import AtlasSavedDrawer from "../components/AtlasSavedDrawer.vue"
+import AtlasStoryReader from "../components/AtlasStoryReader.vue"
 import { adSenseConfig } from "@/config/adsense.mjs"
+import { isMyAtlasGeographicProofEnabled } from "@/features/my-atlas/config/featureFlags.mjs"
 import { hasMapTilerKey } from "../config/mapConfig"
 import { getAtlasPinFocusCamera } from "../config/markerLayout.mjs"
 import { selectAtlasSurprisePlace } from "../config/surpriseSelection.mjs"
@@ -218,6 +250,7 @@ import {
   getAtlasNodes,
   getGuidedJourneyViewModel,
 } from "@/content/selectors/atlas"
+import { getTripViewModel } from "@/content/selectors/trips"
 import { loadAtlasState, saveAtlasState } from "../state/atlasStorage"
 import {
   consumeAtlasEntrySurface,
@@ -242,16 +275,19 @@ export default {
     AtlasJourneyPlayer,
     AtlasMap,
     AtlasSavedDrawer,
+    AtlasStoryReader,
   },
   props: {
     nodeId: {
       type: String,
       default: "",
     },
+    storyMode: Boolean,
   },
   data() {
     return {
       favorites: [],
+      myAtlasEnabled: isMyAtlasGeographicProofEnabled(process.env),
       recent: [],
       lastContext: null,
       cameras: {},
@@ -277,6 +313,10 @@ export default {
       guidedRemainingMs: 0,
       guidedVisitedStopIds: [],
       atlasAdNodeId: "",
+      detailScrollPositions: {},
+      readerEntryNodeId: "",
+      readerScrollPositions: {},
+      storyRobotsElement: null,
     }
   },
   computed: {
@@ -289,11 +329,27 @@ export default {
     guidedJourney() {
       return getGuidedJourneyViewModel(this.currentNode?.journeyId)
     },
-    storyHref() {
-      return (
-        this.currentNode?.actions.find(action => action.type === "internal")
-          ?.href || ""
-      )
+    storyTrip() {
+      const href = this.currentNode?.actions.find(
+        action => action.analyticsType === "story"
+      )?.href
+      const slug = href?.split("/").filter(Boolean).pop() || ""
+      return slug ? getTripViewModel(slug) : null
+    },
+    storyAvailable() {
+      return Boolean(this.storyTrip)
+    },
+    readerSectionId() {
+      const sectionId = this.$route.query.section
+      if (typeof sectionId !== "string" || !this.storyTrip) return ""
+
+      const validSectionIds = [
+        ...this.storyTrip.days.map(day => day.id),
+        ...this.storyTrip.experiences.map(
+          experience => `experience-${experience.slug}`
+        ),
+      ]
+      return validSectionIds.includes(sectionId) ? sectionId : ""
     },
     guidedIsActive() {
       return this.guidedStatus !== "idle"
@@ -322,6 +378,22 @@ export default {
     },
     relatedNodes() {
       return getAtlasNodes(this.currentNode?.relatedIds)
+    },
+    adjacentStops() {
+      const stops = this.guidedJourney?.stops || []
+      const currentIndex = stops.findIndex(
+        stop => stop.id === this.currentNode?.id
+      )
+      if (currentIndex < 0) return []
+
+      return [
+        currentIndex > 0
+          ? { direction: "Previous stop", node: stops[currentIndex - 1] }
+          : null,
+        currentIndex < stops.length - 1
+          ? { direction: "Next stop", node: stops[currentIndex + 1] }
+          : null,
+      ].filter(Boolean)
     },
     journeyNodes() {
       if (!this.currentNode) return []
@@ -389,6 +461,13 @@ export default {
         this.pendingMapPinNodeId = null
         this.requestMapPinExpansion()
       }
+      if (this.storyMode) this.handleStoryState()
+    },
+    storyMode(isReading, wasReading) {
+      this.handleStoryState()
+      if (!isReading && wasReading) {
+        this.$nextTick(this.restoreDetailContext)
+      }
     },
     guidedJourney(nextJourney, previousJourney) {
       if (
@@ -418,6 +497,7 @@ export default {
 
     this.stateLoaded = true
     this.handleRoute(this.nodeId)
+    this.handleStoryState()
     document.addEventListener("visibilitychange", this.handleVisibilityChange)
   },
   // This project uses Vue 2; its current lint preset incorrectly targets Vue 3.
@@ -428,6 +508,7 @@ export default {
       "visibilitychange",
       this.handleVisibilityChange
     )
+    this.setStoryRobots(false)
     document.title = this.previousTitle
   },
   methods: {
@@ -461,6 +542,131 @@ export default {
         public_story_id: this.currentNode.journeyId,
         surface,
       })
+    },
+    openStory(surface = "detail_panel", sectionId = "") {
+      if (!this.currentNode || !this.storyAvailable || this.storyMode) return
+
+      if (this.guidedIsActive) this.exitGuidedJourney(false)
+      this.$set(
+        this.detailScrollPositions,
+        this.currentNode.id,
+        this.$refs.detailPanel?.getScrollPosition() || 0
+      )
+      this.readerEntryNodeId = this.currentNode.id
+      if (sectionId) {
+        this.$set(this.readerScrollPositions, this.currentNode.id, 0)
+      }
+      this.trackStoryOpen(surface)
+      const query = { ...this.$route.query, story: "1" }
+      if (sectionId) query.section = sectionId
+      else delete query.section
+      this.$router.push({
+        name: "TravelAtlas",
+        params: { nodeId: this.currentNode.id },
+        query,
+      })
+    },
+    closeStory() {
+      if (!this.currentNode) return
+
+      this.rememberReaderScroll(
+        this.$refs.storyReader?.getScrollPosition() || 0
+      )
+      if (this.readerEntryNodeId === this.currentNode.id) {
+        this.$router.back()
+        return
+      }
+
+      const query = { ...this.$route.query }
+      delete query.story
+      delete query.section
+      this.$router.replace({
+        name: "TravelAtlas",
+        params: { nodeId: this.currentNode.id },
+        query,
+      })
+    },
+    rememberReaderScroll(position) {
+      if (!this.currentNode) return
+      this.$set(
+        this.readerScrollPositions,
+        this.currentNode.id,
+        Math.max(0, Number(position) || 0)
+      )
+    },
+    restoreDetailContext() {
+      if (!this.currentNode) return
+      this.$refs.detailPanel?.restoreScroll(
+        this.detailScrollPositions[this.currentNode.id] || 0
+      )
+      this.$nextTick(() => this.$refs.detailPanel?.focusStoryAction())
+    },
+    showStoryStop(location) {
+      if (!location?.atlasNodeId) return
+
+      this.rememberReaderScroll(
+        this.$refs.storyReader?.getScrollPosition() || 0
+      )
+      if (location.atlasNodeId === this.currentNode?.id) {
+        this.trackNodeOpen(location.atlasNodeId, "story_reader")
+        this.$router
+          .push({
+            name: "TravelAtlas",
+            params: { nodeId: location.atlasNodeId },
+          })
+          .then(() => this.requestMapPinExpansion())
+        return
+      }
+      this.pendingMapPinNodeId = location.atlasNodeId
+      this.selectNode(location.atlasNodeId, {
+        analyticsSurface: "story_reader",
+      })
+    },
+    handleStoryState() {
+      if (this.storyMode && (!this.currentNode || !this.storyAvailable)) {
+        const query = { ...this.$route.query }
+        delete query.story
+        delete query.section
+        this.$router.replace({
+          name: "TravelAtlas",
+          params: { nodeId: this.currentNode?.id || this.nodeId || undefined },
+          query,
+        })
+        return
+      }
+
+      if (
+        this.storyMode &&
+        this.$route.query.section &&
+        !this.readerSectionId
+      ) {
+        const query = { ...this.$route.query }
+        delete query.section
+        this.$router.replace({
+          name: "TravelAtlas",
+          params: { nodeId: this.currentNode?.id || this.nodeId || undefined },
+          query,
+        })
+        return
+      }
+
+      this.setStoryRobots(this.storyMode)
+      this.updateDocumentTitle()
+    },
+    setStoryRobots(isReading) {
+      if (!isReading) {
+        this.storyRobotsElement?.remove()
+        this.storyRobotsElement = null
+        return
+      }
+
+      if (this.storyRobotsElement) return
+      const element = document.createElement("meta")
+      element.name = "robots"
+      element.content = "noindex,follow"
+      element.dataset.atlasStoryReader = "true"
+      document.head.appendChild(element)
+      this.storyRobotsElement = element
     },
     trackAtlasAction(action) {
       if (action?.analyticsType === "maps") {
@@ -793,9 +999,12 @@ export default {
     },
     updateDocumentTitle() {
       const location = getAtlasNode(this.nodeId)
-      document.title = location
-        ? `${location.title} | Roam With Justin Atlas`
-        : "Interactive Travel Atlas | Roam With Justin"
+      document.title =
+        this.storyMode && this.storyTrip
+          ? `${this.storyTrip.name} story | Roam With Justin Atlas`
+          : location
+            ? `${location.title} | Roam With Justin Atlas`
+            : "Interactive Travel Atlas | Roam With Justin"
     },
   },
 }
@@ -1189,6 +1398,10 @@ export default {
     min-width: 1.35rem;
     height: 1.35rem;
     font-size: 0.7rem;
+  }
+
+  .atlas-page.has-detail .atlas-saved-trigger {
+    display: none;
   }
 
   .atlas-welcome {

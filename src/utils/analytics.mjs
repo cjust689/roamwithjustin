@@ -58,8 +58,6 @@ const controlledValues = Object.freeze({
   device_category: new Set(["desktop", "mobile"]),
   entry_surface: new Set([
     "atlas_direct",
-    "homepage_atlas_card",
-    "homepage_primary",
     "trip_story",
   ]),
   link_type: new Set(["affiliate", "booking", "maps", "phone", "website"]),

@@ -5,7 +5,7 @@ kind: proposal
 status: approved
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - monetization-analytics
   - monetization-analytics-plan
@@ -15,7 +15,7 @@ supersedes: []
 superseded_by: []
 code_paths:
   - src/utils/analytics.mjs
-  - src/views/roam/Home.vue
+  - src/router/index.js
   - src/features/atlas/views/AtlasView.vue
   - src/views/roam/RoamTripOverview.vue
 verification:
@@ -35,7 +35,7 @@ product market fit, or bot activity.
 The immediate order is:
 
 1. make public SPA page views reproducible and privacy bounded;
-2. make the public Atlas easier to discover from the homepage;
+2. make the public Atlas the direct root experience;
 3. measure only meaningful public Atlas and canonical partner actions;
 4. establish a stable baseline before changing acquisition or monetization;
 5. keep private My Atlas plans, future dates, notes, identities, and locations
@@ -50,7 +50,7 @@ The linked implementation record owns delivery. The first slice includes:
   is disabled in the GA4 data stream;
 - a production-host-only loader with local development disabled by default;
 - no GA4 page views or product events on `/my-atlas` routes;
-- an above-the-fold Atlas CTA and clear one-sentence promise;
+- direct root entry into Atlas without an intermediate landing page;
 - a small public event contract for Atlas entry, load, destination, Journey,
   story, Maps handoff, and canonical partner clicks;
 - canonical partner IDs instead of hostname-derived event names; and

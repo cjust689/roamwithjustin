@@ -358,7 +358,7 @@ The workflow is committed with the source, but GitHub must be told to use it:
 3. Under **Build and deployment**, change **Source** to **GitHub Actions**.
 4. Confirm that the custom domain is still `roamwithjustin.com`.
 5. Open the **Actions** tab and watch **Deploy to GitHub Pages** complete.
-6. Verify the homepage, a direct nested URL such as `/trips`, and the favicon.
+6. Verify the root Atlas, a direct nested URL such as `/trips`, and the favicon.
 7. After the Actions deployment is confirmed, archive or delete the legacy
    `pages` branch.
 
