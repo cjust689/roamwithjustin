@@ -60,6 +60,10 @@ verification:
     - develop validation run 44407203277
     - pull request 158 and validation run 44407591044
     - Pages run 44407947707 for production merge 58aa42a280775d6efeb150f9b6eec8339be1dcda
+    - pull requests 164 through 169 for the Gear image preparation, upload, and canonical publication slices
+    - validation runs 44449049950, 44449342350, 44451625808, and 44451891842
+    - Pages runs 44447213314, 44449597304, and 44452107546
+    - production image-workflow merges 98211b8fa5223ba2617755ef01ed75ea3fd36e35, 87ce942cf443101c1f7dcfff7fb23ae26c3c14c1, and f84cc34f8ba04ef09dd049385ca8f7eafc8f56a2
     - live https://roamwithjustin.com/gear rendered and bundle markers verified 2026-11-18
 ---
 
@@ -116,6 +120,30 @@ with an original image into a repeatable publishing workflow.
 - [x] Exact deployed bundle verification found the Amazon Associates disclosure,
   `partner_click`, and `gear_catalog` markers. This establishes deployed code,
   not an observed GA4 event or Amazon conversion.
+
+## Gear image workflow releases, 2026-11-18
+
+- [x] Pull requests 164 and 165 promoted Journey-independent image
+  preparation to production merge
+  `98211b8fa5223ba2617755ef01ed75ea3fd36e35`. Pages run 44447213314
+  succeeded.
+- [x] Pull request 166 passed validation run 44449049950 and merged to
+  `develop` as `6d24865f7dafc46e6b711ce0b4931de0477607c2`. Pull request 167 passed
+  validation run 44449342350 and promoted receipt-backed upload to production
+  merge `87ce942cf443101c1f7dcfff7fb23ae26c3c14c1`. Pages run 44449597304
+  succeeded.
+- [x] Pull request 168 passed validation run 44451625808 and merged to
+  `develop` as `4d315bf4301c4d9a24d39156ec69f6ca3c89c8c1`. Pull request 169 passed
+  validation run 44451891842 and promoted canonical image publication to
+  production merge `f84cc34f8ba04ef09dd049385ca8f7eafc8f56a2`. Pages run 44452107546
+  succeeded.
+- [x] Post-deployment verification received HTTP 200 from
+  `https://roamwithjustin.com/gear`, rendered the expected empty state, omitted
+  the retired workflow phrase, and found the Amazon Associates disclosure,
+  `partner_click`, and `gear_catalog` markers in deployed bundles.
+- [ ] The external Cloudflare upload Worker deployment and first real Gear
+  object upload remain owner-controlled and unverified. Pages deployment does
+  not deploy the Worker.
 
 ## First real product gate
 
