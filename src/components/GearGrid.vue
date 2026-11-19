@@ -15,6 +15,8 @@
           v-if="item.image"
           class="card-banner"
           :src="item.image"
+          :srcset="item.imageSrcset || null"
+          sizes="(min-width: 1100px) 340px, (min-width: 640px) 45vw, 100vw"
           :alt="item.imageAlt"
           loading="lazy"
         />

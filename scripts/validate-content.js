@@ -5,6 +5,7 @@ const { pathToFileURL } = require("url")
 const { validateGearRecords } = require("./lib/gear-ingestion.js")
 const { validateGeneratedRecords } = require("./lib/media-ingestion.js")
 const generatedMediaRecords = require("../src/content/media/generated/records.json")
+const generatedGearImageRecords = require("../src/content/gear/generated/images.json")
 
 const projectRoot = path.resolve(__dirname, "..")
 const errors = []
@@ -325,6 +326,7 @@ async function main() {
     gearSelectors,
     atlasModule,
     atlasRootsModule,
+    gearImagePublicationModule,
   ] = await Promise.all([
     importContent("src/content/contracts.mjs"),
     importContent("src/content/media/index.mjs"),
@@ -338,6 +340,7 @@ async function main() {
     importContent("src/content/selectors/gear.mjs"),
     importContent("src/content/atlas/presentation.mjs"),
     importContent("src/content/atlas/roots.mjs"),
+    importContent("scripts/lib/gear-image-publication.mjs"),
   ])
 
   const controlledKeys = new Map()
@@ -443,11 +446,35 @@ async function main() {
     console.warn("Gear validation warning: " + warning)
   )
 
+  const gearImageIds = new Set(
+    generatedGearImageRecords.assets.map(asset => asset.id)
+  )
+  const otherMedia = mediaModule.mediaRecords.filter(
+    asset => !gearImageIds.has(asset.id)
+  )
+  const gearImageValidation =
+    gearImagePublicationModule.validateGearImageRecords(
+      generatedGearImageRecords,
+      {
+        gearItems: gearModule.gearRecords,
+        otherMediaIds: otherMedia.map(asset => asset.id),
+        otherObjectKeys: otherMedia
+          .map(asset => asset.source?.objectKey)
+          .filter(Boolean),
+      }
+    )
+  gearImageValidation.errors.forEach(report)
+
+  const journeyGeneratedMediaIds = new Set(
+    generatedMediaRecords.assets.map(asset => asset.id)
+  )
   const generatedMediaValidation = validateGeneratedRecords(
     generatedMediaRecords,
     {
       journeys: journeyModule.journeyRecords,
-      staticMedia: mediaModule.mediaRecords.filter(asset => !asset.publication),
+      staticMedia: mediaModule.mediaRecords.filter(
+        asset => !journeyGeneratedMediaIds.has(asset.id)
+      ),
       experiences: experienceModule.experienceRecords,
     }
   )

@@ -15,12 +15,18 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/prepare-gear-image.mjs
+  - scripts/publish-gear-image.mjs
   - scripts/upload-media.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
   - scripts/test-gear-image-upload.mjs
+  - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
+  - src/content/gear/generated/images.json
+  - src/content/selectors/media.mjs
+  - src/components/GearGrid.vue
 verification:
   state: verified
   evidence:
@@ -120,6 +126,39 @@ Only complete remote verification creates
 objects and receipt already verified.
 
 The package and receipt are not canonical Gear or Media state. The external
-Worker deployment and first real Gear upload remain unverified. A later
-publication adapter must verify this receipt and update only the intended Gear
-image reference after card review.
+Worker deployment and first real Gear upload remain unverified.
+
+## Canonical publication dry run
+
+The target Gear item must already exist. Image publication cannot invent its
+product identity, use, notes, links, or verification state. Preview the exact
+receipt-backed update and the public rendition URLs:
+
+```bash
+npm run gear:publish-image -- --gear-id camera-accessory --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --receipt ./gear-ready/camera-accessory-<content-hash>/gear-r2-verification.json --dry-run
+```
+
+The command rechecks the manifest, every local WebP, the manifest checksum
+stored in the receipt, the complete receipt object set, and the existing
+canonical records. Dry run writes nothing.
+
+## Apply after card review
+
+After reviewing the product image, alternative text, public rendition URLs,
+and card context:
+
+```bash
+npm run gear:publish-image -- --gear-id camera-accessory --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --receipt ./gear-ready/camera-accessory-<content-hash>/gear-r2-verification.json --apply --approve-card --build
+```
+
+The transaction writes `src/content/gear/generated/images.json` and updates
+only that existing Gear item's `imageAssetId`. The Gear image shard is composed
+through the canonical Media registry. The 320, 640, and 960 pixel immutable
+objects form a responsive image set, while one stable Media ID survives future
+revisions. Repeating the same publication is unchanged.
+
+Replacing an existing image additionally requires `--replace-image`. A
+changed image advances the stable asset revision and retains its prior batch
+evidence. Content validation or optional build failure restores both generated
+files. The command never uploads, creates a product or usage claim, changes
+links or notes, removes old objects, commits, pushes, or deploys.

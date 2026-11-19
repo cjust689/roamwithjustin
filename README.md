@@ -339,8 +339,16 @@ npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/g
 ```
 
 The same command without `--dry-run` reuses the authenticated immutable media
-Worker and creates a checksum receipt. A prepared or uploaded package is not a
-published Gear record until the separate reviewed canonical update exists.
+Worker and creates a checksum receipt. After reviewing its rendition URLs and
+the existing product card, preview the canonical update:
+
+```bash
+npm run gear:publish-image -- --gear-id camera-accessory --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --receipt ./gear-ready/camera-accessory-<content-hash>/gear-r2-verification.json --dry-run
+```
+
+Apply requires `--apply --approve-card`; replacing an existing image also
+requires `--replace-image`. Image publication cannot create the product,
+Journey usage, notes, or merchant links.
 
 ## How production works
 
