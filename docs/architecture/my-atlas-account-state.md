@@ -95,6 +95,7 @@ verification:
     - Headless Chrome verified that a selected search result opens its destination editor directly below the search control and before the result list at desktop and 390 pixel mobile widths
     - Headless Chrome verified the feature-gated My Atlas Atlas-toolbar action at 320, 390, and 1280 pixel widths, with no horizontal overflow, navigation to /my-atlas, and Back navigation to the root Atlas
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width native year selectors, and zero horizontal overflow at 390 pixels while preserving expanded desktop controls
+    - Local headless Chrome on 2026-11-19 verified the official MapTiler SDK canvas and terrain control in Atlas and My Atlas, hidden desktop-only controls and zero horizontal overflow at 390 by 844, and one shared mtsid across all observed chargeable tile requests
     - Headless Chrome verified that My Atlas attribution begins as a compact info button and expands on activation without removing provider attribution
     - Headless Chrome verified the four-step pre-account walkthrough and first-account quick start at 390 pixel mobile and 1200 pixel desktop widths, including completion targets, persistent dismissal, and no horizontal overflow
     - Headless Chrome verified that overview pins use screen-distance clusters, cluster activation expands nearby destinations into standalone pins, and timeline marker anchors remain within one pixel of their projected coordinates at desktop and 390 pixel mobile widths
@@ -358,7 +359,7 @@ data.
 
 The browser eagerly reads wishlist and saved-plan state when the authenticated
 planner mounts. Its collapsed heading names the current saved plan when one
-exists. Opening the planner switches the existing MapLibre instance from the
+exists. Opening the planner switches the existing MapTiler SDK instance from the
 visited Atlas projection to a private in-memory route projection. That
 projection shows a distinct start, ordered stop numbers, and finish, combines
 roles that share one coordinate, fits the camera to the draft, and draws
@@ -545,15 +546,15 @@ is a visual sequence rather than a recorded travel route.
 
 At phone widths, owner and public views keep the statistics visible but place
 year filtering, playback, path visibility, and Story export inside an
-accessible map-controls disclosure that is collapsed by default. MapLibre's
-desktop navigation and terrain button stack is hidden at the same breakpoint,
+accessible map-controls disclosure that is collapsed by default. The MapTiler
+SDK navigation and terrain button stack is hidden at the same breakpoint,
 because the map retains touch pan and zoom gestures. Desktop layouts keep those
-controls expanded and retain the MapLibre button stack. The year selector is
+controls expanded and retain the SDK button stack. The year selector is
 explicitly restored from the site's legacy hidden-select rule in both layouts.
-Map provider attribution remains available through MapLibre's compact info
+Map provider attribution remains available through the SDK's compact info
 control, but My Atlas collapses its initially expanded attribution text as soon
 as provider data is available. Activating the info button expands the original
-MapLibre attribution control.
+SDK attribution control.
 
 The public phone header uses a compact two-column identity block. The handle
 and display name remain together on the left, while the place count becomes a
@@ -566,7 +567,7 @@ pins collapse into a count marker using the same screen-distance grouping model
 as the primary Atlas, with smaller phone spacing. The selected destination
 always remains precise. Activating a group frames its destinations, and zooming
 past the My Atlas overview threshold releases them into standalone pins. Marker
-elements retain MapLibre's absolute positioning so their bottom anchors remain
+elements retain the SDK's absolute positioning so their bottom anchors remain
 on the projected coordinates during playback. A compact year legend uses the
 same colors. Undated destinations remain visible and filterable but do not
 enter chronological playback. Curved map connections are a deterministic

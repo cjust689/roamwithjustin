@@ -71,7 +71,7 @@ open a neutral Expedia flight search.
    preserve v1 reads without writes, upgrade only on an explicit save, and
    retain v1 Mark Visited compatibility while adding stable occurrence input.
    Duplicate destinations remain rejected.
-4. **Private map overlay.** Reuse the existing MapLibre instance to show
+4. **Private map overlay.** Reuse the existing MapTiler SDK instance to show
    numbered private plan nodes and schematic connections. Do not add plan data
    to public pin projection or claim road geometry.
 5. **Neutral flight assistant.** Use explicit flight legs and copyable area
@@ -94,7 +94,7 @@ planner-coherence slice also implements the presentation portion of Phase 4
 against the version 1 unique-stop contract. Search can add a result directly
 to the ordered draft by creating or reusing its private Wish, save requirements
 remain visible, planning state loads when the component mounts, and the existing
-MapLibre instance switches between visited and private draft projections. The
+MapTiler SDK instance switches between visited and private draft projections. The
 draft overlay shows start, ordered stops, finish, and schematic connections. It
 does not provide stable schema node identity or road geometry.
 

@@ -165,7 +165,7 @@ A place or journey article can show a small, more discovery-oriented block after
 - See my firsthand hotel / activity notes if such editorial content exists.
 - Optional **Sponsored** campaign card after separate approval.
 
-Public editorial context is a better initial sponsor/ad surface than private Trip Plans. Keep paid creative away from photo lightboxes and MapLibre controls.
+Public editorial context is a better initial sponsor/ad surface than private Trip Plans. Keep paid creative away from photo lightboxes and MapTiler SDK controls.
 
 ## 5. Affiliate architecture: approved partner links, not URL guesswork
 
