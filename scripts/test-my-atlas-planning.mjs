@@ -5,6 +5,7 @@ import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
+  buildExpediaFlightSearchUrl,
   buildGoogleMapsDirectionsUrl,
   buildGoogleMapsDirectionsUrls,
   buildGoogleMapsRouteHandoffs,
@@ -12,6 +13,11 @@ import {
   buildPlanRoutePoints,
   routePairKey,
 } from "../src/features/my-atlas/planning/handoffs.mjs"
+import {
+  buildSharedTripUrl,
+  decodeSharedTrip,
+  encodeSharedTrip,
+} from "../src/features/my-atlas/planning/sharedTrip.mjs"
 import {
   normalizeCreatePlan,
   normalizeMarkPlanVisited,
@@ -100,6 +106,11 @@ assert.doesNotMatch(plannerComponent, /Private trip planning beta/)
 assert.match(plannerComponent, /aria-controls="planner-directions-panel"/)
 assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
 assert.match(plannerComponent, /planHasUnsavedChanges/)
+assert.match(plannerComponent, /Copy read only trip link/)
+assert.match(plannerComponent, /place names, and map\s+coordinates/)
+assert.match(plannerComponent, /Include possible stops and activities/)
+assert.match(plannerComponent, /Search this flight on Expedia/)
+assert.match(plannerComponent, /@media \(min-width: 721px\)/)
 assert.match(plannerComponent, /v-model="directionsIncludedPointKeys"/)
 assert.match(plannerComponent, /v-model="directionsDefaultMode"/)
 assert.match(plannerComponent, />\s*Add to trip\s*</)
@@ -115,6 +126,7 @@ assert.match(mapComponent, /showPlannerOverview/)
 assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)
+assert.match(ownerView, /class="my-atlas-profile-trigger"/)
 assert.match(ownerView, /class="my-atlas-tools my-atlas-workflow-section"/)
 assert.match(ownerView, />\s*Share and export\s*</)
 assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
@@ -148,7 +160,7 @@ assert.match(
 )
 assert.match(
   ownerView,
-  /\.my-atlas-account \{[\s\S]*height: auto;[\s\S]*background: transparent;[\s\S]*box-shadow: none;[\s\S]*line-height: 1\.2;/
+  /\.my-atlas-account\.is-menu \{[\s\S]*position: absolute;[\s\S]*right: 1\.25rem;[\s\S]*width: min\(22rem, calc\(100% - 2\.5rem\)\);/
 )
 assert.match(
   ownerView,
@@ -310,6 +322,50 @@ const coordinatePrompt = buildAiPlanningPrompt(plan, {
   includeCoordinates: true,
 })
 assert.match(coordinatePrompt, /38\.616,-109\.607/)
+assert.match(prompt, /Do not add stops or activities unless I ask/)
+assert.match(
+  buildAiPlanningPrompt(plan, { includeNearbySuggestions: true }),
+  /optional stops and activities near this route/
+)
+
+const flightUrl = new URL(
+  buildExpediaFlightSearchUrl({
+    origin: "Atlanta, Georgia, United States",
+    destination: "Moab, Utah, United States",
+    departureDate: "2027-04-18",
+  })
+)
+assert.equal(
+  flightUrl.pathname,
+  "/go/flight/search/oneway/2027-04-18/2027-04-18"
+)
+assert.equal(flightUrl.searchParams.get("FromAirport"), "Atlanta, Georgia, United States")
+assert.equal(flightUrl.searchParams.get("ToAirport"), "Moab, Utah, United States")
+assert.throws(
+  () =>
+    buildExpediaFlightSearchUrl({
+      origin: "Atlanta",
+      destination: "Moab",
+      departureDate: "",
+    }),
+  error => error.code === "flight_date_required"
+)
+
+const encodedTrip = encodeSharedTrip({
+  ...plan,
+  title: "Utah route",
+  desiredYear: 2027,
+  note: "Private planning note",
+})
+const decodedTrip = decodeSharedTrip(encodedTrip)
+assert.equal(decodedTrip.title, "Utah route")
+assert.equal(decodedTrip.stops.length, plan.stops.length)
+assert.equal("note" in decodedTrip, false)
+assert.equal("placeId" in decodedTrip.stops[0], false)
+assert.match(
+  buildSharedTripUrl(plan, "https://roamwithjustin.com/"),
+  /^https:\/\/roamwithjustin\.com\/my-atlas\/trip\//
+)
 
 const longerPlan = {
   ...plan,

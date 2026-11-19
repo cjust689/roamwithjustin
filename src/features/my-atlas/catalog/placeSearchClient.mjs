@@ -41,7 +41,9 @@ function isCanonicalPlace(record) {
   return (
     record &&
     typeof record.placeId === "string" &&
-    /^(?:iso-country:[A-Z]{2}|geonames:\d+)$/.test(record.placeId) &&
+    /^(?:iso-country:[A-Z]{2}|geonames:\d+|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+)$/.test(
+      record.placeId
+    ) &&
     ["country", "city", "spot"].includes(record.placeType) &&
     typeof record.name === "string" &&
     record.name.length > 0 &&

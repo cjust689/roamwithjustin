@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - my-atlas-authentication
   - my-atlas-account-state
@@ -29,6 +29,8 @@ code_paths:
   - scripts/my-atlas/build-place-catalog.mjs
   - scripts/my-atlas/data/curated-spots.json
   - scripts/my-atlas/data/reviewed-cities.json
+  - scripts/my-atlas/data/north-america-national-parks.json
+  - scripts/my-atlas/import-north-america-national-parks.mjs
   - scripts/my-atlas/build-worker-place-catalog.mjs
   - scripts/my-atlas/local-place-search-server.mjs
   - scripts/my-atlas/lib/build-place-catalog.mjs
@@ -45,6 +47,9 @@ verification:
   state: verified
   evidence:
     - npm run my-atlas:test
+    - Catalog tests verify official park identity, deterministic catalog inclusion, and bundled Acadia, Banff, and Cabo Pulmo search results
+    - The generated 2026-11-19 source contains 188 official records from NPS, Parks Canada, and CONANP, split as 63, 46, and 79 source records
+    - The local full catalog build geonames-2026-11-19-north-america-parks produced 237635 records and deterministic 4096 resolution plus 4096 search shards; it is not activated in staging
     - npm run build
     - npx eslint "src/features/my-atlas/**/*.{js,mjs,vue}" src/router/index.js "scripts/my-atlas/**/*.mjs" scripts/test-my-atlas-place-catalog.mjs
     - node --check scripts/serve.js && node --check scripts/my-atlas/local-place-search-server.mjs
@@ -173,6 +178,16 @@ and result label. This presents Krka as a National park even though GeoNames
 codes it as a nature reserve, and Mount Rushmore as a Monument even though
 GeoNames codes it as a mountain.
 
+The importer also reads the generated
+`scripts/my-atlas/data/north-america-national-parks.json` source. Its records
+come from the NPS API, the Parks Canada public ArcGIS service, and the CONANP
+public WFS. The source snapshot contains 63 NPS records representing the
+current 64 named United States national parks because Sequoia and Kings Canyon
+share one NPS record, 46 Canadian national parks and national park reserves,
+and 79 Mexican national parks. Existing curated GeoNames park identities stay
+available for saved pins. Exact country and normalized name matches suppress a
+duplicate official row in new search.
+
 The separate reviewed `scripts/my-atlas/data/reviewed-cities.json` source adds
 specific useful towns that fall below the `cities500` population boundary.
 Each entry must still be a supported GeoNames populated-place feature and pass
@@ -185,6 +200,11 @@ geonames:3621138. Curated spots use the same stable GeoNames identity, for
 example Yellowstone National Park is geonames:5843642. MapLibre renders the
 coordinates associated with those catalog records, but map tiles never provide
 or replace a stored place ID.
+
+Official park records use provider qualified IDs such as
+`park:us:nps:acad`, `park:ca:pca:100092`, and
+`park:mx:conanp:anp00103124`. The browser, Worker route, account contract, and
+catalog store validate the same bounded ID families.
 
 Custom pins use a server-generated `custom:` ID derived from the authenticated
 owner plus the normalized name and coordinates. Repeating that exact entry for
@@ -216,13 +236,14 @@ excluded from new search by default.
 
 The bundled fallback proof catalog contains 250 current GeoNames country or
 territory records, the current GeoNames records for Uvita, Costa Rica, Paris,
-France, Paris, Texas, Torrey, and Hanksville, plus 23 reviewed spots across six
-continents. It is a development fallback, not a worldwide production catalog.
+France, Paris, Texas, Torrey, and Hanksville, plus 23 reviewed spots and 184
+nonduplicate official park records. It is a development fallback, not a
+worldwide production catalog.
 
 When `VUE_APP_MY_ATLAS_PLACE_SEARCH_URL` is configured, the browser issues a
 bounded search request instead. It accepts at most ten records and rejects
-responses that do not contain a canonical ISO country ID or numeric GeoNames
-city or spot ID, supported place type, name, and valid coordinates. Spot
+responses that do not contain a canonical ISO country ID, numeric GeoNames ID,
+or supported official park ID, plus a supported place type, name, and valid coordinates. Spot
 records must also carry a bounded category and human-readable kind. Returned
 canonical records are held in component memory so they can pass the same
 draft-pin validation as bundled records.
@@ -355,12 +376,25 @@ The staging Worker now resolves
 `geonames-2026-11-17-reviewed-spots` releases remain intact for reversal. The
 editorial media bucket and uploader remain outside this boundary.
 
+The locally generated successor
+`geonames-2026-11-19-north-america-parks` contains 237,635 total records,
+including 207 spots and 11,607 append-preserved deprecated records. Its 4,096
+resolution and 4,096 search shards total 211,042,675 compressed bytes. This
+artifact is ignored under `.state/my-atlas/worker-catalog-north-america-parks`.
+It has not been uploaded or activated. The staging catalog therefore remains
+the reviewed Utah catalog described above until the compatible Worker code and
+immutable artifact are published together.
+
 ## License boundary
 
 GeoNames states that its downloadable data is CC BY 4.0 and permits commercial
 use with attribution. The proof displays GeoNames attribution independently
 from MapLibre and the configured tile provider. The imported data remains
 subject to GeoNames accuracy and completeness limitations.
+
+The owner view separately attributes NPS, Parks Canada, and CONANP for the
+official park rows. The generated source retains each provider record ID,
+source URL, and retrieval date.
 
 Custom-pin names and positions are supplied by the Atlas owner rather than
 GeoNames. The owner and public views identify that distinction in their

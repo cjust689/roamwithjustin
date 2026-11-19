@@ -14,6 +14,11 @@ const defaultReviewedCitySource = path.join(
   "data",
   "reviewed-cities.json"
 )
+const defaultOfficialParkSource = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "data",
+  "north-america-national-parks.json"
+)
 
 function usage() {
   return [
@@ -30,6 +35,7 @@ function usage() {
     "  --include-place-id <GeoNames ID> (repeatable or comma separated)",
     "  --spot-source <curated-spots.json>",
     "  --reviewed-city-source <reviewed-cities.json>",
+    "  --official-park-source <north-america-national-parks.json>",
   ].join("\n")
 }
 
@@ -47,6 +53,8 @@ function parseArgs(argv) {
     else if (argument === "--spot-source") options.spotSourceFile = value
     else if (argument === "--reviewed-city-source")
       options.reviewedCitySourceFile = value
+    else if (argument === "--official-park-source")
+      options.officialParkSourceFile = value
     else if (argument === "--include-place-id") {
       options.includePlaceIds.push(
         ...String(value || "")
@@ -76,6 +84,9 @@ try {
     spotSourceFile: path.resolve(options.spotSourceFile || defaultSpotSource),
     reviewedCitySourceFile: path.resolve(
       options.reviewedCitySourceFile || defaultReviewedCitySource
+    ),
+    officialParkSourceFile: path.resolve(
+      options.officialParkSourceFile || defaultOfficialParkSource
     ),
   })
   const output = path.resolve(options.output)

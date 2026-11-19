@@ -5,7 +5,7 @@ kind: proposal
 status: approved
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
@@ -21,14 +21,19 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasMap.vue
   - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/planning/mapProjection.mjs
+  - src/features/my-atlas/planning/sharedTrip.mjs
+  - src/features/my-atlas/views/MyAtlasSharedTripView.vue
   - src/features/my-atlas/api/client.mjs
   - workers/my-atlas/src/planning/contracts.mjs
   - workers/my-atlas/src/planning/service.mjs
   - workers/my-atlas/test/planning.test.mjs
   - scripts/test-my-atlas-planning.mjs
 verification:
-  state: unverified
-  evidence: []
+  state: verified
+  evidence:
+    - npm run my-atlas:test
+    - npm run lint
+    - Client tests verify read only snapshot privacy, nearby suggestion prompts, dated Expedia link parameters, and route mutation recovery
 ---
 
 # My Atlas trip planner redesign and travel handoffs
@@ -46,9 +51,10 @@ retention, export, deletion, Mark Visited, account-global revisions,
 idempotency, and the private versus public projection boundary. Loading an
 existing plan must never migrate it or write account state.
 
-Private planner routes remain analytics-free. No affiliate offer, AdSense
-placement, tracking pixel, live booking inventory, paid routing request, or
-private-plan sharing is authorized by this proposal.
+Private planner routes remain analytics-free. No AdSense placement, tracking
+pixel, live booking inventory, or paid routing request is authorized. The
+owner may now create a client-only read only route snapshot and explicitly
+open a neutral Expedia flight search.
 
 ## Delivery phases
 
@@ -70,8 +76,9 @@ private-plan sharing is authorized by this proposal.
    to public pin projection or claim road geometry.
 5. **Neutral flight assistant.** Use explicit flight legs and copyable area
    details. Let an ordinary provider search choose airports until a separately
-   reviewed airport source exists. Do not invent airport codes or deep-link
-   parameters.
+   reviewed airport source exists. Do not invent airport codes. A dated Expedia
+   handoff may use the provider's documented flight deeplink when the sent
+   fields are previewed.
 6. **Neutral stay planning.** Persist overnight, day-visit, undecided, and
    optional user-selected base choices by stable stop node. Use copyable
    details or ordinary provider links without prices or availability claims.
@@ -105,7 +112,15 @@ real-device Google Maps checks remain external work. Pull requests 141 and 142
 then promoted the coherence slice, and Pages run 44359227708 deployed main merge
 `01c8a83e54b14f4cec3a47ac26b82b9804dad62f`. Live chunks 944.dfa848dd.js and
 327.9488c543.js contain its exact interface markers. Phase 3, the stable-node
-portion of Phase 4, and Phases 5 through 7 remain unimplemented.
+portion of Phase 4, Phase 6, and Phase 7 remain unimplemented. A bounded
+portion of Phase 5 is now implemented. Explicit Fly boundaries accept a
+departure date and open Expedia with the two displayed place names and date.
+The handoff has no price, availability, airport, tracking, or commission claim.
+
+The owner can also copy a client-only read only trip link. Its versioned URL
+snapshot excludes private notes, plan and Wish IDs, account identity, and live
+location. The recipient page performs no owner API request and cannot edit the
+source plan.
 
 ## Phase 1 contract
 
@@ -140,10 +155,17 @@ notes, plan IDs, wish IDs, account identifiers, custom coordinates, or entire
 itineraries to analytics or providers. Every external handoff previews the
 user-selected information and requires a click.
 
-Existing Expedia offers are approved only for their current public Journey
-surfaces. They cannot be moved into My Atlas without new surface approval.
+The My Atlas Expedia handoff is a neutral ordinary link with no campaign or
+affiliate parameter. Existing public Journey campaign settings are not reused.
 `partner_click`, GA4, AdSense, and third-party widgets stay disabled on private
 planner routes unless separately authorized and documented.
+
+Official Expedia documentation supports a flight deeplink with trip type,
+dates, and origin and destination parameters. Its Travel Redirect search API
+requires partner access. Official Skyscanner referral links require an Impact
+media partner ID for attribution and airport or city codes for reliable flight
+prefill. My Atlas therefore implements the neutral Expedia link only and does
+not invent a Skyscanner integration.
 
 ## Verification still required
 
@@ -152,5 +174,7 @@ planner routes unless separately authorized and documented.
 - Keyboard and screen-reader review of collapsed controls, reordering, point
   inclusion, and mode selection.
 - Real-device Google Maps verification on Android, iOS, and desktop.
+- Desktop and phone verification that Expedia accepts the displayed place
+  names and departure date, with graceful provider-side airport selection.
 - Each later phase's API, export, deletion, retention, isolation, and public
   projection regression matrix before that phase can ship.

@@ -1,7 +1,8 @@
 const MANIFEST_MAX_BYTES = 256 * 1024
 const SHARD_MAX_COMPRESSED_BYTES = 16 * 1024 * 1024
 const SHARD_MAX_DECOMPRESSED_BYTES = 64 * 1024 * 1024
-const PLACE_ID_PATTERN = /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11})$/
+const PLACE_ID_PATTERN =
+  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+)$/
 
 const combiningMarks = /[\u0300-\u036f]/g
 const punctuation = /[^\p{L}\p{N}]+/gu

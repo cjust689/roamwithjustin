@@ -741,11 +741,7 @@ describe("private wishlist and trip planning", () => {
       error: "registration_not_found",
     })
     await runInDurableObject(registry(), (_instance, state) => {
-      expect(state.storage.kv.get("handle:planner-owner")).toEqual({
-        schemaVersion: 1,
-        state: "deleted",
-        deletedAt: NOW,
-      })
+      expect(state.storage.kv.get("handle:planner-owner")).toBeUndefined()
     })
 
     const user = env.MY_ATLAS_USERS.getByName(USER_ID)
@@ -762,5 +758,37 @@ describe("private wishlist and trip planning", () => {
         now: NOW,
       })
     ).toMatchObject({ deleted: true, idempotent: true })
+
+    const replacementInvite = "replacement_invitation_1234567890"
+    await registry().issueInvitation({
+      digest: await hashInviteCode(replacementInvite, PEPPER),
+      maxUses: 1,
+      createdAt: NOW,
+      expiresAt: "2026-11-18T15:00:00.000Z",
+    })
+    const replacement = await registerBetaAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input: normalizeRegistrationInput(
+        {
+          inviteCode: replacementInvite,
+          handle: "planner-owner",
+          displayName: "Planner Owner Again",
+          turnstileToken: "test-turnstile-token",
+          acceptTerms: true,
+          acceptPrivacy: true,
+        },
+        "83838383-8383-4383-8383-838383838383"
+      ),
+      now: NOW,
+      turnstileVerifier: async () => true,
+      userIdFactory: () => "usr_eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+    })
+    expect(replacement).toMatchObject({
+      profile: {
+        userId: "usr_eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+        handle: "planner-owner",
+      },
+    })
   })
 })

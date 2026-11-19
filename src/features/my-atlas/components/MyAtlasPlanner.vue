@@ -119,7 +119,14 @@
             <button type="button" @click="focusRouteBuilder">
               Change route
             </button>
+            <button type="button" @click="copySharedTripLink">
+              Copy read only trip link
+            </button>
           </div>
+          <small class="planner-share-disclosure">
+            The link includes this route order, place names, and map
+            coordinates. It excludes private notes and account details.
+          </small>
 
           <div class="planner-next-actions">
             <div>
@@ -279,6 +286,31 @@
                     This leg is kept separate from Google Maps directions.
                     Search for this flight or ferry separately.
                   </span>
+                  <template v-if="handoff.mode === 'fly'">
+                    <label>
+                      <span>Departure date</span>
+                      <input
+                        :value="flightDates[handoff.pairKey] || ''"
+                        type="date"
+                        @input="
+                          setFlightDate(handoff.pairKey, $event.target.value)
+                        "
+                      />
+                    </label>
+                    <a
+                      v-if="flightHandoffUrl(handoff)"
+                      :href="flightHandoffUrl(handoff)"
+                      target="_blank"
+                      rel="noopener noreferrer sponsored"
+                    >
+                      Search this flight on Expedia
+                    </a>
+                    <small>
+                      Expedia receives the two place names and departure date
+                      only after you open the search. Prices and availability
+                      are not checked by My Atlas.
+                    </small>
+                  </template>
                 </div>
               </template>
             </div>
@@ -310,6 +342,10 @@
             <label>
               <input v-model="includePromptCoordinates" type="checkbox" />
               <span>Include exact coordinates in this AI prompt</span>
+            </label>
+            <label>
+              <input v-model="includePromptSuggestions" type="checkbox" />
+              <span>Include possible stops and activities near the route</span>
             </label>
             <button type="button" @click="previewPrompt">
               Preview AI planning prompt
@@ -1034,10 +1070,12 @@ import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
+  buildExpediaFlightSearchUrl,
   buildGoogleMapsRouteHandoffs,
   buildPlanRoutePairs,
   buildPlanRoutePoints,
 } from "../planning/handoffs.mjs"
+import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import {
   formatMyAtlasPlanLoadError,
   formatMyAtlasPlannerError,
@@ -1101,12 +1139,14 @@ export default {
         endDirect: null,
       },
       includePromptCoordinates: false,
+      includePromptSuggestions: false,
       promptPreview: "",
       directionsDefaultMode: "driving",
       directionsIncludedPointKeys: [],
       directionsPairModes: {},
       directionsPlanKey: "",
       routeHandoffs: [],
+      flightDates: {},
       visitDrafts: {},
       monthNames: [
         "January",
@@ -2026,6 +2066,20 @@ export default {
     clearPreparedDirections() {
       this.routeHandoffs = []
     },
+    setFlightDate(pairKey, value) {
+      this.$set(this.flightDates, pairKey, value)
+    },
+    flightHandoffUrl(handoff) {
+      try {
+        return buildExpediaFlightSearchUrl({
+          origin: handoff.origin,
+          destination: handoff.destination,
+          departureDate: this.flightDates[handoff.pairKey],
+        })
+      } catch {
+        return ""
+      }
+    },
     setDirectionsPairMode(pairKey, mode) {
       if (mode) this.$set(this.directionsPairModes, pairKey, mode)
       else this.$delete(this.directionsPairModes, pairKey)
@@ -2120,9 +2174,20 @@ export default {
       try {
         this.promptPreview = buildAiPlanningPrompt(this.plan, {
           includeCoordinates: this.includePromptCoordinates,
+          includeNearbySuggestions: this.includePromptSuggestions,
         })
       } catch (error) {
         this.error = "The planning prompt could not be prepared."
+      }
+    },
+    async copySharedTripLink() {
+      try {
+        const url = buildSharedTripUrl(this.plan)
+        await navigator.clipboard.writeText(url)
+        this.announcement = "The read only trip link was copied."
+      } catch {
+        this.error =
+          "The browser could not copy this trip link. Retry after saving the trip."
       }
     },
     async copyPrompt() {
@@ -2587,6 +2652,39 @@ export default {
   color: #91a9ae;
   font-size: 0.57rem;
   line-height: 1.45;
+}
+.planner-route-boundary label {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+}
+.planner-route-boundary input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.6rem;
+  color: #edf7f2;
+  background: #111f22;
+  font: inherit;
+}
+.planner-route-boundary a {
+  margin-top: 0.55rem;
+}
+.planner-route-boundary small {
+  display: block;
+  margin-top: 0.55rem;
+  color: #8fa29c;
+  font-size: 0.58rem;
+  line-height: 1.5;
+}
+.planner-share-disclosure {
+  display: block;
+  margin-top: 0.55rem;
+  color: #91a49e;
+  font-size: 0.62rem;
+  line-height: 1.5;
 }
 .planner-itinerary-empty button {
   justify-self: start;
@@ -3307,6 +3405,16 @@ export default {
   height: 1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+}
+@media (min-width: 721px) {
+  .planner-itinerary,
+  .planner-directions-points,
+  .planner-wishes,
+  .planner-block fieldset,
+  .planner-stop-order {
+    max-height: none;
+    overflow: visible;
+  }
 }
 @media (max-width: 480px) {
   .planner-error-block {

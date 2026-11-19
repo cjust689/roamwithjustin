@@ -427,7 +427,7 @@ export async function handleRequest(
 
   const isPlaceSearch = url.pathname === "/v1/places/search"
   const placeResolveMatch = url.pathname.match(
-    /^\/v1\/places\/((?:iso-country:[A-Z]{2})|(?:geonames:[1-9][0-9]{0,11}))$/
+    /^\/v1\/places\/((?:iso-country:[A-Z]{2})|(?:geonames:[1-9][0-9]{0,11})|(?:park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+))$/
   )
   if (isPlaceSearch || placeResolveMatch) {
     if (request.method !== "GET") {

@@ -19,7 +19,7 @@ const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const WISH_ID_PATTERN = /^wish_[a-f0-9]{24}$/
 const PLAN_ID_PATTERN = /^plan_[a-f0-9]{24}$/
 const PLACE_ID_PATTERN =
-  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|custom:[a-f0-9]{24})$/
+  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+|custom:[a-f0-9]{24})$/
 
 function validIsoDate(value) {
   return (
@@ -716,11 +716,7 @@ export class RegistrationRegistryDurableObject extends DurableObject {
       }
 
       this.ctx.storage.kv.delete(identityStorageKey)
-      this.ctx.storage.kv.put(handleStorageKey, {
-        schemaVersion: 1,
-        state: "deleted",
-        deletedAt: command.now,
-      })
+      this.ctx.storage.kv.delete(handleStorageKey)
       this.ctx.storage.kv.delete(registrationStorageKey)
       this.ctx.storage.kv.put(deletionKey, {
         schemaVersion: 1,
