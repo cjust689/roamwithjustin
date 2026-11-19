@@ -31,6 +31,11 @@
             : "Add a start or destination to begin"
         }}
       </span>
+      <span v-if="plannerRoute.length" class="my-atlas-planner-map-key">
+        <i class="is-departure" aria-hidden="true"></i>Start
+        <i class="is-route" aria-hidden="true"></i>Route
+        <i class="is-finish" aria-hidden="true"></i>{{ plannerFinishLabel }}
+      </span>
     </div>
     <div
       v-if="ready && placementActive"
@@ -60,6 +65,7 @@ import {
   visitedDatesForPlace,
 } from "../catalog/atlasInsights.mjs"
 import { shouldShowMyAtlasMapMemory } from "../catalog/mapMemory.mjs"
+import { buildPlannerMapSegments } from "../planning/mapProjection.mjs"
 
 const CONNECTION_SOURCE = "my-atlas-connections"
 const CLUSTER_MAX_ZOOM = 7.75
@@ -161,6 +167,21 @@ export default {
     }
   },
   computed: {
+    plannerReturnsToStart() {
+      const start = this.plannerRoute.find(node => node.role === "start")
+      const finish = [...this.plannerRoute]
+        .reverse()
+        .find(node => node.role === "finish")
+      return Boolean(
+        start &&
+          finish &&
+          start.location.coordinates[0] === finish.location.coordinates[0] &&
+          start.location.coordinates[1] === finish.location.coordinates[1]
+      )
+    },
+    plannerFinishLabel() {
+      return this.plannerReturnsToStart ? "Return" : "Finish"
+    },
     yearLegend() {
       if (this.plannerActive) return []
       const years = atlasYears(this.places).map(year => ({
@@ -410,23 +431,15 @@ export default {
     },
     connectionGeoJson() {
       const plannerFeatures = this.plannerActive
-        ? this.plannerRoute.slice(0, -1).flatMap((node, index) => {
-            const next = this.plannerRoute[index + 1]
-            if (!next) return []
-            if (
-              node.location.coordinates[0] === next.location.coordinates[0] &&
-              node.location.coordinates[1] === next.location.coordinates[1]
-            ) {
-              return []
-            }
+        ? buildPlannerMapSegments(this.plannerRoute).map(segment => {
             return {
               type: "Feature",
-              properties: { planner: true },
+              properties: { planner: true, segment: segment.kind },
               geometry: {
                 type: "LineString",
                 coordinates: curvedConnectionCoordinates(
-                  node.location.coordinates,
-                  next.location.coordinates,
+                  segment.from.coordinates,
+                  segment.to.coordinates,
                   35
                 ),
               },
@@ -532,6 +545,32 @@ export default {
       const width = this.plannerActive ? 11 : 9
       const lineWidth = this.plannerActive ? 4 : 3
       const dash = this.plannerActive ? [2.4, 1.05] : [1.5, 1.8]
+      const glowColor = this.plannerActive
+        ? [
+            "match",
+            ["get", "segment"],
+            "departure",
+            "#58d1c9",
+            "finish",
+            "#f08a72",
+            "return",
+            "#f08a72",
+            "#e6ba68",
+          ]
+        : "#e6ba68"
+      const lineColor = this.plannerActive
+        ? [
+            "match",
+            ["get", "segment"],
+            "departure",
+            "#93eee7",
+            "finish",
+            "#ffab98",
+            "return",
+            "#ffab98",
+            "#f8d58d",
+          ]
+        : "#f8d58d"
       this.map.setPaintProperty(
         "my-atlas-connections-glow",
         "line-opacity",
@@ -543,9 +582,19 @@ export default {
         width
       )
       this.map.setPaintProperty(
+        "my-atlas-connections-glow",
+        "line-color",
+        glowColor
+      )
+      this.map.setPaintProperty(
         "my-atlas-connections-line",
         "line-width",
         lineWidth
+      )
+      this.map.setPaintProperty(
+        "my-atlas-connections-line",
+        "line-color",
+        lineColor
       )
       this.map.setPaintProperty(
         "my-atlas-connections-line",
@@ -602,7 +651,9 @@ export default {
       const role = document.createElement("small")
       const roles = group.nodes.map(node => {
         if (node.role === "start") return "Start"
-        if (node.role === "finish") return "Finish"
+        if (node.role === "finish") {
+          return this.plannerReturnsToStart ? "Return" : "Finish"
+        }
         return `Stop ${node.label}`
       })
       const names = [...new Set(group.nodes.map(node => node.location.name))]
@@ -1012,6 +1063,43 @@ export default {
 .my-atlas-planner-map-status span {
   color: #b6c7c1;
   font-size: 0.6rem;
+}
+
+.my-atlas-planner-map-key {
+  display: flex;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.28rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.my-atlas-planner-map-key i {
+  width: 0.48rem;
+  height: 0.48rem;
+  margin-left: 0.3rem;
+  border-radius: 50%;
+  background: #f8d58d;
+  box-shadow: 0 0 0.45rem currentColor;
+}
+
+.my-atlas-planner-map-key i:first-child {
+  margin-left: 0;
+}
+
+.my-atlas-planner-map-key .is-departure {
+  color: #58d1c9;
+  background: #58d1c9;
+}
+
+.my-atlas-planner-map-key .is-route {
+  color: #e6ba68;
+  background: #e6ba68;
+}
+
+.my-atlas-planner-map-key .is-finish {
+  color: #f08a72;
+  background: #f08a72;
 }
 
 .my-atlas-placement-help {

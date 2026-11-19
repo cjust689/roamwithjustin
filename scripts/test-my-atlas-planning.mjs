@@ -28,7 +28,10 @@ import {
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../src/features/my-atlas/planning/errors.mjs"
-import { buildPlannerMapRoute } from "../src/features/my-atlas/planning/mapProjection.mjs"
+import {
+  buildPlannerMapRoute,
+  buildPlannerMapSegments,
+} from "../src/features/my-atlas/planning/mapProjection.mjs"
 
 assert.match(
   formatMyAtlasPlannerError({ code: "insufficient_permissions" }),
@@ -94,6 +97,13 @@ const ownerView = fs.readFileSync(
   ),
   "utf8"
 )
+const pinEditorComponent = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/components/MyAtlasPinEditor.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
 assert.match(plannerComponent, /class="planner-itinerary-card"/)
 assert.match(plannerComponent, /aria-label="Saved trip itinerary"/)
 assert.match(plannerComponent, /aria-controls="planner-trip-editor"/)
@@ -127,6 +137,9 @@ assert.match(plannerComponent, /mounted\(\) \{[\s\S]*loadPlanning/)
 assert.match(mapComponent, /plannerActive/)
 assert.match(mapComponent, /renderPlannerMarkers/)
 assert.match(mapComponent, /showPlannerOverview/)
+assert.match(mapComponent, /buildPlannerMapSegments/)
+assert.match(mapComponent, /plannerReturnsToStart/)
+assert.match(mapComponent, />Start[\s\S]*>Route[\s\S]*plannerFinishLabel/)
 assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)
@@ -137,6 +150,18 @@ assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /openAtlasPanel\('visited'\)/)
 assert.match(ownerView, /class="my-atlas-planner-action"/)
+assert.match(ownerView, /class="my-atlas-selected-memory-action"/)
+assert.match(ownerView, /openExistingPin\(selectedPlace, \{ memoryOnly: true \}\)/)
+assert.match(ownerView, /openExistingPin\(place, \{ memoryOnly: true \}\)/)
+assert.match(ownerView, /openExistingPin\(place\)/)
+assert.match(ownerView, />\s*Visit dates\s*</)
+assert.match(ownerView, /:memory-only="pinEditorMemoryOnly"/)
+assert.match(pinEditorComponent, /v-if="!memoryOnly" class="pin-editor-dates"/)
+assert.match(pinEditorComponent, /if \(this\.memoryOnly\) return "Save memory"/)
+assert.match(
+  pinEditorComponent,
+  /if \(this\.memoryOnly\) this\.\$nextTick\(\(\) => this\.\$refs\.memoryInput\?\.focus\(\)\)/
+)
 assert.match(
   ownerView,
   /async openPlanner\(\)[\s\S]*this\.\$refs\.planner\?\.revealPlanner\(\)/
@@ -289,6 +314,29 @@ assert.deepEqual(
 )
 assert.equal("note" in plannerRoute[0].location, false)
 assert.equal("wishId" in plannerRoute[0].location, false)
+assert.deepEqual(
+  buildPlannerMapSegments(plannerRoute).map(segment => segment.kind),
+  ["departure", "route", "route", "return"]
+)
+const selectedEndRoute = buildPlannerMapRoute({
+  start: moab,
+  stops: plan.stops.slice(0, 2),
+  endMode: "selected-end",
+  end: plan.stops[2],
+})
+assert.deepEqual(
+  buildPlannerMapSegments(selectedEndRoute).map(segment => segment.kind),
+  ["departure", "route", "finish"]
+)
+const lastStopRoute = buildPlannerMapRoute({
+  start: moab,
+  stops: plan.stops,
+  endMode: "last-stop",
+})
+assert.deepEqual(
+  buildPlannerMapSegments(lastStopRoute).map(segment => segment.kind),
+  ["departure", "route", "finish"]
+)
 assert.equal(
   buildPlannerMapRoute({
     start: moab,
