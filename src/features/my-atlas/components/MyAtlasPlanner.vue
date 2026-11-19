@@ -1053,6 +1053,7 @@ import {
   deleteMyAtlasWish,
   fetchMyAtlasAccountExport,
   fetchMyAtlasPlanning,
+  fetchMyAtlasProfile,
   keepMyAtlasPlan,
   markMyAtlasPlanVisited,
   saveMyAtlasPlan,
@@ -1396,6 +1397,14 @@ export default {
     async token() {
       return getMyAtlasApiAccessToken()
     },
+    async refreshPlanningRevision(accessToken) {
+      const profile = await fetchMyAtlasProfile({
+        apiBaseUrl: this.apiBaseUrl,
+        accessToken,
+      })
+      this.emitRevision(profile.revision)
+      return profile.revision
+    },
     setWishDraft(wish) {
       this.$set(this.wishDrafts, wish.wishId, {
         note: wish.note || "",
@@ -1630,23 +1639,18 @@ export default {
         return await applyMutation(accessToken)
       } catch (error) {
         if (error?.code === "revision_conflict") {
-          const refresh = await this.loadPlanning({
-            preservePlanDraft: true,
-            reportError: false,
-          })
-          if (refresh.ok && !refresh.planError) {
-            try {
-              return await applyMutation(await this.token())
-            } catch (retryError) {
-              this.error = this.errorMessage(retryError)
-              return {
-                saved: false,
-                refreshed: false,
-                error: retryError,
-              }
+          try {
+            const accessToken = await this.token()
+            await this.refreshPlanningRevision(accessToken)
+            return await applyMutation(accessToken)
+          } catch (retryError) {
+            this.error = this.errorMessage(retryError)
+            return {
+              saved: false,
+              refreshed: false,
+              error: retryError,
             }
           }
-          this.error = this.errorMessage(error)
         } else {
           this.error = this.errorMessage(error)
         }

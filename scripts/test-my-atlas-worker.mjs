@@ -7,6 +7,7 @@ import {
   deleteMyAtlasPin,
   fetchMyAtlasAccountExport,
   fetchMyAtlasPlanning,
+  fetchMyAtlasProfile,
   fetchPublicAtlas,
   fetchMyAtlasState,
   markMyAtlasPlanVisited,
@@ -629,6 +630,37 @@ for (const token of [
   assert.equal(response.status, 200)
   assert.equal(response.headers.get("ETag"), '"rev-1"')
   assert.equal((await readJson(response)).profile.public, false)
+}
+
+{
+  const token = await signToken({ scope: "read:my-atlas" })
+  const response = await workerResponse(
+    "/v1/me/planning",
+    { token },
+    {},
+    {
+      getMyPlanning: async options => {
+        assert.deepEqual(options.identity, {
+          issuer: ISSUER,
+          subject: SUBJECT,
+        })
+        return {
+          profile: { revision: 7 },
+          wishes: [
+            {
+              wishId: "wish_1234567890abcdef12345678",
+              placeId: "geonames:4180439",
+              name: "Atlanta",
+            },
+          ],
+          plans: [],
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get("ETag"), '"rev-7"')
+  assert.equal((await readJson(response)).wishes[0].name, "Atlanta")
 }
 
 {
@@ -2009,50 +2041,52 @@ assert.equal(
     accessToken: "owner-token",
     fetchImpl: async url => {
       calls.push(url)
-      return url.includes("bucket-list")
-        ? new Response(
-            JSON.stringify({
-              wishes: [
-                {
-                  wishId: "wish_1234567890abcdef12345678",
-                  placeId: "geonames:3621138",
-                  name: "Uvita",
-                },
-              ],
-              nextCursor: null,
-            }),
-            { status: 200, headers: { ETag: '"rev-4"' } }
-          )
-        : new Response(JSON.stringify({ plans: [] }), {
-            status: 200,
-            headers: { ETag: '"rev-4"' },
-          })
+      return new Response(
+        JSON.stringify({
+          wishes: [
+            {
+              wishId: "wish_1234567890abcdef12345678",
+              placeId: "geonames:3621138",
+              name: "Uvita",
+            },
+          ],
+          plans: [],
+        }),
+        { status: 200, headers: { ETag: '"rev-4"' } }
+      )
     },
   })
   assert.equal(state.revision, 4)
   assert.equal(state.wishes[0].name, "Uvita")
-  assert.equal(calls.length, 2)
+  assert.equal(calls.length, 1)
+  assert.match(calls[0], /\/v1\/me\/planning$/)
 
   let revisionRaceCalls = 0
+  let legacyRevisionRaceCalls = 0
   const recoveredState = await fetchMyAtlasPlanning({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
     fetchImpl: async url => {
       revisionRaceCalls += 1
+      if (url.endsWith("/v1/me/planning")) {
+        return new Response(
+          JSON.stringify({ error: "not_found", requestId: "legacy-worker" }),
+          { status: 404 }
+        )
+      }
+      legacyRevisionRaceCalls += 1
       const isWishlist = url.includes("bucket-list")
-      const firstAttempt = revisionRaceCalls <= 2
+      const firstAttempt = legacyRevisionRaceCalls <= 2
       const revision = firstAttempt && isWishlist ? 4 : 5
       return new Response(
         JSON.stringify(
-          isWishlist
-            ? { wishes: [], nextCursor: null }
-            : { plans: [] }
+          isWishlist ? { wishes: [], nextCursor: null } : { plans: [] }
         ),
         { status: 200, headers: { ETag: `"rev-${revision}"` } }
       )
     },
   })
-  assert.equal(revisionRaceCalls, 4)
+  assert.equal(revisionRaceCalls, 5)
   assert.equal(recoveredState.revision, 5)
 
   const partialState = await fetchMyAtlasPlanning({
@@ -2060,35 +2094,61 @@ assert.equal(
     accessToken: "owner-token",
     allowPartial: true,
     fetchImpl: async url =>
-      url.includes("bucket-list")
+      url.endsWith("/v1/me/planning")
         ? new Response(
-            JSON.stringify({
-              wishes: [
-                {
-                  wishId: "wish_1234567890abcdef12345678",
-                  placeId: "geonames:3621138",
-                  name: "Uvita",
-                },
-              ],
-            }),
-            { status: 200, headers: { ETag: '"rev-4"' } }
+            JSON.stringify({ error: "not_found", requestId: "legacy-worker" }),
+            { status: 404 }
           )
-        : new Response(
-            JSON.stringify({
-              error: "account_conflict",
-              requestId: "plan-load-123",
-            }),
-            {
-              status: 409,
-              headers: { "X-Request-Id": "plan-load-123" },
-            }
-          ),
+        : url.includes("bucket-list")
+          ? new Response(
+              JSON.stringify({
+                wishes: [
+                  {
+                    wishId: "wish_1234567890abcdef12345678",
+                    placeId: "geonames:3621138",
+                    name: "Uvita",
+                  },
+                ],
+              }),
+              { status: 200, headers: { ETag: '"rev-4"' } }
+            )
+          : new Response(
+              JSON.stringify({
+                error: "account_conflict",
+                requestId: "plan-load-123",
+              }),
+              {
+                status: 409,
+                headers: { "X-Request-Id": "plan-load-123" },
+              }
+            ),
   })
   assert.equal(partialState.revision, 4)
   assert.equal(partialState.wishes[0].name, "Uvita")
   assert.deepEqual(partialState.plans, [])
   assert.equal(partialState.planError.code, "account_conflict")
   assert.equal(partialState.planError.requestId, "plan-load-123")
+
+  const profile = await fetchMyAtlasProfile({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async (url, options) => {
+      assert.equal(url, "https://api.example.com/v1/me")
+      assert.equal(options.method, "GET")
+      return new Response(
+        JSON.stringify({
+          profile: {
+            handle: "owner",
+            displayName: "Owner",
+            public: false,
+            revision: 9,
+          },
+        }),
+        { status: 200, headers: { ETag: '"rev-9"' } }
+      )
+    },
+  })
+  assert.equal(profile.revision, 9)
 
   const created = await createMyAtlasWish({
     apiBaseUrl: "https://api.example.com",
@@ -2129,6 +2189,21 @@ assert.equal(
           },
         })
       }
+      if (url.endsWith("/v1/me/planning")) {
+        return new Response(
+          JSON.stringify({
+            wishes: [],
+            plans: [
+              {
+                planId: "plan_1234567890abcdef12345678",
+                title: "Changed route",
+                stops: [],
+              },
+            ],
+          }),
+          { status: 200, headers: { ETag: '"rev-6"' } }
+        )
+      }
       if (url.includes("bucket-list")) {
         return new Response(JSON.stringify({ wishes: [], nextCursor: null }), {
           status: 200,
@@ -2149,7 +2224,7 @@ assert.equal(
       )
     },
   })
-  assert.equal(saveCalls, 3)
+  assert.equal(saveCalls, 2)
   assert.equal(recoveredPlan.revision, 6)
   assert.equal(recoveredPlan.recovered, true)
   assert.equal(recoveredPlan.plan.title, "Changed route")

@@ -345,6 +345,24 @@ export async function listMyPlans({ environment, identity }) {
   })
 }
 
+export async function getMyPlanning({ environment, identity, placeCatalog }) {
+  const owner = await ownerContext(environment, identity)
+  const result = expectedPlanningResult(
+    await owner.user.getOwnerPlanning(owner.identityDigest)
+  )
+  const wishes = await projectWishes(
+    result.wishes || [],
+    placeCatalog,
+    environment,
+    { allowUnavailable: true }
+  )
+  return Object.freeze({
+    profile: publicProfile(result.profile),
+    wishes: Object.freeze(wishes),
+    plans: Object.freeze(result.plans || []),
+  })
+}
+
 async function writePlan({
   environment,
   identity,

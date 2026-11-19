@@ -220,6 +220,34 @@ export async function fetchMyAtlasState({
   })
 }
 
+export async function fetchMyAtlasProfile({
+  apiBaseUrl,
+  accessToken,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me",
+    fetchImpl,
+  })
+  if (
+    typeof payload.profile?.handle !== "string" ||
+    typeof payload.profile?.displayName !== "string" ||
+    typeof payload.profile?.public !== "boolean"
+  ) {
+    throw new MyAtlasApiError("The My Atlas profile response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+      requestId: response.headers.get("X-Request-Id") || "",
+    })
+  }
+  return Object.freeze({
+    ...payload.profile,
+    revision: revisionFromResponse(response, payload.profile.revision),
+  })
+}
+
 export async function registerMyAtlasAccount({
   apiBaseUrl,
   accessToken,
@@ -491,14 +519,50 @@ async function fetchMyAtlasPlanningAttempt({
   }
 }
 
+async function fetchMyAtlasPlanningSnapshot({
+  apiBaseUrl,
+  accessToken,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/planning",
+    fetchImpl,
+  })
+  if (
+    !Array.isArray(payload.wishes) ||
+    !Array.isArray(payload.plans) ||
+    payload.plans.length > 1
+  ) {
+    throw new MyAtlasApiError("The planning snapshot response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+      requestId: response.headers.get("X-Request-Id") || "",
+    })
+  }
+  return Object.freeze({
+    revision: validatedPlanningRevision(response),
+    wishes: Object.freeze(
+      payload.wishes.map(wish => Object.freeze({ ...wish }))
+    ),
+    plans: Object.freeze(payload.plans.map(plan => Object.freeze({ ...plan }))),
+    planError: null,
+  })
+}
+
 export async function fetchMyAtlasPlanning(options) {
+  try {
+    return await fetchMyAtlasPlanningSnapshot(options)
+  } catch (error) {
+    if (!["not_found", "method_not_allowed"].includes(error?.code)) {
+      throw error
+    }
+  }
   for (let attempt = 0; attempt < 2; attempt += 1) {
     try {
       const state = await fetchMyAtlasPlanningAttempt(options)
-      if (
-        attempt === 0 &&
-        state.planError?.code === "revision_conflict"
-      ) {
+      if (attempt === 0 && state.planError?.code === "revision_conflict") {
         continue
       }
       return state

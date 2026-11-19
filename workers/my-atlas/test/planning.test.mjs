@@ -12,10 +12,12 @@ import {
   createMyPlan,
   createMyWish,
   deleteMyWish,
+  getMyPlanning,
   keepMyPlan,
   listMyPlans,
   listMyWishes,
   markMyPlanVisited,
+  replaceMyPlan,
   updateMyWish,
 } from "../src/planning/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
@@ -302,6 +304,72 @@ describe("private wishlist and trip planning", () => {
     expect(JSON.stringify(publicState)).not.toContain("Moab")
   })
 
+  it("adds a destination and replaces an existing route at the atomic snapshot revision", async () => {
+    const arches = await createWish(
+      "geonames:5556144",
+      1,
+      "50505050-5050-4050-8050-505050505050"
+    )
+    const created = await createMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        title: "Driving loop",
+        status: "saved",
+        desiredYear: null,
+        note: "",
+        start: { placeId: "geonames:5601615" },
+        stopWishIds: [arches.wish.wishId],
+        endMode: "selected-end",
+        end: { placeId: "geonames:5601615" },
+        expectedRevision: 2,
+        idempotencyKey: "51505050-5050-4050-8050-505050505050",
+      },
+      placeCatalog,
+      now: NOW,
+    })
+    const uvita = await createWish(
+      "geonames:3621138",
+      3,
+      "52505050-5050-4050-8050-505050505050"
+    )
+    const planning = await getMyPlanning({
+      environment: environment(),
+      identity: IDENTITY,
+      placeCatalog,
+    })
+    expect(planning.profile.revision).toBe(4)
+
+    const replaced = await replaceMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        planId: created.plan.planId,
+        title: "Driving loop",
+        status: "saved",
+        desiredYear: null,
+        note: "",
+        start: { placeId: "geonames:5601615" },
+        stopWishIds: [arches.wish.wishId, uvita.wish.wishId],
+        endMode: "selected-end",
+        end: { placeId: "geonames:5601615" },
+        expectedRevision: planning.profile.revision,
+        idempotencyKey: "53505050-5050-4050-8050-505050505050",
+      },
+      placeCatalog,
+      now: NOW,
+    })
+    expect(replaced).toMatchObject({
+      profile: { revision: 5 },
+      plan: {
+        stops: [
+          { sourceWishId: arches.wish.wishId },
+          { sourceWishId: uvita.wish.wishId },
+        ],
+      },
+    })
+  })
+
   it("keeps an unresolved catalog wish removable without accepting it into a plan", async () => {
     const moab = await createWish(
       "geonames:5601615",
@@ -508,6 +576,22 @@ describe("private wishlist and trip planning", () => {
     })
     expect(plans).toMatchObject({
       profile: { revision: 6, wishCount: 1, planCount: 1 },
+      plans: [
+        {
+          planId: created.plan.planId,
+          stops: [{ name: "Arches National Park" }],
+        },
+      ],
+    })
+
+    const planning = await getMyPlanning({
+      environment: environment(),
+      identity: IDENTITY,
+      placeCatalog,
+    })
+    expect(planning).toMatchObject({
+      profile: { revision: 6, wishCount: 1, planCount: 1 },
+      wishes: [{ wishId: moab.wish.wishId, name: "Moab" }],
       plans: [
         {
           planId: created.plan.planId,

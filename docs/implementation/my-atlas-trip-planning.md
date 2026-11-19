@@ -44,6 +44,8 @@ verification:
     - npm run my-atlas:test
     - npm run lint
     - Client tests verify versioned read only trip snapshot encoding, private field omission, optional nearby suggestion prompt copy, dated Expedia handoff parameters, and successful mutation recovery through an authoritative read
+    - Planner boundary tests verify one atomic wishlist and saved-plan snapshot, the temporary legacy fallback, authoritative profile revision reads, and the exact revision used by subsequent writes
+    - Workers runtime tests verify GET /v1/me/planning returns wishlist and plan records under one account revision
     - Workers runtime tests verify that deletion releases registration identity and handle assignments and permits clean registration with the same identity and handle through a new invitation
     - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
@@ -215,6 +217,10 @@ Authenticated owner interaction remains external acceptance.
       authoritative wishlist and plan revision. If the expected plan exists at
       the saved or newer revision, the client accepts that confirmed snapshot
       instead of stranding the editor in an invalid response state.
+- [x] Planner refresh now reads wishlist and saved-plan records through one
+      atomic owner snapshot and one ETag. A temporary fallback supports an older
+      Worker during deployment overlap. Revision-conflict recovery reads the
+      authoritative profile revision before retrying the intended write once.
 - [x] JSON export schema 2 including visited pins, wishlist, plans, snapshots,
       and retention state.
 - [x] Existing public projection continues enumerating only `pin:` keys; tests
@@ -298,9 +304,9 @@ Authenticated owner interaction remains external acceptance.
       hides empty itinerary chrome, and opens trip naming and persistence in a
       modal only after the route has a start, at least one stop, and a finish.
 - [x] A rejected stale mutation still relies on the Worker `If-Match` boundary.
-      The browser treats revisions as monotonic, fetches the latest account state
-      after an explicit HTTP 412, preserves the local itinerary draft where
-      possible, and retries the intended write once. Network failures and second
+      The browser treats revisions as monotonic, fetches the authoritative
+      profile revision after an explicit HTTP 412, preserves the local itinerary
+      draft, and retries the intended write once. Network failures and second
       conflicts are not replayed. Successful wishlist mutations also stop
       replacing an unrelated unsaved plan draft during their refresh.
 - [x] Directions Phase 2 adds browser-only start, stop, and finish inclusion,
@@ -309,12 +315,10 @@ Authenticated owner interaction remains external acceptance.
       boundaries. Longer Maps groups retain the conservative three-waypoint
       segmentation. Custom coordinates remain previewed and confirmation
       gated. These controls do not write account state or refresh retention.
-- [x] A successful plan save or Keep response now displays its confirmed plan
-      snapshot before the companion planning read. If only that follow-up plan
-      read fails, the itinerary remains visible as `Saved, refresh needed` and
-      editing stays disabled until Refresh succeeds. Successful deletion clears
-      the local plan immediately. The Worker, revision, and persistence
-      contracts are unchanged.
+- [x] A successful plan save or Keep response displays its confirmed plan
+      snapshot before the atomic planning refresh. If that refresh fails, the
+      confirmed itinerary remains visible. Successful deletion clears the local
+      plan immediately. The revision and persistence contracts are unchanged.
 - [x] The authenticated component now loads planning state when it mounts and
       names the current saved trip in its collapsed heading. Opening it replaces
       visited-map pins with a private draft overlay on the existing MapLibre
