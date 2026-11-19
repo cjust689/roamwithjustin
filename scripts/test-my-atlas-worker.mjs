@@ -5,13 +5,16 @@ import {
   createMyAtlasWish,
   deleteMyAtlasAccount,
   deleteMyAtlasPin,
+  fetchMyAtlasImage,
   fetchMyAtlasAccountExport,
   fetchMyAtlasPlanning,
   fetchMyAtlasProfile,
   fetchPublicAtlas,
   fetchMyAtlasState,
   markMyAtlasPlanVisited,
+  removeMyAtlasImage,
   registerMyAtlasAccount,
+  replaceMyAtlasImage,
   saveMyAtlasPlan,
   updateMyAtlasPin,
   updateMyAtlasSharing,
@@ -1489,6 +1492,66 @@ await assert.rejects(
   })
   assert.equal(readAttempts, 2)
   assert.equal(retriedState.profile.revision, 2)
+
+  const atlasImageMetadata = {
+    imageId: "image_11111111111111111111111111111111",
+    contentType: "image/webp",
+    width: 1200,
+    height: 1200,
+    byteLength: 4,
+    updatedAt: "2026-11-19T14:00:00.000Z",
+  }
+  let imageUploadOptions
+  const imageUpload = await replaceMyAtlasImage({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    file: new Blob([Uint8Array.from([0xff, 0xd8, 0xff, 0xd9])], {
+      type: "image/jpeg",
+    }),
+    revision: 2,
+    fetchImpl: async (_url, options) => {
+      imageUploadOptions = options
+      return new Response(JSON.stringify({ atlasImage: atlasImageMetadata }), {
+        status: 200,
+        headers: { ETag: '"rev-3"', "Content-Type": "application/json" },
+      })
+    },
+  })
+  assert.equal(imageUploadOptions.method, "POST")
+  assert.equal(imageUploadOptions.headers.get("Content-Type"), "image/jpeg")
+  assert.equal(imageUploadOptions.headers.get("If-Match"), '"rev-2"')
+  assert.ok(imageUploadOptions.body instanceof Blob)
+  assert.equal(imageUpload.revision, 3)
+  assert.deepEqual(imageUpload.atlasImage, atlasImageMetadata)
+
+  const imageBlob = await fetchMyAtlasImage({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.headers.Authorization, "Bearer owner-token")
+      return new Response(Uint8Array.from([82, 73, 70, 70]), {
+        status: 200,
+        headers: { "Content-Type": "image/webp" },
+      })
+    },
+  })
+  assert.equal(imageBlob.type, "image/webp")
+  assert.equal(imageBlob.size, 4)
+
+  const removedImageRevision = await removeMyAtlasImage({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    revision: 3,
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.method, "DELETE")
+      assert.equal(options.headers.get("If-Match"), '"rev-3"')
+      return new Response(JSON.stringify({ deleted: true }), {
+        status: 200,
+        headers: { ETag: '"rev-4"', "Content-Type": "application/json" },
+      })
+    },
+  })
+  assert.equal(removedImageRevision, 4)
 
   const created = await createMyAtlasPin({
     apiBaseUrl: "https://api.example.com",

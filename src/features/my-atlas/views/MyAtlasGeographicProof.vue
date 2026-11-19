@@ -557,6 +557,66 @@
             Choose who can see your Visited Atlas, copy its public link, or
             create a Story image from the destinations currently on the map.
           </p>
+          <div class="my-atlas-favorite-image">
+            <div class="my-atlas-favorite-image-preview">
+              <img
+                v-if="atlasImageUrl"
+                ref="favoriteImagePreview"
+                :src="atlasImageUrl"
+                alt="Your favorite travel image"
+              />
+              <span v-else aria-hidden="true">Atlas Story</span>
+            </div>
+            <div class="my-atlas-favorite-image-copy">
+              <strong>Your favorite travel image</strong>
+              <p>
+                Choose one image that feels like your travels. It is cropped to
+                a square and used on every Atlas Story image you export. It
+                stays private and is not added to your public Atlas.
+              </p>
+              <small>
+                JPEG, PNG, or WebP. Up to 10 MiB before processing and 1 MiB
+                after processing.
+              </small>
+              <input
+                ref="atlasImageInput"
+                class="my-atlas-visually-hidden"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                @change="handleAtlasImageSelection"
+              />
+              <div class="my-atlas-favorite-image-actions">
+                <button
+                  type="button"
+                  :disabled="atlasImagePending || accountPending"
+                  @click="$refs.atlasImageInput.click()"
+                >
+                  {{
+                    atlasImagePending
+                      ? "Processing image"
+                      : atlasImage
+                        ? "Replace image"
+                        : "Choose image"
+                  }}
+                </button>
+                <button
+                  v-if="atlasImage"
+                  type="button"
+                  :disabled="atlasImagePending || accountPending"
+                  @click="removeFavoriteImage"
+                >
+                  Remove image
+                </button>
+              </div>
+              <p
+                v-if="atlasImageError"
+                class="my-atlas-favorite-image-error"
+                role="alert"
+              >
+                {{ atlasImageError }}
+              </p>
+            </div>
+          </div>
           <div class="my-atlas-tools-actions">
             <button
               type="button"
@@ -577,7 +637,7 @@
             </button>
             <button
               type="button"
-              :disabled="!pinnedPlaces.length"
+              :disabled="!pinnedPlaces.length || atlasImagePending"
               @click="exportStory"
             >
               Export Story image
@@ -644,11 +704,15 @@ import {
   searchMyAtlasPlaces,
 } from "../catalog/placeSearchClient.mjs"
 import {
+  MY_ATLAS_IMAGE_MAX_INPUT_BYTES,
   createMyAtlasPin,
   deleteMyAtlasAccount,
   deleteMyAtlasPin,
+  fetchMyAtlasImage,
   fetchMyAtlasState,
+  removeMyAtlasImage,
   registerMyAtlasAccount,
+  replaceMyAtlasImage,
   updateMyAtlasPin,
   updateMyAtlasSharing,
 } from "../api/client.mjs"
@@ -711,6 +775,10 @@ export default {
       addPlaceOpen: false,
       visitedOpen: false,
       toolsOpen: false,
+      atlasImage: null,
+      atlasImageUrl: "",
+      atlasImagePending: false,
+      atlasImageError: "",
       workflowSectionsInitialized: false,
       announcement: "",
       auth: myAtlasAuthState,
@@ -887,6 +955,7 @@ export default {
     window.clearTimeout(this.timelineTimer)
     window.removeEventListener("keydown", this.handleKeyboardNavigation)
     if (this.searchAbortController) this.searchAbortController.abort()
+    if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
     handlePlannerStateChange(state) {
@@ -976,6 +1045,7 @@ export default {
       this.addPlaceOpen = false
       this.visitedOpen = false
       this.toolsOpen = false
+      this.clearAtlasImage()
       this.plannerActive = false
       this.plannerRoute = []
       this.workflowSectionsInitialized = false
@@ -983,6 +1053,7 @@ export default {
     },
     applyAccountState(state, { initializeWorkflow = false } = {}) {
       this.accountProfile = state.profile
+      this.atlasImage = state.atlasImage || null
       this.accountMissing = false
       this.pins = state.pins.map(pin => ({
         pinId: pin.pinId,
@@ -1020,7 +1091,111 @@ export default {
         accessToken,
       })
       this.applyAccountState(state)
+      if (state.atlasImage) await this.loadAtlasImage(accessToken)
+      else this.clearAtlasImage()
       return state
+    },
+    clearAtlasImage() {
+      if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
+      this.atlasImageUrl = ""
+      this.atlasImage = null
+      this.atlasImageError = ""
+    },
+    async loadAtlasImage(accessToken) {
+      if (!this.atlasImage) {
+        this.clearAtlasImage()
+        return
+      }
+      try {
+        const blob = await fetchMyAtlasImage({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken,
+        })
+        const nextUrl = URL.createObjectURL(blob)
+        if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
+        this.atlasImageUrl = nextUrl
+        this.atlasImageError = ""
+      } catch (error) {
+        this.atlasImageError = this.atlasImageErrorMessage(error)
+      }
+    },
+    atlasImageErrorMessage(error) {
+      const messages = {
+        image_empty: "Choose an image before uploading.",
+        image_length_required:
+          "This browser could not send the image safely. Try another browser.",
+        image_too_large: "Choose an image smaller than 10 MiB.",
+        image_type_not_supported: "Choose a JPEG, PNG, or WebP image.",
+        image_animation_not_supported: "Animated images are not supported.",
+        image_dimensions_too_large:
+          "Choose an image with fewer than 36 million pixels.",
+        image_decode_failed: "This image could not be read.",
+        image_processing_failed: "This image could not be processed.",
+        image_output_too_large:
+          "This image remains too large after processing. Choose another image.",
+        atlas_image_service_unavailable:
+          "The image service is temporarily unavailable. Try again shortly.",
+        unavailable: "The image service could not be reached.",
+      }
+      const reference = error?.requestId
+        ? ` Reference: ${error.requestId}.`
+        : ""
+      return `${messages[error?.code] || "Your favorite travel image could not be updated."}${reference}`
+    },
+    async handleAtlasImageSelection(event) {
+      const file = event.target.files?.[0]
+      event.target.value = ""
+      if (!file || !this.accountProfile) return
+      if (file.size > MY_ATLAS_IMAGE_MAX_INPUT_BYTES) {
+        this.atlasImageError = "Choose an image smaller than 10 MiB."
+        return
+      }
+      this.atlasImagePending = true
+      this.atlasImageError = ""
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const result = await this.withAccountRevisionRetry(token, revision =>
+          replaceMyAtlasImage({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            file,
+            revision,
+          })
+        )
+        this.atlasImage = result.atlasImage
+        this.updatePlanningRevision(result.revision)
+        await this.loadAtlasImage(token)
+        this.announcement =
+          "Your favorite travel image will be used on Atlas Story exports."
+      } catch (error) {
+        this.atlasImageError = this.atlasImageErrorMessage(error)
+      } finally {
+        this.atlasImagePending = false
+      }
+    },
+    async removeFavoriteImage() {
+      if (!this.atlasImage || !this.accountProfile) return
+      this.atlasImagePending = true
+      this.atlasImageError = ""
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const revision = await this.withAccountRevisionRetry(
+          token,
+          currentRevision =>
+            removeMyAtlasImage({
+              apiBaseUrl: this.apiBaseUrl,
+              accessToken: token,
+              revision: currentRevision,
+            })
+        )
+        this.updatePlanningRevision(revision)
+        this.clearAtlasImage()
+        this.announcement = "Your favorite travel image was removed."
+      } catch (error) {
+        this.atlasImageError = this.atlasImageErrorMessage(error)
+      } finally {
+        this.atlasImagePending = false
+      }
     },
     async withAccountRevisionRetry(accessToken, action) {
       try {
@@ -1115,6 +1290,7 @@ export default {
           accessToken: token,
         })
         this.applyAccountState(state, { initializeWorkflow: true })
+        if (state.atlasImage) await this.loadAtlasImage(token)
         this.$nextTick(() => this.showAccountTutorialIfNeeded())
       } catch (error) {
         if (error.status === 404) {
@@ -1169,6 +1345,7 @@ export default {
         })
         this.accountMissing = false
         this.pins = []
+        this.clearAtlasImage()
         this.selectedPlaceId = ""
         this.addPlaceOpen = false
         this.visitedOpen = false
@@ -1591,15 +1768,29 @@ export default {
       this.timelinePlaying = true
       this.scheduleTimelineStep()
     },
-    exportStory() {
-      downloadMyAtlasStory({
-        displayName: this.accountProfile?.displayName || this.authDisplayName,
-        filterLabel: this.filterLabel,
-        handle: this.accountProfile?.handle || "",
-        places: this.displayedPlaces,
-        stats: this.visibleStats,
-      })
-      this.announcement = "Your Instagram Story image was created."
+    async exportStory() {
+      try {
+        if (this.atlasImage && !this.atlasImageUrl) {
+          const token = await getMyAtlasApiAccessToken()
+          await this.loadAtlasImage(token)
+          if (!this.atlasImageUrl) throw new Error("atlas_image_unavailable")
+        }
+        await this.$nextTick()
+        const favoriteImage = this.$refs.favoriteImagePreview || null
+        if (favoriteImage?.decode) await favoriteImage.decode()
+        downloadMyAtlasStory({
+          displayName: this.accountProfile?.displayName || this.authDisplayName,
+          favoriteImage,
+          filterLabel: this.filterLabel,
+          handle: this.accountProfile?.handle || "",
+          places: this.displayedPlaces,
+          stats: this.visibleStats,
+        })
+        this.announcement = "Your Instagram Story image was created."
+      } catch {
+        this.atlasImageError =
+          "Your Atlas Story image could not be created. Try again."
+      }
     },
     formatVisitedDates,
     placeTypeLabel: formatPlaceTypeLabel,
@@ -2245,6 +2436,103 @@ export default {
   line-height: 1.55;
 }
 
+.my-atlas-favorite-image {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 0.85rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(230, 186, 104, 0.22);
+  border-radius: 0.85rem;
+  background: rgba(230, 186, 104, 0.045);
+}
+
+.my-atlas-favorite-image-preview {
+  display: grid;
+  width: 7.5rem;
+  aspect-ratio: 1;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid rgba(230, 186, 104, 0.35);
+  border-radius: 0.8rem;
+  color: #d9c58f;
+  background:
+    linear-gradient(145deg, rgba(230, 186, 104, 0.13), transparent 55%), #102023;
+  text-align: center;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.my-atlas-favorite-image-preview img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-atlas-favorite-image-copy {
+  display: grid;
+  align-content: start;
+  gap: 0.42rem;
+  min-width: 0;
+}
+
+.my-atlas-favorite-image-copy > strong {
+  color: #f3d38f;
+  font-size: 0.76rem;
+}
+
+.my-atlas-favorite-image-copy > p,
+.my-atlas-favorite-image-copy > small {
+  margin: 0;
+  color: #a8bab4;
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.my-atlas-favorite-image-copy > small {
+  color: #7f948d;
+  font-size: 0.6rem;
+}
+
+.my-atlas-favorite-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+.my-atlas-favorite-image-actions button {
+  min-height: 2.45rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(230, 186, 104, 0.42);
+  border-radius: 0.65rem;
+  color: #f4d38f;
+  background: rgba(230, 186, 104, 0.07);
+  font: inherit;
+  font-size: 0.64rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-favorite-image-actions button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.my-atlas-favorite-image-error {
+  color: #e6a8a1 !important;
+}
+
+.my-atlas-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .my-atlas-tools-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
@@ -2818,6 +3106,14 @@ export default {
 }
 
 @media (max-width: 480px) {
+  .my-atlas-favorite-image {
+    grid-template-columns: 1fr;
+  }
+
+  .my-atlas-favorite-image-preview {
+    width: min(11rem, 100%);
+  }
+
   .my-atlas-account.is-menu {
     justify-items: stretch;
     min-height: 0;

@@ -1,8 +1,8 @@
 ---
 id: my-atlas-destination-memory-photo-implementation
-title: My Atlas Destination Memory and Single Photo Implementation
+title: My Atlas Destination Memory and Single Photo Implementation, Superseded Photo Scope
 kind: implementation
-status: in-progress
+status: superseded
 implementation_state: partial
 created: 2026-11-19
 updated: 2026-11-19
@@ -10,10 +10,12 @@ related:
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
   - my-atlas-destination-memory-photo-phase-0-2026-11-19
+  - my-atlas-favorite-travel-image-implementation
   - media-pipeline
   - docs-index
 supersedes: []
-superseded_by: []
+superseded_by:
+  - my-atlas-favorite-travel-image-implementation
 code_paths:
   - src/features/my-atlas/components/MyAtlasPinEditor.vue
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
@@ -35,9 +37,10 @@ verification:
 
 # My Atlas destination memory and single photo implementation
 
-Phase 0 and Phase 1 are deployed. Phase 2 remains gated because the
-repository has no isolated traveler media bucket or verified server image
-transformation binding.
+Phase 0 and Phase 1 are deployed. The per-destination photo phase is
+superseded by the bounded account-level
+[favorite travel image](my-atlas-favorite-travel-image.md) release. Memory
+editing remains current. Do not implement the checklist below as active scope.
 
 ## Implemented and test verified
 
@@ -60,7 +63,7 @@ transformation binding.
       and confirm the exact release markers in the live content addressed
       bundles.
 
-## Phase 2 gate
+## Superseded Phase 2 checklist
 
 - [ ] Confirm the Cloudflare Images plan, current transformation pricing, and
       an initial budget alert or stop policy.

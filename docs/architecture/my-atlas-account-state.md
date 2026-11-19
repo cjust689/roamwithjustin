@@ -62,6 +62,8 @@ verification:
     - Client planning tests verify recovery from a successful plan mutation with an incomplete response by reading the authoritative revision and saved plan before reporting failure
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
+    - npm run my-atlas:test verified favorite-image signature, animation, byte, pixel, square WebP, owner isolation, immutable replacement, private projection, removal, and account-deletion contracts
+    - Staging Worker 8fbb0a9e-76bc-4be2-9a53-637be432db5c deployed the private R2, Images, image rate-limit, and November 19 privacy-version configuration; remote health, unauthenticated denial, foreign-origin denial, and allowed preflight checks passed
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
@@ -161,6 +163,8 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `GET /v1/me` reads the private owner profile;
 - `GET /v1/me/atlas` returns the owner profile and resolved pins in one bounded
   browser bootstrap response;
+- `GET|POST|DELETE /v1/me/atlas-image` privately reads, replaces, or removes
+  the owner's single favorite travel image;
 - `PATCH /v1/me` changes display name or visibility;
 - `GET /v1/me/pins` returns at most 100 stored pins and a stable cursor;
 - `POST /v1/me/pins` creates one catalog pin or one owner-created custom pin;
@@ -258,10 +262,25 @@ existing pin patch, preserves the stored visit dates, hides date editing, and
 keeps explicit Close and Save memory actions. It does not add a second memory
 record or mutation route.
 
-Visited pins do not currently store an image reference. The My Atlas Worker has
-no traveler media bucket or Images binding, and the public projection has no
-photo field. Private single photo storage remains gated by the separate Phase 0
-audit and implementation checklist.
+Visited pins do not store image references. One optional account-level favorite
+travel image is stored separately from pins, wishlist entries, plans, and the
+public Atlas projection. Owner state exposes only safe image metadata. The raw
+R2 key and source digest remain inside the Worker and Durable Object boundary.
+
+The browser accepts JPEG, PNG, or WebP input up to 10 MiB. The Worker verifies
+the encoded type and animation boundary, uses Cloudflare Images to enforce a
+36 megapixel decoded ceiling, applies orientation, removes invisible metadata,
+crops to 1200 by 1200, and writes only a WebP derivative no larger than 1 MiB.
+The original upload is not stored. Staging limits image transformations to six
+per authenticated account per minute.
+
+Replacement uses a new immutable R2 key. The new derivative is durable before
+the account-global revision and idempotency guarded image pointer commits. A
+failed pointer commit removes the candidate and leaves the prior image active.
+After a successful commit, the Worker removes the superseded object. Explicit
+image removal clears the pointer before object cleanup. Account deletion removes
+the active object before the Durable Object is finalized. The bucket has no
+public route, development URL, or direct browser access.
 
 Pin IDs are deterministically derived from the internal user ID and stored
 place ID at creation. A custom place ID is first deterministically derived from
@@ -668,11 +687,12 @@ state, and remains absent from story-reader mode.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land
-silhouette, and the label `My Atlas by RoamWithJustin.com`. The silhouette uses
-bundled Natural Earth 1:110m land geometry from `world-atlas`, decoded by
-`topojson-client` and projected into the canvas by `d3-geo`. Export makes no
-tile-provider or other external request. It does not upload the image or expose
-private account fields.
+silhouette, the optional owner-authenticated favorite travel image, and the
+label `My Atlas by RoamWithJustin.com`. The silhouette uses bundled Natural
+Earth 1:110m land geometry from `world-atlas`, decoded by `topojson-client` and
+projected into the canvas by `d3-geo`. Export makes no tile-provider request and
+does not upload the generated Story image. Signed-out public Atlas exports do
+not receive the private favorite image.
 
 ## Deliberately incomplete
 
@@ -692,10 +712,8 @@ selects and confirms stops through Mark Visited. The Mark Visited code and
 durable-state behavior are locally test verified, but its Worker deployment and
 authenticated owner acceptance are not yet claimed.
 
-Memory images are deliberately not part of the text-memory release. They need
-a separately reviewed media boundary with an explicit per-pin count, raw-byte
-and decoded-pixel ceilings, file-signature and decoder validation rather than
-extension trust, metadata stripping, server-controlled re-encoding, owner-only
-object keys, authenticated mutation and deletion, private-by-default delivery,
-storage quotas, and abuse and retention procedures. Image bytes must not be
-stored in the profile Durable Object.
+Per-destination memory images remain outside the release. The implemented media
+scope is one favorite travel image for the account and Atlas Story export.
+Remote staging transformation evidence, real-device acceptance, spend alerts,
+and orphan reconciliation remain required before a broader invited beta. Image
+bytes are stored only in private R2, never in the profile Durable Object.

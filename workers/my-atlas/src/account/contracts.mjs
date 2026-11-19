@@ -153,6 +153,13 @@ export function normalizeProfilePatch(value, headers) {
   })
 }
 
+export function normalizeAtlasImageMutation(headers) {
+  return Object.freeze({
+    expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
+    idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),
+  })
+}
+
 export function normalizeCreatePin(value, headers, currentYear) {
   assertObject(
     value,

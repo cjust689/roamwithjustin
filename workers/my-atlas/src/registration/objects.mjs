@@ -18,6 +18,7 @@ const INVITATION_ID_PATTERN = /^inv_[a-f0-9]{24}$/
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const WISH_ID_PATTERN = /^wish_[a-f0-9]{24}$/
 const PLAN_ID_PATTERN = /^plan_[a-f0-9]{24}$/
+const ATLAS_IMAGE_ID_PATTERN = /^image_[a-f0-9]{32}$/
 const PLACE_ID_PATTERN =
   /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+|custom:[a-f0-9]{24})$/
 
@@ -102,6 +103,8 @@ function wishPlaceKey(placeId) {
 function planKey(planId) {
   return `plan:${planId}`
 }
+
+const ATLAS_IMAGE_KEY = "atlas-image"
 
 function deletionOperationKey(digest) {
   return `deletion-operation:${digest}`
@@ -781,6 +784,27 @@ function validOwnerMutation(command) {
   )
 }
 
+function validStoredAtlasImage(value) {
+  return Boolean(
+    value &&
+      value.schemaVersion === 1 &&
+      ATLAS_IMAGE_ID_PATTERN.test(value.imageId) &&
+      typeof value.storageKey === "string" &&
+      /^private\/atlas\/usr_[0-9a-f-]{36}\/image_[a-f0-9]{32}\.webp$/.test(
+        value.storageKey
+      ) &&
+      DIGEST_PATTERN.test(value.sourceSha256) &&
+      value.contentType === "image/webp" &&
+      value.width === 1200 &&
+      value.height === 1200 &&
+      Number.isSafeInteger(value.byteLength) &&
+      value.byteLength >= 1 &&
+      value.byteLength <= 1024 * 1024 &&
+      validIsoDate(value.createdAt) &&
+      validIsoDate(value.updatedAt)
+  )
+}
+
 function validVisitedYears(value) {
   return (
     Array.isArray(value) &&
@@ -1031,6 +1055,110 @@ export class UserProfileDurableObject extends DurableObject {
     if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
     const result = ownerProfile(this.ctx.storage, identityDigest)
     return result.ok ? profileResult(result.profile, true) : result
+  }
+
+  getOwnerAtlasImage(identityDigest) {
+    if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
+    const owner = ownerProfile(this.ctx.storage, identityDigest)
+    if (!owner.ok) return owner
+    const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+    if (atlasImage && !validStoredAtlasImage(atlasImage)) {
+      return failure("atlas_image_inconsistent")
+    }
+    return Object.freeze({ ok: true, profile: owner.profile, atlasImage })
+  }
+
+  getOwnerAtlasImageForDeletion(identityDigest) {
+    if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
+    const profile = this.ctx.storage.kv.get("profile")
+    if (
+      !profile ||
+      profile.identityDigest !== identityDigest ||
+      !["active", "deleting"].includes(profile.status)
+    ) {
+      return failure("forbidden")
+    }
+    const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+    if (atlasImage && !validStoredAtlasImage(atlasImage)) {
+      return failure("atlas_image_inconsistent")
+    }
+    return Object.freeze({ ok: true, atlasImage })
+  }
+
+  replaceOwnerAtlasImage(command) {
+    if (!validOwnerMutation(command) || !validStoredAtlasImage(command.image)) {
+      return failure("invalid_atlas_image")
+    }
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      if (
+        !command.image.storageKey.startsWith(
+          `private/atlas/${owner.profile.userId}/`
+        )
+      ) {
+        return failure("invalid_atlas_image")
+      }
+      const previousAtlasImage =
+        this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+      if (previousAtlasImage && !validStoredAtlasImage(previousAtlasImage)) {
+        return failure("atlas_image_inconsistent")
+      }
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(ATLAS_IMAGE_KEY, command.image)
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        atlasImage: command.image,
+        previousAtlasImage,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  removeOwnerAtlasImage(command) {
+    if (!validOwnerMutation(command)) return failure("invalid_atlas_image")
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+      if (!atlasImage) return failure("atlas_image_not_found")
+      if (!validStoredAtlasImage(atlasImage)) {
+        return failure("atlas_image_inconsistent")
+      }
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.delete(ATLAS_IMAGE_KEY)
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        removedAtlasImage: atlasImage,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
   }
 
   updateOwnerProfile(command) {
@@ -2053,12 +2181,17 @@ export class UserProfileDurableObject extends DurableObject {
     ) {
       return failure("plans_inconsistent")
     }
+    const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+    if (atlasImage && !validStoredAtlasImage(atlasImage)) {
+      return failure("atlas_image_inconsistent")
+    }
     return Object.freeze({
       ok: true,
       profile: owner.profile,
       pins,
       wishes,
       plans,
+      atlasImage,
     })
   }
 

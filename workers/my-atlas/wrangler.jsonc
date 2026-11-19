@@ -20,6 +20,15 @@
     "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
     "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
   },
+  "images": {
+    "binding": "IMAGES",
+  },
+  "r2_buckets": [
+    {
+      "binding": "MY_ATLAS_MEDIA_R2",
+      "bucket_name": "roamwithjustin-my-atlas-user-media-local",
+    },
+  ],
   "durable_objects": {
     "bindings": [
       {
@@ -73,7 +82,7 @@
         "TURNSTILE_ACTION": "my-atlas-register",
         "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1,roamwithjustin.com,www.roamwithjustin.com",
         "BETA_TERMS_VERSION": "staging-beta-1",
-        "BETA_PRIVACY_VERSION": "my-atlas-privacy-2026-11-17",
+        "BETA_PRIVACY_VERSION": "my-atlas-privacy-2026-11-19",
         "BETA_INVITE_USE_CEILING": "1",
         "BETA_INVITE_MAX_TTL_SECONDS": "86400",
         "REGISTRATION_PENDING_LEASE_SECONDS": "900",
@@ -104,13 +113,28 @@
           "binding": "MY_ATLAS_CATALOG_R2",
           "bucket_name": "roamwithjustin-my-atlas-catalog-staging",
         },
+        {
+          "binding": "MY_ATLAS_MEDIA_R2",
+          "bucket_name": "roamwithjustin-my-atlas-user-media-staging",
+        },
       ],
+      "images": {
+        "binding": "IMAGES",
+      },
       "ratelimits": [
         {
           "name": "MY_ATLAS_PUBLIC_RATE_LIMITER",
           "namespace_id": "2026111601",
           "simple": {
             "limit": 120,
+            "period": 60,
+          },
+        },
+        {
+          "name": "MY_ATLAS_IMAGE_RATE_LIMITER",
+          "namespace_id": "2026111901",
+          "simple": {
+            "limit": 6,
             "period": 60,
           },
         },

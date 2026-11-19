@@ -3,14 +3,19 @@ import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
 import {
   createMyPin,
+  deleteMyAccount,
   deleteMyPin,
   exportMyAtlas,
+  getMyAtlasImage,
   getMyAtlasState,
   getMyProfile,
   listMyPins,
+  removeMyAtlasImage,
+  replaceMyAtlasImage,
   updateMyPin,
   updateMyProfile,
 } from "../src/account/service.mjs"
+import { normalizeDeleteAccount } from "../src/planning/contracts.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
 import {
@@ -154,6 +159,154 @@ beforeEach(async () => {
 })
 
 describe("private owner profile and pin services", () => {
+  it("stores one private Atlas image, replaces it atomically, and removes it", async () => {
+    let imageSequence = 0
+    const imageTransformer = async ({ bytes }) => {
+      imageSequence += 1
+      const output = new Uint8Array([82, 73, 70, 70, imageSequence])
+      return {
+        bytes: output.buffer,
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: output.byteLength,
+        sourceSha256: String(imageSequence).padStart(64, "0"),
+      }
+    }
+    const first = await replaceMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 1,
+        idempotencyKey: "01010101-0101-4101-8101-010101010101",
+      },
+      upload: {
+        bytes: new Uint8Array([1]).buffer,
+        contentType: "image/jpeg",
+      },
+      imageTransformer,
+      imageIdFactory: () => "image_11111111111111111111111111111111",
+      now: NOW,
+    })
+    expect(first).toMatchObject({
+      profile: { revision: 2 },
+      atlasImage: {
+        imageId: "image_11111111111111111111111111111111",
+        width: 1200,
+        height: 1200,
+      },
+    })
+    const firstObject = await env.MY_ATLAS_MEDIA_R2.get(
+      `private/atlas/${USER_ID}/image_11111111111111111111111111111111.webp`
+    )
+    expect(firstObject).not.toBeNull()
+
+    const second = await replaceMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 2,
+        idempotencyKey: "02020202-0202-4202-8202-020202020202",
+      },
+      upload: {
+        bytes: new Uint8Array([2]).buffer,
+        contentType: "image/png",
+      },
+      imageTransformer,
+      imageIdFactory: () => "image_22222222222222222222222222222222",
+      now: "2026-11-16T18:00:00.000Z",
+    })
+    expect(second).toMatchObject({
+      profile: { revision: 3 },
+      atlasImage: {
+        imageId: "image_22222222222222222222222222222222",
+      },
+    })
+    expect(
+      await env.MY_ATLAS_MEDIA_R2.get(
+        `private/atlas/${USER_ID}/image_11111111111111111111111111111111.webp`
+      )
+    ).toBeNull()
+    const ownerImage = await getMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(ownerImage.atlasImage.imageId).toBe(
+      "image_22222222222222222222222222222222"
+    )
+    expect(await ownerImage.object.arrayBuffer()).toEqual(
+      new Uint8Array([82, 73, 70, 70, 2]).buffer
+    )
+    const state = await getMyAtlasState({
+      environment: environment(),
+      identity: IDENTITY,
+      placeCatalog: { resolveMany: async () => [] },
+    })
+    expect(state.atlasImage).toEqual(second.atlasImage)
+    expect(JSON.stringify(state)).not.toContain("storageKey")
+    expect(JSON.stringify(state)).not.toContain("sourceSha256")
+
+    const removed = await removeMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 3,
+        idempotencyKey: "03030303-0303-4303-8303-030303030303",
+      },
+      now: "2026-11-16T19:00:00.000Z",
+    })
+    expect(removed.profile.revision).toBe(4)
+    expect(
+      await env.MY_ATLAS_MEDIA_R2.get(
+        `private/atlas/${USER_ID}/image_22222222222222222222222222222222.webp`
+      )
+    ).toBeNull()
+    await expect(
+      getMyAtlasImage({ environment: environment(), identity: IDENTITY })
+    ).rejects.toMatchObject({ code: "atlas_image_not_found" })
+  })
+
+  it("purges the private Atlas image before final account deletion", async () => {
+    const key = `private/atlas/${USER_ID}/image_33333333333333333333333333333333.webp`
+    await replaceMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 1,
+        idempotencyKey: "04040404-0404-4404-8404-040404040404",
+      },
+      upload: {
+        bytes: new Uint8Array([3]).buffer,
+        contentType: "image/jpeg",
+      },
+      imageTransformer: async () => ({
+        bytes: new Uint8Array([82, 73, 70, 70, 3]).buffer,
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: 5,
+        sourceSha256: "3".repeat(64),
+      }),
+      imageIdFactory: () => "image_33333333333333333333333333333333",
+      now: NOW,
+    })
+    expect(await env.MY_ATLAS_MEDIA_R2.get(key)).not.toBeNull()
+    const input = normalizeDeleteAccount(
+      { confirmation: "DELETE MY ATLAS" },
+      new Headers({
+        "If-Match": '"rev-2"',
+        "Idempotency-Key": "05050505-0505-4505-8505-050505050505",
+      })
+    )
+    await deleteMyAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: "2026-11-16T20:00:00.000Z",
+    })
+    expect(await env.MY_ATLAS_MEDIA_R2.get(key)).toBeNull()
+  })
+
   it("reads a private revision-1 profile and refuses to publish it empty", async () => {
     expect(
       await getMyProfile({ environment: environment(), identity: IDENTITY })
