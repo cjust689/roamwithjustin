@@ -5,7 +5,7 @@ kind: proposal
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - gear-system
   - gear-ingestion-cli
@@ -18,7 +18,9 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
+  - scripts/prepare-gear-image.mjs
   - scripts/lib/gear-ingestion.js
+  - scripts/lib/gear-image-preparation.mjs
   - src/content/gear
   - src/content/selectors/gear.mjs
   - src/components/GearGrid.vue
@@ -48,6 +50,12 @@ mode, and public Gear actions reuse existing analytics. No sample product was
 fabricated. A creator-owned product image, exact product identity, firsthand
 usage, and approved merchant destination are still required for the first real
 record.
+
+The local part of Phase 2 is now implemented. `gear:prepare` validates one
+reviewed creator-owned JPEG or PNG, renders deterministic metadata-stripped
+WebP derivatives, and writes a scoped manifest without a fake Journey. It does
+not download remote images, upload to R2, create a receipt, or update canonical
+Gear state. Those publication steps remain proposal work.
 
 ## 0. Product objective and non-negotiables
 

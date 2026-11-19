@@ -323,6 +323,17 @@ See [the Gear ingestion CLI guide](docs/reference/gear-ingestion-cli.md) for the
 input contract, publication safeguards, selectors, examples, and complete
 operating workflow.
 
+Prepare a reviewed creator-owned JPEG or PNG for a future Gear card without
+creating a Journey association or changing canonical content:
+
+```bash
+npm run gear:prepare -- --gear-id camera-accessory --source ./gear-inbox/camera-accessory.jpg --output ./gear-ready --rights-owner roam-with-justin --rights-status owned --rights-reviewed --alt "Camera accessory on a dark background" --dry-run
+```
+
+See [the Gear image preparation guide](docs/reference/gear-image-preparation.md)
+before using `--apply`. Prepared packages are local review artifacts, not R2
+receipts or published Gear records.
+
 ## How production works
 
 Production is a static site; GitHub Pages does not run Node, Express, Docker,

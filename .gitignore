@@ -16,6 +16,10 @@ node_modules
 .state/my-atlas/
 .wrangler/
 
+# local Gear image sources and prepared packages
+/gear-inbox/
+/gear-ready/
+
 # Log files
 npm-debug.log*
 yarn-debug.log*

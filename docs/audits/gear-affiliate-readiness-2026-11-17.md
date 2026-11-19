@@ -16,7 +16,9 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
+  - scripts/prepare-gear-image.mjs
   - scripts/lib/gear-ingestion.js
+  - scripts/lib/gear-image-preparation.mjs
   - scripts/lib/media-ingestion.js
   - scripts/upload-media.js
   - workers/media-upload/src/index.mjs
@@ -55,7 +57,7 @@ rights to a product image, received GA4 events, or affiliate conversions.
 | How should Gear integrate with existing components and registries? | Canonical generated Gear and Gear Usage registries, selectors, Journey projection, and a registry-backed Gear page already exist. The generated registry is empty. | Extend those records in place. Gear merchant links now reference the canonical Partner identity and the shared commercial click helper. No second merchant registry or Gear-specific analytics event is allowed. |
 | Which affiliate programs and tracking rules are approved? | The repository contains owner-supplied Expedia banner configuration and the owner reports using complete Amazon Associates URLs for Gear. It contains no evidence of approved SmallRig, PGYTECH, Tilta, Marriott, or Booking.com Gear tracking rules or credentials. | Complete Amazon URLs may be stored unchanged against the canonical `amazon-associates` Partner and its bounded host allowlist. Automatic rules fail closed unless a provider-specific adapter is configured and tested. No default Gear rule is enabled. |
 | Should AI product research be part of the first slice? | No product record or source packet currently requires enrichment. The existing OpenAI use is editorial and does not establish a Gear research workflow. | Keep Gear AI off. A later local, manually triggered tool may create source-linked drafts with a fixed budget and human approval, but it is not required to publish the first product. |
-| What is the image publishing workflow? | There is no Gear image prepare, preview, approval, upload, receipt, or publish command. `imageAssetId` can reference an existing canonical image, but creating a product image independently is unsupported. | The next image phase needs dry-run preparation, explicit rights review, deterministic derivatives, immutable upload, checksum receipt verification, and an atomic Gear record update. It remains unimplemented until a creator-owned product image is supplied. |
+| What is the image publishing workflow? | Journey-independent local preparation now exists for a reviewed creator-owned JPEG or PNG. It creates deterministic metadata-stripped derivatives and a Gear-specific manifest without changing canonical state. There is still no Gear upload receipt or publish adapter. | Use `gear:prepare` for local review. Add immutable upload, checksum receipt verification, and an atomic Gear record update before treating a prepared image as published. |
 
 ## Implemented in this reconciliation
 
@@ -94,7 +96,8 @@ rights to a product image, received GA4 events, or affiliate conversions.
 4. The exact approved affiliate URL and canonical Partner metadata, or an
    explicitly noncommissionable ordinary link.
 5. Firsthand notes written from actual use.
-6. The Gear-specific image prepare, upload receipt, and publish adapter.
+6. The Gear-specific upload receipt and publish adapter. Local preparation is
+   implemented but is not publication.
 
 Optional AI research, automatic Amazon tagging, remote image download, Gear
 detail routes, and additional merchant programs remain later phases. They are

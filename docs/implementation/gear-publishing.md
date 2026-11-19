@@ -10,6 +10,7 @@ related:
   - gear-system
   - gear-ingestion-cli
   - gear-sheet-workflow
+  - gear-image-preparation
   - gear-ingestion-affiliate-analytics-ai
   - gear-affiliate-readiness-2026-11-17
   - monetization-analytics
@@ -19,7 +20,11 @@ code_paths:
   - scripts/ingest-gear.js
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
+  - scripts/prepare-gear-image.mjs
   - scripts/lib/gear-ingestion.js
+  - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/image-normalization.js
+  - scripts/test-gear-image-preparation.mjs
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/commercial-links.js
@@ -118,18 +123,21 @@ with an original image into a repeatable publishing workflow.
 
 ## Journey-independent image phase
 
-- [ ] Add `gear:prepare --dry-run` for a local JPEG or PNG with explicit
+- [x] Add `gear:prepare --dry-run` for a local JPEG or PNG with explicit
   creator-owned rights.
-- [ ] Reuse the current Sharp normalization and metadata-stripping primitives.
-- [ ] Produce deterministic product derivatives and a scoped manifest without
+- [x] Reuse the current Sharp normalization and metadata-stripping primitives.
+- [x] Produce deterministic product derivatives and a scoped manifest without
   a fake Journey, Visit, Place, or media placement.
+- [x] Write packages atomically and treat an exact repeat as unchanged while
+  rejecting a conflicting package instead of overwriting it.
 - [ ] Reuse authenticated immutable upload and checksum receipt semantics with
   a Gear-specific manifest validator.
 - [ ] Publish only after receipt verification and card approval.
-- [ ] Make repeat publication idempotent and preserve the prior record if
+- [ ] Make receipt-backed repeat publication idempotent and preserve the prior record if
   validation or build fails.
 
 Remote image download, automatic Amazon tagging, additional merchant adapters,
-product detail routes, and AI research remain outside the next slice. The
-generated Gear registry remains empty until real owner input satisfies the
-gate above.
+product detail routes, and AI research remain outside the next slice. Local
+image preparation does not make a product public. The generated Gear registry
+remains empty until real owner input satisfies the gate above and the
+receipt-backed publication adapter exists.
