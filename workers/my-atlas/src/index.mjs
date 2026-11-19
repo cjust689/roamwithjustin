@@ -27,8 +27,10 @@ import {
   reconcilePendingRegistration,
   revokeBetaInvitation,
 } from "./registration/operator.mjs"
+import { hashQualifiedIdentity } from "./registration/hashing.mjs"
 import {
   formatRevisionEtag,
+  normalizeAtlasImageMutation,
   normalizeCreatePin,
   normalizeDeletePin,
   normalizeExportQuery,
@@ -43,12 +45,20 @@ import {
   deleteMyAccount,
   deleteMyPin,
   exportMyAtlas,
+  getMyAtlasImage,
   getMyAtlasState,
   getMyProfile,
   listMyPins,
+  removeMyAtlasImage,
+  replaceMyAtlasImage,
   updateMyPin,
   updateMyProfile,
 } from "./account/service.mjs"
+import {
+  AtlasImageServiceError,
+  AtlasImageValidationError,
+  readAtlasImageRequest,
+} from "./account/atlas-image.mjs"
 import {
   normalizeCreatePlan,
   normalizeCreateWish,
@@ -164,6 +174,15 @@ function accountJsonResponse(body, status, context, revision) {
   return response
 }
 
+function atlasImageResponse(result, context) {
+  const headers = responseHeaders(context)
+  headers.set("Content-Type", "image/webp")
+  headers.set("Content-Disposition", 'inline; filename="my-atlas-image.webp"')
+  headers.set("Content-Length", String(result.atlasImage.byteLength))
+  if (result.object.httpEtag) headers.set("ETag", result.object.httpEtag)
+  return new Response(result.object.body, { status: 200, headers })
+}
+
 function csvCell(value) {
   const text = String(value ?? "")
   const safeText = /^[\t\r\n ]*[=+\-@]/.test(text) ? `'${text}` : text
@@ -255,6 +274,32 @@ async function publicReadRateLimit({
     const clientAddress = request.headers.get("CF-Connecting-IP") || "unknown"
     const clientKey = `${scope}:${clientAddress}`
     const result = await limiter.limit({ key: clientKey, delta: weight })
+    if (result?.success === true) return null
+    const response = errorResponse(429, "rate_limited", context)
+    response.headers.set("Retry-After", "60")
+    return response
+  } catch {
+    return errorResponse(503, "rate_limit_unavailable", context)
+  }
+}
+
+async function atlasImageUploadRateLimit({
+  environment,
+  dependencies,
+  context,
+  identity,
+}) {
+  const limiter =
+    dependencies.atlasImageRateLimiter ||
+    environment.MY_ATLAS_IMAGE_RATE_LIMITER
+  if (!limiter) return null
+  if (typeof limiter.limit !== "function") {
+    return errorResponse(500, "service_configuration_error", context)
+  }
+  try {
+    const result = await limiter.limit({
+      key: await hashQualifiedIdentity(identity),
+    })
     if (result?.success === true) return null
     const response = errorResponse(429, "rate_limited", context)
     response.headers.set("Retry-After", "60")
@@ -508,6 +553,7 @@ export async function handleRequest(
   const isReconciliation = Boolean(reconciliationMatch)
   const isMyProfile = url.pathname === "/v1/me"
   const isMyAtlasState = url.pathname === "/v1/me/atlas"
+  const isMyAtlasImage = url.pathname === "/v1/me/atlas-image"
   const isMyPins = url.pathname === "/v1/me/pins"
   const myPinMatch = url.pathname.match(/^\/v1\/me\/pins\/(pin_[a-f0-9]{24})$/)
   const isMyPin = Boolean(myPinMatch)
@@ -534,6 +580,7 @@ export async function handleRequest(
   const isAccountRoute =
     isMyProfile ||
     isMyAtlasState ||
+    isMyAtlasImage ||
     isMyPins ||
     isMyPin ||
     isMyWishes ||
@@ -563,6 +610,7 @@ export async function handleRequest(
     (isReconciliation && request.method !== "POST") ||
     (isMyProfile && !["GET", "PATCH", "DELETE"].includes(request.method)) ||
     (isMyAtlasState && request.method !== "GET") ||
+    (isMyAtlasImage && !["GET", "POST", "DELETE"].includes(request.method)) ||
     (isMyPins && !["GET", "POST"].includes(request.method)) ||
     (isMyPin && !["PATCH", "DELETE"].includes(request.method)) ||
     (isMyWishes && !["GET", "POST"].includes(request.method)) ||
@@ -699,7 +747,56 @@ export async function handleRequest(
           placeCatalog: dependencies.placeCatalog,
         })
         return accountJsonResponse(
-          { profile: result.profile, pins: result.pins },
+          {
+            profile: result.profile,
+            pins: result.pins,
+            atlasImage: result.atlasImage,
+          },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+
+      if (isMyAtlasImage && request.method === "GET") {
+        const service = dependencies.getMyAtlasImage || getMyAtlasImage
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+        })
+        return atlasImageResponse(result, context)
+      }
+      if (isMyAtlasImage && request.method === "POST") {
+        const limited = await atlasImageUploadRateLimit({
+          environment,
+          dependencies,
+          context,
+          identity: accountIdentity,
+        })
+        if (limited) return limited
+        const service = dependencies.replaceMyAtlasImage || replaceMyAtlasImage
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeAtlasImageMutation(request.headers),
+          upload: await readAtlasImageRequest(request),
+        })
+        return accountJsonResponse(
+          { atlasImage: result.atlasImage },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyAtlasImage) {
+        const service = dependencies.removeMyAtlasImage || removeMyAtlasImage
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeAtlasImageMutation(request.headers),
+        })
+        return accountJsonResponse(
+          { deleted: true },
           200,
           context,
           result.profile.revision
@@ -1091,6 +1188,7 @@ export async function handleRequest(
           "pin_not_found",
           "wish_not_found",
           "plan_not_found",
+          "atlas_image_not_found",
         ].includes(error.code)
       ) {
         return errorResponse(404, "not_found", context)
@@ -1099,6 +1197,12 @@ export async function handleRequest(
     }
     if (error instanceof AccountServiceError) {
       return errorResponse(503, "account_service_unavailable", context)
+    }
+    if (error instanceof AtlasImageValidationError) {
+      return errorResponse(400, error.code, context)
+    }
+    if (error instanceof AtlasImageServiceError) {
+      return errorResponse(503, "atlas_image_service_unavailable", context)
     }
     if (error instanceof CatalogConfigurationError) {
       return errorResponse(500, "service_configuration_error", context)

@@ -10,6 +10,7 @@ related:
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
   - my-atlas-destination-memory-photo-implementation
+  - my-atlas-favorite-travel-image-implementation
   - media-pipeline
 supersedes: []
 superseded_by: []
@@ -36,6 +37,10 @@ verification:
 This audit records the current repository boundary before private traveler
 photo storage is introduced. It does not claim that a user photo can be
 uploaded, transformed, stored, viewed, exported, or purged today.
+
+The later product decision uses one account-level favorite travel image for
+Atlas Story export rather than one image per visited pin. See the active
+[favorite travel image implementation](../implementation/my-atlas-favorite-travel-image.md).
 
 ## Existing memory behavior
 
