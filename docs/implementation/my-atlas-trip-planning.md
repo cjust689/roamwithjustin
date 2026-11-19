@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - my-atlas-trip-planning
   - my-atlas-trip-planner-ux-routes-flights-lodging
@@ -48,6 +48,7 @@ verification:
     - Planner-coherence tests verify direct Add to trip wiring, visible save requirements, eager planning reads, parent map-mode switching, start and stop and finish route projection, selected-finish omission until chosen, and shared-coordinate role preservation
     - npm run my-atlas:test, npm run lint, npm run docs:audit, and npm run build passed for the planner-coherence slice
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, nested wishlist, readiness-gated trip-details dialog, and zero horizontal overflow
+    - Local Chrome fixture verification on 2026-11-19 at 1280 and 390 CSS pixels confirmed the full-width account row, expanded planner width, natural-height scrolling, readable route builder, and zero horizontal overflow
     - Pull request 141 passed validation run 44358088143 and merged to develop as e514e6d06bcb011cfabd0f2fe68b77144213e8cb; develop validation run 44358509804 then succeeded
     - Pull request 142 passed production validation run 44358862563 and merged to main as 01c8a83e54b14f4cec3a47ac26b82b9804dad62f
     - Pages workflow 44359227708 built and deployed the production coherence merge successfully
@@ -231,6 +232,12 @@ Authenticated owner interaction remains external acceptance.
 - [x] The planner starts collapsed within the owner workflow. Its expanded
       wishlist, destination chooser, and ordered-stop collections use bounded
       scrolling so large private lists do not lengthen the whole Atlas panel.
+- [x] Opening the planner closes Add destination, Visited, and Share and export
+      sections, expands the desktop owner panel to a readable working width,
+      and preserves every direct child at its natural height so overflow scrolls
+      instead of flex-shrinking the planner into horizontal strips.
+- [x] Planner failure state includes an explicit retry action. Narrow screens
+      place builder actions in a full-width two-column row beneath the heading.
 - [x] A missing canonical catalog record no longer prevents the owner from
       opening the planner. The unresolved wish remains visible and removable, is
       disabled as a route choice, and cannot enter a new immutable plan snapshot.

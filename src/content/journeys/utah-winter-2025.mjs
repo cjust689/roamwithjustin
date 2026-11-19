@@ -50,7 +50,7 @@ export const utahWinter2025Journey = Object.freeze({
     },
   ],
   description:
-    "We leave the airport pointed west, reach the salt before sunrise, and spend the next week moving from empty white flats to red canyons and finally snow. The landscapes are the obvious draw; what stays with me is our son at four years old reaching toward a dinosaur, hiking through a surprise snow squall, and watching kids at Woodward treat being upside down as normal.",
+    "We leave the airport pointed west, reach the salt before sunrise, and spend the next week moving from empty white flats to red canyons and finally snow. The landscapes are the obvious draw. What stays with me is our son at four years old reaching toward a dinosaur, hiking through a surprise snow squall, and watching kids at Woodward treat being upside down as normal.",
   duration: "7 days",
   audience: "Couples, photographers, drone pilots, solo travelers",
   costLevel: "$$",
@@ -186,9 +186,9 @@ export const utahWinter2025Journey = Object.freeze({
       type: "attraction",
       droneAllowed: false,
       description:
-        "On paper, Moab Giants is the kid stop. In the photos, our son stands under a roaring dinosaur throwing up two peace signs, then reaches toward another one as if they are meeting. By the time we get back in the car, the desert outside is no longer just geology to him; it is dinosaur country.",
+        "On paper, Moab Giants is the kid stop. In the photos, our son stands under a roaring dinosaur throwing up two peace signs, then reaches toward another one as if they are meeting. By the time we get back in the car, the desert outside is no longer just geology to him. It is dinosaur country.",
       summary:
-        "One roadside stop changes the rest of the drive: every canyon becomes somewhere a dinosaur might still be hiding.",
+        "One roadside stop changes the rest of the drive. Every canyon becomes somewhere a dinosaur might still be hiding.",
       notes: [
         "Full size dinosaur replicas and educational exhibits held our son's attention.",
         "Helped spark our son's imagination for the rest of the trip.",
@@ -229,7 +229,7 @@ export const utahWinter2025Journey = Object.freeze({
       type: "drive",
       droneAllowed: true,
       description:
-        "We reach Potash Road as the low light starts warming the canyon walls. In one frame, our family is barely more than a few dark shapes beneath the rock; the scale is the whole story. The road keeps bending between river and cliff, and every pullout asks for another five minutes.",
+        "We reach Potash Road as the low light starts warming the canyon walls. In one frame, our family is barely more than a few dark shapes beneath the rock. The scale is the whole story. The road keeps bending between river and cliff, and every pullout asks for another five minutes.",
       summary:
         "Late light turns the canyon orange while our family becomes a tiny measure of how large the walls really are.",
       notes: [
@@ -448,7 +448,7 @@ export const utahWinter2025Journey = Object.freeze({
       type: "attraction",
       droneAllowed: false,
       description:
-        "Our son heads to ski school while we take a few runs of our own. By afternoon, the trip changes speed again: the lifts and open slopes give way to a walk through downtown Park City. It is less a grand finale than a welcome reset between two very different kinds of winter play.",
+        "Our son heads to ski school while we take a few runs of our own. By afternoon, the trip changes speed again. The lifts and open slopes give way to a walk through downtown Park City. It is less a grand finale than a welcome reset between two very different kinds of winter play.",
       summary:
         "Ski school buys everyone a little independence before we regroup and slow down downtown.",
       notes: [
@@ -490,12 +490,12 @@ export const utahWinter2025Journey = Object.freeze({
       type: "attraction",
       droneAllowed: false,
       description:
-        "We walk inside and a kid is already completely inverted on a BMX bike above the foam pit. A young skateboarder launches across a transition while bikes move through the same room, and nobody watching acts like any of this is unusual. Our son comes to play; I keep staring at how casually these kids rewrite the limits of what a body and a board can do. They are built different.",
+        "We walk inside and a kid is already completely inverted on a BMX bike above the foam pit. A young skateboarder launches across a transition while bikes move through the same room, and nobody watching acts like any of this is unusual. Our son comes to play. I keep staring at how casually these kids rewrite the limits of what a body and a board can do. They are built different.",
       summary:
         "Bikes, boards, skis, and trampolines. Then a kid rotates upside down and makes the impossible look routine.",
       notes: [
         "Skiing, snowboarding, skating, biking, trampolines, and snow tubing",
-        "Accommodates a wide range of ages; an adult bar area overlooks the action",
+        "Accommodates a wide range of ages. An adult bar area overlooks the action",
       ],
       hero: {
         assetId: "image-utah-locations-utah-woodward",
@@ -579,7 +579,7 @@ export const utahWinter2025Journey = Object.freeze({
       type: "drive",
       droneAllowed: false,
       description:
-        "The route closes with an hour in the car back to SLC and a flight around 1:00 p.m. After a week of salt, sandstone, and snow, the airport is ordinary in exactly the way endings usually are: bags, lines, and one last look back through the camera roll.",
+        "The route closes with an hour in the car back to SLC and a flight around 1:00 p.m. After a week of salt, sandstone, and snow, the airport is ordinary in exactly the way endings usually are. Bags, lines, and one last look back through the camera roll.",
       summary:
         "One quiet hour back to SLC closes a trip that crossed three completely different versions of Utah.",
       notes: [],
@@ -594,7 +594,7 @@ export const utahWinter2025Journey = Object.freeze({
   ],
   days: [
     {
-      label: "Arrival Day: SLC to Wendover",
+      label: "Arrival Day, SLC to Wendover",
       summary:
         "We land in Salt Lake City around 4:00 to 5:00 p.m., collect the Jeep, and point west before the trip has really had time to announce itself. The drive to Wendover takes about two hours and puts us close enough to meet the salt before sunrise.",
       visits: [],
@@ -614,17 +614,17 @@ export const utahWinter2025Journey = Object.freeze({
         {
           visitId: "utah-winter-2025-bonneville-salt-flats",
           notes:
-            "We arrive before dawn in waterproof shoes, with wind moving across puddles on the flats. First the mountains separate from the dark; then the wet salt begins reflecting the sky. The place does not need a grand claim. The nearly empty frame and slow arrival of light do the work.",
+            "We arrive before dawn in waterproof shoes, with wind moving across puddles on the flats. First the mountains separate from the dark. Then the wet salt begins reflecting the sky. The place does not need a grand claim. The nearly empty frame and slow arrival of light do the work.",
         },
         {
           visitId: "utah-winter-2025-moab-giants",
           notes:
-            "Our son throws two peace signs beneath one roaring dinosaur, then reaches toward another as if introductions are in order. The stop is supposed to break up the drive; instead, it changes how he sees everything beyond the windshield for the rest of the way into Moab.",
+            "Our son throws two peace signs beneath one roaring dinosaur, then reaches toward another as if introductions are in order. The stop is supposed to break up the drive. Instead, it changes how he sees everything beyond the windshield for the rest of the way into Moab.",
         },
         {
           visitId: "utah-winter-2025-potash-road",
           notes:
-            "The road bends between river and cliff while late light warms the rock. We stop often enough to notice climbers working the roadside walls, but the frame that holds me is simpler: a few family figures nearly swallowed by the scale of the canyon.",
+            "The road bends between river and cliff while late light warms the rock. We stop often enough to notice climbers working the roadside walls, but the frame that holds me is simpler. A few family figures are nearly swallowed by the scale of the canyon.",
         },
       ],
       routes: [
@@ -656,7 +656,7 @@ export const utahWinter2025Journey = Object.freeze({
         {
           visitId: "utah-winter-2025-dead-horse-point",
           notes:
-            "Five minutes of walking from the parking lot puts us at the edge just as a fast snowstorm moves through. Whole canyon layers disappear into white, then return. The accessibility is practical; the weather is what turns the stop into a scene.",
+            "Five minutes of walking from the parking lot puts us at the edge just as a fast snowstorm moves through. Whole canyon layers disappear into white, then return. The accessibility is practical. The weather is what turns the stop into a scene.",
         },
         {
           visitId: "utah-winter-2025-arches",
@@ -690,7 +690,7 @@ export const utahWinter2025Journey = Object.freeze({
         {
           visitId: "utah-winter-2025-potash-road-solo",
           notes:
-            "The family version of Potash Road is about people dwarfed by cliffs. This solo return is about the opposite view: climbing above the terrain until the ponds flatten into color, line, and symmetry.",
+            "The family version of Potash Road is about people dwarfed by cliffs. This solo return is about the opposite view. I climb above the terrain until the ponds flatten into color, line, and symmetry.",
         },
       ],
       routes: [
@@ -727,7 +727,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 5: Park City Woodward",
       summary:
-        "The first thing that resets my sense of normal is a kid fully inverted on a BMX bike above the foam pit. Then a young skateboarder lifts cleanly over a transition while bikes move through the room behind him. Woodward gives our son ramps, trampolines, boards, bikes, skis, and snow tubing; it gives me an afternoon of watching kids treat fear and gravity like problems they already solved. These kids are built different.",
+        "The first thing that resets my sense of normal is a kid fully inverted on a BMX bike above the foam pit. Then a young skateboarder lifts cleanly over a transition while bikes move through the room behind him. Woodward gives our son ramps, trampolines, boards, bikes, skis, and snow tubing. It gives me an afternoon of watching kids treat fear and gravity like problems they already solved. These kids are built different.",
       visits: [
         {
           visitId: "utah-winter-2025-woodward",
@@ -738,7 +738,7 @@ export const utahWinter2025Journey = Object.freeze({
     {
       label: "Day 6: Uintas Cross Country Skiing and Dog Sledding",
       summary:
-        "Cross country skiing slows us down for three to four hours before the day changes energy completely. A guide checks chains and harnesses, the dogs line up, and our son settles into the sled behind mirrored orange goggles. The dog sled outing lasts about two hours; judging by the kid tucked into that sled, it is the part he would have happily stretched longer.",
+        "Cross country skiing slows us down for three to four hours before the day changes energy completely. A guide checks chains and harnesses, the dogs line up, and our son settles into the sled behind mirrored orange goggles. The dog sled outing lasts about two hours. Judging by the kid tucked into that sled, it is the part he would have happily stretched longer.",
       visits: [
         {
           visitId: "utah-winter-2025-uintas",
@@ -784,9 +784,9 @@ export const utahWinter2025Journey = Object.freeze({
     utah: "We cross Utah from wet salt before sunrise to red rock weather and finally snow, with our son setting the pace at four years old and changing what we notice.",
     "bonneville-salt-flats":
       "We step onto the flats in the dark and wait until the mountains separate from the sky and wet salt begins reflecting the first light.",
-    moab: "Moab becomes our base, but it never feels like a pause: dinosaurs, canyon roads, national parks, and constantly changing weather radiate out from town.",
+    moab: "Moab becomes our base, but it never feels like a pause. Dinosaurs, canyon roads, national parks, and constantly changing weather radiate out from town.",
     "moab-giants":
-      "Our son throws peace signs beneath one dinosaur and reaches toward another; after that, every canyon on the drive becomes dinosaur country.",
+      "Our son throws peace signs beneath one dinosaur and reaches toward another. After that, every canyon on the drive becomes dinosaur country.",
     "potash-road":
       "We first follow the canyon in late light as a family, then I return alone to trade human scale for the aerial geometry of the ponds.",
     "canyonlands-national-park":
@@ -802,6 +802,6 @@ export const utahWinter2025Journey = Object.freeze({
     uintas:
       "After three to four hours on cross country skis, the guide clips in the dogs and our son settles behind goggles almost as large as his face.",
     "salt-lake-city-airport":
-      "SLC is the plain bookend to a week of salt, sandstone, and snow: rental keys on arrival, bags and security on the way home.",
+      "SLC is the plain bookend to a week of salt, sandstone, and snow. Rental keys on arrival, bags and security on the way home.",
   },
 })

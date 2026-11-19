@@ -95,6 +95,18 @@ function validatePublicSourceStyle() {
             '" uses a decorative eyebrow or kicker treatment'
         )
       }
+      if (
+        /\.vue$/.test(entry.name) &&
+        /\b(?:coming soon|first look|still taking shape|will be added over time)\b/i.test(
+          source
+        )
+      ) {
+        report(
+          'Public component "' +
+            relativePath +
+            '" exposes editorial workflow language'
+        )
+      }
     })
   }
 }
@@ -105,8 +117,15 @@ const editorialWorkflowLanguage =
 function validatePublicCopy(value, owner) {
   if (typeof value !== "string" || !value.trim()) return
 
-  if (/[-–—]/u.test(value)) {
+  if (/[-‐‑‒–—―]/u.test(value)) {
     report(owner + " uses dash punctuation in public copy")
+  }
+  if (/(^|[^0-9]):|;/u.test(value)) {
+    report(
+      owner +
+        " uses a colon or semicolon outside an immediately numeric form in public copy: " +
+        JSON.stringify(value)
+    )
   }
   if (editorialWorkflowLanguage.test(value)) {
     report(owner + " exposes editorial workflow language in public copy")

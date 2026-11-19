@@ -5,12 +5,13 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - content-model
   - gear-ingestion-cli
   - gear-sheet-workflow
   - gear-image-preparation
+  - gear-authoring-workflow
   - gear-publishing-implementation
   - photo-exif-gear
   - gear-affiliate-readiness-2026-11-17
@@ -19,6 +20,7 @@ supersedes:
 superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
+  - scripts/gear-workflow.mjs
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
@@ -118,6 +120,16 @@ three derivatives become a responsive `srcset`. A replacement requires the
 separate `--replace-image` acknowledgement. Content validation or optional
 build failure restores both generated files.
 
+`gear:workflow` now composes record ingestion and the complete image path from
+one versioned local JSON file. A no-write preview validates the canonical
+record and renders image derivatives in memory. The first apply checkpoint
+creates the deterministic local package for review. A second explicitly
+approved checkpoint accepts only that existing package, performs authenticated
+immutable upload, verifies the receipt, and invokes the existing canonical
+image transaction. Record state is restored when a later local or publication
+step fails. Uploaded immutable objects are retained for a safe rerun rather
+than destructively removed.
+
 The public Gear page now reads only the verified canonical Gear selector. It
 shows a concise empty state while the registry is empty. The former
 hardcoded product array, third party product photographs, unverified action
@@ -154,6 +166,9 @@ contract and commands.
   protected catalog mirror. Regenerate the workbook when choices change.
 - Optional AI research and automatic merchant tracking rules are not
   implemented.
+- The file-based authoring orchestrator is implemented, but it does not remove
+  the owner product, usage, image-rights, merchant, Worker, or card-review
+  gates.
 - The older `src/data/affiliates.js` page data is a separate legacy commerce
   source and is not canonical Gear identity. Its placeholder Booking record has
   been removed; remaining partner records still require their own relationship

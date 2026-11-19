@@ -15,15 +15,13 @@ const detailPanel = readSource(
   "src/features/atlas/components/AtlasDetailPanel.vue"
 )
 
-assert.match(atlasView, /node\.comingSoon \? "First look" : "Explore"/)
-assert.match(atlasView, /More stories and media will be added\./)
+assert.match(atlasView, />\s*Explore\s*</)
+assert.doesNotMatch(atlasView, /First look|still taking shape|will be added/)
 assert.doesNotMatch(atlasView, />Journey preview</)
 
-assert.match(detailPanel, /This journey is still taking shape\./)
-assert.match(detailPanel, /This part of the journey is still taking shape\./)
-assert.match(
+assert.doesNotMatch(
   detailPanel,
-  /More places, stories, photographs, and\s+films will be added over time\./
+  /First look|still taking shape|will be added over time/
 )
 assert.doesNotMatch(detailPanel, /displayEyebrow/)
 assert.doesNotMatch(detailPanel, /child\.eyebrow/)

@@ -71,6 +71,25 @@
       </div>
     </header>
 
+    <aside
+      v-if="myAtlasEnabled && myAtlasInviteVisible && !storyMode"
+      class="atlas-my-atlas-toast"
+      role="status"
+    >
+      <div>
+        <strong>Make your own Atlas.</strong>
+        <p>
+          Save where you have been and build private plans for what is next.
+        </p>
+      </div>
+      <div class="atlas-my-atlas-toast-actions">
+        <router-link to="/my-atlas" @click.native="dismissMyAtlasInvite">
+          Open My Atlas
+        </router-link>
+        <button type="button" @click="dismissMyAtlasInvite">Dismiss</button>
+      </div>
+    </aside>
+
     <AtlasJourneyPlayer
       v-if="guidedJourney && !storyMode"
       :journey="guidedJourney"
@@ -125,8 +144,7 @@
           <h1>The journey starts with a place.</h1>
           <p>
             Open a mapped journey for its route, stories, photographs, and
-            films. Journeys marked First look are still taking shape and will
-            grow over time.
+            films.
           </p>
         </div>
 
@@ -138,17 +156,13 @@
           <button
             v-for="node in rootNodes"
             :key="node.id"
-            :class="{ 'is-first-look': node.comingSoon }"
             type="button"
             @click="
               selectNode(node.id, { analyticsSurface: 'journey_explorer' })
             "
           >
-            <span>{{ node.comingSoon ? "First look" : "Explore" }}</span>
+            <span>Explore</span>
             <strong>{{ node.title }}</strong>
-            <small v-if="node.comingSoon">
-              More stories and media will be added.
-            </small>
           </button>
         </div>
 
@@ -258,6 +272,8 @@ import {
   trackAnalyticsEvent,
 } from "@/utils/analytics.mjs"
 
+const MY_ATLAS_INVITE_STORAGE_KEY = "rwj:atlas:my-atlas-invite:v1"
+
 const worldCamera = {
   // Offset the world view west so both American and European roots remain
   // visible beside the open journey navigator instead of beneath it.
@@ -288,6 +304,7 @@ export default {
     return {
       favorites: [],
       myAtlasEnabled: isMyAtlasGeographicProofEnabled(process.env),
+      myAtlasInviteVisible: false,
       recent: [],
       lastContext: null,
       cameras: {},
@@ -482,6 +499,16 @@ export default {
   mounted() {
     this.previousTitle = document.title
 
+    if (this.myAtlasEnabled) {
+      try {
+        this.myAtlasInviteVisible =
+          window.sessionStorage.getItem(MY_ATLAS_INVITE_STORAGE_KEY) !==
+          "hidden"
+      } catch {
+        this.myAtlasInviteVisible = true
+      }
+    }
+
     const stored = loadAtlasState()
     this.favorites = stored.favorites
     this.recent = stored.recent
@@ -512,6 +539,14 @@ export default {
     document.title = this.previousTitle
   },
   methods: {
+    dismissMyAtlasInvite() {
+      this.myAtlasInviteVisible = false
+      try {
+        window.sessionStorage.setItem(MY_ATLAS_INVITE_STORAGE_KEY, "hidden")
+      } catch {
+        // The invitation still dismisses for the current view.
+      }
+    },
     handleMapReady() {
       trackAnalyticsEvent("atlas_loaded", {
         device_category: getDeviceCategory(),
@@ -1291,12 +1326,6 @@ export default {
   line-height: 1.35;
 }
 
-.atlas-journey-nav button.is-first-look {
-  background:
-    linear-gradient(135deg, rgba(246, 189, 96, 0.13), transparent 72%),
-    rgba(255, 255, 255, 0.035);
-}
-
 .atlas-welcome-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1343,6 +1372,93 @@ export default {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   backdrop-filter: blur(8px);
+}
+
+.atlas-my-atlas-toast {
+  position: absolute;
+  z-index: 22;
+  right: 1.25rem;
+  bottom: 3.75rem;
+  display: grid;
+  width: min(22rem, calc(100vw - 2rem));
+  gap: 0.75rem;
+  box-sizing: border-box;
+  padding: 0.9rem;
+  border: 1px solid rgba(246, 189, 96, 0.48);
+  border-radius: 16px;
+  background: rgba(7, 11, 14, 0.94);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(16px);
+  animation: atlas-toast-in 220ms ease-out both;
+}
+
+.atlas-page.has-detail .atlas-my-atlas-toast {
+  right: auto;
+  left: 1.25rem;
+}
+
+.atlas-my-atlas-toast > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.atlas-my-atlas-toast strong {
+  color: #f8d79f;
+  font-size: 0.9rem;
+}
+
+.atlas-my-atlas-toast p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.atlas-my-atlas-toast-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.atlas-my-atlas-toast-actions a,
+.atlas-my-atlas-toast-actions button {
+  display: inline-flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(246, 189, 96, 0.42);
+  border-radius: 999px;
+  color: #15191b;
+  background: #f6bd60;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.atlas-my-atlas-toast-actions button {
+  color: rgba(255, 255, 255, 0.76);
+  background: transparent;
+}
+
+.atlas-my-atlas-toast-actions a:focus-visible,
+.atlas-my-atlas-toast-actions button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@keyframes atlas-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .atlas-announcement {
@@ -1478,6 +1594,18 @@ export default {
   .atlas-provider-note {
     display: none;
   }
+
+  .atlas-my-atlas-toast,
+  .atlas-page.has-detail .atlas-my-atlas-toast {
+    right: 0.65rem;
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+    left: 0.65rem;
+    width: auto;
+  }
+
+  .atlas-page.has-detail .atlas-my-atlas-toast {
+    bottom: calc(6.5rem + env(safe-area-inset-bottom));
+  }
 }
 
 @media (max-width: 540px) {
@@ -1540,6 +1668,10 @@ export default {
 @media (prefers-reduced-motion: reduce) {
   .atlas-page * {
     scroll-behavior: auto !important;
+  }
+
+  .atlas-my-atlas-toast {
+    animation: none;
   }
 }
 </style>

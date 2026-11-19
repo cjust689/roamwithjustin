@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - my-atlas-authentication
   - my-atlas-api-authentication
@@ -47,6 +47,7 @@ verification:
     - npx eslint "src/features/my-atlas/**/*.{js,mjs,vue}" src/router/index.js "scripts/my-atlas/**/*.mjs" scripts/test-my-atlas-place-catalog.mjs
     - node --check scripts/serve.js && node --check scripts/my-atlas/local-place-search-server.mjs
     - Headless Chrome local proof at desktop and emulated 390px mobile widths
+    - Local Chrome fixture verification on 2026-11-19 at 1280 and 390 CSS pixels confirmed direct account actions, mutually exclusive owner workflows, readable planner layout, and zero horizontal overflow
     - Noninteractive Auth0 authorization checks accepted the configured local and production callbacks and returned login_required
     - A noninteractive Auth0 connection check redirected the configured SPA to accounts.google.com
     - Owner reported successful Google sign in, callback return, and audience-scoped API access verification in the local browser proof
@@ -388,6 +389,11 @@ ceiling before inviting external users.
       future-planning, and sharing flows. Existing accounts start with the
       potentially large flows closed, while an empty account opens Add
       destination. Expanded destination and planner lists use bounded scrolling.
+- [x] Replace the ambiguous profile action menu with a full-width identity row,
+      direct Sign out, and a named Share and export workflow. Planner, destination,
+      visited, and sharing sections close one another when opened.
+- [x] Prevent desktop owner sections from flex-shrinking inside the scroll panel
+      and widen the panel while the private planner is active.
 - [x] Add a feature-gated My Atlas discovery action. The original homepage card
       was later replaced by one action in the direct root Atlas toolbar.
 - [x] Add an accessible pre-account product walkthrough and a once-per-browser

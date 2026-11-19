@@ -5,7 +5,7 @@ kind: proposal
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - gear-system
   - gear-ingestion-cli
@@ -18,6 +18,7 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
+  - scripts/gear-workflow.mjs
   - scripts/prepare-gear-image.mjs
   - scripts/publish-gear-image.mjs
   - scripts/lib/gear-ingestion.js
@@ -39,7 +40,8 @@ workflow, not implementation evidence. The canonical Gear and Usage ingestor,
 selectors, Journey projection, validation, registry-backed Gear page, Partner
 link integration, and shared `partner_click` path are implemented and
 documented in [Gear registry and Journey usage](../architecture/gear.md). The
-generated registry is empty. Gear image publication, a real product slice,
+generated registry is empty. Gear image publication and the file-based
+authoring workflow are implemented. A real product slice, remote image intake,
 automatic merchant adapters, and optional AI enrichment remain unimplemented.
 Review the current source, managed documentation, and actual account and
 affiliate settings before editing code. Adapt this proposal to the verified
@@ -64,7 +66,9 @@ after complete remote verification. `gear:publish-image` then verifies the
 exact receipt, requires explicit card approval, and atomically composes one
 stable Gear image asset into canonical Media while updating only the intended
 existing Gear item. The first real product, optional remote image intake, and
-authoring orchestration remain proposal work.
+external Worker deployment remain gated. Phase 3 file-based authoring
+orchestration is now implemented through a preview, a local prepare checkpoint,
+and a separately approved publish checkpoint.
 
 ## 0. Product objective and non-negotiables
 
@@ -580,10 +584,16 @@ Proposed structured response:
 
 ### Phase 3 - Authoring orchestration
 
-- Implement a small interactive CLI or file-based `gear:add` / `gear:prepare` / `gear:publish` flow, with full preview and error reporting.
-- Auto-resolve existing product aliases, image duplicates and known merchant settings; ask only on ambiguity or rights/variant conflicts.
-- Provide a single successful command path while retaining explicit `--dry-run` and `--apply` separation.
-- Add managed documentation and developer usage example after actual behavior is verified.
+- [Implemented] One file-based `gear:workflow` command coordinates canonical
+  record planning, deterministic creator-owned image preparation, immutable
+  upload, and receipt-backed image publication with full error reporting.
+- [Implemented] Existing identity and alias conflicts, image content hashes,
+  and Partner merchant settings continue to resolve through the canonical
+  ingestor and image validators. Ambiguity remains a hard stop.
+- [Implemented] The command retains explicit `--dry-run` and `--apply`, with a
+  required local prepare checkpoint before the approved publish checkpoint.
+- [Implemented] Managed documentation and a tested usage example are in
+  `docs/reference/gear-authoring-workflow.md`.
 
 ### Phase 4 - Optional AI pilot (manually triggered)
 

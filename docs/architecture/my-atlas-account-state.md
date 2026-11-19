@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - my-atlas-registration
   - my-atlas-api-authentication
@@ -61,6 +61,7 @@ verification:
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
+    - Local Chrome fixture verification on 2026-11-19 at 1280 and 390 CSS pixels confirmed direct account actions, the Share and export workflow, expanded planner width, natural-height scrolling, and zero horizontal overflow
     - Pull request 137 passed validation run 44347357469 and merged the planner redesign to develop as eecbc6590d47d526a376525c18e1e6399f95bbc2; develop validation run 44347715150 then succeeded
     - Pull request 138 reused that successful validation and merged to main as 61e5542885238c5816f5289a93c3bc20af2481ec
     - Pages run 44348107246 built and deployed the production merge successfully
@@ -619,6 +620,19 @@ vertical padding, centered alignment, and compact status pill at desktop and
 phone widths. Planner failures preserve the Worker request ID in owner-facing
 recovery copy when one is available.
 
+The signed-in identity is now a full-width account row with the display name,
+handle, and direct Sign out action. The former profile action menu is removed.
+Public visibility, public-link copying, and Story image export live together in
+a named collapsible Share and export workflow with explanatory copy. Account
+recovery remains adjacent to the identity only when it is needed. Opening any
+large owner workflow closes the others.
+
+On desktop, an open planner widens the owner panel to a bounded 52 rem maximum.
+Direct panel children do not flex-shrink, so planner and sharing sections retain
+their controls and contribute to the panel's internal scroll height. Mobile
+keeps the full-width panel and places itinerary-builder actions below their
+heading.
+
 An active account also sees `Can't find it? Add a custom pin` directly below
 search. The form can seed its name from the current query, requires a valid
 plain-text name, and activates a gold map marker. The owner clicks or taps the
@@ -632,6 +646,10 @@ that routes to `/my-atlas`. Disabled builds omit that action together with the
 route, so the public shell cannot expose a dead My Atlas link. Journey guides
 remain discoverable inside the Atlas rather than behind an intermediate
 homepage.
+
+The same flag enables one dismissible `Make your own Atlas` invitation in the
+public Atlas per browser tab. It points to `/my-atlas`, never reads account
+state, and remains absent from story-reader mode.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land

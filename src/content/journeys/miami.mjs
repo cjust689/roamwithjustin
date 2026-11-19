@@ -37,7 +37,7 @@ export const miamiJourney = Object.freeze({
   fullImage: null,
   gallery: [],
   description:
-    "We come for a little January sun and find two versions of Miami: the familiar South Beach set, and a wilder one reached by airboat, bicycle, and kayak.",
+    "We come for a little January sun and find two versions of Miami. One is the familiar South Beach set, and the other is a wilder place reached by airboat, bicycle, and kayak.",
   duration: "Short winter getaway",
   audience: "Families mixing beach time with outdoor adventure",
   costLevel: "",
@@ -47,7 +47,7 @@ export const miamiJourney = Object.freeze({
     "January mornings could feel cool or damp during our stay, while the sun felt much stronger by midmorning.",
     "The ocean felt cool but still swimmable to our family visiting from the Atlanta area.",
     "At Shark Valley, midday heat and limited shade made timing and sun protection matter to us.",
-    "The smallest children's bike available during our visit was 20 inches, which challenged our son at five years old; current rental inventory may differ.",
+    "The smallest children's bike available during our visit was 20 inches, which challenged our son at five years old. Current rental inventory may differ.",
   ],
   tips: [],
   lodging: [],
@@ -89,7 +89,7 @@ export const miamiJourney = Object.freeze({
       "At Shark Valley, the engine is gone and we are pedaling instead, sometimes past resting alligators closer to the path than we expect. The sun builds, shade is scarce, and a 20 inch bike asks a lot of our son at five years old. He keeps going and we finish safely.",
       "A family bike ride becomes something stranger when resting alligators share the edge of the path and the afternoon heat keeps building.",
       [
-        "We rented bikes on site; the smallest children's bike available during our visit was 20 inches.",
+        "We rented bikes on site. The smallest children's bike available during our visit was 20 inches.",
         "There were a few tense moments with our son at five years old, but everyone finished safely.",
         "Midday heat and limited shade mattered more than we expected.",
       ]
@@ -107,14 +107,14 @@ export const miamiJourney = Object.freeze({
   ],
   days: [
     {
-      label: "Arrival: South Beach feels like a movie set",
+      label: "Arrival in a South Beach movie set",
       summary:
         "We land after a short flight from the Atlanta area, check into an Airbnb, and head straight out on foot. South Beach has the staged familiarity of a Miami Vice scene, with distinctive storefronts, restaurants, and architecture, until the crowds make the obvious point that this is real life. We are tourists too. That first walk is enough to move the trip out of the routine after Christmas and into its own rhythm.",
       visits: [
         {
           visitId: "miami-south-beach-2026-miami-south-beach",
           notes:
-            "The first walk sets the visual language for the trip: cinematic Miami, interrupted in the best way by ordinary family time.",
+            "The first walk sets the visual language for the trip. Cinematic Miami is interrupted in the best way by ordinary family time.",
         },
       ],
       partnerIds: [],
@@ -166,7 +166,7 @@ export const miamiJourney = Object.freeze({
         {
           visitId: "miami-south-beach-2026-shark-valley",
           notes:
-            "The airboat brings the speed; Shark Valley turns the wildlife encounter into a family bike ride.",
+            "The airboat brings the speed. Shark Valley turns the wildlife encounter into a family bike ride.",
         },
       ],
       partnerIds: [],
@@ -175,7 +175,7 @@ export const miamiJourney = Object.freeze({
     {
       label: "Mangroves and raccoons at Oleta",
       summary:
-        "Miami changes shape again at Oleta River State Park. We rent kayaks and paddle through mangroves, putting the beaches and storefronts behind us for a while. An island brings the oddest wildlife encounter of the trip: raccoons. It is strange, memorable, and worth making room for when a Miami trip has time for one more change of pace.",
+        "Miami changes shape again at Oleta River State Park. We rent kayaks and paddle through mangroves, putting the beaches and storefronts behind us for a while. On one island, raccoons become the oddest wildlife encounter of the trip. It is strange, memorable, and worth making room for when a Miami trip has time for one more change of pace.",
       visits: [
         {
           visitId: "miami-south-beach-2026-oleta-river-state-park",

@@ -35,11 +35,11 @@ export const usviStJohn2025Journey = Object.freeze({
     "We flew from Atlanta into Cyril E. King Airport on St. Thomas, crossed the island by taxi, and took the passenger ferry from Red Hook into Cruz Bay.",
     "Traffic keeps left even though the steering wheel is also on the left, something the first taxi ride makes impossible to forget.",
     "The story follows seven chapters, moving from arrival through beach days, the charter, and the Waterlemon Cay outing.",
-    "Nate's Custom Charters operated the boat day; the captain's humor and love of music became part of the memory.",
+    "Nate's Custom Charters operated the boat day. The captain's humor and love of music became part of the memory.",
   ],
   tips: [
     "Maho was our family's favorite beach. Parking became harder as the morning went on, so getting there earlier made the easy roadside access even easier.",
-    "Cinnamon felt more touristy to us than Maho; that is our firsthand comparison, not a universal ranking.",
+    "Cinnamon felt more touristy to us than Maho. That is our firsthand comparison, not a universal ranking.",
     "Waterlemon rewards the effort, but the rocky coastal walk, limited amenities, and strong current deserve proper shoes, a light load, and respect for the ocean.",
     "Wildlife sightings are part of our story, never a promise about what another visitor will see.",
   ],
@@ -68,7 +68,7 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "arrival",
       description:
-        "Cyril E. King Airport made the change in scale immediate: fresh air and palms outside, ocean views nearby, and small prop planes moving where Atlanta's largest jets had filled the horizon hours earlier.",
+        "Cyril E. King Airport made the change in scale immediate. Fresh air and palms were outside, ocean views were nearby, and small prop planes moved where Atlanta's largest jets had filled the horizon hours earlier.",
       summary:
         "The small St. Thomas airport made arrival feel fast and physical. Outside air, palms, ocean, and prop planes replaced the scale of Atlanta.",
       notes: [
@@ -110,7 +110,7 @@ export const usviStJohn2025Journey = Object.freeze({
       description:
         "We rode the top deck into Cruz Bay with the wind in our faces, the sun dropping behind St. Thomas, and late gold light reaching St. John in front of us.",
       summary:
-        "The quick ferry crossing arrived in the best possible light: St. Thomas falling into silhouette behind us and St. John turning gold ahead.",
+        "The quick ferry crossing arrived in the best possible light, with St. Thomas falling into silhouette behind us and St. John turning gold ahead.",
       notes: [
         "The family reached the ferry shortly before sunset and sat on the top deck during the crossing.",
         "The ride felt surprisingly fast, with strong wind on the open upper deck.",
@@ -134,7 +134,7 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "beach",
       description:
-        "Maho was our family's favorite beach: calm water, anchored boats, paddleboards, a Painkiller that converted even a reluctant rum drinker, and a memorable turtle encounter while snorkeling together.",
+        "Maho was our family's favorite beach. Calm water, anchored boats, paddleboards, a Painkiller that converted even a reluctant rum drinker, and a memorable turtle encounter while snorkeling together made the case.",
       summary:
         "Maho paired easy roadside access and useful amenities with the kind of calm water that let the whole family settle in.",
       notes: [
@@ -157,7 +157,7 @@ export const usviStJohn2025Journey = Object.freeze({
       description:
         "Oceana Villa overlooking Great Cruz Bay became the trip's home base, where roosters replaced alarms and breakfast happened on the patio in the breeze above the water.",
       summary:
-        "The villa mornings had their own island soundtrack: the infamous St. John roosters, breakfast outside, and the view over Great Cruz Bay.",
+        "The villa mornings had their own island soundtrack, with the infamous St. John roosters, breakfast outside, and the view over Great Cruz Bay.",
       notes: [
         "Oceana Villa in Great Cruz Bay became our base for the trip.",
         "I captured drone footage and a small photo set from the patio and around the property.",
@@ -194,7 +194,7 @@ export const usviStJohn2025Journey = Object.freeze({
       evidenceStatus: "confirmed",
       type: "charter stop",
       description:
-        "Lovango gave the charter day a slower middle: lunch, time to relax, and open views back toward both St. John and St. Thomas.",
+        "Lovango gave the charter day a slower middle with lunch, time to relax, and open views back toward both St. John and St. Thomas.",
       summary:
         "The stop had a cool, relaxed feel and enough distance to see St. John and St. Thomas as part of the same view.",
       notes: [
@@ -222,7 +222,7 @@ export const usviStJohn2025Journey = Object.freeze({
       description:
         "Trunk Bay arrived with a world class reputation and absolutely looked the part, but honestly, I enjoyed some of St. John's other beaches more.",
       summary:
-        "The beauty was obvious; the more useful truth for our family was that the rougher water demanded a closer eye on the younger kids.",
+        "The beauty was obvious. The more useful truth for our family was that the rougher water demanded a closer eye on the younger kids.",
       notes: [
         "Children played along the beach during our Trunk Bay visit.",
         "The tide and shore break felt rougher than at Maho during the family's visit, which required more attention with young children.",
@@ -268,7 +268,7 @@ export const usviStJohn2025Journey = Object.freeze({
         "The outing began around the old Annaberg sugar plantation landscape, whose history added necessary weight before the walk to the cay.",
         "I remember roughly a mile of rocky coastal walking and recommend proper shoes and carrying as little as practical.",
         "The family encountered only one or two other people and observed abundant sea life, including reef sharks.",
-        "The current felt challenging during the visit; the story treats that as a firsthand warning to avoid underestimating the ocean.",
+        "The current felt challenging during the visit. The story treats that as a firsthand warning to avoid underestimating the ocean.",
       ],
       media: [
         {
@@ -284,7 +284,7 @@ export const usviStJohn2025Journey = Object.freeze({
     {
       label: "Day 1: From Atlanta to Cruz Bay",
       summary:
-        "The first thing that changes is the scale. We leave Atlanta, where some of the largest planes in the sky seem to be taking off constantly, and arrive at this small St. Thomas airport with little prop planes coming and going. We step outside into fresh air with palms in the distance, an ocean breeze, and island views. The terminal moves fast. There is no long wait or drawn out line, which only adds to the anticipation of finally being where we have waited to be.\n\nOur bags go into the taxi and the next adjustment happens immediately: traffic keeps left even though the steering wheel is also on the left. On the ride across St. Thomas, my son keeps pointing out the giant cruise ships in the main harbor while the ports and hills slide past the windows.\n\nWe reach Red Hook not long before sunset. The ferry is surprisingly quick, especially from the top deck with the wind in our faces. The sun drops behind us, St. Thomas turns into a silhouette, and the last gold light lands on St. John ahead. By the time we step into a packed High Tide for a quick bite, the travel day no longer feels like something we had to get through. It is the opening scene.",
+        "The first thing that changes is the scale. We leave Atlanta, where some of the largest planes in the sky seem to be taking off constantly, and arrive at this small St. Thomas airport with little prop planes coming and going. We step outside into fresh air with palms in the distance, an ocean breeze, and island views. The terminal moves fast. There is no long wait or drawn out line, which only adds to the anticipation of finally being where we have waited to be.\n\nOur bags go into the taxi and the next adjustment happens immediately. Traffic keeps left even though the steering wheel is also on the left. On the ride across St. Thomas, my son keeps pointing out the giant cruise ships in the main harbor while the ports and hills slide past the windows.\n\nWe reach Red Hook not long before sunset. The ferry is surprisingly quick, especially from the top deck with the wind in our faces. The sun drops behind us, St. Thomas turns into a silhouette, and the last gold light lands on St. John ahead. By the time we step into a packed High Tide for a quick bite, the travel day no longer feels like something we had to get through. It is the opening scene.",
       visits: [
         { visitId: "usvi-st-john-2025-cyril-e-king-airport" },
         { visitId: "usvi-st-john-2025-red-hook-ferry-terminal" },
@@ -313,7 +313,7 @@ export const usviStJohn2025Journey = Object.freeze({
     {
       label: "Day 3: Boat Day",
       summary:
-        "Nate's Custom Charters picks us up from the National Park dock beside the Cruz Bay Visitor Center. There are twelve of us, and the boat handles the group without ever feeling cramped. Most of it is covered, which matters once the sun is up, and it moves through the chop more smoothly than I expect.\n\nThe captain is phenomenal: funny, relaxed, and serious about the music. 'Hope you like music,' is less a warning than the operating philosophy for the day. We move from reef to reef, watching the coast change between St. Thomas and Leinster Bay and seeing sea life almost everywhere we stop.\n\nAt the place I call Hermit Crab Island, we pause long enough to notice that the ground is moving. There are crabs everywhere. We also pass a sunken sailboat captured in the media. Lunch at Lovango slows the day down and opens a wide view toward both St. John and St. Thomas. The places are great. The captain's personality is what holds the whole day together.",
+        "Nate's Custom Charters picks us up from the National Park dock beside the Cruz Bay Visitor Center. There are twelve of us, and the boat handles the group without ever feeling cramped. Most of it is covered, which matters once the sun is up, and it moves through the chop more smoothly than I expect.\n\nThe captain is phenomenal, funny, relaxed, and serious about the music. 'Hope you like music,' is less a warning than the operating philosophy for the day. We move from reef to reef, watching the coast change between St. Thomas and Leinster Bay and seeing sea life almost everywhere we stop.\n\nAt the place I call Hermit Crab Island, we pause long enough to notice that the ground is moving. There are crabs everywhere. We also pass a sunken sailboat captured in the media. Lunch at Lovango slows the day down and opens a wide view toward both St. John and St. Thomas. The places are great. The captain's personality is what holds the whole day together.",
       visits: [
         {
           visitId: "usvi-st-john-2025-cruz-bay",
