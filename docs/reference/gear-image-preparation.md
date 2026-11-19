@@ -15,13 +15,17 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/prepare-gear-image.mjs
+  - scripts/upload-media.js
   - scripts/lib/gear-image-preparation.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-image-upload.mjs
+  - workers/media-upload/src/index.mjs
 verification:
   state: verified
   evidence:
     - npm run gear:test
+    - npm run media:worker:check
     - node scripts/test-media-ingestion.js
     - node scripts/test-media-upload.js
 ---
@@ -31,8 +35,9 @@ verification:
 `gear:prepare` creates a deterministic local product-image package without a
 fake Journey, Visit, Place, or Media placement. It accepts one local JPEG or
 PNG only after the operator explicitly confirms reviewed creator-owned rights.
-It never downloads a remote image, uploads to R2, edits the canonical Gear
-registry, commits, pushes, or deploys.
+It never downloads a remote image, edits the canonical Gear registry, commits,
+pushes, or deploys. A separate `gear:upload` command can upload an applied
+package after local review.
 
 The root-level `gear-inbox/` and `gear-ready/` directories are ignored so
 private source photographs and prepared local packages are not staged by
@@ -85,10 +90,36 @@ content hash. It contains:
 The manifest records only the source filename, never its absolute local path
 or retained source metadata.
 
-## Remaining publication boundary
+## Upload dry run
 
-This package is not a receipt and is not canonical Gear or Media state. The
-existing `media:upload` command accepts Journey media manifests, not this Gear
-manifest. A later Gear-specific adapter must revalidate this package, use the
-authenticated immutable upload boundary, verify checksums in an upload
-receipt, and update only the intended Gear image reference after review.
+Validate the applied package and every local WebP without credentials or
+network writes:
+
+```bash
+npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --dry-run
+```
+
+The Gear adapter requires the exact preparation contract. It rejects changed
+keys, paths, dimensions, checksums, rights state, processing policy, or local
+bytes before contacting the Worker.
+
+## Upload and receipt
+
+After configuring the private `MEDIA_UPLOAD_WORKER_URL` and
+`MEDIA_UPLOAD_TOKEN` described in the R2 Worker runbook:
+
+```bash
+npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json
+```
+
+The command reuses the existing authenticated upload transport. Worker source
+accepts prepared WebP, requires the content hash embedded in each immutable
+key, verifies byte size and SHA-256, and never overwrites a different object.
+Only complete remote verification creates
+`gear-r2-verification.json` beside the manifest. An exact rerun reports the
+objects and receipt already verified.
+
+The package and receipt are not canonical Gear or Media state. The external
+Worker deployment and first real Gear upload remain unverified. A later
+publication adapter must verify this receipt and update only the intended Gear
+image reference after card review.

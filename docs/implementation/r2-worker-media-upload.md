@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-14
+updated: 2026-11-18
 related:
   - media-pipeline
   - journey-media-ingestion
@@ -16,6 +16,8 @@ superseded_by: []
 code_paths:
   - scripts/upload-media.js
   - scripts/test-media-upload.js
+  - scripts/test-gear-image-upload.mjs
+  - scripts/lib/gear-image-preparation.mjs
   - workers/media-upload/src/index.mjs
   - workers/media-upload/wrangler.jsonc
   - workers/media-upload/.dev.vars.example
@@ -40,11 +42,11 @@ production object upload has been performed from this implementation.
 ## Implemented boundary
 
 ```text
-local publication-manifest.json
+local Journey or Gear image manifest
         |
         v
 scripts/upload-media.js
-  - validates canonical manifest
+  - validates the selected Journey or Gear manifest contract
   - verifies every local image/MP4 signature, size, and SHA-256
   - uploads only manifest-listed files with bounded concurrency/retries
   - automatically chunks MP4s above 64 MiB into fixed multipart parts
@@ -53,22 +55,23 @@ scripts/upload-media.js
 authenticated upload-only Worker
   - accepts single PUT and constrained multipart actions for a manifest key
   - restricts keys to images/ and videos/
-  - accepts JPEG, PNG, and MP4 only
+  - accepts JPEG, PNG, WebP, and MP4 only
   - enforces object/part size, batch ID, and SHA-256 contracts
   - uses R2 native multipart for larger MP4s
   - verifies the completed object before returning success
         |
         v
-local r2-verification.json
+local checksum receipt
         |
         v
-existing media:ingest transaction
+existing media:ingest or later reviewed Gear publication
 ```
 
 The Worker exposes no object download, delete, list, arbitrary bucket, or
 canonical-publication endpoint. Upload success does not edit the repository or
 publish a placement. The existing ingestor remains the only generated-record
-writer.
+writer for Journey media. Gear receipt-backed canonical publication remains a
+separate unimplemented step.
 
 The authenticated object route supports these internal actions. The local CLI
 constructs them; normal use does not require calling them directly.
@@ -234,6 +237,18 @@ partial or dry-run upload. The next commands are:
 npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/r2-verification.json" --dry-run
 npm run media:ingest -- --manifest "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/publication-manifest.json" --verification-receipt "O:/WebWorksMedia/Davinci Edits/USVI/r2-ready/usvi-waterlemon-cay/r2-verification.json"
 ```
+
+For a reviewed Gear package, use its explicit adapter:
+
+```bash
+npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --dry-run
+npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json
+```
+
+The Gear adapter produces `gear-r2-verification.json`. It does not run
+`media:ingest` or update a Gear record. The checked-in Worker source accepts
+the prepared WebP contract, but the external Worker deployment and first real
+Gear object upload remain unverified.
 
 ## Retry and conflict behavior
 

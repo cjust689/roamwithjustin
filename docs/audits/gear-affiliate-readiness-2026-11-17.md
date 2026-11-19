@@ -53,11 +53,11 @@ rights to a product image, received GA4 events, or affiliate conversions.
 
 | Question | Verified finding | Decision |
 | --- | --- | --- |
-| Can the media pipeline ingest product images without a Journey? | No. The current preparation and ingestion manifest requires a canonical Journey and publishes Journey media placements. The upload Worker can accept permitted immutable object keys, but the supported upload command validates the Journey manifest first. | A future product-image slice must use a Gear-specific prepare and receipt adapter that reuses the optimizer and upload primitives. It must not create a fake Journey. |
+| Can the media pipeline ingest product images without a Journey? | Journey media ingestion still requires a canonical Journey, but Gear now has a separate preparation manifest and receipt adapter that reuse the optimizer and authenticated immutable upload transport. Neither creates a Media placement or canonical Gear record. | Keep product images outside Journey media ingestion. A reviewed canonical Gear publication adapter may consume the Gear receipt without creating a fake Journey. |
 | How should Gear integrate with existing components and registries? | Canonical generated Gear and Gear Usage registries, selectors, Journey projection, and a registry-backed Gear page already exist. The generated registry is empty. | Extend those records in place. Gear merchant links now reference the canonical Partner identity and the shared commercial click helper. No second merchant registry or Gear-specific analytics event is allowed. |
 | Which affiliate programs and tracking rules are approved? | The repository contains owner-supplied Expedia banner configuration and the owner reports using complete Amazon Associates URLs for Gear. It contains no evidence of approved SmallRig, PGYTECH, Tilta, Marriott, or Booking.com Gear tracking rules or credentials. | Complete Amazon URLs may be stored unchanged against the canonical `amazon-associates` Partner and its bounded host allowlist. Automatic rules fail closed unless a provider-specific adapter is configured and tested. No default Gear rule is enabled. |
 | Should AI product research be part of the first slice? | No product record or source packet currently requires enrichment. The existing OpenAI use is editorial and does not establish a Gear research workflow. | Keep Gear AI off. A later local, manually triggered tool may create source-linked drafts with a fixed budget and human approval, but it is not required to publish the first product. |
-| What is the image publishing workflow? | Journey-independent local preparation now exists for a reviewed creator-owned JPEG or PNG. It creates deterministic metadata-stripped derivatives and a Gear-specific manifest without changing canonical state. There is still no Gear upload receipt or publish adapter. | Use `gear:prepare` for local review. Add immutable upload, checksum receipt verification, and an atomic Gear record update before treating a prepared image as published. |
+| What is the image publishing workflow? | Journey-independent local preparation and a Gear-specific adapter for the authenticated immutable upload transport now exist. They create deterministic metadata-stripped WebP derivatives and a checksum receipt without changing canonical state. The external Worker deployment, first real upload, and canonical publish adapter remain unverified or unimplemented. | Use `gear:prepare` for local review and `gear:upload` for local validation or receipt-backed upload. Add an atomic reviewed Gear record update before treating an uploaded image as published. |
 
 ## Implemented in this reconciliation
 
@@ -96,8 +96,8 @@ rights to a product image, received GA4 events, or affiliate conversions.
 4. The exact approved affiliate URL and canonical Partner metadata, or an
    explicitly noncommissionable ordinary link.
 5. Firsthand notes written from actual use.
-6. The Gear-specific upload receipt and publish adapter. Local preparation is
-   implemented but is not publication.
+6. The canonical publish adapter that verifies the Gear upload receipt. Local
+   preparation and receipt generation are implemented but are not publication.
 
 Optional AI research, automatic Amazon tagging, remote image download, Gear
 detail routes, and additional merchant programs remain later phases. They are

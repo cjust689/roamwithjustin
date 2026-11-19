@@ -22,10 +22,13 @@ code_paths:
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
+  - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-image-upload.mjs
+  - workers/media-upload/src/index.mjs
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/gear/index.mjs
@@ -41,6 +44,7 @@ verification:
   state: verified
   evidence:
     - npm run gear:test
+    - npm run media:worker:check
     - npm run gear:workbook
     - npm run content:validate
 ---
@@ -88,9 +92,15 @@ PNG without requiring a Journey. It reuses the media pipeline's Sharp
 normalization primitive, strips private source metadata, and produces
 deterministic 320, 640, and 960 pixel WebP derivatives plus a Gear-specific
 manifest. Dry run writes nothing, apply is atomic, and an identical rerun
-verifies the package as unchanged. This is preparation only. The existing
-Journey uploader does not accept the Gear manifest, and no canonical Gear
-record is changed.
+verifies the package as unchanged.
+
+`gear:upload` revalidates that manifest and every local WebP before adapting
+the derivatives into the existing authenticated immutable upload transport.
+The Worker accepts prepared WebP under the same size, key, checksum, and
+create-only constraints as JPEG and PNG. The descriptive Gear batch remains
+in the receipt while the content hash is the Worker batch segment embedded in
+each immutable key. An exact rerun verifies existing objects and the existing
+receipt. Upload still does not change a canonical Gear record.
 
 The public Gear page now reads only the verified canonical Gear selector. It
 shows a concise empty state while the registry is empty. The former
@@ -117,9 +127,11 @@ contract and commands.
 - Gear links can render only on their explicit public surfaces. Affiliate
   links require a canonical affiliate Partner and a permitted destination
   host. Ordinary links remain noncommissionable and use `trackingMode: none`.
-- Local product-image preparation is Journey independent. Receipt-backed R2
-  upload and canonical Gear image publication still require a Gear-specific
+- Local product-image preparation and receipt-backed R2 upload are Journey
+  independent. Canonical Gear image publication still requires a reviewed
   adapter and must not create a fake Journey placement.
+- Worker source accepts Gear WebP, but the external Cloudflare deployment and
+  a first real Gear object upload remain unverified.
 - The workbook Catalog is generated from the repository and is not yet a live
   protected catalog mirror. Regenerate the workbook when choices change.
 - Optional AI research and automatic merchant tracking rules are not

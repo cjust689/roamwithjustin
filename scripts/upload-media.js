@@ -21,11 +21,14 @@ function usage() {
 Usage:
   npm run media:upload -- --manifest <file> [--dry-run]
   npm run media:upload -- --manifest <file> [--endpoint <url>] [--receipt <file>]
+  npm run gear:upload -- --manifest <file> [--dry-run]
+  npm run gear:upload -- --manifest <file> [--endpoint <url>] [--receipt <file>]
 
 Options:
-  --manifest <file>      publication-manifest.json from media:prepare
+  --manifest <file>      Prepared Journey or Gear image manifest
+  --gear                 Validate a gear-image-manifest.json package
   --endpoint <url>       Upload Worker URL (default: MEDIA_UPLOAD_WORKER_URL)
-  --receipt <file>       Receipt output (default: <package>/r2-verification.json)
+  --receipt <file>       Receipt output (default: package-specific receipt)
   --concurrency <n>      Simultaneous object uploads (default: ${defaultConcurrency}, maximum: 8)
   --retries <n>          Retries for network, 429, and 5xx failures (default: ${defaultRetries})
   --multipart-threshold-mib <n>
@@ -69,6 +72,7 @@ function parseArguments(args) {
     concurrency: defaultConcurrency,
     dryRun: false,
     endpoint: process.env.MEDIA_UPLOAD_WORKER_URL || "",
+    gear: false,
     help: false,
     manifest: null,
     multipartPartBytes: defaultMultipartPartBytes,
@@ -82,6 +86,7 @@ function parseArguments(args) {
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index]
     if (argument === "--dry-run") options.dryRun = true
+    else if (argument === "--gear") options.gear = true
     else if (argument === "--resume") options.resume = true
     else if (["--help", "--h", "-h"].includes(argument)) options.help = true
     else if (argument === "--manifest") {
@@ -238,24 +243,59 @@ async function importJourneys() {
   )
 }
 
-async function loadPreparedPackage(manifestFile) {
+async function importGearImagePreparation() {
+  return import(
+    pathToFileURL(
+      path.join(
+        projectRoot,
+        "scripts",
+        "lib",
+        "gear-image-preparation.mjs"
+      )
+    ).href
+  )
+}
+
+async function loadPreparedPackage(manifestFile, options = {}) {
   const absoluteManifest = path.resolve(process.cwd(), manifestFile)
-  const input = readJsonFile(absoluteManifest, "Publication manifest")
-  const journeyModule = await importJourneys()
-  const validation = validateManifest(input.value, {
-    journeys: journeyModule.journeyRecords,
-  })
-  if (validation.errors.length) {
-    throw new Error(
-      `Publication manifest rejected:\n- ${validation.errors.join("\n- ")}`
-    )
+  const input = readJsonFile(
+    absoluteManifest,
+    options.gear ? "Gear image manifest" : "Publication manifest"
+  )
+  let manifest
+  let packageKind
+  if (options.gear) {
+    const gearModule = await importGearImagePreparation()
+    const validation = gearModule.validateGearImageManifest(input.value)
+    if (validation.errors.length) {
+      throw new Error(
+        `Gear image manifest rejected:\n- ${validation.errors.join("\n- ")}`
+      )
+    }
+    manifest = {
+      ...input.value,
+      assets: input.value.derivatives.map(output => ({ output })),
+    }
+    packageKind = "gear"
+  } else {
+    const journeyModule = await importJourneys()
+    const validation = validateManifest(input.value, {
+      journeys: journeyModule.journeyRecords,
+    })
+    if (validation.errors.length) {
+      throw new Error(
+        `Publication manifest rejected:\n- ${validation.errors.join("\n- ")}`
+      )
+    }
+    manifest = input.value
+    packageKind = "journey"
   }
 
   const packageDirectory = path.dirname(absoluteManifest)
   const realPackageDirectory = await fs.promises.realpath(packageDirectory)
   const packageRoot = `${realPackageDirectory}${path.sep}`
   const preparedAssets = []
-  for (const asset of input.value.assets) {
+  for (const asset of manifest.assets) {
     const relativePath = asset.output.relativePath
     if (!isSafeRelativePath(relativePath)) {
       throw new Error(`Unsafe package path in manifest: ${relativePath}`)
@@ -276,9 +316,10 @@ async function loadPreparedPackage(manifestFile) {
   }
 
   return {
-    manifest: input.value,
+    manifest,
     manifestFile: absoluteManifest,
     manifestSha256: sha256(input.contents),
+    packageKind,
     packageDirectory,
     preparedAssets,
   }
@@ -302,8 +343,13 @@ async function readVerifiedAsset(prepared) {
     }
   } else {
     const metadata = await sharp(data).metadata()
-    const expectedFormat = output.mimeType === "image/jpeg" ? "jpeg" : "png"
+    const expectedFormat = {
+      "image/jpeg": "jpeg",
+      "image/png": "png",
+      "image/webp": "webp",
+    }[output.mimeType]
     if (
+      !expectedFormat ||
       metadata.format !== expectedFormat ||
       metadata.width !== output.width ||
       metadata.height !== output.height
@@ -335,7 +381,7 @@ function uploadUrl(endpoint, objectKey, action = null, parameters = {}) {
 function commonUploadHeaders(manifest, output, options) {
   return {
     authorization: `Bearer ${options.token}`,
-    "x-media-batch-id": manifest.batchId,
+    "x-media-batch-id": manifest.uploadBatchId || manifest.batchId,
     "x-media-byte-size": String(output.byteSize),
     "x-media-mime-type": output.mimeType,
     "x-media-sha256": output.sha256,
@@ -689,7 +735,9 @@ async function validatePreparedAssets(mediaPackage) {
 }
 
 async function uploadMediaPackage(input) {
-  const mediaPackage = await loadPreparedPackage(input.manifestFile)
+  const mediaPackage = await loadPreparedPackage(input.manifestFile, {
+    gear: input.gear === true,
+  })
   const options = {
     concurrency: input.concurrency ?? defaultConcurrency,
     endpoint: input.endpoint,
@@ -725,6 +773,9 @@ async function uploadMediaPackage(input) {
   const receipt = {
     schemaVersion: 1,
     batchId: mediaPackage.manifest.batchId,
+    ...(mediaPackage.packageKind === "gear"
+      ? { manifestType: mediaPackage.manifest.manifestType }
+      : {}),
     objects: receiptObjects(mediaPackage.manifest),
     verification: {
       method: "worker-r2-integrity-v2",
@@ -744,7 +795,12 @@ async function uploadMediaPackage(input) {
   }
   const receiptFile =
     input.receiptFile ||
-    path.join(mediaPackage.packageDirectory, "r2-verification.json")
+    path.join(
+      mediaPackage.packageDirectory,
+      mediaPackage.packageKind === "gear"
+        ? "gear-r2-verification.json"
+        : "r2-verification.json"
+    )
   const receiptWrite = await writeReceipt(receiptFile, receipt)
   return { dryRun: false, mediaPackage, receipt, receiptWrite, results }
 }
@@ -760,6 +816,7 @@ async function main() {
     concurrency: options.concurrency,
     dryRun: options.dryRun,
     endpoint: options.endpoint,
+    gear: options.gear,
     manifestFile: options.manifest,
     multipartPartBytes: options.multipartPartBytes,
     multipartThresholdBytes: options.multipartThresholdBytes,
@@ -769,8 +826,12 @@ async function main() {
   })
   const { manifest } = result.mediaPackage
   console.log(`Batch: ${manifest.batchId}`)
-  console.log(`Journey: ${manifest.journeyId}`)
-  if (manifest.placeId) console.log(`Place: ${manifest.placeId}`)
+  if (result.mediaPackage.packageKind === "gear") {
+    console.log(`Gear: ${manifest.gearId}`)
+  } else {
+    console.log(`Journey: ${manifest.journeyId}`)
+    if (manifest.placeId) console.log(`Place: ${manifest.placeId}`)
+  }
   console.log(`Objects: ${manifest.assets.length}`)
 
   if (result.dryRun) {
@@ -798,9 +859,15 @@ async function main() {
   console.log(
     `${result.receiptWrite.existing ? "Verified existing" : "Created"} receipt: ${result.receiptWrite.target}`
   )
-  console.log(
-    "Upload complete. Run npm run media:ingest with this manifest and verification receipt."
-  )
+  if (result.mediaPackage.packageKind === "gear") {
+    console.log(
+      "Gear image upload complete. Canonical publication remains a separate reviewed step."
+    )
+  } else {
+    console.log(
+      "Upload complete. Run npm run media:ingest with this manifest and verification receipt."
+    )
+  }
 }
 
 if (require.main === module) {

@@ -1,6 +1,11 @@
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const checksumPattern = /^[a-f0-9]{64}$/
-const allowedMimeTypes = new Set(["image/jpeg", "image/png", "video/mp4"])
+const allowedMimeTypes = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "video/mp4",
+])
 const defaultPrefixes = "images/,videos/"
 const defaultMaximumImageBytes = 25 * 1024 * 1024
 const defaultMaximumVideoBytes = 190 * 1024 * 1024
@@ -267,7 +272,7 @@ export async function handleRequest(request, env) {
     return errorResponse(
       415,
       "unsupported_media_type",
-      "Only prepared JPEG, PNG, and MP4 media are accepted.",
+      "Only prepared JPEG, PNG, WebP, and MP4 media are accepted.",
       requestId
     )
   }
@@ -293,6 +298,7 @@ export async function handleRequest(request, env) {
   const extensionMatchesMime =
     (mimeType === "image/jpeg" && /\.jpe?g$/i.test(filename)) ||
     (mimeType === "image/png" && /\.png$/i.test(filename)) ||
+    (mimeType === "image/webp" && /\.webp$/i.test(filename)) ||
     (mimeType === "video/mp4" && /\.mp4$/i.test(filename))
   if (keyBatchId !== batchId || !extensionMatchesMime) {
     return errorResponse(
