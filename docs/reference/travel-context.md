@@ -4,11 +4,12 @@ title: Travel History and Content Context
 kind: reference
 status: approved
 implementation_state: unknown
-updated: 2026-11-14
+updated: 2026-11-19
 related:
   - content-model
   - storytelling-framework
   - usvi-st-john-source
+  - maptiler-sdk-session-migration
 supersedes: []
 superseded_by: []
 code_paths:
@@ -788,11 +789,11 @@ These are **product requirements**, not recovered trip facts, but they explain w
 ## Geographic discovery
 
 - Start with a visually compelling world or regional atlas, favoring **cinematic satellite + elevated 3D terrain** for regional/destination exploration.
-- **MapLibre GL JS** should manage map rendering and geographic coordinate projection. Use a compatible provider such as MapTiler for imagery/terrain if needed and properly configured. Do not implement a globe/terrain renderer from scratch.
+- **MapTiler SDK JS** should manage map rendering, geographic coordinate projection, imagery, and terrain through its session-based runtime. Do not add a direct MapLibre application dependency or implement a globe or terrain renderer from scratch.
 - Pins start broad (country/region/city), then reveal meaningful sublocations and experiences at deeper zoom/selection levels.
 - No wall of markers; cluster or curate by scale. The pin photo should be tied to that locale, not randomly drawn from an entire country.
 - Hover on desktop can show a compact image preview; click/tap should persist a detail card. Mobile must not depend on hover.
-- Use MapLibre HTML markers/popups or straightforward HTML overlay patterns for cards. Three.js/CSS2D is **optional** only if a concrete effect demands it; do not create unnecessary parallel coordinate or rendering systems.
+- Use MapTiler SDK HTML markers and popups or straightforward HTML overlay patterns for cards. Three.js/CSS2D is **optional** only if a concrete effect demands it; do not create unnecessary parallel coordinate or rendering systems.
 - A detail card can expand into a full editorial article/gallery/short film, with related places, stops, and venues.
 
 ## Returning and saving

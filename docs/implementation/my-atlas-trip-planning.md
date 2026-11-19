@@ -333,7 +333,7 @@ Authenticated owner interaction remains external acceptance.
       plan immediately. The revision and persistence contracts are unchanged.
 - [x] The authenticated component now loads planning state when it mounts and
       names the current saved trip in its collapsed heading. Opening it replaces
-      visited-map pins with a private draft overlay on the existing MapLibre
+      visited-map pins with a private draft overlay on the existing MapTiler SDK
       instance. Start, ordered stops, and finish have distinct markers, shared
       coordinates combine their roles, schematic connections strengthen the
       route, and closing the planner restores the visited Atlas. The overlay is

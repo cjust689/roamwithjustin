@@ -35,6 +35,10 @@ verification:
 > exclusion of image uploads only for one private account-level image used in
 > owner Atlas Story export. Per-destination photos remain excluded. See the
 > active favorite travel image implementation for the exact boundary.
+> The later MapTiler SDK JS decision also replaces the direct MapLibre browser
+> runtime described below. Map rendering now uses the official SDK with
+> session tracking while GeoNames and official park records remain the
+> persistent identity authorities.
 > Phase 1 is implemented as an environment-gated local geographic proof. A
 > bounded Auth0 browser client is also implemented and owner verified locally.
 > Phase 2A adds a local-only Worker that cryptographically verifies the exact
@@ -69,7 +73,7 @@ verification:
 
 **Important principles:**
 
-1. **MapLibre renders**; existing **MapTiler tiles/terrain** provide appearance; an **independently licensed GeoNames-derived catalog** supplies persistent geographic identity. Do not treat MapTiler search feature IDs or MapTiler geocoding result coordinates as the canonical pin dataset.
+1. **MapTiler SDK JS renders** with session tracking; MapTiler styles and terrain provide appearance; an **independently licensed GeoNames-derived catalog** supplies persistent geographic identity. Do not treat MapTiler search feature IDs or MapTiler geocoding result coordinates as the canonical pin dataset.
 2. **One Cloudflare Worker API** plus a **single registration-registry Durable Object** and **one per-user Durable Object** are sufficient for this beta. SQLite-backed DO storage can be accessed through the DO key/value API; no conventional SQL data-model redesign is required.
 3. **GitHub Pages continues hosting the Vue application.** The production Cloudflare Worker Route uses a supported wildcard path such as `roamwithjustin.com/my-atlas/*`, **not** a named `{handle}` parameter. The Worker must recognize only a valid single-segment profile handle and pass unrelated/reserved subroutes through to GitHub Pages. Keep staging until tested.
 4. **Privacy before growth:** beta profiles begin private; only an explicit user action publishes a profile. No public KV cache or CDN caching of dynamic profile data; hidden, suspended and deleted profiles must stop being served from authoritative state immediately. Geographic catalog R2 objects, if used, live in a separate dedicated bucket, never the curated media bucket.
@@ -107,7 +111,7 @@ verification:
   Vue 2.6 + Vue Router 3 / GitHub Pages
      |                         |
      | curated Atlas           | independent My Atlas component
-     | unchanged               | MapLibre + existing MapTiler basemap/terrain
+     | SDK migration           | MapTiler SDK JS + existing MapTiler basemap/terrain
      |                         | search results from OUR GeoNames catalog
      |                         |
      +-------------------------+-------------------------+
@@ -147,13 +151,13 @@ verification:
 
 **Cloudflare scaling caveat:** A single global registration DO is intentionally simple for a small invite-only beta. It becomes a contention point if registrations/handle lookups explode. Reevaluate indexing and sharding as real traffic approaches large scale, **without** sacrificing invitation uniqueness or privacy revocation. Do not design an imaginary 100,000-user backend before testing actual adoption.
 
-## 3. Permanent geographic identity: MapLibre + MapTiler + GeoNames
+## 3. Permanent geographic identity: MapTiler SDK JS + GeoNames
 
 ### Separation of responsibilities
 
 | Layer                | Use                                                                                   | Persistence rule                                                                   |
 | -------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| MapLibre             | Browser renderer, markers, clustering, interactions                                   | No geographic identity or search authority                                         |
+| MapTiler SDK JS      | Browser renderer, markers, clustering, interactions, and map-session tracking         | No geographic identity or search authority                                         |
 | Existing MapTiler    | Basemap and terrain tile delivery; existing cartographic style                        | Keep tile use within MapTiler terms; **do not derive pin identity from search**    |
 | Our GeoNames catalog | Search country and city, resolve names/aliases, hierarchy, representative coordinates | Downloaded and transformed under GeoNames CC BY 4.0; persist our canonical entries |
 | User Durable Object  | Saved user's selected catalog IDs and optional visited years                          | Authoritative user state; reads/writes under authenticated owner authorization     |
@@ -370,11 +374,11 @@ Do not use ad blockers, artificial reloads or auto-refresh to force impressions.
 
 ## 11. Repository integration for coding agent
 
-Audit actual repo and configuration before writing code. Prior review reported Vue **2.6**, Vue Router **3** in history mode, an existing `AtlasMap.vue` tied to the curated Atlas, GitHub Pages build using `404.html` fallback, an R2-only media-upload Worker, and current MapTiler/MapLibre integrations. Reverify rather than assuming those facts remain current.
+Audit actual repo and configuration before writing code. Prior review reported Vue **2.6**, Vue Router **3** in history mode, an existing `AtlasMap.vue` tied to the curated Atlas, GitHub Pages build using `404.html` fallback, an R2-only media-upload Worker, and the official MapTiler SDK JS runtime. Reverify rather than assuming those facts remain current.
 
 **Implementation boundaries:**
 
-- New feature directory (suggested): `src/features/my-atlas/` with its **own** MapLibre map component and auth/editor/viewer pages. Share design tokens, map configuration and minimal visual primitives only; do not reuse the owner Atlas's domain registry/state mutations.
+- New feature directory (suggested): `src/features/my-atlas/` with its **own** MapTiler SDK map component and auth/editor/viewer pages. Share design tokens, map configuration and minimal visual primitives only; do not reuse the owner Atlas's domain registry/state mutations.
 - New independent Worker (suggested): `workers/my-atlas/` with `api`, `auth`, `registry`, `user`, `places`, `sharing`, and `admin`. Own Wrangler environments and DO bindings. Do not broaden existing `workers/media-upload/` privileges or expose its R2 upload secrets.
 - Reproducible GeoNames import (suggested): `scripts/my-atlas/build-place-catalog.*`, immutable catalog version and license manifest, test fixtures for city/country disambiguation.
 - Maintain dev/staging/prod separation for Auth0 tenant/application, DO namespaces, Worker routes and catalog artifacts. Never check in tokens, real beta identities, invitation codes or user data.
@@ -386,7 +390,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 | Phase                    | Deliverable                                                                                                                                                                                                              | Gate / forbidden shortcuts                                                                                              |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
 | **0 - Audit/decisions**  | Repo/DNS/Worker route review (including wildcard/reserved-path passthrough), GeoNames license and catalog size benchmark, Auth0 SPA + exact API audience, catalog isolation, cost cap, terms/privacy/retention decisions | **No deployment or content changes**; GeoNames catalog coverage and permanent storage rights are prerequisites          |
-| **1 - Geographic proof** | Download/build small country+city catalog, IDs, search and map markers using unchanged MapLibre/MapTiler visuals                                                                                                         | Searching Uvita and ambiguous cities works; map tiles do not supply persistent pin ID                                   |
+| **1 - Geographic proof** | Download or build a small country and city catalog, IDs, search and map markers using the shared MapTiler SDK visuals                                                                                                   | Searching Uvita and ambiguous cities works; map tiles do not supply persistent pin ID                                   |
 | **2 - Secure backend**   | Worker + Auth0 Google validation + registration registry DO + user DO + invite flow + profile/pin CRUD + export/delete/report                                                                                            | Concurrent invite redemption, registration retries, stale revision and private-visibility tests pass; no public release |
 | **3 - Share experience** | Vue 2 user flow, private default, explicit Publish, dynamic public profile Worker HTML and Open Graph, noindex, staging share preview                                                                                    | HTTP 200 correct OG for public; 404/410/no leak for private/deleted; curated Atlas intact                               |
 | **4 - Invited beta**     | Admin invitations, monitoring, user reports, reset notice/export process, small invited test group                                                                                                                       | Users can safely sign in/pin/edit/share/revoke; no KV, ads, photos, Facebook or recap graphics                          |
@@ -397,7 +401,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 
 **Geographic correctness**
 
-- [ ] Existing curated map appearance stays unchanged; My Atlas MapLibre uses MapTiler **tiles/terrain only**, not MapTiler feature IDs as stored pins.
+- [x] Existing curated map appearance stays unchanged; My Atlas uses MapTiler SDK **styles and terrain only**, not MapTiler feature IDs as stored pins.
 - [ ] GeoNames-derived country/city catalog has documented CC BY 4.0 attribution and versioned source files.
 - [ ] Uvita, Costa Rica and homonymous cities are searchable or a failed catalog-coverage test blocks launch with a documented fix.
 - [ ] Catalog imports are append-preserving by stable ID; removed source records remain resolvable as deprecated, not physically deleted; search omits deprecated records and an explicit migration is required for actual merges/corrections.
@@ -440,14 +444,14 @@ Audit actual repo and configuration before writing code. Prior review reported V
 
 ## 14. Codex handoff prompt
 
-> Review this My Atlas Private Beta V1.1 proposal against the current repository. Start with Phase 0 and report real blockers, especially GeoNames catalog coverage/licensing/deprecation, Cloudflare `roamwithjustin.com/my-atlas/*` route passthrough, Vue 2-compatible Auth0 integration with **API-audience access tokens (never ID tokens)**, isolated GeoNames catalog bindings, DO registration race safety, privacy revocation and backend costs. Preserve existing Atlas design and MapLibre/MapTiler tile configuration. Implement only the smallest approved phase; do not provision production resources, activate ads, enable user uploads or edit curated Atlas records by default. Keep My Atlas isolated from the existing media uploader. Once accepted, reconcile this document's frontmatter with the real docs schema, resolve stable documentation IDs, move it to `docs/proposals/my-atlas-private-beta.md`, supersede the original V1 in the index and update `docs/README.md`. Provide an implementation diff and acceptance test evidence before progressing to later phases.
+> Review this My Atlas Private Beta V1.1 proposal against the current repository. Start with Phase 0 and report real blockers, especially GeoNames catalog coverage/licensing/deprecation, Cloudflare `roamwithjustin.com/my-atlas/*` route passthrough, Vue 2-compatible Auth0 integration with **API-audience access tokens (never ID tokens)**, isolated GeoNames catalog bindings, DO registration race safety, privacy revocation and backend costs. Preserve existing Atlas design and the shared MapTiler SDK session configuration. Implement only the smallest approved phase; do not provision production resources, activate ads, enable user uploads or edit curated Atlas records by default. Keep My Atlas isolated from the existing media uploader. Once accepted, reconcile this document's frontmatter with the real docs schema, resolve stable documentation IDs, move it to `docs/proposals/my-atlas-private-beta.md`, supersede the original V1 in the index and update `docs/README.md`. Provide an implementation diff and acceptance test evidence before progressing to later phases.
 
 ## 15. Reference URLs for implementation verification
 
 - GeoNames download, licensing, commercial permission and attribution: https://www.geonames.org/export/
 - GeoNames downloadable catalog structure and CC BY 4.0: https://download.geonames.org/export/dump/readme.txt
 - MapTiler Cloud API and terms (keep tile use separate from search persistence): https://docs.maptiler.com/cloud/api/reference/ and https://www.maptiler.com/terms/cloud/
-- MapLibre map library: https://maplibre.org/
+- MapTiler SDK JS and session usage: https://docs.maptiler.com/sdk-js/ and https://docs.maptiler.com/guides/account/sessions-vs-requests/
 - Public Nominatim autocomplete prohibition: https://operations.osmfoundation.org/policies/nominatim/
 - Auth0 generic SPA SDK for Vue 2: https://auth0.github.io/auth0-spa-js/
 - Auth0 access tokens vs ID tokens: https://developer.auth0.com/resources/get-started/spa

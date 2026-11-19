@@ -631,7 +631,7 @@ Proposed structured response:
 18. An outbound affiliate click triggers one `partner_click` and the link still opens when analytics is blocked/unavailable.
 19. Generic GA4 enhanced-measurement `click` and `partner_click` are not summed as independent purchases or unique referrals.
 20. Public gear cards and articles display appropriate paid-link disclosure, with Amazon's separate program-required statement when applicable.
-21. No AdSense ads appear in MapLibre, private My Atlas, photo lightboxes, gear card controls or user profile sharing.
+21. No AdSense ads appear in MapTiler SDK maps, private My Atlas, photo lightboxes, gear card controls or user profile sharing.
 22. Optional AI output remains draft and source-labeled, never invents usage/prices/ratings, and performs no background visitor-time inference.
 23. Amazon/retailer customer review submission is not automated; any review draft uses real hands-on notes and respects platform restrictions.
 24. Site still builds, validates and deploys with the existing managed pipeline; no unrelated content model migration is required.

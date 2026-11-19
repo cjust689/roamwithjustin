@@ -5,12 +5,13 @@ kind: reference
 status: implemented
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - monetization-analytics
   - monetization-analytics-plan
   - ga4-three-day-improvement-roadmap
   - ga4-tracking-audit-2026-11-17
+  - maptiler-sdk-session-migration
 supersedes: []
 superseded_by: []
 code_paths:
@@ -42,7 +43,7 @@ be summed with the custom events.
 | --- | --- | --- |
 | `page_view` | One public page load or history navigation. Enhanced Measurement owns this by default; the tested manual router mode can own it only after the account's history option is disabled | automatic GA4 fields, or manual `page_path`, sanitized `page_location`, and `page_title` |
 | `atlas_open_clicked` | A visitor activates an explicit public Atlas entry link, such as a Journey story action | `entry_surface`, coarse `campaign_context` |
-| `atlas_loaded` | MapLibre reports the public Atlas map ready | `entry_surface`, `device_category` |
+| `atlas_loaded` | MapTiler SDK JS reports the public Atlas map ready | `entry_surface`, `device_category` |
 | `atlas_destination_opened` | A visitor intentionally opens a public child Place | `content_type`, `public_destination_id`, `surface` |
 | `atlas_journey_opened` | A visitor intentionally opens a public top-level Journey | `public_journey_id`, `surface` |
 | `atlas_story_opened` | A visitor opens a public Journey story from the Atlas | `public_story_id`, `surface` |

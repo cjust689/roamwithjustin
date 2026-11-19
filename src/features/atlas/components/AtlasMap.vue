@@ -37,9 +37,11 @@
 
 <script>
 /* eslint-disable vue/require-explicit-emits -- Vue 2 uses implicit component events. */
-import * as maplibregl from "maplibre-gl"
-import "maplibre-gl/dist/maplibre-gl.css"
-import { mapStyleUrl, terrainSource } from "../config/mapConfig"
+import {
+  hasMapTilerKey,
+  mapTilerMapOptions,
+  mapTilerSdk,
+} from "../config/mapConfig"
 import {
   atlasMarkerClusterRadius,
   atlasMarkerCompactClusterRadius,
@@ -63,10 +65,6 @@ const transportIcons = {
   flight: "✈",
   plane: "✈",
 }
-
-maplibregl.setWorkerUrl(
-  new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
-)
 
 function supportsWebGL2() {
   try {
@@ -212,7 +210,7 @@ export default {
       )
       element.textContent = transportIcons[mode] || "✦"
 
-      this.transportMarker = new maplibregl.Marker({
+      this.transportMarker = new mapTilerSdk.Marker({
         element,
         anchor: "center",
       })
@@ -289,61 +287,38 @@ export default {
       this.transportProgress = 0
     },
     initializeMap() {
+      if (!hasMapTilerKey) {
+        this.error = "MapTiler is not configured"
+        return
+      }
       if (!supportsWebGL2()) {
         this.error = "WebGL 2 is unavailable"
         return
       }
 
       try {
-        this.map = new maplibregl.Map({
+        this.map = new mapTilerSdk.Map({
           container: this.$refs.map,
-          style: mapStyleUrl,
+          ...mapTilerMapOptions,
           center: this.camera.center,
           zoom: this.camera.zoom,
           pitch: this.camera.pitch,
           bearing: this.camera.bearing,
           maxPitch: 78,
-          // Add attribution explicitly below so MapLibre cannot choose the
-          // expanded desktop pill as its initial state.
-          attributionControl: false,
           cooperativeGestures: true,
         })
 
-        this.map.addControl(
-          new maplibregl.AttributionControl({ compact: true }),
-          "bottom-right"
-        )
-        // MapLibre deliberately expands a new compact attribution control once
+        // The SDK expands a new compact attribution control once
         // on mount. Start with only its information icon and let the visitor
         // open the attribution when needed.
         this.collapseAttribution()
 
-        this.map.addControl(
-          new maplibregl.NavigationControl({ visualizePitch: true }),
-          "bottom-left"
-        )
-
         this.map.on("load", () => {
           this.ready = true
           this.$emit("ready")
-          // Style initialization can re-run MapLibre's compact-state update.
+          // Style initialization can re-run the compact-state update.
           // Close it again after load so the initial UI is icon-only.
           this.collapseAttribution()
-
-          if (terrainSource && !this.map.getSource("atlas-terrain")) {
-            this.map.addSource("atlas-terrain", terrainSource)
-            this.map.setTerrain({
-              source: "atlas-terrain",
-              exaggeration: 1.15,
-            })
-            this.map.addControl(
-              new maplibregl.TerrainControl({
-                source: "atlas-terrain",
-                exaggeration: 1.15,
-              }),
-              "bottom-left"
-            )
-          }
 
           this.renderJourney()
           this.renderMarkers()
@@ -422,7 +397,7 @@ export default {
     },
     scheduleMarkerRefresh() {
       this.cancelScheduledMarkerRefresh()
-      // MapLibre can emit moveend before its final DOM marker transforms have
+      // The SDK can emit moveend before its final DOM marker transforms have
       // painted. Recreate the markers after two paint frames so releasing a
       // drag/rotation always snaps cards back to the final projected points.
       this.markerRefreshFrame = window.requestAnimationFrame(() => {
@@ -633,7 +608,7 @@ export default {
       if (nodeId) pin.dataset.nodeId = nodeId
       if (groupId) pin.dataset.clusterId = groupId
 
-      const marker = new maplibregl.Marker({
+      const marker = new mapTilerSdk.Marker({
         element: pin,
         anchor: "center",
         rotationAlignment: "map",
@@ -647,7 +622,7 @@ export default {
       this.markers.push(marker)
     },
     addCardMarker(element, coordinates) {
-      const marker = new maplibregl.Marker({
+      const marker = new mapTilerSdk.Marker({
         element,
         anchor: "bottom",
         offset: [0, this.compactMarkerMedia?.matches ? -21 : -14],
@@ -666,7 +641,7 @@ export default {
 
       const bounds = group.nodes.reduce(
         (result, node) => result.extend(node.coordinates),
-        new maplibregl.LngLatBounds()
+        new mapTilerSdk.LngLatBounds()
       )
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -710,7 +685,7 @@ export default {
       content.append(title, summary)
       card.append(content)
 
-      this.popup = new maplibregl.Popup({
+      this.popup = new mapTilerSdk.Popup({
         closeButton: false,
         closeOnClick: false,
         offset: 34,
@@ -873,8 +848,8 @@ export default {
 .atlas-marker {
   --marker-avatar-size: 38px;
 
-  /* MapLibre markers must remain out of document flow. `position: relative`
-     here overrides MapLibre's marker rule and adds one card-height of drift
+  /* SDK markers must remain out of document flow. `position: relative`
+     here overrides the SDK marker rule and adds one card-height of drift
      for every preceding marker. */
   position: absolute;
   display: flex;

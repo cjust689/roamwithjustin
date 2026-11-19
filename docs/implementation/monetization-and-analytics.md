@@ -252,7 +252,7 @@ Use **manual AdSense ad units** only where the page has substantial original con
 | Surface                                      | Initial policy                                                                                       | Why                                                                                                        |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Atlas root entry shell                       | **No Google display ads**                                                                            | Preserve the immediate exploratory entry and visual brand.                                                |
-| Interactive globe / 3D MapLibre atlas        | **No ads on the map or controls; one optional gated unit inside rich guided-stop editorial content** | Preserve exploration, require three distinct guided arrivals, and cap requests to one per Journey and tab. |
+| Interactive globe / 3D MapTiler SDK atlas    | **No ads on the map or controls; one optional gated unit inside rich guided-stop editorial content** | Preserve exploration, require three distinct guided arrivals, and cap requests to one per Journey and tab. |
 | Hover photo pins / location previews         | **No Google display ads**                                                                            | Pins/cards are interactive navigation, not ad inventory.                                                   |
 | Photo lightboxes, video players, galleries   | **No Google display ads**                                                                            | Respect the art and avoid obscuring controls/media.                                                        |
 | Destination editorial guides                 | **Up to 1–2 intentional display placements initially**                                               | Natural, content-rich reading breaks; measure impact.                                                      |
@@ -453,7 +453,7 @@ These are **separate products** with separate economics:
 
 1. Discovers a Croatia reel on Instagram.
 2. Opens the Split experience through a shareable deep link.
-3. Explores cinematic MapLibre terrain and a few photo pins.
+3. Explores cinematic MapTiler SDK terrain and a few photo pins.
 4. Opens Raptor Experience and sees the creator's actual boat-trip images, stops, and helpful operator information.
 5. Chooses `View Operator` or `Open in Maps`—not an ad disguised as a tour button.
 6. Sees an optional `Behind the Shot` expansion describing camera/lens technique.

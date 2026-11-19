@@ -142,7 +142,8 @@
           </a>
           <span v-else>{{ attribution.provider }}</span>
           under {{ attribution.license }}. Custom pins are supplied by the Atlas
-          owner. Map rendering uses MapLibre and the configured tile provider.
+          owner. Map rendering uses MapTiler SDK JS with session-based map
+          usage.
         </p>
       </template>
     </section>

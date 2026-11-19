@@ -224,7 +224,11 @@
     />
 
     <div class="atlas-provider-note">
-      {{ hasCinematicMap ? "Satellite terrain" : "Preview basemap" }}
+      {{
+        hasCinematicMap
+          ? "MapTiler satellite terrain"
+          : "MapTiler configuration required"
+      }}
     </div>
 
     <AtlasSavedDrawer
