@@ -53,9 +53,11 @@
 
 <script>
 /* eslint-disable vue/require-explicit-emits -- Vue 2 uses implicit component events. */
-import * as maplibregl from "maplibre-gl"
-import "maplibre-gl/dist/maplibre-gl.css"
-import { mapStyleUrl, terrainSource } from "../../atlas/config/mapConfig"
+import {
+  hasMapTilerKey,
+  mapTilerMapOptions,
+  mapTilerSdk,
+} from "../../atlas/config/mapConfig"
 import { buildAtlasMarkerGroups } from "../../atlas/config/markerLayout.mjs"
 import {
   atlasYears,
@@ -87,10 +89,6 @@ const worldCamera = {
   pitch: 8,
   bearing: 0,
 }
-
-maplibregl.setWorkerUrl(
-  new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString()
-)
 
 function supportsWebGL2() {
   try {
@@ -261,47 +259,28 @@ export default {
   },
   methods: {
     initializeMap() {
+      if (!hasMapTilerKey) {
+        this.error = "MapTiler is not configured"
+        return
+      }
       if (!supportsWebGL2()) {
         this.error = "WebGL 2 is unavailable"
         return
       }
 
       try {
-        this.map = new maplibregl.Map({
+        this.map = new mapTilerSdk.Map({
           container: this.$refs.map,
-          style: mapStyleUrl,
+          ...mapTilerMapOptions,
           ...worldCamera,
           maxPitch: 78,
-          attributionControl: false,
           cooperativeGestures: true,
         })
-        this.map.addControl(
-          new maplibregl.AttributionControl({ compact: true }),
-          "bottom-right"
-        )
         this.collapseInitialAttribution()
         this.map.on("styledata", this.collapseInitialAttribution)
         this.map.on("sourcedata", this.collapseInitialAttribution)
-        this.map.addControl(
-          new maplibregl.NavigationControl({ visualizePitch: true }),
-          "bottom-left"
-        )
         this.map.on("load", () => {
           this.ready = true
-          if (terrainSource && !this.map.getSource("my-atlas-terrain")) {
-            this.map.addSource("my-atlas-terrain", terrainSource)
-            this.map.setTerrain({
-              source: "my-atlas-terrain",
-              exaggeration: 1.15,
-            })
-            this.map.addControl(
-              new maplibregl.TerrainControl({
-                source: "my-atlas-terrain",
-                exaggeration: 1.15,
-              }),
-              "bottom-left"
-            )
-          }
           this.initializeConnections()
           this.renderMarkers()
           this.syncPlacementMarker()
@@ -398,7 +377,7 @@ export default {
         ])
       })
 
-      this.placementMarker = new maplibregl.Marker({
+      this.placementMarker = new mapTilerSdk.Marker({
         element,
         anchor: "bottom",
         draggable: true,
@@ -761,7 +740,7 @@ export default {
       this.addMarker(element, group.coordinates)
     },
     addMarker(element, coordinates) {
-      const marker = new maplibregl.Marker({
+      const marker = new mapTilerSdk.Marker({
         element,
         anchor: "bottom",
         rotationAlignment: "viewport",
@@ -777,7 +756,7 @@ export default {
       if (!this.map || group.nodes.length < 2) return
       const bounds = group.nodes.reduce(
         (result, place) => result.extend(place.coordinates),
-        new maplibregl.LngLatBounds()
+        new mapTilerSdk.LngLatBounds()
       )
       const reducedMotion = window.matchMedia?.(
         "(prefers-reduced-motion: reduce)"
@@ -829,7 +808,7 @@ export default {
       }
       const bounds = coordinates.reduce(
         (current, coordinate) => current.extend(coordinate),
-        new maplibregl.LngLatBounds(coordinates[0], coordinates[0])
+        new mapTilerSdk.LngLatBounds(coordinates[0], coordinates[0])
       )
       this.map.fitBounds(bounds, {
         padding:
@@ -850,7 +829,7 @@ export default {
       if (coordinates.length < 2) return
       const bounds = coordinates.reduce(
         (current, coordinate) => current.extend(coordinate),
-        new maplibregl.LngLatBounds(coordinates[0], coordinates[0])
+        new mapTilerSdk.LngLatBounds(coordinates[0], coordinates[0])
       )
       this.map.fitBounds(bounds, {
         padding: 72,
@@ -902,7 +881,9 @@ export default {
       let destination = [...to]
       if (destination[0] - from[0] > 180) destination[0] -= 360
       if (from[0] - destination[0] > 180) destination[0] += 360
-      const bounds = new maplibregl.LngLatBounds(from, from).extend(destination)
+      const bounds = new mapTilerSdk.LngLatBounds(from, from).extend(
+        destination
+      )
       const mobile = window.innerWidth <= 640
       this.map.fitBounds(bounds, {
         padding: mobile
@@ -948,7 +929,7 @@ export default {
       aircraft.setAttribute("aria-hidden", "true")
       aircraft.textContent = "✈"
       element.appendChild(aircraft)
-      this.flightMarker = new maplibregl.Marker({ element, anchor: "center" })
+      this.flightMarker = new mapTilerSdk.Marker({ element, anchor: "center" })
         .setLngLat(route[0])
         .addTo(this.map)
 
@@ -1184,8 +1165,8 @@ export default {
 }
 
 ::v-deep .my-atlas-pin {
-  /* MapLibre markers must remain out of document flow. Relative positioning
-     overrides MapLibre's marker rule and creates cumulative vertical drift. */
+  /* SDK markers must remain out of document flow. Relative positioning
+     overrides the SDK marker rule and creates cumulative vertical drift. */
   position: absolute;
   width: 2.2rem;
   height: 2.8rem;

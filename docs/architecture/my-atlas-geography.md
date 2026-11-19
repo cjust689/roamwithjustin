@@ -123,8 +123,8 @@ public-beta approval.
 
 My Atlas is isolated under src/features/my-atlas. It does not import curated
 Journey, Place, Visit, Experience, Moment, media, or editorial state. Its map
-component reuses only the existing MapLibre style and terrain configuration
-from the curated Atlas.
+component reuses only the official MapTiler SDK JS session, hybrid style, and
+terrain configuration from the curated Atlas.
 
 The map can project a pin's already authorized favorite memory as plain text.
 Selecting a standalone pin reveals its complete memory in that pin's label.
@@ -197,9 +197,9 @@ import. Torrey and Hanksville are the first reviewed supplements.
 
 Countries use IDs such as iso-country:CR. Populated places use IDs such as
 geonames:3621138. Curated spots use the same stable GeoNames identity, for
-example Yellowstone National Park is geonames:5843642. MapLibre renders the
-coordinates associated with those catalog records, but map tiles never provide
-or replace a stored place ID.
+example Yellowstone National Park is geonames:5843642. MapTiler SDK JS renders
+the coordinates associated with those catalog records, but map tiles never
+provide or replace a stored place ID.
 
 Official park records use provider qualified IDs such as
 `park:us:nps:acad`, `park:ca:pca:100092`, and
@@ -389,8 +389,8 @@ immutable artifact are published together.
 
 GeoNames states that its downloadable data is CC BY 4.0 and permits commercial
 use with attribution. The proof displays GeoNames attribution independently
-from MapLibre and the configured tile provider. The imported data remains
-subject to GeoNames accuracy and completeness limitations.
+from MapTiler SDK JS. The imported data remains subject to GeoNames accuracy
+and completeness limitations.
 
 The owner view separately attributes NPS, Parks Canada, and CONANP for the
 official park rows. The generated source retains each provider record ID,

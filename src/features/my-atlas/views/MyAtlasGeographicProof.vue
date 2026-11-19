@@ -667,7 +667,7 @@
         <a href="https://www.gob.mx/conanp" target="_blank" rel="noopener">
           CONANP </a
         >. Custom pins are supplied by each Atlas owner. Map rendering uses
-        MapLibre and the configured tile provider.
+        MapTiler SDK JS with session-based map usage.
       </p>
       <p class="my-atlas-brand">My Atlas by RoamWithJustin.com</p>
       <p class="my-atlas-announcement" aria-live="polite">{{ announcement }}</p>

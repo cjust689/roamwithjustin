@@ -157,7 +157,7 @@ remains the indexable representation.
 - [x] Extract a shared presentational Journey body from the standalone page
   without moving canonical content or duplicating full article markup.
 - [x] Add explicit Atlas reader route state and browser history semantics.
-- [x] Keep the existing MapLibre instance mounted while the reader opens.
+- [x] Keep the existing MapTiler SDK instance mounted while the reader opens.
 - [x] Implement desktop split-pane and mobile focused sheet behavior.
 - [x] Restore Journey and reader scroll positions and keyboard focus.
 - [x] Reconcile analytics so an in-place open is not counted as an unrelated

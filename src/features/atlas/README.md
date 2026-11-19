@@ -8,6 +8,7 @@ updated: 2026-11-19
 related:
   - content-model
   - atlas-integrated-story-reader
+  - maptiler-sdk-session-migration
 supersedes: []
 superseded_by: []
 code_paths:
@@ -37,6 +38,8 @@ verification:
     - local Chrome accessibility tree checks for mobile modal, map peek region, and desktop region semantics on 2026-11-18
     - local Chrome mobile detail checks at 320 and 390 CSS pixels on 2026-11-18
     - local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels on 2026-11-18
+    - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
+    - local Chrome MapTiler SDK layout check on 2026-11-19 retained both map canvases, terrain controls, Journey markers, and zero horizontal overflow at desktop and 390 by 844 mobile widths
 ---
 
 # Travel Atlas feature
@@ -58,8 +61,9 @@ The only application-level integration points are:
    route.
 2. `src/App.vue` renders routes with `meta.standalone` without the legacy site
    chrome.
-3. `package.json` includes the lazily loaded `maplibre-gl` dependency and a
-   narrow transitive override that preserves the project's Node 20 support.
+3. `package.json` includes the lazily loaded official `@maptiler/sdk`
+   dependency. The application does not declare or import `maplibre-gl`
+   directly.
 4. The Pages workflow exposes the optional `MAPTILER_API_KEY` repository secret
    as `VUE_APP_MAPTILER_KEY` during the build.
 
@@ -87,15 +91,13 @@ marketing surface.
 The atlas brand uses a normal document link back to `/`, which resets the
 Atlas to its root Journey explorer.
 
-MapLibre 6 requires an explicit worker URL when bundled with webpack. The map
-component uses `setWorkerUrl(new URL(..., import.meta.url))`, which makes Vue
-CLI emit the worker as a JavaScript asset. Do not remove that setup: otherwise
-the worker URL resolves against the current `/atlas/...` route and receives the
-SPA HTML fallback instead of executable JavaScript.
+MapTiler SDK JS owns its rendering worker and resource URL handling. The
+application does not set a MapLibre worker URL. The SDK remains inside the
+lazy Atlas route chunk so nonmap routes do not pay its download cost.
 
 ## Marker behavior
 
-Each marker is rendered as two synchronized MapLibre markers. Its numbered
+Each marker is rendered as two synchronized MapTiler SDK markers. Its numbered
 coordinate point uses map pitch/rotation alignment and subpixel positioning,
 so it remains attached to the canonical Place coordinate and Journey route
 while the map turns. Its card stays viewport-aligned so the title remains
@@ -124,11 +126,11 @@ and is covered by `npm run atlas:test`.
 
 ## Map configuration
 
-Without configuration, the atlas uses the MapLibre demonstration basemap and
-displays a `Preview basemap` indicator. This keeps local development and pull
-request previews functional.
+The map fails closed when no MapTiler browser key is configured. It does not
+fall back to a third-party demonstration basemap or silently change the usage
+model.
 
-For the default MapTiler `hybrid-v4` satellite imagery and terrain, create a
+For the default MapTiler SDK hybrid satellite imagery and terrain, create a
 MapTiler browser key and set:
 
 ```text
@@ -140,20 +142,19 @@ GitHub Pages, add it as the repository Actions secret `MAPTILER_API_KEY`.
 Restrict the browser key to the production and local-development origins in
 MapTiler. Store only the key itself: do not include quotes or leading/trailing
 whitespace. The application trims accidental surrounding whitespace before it
-constructs MapTiler requests, but keeping the secret clean makes deployment
-configuration easier to audit.
+configures the SDK, but keeping the secret clean makes deployment configuration
+easier to audit.
+
+The shared configuration explicitly enables MapTiler SDK session tracking and
+persistent request caching. The SDK adds the session identifier to MapTiler
+Cloud map traffic, so interactive tile and terrain use follows MapTiler's
+session model rather than third-party request billing.
 
 If production displays `Map unavailable`, inspect the failed `style.json`
 request in browser developer tools. A `401` or `403` response means the key is
 invalid, expired, or does not allow the current production origin. Confirm the
 GitHub Actions `MAPTILER_API_KEY` secret and the key's allowed origins in
 MapTiler, then rerun the Pages deployment.
-
-An optional custom MapTiler style can be supplied locally with:
-
-```text
-VUE_APP_MAPTILER_STYLE_URL=https://api.maptiler.com/maps/your-style/style.json?key=your_browser_key
-```
 
 ## Adding content
 
