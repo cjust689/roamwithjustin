@@ -5,10 +5,11 @@ kind: reference
 status: implemented
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - gear-system
   - gear-publishing-implementation
+  - gear-authoring-workflow
   - gear-ingestion-affiliate-analytics-ai
   - media-pipeline
 supersedes: []
@@ -162,3 +163,8 @@ changed image advances the stable asset revision and retains its prior batch
 evidence. Content validation or optional build failure restores both generated
 files. The command never uploads, creates a product or usage claim, changes
 links or notes, removes old objects, commits, pushes, or deploys.
+
+The file-based [Gear authoring workflow](gear-authoring-workflow.md) can
+coordinate these same preparation, upload, and publication functions. It
+retains a mandatory local prepare checkpoint so a newly generated package
+cannot be uploaded and published before review.

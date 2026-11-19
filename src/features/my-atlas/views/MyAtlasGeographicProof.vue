@@ -21,7 +21,11 @@
       @complete="completeTutorial"
     />
 
-    <section class="my-atlas-panel" aria-labelledby="my-atlas-title">
+    <section
+      class="my-atlas-panel"
+      :class="{ 'is-planning': plannerActive }"
+      aria-labelledby="my-atlas-title"
+    >
       <header>
         <a href="/" aria-label="Roam With Justin home">RWJ</a>
         <span>My Atlas</span>
@@ -214,75 +218,28 @@
           Sign in with Google
         </button>
         <template v-else>
-          <button
-            type="button"
-            class="my-atlas-profile-button"
-            :aria-expanded="String(profileMenuOpen)"
-            aria-controls="my-atlas-profile-menu"
-            @click="profileMenuOpen = !profileMenuOpen"
-          >
+          <div class="my-atlas-account-card">
             <span>
               <strong>{{ authDisplayName }}</strong>
               <small v-if="accountProfile">@{{ accountProfile.handle }}</small>
               <small v-else>Finish account setup</small>
             </span>
-            <b>{{ profileMenuOpen ? "Close" : "Profile" }}</b>
-          </button>
-          <div
-            v-if="profileMenuOpen"
-            id="my-atlas-profile-menu"
-            class="my-atlas-profile-menu"
-          >
-            <button type="button" @click="verifyApiAccess">Verify API</button>
             <button
               v-if="accountLoadFailed"
+              class="my-atlas-account-retry"
               type="button"
               :disabled="accountPending"
               @click="loadAccount"
             >
               {{ accountPending ? "Loading Atlas" : "Retry saved Atlas" }}
             </button>
-            <button
-              v-if="accountProfile"
-              type="button"
-              :disabled="
-                accountPending || (!pins.length && !accountProfile.public)
-              "
-              @click="toggleSharing"
-            >
-              {{ accountProfile.public ? "Make Atlas private" : "Share Atlas" }}
+            <button class="my-atlas-sign-out" type="button" @click="signOut">
+              Sign out
             </button>
-            <button
-              v-if="accountProfile"
-              type="button"
-              :disabled="!pinnedPlaces.length"
-              @click="exportStory"
-            >
-              Export Story image
-            </button>
-            <button
-              v-if="accountProfile && accountProfile.public"
-              type="button"
-              :disabled="accountPending"
-              @click="copyShareLink"
-            >
-              Copy public link
-            </button>
-            <button
-              v-if="accountProfile"
-              type="button"
-              @click="openTutorial('account')"
-            >
-              Quick start guide
-            </button>
-            <button type="button" @click="signOut">Sign out</button>
           </div>
         </template>
         <p v-if="auth.error" class="my-atlas-auth-error" role="alert">
           {{ auth.error }}
-        </p>
-        <p v-if="apiAccessVerified" class="my-atlas-auth-success" role="status">
-          The My Atlas API verified your audience scoped access token.
         </p>
         <p v-if="accountError" class="my-atlas-auth-error" role="alert">
           {{ accountError }}
@@ -514,6 +471,71 @@
         @account-deleted="handleAccountDeleted"
       />
 
+      <section
+        v-if="accountProfile"
+        class="my-atlas-tools my-atlas-workflow-section"
+      >
+        <button
+          type="button"
+          class="my-atlas-section-toggle"
+          :aria-expanded="String(toolsOpen)"
+          aria-controls="my-atlas-tools-content"
+          @click="openTools"
+        >
+          <span>
+            <strong>Share and export</strong>
+            <small>
+              {{
+                accountProfile.public
+                  ? "Your Visited Atlas has a public link"
+                  : "Your Visited Atlas is private"
+              }}
+            </small>
+          </span>
+          <b>{{ toolsOpen ? "Hide" : "Open" }}</b>
+        </button>
+        <div
+          v-if="toolsOpen"
+          id="my-atlas-tools-content"
+          class="my-atlas-section-content my-atlas-tools-content"
+        >
+          <p>
+            Choose who can see your Visited Atlas, copy its public link, or
+            create a Story image from the destinations currently on the map.
+          </p>
+          <div class="my-atlas-tools-actions">
+            <button
+              type="button"
+              :disabled="
+                accountPending || (!pins.length && !accountProfile.public)
+              "
+              @click="toggleSharing"
+            >
+              {{ accountProfile.public ? "Make Atlas private" : "Share Atlas" }}
+            </button>
+            <button
+              v-if="accountProfile.public"
+              type="button"
+              :disabled="accountPending"
+              @click="copyShareLink"
+            >
+              Copy public link
+            </button>
+            <button
+              type="button"
+              :disabled="!pinnedPlaces.length"
+              @click="exportStory"
+            >
+              Export Story image
+            </button>
+          </div>
+          <p v-if="accountProfile.public" class="my-atlas-share-link">
+            <span>Public link</span>
+            <strong>{{ shareUrl }}</strong>
+          </p>
+        </div>
+      </section>
+
       <p class="my-atlas-beta-note">
         Private beta data may be reset. Story images are generated locally in
         your browser.
@@ -568,7 +590,6 @@ import {
   registerMyAtlasAccount,
   updateMyAtlasPin,
   updateMyAtlasSharing,
-  verifyMyAtlasApiAccess,
 } from "../api/client.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
@@ -627,11 +648,10 @@ export default {
       mobileControlsOpen: false,
       addPlaceOpen: false,
       visitedOpen: false,
-      profileMenuOpen: false,
+      toolsOpen: false,
       workflowSectionsInitialized: false,
       announcement: "",
       auth: myAtlasAuthState,
-      apiAccessVerified: false,
       accountProfile: null,
       accountMissing: false,
       accountPending: false,
@@ -805,15 +825,24 @@ export default {
       const nextVisited = panel === "visited" && !this.visitedOpen
       this.addPlaceOpen = nextAdd
       this.visitedOpen = nextVisited
-      this.profileMenuOpen = false
+      this.toolsOpen = false
+      if (nextAdd || nextVisited) this.$refs.planner?.closePlanner()
       if (nextAdd) this.$nextTick(() => this.$refs.searchInput?.focus())
     },
     async openPlanner() {
       this.addPlaceOpen = false
       this.visitedOpen = false
-      this.profileMenuOpen = false
+      this.toolsOpen = false
       await this.$nextTick()
       await this.$refs.planner?.revealPlanner()
+    },
+    openTools() {
+      const opening = !this.toolsOpen
+      this.toolsOpen = opening
+      if (!opening) return
+      this.addPlaceOpen = false
+      this.visitedOpen = false
+      this.$refs.planner?.closePlanner()
     },
     updatePlanningRevision(revision) {
       if (
@@ -869,7 +898,7 @@ export default {
       this.selectedPlaceId = ""
       this.addPlaceOpen = false
       this.visitedOpen = false
-      this.profileMenuOpen = false
+      this.toolsOpen = false
       this.plannerActive = false
       this.plannerRoute = []
       this.workflowSectionsInitialized = false
@@ -888,7 +917,7 @@ export default {
       if (initializeWorkflow && !this.workflowSectionsInitialized) {
         this.addPlaceOpen = false
         this.visitedOpen = false
-        this.profileMenuOpen = false
+        this.toolsOpen = false
         this.workflowSectionsInitialized = true
       }
       state.pins.forEach(pin => {
@@ -971,20 +1000,6 @@ export default {
     },
     signOut() {
       logoutFromMyAtlas()
-    },
-    async verifyApiAccess() {
-      this.auth.error = ""
-      this.apiAccessVerified = false
-      try {
-        const token = await getMyAtlasApiAccessToken()
-        await verifyMyAtlasApiAccess({
-          apiBaseUrl: this.apiBaseUrl,
-          accessToken: token,
-        })
-        this.apiAccessVerified = true
-      } catch (error) {
-        this.auth.error = "The My Atlas API could not verify this session."
-      }
     },
     async loadAccount() {
       if (!this.apiBaseUrl) return
@@ -1079,7 +1094,7 @@ export default {
         this.selectedPlaceId = ""
         this.addPlaceOpen = false
         this.visitedOpen = false
-        this.profileMenuOpen = false
+        this.toolsOpen = false
         this.workflowSectionsInitialized = true
         this.announcement =
           "Your private Atlas account was created. Add your first destination."
@@ -1567,6 +1582,15 @@ export default {
   background: rgba(10, 20, 22, 0.92);
   box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(18px);
+  transition: width 180ms ease;
+}
+
+.my-atlas-panel.is-planning {
+  width: min(52rem, calc(100vw - 2rem));
+}
+
+.my-atlas-panel > * {
+  flex: 0 0 auto;
 }
 
 .my-atlas-panel > header {
@@ -1870,11 +1894,11 @@ export default {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: center;
-  justify-items: end;
+  justify-items: stretch;
   width: 100%;
   height: auto;
   min-height: 2.75rem;
-  margin: -0.65rem 0 0.85rem;
+  margin: 0 0 1.25rem;
   color: inherit;
   background: transparent;
   box-shadow: none;
@@ -1893,8 +1917,8 @@ export default {
 }
 
 .my-atlas-sign-in,
-.my-atlas-profile-button,
-.my-atlas-profile-menu button {
+.my-atlas-account-card button,
+.my-atlas-tools-actions button {
   min-height: 2.75rem;
   padding: 0.55rem 0.75rem;
   border: 1px solid rgba(230, 186, 104, 0.45);
@@ -1907,32 +1931,31 @@ export default {
   cursor: pointer;
 }
 
-.my-atlas-profile-button {
-  display: flex;
+.my-atlas-account-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.55rem;
   box-sizing: border-box;
-  width: min(100%, 18rem);
-  max-width: 100%;
+  width: 100%;
   min-width: 0;
-  overflow: hidden;
+  padding: 0.55rem 0.6rem 0.55rem 0.75rem;
+  border: 1px solid rgba(230, 186, 104, 0.35);
   border-radius: 0.85rem;
   color: #edf7f2;
   background: rgba(230, 186, 104, 0.08);
-  appearance: none;
   line-height: 1.2;
 }
 
-.my-atlas-profile-button > span {
+.my-atlas-account-card > span {
   display: grid;
   min-width: 0;
   line-height: 1.2;
   text-align: left;
 }
 
-.my-atlas-profile-button strong,
-.my-atlas-profile-button small {
+.my-atlas-account-card strong,
+.my-atlas-account-card small {
   display: block;
   overflow: hidden;
   margin: 0;
@@ -1942,58 +1965,35 @@ export default {
   white-space: nowrap;
 }
 
-.my-atlas-profile-button small {
+.my-atlas-account-card small {
   color: #aebdb8;
   font-size: 0.54rem;
 }
 
-.my-atlas-profile-button b {
-  color: #e6ba68;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.54rem;
+.my-atlas-account-card button {
+  min-width: 6rem;
+  border-radius: 0.65rem;
+  color: #f4d38f;
+  background: rgba(230, 186, 104, 0.07);
 }
 
 .my-atlas-sign-in:focus,
 .my-atlas-sign-in:focus-visible,
-.my-atlas-profile-button:focus,
-.my-atlas-profile-button:focus-visible {
+.my-atlas-account-card button:focus,
+.my-atlas-account-card button:focus-visible {
   border-color: #e6ba68;
   background: rgba(230, 186, 104, 0.14);
   outline: 2px solid rgba(230, 186, 104, 0.35);
   outline-offset: 0.12rem;
 }
 
-.my-atlas-profile-menu {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  z-index: 8;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.4rem;
-  width: min(22rem, calc(100vw - 4rem));
-  padding: 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.32);
-  border-radius: 0.85rem;
-  background: #111f22;
-  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.42);
-}
-
-.my-atlas-profile-menu button {
-  border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.07);
-}
-
 .my-atlas-account > .my-atlas-auth-error,
 .my-atlas-account > .my-atlas-auth-success {
-  position: absolute;
-  top: calc(100% + 0.2rem);
-  right: 0;
-  z-index: 7;
+  position: static;
+  box-sizing: border-box;
+  width: 100%;
   max-width: 100%;
-  margin: 0;
+  margin: 0.4rem 0 0;
   padding: 0.35rem 0.5rem;
   border-radius: 0.5rem;
   background: #111f22;
@@ -2083,6 +2083,54 @@ export default {
   gap: 0.75rem;
   padding: 0.8rem;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.my-atlas-tools-content > p {
+  margin: 0;
+  color: #9bada7;
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+.my-atlas-tools-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.my-atlas-tools-actions button {
+  border-radius: 0.7rem;
+  color: #f4d38f;
+  background: rgba(230, 186, 104, 0.07);
+}
+
+.my-atlas-tools-actions button:focus-visible {
+  border-color: #e6ba68;
+  outline: 2px solid rgba(230, 186, 104, 0.35);
+  outline-offset: 0.12rem;
+}
+
+.my-atlas-share-link {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.7rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.my-atlas-share-link span {
+  color: #e6ba68;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.my-atlas-share-link strong {
+  overflow-wrap: anywhere;
+  color: #edf7f2;
+  font-size: 0.62rem;
 }
 
 .my-atlas-search > span {
@@ -2608,7 +2656,7 @@ export default {
   }
 
   .my-atlas-sign-in,
-  .my-atlas-profile-button {
+  .my-atlas-account-card {
     width: 100%;
     height: auto;
     min-height: 2.75rem;
@@ -2616,9 +2664,17 @@ export default {
     transform: none;
   }
 
-  .my-atlas-profile-menu {
+  .my-atlas-account-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .my-atlas-account-retry {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .my-atlas-tools-actions {
     grid-template-columns: 1fr;
-    width: 100%;
   }
 
   .my-atlas-overview-actions.has-planner-action {
@@ -2627,6 +2683,12 @@ export default {
 
   .my-atlas-planner-action {
     grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .my-atlas-panel {
+    transition: none;
   }
 }
 </style>

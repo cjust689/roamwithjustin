@@ -4,7 +4,7 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - content-model
   - atlas-integrated-story-reader
@@ -31,7 +31,7 @@ verification:
     - GitHub pull request 38 validated and merged to develop as c75d8d9 on 2026-11-16
     - GitHub pull request 39 validated and merged to main as a36da55 on 2026-11-16
     - Pages workflow run 43816272856 succeeded on 2026-11-16
-    - exact First look chooser and Journey-panel copy verified in production on 2026-11-16
+    - sparse-Journey chooser and panel behavior verified in production on 2026-11-16
     - local Chrome story discovery checks at 320, 375, 390, 768, 1024, and 1440 CSS pixels on 2026-11-18
     - local Chrome in-place reader, retained map, Back and Forward, scroll restoration, map peek, stop handoff, and lightbox checks on 2026-11-18
     - local Chrome accessibility tree checks for mobile modal, map peek region, and desktop region semantics on 2026-11-18
@@ -73,7 +73,7 @@ would remove the Atlas UI but must not delete `src/content/` records.
 - `/atlas/utah`, `/atlas/utah-2026`, `/atlas/puerto-rico`, `/atlas/st-john`,
   `/atlas/europe`, and `/atlas/costa-rica` open multi-stop journey roots.
 - `/atlas/miami-south-beach`, `/atlas/north-georgia-blue-ridge`,
-  `/atlas/peoria-illinois`, and `/atlas/hungary` open bounded coming-soon
+  `/atlas/peoria-illinois`, and `/atlas/hungary` open bounded sparse
   destination roots.
 - `/atlas/moab`, `/atlas/old-san-juan`, and other IDs registered in
   `src/content/atlas/presentation.mjs` are shareable deep links.
@@ -186,15 +186,12 @@ poster is reserved for the opened video player; a missing poster remains empty.
 
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible. Their top-level navigation cards use the
-reader-facing `First look` cue and say that more stories and media will be
-added. Every incomplete Journey panel also explains that the Journey is still
-taking shape, including child Place panels where sparse content could otherwise
-look accidental. Missing material stays absent instead of rendering empty
-sections or internal workflow language. Planned-only stops are excluded. The
-validator requires every internally incomplete Journey Visit to resolve to an
-Atlas node so later media ingestion enriches stable IDs instead of creating a
-parallel map record.
+Place summaries remain visible. Their navigation cards use the same `Explore`
+action as established Journeys. Missing material stays absent instead of
+rendering empty sections or editorial workflow language in cards or panels.
+Planned-only stops are excluded. The validator requires every internally
+incomplete Journey Visit to resolve to an Atlas node so later media ingestion
+enriches stable IDs instead of creating a parallel map record.
 
 Every Atlas root uses the canonical Journey title and date label, including
 its year, because the same Place can host multiple trips. Child nodes use their
@@ -266,6 +263,11 @@ one `My Atlas` link to `/my-atlas`. The same flag owns route registration, so a
 disabled build cannot expose a dead control. My Atlas remains a separate
 private application boundary; the toolbar entry does not mix its account data
 into public Atlas state.
+
+The same feature flag enables a dismissible Atlas invitation that says `Make
+your own Atlas` and links to `/my-atlas`. It appears outside story-reader state
+once per browser tab, records dismissal in `sessionStorage`, and moves clear of
+the desktop inspector and mobile detail dock.
 
 ## Persistence
 

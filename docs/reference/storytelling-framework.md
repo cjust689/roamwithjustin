@@ -4,7 +4,7 @@ title: Experiential Storytelling Framework
 kind: reference
 status: approved
 implementation_state: unknown
-updated: 2026-11-14
+updated: 2026-11-19
 related:
   - atlas-content-strategy
   - travel-context
@@ -116,9 +116,10 @@ Suggested elastic arc (not a mandatory formula):
 - **Leave visual breathing room:** photos and clips can carry a moment that words would over-explain.
 - **One chapter, one primary emotional shift.** A trip may have many stories; avoid forcing every observation into one sweeping recap.
 - **Avoid sameness:** not every chapter needs an obstacle, revelation, or tidy moral. Quiet enjoyment can be its own payoff.
-- **Keep public prose free of dash punctuation:** use commas, colons, periods,
-  or a rewritten sentence instead. Technical IDs, slugs, URLs, and private
-  editorial notes are not public prose.
+- **Keep public prose free of dash punctuation:** use commas, periods, or a
+  rewritten sentence instead. Do not use semicolons. Do not use colons unless
+  the colon immediately follows a numeral, as in a clock time such as `7:30`.
+  Technical IDs, slugs, URLs, and private editorial notes are not public prose.
 - **Hide the editorial workflow:** an incomplete story should simply present
   the facts, places, and media that exist. Do not show visitors labels such as
   "coming soon," "confirmed," "unconfirmed," "verified," "unverified,"

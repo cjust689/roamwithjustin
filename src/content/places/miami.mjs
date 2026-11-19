@@ -65,7 +65,7 @@ export const miamiPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "visitor-center",
     description:
-      "The precisely known Everglades stop: a family bike ride on the Shark Valley path, with resting alligators nearby and very little relief from the building heat.",
+      "The precisely known Everglades stop is a family bike ride on the Shark Valley path, with resting alligators nearby and very little relief from the building heat.",
     externalLinks: {
       official: "https://www.nps.gov/ever/planyourvisit/svdirections.htm",
     },

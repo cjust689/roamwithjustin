@@ -192,7 +192,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "venue",
     description:
-      "BMX riders rotate above the foam pit while young skateboarders launch across indoor transitions; outside, the same campus continues with skiing, snowboarding, and tubing.",
+      "BMX riders rotate above the foam pit while young skateboarders launch across indoor transitions. Outside, the same campus continues with skiing, snowboarding, and tubing.",
     externalLinks: {
       official: "https://www.woodwardparkcity.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.754775%2C-111.585887",
@@ -231,7 +231,7 @@ export const utahPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "airport",
     description:
-      "The ordinary bookend to a week of salt, sandstone, and snow: rental keys on arrival and busy winter security lines on departure.",
+      "The ordinary bookend to a week of salt, sandstone, and snow brings rental keys on arrival and busy winter security lines on departure.",
     externalLinks: {
       official: "https://slcairport.com/",
       maps: "https://www.google.com/maps/search/?api=1&query=40.788393%2C-111.977773",
