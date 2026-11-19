@@ -48,15 +48,6 @@ const routes = [
     component: () => import("../views/roam/Gear.vue"),
   },
   {
-    path: "/",
-    name: "Home",
-    meta: {
-      analyticsTitle: "Roam With Justin",
-    },
-    component: () => import("../views/roam/Home.vue"),
-  },
-
-  {
     path: "/affiliates",
     name: "affiliates",
     meta: {

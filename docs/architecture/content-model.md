@@ -34,6 +34,15 @@ code_paths:
   - src/content/editorial/generated/records.json
   - src/content/selectors/experiences.mjs
   - src/content/selectors/projections.mjs
+  - src/components/JourneyStoryBody.vue
+  - src/features/atlas/components/AtlasDetailPanel.vue
+  - src/features/atlas/components/AtlasStoryReader.vue
+  - src/features/atlas/routes.js
+  - src/features/atlas/views/AtlasView.vue
+  - src/views/roam/RoamTripOverview.vue
+  - src/router/index.js
+  - scripts/test-atlas-story-discovery.mjs
+  - scripts/test-atlas-story-reader.mjs
   - scripts/validate-content.js
   - scripts/editorial-baseline.mjs
   - scripts/lib/editorial-baseline.mjs
@@ -78,6 +87,11 @@ verification:
     - live Atlas Place dropdown verified with the New Place request choice on 2026-11-16
     - live Catalog refresh verified 223 references, 71 Visit choices, and 106 exact bindings with no Posts ID writes on 2026-11-16
     - Atlas Journey First look presentation verified in production on 2026-11-16
+    - npm run atlas:test verified published story leads and incomplete Journey suppression
+    - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
+    - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
+    - Local Chrome verified the revised mobile detail hierarchy at 320 and 390 CSS pixels on 2026-11-18
+    - Local Chrome verified direct root Atlas startup and the feature-gated My Atlas handoff at 320, 390, and 1280 CSS pixels on 2026-11-18
 ---
 
 # Canonical content model
@@ -182,6 +196,53 @@ selector for compatibility.
 `src/content/selectors/projections.mjs` builds public trip, location, Atlas,
 and guided-journey shapes. Feature components consume those projections rather
 than maintaining another content database.
+
+An Atlas root receives a story lead only when its canonical Journey is
+published and owns substantive Journey chapters or a published Experience.
+The lead reuses the canonical Journey title, description, hero, public story
+ID, and standalone route. A slug alone is not story availability. Incomplete
+Journey previews and overview-only records therefore do not expose an Atlas
+story action.
+
+Stop-to-story relationships reuse canonical IDs already present in the content
+model. `Journey.days[].visits[].visitId` creates a chapter edge to that Visit,
+including many-to-many cases where one Visit appears in several chapters.
+Published Experiences create a stop edge only when both their `visitId` and
+`placeId` match. Atlas presentation selects the intended Visit when more than
+one Visit shares a Place, so it can retain one deliberate pin without merging
+the underlying story relationships. Structural hubs and chapters without a
+Visit reference have no stop-specific relationship.
+
+`src/components/JourneyStoryBody.vue` renders the canonical Journey chapters,
+locations, published Experiences and Moments, and media for both
+`RoamTripOverview.vue` and the in-Atlas reader. Atlas does not copy narrative
+or media into a second content shape. The exact Atlas node ID added to a trip
+location remains navigation identity. The stop-to-chapter relationship comes
+from the canonical Visit reference, not from matching a Place slug or map
+node.
+
+The Atlas reader is presentation state on the existing selected-node route,
+expressed by `?story=1`. `AtlasView.vue` keeps the single `AtlasMap.vue`
+instance mounted while `AtlasStoryReader.vue` replaces the inspector. The
+reader uses the same projected trip body, preserves browser history and local
+scroll positions, and applies temporary `noindex,follow` metadata so the
+standalone `/trips/:id` page remains the indexable representation. A validated
+`section` query can land on a derived Journey chapter ID or an explicitly
+related Experience anchor. Fresh section entries focus that section heading,
+while browser-history restoration retains its saved offset. Embedded videos
+defer media requests until playback; the standalone Journey renderer retains
+metadata preload. The full mobile sheet is a named modal dialog, while mobile
+map peek and the desktop split pane expose the reader as a named nonmodal
+region. Ads,
+lodging and planning offers, Partner cards, and affiliate Gear links remain
+outside the embedded reader.
+
+Mobile Atlas detail presentation removes redundant Journey labels, uses a
+passive bottom fade for scroll affordance, and places the selected-place Save
+state and total saved count in the bottom dock. The root route now renders the
+same Atlas projection as `/atlas`; it introduces no alternate content model.
+The feature-gated My Atlas toolbar action links to the separate private route
+and does not merge private account state into public Atlas records.
 
 Published Experiences are projected into their Journey page. Their stable
 deep link is `#experience-<slug>`. Published Moments retain explicit append

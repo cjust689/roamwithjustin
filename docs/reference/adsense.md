@@ -37,7 +37,7 @@ verification:
 
 The repository contains a conservative manual AdSense integration. It is
 disabled by default. The verified public publisher ID is present only in the
-homepage verification meta tag; no ad slot ID is committed. Live ads cannot
+root HTML verification meta tag; no ad slot ID is committed. Live ads cannot
 appear until the owner supplies the remaining exact account values and
 explicitly enables every safety gate.
 
@@ -75,7 +75,7 @@ It does not appear on the map canvas, markers, guided controls, incomplete
 Journeys, or thin stops. Its tab-scoped `sessionStorage` reservation prevents
 replay, backward navigation, and later stops from requesting additional ads.
 
-Neither placement renders on the home page, story hero, gallery, lightbox,
+Neither placement renders on the Atlas root shell, story hero, gallery, lightbox,
 video player, location dialog, navigation, or footer. The component does not
 track ad impressions or clicks. An empty unit collapses after Google marks it
 `data-ad-status="unfilled"` or `data-ad-status="unfill-optimized"`. It also
@@ -102,9 +102,9 @@ These identifiers are public configuration, not private API credentials. The
 workflow maps them into the Vue build. `ADSENSE_GOOGLE_ADS_TXT_LINE` is used by
 the postbuild step to create `/ads.txt` at the deployed site root.
 
-The homepage also contains Google's supported publisher verification meta tag
+The root HTML shell also contains Google's supported publisher verification meta tag
 for `ca-pub-5275158408075125`. This proves the public account association
-without loading the AdSense JavaScript on the home page, Atlas, or other routes
+without loading the AdSense JavaScript on the Atlas root or other routes
 that do not contain the manual ad unit. In AdSense, select **Meta tag** as the
 site verification method. The account code script Google displays is already
 created by `src/services/adsense.mjs` when the eligible story unit mounts and

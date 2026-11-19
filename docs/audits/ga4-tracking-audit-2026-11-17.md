@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - monetization-analytics
   - monetization-analytics-plan
@@ -79,17 +79,15 @@ consent state remain externally unverified.
 
 ## Expected reproducible trace
 
-After the owner confirms that exactly one page-view mode is active, the target
-trace for `homepage -> Atlas -> Journey -> Place -> Back -> different Place`
+After the owner confirms that exactly one page-view mode is active, the current
+target trace for `root Atlas -> Journey -> Place -> Back -> different Place`
 is:
 
-1. one homepage `page_view`;
-2. one `atlas_open_clicked`;
-3. one Atlas-root `page_view` and one `atlas_loaded`;
-4. one Journey-route `page_view` and one `atlas_journey_opened`;
-5. one Place-route `page_view` and one `atlas_destination_opened`;
-6. one page view for Back navigation; and
-7. one page view plus one destination-open event for the next intentional
+1. one root `page_view` and one `atlas_loaded` with `atlas_direct`;
+2. one Journey-route `page_view` and one `atlas_journey_opened`;
+3. one Place-route `page_view` and one `atlas_destination_opened`;
+4. one page view for Back navigation; and
+5. one page view plus one destination-open event for the next intentional
    Place choice.
 
 Manual mode sets `send_page_view: false`, but Google documents that this does

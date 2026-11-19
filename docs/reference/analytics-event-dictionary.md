@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - monetization-analytics
   - monetization-analytics-plan
@@ -15,7 +15,6 @@ supersedes: []
 superseded_by: []
 code_paths:
   - src/utils/analytics.mjs
-  - src/views/roam/Home.vue
   - src/features/atlas/views/AtlasView.vue
   - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasDetailPanel.vue
@@ -42,7 +41,7 @@ be summed with the custom events.
 | Event | Intentional trigger | Parameters |
 | --- | --- | --- |
 | `page_view` | One public page load or history navigation. Enhanced Measurement owns this by default; the tested manual router mode can own it only after the account's history option is disabled | automatic GA4 fields, or manual `page_path`, sanitized `page_location`, and `page_title` |
-| `atlas_open_clicked` | A visitor activates a tracked public Atlas entry link | `entry_surface`, coarse `campaign_context` |
+| `atlas_open_clicked` | A visitor activates an explicit public Atlas entry link, such as a Journey story action | `entry_surface`, coarse `campaign_context` |
 | `atlas_loaded` | MapLibre reports the public Atlas map ready | `entry_surface`, `device_category` |
 | `atlas_destination_opened` | A visitor intentionally opens a public child Place | `content_type`, `public_destination_id`, `surface` |
 | `atlas_journey_opened` | A visitor intentionally opens a public top-level Journey | `public_journey_id`, `surface` |
@@ -52,8 +51,7 @@ be summed with the custom events.
 
 ## Controlled values
 
-- Atlas entry surfaces: `homepage_primary`, `homepage_atlas_card`,
-  `trip_story`, `atlas_direct`.
+- Atlas entry surfaces: `trip_story`, `atlas_direct`.
 - Device categories: `mobile`, `desktop`.
 - Content types: `journey`, `place`, `story`.
 - Link types: `website`, `booking`, `maps`, `phone`, `affiliate`.

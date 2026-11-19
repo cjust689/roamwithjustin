@@ -92,7 +92,7 @@ verification:
     - npm run my-atlas:test passed optional month and year date compatibility, Auth0 session restoration, statistics, year filtering, chronological destination playback, cumulative reveal, and curved connection tests
     - Headless Chrome verified exact desktop year-editor alignment and cinematic playback at 1248 by 598 and 390 by 844 without horizontal overflow
     - Headless Chrome verified search, active destination editor, then result-list document and visual order at desktop and 390 pixel mobile widths without horizontal overflow
-    - Headless Chrome verified the feature-gated My Atlas homepage card, three-card desktop and stacked mobile layouts, exact /my-atlas navigation, and no horizontal overflow
+    - Headless Chrome historically verified the former feature-gated My Atlas homepage card, three-card desktop and stacked mobile layouts, exact /my-atlas navigation, and no horizontal overflow; the direct Atlas root later replaced that surface
     - A 390 pixel emulated mobile viewport reported 390 pixel root, body, panel, and input boundaries with no horizontal overflow
     - Headless Chrome verified collapsed owner and public map-control drawers, hidden MapLibre desktop controls, full-width visible year selectors, and 390 pixel root and panel boundaries; desktop retained expanded controls and the MapLibre button stack
     - Headless Chrome verified an initially collapsed MapLibre attribution info control and successful click-to-expand behavior
@@ -388,8 +388,8 @@ ceiling before inviting external users.
       future-planning, and sharing flows. Existing accounts start with the
       potentially large flows closed, while an empty account opens Add
       destination. Expanded destination and planner lists use bounded scrolling.
-- [x] Add a feature-gated homepage discovery card that routes visitors directly
-      to My Atlas and remains responsive with the existing Atlas and guide cards.
+- [x] Add a feature-gated My Atlas discovery action. The original homepage card
+      was later replaced by one action in the direct root Atlas toolbar.
 - [x] Add an accessible pre-account product walkthrough and a once-per-browser
       quick start for newly provisioned empty accounts, with permanent manual
       access and task-focused completion actions.
@@ -546,11 +546,11 @@ The search interaction was then verified with Uvita at 1084 by 749 and 390 by 84
 editor, the editor preceded the catalog result list, and the document had no
 horizontal overflow.
 
-The feature-enabled homepage was verified with three photographic discovery
-cards at desktop width and a deliberate single-column stack at 390 pixels. All
-mobile cards measured 369 pixels inside the 390 pixel viewport, the document
-had no horizontal overflow, and activating the My Atlas card changed the route
-to `/my-atlas`.
+The former feature-enabled homepage was verified with three photographic
+discovery cards at desktop width and a deliberate single-column stack at 390
+pixels. That evidence remains historical. The page was removed on 2026-11-18,
+and the public root now enters Atlas directly with one feature-gated My Atlas
+toolbar action.
 
 The owner and fixture-backed public Atlas were then verified at 390 by 844.
 Both showed a collapsed map-controls disclosure by default, expanded it with

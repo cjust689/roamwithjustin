@@ -39,7 +39,7 @@
     "analytics:test": "node scripts/test-analytics.mjs",
     "commerce:test": "node scripts/test-commercial-content.mjs && node scripts/audit-lodging-links.mjs --check",
     "lodging:audit": "node scripts/audit-lodging-links.mjs",
-    "atlas:test": "node scripts/test-atlas-marker-layout.mjs && node scripts/test-atlas-surprise-selection.mjs && node scripts/test-atlas-journey-readiness.mjs",
+    "atlas:test": "node scripts/test-atlas-marker-layout.mjs && node scripts/test-atlas-surprise-selection.mjs && node scripts/test-atlas-journey-readiness.mjs && node scripts/test-atlas-story-discovery.mjs && node scripts/test-atlas-story-reader.mjs && node scripts/test-atlas-story-relationships.mjs",
     "gear:ingest": "node scripts/ingest-gear.js",
     "gear:journeys": "node scripts/ingest-gear.js --journeys",
     "gear:list": "node scripts/ingest-gear.js --list",

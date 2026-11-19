@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - editorial-voice
   - storytelling-framework
@@ -15,7 +15,6 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
-  - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/views/roam/Affiliates.vue
   - src/features/atlas/views/AtlasView.vue
@@ -33,16 +32,17 @@ verification:
 
 This is the first bounded audit pass, not a claim that every public string has
 been rewritten. It distinguishes interface copy from creator storytelling,
-user data, disclosures, and legal text. The older brief assumed three homepage
-cards and unimplemented My Atlas planning. Current source has two homepage
-cards, and private planning is implemented and test verified.
+user data, disclosures, and legal text. At the time of this audit, the older
+brief assumed three homepage cards while source had two, and private planning
+was implemented and test verified. The separate homepage was removed on
+2026-11-18 when the public root began entering Atlas directly.
 
 ## High-visibility inventory
 
 | Source | Surface and actual copy | Finding | Action and risk |
 | --- | --- | --- | --- |
-| `src/views/roam/Home.vue` | Homepage subtitle, `Adventure meets intention...` | Generic and does not say what the site contains. | Replaced with the owner-approved photography, films, and practical notes sentence. Low product risk. |
-| `src/views/roam/Home.vue` | Homepage headline, Atlas helper, Atlas card, and My Atlas card | The headline is distinctive. The helper and actions accurately describe the two current entry points. | Preserved. The brief's assumed third Journey card is stale and was not restored. |
+| Former homepage | Homepage subtitle, `Adventure meets intention...` | Generic and does not say what the site contains. | Replaced with the owner-approved photography, films, and practical notes sentence. The entire homepage was later removed when Atlas became the root experience. |
+| Former homepage | Homepage headline, Atlas helper, Atlas card, and My Atlas card | The headline was distinctive. The helper and actions accurately described the two entry points at the time. | Preserved during this audit, then superseded by the direct root Atlas shell. |
 | `src/features/atlas/views/AtlasView.vue` | Journey explorer instructions and `First look` explanation | Current copy states what opens and distinguishes incomplete Journey depth without exposing internal workflow state. | Preserved. A broad rewrite would risk changing established Atlas behavior and Journey readiness language. |
 | `src/features/my-atlas/views/MyAtlasGeographicProof.vue` | My Atlas introduction, privacy state, map controls, and empty states | Current copy uses second person, distinguishes private account storage from the local proof, and matches shipped controls. | Preserved. User-authored names and memories are outside editorial rewriting. |
 | `src/features/my-atlas/components/MyAtlasPlanner.vue` | Bucket list, saved trip, retention, export, and Mark Visited system copy | Planning is implemented, contrary to the source brief's assumption. The copy is functional and privacy specific. | Preserved in this copy-only pass. Planner behavior remains owned by its active implementation document and tests. |
@@ -53,7 +53,8 @@ cards, and private planning is implemented and test verified.
 
 ## Implemented revision set
 
-- Homepage subtitle replaced with the exact approved concrete description.
+- The former homepage subtitle was replaced with the exact approved concrete
+  description before that page was later retired.
 - Gear introduction now says what the page will contain rather than exposing
   internal review steps.
 - Gear empty state now states the visible condition and future content plainly.

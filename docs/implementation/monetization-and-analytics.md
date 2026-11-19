@@ -4,7 +4,7 @@ title: Monetization, Analytics, and Partner Referrals
 kind: implementation
 status: in-progress
 implementation_state: partial
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - monetization-analytics
   - ga4-three-day-improvement-roadmap
@@ -23,7 +23,6 @@ code_paths:
   - src/router/index.js
   - src/utils/analytics.mjs
   - src/content/commercial-links.js
-  - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/components/TravelPlanningOffers.vue
   - src/data/affiliates.js
@@ -155,10 +154,9 @@ verification:
   browser opt-out key.
 - [x] Excluded `/my-atlas` routes and private planning state from this GA4
   phase.
-- [x] Added the primary homepage Atlas CTA and one-sentence map promise.
-- [x] Reduced the secondary homepage discovery surface to concise Travel Atlas
-  and feature-gated My Atlas cards. Journey guides remain discoverable through
-  the Atlas rather than a duplicate homepage card.
+- [x] Replaced the separate homepage discovery surface with direct root Atlas
+  entry and one feature-gated My Atlas action in the Atlas toolbar. Journey
+  guides remain discoverable inside the Atlas.
 - [x] Added allowlisted Atlas entry, load, Journey, destination, story, Maps,
   and canonical Partner actions without map movement telemetry.
 - [x] Removed hostname-derived GearGrid events, full outbound URL parameters,
@@ -185,12 +183,12 @@ verification:
 - One separately disabled Atlas placement may appear below editorial stop
   content after three distinct guided arrivals on a published, media-rich
   Journey. A browser-tab session reservation prevents per-stop refreshes.
-- There are no placements on the home page, map canvas, markers, free Atlas
+- There are no placements on the Atlas root shell, map canvas, markers, free Atlas
   exploration, incomplete Journeys, story heroes, location cards, galleries,
   lightboxes, videos, dialogs, navigation, or footer.
 - The shared loader is added only when the eligible unit mounts and is never
   duplicated. The component does not refresh ads or track their interactions.
-- The homepage exposes the owner supplied publisher ID through Google's
+- The root HTML shell exposes the owner supplied publisher ID through Google's
   supported verification meta tag without loading advertising JavaScript.
 - Live activation fails closed unless privacy readiness and Auto ads being off
   are explicitly acknowledged alongside valid client, slot, and ads.txt data.
@@ -253,7 +251,7 @@ Use **manual AdSense ad units** only where the page has substantial original con
 
 | Surface                                      | Initial policy                                                                                       | Why                                                                                                        |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Cinematic homepage hero                      | **No Google display ads**                                                                            | Preserve the first impression and visual brand.                                                            |
+| Atlas root entry shell                       | **No Google display ads**                                                                            | Preserve the immediate exploratory entry and visual brand.                                                |
 | Interactive globe / 3D MapLibre atlas        | **No ads on the map or controls; one optional gated unit inside rich guided-stop editorial content** | Preserve exploration, require three distinct guided arrivals, and cap requests to one per Journey and tab. |
 | Hover photo pins / location previews         | **No Google display ads**                                                                            | Pins/cards are interactive navigation, not ad inventory.                                                   |
 | Photo lightboxes, video players, galleries   | **No Google display ads**                                                                            | Respect the art and avoid obscuring controls/media.                                                        |
