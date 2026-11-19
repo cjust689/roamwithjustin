@@ -43,6 +43,15 @@ verification:
   evidence:
     - npm run my-atlas:test
     - npm run lint
+    - Pull request 174 passed validation run 44551655463 and merged to develop as 9dc320c08ee9b0efa87477236aded35e15dca7c8; develop validation run 44552079192 then succeeded
+    - Pull request 175 passed production validation run 44552479821 and merged to main as 8852245ef99bb70d63658e20c70ac87bd71e84ab
+    - Pages run 44552804408 deployed the production merge successfully
+    - Live bundles app.1723abca.js, 863.53806ea6.js, and 327.76157321.js returned 200 and contained the read only trip action, dated Expedia handoff, upper-right profile action, and official park identity markers
+    - Staging Worker version cfcd24f1-eb25-4ca9-ae9c-bea2340cfdfe deployed the atomic planning snapshot, returned 200 health with the production CORS origin, and rejected an unauthenticated planning snapshot read with 401
+    - Pull request 176 passed validation run 44564175987 and merged to develop as 33265fc69069d7cba5333388fb38440924dbcc4c; develop validation run 44564599236 then succeeded
+    - Pull request 177 passed production validation run 44564960456 and merged to main as 6c83c834cd1849fbad87e34b2e53cf657b64e47d
+    - Pages run 44565347879 deployed the production hotfix successfully
+    - Live chunks 327.509840b5.js and 761.a1e574b6.js returned 200 and contained the atomic planning endpoint, invalid snapshot guard, and authoritative revision recovery method
     - Client tests verify versioned read only trip snapshot encoding, private field omission, optional nearby suggestion prompt copy, dated Expedia handoff parameters, and successful mutation recovery through an authoritative read
     - Planner boundary tests verify one atomic wishlist and saved-plan snapshot, the temporary legacy fallback, authoritative profile revision reads, and the exact revision used by subsequent writes
     - Workers runtime tests verify GET /v1/me/planning returns wishlist and plan records under one account revision
