@@ -16,6 +16,7 @@ related:
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
   - my-atlas-destination-memory-photo-implementation
+  - my-atlas-favorite-travel-image-implementation
   - docs-index
 supersedes: []
 superseded_by: []
@@ -487,14 +488,16 @@ completed handoff evidence is:
       status behavior only after the secure backend and staging tests pass.
 - [ ] Invite users only after privacy, moderation, monitoring, reset, and export
       procedures are approved and tested.
-- [ ] Keep ads, photos, Facebook, recaps, public people discovery, and editorial
-      content outside the beta.
-- [ ] Implement the audited single photo release tracked by
-      [My Atlas destination memory and single photo](my-atlas-destination-memory-photo.md).
-      The accepted boundary is one private image per visited pin. It requires a
-      dedicated traveler media bucket and a verified server Images binding
-      before upload UI can ship. Do not store image bytes in the profile Durable
-      Object or trust browser MIME types as validation.
+- [ ] Keep ads, per-destination photos, Facebook, public people discovery, and
+      editorial content outside the beta.
+- [ ] Complete the remote staging gate for the bounded
+      [My Atlas favorite travel image](my-atlas-favorite-travel-image.md).
+      The implemented repository contract uses one private account-level image
+      for owner Atlas Story export. It requires the dedicated traveler media
+      bucket, verified server Images transform, authenticated replacement and
+      deletion acceptance, budget alerts, and real-device review before a
+      broader beta. Image bytes never enter the profile Durable Object or the
+      public Atlas projection.
 - [x] Implement the first private planned-destination lifecycle separately from
       visited pins, as tracked by
       [My Atlas trip planning](my-atlas-trip-planning.md). It does not enter

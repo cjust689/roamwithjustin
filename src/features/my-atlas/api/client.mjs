@@ -25,6 +25,8 @@ export class MyAtlasApiError extends Error {
 const PUBLIC_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 const CATALOG_PLACE_ID_PATTERN =
   /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+)$/
+export const MY_ATLAS_IMAGE_MAX_INPUT_BYTES = 10 * 1024 * 1024
+const MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES = 1024 * 1024
 
 function isVisitedDate(value) {
   return Boolean(
@@ -95,6 +97,26 @@ function revisionFromResponse(response, fallback = 0) {
     })
   }
   return revision
+}
+
+function normalizedAtlasImage(value) {
+  if (value === null || value === undefined) return null
+  if (
+    typeof value !== "object" ||
+    !/^image_[a-f0-9]{32}$/.test(value.imageId || "") ||
+    value.contentType !== "image/webp" ||
+    value.width !== 1200 ||
+    value.height !== 1200 ||
+    !Number.isSafeInteger(value.byteLength) ||
+    value.byteLength < 1 ||
+    value.byteLength > MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES ||
+    typeof value.updatedAt !== "string"
+  ) {
+    throw new MyAtlasApiError("The Atlas image response is invalid.", {
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({ ...value })
 }
 
 async function authenticatedJsonRequest({
@@ -217,7 +239,129 @@ export async function fetchMyAtlasState({
   return Object.freeze({
     profile: Object.freeze({ ...payload.profile, revision }),
     pins: Object.freeze(payload.pins.map(normalizedPin)),
+    atlasImage: normalizedAtlasImage(payload.atlasImage),
   })
+}
+
+export async function fetchMyAtlasImage({
+  apiBaseUrl,
+  accessToken,
+  fetchImpl = fetch,
+}) {
+  if (!apiBaseUrl || typeof accessToken !== "string" || !accessToken) {
+    throw new MyAtlasApiError("My Atlas API access is not configured.", {
+      code: "not_configured",
+    })
+  }
+  let response
+  try {
+    response = await fetchImpl(`${apiBaseUrl}/v1/me/atlas-image`, {
+      method: "GET",
+      headers: {
+        Accept: "image/webp",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      cache: "no-store",
+    })
+  } catch {
+    throw new MyAtlasApiError("Your Atlas image could not be reached.", {
+      code: "unavailable",
+    })
+  }
+  if (!response.ok) {
+    let payload = {}
+    try {
+      payload = await response.json()
+    } catch {
+      // Invalid errors use the generic rejection below.
+    }
+    throw new MyAtlasApiError("Your Atlas image could not be loaded.", {
+      status: response.status,
+      code: typeof payload.error === "string" ? payload.error : "rejected",
+      requestId: typeof payload.requestId === "string" ? payload.requestId : "",
+    })
+  }
+  const blob = await response.blob()
+  if (
+    blob.type !== "image/webp" ||
+    blob.size < 1 ||
+    blob.size > MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES
+  ) {
+    throw new MyAtlasApiError("The Atlas image response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return blob
+}
+
+export async function replaceMyAtlasImage({
+  apiBaseUrl,
+  accessToken,
+  file,
+  revision,
+  fetchImpl = fetch,
+}) {
+  if (!(file instanceof Blob) || file.size < 1) {
+    throw new MyAtlasApiError("Choose an image to upload.", {
+      code: "image_empty",
+    })
+  }
+  if (file.size > MY_ATLAS_IMAGE_MAX_INPUT_BYTES) {
+    throw new MyAtlasApiError("The selected image is larger than 10 MiB.", {
+      code: "image_too_large",
+    })
+  }
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new MyAtlasApiError("Choose a JPEG, PNG, or WebP image.", {
+      code: "image_type_not_supported",
+    })
+  }
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/atlas-image",
+    method: "POST",
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl: async (url, options) =>
+      fetchImpl(url, {
+        ...options,
+        headers: new Headers({
+          ...Object.fromEntries(options.headers),
+          "Content-Type": file.type,
+        }),
+        body: file,
+      }),
+  })
+  return Object.freeze({
+    atlasImage: normalizedAtlasImage(payload.atlasImage),
+    revision: revisionFromResponse(response),
+  })
+}
+
+export async function removeMyAtlasImage({
+  apiBaseUrl,
+  accessToken,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/atlas-image",
+    method: "DELETE",
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (payload.deleted !== true) {
+    throw new MyAtlasApiError("The Atlas image removal response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return revisionFromResponse(response)
 }
 
 export async function fetchMyAtlasProfile({

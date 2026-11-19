@@ -178,8 +178,32 @@ function drawStat(context, x, y, value, label) {
   context.fillText(label.toUpperCase(), x + 24, y + 126)
 }
 
+function drawFavoriteImage(context, image) {
+  if (!image) return
+  const x = 758
+  const y = 62
+  const size = 262
+  context.save()
+  context.shadowColor = "rgba(0, 0, 0, 0.48)"
+  context.shadowBlur = 34
+  roundedRectangle(context, x, y, size, size, 34)
+  context.clip()
+  context.drawImage(image, x, y, size, size)
+  const shade = context.createLinearGradient(x, y, x, y + size)
+  shade.addColorStop(0, "rgba(6, 15, 17, 0.02)")
+  shade.addColorStop(1, "rgba(6, 15, 17, 0.2)")
+  context.fillStyle = shade
+  context.fillRect(x, y, size, size)
+  context.restore()
+  roundedRectangle(context, x, y, size, size, 34)
+  context.strokeStyle = "rgba(240, 201, 120, 0.65)"
+  context.lineWidth = 3
+  context.stroke()
+}
+
 export function createMyAtlasStoryCanvas({
   displayName,
+  favoriteImage = null,
   filterLabel = "All destinations",
   handle,
   places,
@@ -196,13 +220,19 @@ export function createMyAtlasStoryCanvas({
   context.fillText("MY ATLAS", 62, 82)
   context.fillStyle = "#f4fbf7"
   context.font = "700 78px Poppins, Arial, sans-serif"
-  context.fillText(displayName || "My travels", 62, 188, 920)
+  context.fillText(
+    displayName || "My travels",
+    62,
+    188,
+    favoriteImage ? 640 : 920
+  )
   context.fillStyle = "#a9bbb5"
   context.font = "500 28px Poppins, Arial, sans-serif"
   context.fillText(handle ? `@${handle}` : filterLabel, 64, 244)
   context.fillStyle = "#d5e2dd"
   context.font = "600 32px Poppins, Arial, sans-serif"
   context.fillText(filterLabel, 64, 330)
+  drawFavoriteImage(context, favoriteImage)
 
   drawMap(context)
   drawConnections(context, places)

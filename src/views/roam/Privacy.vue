@@ -3,7 +3,7 @@
     <article>
       <header>
         <h1>Privacy and advertising</h1>
-        <p>Effective November 17, 2026</p>
+        <p>Effective November 19, 2026</p>
       </header>
 
       <section>
@@ -27,25 +27,28 @@
           internal account identifier, your chosen handle and display name,
           policy acceptance records, and the places, optional visit years,
           favorite memories, private wishlist entries, and trip plans that you
-          choose to save. Custom pins and private plans may include coordinates.
-          Access tokens are kept in browser memory rather than permanent browser
-          storage.
+          choose to save. You may also upload one favorite travel image for use
+          in an exported Atlas Story image. Custom pins and private plans may
+          include coordinates. Access tokens are kept in browser memory rather
+          than permanent browser storage.
         </p>
         <p>
           My Atlas accounts begin private. If you publish your Visited Atlas,
           your handle, display name, visited places, optional visit years,
           favorite memories, and custom pin names and positions become available
           through your public profile link. Wishlist entries, future trip plans,
-          private notes, desired years, and plan retention details are never
-          included in that public profile.
+          private notes, desired years, plan retention details, and your
+          favorite travel image are never included in that public profile.
         </p>
         <p>
           Auth0 supports authentication. Cloudflare hosts the application data,
-          account services, and human verification. GeoNames supplies geographic
-          catalog data. Google receives a request only when you sign in through
-          Google or choose to open a prepared Google Maps link. My Atlas account
-          screens are excluded from the site's Google Analytics page and event
-          tracking.
+          account services, private image storage, image processing, and human
+          verification. Uploaded images are resized to a square WebP image and
+          stripped of invisible metadata before private storage. The original
+          upload is not retained. GeoNames supplies geographic catalog data.
+          Google receives a request only when you sign in through Google or
+          choose to open a prepared Google Maps link. My Atlas account screens
+          are excluded from the site's Google Analytics page and event tracking.
         </p>
       </section>
 
@@ -72,8 +75,8 @@
           A signed in account owner can download private account data and can
           permanently delete the My Atlas application account. Deletion removes
           the profile, visited pins, memories, wishlist, trip plan, policy
-          records, and active application registration. It does not delete the
-          owner's Google or Auth0 identity.
+          records, favorite travel image, and active application registration.
+          It does not delete the owner's Google or Auth0 identity.
         </p>
         <p>
           A minimal record is retained to make an interrupted deletion safe to
@@ -142,8 +145,9 @@
         <p>
           My Atlas owners can keep the account private, unpublish a shared
           Atlas, remove individual places, delete wishlist entries and plans,
-          export account data, or permanently delete the application account
-          from the signed in My Atlas screen.
+          replace or remove the favorite travel image, export account data, or
+          permanently delete the application account from the signed in My Atlas
+          screen.
         </p>
       </section>
 

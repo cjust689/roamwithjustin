@@ -13,6 +13,11 @@ import {
   isNormalizedCustomPlace,
   projectCustomPlace,
 } from "./custom-place.mjs"
+import {
+  AtlasImageServiceError,
+  requireAtlasImageBucket,
+  transformAtlasImage,
+} from "./atlas-image.mjs"
 
 export class AccountConflictError extends Error {
   constructor(code) {
@@ -170,6 +175,18 @@ function publicOwnerPin(pin) {
   })
 }
 
+function ownerAtlasImageMetadata(atlasImage) {
+  if (!atlasImage) return null
+  return Object.freeze({
+    imageId: atlasImage.imageId,
+    contentType: atlasImage.contentType,
+    width: atlasImage.width,
+    height: atlasImage.height,
+    byteLength: atlasImage.byteLength,
+    updatedAt: atlasImage.updatedAt,
+  })
+}
+
 async function projectOwnerPins(pins, placeCatalog, environment) {
   const catalogPins = pins.filter(
     pin => !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
@@ -217,6 +234,156 @@ export async function getMyAtlasState({ environment, identity, placeCatalog }) {
   return Object.freeze({
     profile: publicProfile(result.profile),
     pins: Object.freeze(pins),
+    atlasImage: ownerAtlasImageMetadata(result.atlasImage),
+  })
+}
+
+export async function getMyAtlasImage({ environment, identity }) {
+  const owner = await ownerContext(environment, identity)
+  const result = expectedResult(
+    await owner.user.getOwnerAtlasImage(owner.identityDigest)
+  )
+  if (!result.atlasImage) {
+    throw new AccountConflictError("atlas_image_not_found")
+  }
+  let object
+  try {
+    object = await requireAtlasImageBucket(environment).get(
+      result.atlasImage.storageKey
+    )
+  } catch {
+    throw new AtlasImageServiceError()
+  }
+  if (
+    !object ||
+    !object.body ||
+    object.size !== result.atlasImage.byteLength ||
+    object.httpMetadata?.contentType !== "image/webp"
+  ) {
+    throw new AtlasImageServiceError()
+  }
+  return Object.freeze({
+    profile: publicProfile(result.profile),
+    atlasImage: ownerAtlasImageMetadata(result.atlasImage),
+    object,
+  })
+}
+
+export async function replaceMyAtlasImage({
+  environment,
+  identity,
+  input,
+  upload,
+  imageTransformer = transformAtlasImage,
+  imageIdFactory = () => `image_${crypto.randomUUID().replaceAll("-", "")}`,
+  now = new Date().toISOString(),
+}) {
+  const owner = await ownerContext(environment, identity)
+  const transformed = await imageTransformer({
+    ...upload,
+    images: environment.IMAGES,
+  })
+  const imageId = imageIdFactory()
+  const storageKey = `private/atlas/${owner.userId}/${imageId}.webp`
+  const atlasImage = Object.freeze({
+    schemaVersion: 1,
+    imageId,
+    storageKey,
+    sourceSha256: transformed.sourceSha256,
+    contentType: transformed.contentType,
+    width: transformed.width,
+    height: transformed.height,
+    byteLength: transformed.byteLength,
+    createdAt: now,
+    updatedAt: now,
+  })
+  const mutation = await mutationMetadata(owner, input, "replace-atlas-image", {
+    sourceSha256: transformed.sourceSha256,
+  })
+  const bucket = requireAtlasImageBucket(environment)
+  let stored = false
+  try {
+    const object = await bucket.put(storageKey, transformed.bytes, {
+      onlyIf: { etagDoesNotMatch: "*" },
+      httpMetadata: {
+        contentType: "image/webp",
+        contentDisposition: "inline",
+        cacheControl: "private, no-store",
+      },
+      customMetadata: { mediaKind: "atlas-cover-v1" },
+    })
+    if (!object || object.size !== transformed.byteLength) {
+      throw new AtlasImageServiceError()
+    }
+    stored = true
+    const result = expectedResult(
+      await owner.user.replaceOwnerAtlasImage({
+        identityDigest: owner.identityDigest,
+        expectedRevision: input.expectedRevision,
+        image: atlasImage,
+        now,
+        ...mutation,
+      })
+    )
+    if (result.idempotent) {
+      await bucket.delete(storageKey)
+    } else if (result.previousAtlasImage) {
+      try {
+        await bucket.delete(result.previousAtlasImage.storageKey)
+      } catch {
+        console.error(
+          JSON.stringify({ event: "atlas_image_replacement_cleanup_failed" })
+        )
+      }
+    }
+    return Object.freeze({
+      idempotent: result.idempotent,
+      profile: publicProfile(result.profile),
+      atlasImage: ownerAtlasImageMetadata(result.atlasImage),
+    })
+  } catch (error) {
+    if (stored) {
+      try {
+        await bucket.delete(storageKey)
+      } catch {
+        console.error(JSON.stringify({ event: "atlas_image_rollback_failed" }))
+      }
+    }
+    throw error
+  }
+}
+
+export async function removeMyAtlasImage({
+  environment,
+  identity,
+  input,
+  now = new Date().toISOString(),
+}) {
+  const owner = await ownerContext(environment, identity)
+  const mutation = await mutationMetadata(
+    owner,
+    input,
+    "remove-atlas-image",
+    { remove: true }
+  )
+  const result = expectedResult(
+    await owner.user.removeOwnerAtlasImage({
+      identityDigest: owner.identityDigest,
+      expectedRevision: input.expectedRevision,
+      now,
+      ...mutation,
+    })
+  )
+  try {
+    await requireAtlasImageBucket(environment).delete(
+      result.removedAtlasImage.storageKey
+    )
+  } catch {
+    console.error(JSON.stringify({ event: "atlas_image_removal_cleanup_failed" }))
+  }
+  return Object.freeze({
+    idempotent: result.idempotent,
+    profile: publicProfile(result.profile),
   })
 }
 
@@ -399,6 +566,7 @@ export async function exportMyAtlas({ environment, identity }) {
     pins: Object.freeze(result.pins.map(publicOwnerPin)),
     wishlist: Object.freeze(result.wishes || []),
     plans: Object.freeze(result.plans || []),
+    atlasImage: ownerAtlasImageMetadata(result.atlasImage),
   })
 }
 
@@ -440,6 +608,12 @@ export async function deleteMyAccount({
   }
 
   const user = requireNamespace(environment, "MY_ATLAS_USERS").getByName(userId)
+  const mediaResult = await user.getOwnerAtlasImageForDeletion(identityDigest)
+  const atlasImage = mediaResult?.ok
+    ? mediaResult.atlasImage
+    : registryDeleted && mediaResult?.error === "forbidden"
+      ? null
+      : expectedResult(mediaResult).atlasImage
   if (!registryDeleted) {
     expectedResult(
       await user.prepareOwnerDeletion({
@@ -459,6 +633,13 @@ export async function deleteMyAccount({
         now,
       })
     )
+  }
+  if (atlasImage) {
+    try {
+      await requireAtlasImageBucket(environment).delete(atlasImage.storageKey)
+    } catch {
+      throw new AtlasImageServiceError()
+    }
   }
   const completed = expectedResult(
     await user.finalizeOwnerDeletion({ operationDigest, requestDigest, now })

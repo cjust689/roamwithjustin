@@ -5,12 +5,13 @@ kind: proposal
 status: approved
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-19
 related:
   - my-atlas-geography
   - my-atlas-registration
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
+  - my-atlas-favorite-travel-image-implementation
   - docs-index
 supersedes:
   - my-atlas-private-beta-v1
@@ -30,6 +31,10 @@ verification:
 # My Atlas: Private Beta V1.1 - Lean Implementation Proposal
 
 > **Adoption status:** This is the accepted product and architecture target.
+> The later favorite-travel-image decision supersedes this proposal's blanket
+> exclusion of image uploads only for one private account-level image used in
+> owner Atlas Story export. Per-destination photos remain excluded. See the
+> active favorite travel image implementation for the exact boundary.
 > Phase 1 is implemented as an environment-gated local geographic proof. A
 > bounded Auth0 browser client is also implemented and owner verified locally.
 > Phase 2A adds a local-only Worker that cryptographically verifies the exact
@@ -355,12 +360,12 @@ Do not use ad blockers, artificial reloads or auto-refresh to force impressions.
 - Lifetime traveled, first-time visited and recorded-for-year are different concepts. Do not advertise "new countries" without recording first visit semantics.
 - Beta data resets invalidate lifetime/annual claims: communicate clearly; export remains available.
 
-### V2 images: strictly four per profile
+### Profile image scope: one favorite travel image
 
-- One **cover photo** and **three favorite travel images** across the whole profile, not per pin, with no required location association. Favorites can be swapped annually.
-- Keep user-media uploads separate from existing editorial R2 bucket/prefix. Enforce quota and bytes/dimensions server-side, strip EXIF/GPS, resize/re-encode, handle orientation, use short-lived upload permissions, remove replaced/orphan objects, and moderate rights/content.
-- Illustrative optimized targets: cover <= 200 KB, each favorite <= 150 KB where visually acceptable. These are test targets, not guaranteed limits for every source photo; choose dimensions/encoding empirically.
-- Before adding image-rich annual recaps, decide whether older recaps show current favorites, stored historical versions, or immutable pre-rendered snapshots. Define retention/deletion rights.
+- The earlier four-image roadmap is superseded by one optional favorite travel image for the whole account. It is used only in owner Atlas Story export and is not attached to a pin or included in public Atlas data.
+- Keep user-media uploads separate from the existing editorial R2 bucket and prefix. Enforce byte and dimension limits on the server, strip EXIF and GPS data, resize and re-encode, handle orientation, and remove replaced or orphaned objects.
+- The active implementation uses an exact 1200 by 1200 WebP derivative with a 1 MiB stored ceiling. The source is not retained.
+- Any additional profile images, historical image versions, or image-rich annual recaps require a separate product, privacy, retention, moderation, and cost decision.
 - Potential future providers: Facebook/Apple auth, attractions under licensed provider, opt-in user directory, sponsor discovery, and read caching **only with correct privacy revocation**.
 
 ## 11. Repository integration for coding agent
