@@ -1048,7 +1048,7 @@
 <script>
 import {
   createMyAtlasWish,
-  deleteMyAtlasAccount,
+  deleteMyAtlasAccountWithRevisionRecovery,
   deleteMyAtlasPlan,
   deleteMyAtlasWish,
   fetchMyAtlasAccountExport,
@@ -2227,11 +2227,16 @@ export default {
           }
           window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
         }
-        await deleteMyAtlasAccount({
+        await deleteMyAtlasAccountWithRevisionRecovery({
           apiBaseUrl: this.apiBaseUrl,
           accessToken: await this.token(),
           revision: operation.revision,
           idempotencyKey: operation.idempotencyKey,
+          onRevision: revision => {
+            operation = { ...operation, revision }
+            window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
+            this.emitRevision(revision)
+          },
         })
         window.sessionStorage.removeItem(storageKey)
         this.$emit("account-deleted")

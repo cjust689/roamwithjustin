@@ -244,6 +244,14 @@ assert.match(
   plannerComponent,
   /error\?\.code === "revision_conflict"[\s\S]*refreshPlanningRevision\(accessToken\)[\s\S]*applyMutation\(accessToken\)/
 )
+assert.match(
+  plannerComponent,
+  /deleteMyAtlasAccountWithRevisionRecovery\([\s\S]*onRevision: revision =>[\s\S]*sessionStorage\.setItem/
+)
+assert.match(
+  ownerView,
+  /pendingDeletion[\s\S]*deleteMyAtlasAccountWithRevisionRecovery\([\s\S]*onRevision: revision =>[\s\S]*sessionStorage\.setItem/
+)
 assert.match(apiClient, /path: "\/v1\/me\/planning"/)
 assert.match(apiClient, /fetchMyAtlasProfile[\s\S]*path: "\/v1\/me"/)
 assert.match(

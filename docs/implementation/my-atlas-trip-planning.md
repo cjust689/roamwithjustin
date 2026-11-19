@@ -59,6 +59,7 @@ verification:
     - Planner boundary tests verify one atomic wishlist and saved-plan snapshot, the temporary legacy fallback, authoritative profile revision reads, and the exact revision used by subsequent writes
     - Workers runtime tests verify GET /v1/me/planning returns wishlist and plan records under one account revision
     - Workers runtime tests verify that deletion releases registration identity and handle assignments and permits clean registration with the same identity and handle through a new invitation
+    - Client deletion recovery tests verify a stale account DELETE at revision 5, authoritative profile recovery at revision 7, persisted revision replacement, and one successful retry with the original idempotency key
     - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
@@ -186,6 +187,9 @@ Authenticated owner interaction remains external acceptance.
       Completed deletion removes the active handle assignment instead of
       retaining a handle tombstone, so a newly invited account can reuse the
       former identity and handle with a new internal user ID.
+      A definitive HTTP 412 now reads the authoritative profile revision,
+      persists it with the existing deletion idempotency key, and retries once.
+      The same recovery runs when a reload resumes a stored deletion operation.
 - [x] Owner-only wishlist CRUD for catalog and existing custom-place shapes.
 - [x] Deterministic owner-scoped wish IDs, duplicate index, 250-entry cap,
       normalized notes, priorities, optional desired year, and 100-record paging.

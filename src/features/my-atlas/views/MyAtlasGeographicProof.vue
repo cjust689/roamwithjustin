@@ -706,7 +706,7 @@ import {
 import {
   MY_ATLAS_IMAGE_MAX_INPUT_BYTES,
   createMyAtlasPin,
-  deleteMyAtlasAccount,
+  deleteMyAtlasAccountWithRevisionRecovery,
   deleteMyAtlasPin,
   fetchMyAtlasImage,
   fetchMyAtlasState,
@@ -1274,11 +1274,18 @@ export default {
           pendingDeletion?.idempotencyKey &&
           Number.isSafeInteger(pendingDeletion.revision)
         ) {
-          await deleteMyAtlasAccount({
+          await deleteMyAtlasAccountWithRevisionRecovery({
             apiBaseUrl: this.apiBaseUrl,
             accessToken: token,
             revision: pendingDeletion.revision,
             idempotencyKey: pendingDeletion.idempotencyKey,
+            onRevision: revision => {
+              pendingDeletion = { ...pendingDeletion, revision }
+              window.sessionStorage.setItem(
+                deletionKey,
+                JSON.stringify(pendingDeletion)
+              )
+            },
           })
           window.sessionStorage.removeItem(deletionKey)
           this.handleAccountDeleted()

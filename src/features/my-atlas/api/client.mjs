@@ -974,6 +974,38 @@ export async function deleteMyAtlasAccount({
   return Object.freeze({ deleted: true, deletedAt: payload.deletedAt })
 }
 
+export async function deleteMyAtlasAccountWithRevisionRecovery({
+  apiBaseUrl,
+  accessToken,
+  revision,
+  idempotencyKey = newIdempotencyKey(),
+  onRevision,
+  fetchImpl = fetch,
+}) {
+  const deletion = currentRevision =>
+    deleteMyAtlasAccount({
+      apiBaseUrl,
+      accessToken,
+      revision: currentRevision,
+      idempotencyKey,
+      fetchImpl,
+    })
+
+  try {
+    return await deletion(revision)
+  } catch (error) {
+    if (error?.code !== "revision_conflict") throw error
+  }
+
+  const profile = await fetchMyAtlasProfile({
+    apiBaseUrl,
+    accessToken,
+    fetchImpl,
+  })
+  if (typeof onRevision === "function") onRevision(profile.revision)
+  return deletion(profile.revision)
+}
+
 export async function fetchMyAtlasAccountExport({
   apiBaseUrl,
   accessToken,
