@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - storytelling-framework
   - sitewide-copy-audit-2026-11-17
@@ -15,7 +15,7 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
-  - src/views/roam/Home.vue
+  - src/features/atlas/views/AtlasView.vue
   - src/components/GearGrid.vue
   - src/features/atlas
   - src/features/my-atlas
@@ -72,8 +72,9 @@ owner travel context.
 | Gear introduction | A sentence about product identity and review steps | `Camera and travel gear from my trips, with original photographs and firsthand notes.` | Leads with visitor value and stays within published actual-use rules. |
 | Gear empty state | `Field notes are being prepared` plus a catalog workflow explanation | `No gear notes yet. Products will appear here with original photographs and firsthand trip notes.` | States the visitor-visible condition without internal production language. |
 
-The homepage headline, Atlas CTA, two current entry cards, travel stories,
-legal copy, and user-authored My Atlas data were intentionally left unchanged
-in this slice. A complete route-by-route copy pass remains future work and
-must use actual rendered behavior rather than the older brief's assumed three
-homepage cards.
+This table records the first audited revision as it existed on 2026-11-17. The
+separate homepage was removed on 2026-11-18, and the public root now enters the
+Atlas directly with an optional My Atlas toolbar action. Travel stories, legal
+copy, and user-authored My Atlas data remain subject to their own evidence and
+privacy rules. A complete route-by-route copy pass remains future work and
+must use actual rendered behavior.

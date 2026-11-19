@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - monetization-analytics-plan
   - ga4-three-day-improvement-roadmap
@@ -24,7 +24,6 @@ code_paths:
   - src/router/index.js
   - src/utils/analytics.mjs
   - src/content/commercial-links.js
-  - src/views/roam/Home.vue
   - src/components/GearGrid.vue
   - src/components/TravelPlanningOffers.vue
   - src/data/affiliates.js
@@ -87,8 +86,9 @@ received event data require external owner verification.
   manual page locations preserve only allowlisted `utm_*` campaign fields and
   omit arbitrary queries and fragments. The OAuth callback never initializes
   the tag.
-- The homepage has an above-the-fold Interactive Atlas CTA plus the existing
-  Atlas card. Both emit one bounded `atlas_open_clicked` event.
+- The public root enters Atlas directly and reports `atlas_direct` when the map
+  loads. Explicit Atlas links from Journey stories retain the bounded
+  `atlas_open_clicked` contract.
 - The public Atlas emits allowlisted load, Journey, Place, story, and Maps
   handoff events only for meaningful user actions. It does not track map pans,
   zooms, hovers, technical attribution, or own-media navigation.
@@ -139,7 +139,7 @@ received event data require external owner verification.
   least 180 characters of combined summary and personal notes plus one media
   item. A `sessionStorage` reservation limits the unit to one request per
   Journey and browser-tab session.
-- The home page, map canvas, markers, heroes, galleries, videos, lightboxes,
+- The Atlas root shell, map canvas, markers, heroes, galleries, videos, lightboxes,
   dialogs, navigation controls, incomplete Journeys, free map exploration, and
   thin Atlas stops contain no placements.
 - The ad component displays a plain `Advertisement` label, does not emit

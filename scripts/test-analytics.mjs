@@ -263,11 +263,11 @@ browser.navigate({ meta: {}, path: "/atlas" })
 assert.equal(browser.windowObject["ga-disable-G-1NKNN94JT3"], false)
 
 assert.equal(
-  trackAtlasOpen({ entrySurface: "homepage_primary" }),
+  trackAtlasOpen({ entrySurface: "trip_story" }),
   true,
-  "the primary homepage CTA should emit its bounded event"
+  "a Journey story Atlas link should emit its bounded event"
 )
-assert.equal(consumeAtlasEntrySurface(browser.windowObject), "homepage_primary")
+assert.equal(consumeAtlasEntrySurface(browser.windowObject), "trip_story")
 assert.equal(consumeAtlasEntrySurface(browser.windowObject), "atlas_direct")
 
 assert.equal(

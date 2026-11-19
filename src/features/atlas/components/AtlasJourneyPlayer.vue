@@ -16,7 +16,9 @@
         @click="setCollapsed(false)"
       >
         <strong>{{ compactTitle }}</strong>
-        <b class="atlas-guided-expand" aria-hidden="true">&#8964;</b>
+        <svg class="atlas-guided-expand" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3.5 5.5 8 10l4.5-4.5" />
+        </svg>
       </button>
       <button
         class="atlas-guided-compact-action primary"
@@ -48,7 +50,13 @@
             aria-label="Collapse guided journey controls"
             @click="setCollapsed(true)"
           >
-            &minus;
+            <svg
+              class="atlas-guided-collapse-icon"
+              viewBox="0 0 16 16"
+              aria-hidden="true"
+            >
+              <path d="M3.5 10.5 8 6l4.5 4.5" />
+            </svg>
           </button>
           <button
             v-if="isActive"
@@ -311,8 +319,14 @@ export default {
   position: absolute;
   top: 50%;
   right: 0.55rem;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
   color: rgba(255, 255, 255, 0.62);
-  font-size: 1rem;
   transform: translateY(-50%);
 }
 
@@ -394,7 +408,18 @@ export default {
 }
 
 .atlas-guided-collapse {
-  font-size: 1.2rem;
+  display: inline-grid;
+  place-items: center;
+}
+
+.atlas-guided-collapse-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .atlas-guided-intro {

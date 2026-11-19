@@ -22,7 +22,7 @@
           aria-label="Return to the previous geographic level"
           @click="$emit('close')"
         >
-          <span aria-hidden="true">&larr;</span>
+          <span class="atlas-dock-icon" aria-hidden="true">&larr;</span>
           Back
         </button>
         <button
@@ -38,7 +38,13 @@
             <strong>{{ node.title }}</strong>
           </span>
           <span class="atlas-dock-toggle" aria-hidden="true">
-            <span>{{ mobileExpanded ? "&#8964;" : "&#8963;" }}</span>
+            <svg
+              class="atlas-dock-chevron"
+              :class="{ 'is-open': mobileExpanded }"
+              viewBox="0 0 16 16"
+            >
+              <path d="M3.5 5.5 8 10l4.5-4.5" />
+            </svg>
             <small>{{ mobileExpanded ? "Close" : "Details" }}</small>
           </span>
         </button>
@@ -50,10 +56,13 @@
           :aria-label="isFavorite ? 'Remove from saved places' : 'Save place'"
           @click="$emit('toggle-favorite', node.id)"
         >
-          <span aria-hidden="true">{{
+          <span class="atlas-dock-icon" aria-hidden="true">{{
             isFavorite ? "&#9733;" : "&#9734;"
           }}</span>
           {{ isFavorite ? "Saved" : "Save" }}
+          <span class="atlas-dock-count" aria-hidden="true">
+            {{ savedCount }}
+          </span>
         </button>
       </div>
 
@@ -109,12 +118,13 @@
           </button>
           <div class="atlas-detail-title">
             <h1>{{ node.title }}</h1>
-            <p>{{ node.category }}</p>
           </div>
         </div>
 
         <div class="atlas-detail-content">
-          <p class="atlas-summary">{{ node.summary }}</p>
+          <p v-if="!node.storyLead" class="atlas-summary">
+            {{ node.summary }}
+          </p>
           <section
             v-if="node.comingSoon"
             class="atlas-first-look"
@@ -133,14 +143,111 @@
               films will be added over time.
             </p>
           </section>
+          <section
+            v-if="storySections.length"
+            class="atlas-stop-story"
+            :aria-labelledby="`atlas-stop-story-title-${node.id}`"
+          >
+            <button
+              v-if="node.image"
+              class="atlas-stop-story-media"
+              type="button"
+              @click="openStorySection(storySections[0].id)"
+            >
+              <img
+                :src="node.image"
+                :alt="`${node.title} journey photograph`"
+                loading="lazy"
+                @load="updateScrollCue"
+              />
+            </button>
+            <div class="atlas-stop-story-copy">
+              <h2 :id="`atlas-stop-story-title-${node.id}`">
+                {{ storySections[0].title }}
+              </h2>
+              <p v-if="storySections[0].summary">
+                {{ storySections[0].summary }}
+              </p>
+              <button
+                ref="stopStoryAction"
+                class="atlas-stop-story-action"
+                type="button"
+                @click="openStorySection(storySections[0].id)"
+              >
+                {{ storySections[0].actionLabel }}
+              </button>
+            </div>
+            <div v-if="storySections.length > 1" class="atlas-stop-story-more">
+              <span>More from this place</span>
+              <button
+                v-for="section in storySections.slice(1)"
+                :key="section.id"
+                type="button"
+                @click="openStorySection(section.id)"
+              >
+                <strong>{{ section.title }}</strong>
+                <small>{{ section.actionLabel }}</small>
+              </button>
+            </div>
+          </section>
+          <section
+            v-if="node.storyLead"
+            class="atlas-story-lead"
+            :aria-labelledby="`atlas-story-title-${node.id}`"
+          >
+            <button
+              v-if="node.storyLead.image"
+              class="atlas-story-lead-media"
+              type="button"
+              @click="openStory"
+            >
+              <img
+                :src="node.storyLead.image"
+                :alt="node.storyLead.imageAlt"
+                loading="lazy"
+                @load="updateScrollCue"
+              />
+            </button>
+            <div class="atlas-story-lead-copy">
+              <h2 :id="`atlas-story-title-${node.id}`">
+                {{ node.storyLead.title }}
+              </h2>
+              <p v-if="node.storyLead.excerpt">
+                {{ node.storyLead.excerpt }}
+              </p>
+              <div class="atlas-story-lead-actions">
+                <button
+                  ref="storyAction"
+                  class="is-primary"
+                  type="button"
+                  @click="openStory"
+                >
+                  Explore the story
+                </button>
+                <button
+                  v-if="children.length"
+                  type="button"
+                  @click="scrollToJourneyStops"
+                >
+                  View {{ children.length }} stops
+                </button>
+              </div>
+            </div>
+          </section>
+
           <div v-if="node.personalNote" class="atlas-note">
-            <span>From the trip</span>
             <p>{{ node.personalNote }}</p>
           </div>
 
-          <section v-if="children.length" class="atlas-discoveries">
+          <section
+            v-if="children.length"
+            id="atlas-journey-stops"
+            ref="journeyStops"
+            class="atlas-discoveries"
+            aria-labelledby="atlas-journey-stops-title"
+          >
             <div class="atlas-section-heading">
-              <span>Explore deeper</span>
+              <h2 id="atlas-journey-stops-title">Journey stops</h2>
               <strong>{{ children.length }} places</strong>
             </div>
             <button
@@ -166,6 +273,23 @@
               >
               <span aria-hidden="true">&rarr;</span>
             </button>
+          </section>
+
+          <section v-if="adjacentStops.length" class="atlas-adjacent">
+            <div class="atlas-section-heading">
+              <span>Journey sequence</span>
+            </div>
+            <div>
+              <button
+                v-for="item in adjacentStops"
+                :key="item.node.id"
+                type="button"
+                @click="$emit('select', item.node.id)"
+              >
+                <small>{{ item.direction }}</small>
+                <strong>{{ item.node.title }}</strong>
+              </button>
+            </div>
           </section>
 
           <section v-if="related.length" class="atlas-related">
@@ -232,19 +356,18 @@
             variant="atlas"
           />
 
-          <div v-if="node.actions.length" class="atlas-actions">
-            <template v-for="action in node.actions">
-              <router-link
-                v-if="action.type === 'internal'"
-                :key="action.label"
-                :to="action.href"
-                @click.native="$emit('action', action)"
-              >
-                {{ action.label }}
-              </router-link>
+          <section
+            v-if="usefulActions.length"
+            class="atlas-actions"
+            aria-labelledby="atlas-useful-links-title"
+          >
+            <div class="atlas-section-heading">
+              <h2 id="atlas-useful-links-title">Useful links</h2>
+            </div>
+            <div>
               <a
-                v-else
-                :key="action.label"
+                v-for="action in usefulActions"
+                :key="action.href"
                 :href="action.href"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -252,27 +375,16 @@
               >
                 {{ action.label }}
               </a>
-            </template>
-          </div>
+            </div>
+          </section>
         </div>
       </div>
 
-      <button
-        v-if="detailCanScroll && showScrollCue"
-        class="atlas-scroll-cue"
-        type="button"
-        aria-label="Scroll down for more information about this stop"
-        @click="scrollDetailsForward"
-      >
-        <span>
-          {{
-            node.comingSoon
-              ? "Scroll for places and trip details"
-              : "Scroll for story, photos & links"
-          }}
-        </span>
-        <b aria-hidden="true">&#8964;</b>
-      </button>
+      <div
+        v-if="showScrollCue"
+        class="atlas-scroll-fade"
+        aria-hidden="true"
+      ></div>
     </aside>
 
     <div
@@ -356,7 +468,15 @@ export default {
       type: Array,
       default: () => [],
     },
+    adjacentStops: {
+      type: Array,
+      default: () => [],
+    },
     isFavorite: Boolean,
+    savedCount: {
+      type: Number,
+      default: 0,
+    },
     expandRequest: {
       type: Number,
       default: 0,
@@ -377,6 +497,14 @@ export default {
       default: "",
     },
   },
+  emits: [
+    "action",
+    "close",
+    "open-story",
+    "open-story-section",
+    "select",
+    "toggle-favorite",
+  ],
   data() {
     return {
       mobileExpanded: false,
@@ -385,7 +513,6 @@ export default {
       previouslyFocusedElement: null,
       guidedHeroIndex: 0,
       guidedHeroTimer: null,
-      detailCanScroll: false,
       showScrollCue: false,
       detailResizeObserver: null,
     }
@@ -420,6 +547,25 @@ export default {
     },
     hasVideo() {
       return this.galleryMedia.some(item => item.kind === "video")
+    },
+    usefulActions() {
+      return this.node.actions.filter(action => action.type === "external")
+    },
+    storySections() {
+      return [
+        ...(this.node.storyChapters || []).map(chapter => ({
+          id: chapter.id,
+          title: chapter.label,
+          summary: chapter.summary,
+          actionLabel: "Read this chapter",
+        })),
+        ...(this.node.storyExperiences || []).map(experience => ({
+          id: experience.id,
+          title: experience.title,
+          summary: experience.summary,
+          actionLabel: "Read this experience",
+        })),
+      ]
     },
     guidedHeroMedia() {
       if (!this.guidedPresentation) {
@@ -493,6 +639,28 @@ export default {
     )
   },
   methods: {
+    openStory() {
+      this.$emit("open-story")
+    },
+    openStorySection(sectionId) {
+      this.$emit("open-story-section", sectionId)
+    },
+    getScrollPosition() {
+      return this.$refs.detailScroll?.scrollTop || 0
+    },
+    restoreScroll(position = 0) {
+      this.mobileExpanded = true
+      this.$nextTick(() => {
+        if (this.$refs.detailScroll) {
+          this.$refs.detailScroll.scrollTop = Math.max(0, position)
+        }
+        this.updateScrollCue()
+      })
+    },
+    focusStoryAction() {
+      const storyAction = this.$refs.storyAction || this.$refs.stopStoryAction
+      storyAction?.focus()
+    },
     toggleMobileDrawer() {
       this.mobileExpanded = !this.mobileExpanded
       if (this.mobileExpanded) {
@@ -564,22 +732,23 @@ export default {
 
       const remaining =
         scroller.scrollHeight - scroller.clientHeight - scroller.scrollTop
-      this.detailCanScroll = scroller.scrollHeight - scroller.clientHeight > 24
-      this.showScrollCue = this.detailCanScroll && remaining > 28
+      const canScroll = scroller.scrollHeight - scroller.clientHeight > 24
+      this.showScrollCue = canScroll && remaining > 28
     },
     handleDetailScroll() {
       this.updateScrollCue()
     },
-    scrollDetailsForward() {
+    scrollToJourneyStops() {
       const scroller = this.$refs.detailScroll
-      if (!scroller) return
+      const target = this.$refs.journeyStops
+      if (!scroller || !target) return
 
       const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
         .matches
         ? "auto"
         : "smooth"
-      scroller.scrollBy({
-        top: Math.max(220, scroller.clientHeight * 0.68),
+      scroller.scrollTo({
+        top: Math.max(0, target.offsetTop - 20),
         behavior,
       })
     },
@@ -704,64 +873,20 @@ export default {
   background: #f6bd60;
 }
 
-.atlas-scroll-cue {
+.atlas-scroll-fade {
   position: absolute;
   z-index: 5;
-  right: 1rem;
-  bottom: 0.85rem;
-  left: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  min-height: 3rem;
-  border: 1px solid rgba(246, 189, 96, 0.5);
-  border-radius: 999px;
-  padding: 0.65rem 1rem;
-  background: rgba(7, 11, 14, 0.92);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.45),
-    0 -24px 32px 14px rgba(9, 14, 17, 0.76);
-  color: #fff;
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  backdrop-filter: blur(14px);
-}
-
-.atlas-scroll-cue b {
-  display: inline-grid;
-  place-items: center;
-  width: 1.65rem;
-  height: 1.65rem;
-  border-radius: 50%;
-  background: #f6bd60;
-  color: #111719;
-  font-size: 1rem;
-  line-height: 1;
-  animation: atlas-scroll-nudge 1.8s ease-in-out infinite;
-}
-
-.atlas-scroll-cue:hover,
-.atlas-scroll-cue:focus-visible {
-  border-color: #f6bd60;
-  background: rgba(17, 25, 29, 0.98);
-}
-
-.atlas-scroll-cue:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
-}
-
-@keyframes atlas-scroll-nudge {
-  0%,
-  100% {
-    transform: translateY(-1px);
-  }
-  50% {
-    transform: translateY(3px);
-  }
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 6.25rem;
+  background: linear-gradient(
+    180deg,
+    rgba(9, 14, 17, 0),
+    rgba(9, 14, 17, 0.74) 58%,
+    rgba(9, 14, 17, 0.98)
+  );
+  pointer-events: none;
 }
 
 .atlas-detail-hero {
@@ -876,7 +1001,6 @@ export default {
   left: 1.25rem;
 }
 
-.atlas-note span,
 .atlas-section-heading span {
   color: #f6bd60;
   font-size: 0.66rem;
@@ -891,13 +1015,8 @@ export default {
   line-height: 0.98;
 }
 
-.atlas-detail-title p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.7);
-}
-
 .atlas-detail-content {
-  padding: 1.35rem;
+  padding: 1.35rem 1.35rem 5.5rem;
 }
 
 .atlas-summary {
@@ -946,13 +1065,235 @@ export default {
   padding-left: 1rem;
 }
 
+.atlas-story-lead + .atlas-note {
+  margin-top: 1.4rem;
+}
+
 .atlas-note p {
-  margin: 0.35rem 0 0;
+  margin: 0;
   color: rgba(255, 255, 255, 0.68);
   line-height: 1.55;
 }
 
+.atlas-stop-story {
+  display: grid;
+  grid-template-columns: minmax(108px, 0.72fr) minmax(0, 1.28fr);
+  gap: 1rem;
+  overflow: hidden;
+  margin: 0 0 1.4rem;
+  border: 1px solid rgba(246, 189, 96, 0.42);
+  border-radius: 18px;
+  padding: 0.85rem;
+  background:
+    linear-gradient(145deg, rgba(246, 189, 96, 0.12), transparent 65%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.atlas-stop-story-media {
+  overflow: hidden;
+  min-height: 176px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  background: #10181c;
+  cursor: pointer;
+}
+
+.atlas-stop-story-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atlas-stop-story-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.atlas-stop-story-more > span {
+  color: #f6bd60;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.atlas-stop-story h2 {
+  margin: 0.35rem 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.28rem;
+  font-weight: 500;
+  line-height: 1.12;
+}
+
+.atlas-stop-story-copy p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.55rem 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.atlas-stop-story-action {
+  align-self: flex-start;
+  min-height: 2.65rem;
+  margin-top: auto;
+  border: 1px solid #f6bd60;
+  border-radius: 999px;
+  padding: 0.62rem 0.82rem;
+  background: #f6bd60;
+  color: #111719;
+  font: inherit;
+  font-size: max(0.875rem, 14px);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.atlas-stop-story-more {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 0.8rem;
+}
+
+.atlas-stop-story-more button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.7rem 0.75rem;
+  background: rgba(0, 0, 0, 0.16);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.atlas-stop-story-more strong {
+  font-size: 0.86rem;
+  line-height: 1.3;
+}
+
+.atlas-stop-story-more small {
+  flex: 0 0 auto;
+  color: #f6bd60;
+  font-weight: 800;
+}
+
+.atlas-stop-story button:hover,
+.atlas-stop-story button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+.atlas-story-lead {
+  display: grid;
+  grid-template-columns: minmax(118px, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  overflow: hidden;
+  margin-top: 1.8rem;
+  border: 1px solid rgba(246, 189, 96, 0.38);
+  border-radius: 18px;
+  padding: 0.85rem;
+  background: rgba(246, 189, 96, 0.065);
+}
+
+.atlas-story-lead-media {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  min-height: 164px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  background: #10181c;
+  cursor: pointer;
+}
+
+.atlas-story-lead-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.atlas-story-lead-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.atlas-story-lead h2,
+.atlas-section-heading h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.atlas-story-lead h2 {
+  font-size: 1.35rem;
+  line-height: 1.08;
+}
+
+.atlas-story-lead p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0.55rem 0 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.atlas-story-lead-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.8rem;
+}
+
+.atlas-story-lead-actions a,
+.atlas-story-lead-actions button {
+  min-height: 2.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.62rem 0.78rem;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: max(0.875rem, 14px);
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.atlas-story-lead-actions .is-primary {
+  border-color: #f6bd60;
+  background: #f6bd60;
+  color: #111719;
+}
+
+.atlas-story-lead-actions a:hover,
+.atlas-story-lead-actions a:focus-visible,
+.atlas-story-lead-actions button:hover,
+.atlas-story-lead-actions button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .atlas-discoveries,
+.atlas-adjacent,
 .atlas-related,
 .atlas-mini-gallery,
 .atlas-actions {
@@ -969,6 +1310,15 @@ export default {
 .atlas-section-heading strong {
   color: rgba(255, 255, 255, 0.46);
   font-size: 0.72rem;
+}
+
+.atlas-section-heading h2 {
+  color: #f6bd60;
+  font-family: inherit;
+  font-size: max(0.875rem, 14px);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .atlas-discoveries > button {
@@ -1029,6 +1379,46 @@ export default {
   gap: 0.55rem;
 }
 
+.atlas-adjacent > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.atlas-adjacent button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.atlas-adjacent small {
+  color: #f6bd60;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.atlas-adjacent strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atlas-adjacent button:hover,
+.atlas-adjacent button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
 .atlas-related button {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
@@ -1040,7 +1430,9 @@ export default {
 
 .atlas-mini-gallery > div {
   overflow-x: auto;
+  overscroll-behavior-inline: contain;
   padding: 0.1rem 0 0.45rem;
+  scroll-padding-inline: 0.1rem;
   scroll-snap-type: x mandatory;
 }
 
@@ -1135,16 +1527,22 @@ export default {
 }
 
 .atlas-actions {
-  display: grid;
-  gap: 0.6rem;
+  display: block;
+}
+
+.atlas-actions > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .atlas-actions a {
   border: 1px solid rgba(246, 189, 96, 0.38);
-  border-radius: 12px;
-  padding: 0.85rem 1rem;
+  border-radius: 999px;
+  padding: 0.65rem 0.8rem;
   color: #f8d79f;
-  text-align: center;
+  font-size: max(0.875rem, 14px);
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -1278,21 +1676,19 @@ export default {
     display: none;
   }
 
-  .atlas-detail:not(.is-expanded) .atlas-scroll-cue {
+  .atlas-detail:not(.is-expanded) .atlas-scroll-fade {
     display: none;
   }
 
-  .atlas-scroll-cue {
-    right: 0.85rem;
-    bottom: calc(5.75rem + env(safe-area-inset-bottom) + 0.7rem);
-    left: 0.85rem;
-    min-height: 3.15rem;
-    font-size: 0.82rem;
+  .atlas-scroll-fade {
+    bottom: calc(5.75rem + env(safe-area-inset-bottom));
+    height: 5.5rem;
   }
 
   .atlas-detail-scroll {
     order: 1;
     min-height: 0;
+    scroll-padding-bottom: 5.5rem;
   }
 
   .atlas-detail-dock {
@@ -1318,6 +1714,7 @@ export default {
   }
 
   .atlas-dock-action {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1328,14 +1725,29 @@ export default {
     font-weight: 700 !important;
   }
 
-  .atlas-dock-action > span {
+  .atlas-dock-action > .atlas-dock-icon {
     color: #fff;
     font-size: 1.35rem;
   }
 
   .atlas-dock-action.active,
-  .atlas-dock-action.active > span {
+  .atlas-dock-action.active > .atlas-dock-icon {
     color: #f6bd60 !important;
+  }
+
+  .atlas-dock-count {
+    position: absolute;
+    top: 0.72rem;
+    right: 0.55rem;
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 50%;
+    background: #f6bd60;
+    color: #111;
+    font-size: 0.65rem;
+    font-weight: 800;
   }
 
   .atlas-dock-place {
@@ -1367,10 +1779,9 @@ export default {
   }
 
   .atlas-dock-place strong {
-    overflow: hidden;
     font-size: 1rem;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   .atlas-dock-toggle {
@@ -1381,9 +1792,20 @@ export default {
     color: rgba(255, 255, 255, 0.62);
   }
 
-  .atlas-dock-toggle > span {
-    font-size: 1.3rem;
-    line-height: 0.8;
+  .atlas-dock-chevron {
+    width: 1.15rem;
+    height: 1.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.8;
+    transform: rotate(180deg);
+    transition: transform 180ms ease;
+  }
+
+  .atlas-dock-chevron.is-open {
+    transform: rotate(0);
   }
 
   .atlas-dock-toggle > small {
@@ -1407,8 +1829,6 @@ export default {
     font-size: 0.8rem;
   }
 
-  .atlas-detail-title span,
-  .atlas-note span,
   .atlas-section-heading span {
     font-size: 0.8rem;
   }
@@ -1417,13 +1837,12 @@ export default {
     font-size: clamp(2.25rem, 10vw, 3rem);
   }
 
-  .atlas-detail-title p,
   .atlas-note p {
     font-size: 1rem;
   }
 
   .atlas-detail-content {
-    padding: 1.4rem;
+    padding: 1.4rem 1.4rem 6.5rem;
   }
 
   .atlas-summary {
@@ -1442,8 +1861,68 @@ export default {
     font-size: 0.96rem;
   }
 
+  .atlas-stop-story {
+    grid-template-columns: 1fr;
+    padding: 0.9rem;
+  }
+
+  .atlas-stop-story-media {
+    min-height: 150px;
+    max-height: 210px;
+  }
+
+  .atlas-stop-story-more > span {
+    font-size: 0.76rem;
+  }
+
+  .atlas-stop-story h2 {
+    font-size: 1.55rem;
+  }
+
+  .atlas-stop-story-copy p {
+    font-size: max(1rem, 16px);
+    -webkit-line-clamp: 5;
+  }
+
+  .atlas-stop-story-action {
+    min-height: 3rem;
+    margin-top: 0.9rem;
+  }
+
+  .atlas-stop-story-more {
+    grid-column: auto;
+  }
+
   .atlas-section-heading strong {
     font-size: 0.82rem;
+  }
+
+  .atlas-story-lead {
+    grid-template-columns: 1fr;
+    padding: 0.9rem;
+  }
+
+  .atlas-story-lead-media {
+    display: none;
+  }
+
+  .atlas-story-lead h2 {
+    font-size: 1.65rem;
+  }
+
+  .atlas-story-lead p {
+    font-size: max(1rem, 16px);
+    -webkit-line-clamp: 5;
+  }
+
+  .atlas-story-lead-actions a,
+  .atlas-story-lead-actions button {
+    min-height: 3rem;
+    font-size: max(0.875rem, 14px);
+  }
+
+  .atlas-section-heading h2 {
+    font-size: 0.88rem;
   }
 
   .atlas-discoveries > button {
@@ -1500,8 +1979,8 @@ export default {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .atlas-scroll-cue b {
-    animation: none;
+  .atlas-dock-chevron {
+    transition: none;
   }
 }
 </style>

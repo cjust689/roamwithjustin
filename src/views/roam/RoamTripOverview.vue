@@ -76,237 +76,15 @@
         </div>
       </section>
 
-      <section
-        v-if="trip.hasItinerary"
-        id="itinerary"
-        class="story-shell itinerary-section"
-      >
-        <header class="section-intro">
-          <h2>Inside the journey</h2>
-          <p>
-            {{ itineraryIntroduction }}
-          </p>
-        </header>
-
-        <article
-          v-for="(day, index) in trip.days"
-          :key="day.label"
-          class="story-day"
-        >
-          <header class="day-heading">
-            <span>{{ String(index + 1).padStart(2, "0") }}</span>
-            <div>
-              <p>
-                {{
-                  trip.itineraryMode === "chapters"
-                    ? "Story chapter"
-                    : "Itinerary chapter"
-                }}
-              </p>
-              <h3>{{ day.label }}</h3>
-            </div>
-          </header>
-
-          <p class="day-summary">{{ day.summary }}</p>
-
-          <div
-            v-if="day.partners && day.partners.length"
-            class="experience-links"
-          >
-            <a
-              v-for="partner in day.partners"
-              :key="partner.id"
-              :href="partner.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click="trackPartnerClick(partner)"
-            >
-              <span>{{ partner.label || "Trip resource" }}</span>
-              <strong>{{ partner.name }}</strong>
-              <small>{{ partner.disclosure }}</small>
-            </a>
-          </div>
-
-          <div v-if="day.routes && day.routes.length" class="route-links">
-            <a
-              v-for="route in day.routes"
-              :key="route.link"
-              :href="route.link"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click="trackMapsHandoff"
-            >
-              <span>Route</span>
-              {{ route.label }}
-              <small v-if="route.duration">{{ route.duration }}</small>
-            </a>
-          </div>
-
-          <div class="location-grid">
-            <article
-              v-for="entry in day.locations"
-              :key="entry.ref"
-              class="location-card"
-            >
-              <button type="button" @click="openLocation(entry.ref)">
-                <span class="location-image">
-                  <img
-                    v-if="getLocation(entry.ref).image"
-                    :src="getLocation(entry.ref).image"
-                    :alt="getLocation(entry.ref).name"
-                    loading="lazy"
-                  />
-                  <span
-                    v-else
-                    class="location-image-placeholder"
-                    aria-hidden="true"
-                  ></span>
-                </span>
-                <span class="location-copy">
-                  <span>{{ getLocation(entry.ref).type || "Trip stop" }}</span>
-                  <strong>{{ getLocation(entry.ref).name }}</strong>
-                  <small>{{ getLocationSummary(entry) }}</small>
-                  <b>Open field notes &rarr;</b>
-                </span>
-              </button>
-              <router-link
-                v-if="getLocation(entry.ref).atlasExact"
-                class="location-atlas-link"
-                :to="getLocation(entry.ref).atlasHref"
-                @click.native="trackAtlasEntry"
-              >
-                View this stop in Atlas
-              </router-link>
-            </article>
-          </div>
-        </article>
-      </section>
-
-      <section
-        v-if="trip.experiences.length"
-        id="experiences"
-        class="story-shell experience-section"
-      >
-        <header class="section-intro compact">
-          <h2>Experiences and moments</h2>
-        </header>
-
-        <article
-          v-for="experience in trip.experiences"
-          :id="`experience-${experience.slug}`"
-          :key="experience.id"
-          class="experience-story"
-        >
-          <header>
-            <h3>{{ experience.title }}</h3>
-            <p v-if="experience.summary">{{ experience.summary }}</p>
-          </header>
-
-          <article
-            v-for="moment in experience.moments"
-            :key="moment.id"
-            class="experience-moment"
-          >
-            <div class="moment-copy">
-              <span v-if="moment.travelDate">{{ moment.travelDate }}</span>
-              <h4>{{ moment.title }}</h4>
-              <p v-if="moment.notes">{{ moment.notes }}</p>
-            </div>
-            <div v-if="moment.media.length" class="moment-media">
-              <template v-for="media in moment.media">
-                <video
-                  v-if="media.kind === 'video'"
-                  :key="media.id"
-                  controls
-                  playsinline
-                  preload="metadata"
-                  :poster="media.poster || null"
-                  :aria-label="media.alt"
-                >
-                  <source
-                    :src="media.src"
-                    :type="media.mimeType || 'video/mp4'"
-                  />
-                  Your browser does not support HTML video.
-                </video>
-                <a
-                  v-else
-                  :key="media.id"
-                  :href="media.src"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    :src="media.src"
-                    :alt="media.alt"
-                    :width="media.width || null"
-                    :height="media.height || null"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </a>
-              </template>
-            </div>
-          </article>
-        </article>
-      </section>
-
-      <AdSlot
-        v-if="storyAdEligible"
-        :slot-id="storyAdSlotId"
-        placement="travel-story-inline-1"
-      />
-
-      <section
-        v-if="trip.allMedia.length"
-        id="all-photography"
-        class="story-shell photography-section"
-      >
-        <header class="section-intro compact">
-          <div>
-            <h2>Photography and video</h2>
-          </div>
-          <p>
-            Photographs and videos from this journey, grouped with the places
-            and field notes that give them context.
-          </p>
-        </header>
-
-        <div class="photography-grid">
-          <div
-            v-for="media in trip.allMedia"
-            :key="media.id"
-            class="photography-item"
-          >
-            <video
-              v-if="media.kind === 'video'"
-              controls
-              playsinline
-              preload="metadata"
-              :poster="media.poster || null"
-              :aria-label="media.alt"
-            >
-              <source :src="media.src" :type="media.mimeType || 'video/mp4'" />
-              Your browser does not support HTML video.
-            </video>
-            <a
-              v-else
-              :href="media.src"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img
-                :src="media.src"
-                :alt="media.alt"
-                :width="media.width || null"
-                :height="media.height || null"
-                loading="lazy"
-                decoding="async"
-              />
-            </a>
-          </div>
-        </div>
-      </section>
+      <JourneyStoryBody :trip="trip" @open-location="openLocation">
+        <template #between-content>
+          <AdSlot
+            v-if="storyAdEligible"
+            :slot-id="storyAdSlotId"
+            placement="travel-story-inline-1"
+          />
+        </template>
+      </JourneyStoryBody>
 
       <section
         v-if="trip.lodging.length"
@@ -454,6 +232,7 @@ import { getTripViewModel } from "@/content/selectors/trips"
 import { adSenseConfig } from "@/config/adsense.mjs"
 import AdSlot from "@/components/AdSlot.vue"
 import HeroCarousel from "@/components/HeroCarousel.vue"
+import JourneyStoryBody from "@/components/JourneyStoryBody.vue"
 import LocationModal from "@/components/LocationModal.vue"
 import TravelPlanningOffers from "@/components/TravelPlanningOffers.vue"
 import commercialLinks from "@/content/commercial-links.js"
@@ -464,6 +243,7 @@ export default {
   components: {
     AdSlot,
     HeroCarousel,
+    JourneyStoryBody,
     LocationModal,
     TravelPlanningOffers,
   },
@@ -517,11 +297,6 @@ export default {
     storyAdSlotId() {
       return adSenseConfig.storySlotId
     },
-    itineraryIntroduction() {
-      return this.trip?.itineraryMode === "chapters"
-        ? "These chapters follow the trip by experience, giving each place room for its own story. Open a place for field notes or jump to its Atlas pin."
-        : "Open a place for photographs and field notes, or jump directly to its Atlas pin when that stop has a mapped presentation."
-    },
   },
   watch: {
     id() {
@@ -540,21 +315,6 @@ export default {
   methods: {
     trackAtlasEntry() {
       trackAtlasOpen({ entrySurface: "trip_story" })
-    },
-    trackMapsHandoff() {
-      trackAnalyticsEvent("maps_handoff_clicked", {
-        content_type: "journey",
-        surface: "itinerary_route",
-      })
-    },
-    trackPartnerClick(partner) {
-      const parameters = commercialLinks.buildPartnerClickParameters({
-        linkType: partner.linkType,
-        partnerId: partner.id,
-        placement: "trip_itinerary_partner",
-        publicJourneyId: this.trip.journeyId,
-      })
-      if (parameters) trackAnalyticsEvent("partner_click", parameters)
     },
     trackLodgingClick(stay) {
       const parameters = commercialLinks.buildPartnerClickParameters({
@@ -580,14 +340,8 @@ export default {
         document.title = `${this.trip.name} | Roam With Justin`
       }
     },
-    getLocation(ref) {
-      return this.trip.locations.find(location => location.id === ref) || {}
-    },
-    getLocationSummary(entry) {
-      return entry.notes || this.getLocation(entry.ref).description || ""
-    },
-    openLocation(ref) {
-      this.activeLocation = this.getLocation(ref)
+    openLocation(location) {
+      this.activeLocation = location
       this.modalOpen = true
     },
   },

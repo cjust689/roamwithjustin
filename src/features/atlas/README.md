@@ -4,28 +4,39 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-15
+updated: 2026-11-18
 related:
   - content-model
+  - atlas-integrated-story-reader
 supersedes: []
 superseded_by: []
 code_paths:
   - src/features/atlas
+  - src/router/index.js
+  - src/features/my-atlas/config/featureFlags.mjs
   - src/content/atlas
   - src/content/geography
   - src/content/atlas/preview-presentation.mjs
   - src/content/selectors/atlas.js
+  - src/components/JourneyStoryBody.vue
+  - src/features/atlas/components/AtlasStoryReader.vue
 verification:
   state: verified
   evidence:
     - npm run adsense:test
     - npm run atlas:test
+    - npm run lint
     - npm run content:validate
     - npm run build
     - GitHub pull request 38 validated and merged to develop as c75d8d9 on 2026-11-16
     - GitHub pull request 39 validated and merged to main as a36da55 on 2026-11-16
     - Pages workflow run 43816272856 succeeded on 2026-11-16
     - exact First look chooser and Journey-panel copy verified in production on 2026-11-16
+    - local Chrome story discovery checks at 320, 375, 390, 768, 1024, and 1440 CSS pixels on 2026-11-18
+    - local Chrome in-place reader, retained map, Back and Forward, scroll restoration, map peek, stop handoff, and lightbox checks on 2026-11-18
+    - local Chrome accessibility tree checks for mobile modal, map peek region, and desktop region semantics on 2026-11-18
+    - local Chrome mobile detail checks at 320 and 390 CSS pixels on 2026-11-18
+    - local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels on 2026-11-18
 ---
 
 # Travel Atlas feature
@@ -57,6 +68,7 @@ would remove the Atlas UI but must not delete `src/content/` records.
 
 ## Routes
 
+- `/` renders the Atlas landing view directly without a redirect.
 - `/atlas` opens the atlas landing view.
 - `/atlas/utah`, `/atlas/utah-2026`, `/atlas/puerto-rico`, `/atlas/st-john`,
   `/atlas/europe`, and `/atlas/costa-rica` open multi-stop journey roots.
@@ -65,13 +77,15 @@ would remove the Atlas UI but must not delete `src/content/` records.
   destination roots.
 - `/atlas/moab`, `/atlas/old-san-juan`, and other IDs registered in
   `src/content/atlas/presentation.mjs` are shareable deep links.
+- `?story=1` opens a published Journey's secondary in-Atlas reader state on
+  the same selected-node route. Invalid or unavailable story state is removed.
 
-The route is lazy-loaded, so MapLibre and atlas code are not downloaded by
-visitors who only use the existing site.
+The Atlas view remains a lazy route component, but the root application now
+selects it immediately so visitors enter the map experience without a separate
+marketing surface.
 
-The atlas brand uses a normal document link back to `/`. This deliberately
-reloads the legacy Materialize homepage instead of swapping the legacy and
-standalone application layouts during the same Vue render cycle.
+The atlas brand uses a normal document link back to `/`, which resets the
+Atlas to its root Journey explorer.
 
 MapLibre 6 requires an explicit worker URL when bundled with webpack. The map
 component uses `setWorkerUrl(new URL(..., import.meta.url))`, which makes Vue
@@ -185,6 +199,73 @@ parallel map record.
 Every Atlas root uses the canonical Journey title and date label, including
 its year, because the same Place can host multiple trips. Child nodes use their
 canonical Place names and local labels without repeating the Journey year.
+
+## Story discovery
+
+Published Journey roots derive a story lead from the same canonical Journey
+used by `/trips/:id`. The lead reuses its real title, overview, hero, public
+story ID, and route, and appears before the ordered stop list. `View N stops`
+scrolls the existing detail container to those stops. External map and official
+Place actions appear after editorial media under `Useful links`.
+
+Story availability is stricter than the presence of a Journey slug. The
+Journey must be published and own substantive chapters or a published
+Experience. Incomplete Journey previews therefore expose no story lead and no
+toolbar Story action.
+
+Published child stops derive specific story relationships from canonical
+Visit edges. Journey chapter matches come from
+`days[].visits[].visitId`, so one Visit can appear in several chapters and two
+Visits at one Place stay distinct. Published Experiences join only when their
+`visitId` and `placeId` both match. Structural hubs and Journey-only chapters
+with no Visit references do not receive a preview.
+
+`Explore the story` now adds `?story=1` to the selected Atlas route and mounts
+`AtlasStoryReader.vue` without replacing `AtlasView.vue` or `AtlasMap.vue`.
+`JourneyStoryBody.vue` is shared with the standalone `/trips/:id` page and
+renders the same canonical chapters, locations, Experiences, Moments, and
+media. The Atlas variant omits ads and commercial modules. Temporary
+`noindex,follow` metadata leaves the standalone page as the indexable story.
+
+The desktop reader occupies a bounded pane beside the retained map. Mobile
+uses a full-width focused sheet with a deliberate map peek toggle. Reader and
+inspector scroll offsets survive browser Back and Forward, exact `Show on map`
+actions can open an existing stop, and browser Back restores the reader. A
+stop preview opens the exact shared-body chapter or Experience through the
+validated `section` route value. Previous and next stop actions use the
+canonical guided Journey order and do not introduce another route sequence.
+
+The focused mobile sheet exposes a named modal dialog and contains keyboard
+focus. Map peek changes that same reader to a named nonmodal region, which is
+also the role used by the desktop split pane.
+
+Fresh exact-section entries focus the requested heading after their bounded
+initial scroll pass. Pointer, touch, wheel, or reader navigation-key input
+cancels that pass so restoration never fights an early visitor action. A
+browser-history offset still takes precedence when returning to the reader.
+Embedded story videos use `preload="none"`; the public standalone story keeps
+metadata preload. The desktop reader uses a 46 percent starting width and a
+720 pixel maximum so the active map remains the larger context on wide screens.
+
+The mobile panel retains one vertical scroll container. Extra bottom content
+clearance keeps the final utility actions above the dock and temporary scroll
+fade, while the dock title wraps instead of forcing a single ellipsized line.
+The photography rail remains an intentional horizontal carousel with a partial
+next item as its swipe cue.
+
+The mobile detail fade is passive and contains no textual scroll pill. Journey
+category and trip eyebrow labels are omitted when the guided control already
+provides that context. SVG disclosure chevrons replace platform-dependent
+glyphs. While a mobile detail drawer is present, the selected place's bottom
+Save control carries the total saved count and the duplicate toolbar Saved
+control is hidden. At the Atlas root, the toolbar control remains available to
+open the saved-place drawer.
+
+When `VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF=true`, the Atlas toolbar exposes
+one `My Atlas` link to `/my-atlas`. The same flag owns route registration, so a
+disabled build cannot expose a dead control. My Atlas remains a separate
+private application boundary; the toolbar entry does not mix its account data
+into public Atlas state.
 
 ## Persistence
 
