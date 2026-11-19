@@ -21,19 +21,24 @@ code_paths:
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
+  - scripts/publish-gear-image.mjs
   - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
   - scripts/test-gear-image-upload.mjs
+  - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
+  - src/content/gear/generated/images.json
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/commercial-links.js
   - src/content/gear
   - src/content/partners/index.mjs
   - src/content/selectors/gear.mjs
+  - src/content/selectors/media.mjs
   - src/components/GearGrid.vue
   - src/views/roam/RoamTripOverview.vue
   - src/utils/analytics.mjs
@@ -140,14 +145,14 @@ with an original image into a repeatable publishing workflow.
   authentication, and create-only controls.
 - [x] Keep upload idempotent by verifying matching remote objects and refusing
   to overwrite a different local receipt.
-- [ ] Publish only after receipt verification and card approval.
-- [ ] Make receipt-backed canonical publication idempotent and preserve the
+- [x] Publish only after receipt verification and explicit card approval.
+- [x] Make receipt-backed canonical publication idempotent and preserve the
   prior record if validation or build fails.
 
 Remote image download, automatic Amazon tagging, additional merchant adapters,
 product detail routes, and AI research remain outside the next slice. Local
 image preparation does not make a product public. The generated Gear registry
 remains empty until real owner input satisfies the gate above and the
-receipt-backed canonical publication adapter exists. Worker source now accepts
-the Gear WebP contract, but its external Cloudflare deployment and the first
-real Gear upload remain unverified.
+first reviewed product is deliberately published. Worker source accepts the
+Gear WebP contract, but its external Cloudflare deployment and the first real
+Gear upload remain unverified.

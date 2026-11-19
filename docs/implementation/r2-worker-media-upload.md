@@ -246,9 +246,16 @@ npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/g
 ```
 
 The Gear adapter produces `gear-r2-verification.json`. It does not run
-`media:ingest` or update a Gear record. The checked-in Worker source accepts
-the prepared WebP contract, but the external Worker deployment and first real
-Gear object upload remain unverified.
+`media:ingest` or update a Gear record. After receipt and card review,
+`gear:publish-image` is the separate canonical transaction:
+
+```bash
+npm run gear:publish-image -- --gear-id camera-accessory --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --receipt ./gear-ready/camera-accessory-<content-hash>/gear-r2-verification.json --dry-run
+```
+
+The checked-in Worker source accepts the prepared WebP contract, but the
+external Worker deployment and first real Gear object upload remain
+unverified.
 
 ## Retry and conflict behavior
 

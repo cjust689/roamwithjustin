@@ -19,8 +19,11 @@ superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
   - scripts/prepare-gear-image.mjs
+  - scripts/publish-gear-image.mjs
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-image-publication.mjs
+  - src/content/gear/generated/images.json
   - src/content/gear
   - src/content/selectors/gear.mjs
   - src/components/GearGrid.vue
@@ -57,8 +60,11 @@ WebP derivatives, and writes a scoped manifest without a fake Journey. It does
 not download remote images or update canonical Gear state. `gear:upload` now
 revalidates that package, sends only its listed WebP derivatives through the
 authenticated immutable Worker contract, and writes a checksum receipt only
-after complete remote verification. Canonical Gear image publication remains
-proposal work.
+after complete remote verification. `gear:publish-image` then verifies the
+exact receipt, requires explicit card approval, and atomically composes one
+stable Gear image asset into canonical Media while updating only the intended
+existing Gear item. The first real product, optional remote image intake, and
+authoring orchestration remain proposal work.
 
 ## 0. Product objective and non-negotiables
 
@@ -567,10 +573,10 @@ Proposed structured response:
 
 ### Phase 2 - Image preparation and R2 publication
 
-- Add gear-specific prepare/manifest path reusing existing optimizer/receipt/upload/validation libraries; do not fake Journey association.
+- [Implemented locally] Add a Gear-specific prepare, upload, receipt, and canonical publication path reusing existing optimizer and validation libraries without a fake Journey association.
 - Intake one creator-owned local JPEG and one explicitly authorized remote image URL; verify clipping/alpha, compression, EXIF removal and derivative sizes.
-- Require review and dry-run success before external upload. Upload + checksum verify, then idempotently update canonical/generated gear image reference.
-- Repeated import of identical content creates no duplicate products/media, and a changed image updates only its intended asset.
+- [Implemented locally] Require review and dry-run success before external upload. Checksum receipt and card approval then gate the idempotent canonical image update.
+- [Implemented locally] Repeated publication of identical content creates no duplicate products or Media, while an explicitly approved changed image advances only its stable intended asset.
 
 ### Phase 3 - Authoring orchestration
 

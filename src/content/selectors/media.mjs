@@ -46,6 +46,22 @@ function inferMimeType(src, kind, declaredMimeType = "") {
   return "video/mp4"
 }
 
+export function buildMediaSrcset(asset) {
+  if (asset?.source?.provider !== "r2" || !Array.isArray(asset.renditions)) {
+    return ""
+  }
+  return asset.renditions
+    .filter(rendition => rendition?.objectKey && rendition?.width)
+    .sort((left, right) => left.width - right.width)
+    .filter(
+      (rendition, index, all) =>
+        all.findIndex(candidate => candidate.width === rendition.width) ===
+        index
+    )
+    .map(rendition => `${r2Url(rendition.objectKey)} ${rendition.width}w`)
+    .join(", ")
+}
+
 function resolveAssetUsage(usage) {
   const asset = getMediaAsset(usage.assetId)
   if (!asset) return null
@@ -61,6 +77,7 @@ function resolveAssetUsage(usage) {
     posterSource.provider === "r2"
       ? r2Url(posterSource.objectKey)
       : posterSource.path || ""
+  const srcset = buildMediaSrcset(asset)
 
   return {
     id: asset.id,
@@ -68,6 +85,7 @@ function resolveAssetUsage(usage) {
     type: asset.kind,
     provider: source.provider,
     src,
+    srcset,
     mimeType: asset.intrinsic?.mimeType || "",
     width: asset.intrinsic?.width || null,
     height: asset.intrinsic?.height || null,

@@ -22,13 +22,17 @@ code_paths:
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
+  - scripts/publish-gear-image.mjs
   - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
   - scripts/test-gear-image-upload.mjs
+  - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
+  - src/content/gear/generated/images.json
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/gear/index.mjs
@@ -36,6 +40,7 @@ code_paths:
   - src/content/commercial-links.js
   - src/content/partners/index.mjs
   - src/content/selectors/gear.mjs
+  - src/content/selectors/media.mjs
   - src/content/selectors/projections.mjs
   - src/components/GearGrid.vue
   - src/components/Banner.vue
@@ -102,6 +107,17 @@ in the receipt while the content hash is the Worker batch segment embedded in
 each immutable key. An exact rerun verifies existing objects and the existing
 receipt. Upload still does not change a canonical Gear record.
 
+`gear:publish-image` closes the repository transaction only for an existing
+canonical Gear ID. It revalidates the local package and exact checksum receipt,
+requires explicit card approval, and writes a Gear-owned generated Media shard
+plus that item's `imageAssetId`. The shard is composed through the existing
+Media registry, so selectors retain one canonical Media lookup instead of a
+second browser image registry. The stable asset ID survives replacement while
+immutable R2 objects and receipt-backed batch revisions preserve history. All
+three derivatives become a responsive `srcset`. A replacement requires the
+separate `--replace-image` acknowledgement. Content validation or optional
+build failure restores both generated files.
+
 The public Gear page now reads only the verified canonical Gear selector. It
 shows a concise empty state while the registry is empty. The former
 hardcoded product array, third party product photographs, unverified action
@@ -127,11 +143,13 @@ contract and commands.
 - Gear links can render only on their explicit public surfaces. Affiliate
   links require a canonical affiliate Partner and a permitted destination
   host. Ordinary links remain noncommissionable and use `trackingMode: none`.
-- Local product-image preparation and receipt-backed R2 upload are Journey
-  independent. Canonical Gear image publication still requires a reviewed
-  adapter and must not create a fake Journey placement.
+- Local product-image preparation, receipt-backed R2 upload, and canonical
+  Gear image publication are Journey independent and create no fake Journey
+  placement.
 - Worker source accepts Gear WebP, but the external Cloudflare deployment and
   a first real Gear object upload remain unverified.
+- Product identity, usage, links, notes, rights, and the rendered card still
+  require owner review. Image publication cannot create a Gear product.
 - The workbook Catalog is generated from the repository and is not yet a live
   protected catalog mirror. Regenerate the workbook when choices change.
 - Optional AI research and automatic merchant tracking rules are not

@@ -68,6 +68,7 @@ function gearView(item, usage = [], surface = "public-gear") {
     model: item.model,
     description: item.description,
     image: image?.src || "",
+    imageSrcset: image?.srcset || "",
     imageAlt: image?.alt || item.name,
     links: Object.freeze(links),
     primaryLink: links[0] || null,
