@@ -27,7 +27,9 @@ code_paths:
   - src/features/my-atlas/planning/errors.mjs
   - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/planning/mapProjection.mjs
+  - src/features/my-atlas/planning/sharedTrip.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
+  - src/features/my-atlas/views/MyAtlasSharedTripView.vue
   - src/views/roam/Privacy.vue
   - workers/my-atlas/src/account/service.mjs
   - workers/my-atlas/src/index.mjs
@@ -41,6 +43,8 @@ verification:
   evidence:
     - npm run my-atlas:test
     - npm run lint
+    - Client tests verify versioned read only trip snapshot encoding, private field omission, optional nearby suggestion prompt copy, dated Expedia handoff parameters, and successful mutation recovery through an authoritative read
+    - Workers runtime tests verify that deletion releases registration identity and handle assignments and permits clean registration with the same identity and handle through a new invitation
     - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
@@ -165,6 +169,9 @@ Authenticated owner interaction remains external acceptance.
 - [x] Permanent owner account deletion route, explicit confirmation, revision
       guard, registry and handle cleanup, per-user erasure, and exact retry
       tombstone.
+      Completed deletion removes the active handle assignment instead of
+      retaining a handle tombstone, so a newly invited account can reuse the
+      former identity and handle with a new internal user ID.
 - [x] Owner-only wishlist CRUD for catalog and existing custom-place shapes.
 - [x] Deterministic owner-scoped wish IDs, duplicate index, 250-entry cap,
       normalized notes, priorities, optional desired year, and 100-record paging.
@@ -194,6 +201,20 @@ Authenticated owner interaction remains external acceptance.
 - [x] Client-only Google Maps URL and privacy-filtered AI prompt builders.
       Longer plans become continuous Maps legs with at most three intermediary
       waypoints per link for the conservative mobile-browser boundary.
+      The prompt preview has an explicit option to request possible nearby
+      stops and activities while keeping them separate from the chosen route.
+- [x] Client-only read only trip links encode a versioned route snapshot in the
+      URL. They include broad place labels, coordinates, order, finish mode,
+      title, and optional year. They exclude notes, plan IDs, Wish IDs, account
+      identity, and live location. The recipient route performs no account read.
+- [x] Explicit Fly boundaries can open a dated one way Expedia search after the
+      owner enters a departure date. The click sends only the two displayed
+      place names and date. My Atlas does not claim price, availability, airport
+      selection, or partner attribution.
+- [x] A successful plan mutation with an incomplete response now reads the
+      authoritative wishlist and plan revision. If the expected plan exists at
+      the saved or newer revision, the client accepts that confirmed snapshot
+      instead of stranding the editor in an invalid response state.
 - [x] JSON export schema 2 including visited pins, wishlist, plans, snapshots,
       and retention state.
 - [x] Existing public projection continues enumerating only `pin:` keys; tests
@@ -236,6 +257,8 @@ Authenticated owner interaction remains external acceptance.
       sections, expands the desktop owner panel to a readable working width,
       and preserves every direct child at its natural height so overflow scrolls
       instead of flex-shrinking the planner into horizontal strips.
+      Desktop planner collections also release their nested height limits, so
+      the owner panel is the single vertical scrolling surface.
 - [x] Planner failure state includes an explicit retry action. Narrow screens
       place builder actions in a full-width two-column row beneath the heading.
 - [x] A missing canonical catalog record no longer prevents the owner from
@@ -346,10 +369,14 @@ Authenticated owner interaction remains external acceptance.
       evidence verifies zero horizontal overflow at 1,280 and 390 CSS pixels;
       authenticated and real-device acceptance remain open above.
 - [ ] Implement stable itinerary node IDs, persisted logistics, schema-backed
-      map occurrence identity, neutral flight and stay helpers, and any
+      map occurrence identity, neutral stay helpers, and any
       commercial activation only through their separately reviewed later
       phases. The current private overlay intentionally uses the unique-stop
       version 1 draft and does not imply road geometry.
+- [ ] Validate the Expedia handoff on desktop and phone against the provider's
+      current search behavior. Skyscanner integration remains unimplemented
+      because its official referral link requires an approved affiliate media
+      partner ID and airport or city codes.
 
 ## Verified commands
 

@@ -304,6 +304,51 @@ function parseSpots(file) {
   })
 }
 
+function parseOfficialParks(file) {
+  if (!file) return []
+  const value = JSON.parse(fs.readFileSync(file, "utf8"))
+  if (
+    value?.schemaVersion !== 1 ||
+    value.scope !== "north-america-national-parks" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(value.sourceSnapshotDate) ||
+    !Array.isArray(value.records)
+  ) {
+    throw new Error("Invalid official national park source: " + file)
+  }
+  const seen = new Set()
+  return value.records.map(record => {
+    if (
+      !/^park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+$/.test(record.placeId) ||
+      seen.has(record.placeId) ||
+      typeof record.name !== "string" ||
+      !record.name.trim() ||
+      !Array.isArray(record.aliases) ||
+      !record.aliases.every(alias => typeof alias === "string") ||
+      !/^[A-Z]{2}$/.test(record.countryCode) ||
+      !Number.isFinite(record.latitude) ||
+      record.latitude < -90 ||
+      record.latitude > 90 ||
+      !Number.isFinite(record.longitude) ||
+      record.longitude < -180 ||
+      record.longitude > 180 ||
+      !record.source ||
+      !["National Park Service", "Parks Canada", "CONANP"].includes(
+        record.source.provider
+      ) ||
+      typeof record.source.recordId !== "string" ||
+      !record.source.recordId ||
+      typeof record.source.sourceUrl !== "string" ||
+      !record.source.sourceUrl.startsWith("https://")
+    ) {
+      throw new Error(
+        `Invalid official national park record: ${record.placeId || "unknown"}`
+      )
+    }
+    seen.add(record.placeId)
+    return record
+  })
+}
+
 function searchNames({ aliases, name, admin1Name, countryName, iso2, iso3 }) {
   const normalizedAliases = unique([name, ...(aliases || []), iso2, iso3])
     .map(normalizeSearchText)
@@ -466,6 +511,48 @@ function spotRecord(spot, countries, revision) {
   }
 }
 
+function officialParkRecord(park, countries, revision) {
+  const country = countries.get(park.countryCode)
+  if (!country) {
+    throw new Error(
+      `Official park ${park.placeId} references unknown country ${park.countryCode}`
+    )
+  }
+  const aliases = unique([park.name, ...(park.aliases || [])])
+  return {
+    placeId: park.placeId,
+    placeType: "spot",
+    name: park.name,
+    asciiName: park.name
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, ""),
+    aliases,
+    searchNames: searchNames({
+      aliases,
+      name: park.name,
+      admin1Name: park.admin1Name || "",
+      countryName: country.name,
+    }),
+    countryCode: park.countryCode,
+    countryName: country.name,
+    continent: country.continent,
+    admin1Name: park.admin1Name || "",
+    coordinates: [park.longitude, park.latitude],
+    coordinateKind: "official-park-center",
+    spotCategory: "national-park",
+    spotKind: "National park",
+    population: 0,
+    source: {
+      provider: park.source.provider,
+      sourceRecordId: park.source.recordId,
+      sourceUrl: park.source.sourceUrl,
+      retrieved: park.source.retrieved,
+    },
+    catalogRevision: revision,
+    deprecated: false,
+  }
+}
+
 function assertStableIdentity(previous, current) {
   if (previous.placeType !== current.placeType) {
     throw new Error("Catalog identity type changed for " + current.placeId)
@@ -473,8 +560,13 @@ function assertStableIdentity(previous, current) {
   if (previous.countryCode !== current.countryCode) {
     throw new Error("Catalog identity country changed for " + current.placeId)
   }
+  const previousSourceId =
+    previous.source?.geonameId || previous.source?.sourceRecordId
+  const currentSourceId =
+    current.source?.geonameId || current.source?.sourceRecordId
   if (
-    String(previous.source?.geonameId) !== String(current.source?.geonameId)
+    previous.source?.provider !== current.source?.provider ||
+    String(previousSourceId) !== String(currentSourceId)
   ) {
     throw new Error("Catalog source identity changed for " + current.placeId)
   }
@@ -504,7 +596,8 @@ function mergePrevious(records, previousCatalog, revision) {
 function sourceManifest(
   sourceDirectory,
   spotSourceFile,
-  reviewedCitySourceFile
+  reviewedCitySourceFile,
+  officialParkSourceFile
 ) {
   return [
     ...sourceFiles.map(fileName => ({
@@ -519,6 +612,14 @@ function sourceManifest(
           {
             fileName: path.basename(reviewedCitySourceFile),
             file: reviewedCitySourceFile,
+          },
+        ]
+      : []),
+    ...(officialParkSourceFile
+      ? [
+          {
+            fileName: path.basename(officialParkSourceFile),
+            file: officialParkSourceFile,
           },
         ]
       : []),
@@ -540,6 +641,7 @@ export function buildPlaceCatalog({
   previousCatalog = null,
   spotSourceFile = "",
   reviewedCitySourceFile = "",
+  officialParkSourceFile = "",
 }) {
   if (!sourceDirectory || !revision || !sourceSnapshotDate) {
     throw new Error(
@@ -566,6 +668,24 @@ export function buildPlaceCatalog({
     )
   )
   const spots = parseSpots(spotSourceFile ? path.resolve(spotSourceFile) : "")
+  const officialParks = parseOfficialParks(
+    officialParkSourceFile ? path.resolve(officialParkSourceFile) : ""
+  )
+  const legacyParkKeys = new Set(
+    spots
+      .filter(spot => spot.spotCategory === "national-park")
+      .flatMap(spot =>
+        unique([spot.preferredName, spot.name, ...(spot.aliases || [])]).map(
+          name => `${spot.countryCode}:${normalizeSearchText(name)}`
+        )
+      )
+  )
+  const selectedOfficialParks = officialParks.filter(
+    park =>
+      !unique([park.name, ...(park.aliases || [])]).some(name =>
+        legacyParkKeys.has(`${park.countryCode}:${normalizeSearchText(name)}`)
+      )
+  )
   const selectedIds = new Set(includePlaceIds.map(String))
   const selectedCities = selectedIds.size
     ? cities.filter(city => selectedIds.has(city.geonameId))
@@ -586,6 +706,9 @@ export function buildPlaceCatalog({
       cityRecord(city, countries, admin1, revision)
     ),
     ...spots.map(spot => spotRecord(spot, countries, revision)),
+    ...selectedOfficialParks.map(park =>
+      officialParkRecord(park, countries, revision)
+    ),
   ]
   records = mergePrevious(records, previousCatalog, revision).sort(
     (left, right) => left.placeId.localeCompare(right.placeId)
@@ -601,20 +724,42 @@ export function buildPlaceCatalog({
       license: "CC BY 4.0",
       licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
     },
+    attributions: [
+      {
+        provider: "GeoNames",
+        url: "https://www.geonames.org/",
+        license: "CC BY 4.0",
+        licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+      },
+      ...(officialParks.length
+        ? [
+            { provider: "National Park Service", url: "https://www.nps.gov/" },
+            { provider: "Parks Canada", url: "https://parks.canada.ca/" },
+            { provider: "CONANP", url: "https://www.gob.mx/conanp" },
+          ]
+        : []),
+    ],
     selection: selectedIds.size
       ? {
           mode: "proof-subset-plus-reviewed-places",
           cityIds: [...selectedIds].sort(),
           spotIds: spots.map(spot => spot.geonameId).sort(),
+          officialParkIds: selectedOfficialParks
+            .map(park => park.placeId)
+            .sort(),
         }
       : {
           mode: "all-cities500-plus-reviewed-places",
           spotIds: spots.map(spot => spot.geonameId).sort(),
+          officialParkIds: selectedOfficialParks
+            .map(park => park.placeId)
+            .sort(),
         },
     sources: sourceManifest(
       sourceDirectory,
       spotSourceFile,
-      reviewedCitySourceFile
+      reviewedCitySourceFile,
+      officialParkSourceFile
     ),
     stats: {
       countries: records.filter(record => record.placeType === "country")

@@ -551,6 +551,86 @@ pins = addDraftPin([], "geonames:5843642", first)
 assert.deepEqual(pins, [{ placeId: "geonames:5843642" }])
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "my-atlas-catalog-"))
+const officialParkFixture = path.join(tempRoot, "official-parks.json")
+fs.writeFileSync(
+  officialParkFixture,
+  JSON.stringify({
+    schemaVersion: 1,
+    scope: "north-america-national-parks",
+    sourceSnapshotDate: "2026-11-19",
+    records: [
+      {
+        placeId: "park:us:nps:acad",
+        name: "Acadia National Park",
+        aliases: [],
+        countryCode: "US",
+        admin1Name: "ME",
+        longitude: -68.2475,
+        latitude: 44.4093,
+        source: {
+          provider: "National Park Service",
+          recordId: "acad",
+          sourceUrl: "https://www.nps.gov/acad/index.htm",
+          retrieved: "2026-11-19",
+        },
+      },
+    ],
+  }),
+  "utf8"
+)
+const officialParkCatalog = buildPlaceCatalog({
+  ...options,
+  revision: "fixture-official-parks",
+  officialParkSourceFile: officialParkFixture,
+})
+const acadia = resolveCatalogPlace(officialParkCatalog, "park:us:nps:acad")
+assert.equal(acadia.spotKind, "National park")
+assert.equal(acadia.source.provider, "National Park Service")
+assert.equal(
+  searchPlaceCatalog(officialParkCatalog, "Acadia National Park")[0].placeId,
+  "park:us:nps:acad"
+)
+
+const northAmericaParks = JSON.parse(
+  fs.readFileSync(
+    path.join(
+      projectRoot,
+      "scripts",
+      "my-atlas",
+      "data",
+      "north-america-national-parks.json"
+    ),
+    "utf8"
+  )
+)
+assert.deepEqual(northAmericaParks.stats, {
+  unitedStates: 63,
+  canada: 46,
+  mexico: 79,
+  total: 188,
+})
+const proofCatalog = JSON.parse(
+  fs.readFileSync(
+    path.join(
+      projectRoot,
+      "src",
+      "features",
+      "my-atlas",
+      "data",
+      "place-catalog.proof.json"
+    ),
+    "utf8"
+  )
+)
+assert.equal(
+  searchPlaceCatalog(proofCatalog, "Acadia National Park")[0].placeId,
+  "park:us:nps:acad"
+)
+assert.equal(
+  searchPlaceCatalog(proofCatalog, "Banff National Park")[0].countryCode,
+  "CA"
+)
+assert.equal(searchPlaceCatalog(proofCatalog, "Cabo Pulmo")[0].countryCode, "MX")
 const nextSource = path.join(tempRoot, "next")
 fs.cpSync(fixture, nextSource, { recursive: true })
 const cityFile = path.join(nextSource, "cities500.txt")

@@ -31,6 +31,7 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/planning/handoffs.mjs
+  - src/features/my-atlas/planning/sharedTrip.mjs
   - src/features/my-atlas/planning/mapProjection.mjs
   - src/features/my-atlas/auth/session.mjs
   - src/features/my-atlas/catalog/atlasInsights.mjs
@@ -44,6 +45,7 @@ code_paths:
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - src/features/my-atlas/views/MyAtlasSharedTripView.vue
   - src/views/roam/Privacy.vue
   - src/features/atlas/views/AtlasView.vue
   - src/features/my-atlas/config/featureFlags.mjs
@@ -56,6 +58,8 @@ verification:
   state: verified
   evidence:
     - npm run my-atlas:worker:test
+    - Workers runtime deletion coverage verifies that completed deletion releases both the identity and handle assignments, preserves exact retry safety, and permits the same identity and handle to register again with a new invitation and user ID
+    - Client planning tests verify recovery from a successful plan mutation with an incomplete response by reading the authoritative revision and saved plan before reporting failure
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
@@ -405,14 +409,12 @@ memory only: they produce no account write and do not refresh plan retention.
 `DELETE /v1/me` requires the verified owner, write permission, a strong current
 revision, a UUID idempotency key, and the exact confirmation phrase. The user
 object first becomes private and `deleting`. The registry then removes its
-active identity assignment, replaces the handle assignment with a nonactive
-nonreusable handle tombstone, and the user object erases profile,
+active identity and handle assignments, and the user object erases profile,
 pins, wishlist, plans, indexes, mutation history, and policy acceptance state.
 A minimal operation tombstone supports an exact retry after a cross-object
 partial failure. It retains no handle, profile, content, or qualified identity.
-The separate handle tombstone retains the formerly public handle and deletion
-time, but no user ID or identity, and public lookup still returns the generic
-404 response.
+The released handle can be registered again through the ordinary invitation
+flow. Public lookup returns the generic 404 response after deletion.
 This operation does not delete the upstream Google or Auth0 identity.
 
 ## Catalog boundary
@@ -620,8 +622,9 @@ vertical padding, centered alignment, and compact status pill at desktop and
 phone widths. Planner failures preserve the Worker request ID in owner-facing
 recovery copy when one is available.
 
-The signed-in identity is now a full-width account row with the display name,
-handle, and direct Sign out action. The former profile action menu is removed.
+The signed-in identity is now a circular control in the upper right of the
+owner panel. It opens a compact popover with the display name, handle, recovery
+action when needed, and direct Sign out action.
 Public visibility, public-link copying, and Story image export live together in
 a named collapsible Share and export workflow with explanatory copy. Account
 recovery remains adjacent to the identity only when it is needed. Opening any
@@ -661,7 +664,7 @@ private account fields.
 
 ## Deliberately incomplete
 
-The API still needs handle-change coordination with registry tombstones, abuse
+The API still needs handle-change coordination with active registry records, abuse
 reporting and moderation, and registration or operator rate-limit enforcement.
 Permanent application-account deletion and the six-month plus 30-day plan
 retention contract are implemented and staged, but authenticated deletion still

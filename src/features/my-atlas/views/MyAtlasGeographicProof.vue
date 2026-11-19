@@ -27,8 +27,30 @@
       aria-labelledby="my-atlas-title"
     >
       <header>
-        <a href="/" aria-label="Roam With Justin home">RWJ</a>
-        <span>My Atlas</span>
+        <span class="my-atlas-brand-lockup">
+          <a href="/" aria-label="Roam With Justin home">RWJ</a>
+          <span>My Atlas</span>
+        </span>
+        <button
+          v-if="auth.authenticated"
+          type="button"
+          class="my-atlas-profile-trigger"
+          :aria-expanded="String(accountMenuOpen)"
+          aria-controls="my-atlas-account-menu"
+          aria-label="Open My Atlas profile menu"
+          @click="accountMenuOpen = !accountMenuOpen"
+        >
+          {{ authInitials }}
+        </button>
+        <button
+          v-else-if="auth.configured && !auth.loading"
+          ref="signInButton"
+          type="button"
+          class="my-atlas-header-sign-in"
+          @click="signIn"
+        >
+          Sign in
+        </button>
       </header>
 
       <div class="my-atlas-intro">
@@ -197,8 +219,17 @@
       </section>
 
       <nav
+        v-if="
+          accountMenuOpen ||
+          auth.loading ||
+          !auth.configured ||
+          auth.error ||
+          accountError
+        "
+        id="my-atlas-account-menu"
         ref="authSection"
         class="my-atlas-account"
+        :class="{ 'is-menu': accountMenuOpen }"
         aria-label="My Atlas account"
         tabindex="-1"
       >
@@ -210,7 +241,6 @@
         </span>
         <button
           v-else-if="!auth.authenticated"
-          ref="signInButton"
           type="button"
           class="my-atlas-sign-in"
           @click="signIn"
@@ -545,8 +575,15 @@
         <a href="https://www.geonames.org/" target="_blank" rel="noopener">
           GeoNames
         </a>
-        under CC BY 4.0. Custom pins are supplied by each Atlas owner. Map
-        rendering uses MapLibre and the configured tile provider.
+        under CC BY 4.0. National park records also come from
+        <a href="https://www.nps.gov/" target="_blank" rel="noopener">NPS</a>,
+        <a href="https://parks.canada.ca/" target="_blank" rel="noopener">
+          Parks Canada </a
+        >, and
+        <a href="https://www.gob.mx/conanp" target="_blank" rel="noopener">
+          CONANP </a
+        >. Custom pins are supplied by each Atlas owner. Map rendering uses
+        MapLibre and the configured tile provider.
       </p>
       <p class="my-atlas-brand">My Atlas by RoamWithJustin.com</p>
       <p class="my-atlas-announcement" aria-live="polite">{{ announcement }}</p>
@@ -664,11 +701,25 @@ export default {
       tutorialVariant: "preview",
       plannerActive: false,
       plannerRoute: [],
+      accountMenuOpen: false,
     }
   },
   computed: {
     authDisplayName() {
       return this.auth.user?.name || this.auth.user?.email || "Signed in"
+    },
+    authInitials() {
+      const words = this.authDisplayName
+        .replace(/@.*$/, "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+      if (!words.length) return "ME"
+      return words
+        .slice(0, 2)
+        .map(word => word[0])
+        .join("")
+        .toUpperCase()
     },
     customPlaceCharacterCount() {
       return Array.from(this.customPlaceName).length
@@ -892,6 +943,7 @@ export default {
       this.visitedOpen = true
     },
     handleAccountDeleted() {
+      this.accountMenuOpen = false
       this.accountProfile = null
       this.accountMissing = true
       this.pins = []
@@ -999,6 +1051,7 @@ export default {
       loginToMyAtlas()
     },
     signOut() {
+      this.accountMenuOpen = false
       logoutFromMyAtlas()
     },
     async loadAccount() {
@@ -1612,7 +1665,8 @@ export default {
 .my-atlas-panel > header {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  justify-content: space-between;
+  gap: 1rem;
   color: #e6ba68;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -1620,7 +1674,13 @@ export default {
   font-weight: 700;
 }
 
-.my-atlas-panel > header a {
+.my-atlas-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.my-atlas-brand-lockup > a {
   display: grid;
   width: 2.35rem;
   height: 2.35rem;
@@ -1629,6 +1689,38 @@ export default {
   color: #132023;
   background: #e6ba68;
   letter-spacing: 0;
+}
+
+.my-atlas-profile-trigger,
+.my-atlas-header-sign-in {
+  flex: 0 0 auto;
+  min-width: 2.35rem;
+  min-height: 2.35rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(230, 186, 104, 0.55);
+  border-radius: 999px;
+  color: #132023;
+  background: #e6ba68;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.my-atlas-header-sign-in {
+  padding-right: 0.85rem;
+  padding-left: 0.85rem;
+  color: #f7e6bf;
+  background: rgba(230, 186, 104, 0.08);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.my-atlas-profile-trigger:focus-visible,
+.my-atlas-header-sign-in:focus-visible {
+  outline: 2px solid rgba(230, 186, 104, 0.5);
+  outline-offset: 0.15rem;
 }
 
 .my-atlas-intro {
@@ -1899,10 +1991,22 @@ export default {
   height: auto;
   min-height: 2.75rem;
   margin: 0 0 1.25rem;
+  padding: 0.6rem;
+  border: 1px solid rgba(230, 186, 104, 0.35);
+  border-radius: 1rem;
   color: inherit;
-  background: transparent;
-  box-shadow: none;
+  background: #101d20;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
   line-height: 1.2;
+}
+
+.my-atlas-account.is-menu {
+  position: absolute;
+  top: 4.25rem;
+  right: 1.25rem;
+  z-index: 8;
+  width: min(22rem, calc(100% - 2.5rem));
+  margin: 0;
 }
 
 .my-atlas-account:focus {
@@ -2649,10 +2753,11 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .my-atlas-account {
+  .my-atlas-account.is-menu {
     justify-items: stretch;
     min-height: 0;
-    margin: 0 0 0.85rem;
+    width: calc(100% - 2.5rem);
+    margin: 0;
   }
 
   .my-atlas-sign-in,

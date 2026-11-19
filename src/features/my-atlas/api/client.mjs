@@ -24,7 +24,7 @@ export class MyAtlasApiError extends Error {
 
 const PUBLIC_HANDLE_PATTERN = /^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/
 const CATALOG_PLACE_ID_PATTERN =
-  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11})$/
+  /^(?:iso-country:[A-Z]{2}|geonames:[1-9][0-9]{0,11}|park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+)$/
 
 function isVisitedDate(value) {
   return Boolean(
@@ -614,15 +614,41 @@ export async function saveMyAtlasPlan({
     idempotencyKey: newIdempotencyKey(),
     fetchImpl,
   })
-  if (typeof payload.plan?.planId !== "string") {
+  const savedRevision = validatedPlanningRevision(response)
+  if (
+    typeof payload.plan?.planId !== "string" ||
+    !Array.isArray(payload.plan?.stops)
+  ) {
+    try {
+      const refreshed = await fetchMyAtlasPlanning({
+        apiBaseUrl,
+        accessToken,
+        allowPartial: false,
+        fetchImpl,
+      })
+      const recoveredPlan = planId
+        ? refreshed.plans.find(plan => plan.planId === planId)
+        : refreshed.plans[0]
+      if (recoveredPlan && refreshed.revision >= savedRevision) {
+        return Object.freeze({
+          plan: Object.freeze({ ...recoveredPlan }),
+          revision: refreshed.revision,
+          recovered: true,
+        })
+      }
+    } catch {
+      // The mutation returned success. Preserve its request reference below
+      // when the authoritative recovery read cannot confirm the saved plan.
+    }
     throw new MyAtlasApiError("The saved trip-plan response is invalid.", {
       status: response.status,
       code: "invalid_response",
+      requestId: response.headers.get("X-Request-Id") || "",
     })
   }
   return Object.freeze({
     plan: Object.freeze({ ...payload.plan }),
-    revision: validatedPlanningRevision(response),
+    revision: savedRevision,
   })
 }
 

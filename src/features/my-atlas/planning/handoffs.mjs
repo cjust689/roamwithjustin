@@ -1,5 +1,6 @@
 const GOOGLE_MAPS_DIRECTIONS_URL = "https://www.google.com/maps/dir/"
 const GOOGLE_MAPS_SEARCH_URL = "https://www.google.com/maps/search/"
+const EXPEDIA_FLIGHT_SEARCH_URL = "https://www.expedia.com/go/flight/search/oneway/"
 const MAX_MAPS_URL_LENGTH = 2048
 const MAX_MAPS_WAYPOINTS_PER_LEG = 3
 export const MAX_PLAN_DESTINATIONS = 50
@@ -21,6 +22,38 @@ export class MyAtlasHandoffError extends Error {
     this.name = "MyAtlasHandoffError"
     this.code = code
   }
+}
+
+export function buildExpediaFlightSearchUrl({
+  origin,
+  destination,
+  departureDate,
+}) {
+  const from = String(origin || "").trim()
+  const to = String(destination || "").trim()
+  const date = String(departureDate || "").trim()
+  if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new MyAtlasHandoffError(
+      "Choose a departure date before opening the flight search.",
+      "flight_date_required"
+    )
+  }
+  const parsed = new Date(`${date}T00:00:00Z`)
+  if (
+    Number.isNaN(parsed.getTime()) ||
+    parsed.toISOString().slice(0, 10) !== date
+  ) {
+    throw new MyAtlasHandoffError(
+      "The flight departure date is invalid.",
+      "invalid_flight_date"
+    )
+  }
+  const url = new URL(`${EXPEDIA_FLIGHT_SEARCH_URL}${date}/${date}`)
+  url.searchParams.set("load", "1")
+  url.searchParams.set("FromAirport", from)
+  url.searchParams.set("ToAirport", to)
+  url.searchParams.set("NumAdult", "1")
+  return url.toString()
 }
 
 function validatedLocation(value) {
@@ -426,7 +459,7 @@ function readableLocation(location, includeCoordinates) {
 
 export function buildAiPlanningPrompt(
   plan,
-  { includeCoordinates = false } = {}
+  { includeCoordinates = false, includeNearbySuggestions = false } = {}
 ) {
   if (
     !plan ||
@@ -454,6 +487,9 @@ export function buildAiPlanningPrompt(
     "Destinations:",
     ...stops.map((stop, index) => `${index + 1}. ${stop}`),
     finish,
-    "Do not assume this order is fastest. Flag seasonal access, permits, closures, and locations that need an entrance selected. Ask me before adding dates, lodging, or activities.",
+    includeNearbySuggestions
+      ? "Suggest a short list of optional stops and activities near this route. Keep them separate from my chosen destinations and explain why each is practical."
+      : "Do not add stops or activities unless I ask.",
+    "Do not assume this order is fastest. Flag seasonal access, permits, closures, and locations that need an entrance selected. Ask me before adding dates or lodging.",
   ].join("\n")
 }

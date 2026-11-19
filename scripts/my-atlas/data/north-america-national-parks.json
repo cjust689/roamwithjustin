@@ -1,0 +1,2850 @@
+{
+  "schemaVersion": 1,
+  "scope": "north-america-national-parks",
+  "sourceSnapshotDate": "2026-11-19",
+  "sources": [
+    {
+      "provider": "National Park Service",
+      "url": "https://developer.nps.gov/api/v1/parks"
+    },
+    {
+      "provider": "Parks Canada",
+      "url": "https://services2.arcgis.com/wCOMu5IS7YdSyPNx/arcgis/rest/services/vw_Places_Public_lieux_public_APCA/FeatureServer/0/query"
+    },
+    {
+      "provider": "CONANP",
+      "url": "https://geoserver.conanp.gob.mx/geoserver/SIG-DES/wfs"
+    }
+  ],
+  "stats": {
+    "unitedStates": 63,
+    "canada": 46,
+    "mexico": 79,
+    "total": 188
+  },
+  "records": [
+    {
+      "placeId": "park:ca:pca:100007",
+      "name": "Sable Island National Park Reserve",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -59.90602745955161,
+      "latitude": 43.94376657134084,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100007",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100089",
+      "name": "Aulavik National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -119.60041329211623,
+      "latitude": 73.7634891028078,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100089",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100092",
+      "name": "Banff National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -116.1239583876297,
+      "latitude": 51.547759551670715,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100092",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100105",
+      "name": "Bruce Peninsula National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -81.49120809859662,
+      "latitude": 45.194286687063986,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100105",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100111",
+      "name": "Cape Breton Highlands National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -60.641053795225304,
+      "latitude": 46.732421383513014,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100111",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100157",
+      "name": "Elk Island National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -112.86189449347938,
+      "latitude": 53.607806844933116,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100157",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100169",
+      "name": "Forillon National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -64.35566632068286,
+      "latitude": 48.89051941608962,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100169",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100201",
+      "name": "Fundy National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -65.03526736327305,
+      "latitude": 45.6191990706953,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100201",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100204",
+      "name": "Georgian Bay Islands National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -79.87652462270974,
+      "latitude": 44.88724690359783,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100204",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100205",
+      "name": "Glacier National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -117.5244506553765,
+      "latitude": 51.26898543513359,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100205",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100209",
+      "name": "Grasslands National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -107.17222900829744,
+      "latitude": 49.10277649367793,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100209",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100211",
+      "name": "Gros Morne National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -57.73376311786955,
+      "latitude": 49.631945067543214,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100211",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100240",
+      "name": "Ivvavik National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -139.84985104188254,
+      "latitude": 69.11045834404747,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100240",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100244",
+      "name": "Jasper National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -117.98798824636212,
+      "latitude": 52.85579778444855,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100244",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100247",
+      "name": "Kejimkujik National Park and National Historic Site of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -65.2721306118568,
+      "latitude": 44.34176079948383,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100247",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100252",
+      "name": "Kluane National Park and Reserve of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -139.2073658772454,
+      "latitude": 60.63662003807062,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100252",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100253",
+      "name": "Kootenay National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -116.04170469699729,
+      "latitude": 50.9634244361911,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100253",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100254",
+      "name": "Kouchibouguac National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -64.94108176844138,
+      "latitude": 46.82397419468736,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100254",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100257",
+      "name": "La Mauricie National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -72.96642819057764,
+      "latitude": 46.78689411871496,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100257",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100299",
+      "name": "Nahanni National Park Reserve of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -125.91222270548256,
+      "latitude": 61.61924164913394,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100299",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100322",
+      "name": "Prince Edward Island National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -63.150571202329495,
+      "latitude": 46.45297400090733,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100322",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100324",
+      "name": "Pacific Rim National Park Reserve of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -125.19634843994507,
+      "latitude": 48.83772663814454,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100324",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100337",
+      "name": "Point Pelee National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -82.52075581182665,
+      "latitude": 41.95903262440098,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100337",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100346",
+      "name": "Prince Albert National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -106.3699442060614,
+      "latitude": 53.96507977117266,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100346",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100356",
+      "name": "Pukaskwa National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -85.90421804889853,
+      "latitude": 48.289854455859704,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100356",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100363",
+      "name": "Quttinirpaaq National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -71.65476599438615,
+      "latitude": 82.18685065710858,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100363",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100373",
+      "name": "Riding Mountain National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -100.20142785709284,
+      "latitude": 50.829485867447914,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100373",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100376",
+      "name": "Mingan Archipelago National Park Reserve of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -63.547855745324,
+      "latitude": 50.2237244664354,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100376",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100398",
+      "name": "Sirmilik National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -79.84811092765706,
+      "latitude": 73.09357755131086,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100398",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100403",
+      "name": "Thousand Islands National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -76.00214409818626,
+      "latitude": 44.36400310581471,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100403",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100412",
+      "name": "Terra Nova National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -53.96523616124761,
+      "latitude": 48.5254304256484,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100412",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100420",
+      "name": "Tuktut Nogait National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -121.81183443174127,
+      "latitude": 68.76474912968847,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100420",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100424",
+      "name": "Vuntut National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -139.87103748878627,
+      "latitude": 68.38885755083449,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100424",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100425",
+      "name": "Wapusk National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -93.23284026135283,
+      "latitude": 57.80509037568963,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100425",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100429",
+      "name": "Waterton Lakes National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -113.9331953110508,
+      "latitude": 49.08143143414058,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100429",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100434",
+      "name": "Wood Buffalo National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -113.27020951527129,
+      "latitude": 59.3771295127687,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100434",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100505",
+      "name": "Mount Revelstoke National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -118.04476093191529,
+      "latitude": 51.09342279745101,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100505",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100588",
+      "name": "Auyuittuq National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -66.02006562549896,
+      "latitude": 67.37753611848295,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100588",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100815",
+      "name": "Yoho National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -116.52608940827156,
+      "latitude": 51.38394148087071,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100815",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100906",
+      "name": "Ukkusiksalik National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -89.7420510748422,
+      "latitude": 65.84847171836077,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100906",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100954",
+      "name": "Torngat Mountains National Park",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -64.00822069572139,
+      "latitude": 59.240430179766975,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100954",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:100958",
+      "name": "Akami Uapishku, KakKasuak, Mealy Mountains National Park Reserve of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -58.3419573323294,
+      "latitude": 53.57486725998882,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "100958",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:101071",
+      "name": "Nááts'ihch'oh National Park Reserve",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -128.54548878167148,
+      "latitude": 62.67370019562104,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "101071",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:101281",
+      "name": "Qausuittuq National Park of Canada",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -100.92257027738087,
+      "latitude": 76.14917985376246,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "101281",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:101300",
+      "name": "Gwaii Haanas National Park Reserve of Canada and Haida Heritage Site",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -131.47795535571103,
+      "latitude": 52.43220281302115,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "101300",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:ca:pca:101322",
+      "name": "Thaidene Nene National Park Reserve",
+      "aliases": [],
+      "countryCode": "CA",
+      "admin1Name": "",
+      "longitude": -108.62959764318313,
+      "latitude": 62.71387296496481,
+      "source": {
+        "provider": "Parks Canada",
+        "recordId": "101322",
+        "sourceUrl": "https://parks.canada.ca/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103045",
+      "name": "Sierra de San Pedro Mártir",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California",
+      "longitude": -115.4413,
+      "latitude": 30.933999999999997,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103045",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103052",
+      "name": "Constitución de 1857",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California",
+      "longitude": -115.90355,
+      "latitude": 32.07665,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103052",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103124",
+      "name": "Cabo Pulmo",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California Sur",
+      "longitude": -109.42654999999999,
+      "latitude": 23.438,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103124",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103129",
+      "name": "Bahía de Loreto",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California Sur",
+      "longitude": -111.05455,
+      "latitude": 25.8598,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103129",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103157",
+      "name": "Zona marina del Archipiélago de San Lorenzo",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Se ubica en el Golfo de California",
+      "longitude": -112.8507,
+      "latitude": 28.7419,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103157",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103162",
+      "name": "Zona marina del Archipiélago de Espíritu Santo",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Se ubica en el Golfo de California",
+      "longitude": -110.34885,
+      "latitude": 24.547800000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103162",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103183",
+      "name": "Revillagigedo",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Se ubica en el Océano Pacífico",
+      "longitude": -112.77475000000001,
+      "latitude": 18.8319,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103183",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103190",
+      "name": "Loreto II",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California Sur",
+      "longitude": -111.3218,
+      "latitude": 25.77995,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103190",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103191",
+      "name": "Nopoló",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California Sur",
+      "longitude": -111.3789,
+      "latitude": 25.943150000000003,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103191",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00103192",
+      "name": "San Quintín",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Baja California",
+      "longitude": -115.90665,
+      "latitude": 30.3998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00103192",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00303037",
+      "name": "Cumbres de Majalca",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Chihuahua",
+      "longitude": -106.47229999999999,
+      "latitude": 28.806150000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00303037",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00303067",
+      "name": "Cascada de Bassaseachic",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Chihuahua",
+      "longitude": -108.2229,
+      "latitude": 28.1449,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00303067",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00303146",
+      "name": "Sierra de Órganos",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Zacatecas",
+      "longitude": -103.7984,
+      "latitude": 23.7883,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00303146",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00403008",
+      "name": "El Potosí",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "San Luis Potosí",
+      "longitude": -100.33744999999999,
+      "latitude": 21.898200000000003,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00403008",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00403010",
+      "name": "Gogorrón",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "San Luis Potosí",
+      "longitude": -100.9099,
+      "latitude": 21.79,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00403010",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00403029",
+      "name": "El Sabinal",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Nuevo León",
+      "longitude": -99.6234,
+      "latitude": 26.08305,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00403029",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00403039",
+      "name": "Los Novillos",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Coahuila",
+      "longitude": -100.96455,
+      "latitude": 29.2563,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00403039",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00403144",
+      "name": "Cumbres de Monterrey",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Nuevo León",
+      "longitude": -100.34075,
+      "latitude": 25.35605,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00403144",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503005",
+      "name": "Cerro de Garnica",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Michoacán",
+      "longitude": -100.822,
+      "latitude": 19.667749999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503005",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503006",
+      "name": "Volcán Nevado de Colima",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Jalisco y Colima",
+      "longitude": -103.61445,
+      "latitude": 19.538,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503006",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503033",
+      "name": "Barranca del Cupatitzio",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Michoacán",
+      "longitude": -102.096,
+      "latitude": 19.4315,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503033",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503034",
+      "name": "Insurgente José María Morelos",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Michoacán",
+      "longitude": -100.99754999999999,
+      "latitude": 19.625349999999997,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503034",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503042",
+      "name": "El Lago de Camécuaro",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Michoacán",
+      "longitude": -102.2099,
+      "latitude": 19.9033,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503042",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503050",
+      "name": "Rayón",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Michoacán",
+      "longitude": -100.18610000000001,
+      "latitude": 19.8075,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503050",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503065",
+      "name": "Isla Isabel",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Nayarit",
+      "longitude": -105.88505,
+      "latitude": 21.84705,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503065",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503159",
+      "name": "Islas Marietas",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Nayarit",
+      "longitude": -105.5775,
+      "latitude": 20.69975,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503159",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00503214",
+      "name": "Zona Marina de la Isla Isabel",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Se ubica en el Golfo de California",
+      "longitude": -105.88335000000001,
+      "latitude": 21.85,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00503214",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603001",
+      "name": "Desierto de los Leones",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.31354999999999,
+      "latitude": 19.296,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603001",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603002",
+      "name": "Iztaccíhuatl-Popocatépetl",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México, Puebla y Morelos",
+      "longitude": -98.68010000000001,
+      "latitude": 19.226399999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603002",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603004",
+      "name": "Grutas de Cacahuamilpa",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Guerrero",
+      "longitude": -99.5099,
+      "latitude": 18.6625,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603004",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603007",
+      "name": "Los Mármoles",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Hidalgo",
+      "longitude": -99.23015000000001,
+      "latitude": 20.8779,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603007",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603009",
+      "name": "Insurgente Miguel Hidalgo y Costilla",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México",
+      "longitude": -99.3606,
+      "latitude": 19.29,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603009",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603011",
+      "name": "Cumbres del Ajusco",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.2579,
+      "latitude": 19.209699999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603011",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603012",
+      "name": "Fuentes Brotantes de Tlalpan",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.17914999999999,
+      "latitude": 19.28585,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603012",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603013",
+      "name": "Lagunas de Zempoala",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Morelos y Estado de México",
+      "longitude": -99.3099,
+      "latitude": 19.06335,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603013",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603015",
+      "name": "El Tepozteco",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Morelos",
+      "longitude": -99.11410000000001,
+      "latitude": 18.99255,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603015",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603016",
+      "name": "El Tepeyac",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.1149,
+      "latitude": 19.5034,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603016",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603019",
+      "name": "Cerro de Las Campanas",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Querétaro",
+      "longitude": -100.40899999999999,
+      "latitude": 20.592599999999997,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603019",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603021",
+      "name": "Molino de Flores Netzahualcóyotl",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México",
+      "longitude": -98.8397,
+      "latitude": 19.51395,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603021",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603022",
+      "name": "Xicoténcatl",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Tlaxcala",
+      "longitude": -98.23175,
+      "latitude": 19.325499999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603022",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603026",
+      "name": "Los Remedios",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México",
+      "longitude": -99.2544,
+      "latitude": 19.4726,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603026",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603027",
+      "name": "Lomas de Padierna",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.24080000000001,
+      "latitude": 19.3104,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603027",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603028",
+      "name": "Cerro de La Estrella",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.09185,
+      "latitude": 19.337400000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603028",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603030",
+      "name": "El Histórico Coyoacán",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Ciudad de México",
+      "longitude": -99.1726,
+      "latitude": 19.35405,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603030",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603031",
+      "name": "La Montaña Malinche o Matlalcuéyatl",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Tlaxcala y Puebla",
+      "longitude": -98.0458,
+      "latitude": 19.2243,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603031",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603036",
+      "name": "Sacromonte",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México",
+      "longitude": -98.7757,
+      "latitude": 19.12745,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603036",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603041",
+      "name": "Bosencheve",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México y Michoacán",
+      "longitude": -100.1566,
+      "latitude": 19.432000000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603041",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603044",
+      "name": "Desierto del Carmen o de Nixcongo",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Estado de México",
+      "longitude": -99.55085,
+      "latitude": 18.905450000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603044",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603053",
+      "name": "General Juan Álvarez",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Guerrero",
+      "longitude": -99.08125000000001,
+      "latitude": 17.602600000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603053",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603064",
+      "name": "El Veladero",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Guerrero",
+      "longitude": -99.88575,
+      "latitude": 16.87135,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603064",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603070",
+      "name": "Tula",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Hidalgo",
+      "longitude": -99.33840000000001,
+      "latitude": 20.068,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603070",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603074",
+      "name": "El Chico",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Hidalgo",
+      "longitude": -98.7278,
+      "latitude": 20.196849999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603074",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603075",
+      "name": "El Cimatario",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Querétaro",
+      "longitude": -100.3486,
+      "latitude": 20.51645,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603075",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00603193",
+      "name": "Vicente Guerrero",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Guerrero",
+      "longitude": -101.6223,
+      "latitude": 17.6813,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00603193",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00703014",
+      "name": "Pico de Orizaba",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Veracruz y Puebla",
+      "longitude": -97.2855,
+      "latitude": 19.0566,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00703014",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00703017",
+      "name": "Cofre de Perote o Nauhcampatépetl",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Veracruz",
+      "longitude": -97.15785,
+      "latitude": 19.49755,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00703017",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00703025",
+      "name": "Cañón del Río Blanco",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Veracruz",
+      "longitude": -97.1659,
+      "latitude": 18.804299999999998,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00703025",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00703109",
+      "name": "Sistema Arrecifal Veracruzano",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Veracruz",
+      "longitude": -95.9861,
+      "latitude": 19.15335,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00703109",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00703210",
+      "name": "Carmen Serdán",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Puebla",
+      "longitude": -97.89755,
+      "latitude": 20.27035,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00703210",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803020",
+      "name": "Lagunas de Chacahua",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -97.65985,
+      "latitude": 16.00185,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803020",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803023",
+      "name": "Benito Juárez",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -96.6723,
+      "latitude": 17.1343,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803023",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803051",
+      "name": "Lagunas de Montebello",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Chiapas",
+      "longitude": -91.71605,
+      "latitude": 16.11855,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803051",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803066",
+      "name": "Cañón del Sumidero",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Chiapas",
+      "longitude": -93.095,
+      "latitude": 16.82795,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803066",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803071",
+      "name": "Palenque",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Chiapas",
+      "longitude": -92.05449999999999,
+      "latitude": 17.4848,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803071",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803134",
+      "name": "Huatulco",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -96.17945,
+      "latitude": 15.720849999999999,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803134",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803197",
+      "name": "Huatulco II",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -96.1791,
+      "latitude": 15.7395,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803197",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803199",
+      "name": "Ricardo Flores Magón",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -96.08245,
+      "latitude": 15.797049999999999,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803199",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00803226",
+      "name": "Tangolunda",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Oaxaca",
+      "longitude": -96.10985,
+      "latitude": 15.78145,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00803226",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903069",
+      "name": "Tulum",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -87.4229,
+      "latitude": 20.22435,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903069",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903097",
+      "name": "Dzibilchantún",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Yucatán",
+      "longitude": -89.59764999999999,
+      "latitude": 21.0883,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903097",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903117",
+      "name": "Arrecife Alacranes",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Yucatán",
+      "longitude": -89.70445000000001,
+      "latitude": 22.474600000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903117",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903127",
+      "name": "Costa Occ. de I. Mujeres, Pta. Cancún y Pta. Nizuc",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -86.76515,
+      "latitude": 21.1279,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903127",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903128",
+      "name": "Arrecifes de Cozumel",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -86.97274999999999,
+      "latitude": 20.36305,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903128",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903131",
+      "name": "Isla Contoy",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -86.79335,
+      "latitude": 21.48705,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903131",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903133",
+      "name": "Arrecife de Puerto Morelos",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -86.83250000000001,
+      "latitude": 20.9053,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903133",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903150",
+      "name": "Arrecifes de Xcalak",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Quintana Roo",
+      "longitude": -87.79175000000001,
+      "latitude": 18.33585,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903150",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903207",
+      "name": "Nuevo Uxmal",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Campeche y Yucatán",
+      "longitude": -89.84455,
+      "latitude": 20.32745,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903207",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp00903212",
+      "name": "Bajos del Norte",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Se ubica en el área conocida como Banco de Campeche en el Golfo de México",
+      "longitude": -89.03545,
+      "latitude": 22.98285,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP00903212",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:mx:conanp:anp09703231",
+      "name": "Arrecifes del Golfo de México-Sur",
+      "aliases": [],
+      "countryCode": "MX",
+      "admin1Name": "Golfo de México",
+      "longitude": -90.98805,
+      "latitude": 21.521900000000002,
+      "source": {
+        "provider": "CONANP",
+        "recordId": "ANP09703231",
+        "sourceUrl": "https://sig.conanp.gob.mx/snd/",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:acad",
+      "name": "Acadia National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "ME",
+      "longitude": -68.247501,
+      "latitude": 44.409286,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "acad",
+        "sourceUrl": "https://www.nps.gov/acad/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:arch",
+      "name": "Arches National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "UT",
+      "longitude": -109.5863666,
+      "latitude": 38.72261844,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "arch",
+        "sourceUrl": "https://www.nps.gov/arch/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:badl",
+      "name": "Badlands National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "SD",
+      "longitude": -102.482942,
+      "latitude": 43.68584846,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "badl",
+        "sourceUrl": "https://www.nps.gov/badl/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:bibe",
+      "name": "Big Bend National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "TX",
+      "longitude": -103.2297897,
+      "latitude": 29.29817767,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "bibe",
+        "sourceUrl": "https://www.nps.gov/bibe/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:bisc",
+      "name": "Biscayne National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "FL",
+      "longitude": -80.21023851,
+      "latitude": 25.490587,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "bisc",
+        "sourceUrl": "https://www.nps.gov/bisc/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:blca",
+      "name": "Black Canyon Of The Gunnison National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CO",
+      "longitude": -107.7242756,
+      "latitude": 38.57779869,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "blca",
+        "sourceUrl": "https://www.nps.gov/blca/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:brca",
+      "name": "Bryce Canyon National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "UT",
+      "longitude": -112.1826689,
+      "latitude": 37.58399144,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "brca",
+        "sourceUrl": "https://www.nps.gov/brca/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:cany",
+      "name": "Canyonlands National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "UT",
+      "longitude": -109.8801624,
+      "latitude": 38.24555783,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "cany",
+        "sourceUrl": "https://www.nps.gov/cany/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:care",
+      "name": "Capitol Reef National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "UT",
+      "longitude": -111.247048378,
+      "latitude": 38.2821653131,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "care",
+        "sourceUrl": "https://www.nps.gov/care/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:cave",
+      "name": "Carlsbad Caverns National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "NM",
+      "longitude": -104.5529688,
+      "latitude": 32.14089463,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "cave",
+        "sourceUrl": "https://www.nps.gov/cave/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:chir",
+      "name": "Chiricahua National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AZ",
+      "longitude": -109.341607,
+      "latitude": 32.01214618,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "chir",
+        "sourceUrl": "https://www.nps.gov/chir/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:chis",
+      "name": "Channel Islands National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -119.9112735,
+      "latitude": 33.98680093,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "chis",
+        "sourceUrl": "https://www.nps.gov/chis/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:cong",
+      "name": "Congaree National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "SC",
+      "longitude": -80.74867805,
+      "latitude": 33.79187523,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "cong",
+        "sourceUrl": "https://www.nps.gov/cong/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:crla",
+      "name": "Crater Lake National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "OR",
+      "longitude": -122.1338414,
+      "latitude": 42.94065854,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "crla",
+        "sourceUrl": "https://www.nps.gov/crla/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:cuva",
+      "name": "Cuyahoga Valley National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "OH",
+      "longitude": -81.57116722,
+      "latitude": 41.26093905,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "cuva",
+        "sourceUrl": "https://www.nps.gov/cuva/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:dena",
+      "name": "Denali National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -151.0526568,
+      "latitude": 63.29777484,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "dena",
+        "sourceUrl": "https://www.nps.gov/dena/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:deva",
+      "name": "Death Valley National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA,NV",
+      "longitude": -117.134395,
+      "latitude": 36.48753731,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "deva",
+        "sourceUrl": "https://www.nps.gov/deva/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:drto",
+      "name": "Dry Tortugas National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "FL",
+      "longitude": -82.87319,
+      "latitude": 24.628741,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "drto",
+        "sourceUrl": "https://www.nps.gov/drto/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:ever",
+      "name": "Everglades National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "FL",
+      "longitude": -80.88200301,
+      "latitude": 25.37294225,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "ever",
+        "sourceUrl": "https://www.nps.gov/ever/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:gaar",
+      "name": "Gates Of The Arctic National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -153.2917758,
+      "latitude": 67.75961636,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "gaar",
+        "sourceUrl": "https://www.nps.gov/gaar/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:glac",
+      "name": "Glacier National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "MT",
+      "longitude": -113.8009306,
+      "latitude": 48.68414678,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "glac",
+        "sourceUrl": "https://www.nps.gov/glac/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:glba",
+      "name": "Glacier Bay National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -136.8407579,
+      "latitude": 58.80086718,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "glba",
+        "sourceUrl": "https://www.nps.gov/glba/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:grba",
+      "name": "Great Basin National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "NV",
+      "longitude": -114.2579782,
+      "latitude": 38.94617378,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "grba",
+        "sourceUrl": "https://www.nps.gov/grba/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:grca",
+      "name": "Grand Canyon National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AZ",
+      "longitude": -112.121516363,
+      "latitude": 36.0001165336,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "grca",
+        "sourceUrl": "https://www.nps.gov/grca/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:grsa",
+      "name": "Great Sand Dunes National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CO",
+      "longitude": -105.5919572,
+      "latitude": 37.79256812,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "grsa",
+        "sourceUrl": "https://www.nps.gov/grsa/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:grsm",
+      "name": "Great Smoky Mountains National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "NC,TN",
+      "longitude": -83.50818326,
+      "latitude": 35.60116374,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "grsm",
+        "sourceUrl": "https://www.nps.gov/grsm/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:grte",
+      "name": "Grand Teton National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "WY",
+      "longitude": -110.7054666,
+      "latitude": 43.81853565,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "grte",
+        "sourceUrl": "https://www.nps.gov/grte/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:gumo",
+      "name": "Guadalupe Mountains National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "TX",
+      "longitude": -104.885527,
+      "latitude": 31.92304462,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "gumo",
+        "sourceUrl": "https://www.nps.gov/gumo/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:hale",
+      "name": "Haleakalā National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "HI",
+      "longitude": -156.1591775,
+      "latitude": 20.70693015,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "hale",
+        "sourceUrl": "https://www.nps.gov/hale/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:havo",
+      "name": "Hawaiʻi Volcanoes National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "HI",
+      "longitude": -155.4700257,
+      "latitude": 19.3355036,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "havo",
+        "sourceUrl": "https://www.nps.gov/havo/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:hosp",
+      "name": "Hot Springs National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AR",
+      "longitude": -93.06332936,
+      "latitude": 34.52414366,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "hosp",
+        "sourceUrl": "https://www.nps.gov/hosp/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:indu",
+      "name": "Indiana Dunes National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "IN",
+      "longitude": -87.09647445,
+      "latitude": 41.63765525,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "indu",
+        "sourceUrl": "https://www.nps.gov/indu/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:isro",
+      "name": "Isle Royale National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "MI",
+      "longitude": -88.82780657,
+      "latitude": 48.01145819,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "isro",
+        "sourceUrl": "https://www.nps.gov/isro/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:jeff",
+      "name": "Gateway Arch National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "MO",
+      "longitude": -90.1892508,
+      "latitude": 38.6258069,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "jeff",
+        "sourceUrl": "https://www.nps.gov/jeff/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:jotr",
+      "name": "Joshua Tree National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -115.8398125,
+      "latitude": 33.91418525,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "jotr",
+        "sourceUrl": "https://www.nps.gov/jotr/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:katm",
+      "name": "Katmai National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -155.0126574,
+      "latitude": 58.62235668,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "katm",
+        "sourceUrl": "https://www.nps.gov/katm/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:kefj",
+      "name": "Kenai Fjords National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -150.106502,
+      "latitude": 59.81804414,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "kefj",
+        "sourceUrl": "https://www.nps.gov/kefj/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:kova",
+      "name": "Kobuk Valley National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -159.2002293,
+      "latitude": 67.35631336,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "kova",
+        "sourceUrl": "https://www.nps.gov/kova/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:lacl",
+      "name": "Lake Clark National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -153.55535,
+      "latitude": 60.57405857,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "lacl",
+        "sourceUrl": "https://www.nps.gov/lacl/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:lavo",
+      "name": "Lassen Volcanic National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -121.4075993,
+      "latitude": 40.49354575,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "lavo",
+        "sourceUrl": "https://www.nps.gov/lavo/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:maca",
+      "name": "Mammoth Cave National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "KY",
+      "longitude": -86.13090198,
+      "latitude": 37.19760458,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "maca",
+        "sourceUrl": "https://www.nps.gov/maca/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:meve",
+      "name": "Mesa Verde National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CO",
+      "longitude": -108.4624032,
+      "latitude": 37.23908345,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "meve",
+        "sourceUrl": "https://www.nps.gov/meve/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:mora",
+      "name": "Mount Rainier National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "WA",
+      "longitude": -121.7043885,
+      "latitude": 46.86075416,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "mora",
+        "sourceUrl": "https://www.nps.gov/mora/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:neri",
+      "name": "New River Gorge National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "WV",
+      "longitude": -80.99956002,
+      "latitude": 37.86878554,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "neri",
+        "sourceUrl": "https://www.nps.gov/neri/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:noca",
+      "name": "North Cascades National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "WA",
+      "longitude": -121.2069423,
+      "latitude": 48.71171756,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "noca",
+        "sourceUrl": "https://www.nps.gov/noca/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:npsa",
+      "name": "National Park of American Samoa",
+      "aliases": [],
+      "countryCode": "AS",
+      "admin1Name": "AS",
+      "longitude": -169.8503777,
+      "latitude": -14.22865935,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "npsa",
+        "sourceUrl": "https://www.nps.gov/npsa/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:olym",
+      "name": "Olympic National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "WA",
+      "longitude": -123.6663848,
+      "latitude": 47.80392754,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "olym",
+        "sourceUrl": "https://www.nps.gov/olym/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:pefo",
+      "name": "Petrified Forest National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AZ",
+      "longitude": -109.7877678,
+      "latitude": 34.98387664,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "pefo",
+        "sourceUrl": "https://www.nps.gov/pefo/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:pinn",
+      "name": "Pinnacles National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -121.1813607,
+      "latitude": 36.49029208,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "pinn",
+        "sourceUrl": "https://www.nps.gov/pinn/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:redw",
+      "name": "Redwood National and State Parks",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -124.0318129,
+      "latitude": 41.37237268,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "redw",
+        "sourceUrl": "https://www.nps.gov/redw/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:romo",
+      "name": "Rocky Mountain National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CO",
+      "longitude": -105.6972879,
+      "latitude": 40.3556924,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "romo",
+        "sourceUrl": "https://www.nps.gov/romo/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:sagu",
+      "name": "Saguaro National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AZ",
+      "longitude": -110.7574974,
+      "latitude": 32.20909636,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "sagu",
+        "sourceUrl": "https://www.nps.gov/sagu/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:seki",
+      "name": "Sequoia & Kings Canyon National Parks",
+      "aliases": [
+        "Sequoia National Park",
+        "Kings Canyon National Park"
+      ],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -118.587429,
+      "latitude": 36.71277299,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "seki",
+        "sourceUrl": "https://www.nps.gov/seki/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:shen",
+      "name": "Shenandoah National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "VA",
+      "longitude": -78.46907715,
+      "latitude": 38.49236644,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "shen",
+        "sourceUrl": "https://www.nps.gov/shen/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:thro",
+      "name": "Theodore Roosevelt National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "ND",
+      "longitude": -103.4300083,
+      "latitude": 47.17777274,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "thro",
+        "sourceUrl": "https://www.nps.gov/thro/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:viis",
+      "name": "Virgin Islands National Park",
+      "aliases": [],
+      "countryCode": "VI",
+      "admin1Name": "VI",
+      "longitude": -64.74194451,
+      "latitude": 18.34279656,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "viis",
+        "sourceUrl": "https://www.nps.gov/viis/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:voya",
+      "name": "Voyageurs National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "MN",
+      "longitude": -92.8382913,
+      "latitude": 48.48370609,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "voya",
+        "sourceUrl": "https://www.nps.gov/voya/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:whsa",
+      "name": "White Sands National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "NM",
+      "longitude": -106.3333461,
+      "latitude": 32.77907858,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "whsa",
+        "sourceUrl": "https://www.nps.gov/whsa/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:wica",
+      "name": "Wind Cave National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "SD",
+      "longitude": -103.4394709,
+      "latitude": 43.58012365,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "wica",
+        "sourceUrl": "https://www.nps.gov/wica/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:wrst",
+      "name": "Wrangell - St Elias National Park & Preserve",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "AK",
+      "longitude": -142.6028439,
+      "latitude": 61.4182147,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "wrst",
+        "sourceUrl": "https://www.nps.gov/wrst/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:yell",
+      "name": "Yellowstone National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "ID,MT,WY",
+      "longitude": -110.5471695,
+      "latitude": 44.59824417,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "yell",
+        "sourceUrl": "https://www.nps.gov/yell/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:yose",
+      "name": "Yosemite National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "CA",
+      "longitude": -119.5571873,
+      "latitude": 37.84883288,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "yose",
+        "sourceUrl": "https://www.nps.gov/yose/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    },
+    {
+      "placeId": "park:us:nps:zion",
+      "name": "Zion National Park",
+      "aliases": [],
+      "countryCode": "US",
+      "admin1Name": "UT",
+      "longitude": -113.0265138,
+      "latitude": 37.29839254,
+      "source": {
+        "provider": "National Park Service",
+        "recordId": "zion",
+        "sourceUrl": "https://www.nps.gov/zion/index.htm",
+        "retrieved": "2026-11-19"
+      }
+    }
+  ]
+}

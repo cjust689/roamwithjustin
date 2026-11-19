@@ -11,6 +11,7 @@ import {
   fetchMyAtlasState,
   markMyAtlasPlanVisited,
   registerMyAtlasAccount,
+  saveMyAtlasPlan,
   updateMyAtlasPin,
   updateMyAtlasSharing,
   verifyMyAtlasApiAccess,
@@ -2109,6 +2110,49 @@ assert.equal(
     },
   })
   assert.equal(created.revision, 5)
+
+  let saveCalls = 0
+  const recoveredPlan = await saveMyAtlasPlan({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    planId: "plan_1234567890abcdef12345678",
+    value: { title: "Changed route" },
+    revision: 5,
+    fetchImpl: async (url, options) => {
+      saveCalls += 1
+      if (options.method === "PATCH") {
+        return new Response(JSON.stringify({ saved: true }), {
+          status: 200,
+          headers: {
+            ETag: '"rev-6"',
+            "X-Request-Id": "save-recovery-123",
+          },
+        })
+      }
+      if (url.includes("bucket-list")) {
+        return new Response(JSON.stringify({ wishes: [], nextCursor: null }), {
+          status: 200,
+          headers: { ETag: '"rev-6"' },
+        })
+      }
+      return new Response(
+        JSON.stringify({
+          plans: [
+            {
+              planId: "plan_1234567890abcdef12345678",
+              title: "Changed route",
+              stops: [],
+            },
+          ],
+        }),
+        { status: 200, headers: { ETag: '"rev-6"' } }
+      )
+    },
+  })
+  assert.equal(saveCalls, 3)
+  assert.equal(recoveredPlan.revision, 6)
+  assert.equal(recoveredPlan.recovered, true)
+  assert.equal(recoveredPlan.plan.title, "Changed route")
 
   const marked = await markMyAtlasPlanVisited({
     apiBaseUrl: "https://api.example.com",

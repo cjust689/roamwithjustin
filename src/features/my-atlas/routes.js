@@ -21,6 +21,16 @@ export const myAtlasRoutes = geographicProofEnabled
         component: () => import("./views/MyAtlasGeographicProof.vue"),
       },
       {
+        path: "/my-atlas/trip/:snapshot",
+        name: "MyAtlasSharedTrip",
+        props: true,
+        meta: {
+          standalone: true,
+          analyticsTitle: "Shared trip | My Atlas",
+        },
+        component: () => import("./views/MyAtlasSharedTripView.vue"),
+      },
+      {
         path: "/my-atlas/:handle",
         name: "MyAtlasPublic",
         props: true,
