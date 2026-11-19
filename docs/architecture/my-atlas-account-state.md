@@ -60,6 +60,9 @@ verification:
     - npm run my-atlas:worker:test
     - Workers runtime deletion coverage verifies that completed deletion releases both the identity and handle assignments, preserves exact retry safety, and permits the same identity and handle to register again with a new invitation and user ID
     - Client deletion recovery coverage verifies stale DELETE, authoritative profile revision read, persisted revision replacement, and one retry with the original idempotency key across both the active planner and reload-resume paths
+    - Pull request 192 passed validation run 44635828088 and merged to develop as 7ac63d1aeaf497ad144ce2eeec449171f04b3829; develop validation run 44636119731 then succeeded
+    - Pull request 193 passed production validation run 44636436895 and merged to main as 08e5d6d2f1bac45a1dd8596ad87ba64581702668
+    - Pages run 44636727908 deployed the recovery, and live chunk 129.fea5c713.js contained both the active-click and reload-resume revision callbacks
     - Client planning tests verify recovery from a successful plan mutation with an incomplete response by reading the authoritative revision and saved plan before reporting failure
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs

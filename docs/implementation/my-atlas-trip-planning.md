@@ -60,6 +60,8 @@ verification:
     - Workers runtime tests verify GET /v1/me/planning returns wishlist and plan records under one account revision
     - Workers runtime tests verify that deletion releases registration identity and handle assignments and permits clean registration with the same identity and handle through a new invitation
     - Client deletion recovery tests verify a stale account DELETE at revision 5, authoritative profile recovery at revision 7, persisted revision replacement, and one successful retry with the original idempotency key
+    - Pull requests 192 and 193 passed validation runs 44635828088 and 44636436895, merged through develop and main, and develop validation run 44636119731 succeeded
+    - Pages run 44636727908 deployed main merge 08e5d6d2f1bac45a1dd8596ad87ba64581702668; live chunk 129.fea5c713.js contained both deletion revision recovery callbacks
     - Phase 1 source assertions verify the primary saved-itinerary region, explicit Start and Finish presentation, collapsed editor and destination controls, functional Directions and planning-prompt panels, dirty-state marker, and absence of dead Flights or Stays actions
     - Phase 2 client tests verify point inclusion, retained order, Maps mode grouping, fly and ferry boundaries, one-point search, same-place collapse, new-adjacency default behavior, three-waypoint segmentation, URL length limits, coordinate confirmation, and URL privacy
     - Phase 2 source assertions verify browser-only preference handlers do not call the API, a mutation, plan save, or planning refresh
