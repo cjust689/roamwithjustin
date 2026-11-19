@@ -3,6 +3,10 @@ const path = require("path")
 const sharp = require("sharp")
 const crypto = require("crypto")
 const { pathToFileURL } = require("url")
+const {
+  compressedPipeline,
+  maximumDimension,
+} = require("./lib/image-normalization.js")
 
 const projectRoot = path.resolve(__dirname, "..")
 const defaultImageDirectory = path.join(projectRoot, "public", "img")
@@ -12,8 +16,6 @@ const supportedPackageExtensions = new Set([
   ...supportedImageExtensions,
   ...supportedVideoExtensions,
 ])
-const maximumDimension = 2560
-const jpegQuality = 82
 const defaultMaximumVideoMiB = 190
 
 const formatBytes = bytes => `${(bytes / 1024 / 1024).toFixed(1)} MiB`
@@ -679,34 +681,6 @@ async function requireDirectory(directory) {
   if (!stats.isDirectory()) {
     throw new Error(`Source path is not a directory: ${directory}`)
   }
-}
-
-function compressedPipeline(input, extension) {
-  let pipeline = sharp(input)
-    .autoOrient()
-    .resize({
-      width: maximumDimension,
-      height: maximumDimension,
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .toColourspace("srgb")
-
-  if (extension === ".jpg" || extension === ".jpeg") {
-    pipeline = pipeline.jpeg({
-      quality: jpegQuality,
-      mozjpeg: true,
-      progressive: true,
-    })
-  } else {
-    pipeline = pipeline.png({
-      compressionLevel: 9,
-      adaptiveFiltering: true,
-      palette: false,
-    })
-  }
-
-  return pipeline
 }
 
 async function replaceFile(source, replacement) {

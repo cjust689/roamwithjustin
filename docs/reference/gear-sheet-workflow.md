@@ -158,9 +158,10 @@ and does not duplicate Gear or Usage records.
   Regenerate the workbook when canonical choices change.
 - `Gear Library` is a convenience template and canonical-product snapshot. It
   is not automatically synchronized into an already uploaded Google Sheet.
-- Product images must already be canonical Media IDs. The
-  Journey-independent product image prepare and upload adapter remains a later
-  phase.
+- Product images referenced by a Sheet row must already be canonical Media
+  IDs. Journey-independent local image preparation exists, but its output is
+  not canonical until a later Gear-specific upload receipt and publication
+  adapter is implemented.
 - Affiliate URLs are never generated. They require an existing affiliate
   Partner, a complete owner-supplied URL, `custom` tracking mode, an allowed
   host, and explicit verification.

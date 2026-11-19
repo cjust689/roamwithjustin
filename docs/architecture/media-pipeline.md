@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-16
+updated: 2026-11-18
 related:
   - content-model
   - journey-media-ingestion
@@ -16,6 +16,7 @@ supersedes:
 superseded_by: []
 code_paths:
   - scripts/optimize-images.js
+  - scripts/lib/image-normalization.js
   - scripts/ingest-media.js
   - scripts/cull-media.js
   - scripts/lib/media-ingestion.js
@@ -75,6 +76,12 @@ The full operator workflow and flags are in
 [Journey media ingestion](../implementation/journey-media-ingestion.md).
 Worker deployment, credentials, retry behavior, and recovery are in
 [R2 Worker media upload](../implementation/r2-worker-media-upload.md).
+
+The lower-level Sharp orientation, bounded resize, and sRGB normalization
+primitive is also reused by the local Gear image preparer. That command emits
+Gear-specific WebP derivatives and a manifest without creating Media records
+or Journey placements. The Journey uploader and ingestor still accept only
+their own manifest contract.
 
 ## Publication and generated state
 

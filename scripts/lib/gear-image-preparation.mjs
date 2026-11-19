@@ -1,0 +1,452 @@
+import crypto from "node:crypto"
+import fs from "node:fs"
+import path from "node:path"
+import { createRequire } from "node:module"
+
+import sharp from "sharp"
+
+const require = createRequire(import.meta.url)
+const { gearWebpPipeline } = require("./image-normalization.js")
+
+const gearIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const ownerPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const maximumSourceBytes = 50 * 1024 * 1024
+const maximumSourcePixels = 80_000_000
+const preparationVersion = 1
+
+const sourceFormats = Object.freeze({
+  ".jpeg": { format: "jpeg", mimeType: "image/jpeg" },
+  ".jpg": { format: "jpeg", mimeType: "image/jpeg" },
+  ".png": { format: "png", mimeType: "image/png" },
+})
+
+export const gearDerivativeSpecs = Object.freeze([
+  Object.freeze({ role: "card-thumbnail", width: 320 }),
+  Object.freeze({ role: "card-display", width: 640 }),
+  Object.freeze({ role: "detail", width: 960 }),
+])
+
+export function gearImageUsage() {
+  return [
+    "Gear image preparation",
+    "",
+    "Usage:",
+    "  npm run gear:prepare -- --gear-id <id> --source <file> --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --dry-run",
+    "  npm run gear:prepare -- --gear-id <id> --source <file> --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --apply",
+    "",
+    "This local-only command accepts one JPEG or PNG whose creator-owned rights have",
+    "been reviewed. It creates deterministic 320, 640, and 960 pixel WebP",
+    "derivatives plus a Gear-specific manifest. It never uploads, edits canonical",
+    "Gear records, creates Journey associations, or overwrites a different package.",
+    "",
+    "Options:",
+    "  --gear-id <id>          Stable lowercase ASCII kebab-case Gear ID",
+    "  --source <file>         Local JPEG or PNG source file",
+    "  --output <directory>    Parent directory for the prepared package",
+    "  --rights-owner <id>     Reviewed creator rights owner identifier",
+    "  --rights-status owned   Required creator-owned status for this slice",
+    "  --rights-reviewed       Confirms the source rights were deliberately reviewed",
+    "  --alt <text>            Neutral, reviewed product image alternative text",
+    "  --dry-run               Validate and render derivatives in memory only",
+    "  --apply                 Atomically write the deterministic package",
+    "  --help, --h, -h         Show this help",
+  ].join("\n")
+}
+
+function optionValue(args, index, option) {
+  const value = args[index + 1]
+  if (value === undefined || value.startsWith("--")) {
+    throw new Error(option + " requires a value\n\n" + gearImageUsage())
+  }
+  return value
+}
+
+export function parseGearImageArguments(args) {
+  const options = {
+    alt: null,
+    apply: false,
+    dryRun: false,
+    gearId: null,
+    help: false,
+    output: null,
+    rightsOwner: null,
+    rightsReviewed: false,
+    rightsStatus: null,
+    source: null,
+  }
+  const valueOptions = new Map([
+    ["--alt", "alt"],
+    ["--gear-id", "gearId"],
+    ["--output", "output"],
+    ["--rights-owner", "rightsOwner"],
+    ["--rights-status", "rightsStatus"],
+    ["--source", "source"],
+  ])
+
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index]
+    if (argument === "--apply") options.apply = true
+    else if (argument === "--dry-run") options.dryRun = true
+    else if (argument === "--rights-reviewed") options.rightsReviewed = true
+    else if (["--help", "--h", "-h"].includes(argument)) options.help = true
+    else if (valueOptions.has(argument)) {
+      options[valueOptions.get(argument)] = optionValue(args, index, argument)
+      index += 1
+    } else {
+      const equalsOption = [...valueOptions.keys()].find(option =>
+        argument.startsWith(option + "=")
+      )
+      if (!equalsOption) {
+        throw new Error("Unknown argument: " + argument + "\n\n" + gearImageUsage())
+      }
+      options[valueOptions.get(equalsOption)] = argument.slice(
+        equalsOption.length + 1
+      )
+    }
+  }
+
+  if (options.help) return options
+  validateGearImageOptions(options)
+  return options
+}
+
+function cleanText(value, label) {
+  const text = String(value || "").trim()
+  if (!text) throw new Error(label + " is required")
+  if (text !== value) {
+    throw new Error(label + " cannot start or end with whitespace")
+  }
+  if (/[\u0000-\u001f\u007f]/.test(text)) {
+    throw new Error(label + " cannot contain control characters")
+  }
+  return text
+}
+
+export function validateGearImageOptions(options) {
+  if (options.apply === options.dryRun) {
+    throw new Error("Choose exactly one of --dry-run or --apply")
+  }
+
+  options.gearId = cleanText(options.gearId, "--gear-id")
+  if (!gearIdPattern.test(options.gearId)) {
+    throw new Error("--gear-id must be lowercase ASCII kebab-case")
+  }
+  options.source = cleanText(options.source, "--source")
+  options.output = cleanText(options.output, "--output")
+  options.rightsOwner = cleanText(options.rightsOwner, "--rights-owner")
+  if (!ownerPattern.test(options.rightsOwner)) {
+    throw new Error("--rights-owner must be lowercase ASCII kebab-case")
+  }
+  if (options.rightsStatus !== "owned") {
+    throw new Error(
+      "--rights-status must be owned for the creator-owned local image slice"
+    )
+  }
+  if (!options.rightsReviewed) {
+    throw new Error(
+      "--rights-reviewed is required; image rights are never inferred"
+    )
+  }
+  options.alt = cleanText(options.alt, "--alt")
+  if (options.alt.length > 240) {
+    throw new Error("--alt cannot exceed 240 characters")
+  }
+}
+
+function sha256(data) {
+  return crypto.createHash("sha256").update(data).digest("hex")
+}
+
+async function pathExists(target) {
+  try {
+    await fs.promises.access(target)
+    return true
+  } catch (error) {
+    if (error.code === "ENOENT") return false
+    throw error
+  }
+}
+
+async function readAndValidateSource(sourcePath) {
+  const extension = path.extname(sourcePath).toLowerCase()
+  const contract = sourceFormats[extension]
+  if (!contract) throw new Error("Gear image source must be a JPEG or PNG file")
+
+  let stats
+  try {
+    stats = await fs.promises.stat(sourcePath)
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      throw new Error("Gear image source does not exist: " + sourcePath)
+    }
+    throw error
+  }
+  if (!stats.isFile()) {
+    throw new Error("Gear image source is not a file: " + sourcePath)
+  }
+  if (!stats.size) throw new Error("Gear image source is empty")
+  if (stats.size > maximumSourceBytes) {
+    throw new Error("Gear image source exceeds the 50 MiB local preparation limit")
+  }
+
+  const data = await fs.promises.readFile(sourcePath)
+  let metadata
+  try {
+    metadata = await sharp(data, {
+      limitInputPixels: maximumSourcePixels,
+    }).metadata()
+  } catch (error) {
+    throw new Error("Gear image source could not be decoded: " + error.message)
+  }
+  if (metadata.format !== contract.format) {
+    throw new Error(
+      "Gear image extension " +
+        extension +
+        " does not match decoded " +
+        (metadata.format || "unknown") +
+        " bytes"
+    )
+  }
+  if (!metadata.width || !metadata.height) {
+    throw new Error("Gear image source has no measurable dimensions")
+  }
+  if (metadata.width * metadata.height > maximumSourcePixels) {
+    throw new Error("Gear image source exceeds the 80 megapixel preparation limit")
+  }
+  if ((metadata.pages || 1) !== 1) {
+    throw new Error("Animated or multi-page images are not supported")
+  }
+  return { contract, data, metadata, stats }
+}
+
+async function createDerivatives(sourceData) {
+  const derivatives = []
+  for (const spec of gearDerivativeSpecs) {
+    const { data, info } = await gearWebpPipeline(
+      sourceData,
+      spec.width
+    ).toBuffer({ resolveWithObject: true })
+    const metadata = await sharp(data).metadata()
+    const retainedPrivateMetadata = ["exif", "iptc", "xmp"].filter(
+      field => metadata[field]
+    )
+    if (retainedPrivateMetadata.length) {
+      throw new Error(
+        "Prepared " +
+          spec.role +
+          " retained forbidden metadata: " +
+          retainedPrivateMetadata.join(", ")
+      )
+    }
+    derivatives.push({
+      role: spec.role,
+      targetWidth: spec.width,
+      width: info.width,
+      height: info.height,
+      relativePath: spec.width + ".webp",
+      mimeType: "image/webp",
+      byteSize: data.length,
+      sha256: sha256(data),
+      data,
+    })
+  }
+  return derivatives
+}
+
+function createManifest(options, source, derivatives) {
+  const sourceSha256 = sha256(source.data)
+  const contentHash = sha256(
+    JSON.stringify({
+      preparationVersion,
+      sourceSha256,
+      derivatives: derivatives.map(derivative => ({
+        role: derivative.role,
+        targetWidth: derivative.targetWidth,
+        sha256: derivative.sha256,
+      })),
+    })
+  ).slice(0, 24)
+  const r2Prefix =
+    "images/gear/" + options.gearId + "/" + contentHash + "/"
+
+  return {
+    schemaVersion: 1,
+    manifestType: "gear-image-publication",
+    batchId: "gear-image-" + options.gearId + "-" + contentHash,
+    gearId: options.gearId,
+    contentHash,
+    source: {
+      originalFilename: path.basename(options.source),
+      mimeType: source.contract.mimeType,
+      width: source.metadata.width,
+      height: source.metadata.height,
+      byteSize: source.stats.size,
+      sha256: sourceSha256,
+    },
+    rights: {
+      owner: options.rightsOwner,
+      status: options.rightsStatus,
+      reviewed: true,
+    },
+    alt: options.alt,
+    processing: {
+      version: preparationVersion,
+      format: "webp",
+      fit: "inside",
+      colourspace: "srgb",
+      metadata: "stripped",
+      withoutEnlargement: true,
+    },
+    r2Prefix,
+    derivatives: derivatives.map(derivative => ({
+      role: derivative.role,
+      targetWidth: derivative.targetWidth,
+      width: derivative.width,
+      height: derivative.height,
+      relativePath: derivative.relativePath,
+      objectKey: r2Prefix + derivative.relativePath,
+      mimeType: derivative.mimeType,
+      byteSize: derivative.byteSize,
+      sha256: derivative.sha256,
+    })),
+  }
+}
+
+function serializeManifest(manifest) {
+  return JSON.stringify(manifest, null, 2) + "\n"
+}
+
+async function validateExistingPackage(packageDirectory, manifest, derivatives) {
+  const expectedNames = new Set([
+    "gear-image-manifest.json",
+    ...derivatives.map(derivative => derivative.relativePath),
+  ])
+  const entries = await fs.promises.readdir(packageDirectory, {
+    withFileTypes: true,
+  })
+  if (
+    entries.some(entry => !entry.isFile() || !expectedNames.has(entry.name)) ||
+    entries.length !== expectedNames.size
+  ) {
+    throw new Error(
+      "Existing Gear image package differs from the deterministic file set: " +
+        packageDirectory
+    )
+  }
+
+  const existingManifest = await fs.promises.readFile(
+    path.join(packageDirectory, "gear-image-manifest.json"),
+    "utf8"
+  )
+  if (existingManifest !== serializeManifest(manifest)) {
+    throw new Error(
+      "Existing Gear image package has different manifest content: " +
+        packageDirectory
+    )
+  }
+  for (const derivative of derivatives) {
+    const data = await fs.promises.readFile(
+      path.join(packageDirectory, derivative.relativePath)
+    )
+    if (sha256(data) !== derivative.sha256) {
+      throw new Error(
+        "Existing Gear image derivative failed checksum verification: " +
+          derivative.relativePath
+      )
+    }
+  }
+}
+
+async function writePackage(packageDirectory, manifest, derivatives) {
+  const parentDirectory = path.dirname(packageDirectory)
+  await fs.promises.mkdir(parentDirectory, { recursive: true })
+  if (await pathExists(packageDirectory)) {
+    await validateExistingPackage(packageDirectory, manifest, derivatives)
+    return "unchanged"
+  }
+
+  const stagingDirectory = path.join(
+    parentDirectory,
+    "." +
+      path.basename(packageDirectory) +
+      "-prepare-" +
+      process.pid +
+      "-" +
+      Date.now()
+  )
+  await fs.promises.mkdir(stagingDirectory, { recursive: false })
+  try {
+    for (const derivative of derivatives) {
+      await fs.promises.writeFile(
+        path.join(stagingDirectory, derivative.relativePath),
+        derivative.data,
+        { flag: "wx" }
+      )
+    }
+    await fs.promises.writeFile(
+      path.join(stagingDirectory, "gear-image-manifest.json"),
+      serializeManifest(manifest),
+      { flag: "wx" }
+    )
+    await fs.promises.rename(stagingDirectory, packageDirectory)
+    return "created"
+  } catch (error) {
+    await fs.promises.rm(stagingDirectory, { recursive: true, force: true })
+    throw error
+  }
+}
+
+export async function prepareGearImage(options, { log = console.log } = {}) {
+  validateGearImageOptions(options)
+  const sourcePath = path.resolve(process.cwd(), options.source)
+  const outputDirectory = path.resolve(process.cwd(), options.output)
+  const source = await readAndValidateSource(sourcePath)
+  const derivatives = await createDerivatives(source.data)
+  const manifest = createManifest(
+    { ...options, source: sourcePath },
+    source,
+    derivatives
+  )
+  const packageDirectory = path.join(
+    outputDirectory,
+    options.gearId + "-" + manifest.contentHash
+  )
+  const status = options.dryRun
+    ? "dry-run"
+    : await writePackage(packageDirectory, manifest, derivatives)
+
+  log(
+    (options.dryRun
+      ? "Would prepare"
+      : status === "unchanged"
+        ? "Already prepared"
+        : "Prepared") +
+      " Gear image package for " +
+      options.gearId +
+      "."
+  )
+  for (const derivative of manifest.derivatives) {
+    log(
+      derivative.role +
+        ": " +
+        derivative.width +
+        "x" +
+        derivative.height +
+        ", " +
+        derivative.byteSize +
+        " bytes, " +
+        derivative.relativePath
+    )
+  }
+  log("R2 prefix reserved for later upload: " + manifest.r2Prefix)
+  log(
+    "Manifest: " +
+      path.join(packageDirectory, "gear-image-manifest.json")
+  )
+  if (!options.dryRun) {
+    log(
+      "No upload or canonical Gear update was performed. Receipt-backed publication remains a separate step."
+    )
+  }
+  return { manifest, packageDirectory, status }
+}
