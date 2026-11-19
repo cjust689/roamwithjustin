@@ -8,6 +8,7 @@ import sharp from "sharp"
 import {
   parseGearImageArguments,
   prepareGearImage,
+  validateGearImageManifest,
 } from "./lib/gear-image-preparation.mjs"
 
 const temporaryRoot = await fs.promises.mkdtemp(
@@ -71,7 +72,9 @@ try {
   assert.equal(dryRun.status, "dry-run")
   assert.equal(dryRun.manifest.manifestType, "gear-image-publication")
   assert.equal(dryRun.manifest.gearId, "camera-accessory")
+  assert.equal(dryRun.manifest.uploadBatchId, dryRun.manifest.contentHash)
   assert.equal(dryRun.manifest.derivatives.length, 3)
+  assert.deepEqual(validateGearImageManifest(dryRun.manifest).errors, [])
   assert.equal(await exists(dryRun.packageDirectory), false)
   assert.ok(
     dryRun.manifest.derivatives.every(derivative =>
@@ -94,6 +97,7 @@ try {
   assert.equal(manifest.rights.reviewed, true)
   assert.equal(manifest.rights.status, "owned")
   assert.equal(manifest.processing.metadata, "stripped")
+  assert.deepEqual(validateGearImageManifest(manifest).errors, [])
   assert.doesNotMatch(manifestText, /Private Owner/)
   assert.doesNotMatch(manifestText, new RegExp(escapeRegex(temporaryRoot)))
   assert.deepEqual(
@@ -103,6 +107,19 @@ try {
       [640, 427],
       [900, 600],
     ]
+  )
+
+  const invalidManifest = structuredClone(manifest)
+  invalidManifest.derivatives[0].objectKey = "images/outside/320.webp"
+  assert.match(
+    validateGearImageManifest(invalidManifest).errors.join("\n"),
+    /objectKey is invalid/
+  )
+  const mismatchedHashManifest = structuredClone(manifest)
+  mismatchedHashManifest.derivatives[0].sha256 = "0".repeat(64)
+  assert.match(
+    validateGearImageManifest(mismatchedHashManifest).errors.join("\n"),
+    /contentHash does not match/
   )
 
   for (const derivative of manifest.derivatives) {

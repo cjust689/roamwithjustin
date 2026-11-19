@@ -21,10 +21,13 @@ code_paths:
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
+  - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-image-upload.mjs
+  - workers/media-upload/src/index.mjs
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/commercial-links.js
@@ -41,6 +44,7 @@ verification:
   state: verified
   evidence:
     - npm run gear:test
+    - npm run media:worker:check
     - npm run commerce:test
     - npm run analytics:test
     - npm run content:validate
@@ -130,14 +134,20 @@ with an original image into a repeatable publishing workflow.
   a fake Journey, Visit, Place, or media placement.
 - [x] Write packages atomically and treat an exact repeat as unchanged while
   rejecting a conflicting package instead of overwriting it.
-- [ ] Reuse authenticated immutable upload and checksum receipt semantics with
+- [x] Reuse authenticated immutable upload and checksum receipt semantics with
   a Gear-specific manifest validator.
+- [x] Accept prepared WebP through the existing Worker key, checksum, size,
+  authentication, and create-only controls.
+- [x] Keep upload idempotent by verifying matching remote objects and refusing
+  to overwrite a different local receipt.
 - [ ] Publish only after receipt verification and card approval.
-- [ ] Make receipt-backed repeat publication idempotent and preserve the prior record if
-  validation or build fails.
+- [ ] Make receipt-backed canonical publication idempotent and preserve the
+  prior record if validation or build fails.
 
 Remote image download, automatic Amazon tagging, additional merchant adapters,
 product detail routes, and AI research remain outside the next slice. Local
 image preparation does not make a product public. The generated Gear registry
 remains empty until real owner input satisfies the gate above and the
-receipt-backed publication adapter exists.
+receipt-backed canonical publication adapter exists. Worker source now accepts
+the Gear WebP contract, but its external Cloudflare deployment and the first
+real Gear upload remain unverified.

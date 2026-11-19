@@ -17,6 +17,7 @@ superseded_by: []
 code_paths:
   - scripts/optimize-images.js
   - scripts/lib/image-normalization.js
+  - scripts/lib/gear-image-preparation.mjs
   - scripts/ingest-media.js
   - scripts/cull-media.js
   - scripts/lib/media-ingestion.js
@@ -38,6 +39,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run gear:test
     - npm run editorial:test
     - npm run media:test
     - npm run media:worker:check
@@ -49,7 +51,8 @@ verification:
 
 ## Current paths
 
-The repository supports three local preparation modes and one upload boundary:
+The repository supports four local preparation modes and one shared upload
+boundary:
 
 1. `images:optimize` recursively optimizes oversized JPEG/PNG files under
    `public/img` in place.
@@ -62,9 +65,14 @@ The repository supports three local preparation modes and one upload boundary:
    MP4-only source folder creates byte-identical numbered copies without
    transcoding. Both produce versioned R2 object keys and a measured
    `publication-manifest.json` with explicit rights and validated scope.
-4. `media:upload` revalidates a prepared local package, uploads only its
-   manifest-listed media through an authenticated upload-only Worker, and
-   atomically creates the checksum receipt already accepted by `media:ingest`.
+4. `gear:prepare` creates reviewed Journey-independent WebP product-image
+   derivatives and a Gear-specific manifest without creating Media records or
+   placements.
+5. `media:upload` and its explicit `gear:upload` adapter revalidate a prepared
+   package, upload only its manifest-listed media through the same
+   authenticated upload-only Worker, and atomically create a checksum receipt.
+   `media:ingest` accepts only the Journey receipt. Gear canonical publication
+   remains a separate boundary.
 
 Published generated media can be removed from public Journey, Place, and Atlas
 views with `media:cull`. The command changes every published placement for one
@@ -80,8 +88,9 @@ Worker deployment, credentials, retry behavior, and recovery are in
 The lower-level Sharp orientation, bounded resize, and sRGB normalization
 primitive is also reused by the local Gear image preparer. That command emits
 Gear-specific WebP derivatives and a manifest without creating Media records
-or Journey placements. The Journey uploader and ingestor still accept only
-their own manifest contract.
+or Journey placements. The Gear upload adapter reuses the shared immutable
+transport, while the Journey and Gear validators retain their separate
+manifest contracts. `media:ingest` still accepts only Journey media.
 
 ## Publication and generated state
 
