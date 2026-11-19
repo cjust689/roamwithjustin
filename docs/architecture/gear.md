@@ -5,11 +5,12 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-17
+updated: 2026-11-18
 related:
   - content-model
   - gear-ingestion-cli
   - gear-sheet-workflow
+  - gear-image-preparation
   - gear-publishing-implementation
   - photo-exif-gear
   - gear-affiliate-readiness-2026-11-17
@@ -20,7 +21,11 @@ code_paths:
   - scripts/ingest-gear.js
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
+  - scripts/prepare-gear-image.mjs
   - scripts/lib/gear-ingestion.js
+  - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/image-normalization.js
+  - scripts/test-gear-image-preparation.mjs
   - scripts/lib/gear-tracking-sheet.js
   - templates/roam-with-justin-gear-tracker.xlsx
   - src/content/gear/index.mjs
@@ -78,6 +83,15 @@ The generated Gear and Usage arrays are currently empty. The CLI and selector
 path are implemented and tested, but no example product from a planning brief
 was treated as confirmed production input.
 
+The local `gear:prepare` path now accepts one reviewed creator-owned JPEG or
+PNG without requiring a Journey. It reuses the media pipeline's Sharp
+normalization primitive, strips private source metadata, and produces
+deterministic 320, 640, and 960 pixel WebP derivatives plus a Gear-specific
+manifest. Dry run writes nothing, apply is atomic, and an identical rerun
+verifies the package as unchanged. This is preparation only. The existing
+Journey uploader does not accept the Gear manifest, and no canonical Gear
+record is changed.
+
 The public Gear page now reads only the verified canonical Gear selector. It
 shows a concise empty state while the registry is empty. The former
 hardcoded product array, third party product photographs, unverified action
@@ -103,9 +117,9 @@ contract and commands.
 - Gear links can render only on their explicit public surfaces. Affiliate
   links require a canonical affiliate Partner and a permitted destination
   host. Ordinary links remain noncommissionable and use `trackingMode: none`.
-- The Journey-bound media pipeline cannot yet create a product image without
-  a Journey. A later Gear adapter must reuse lower-level image and upload
-  primitives without creating a fake Journey placement.
+- Local product-image preparation is Journey independent. Receipt-backed R2
+  upload and canonical Gear image publication still require a Gear-specific
+  adapter and must not create a fake Journey placement.
 - The workbook Catalog is generated from the repository and is not yet a live
   protected catalog mirror. Regenerate the workbook when choices change.
 - Optional AI research and automatic merchant tracking rules are not

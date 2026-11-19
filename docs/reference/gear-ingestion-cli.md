@@ -294,6 +294,9 @@ showing a camera does not mean that camera is visible in the photograph.
 - Removal is intentionally not implemented. Unlinking must become an explicit,
   previewable operation that never deletes shared Gear.
 - The CLI does not upload product images or other files to Cloudflare R2.
+- `gear:prepare` can create a separate reviewed local Gear image package, but
+  the ingestor does not consume that package until a receipt-backed publication
+  adapter is implemented.
 - Uploading an image to R2 does not register Gear or Media by itself.
 - The CLI does not commit, push, or deploy. `--build` only validates the local
   production build.
