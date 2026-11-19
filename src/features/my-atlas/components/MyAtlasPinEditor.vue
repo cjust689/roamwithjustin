@@ -2,7 +2,7 @@
   <section class="pin-editor" aria-labelledby="pin-editor-title">
     <div class="pin-editor-heading">
       <div>
-        <p>{{ pin ? "Edit destination" : "Add destination" }}</p>
+        <p>{{ editorLabel }}</p>
         <h2 id="pin-editor-title">{{ place.name }}</h2>
         <span>{{ placeLabel }}</span>
       </div>
@@ -11,7 +11,7 @@
       </button>
     </div>
 
-    <div class="pin-editor-dates">
+    <div v-if="!memoryOnly" class="pin-editor-dates">
       <p>When did you visit?</p>
       <span>
         Optional. Add one or more years for timeline playback, or leave this
@@ -59,6 +59,7 @@
         your shared Atlas when your Atlas is public.
       </small>
       <textarea
+        ref="memoryInput"
         v-model="memory"
         rows="3"
         :maxlength="memoryMaxInputUnits"
@@ -82,9 +83,9 @@
 
     <div class="pin-editor-actions">
       <button type="button" :disabled="pending" @click="submit">
-        {{ pending ? "Saving" : pin ? "Save destination" : "Add to My Atlas" }}
+        {{ saveLabel }}
       </button>
-      <small v-if="!dates.length && !year">
+      <small v-if="!memoryOnly && !dates.length && !year">
         You can add this destination without a year.
       </small>
     </div>
@@ -116,6 +117,10 @@ export default {
       type: Object,
       default: null,
     },
+    memoryOnly: {
+      type: Boolean,
+      default: false,
+    },
     place: {
       type: Object,
       required: true,
@@ -140,6 +145,15 @@ export default {
     }
   },
   computed: {
+    editorLabel() {
+      if (this.memoryOnly) return "Edit memory"
+      return this.pin ? "Edit destination" : "Add destination"
+    },
+    saveLabel() {
+      if (this.pending) return "Saving"
+      if (this.memoryOnly) return "Save memory"
+      return this.pin ? "Save destination" : "Add to My Atlas"
+    },
     validDraftDate() {
       return (
         Number.isInteger(this.year) &&
@@ -161,6 +175,9 @@ export default {
       }
       return ""
     },
+  },
+  mounted() {
+    if (this.memoryOnly) this.$nextTick(() => this.$refs.memoryInput?.focus())
   },
   methods: {
     addDraftDate() {

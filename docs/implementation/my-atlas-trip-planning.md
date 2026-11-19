@@ -336,6 +336,10 @@ Authenticated owner interaction remains external acceptance.
       route, and closing the planner restores the visited Atlas. The overlay is
       browser-only and changes no Worker, storage, export, public projection,
       analytics, or retention contract.
+- [x] Planner route connections now distinguish the departure leg in teal,
+      intermediate travel in gold, and the final finish or return leg in coral.
+      The map key names Start, Route, and Finish or Return, while shared start
+      and return coordinates retain their combined marker.
 
 ## Partial or not yet verified
 
