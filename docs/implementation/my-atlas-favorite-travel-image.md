@@ -40,6 +40,9 @@ verification:
     - Staging Worker version 8fbb0a9e-76bc-4be2-9a53-637be432db5c deployed with MY_ATLAS_MEDIA_R2, IMAGES, MY_ATLAS_IMAGE_RATE_LIMITER, and the November 19 privacy version
     - Remote staging returned 200 health, 401 for an unauthenticated owner image read, 403 for a foreign origin, and 204 for the allowed upload preflight
     - Local responsive fixture review showed the complete saved-image card and actions, while simulated 390 pixel metrics reported zero document and panel overflow
+    - Pull request 184 passed validation run 44619801709 and merged to develop as 92f8cd9b75d69b8996ce12ad427b767e2f466d04; develop validation run 44620185226 then succeeded
+    - Pull request 185 passed production validation run 44620479789 and merged to main as 11ff6c6ec5fc4d7c2fae0ea7826fcc7eeec717f0
+    - Pages run 44620760737 deployed the production merge, and live chunk 22.5e12852a.js returned 200 with the favorite-image label, export-use explanation, and choose-image action together
 ---
 
 # My Atlas favorite travel image implementation
@@ -90,6 +93,8 @@ not changed by this media scope.
       development URL and no custom domain.
 - [x] Deploy the staging Worker with `MY_ATLAS_MEDIA_R2`, `IMAGES`, and
       `MY_ATLAS_IMAGE_RATE_LIMITER` bindings.
+- [x] Promote the owner UI through protected develop and main pull requests,
+      deploy it through Pages, and verify its exact live bundle markers.
 - [ ] Use a disposable authenticated beta account to upload representative
       portrait, landscape, PNG, and WebP samples. Record source dimensions,
       source bytes, output dimensions, output bytes, and metadata inspection.
