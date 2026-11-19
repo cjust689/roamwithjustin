@@ -40,6 +40,8 @@ verification:
     - local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels on 2026-11-18
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
     - local Chrome MapTiler SDK layout check on 2026-11-19 retained both map canvases, terrain controls, Journey markers, and zero horizontal overflow at desktop and 390 by 844 mobile widths
+    - Pull requests 188 and 189 passed validation runs 44628906987 and 44629509687, merged through develop and main, and Pages run 44629848589 deployed the official SDK runtime
+    - Live Chrome on 2026-11-19 observed 75 chargeable tile requests across Atlas, a Journey, and My Atlas with zero missing mtsid values and one shared session identifier
 ---
 
 # Travel Atlas feature
