@@ -252,6 +252,17 @@ and Unicode noncharacters. The Durable Object independently requires the
 already normalized value so an internal caller cannot bypass the HTTP contract.
 Legacy pins without the field project an empty memory and require no migration.
 
+The owner interface exposes Add memory or Edit memory from both the selected
+destination card and each visited destination row. Memory mode reuses the
+existing pin patch, preserves the stored visit dates, hides date editing, and
+keeps explicit Close and Save memory actions. It does not add a second memory
+record or mutation route.
+
+Visited pins do not currently store an image reference. The My Atlas Worker has
+no traveler media bucket or Images binding, and the public projection has no
+photo field. Private single photo storage remains gated by the separate Phase 0
+audit and implementation checklist.
+
 Pin IDs are deterministically derived from the internal user ID and stored
 place ID at creation. A custom place ID is first deterministically derived from
 that internal user ID plus the normalized custom name and coordinates. An

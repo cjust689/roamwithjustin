@@ -178,6 +178,18 @@
           <blockquote v-if="selectedPlace.memory">
             {{ selectedPlace.memory }}
           </blockquote>
+          <p v-else class="my-atlas-selected-memory-empty">
+            No favorite memory added yet.
+          </p>
+          <button
+            v-if="accountProfile"
+            type="button"
+            class="my-atlas-selected-memory-action"
+            :disabled="accountPending"
+            @click="openExistingPin(selectedPlace, { memoryOnly: true })"
+          >
+            {{ selectedPlace.memory ? "Edit memory" : "Add memory" }}
+          </button>
         </div>
 
         <div
@@ -399,6 +411,7 @@
             :place="pinEditorPlace"
             :place-label="placeLabel(pinEditorPlace)"
             :pin="pinEditorPin"
+            :memory-only="pinEditorMemoryOnly"
             :pending="accountPending"
             :error="pinEditorError"
             @cancel="closePinEditor"
@@ -465,24 +478,35 @@
                 <em>{{ formatVisitedDates(place) }}</em>
                 <q v-if="place.memory">{{ place.memory }}</q>
               </button>
-              <button
-                class="edit"
-                type="button"
-                :disabled="accountPending"
-                :aria-label="'Edit visit details for ' + place.name"
-                @click="openExistingPin(place)"
-              >
-                Edit
-              </button>
-              <button
-                class="remove"
-                type="button"
-                :disabled="accountPending"
-                :aria-label="'Remove ' + place.name"
-                @click="removePlace(place)"
-              >
-                Remove
-              </button>
+              <div class="my-atlas-pin-actions">
+                <button
+                  class="edit"
+                  type="button"
+                  :disabled="accountPending"
+                  :aria-label="'Edit memory for ' + place.name"
+                  @click="openExistingPin(place, { memoryOnly: true })"
+                >
+                  {{ place.memory ? "Edit memory" : "Add memory" }}
+                </button>
+                <button
+                  class="visit-edit"
+                  type="button"
+                  :disabled="accountPending"
+                  :aria-label="'Edit visit dates for ' + place.name"
+                  @click="openExistingPin(place)"
+                >
+                  Visit dates
+                </button>
+                <button
+                  class="remove"
+                  type="button"
+                  :disabled="accountPending"
+                  :aria-label="'Remove ' + place.name"
+                  @click="removePlace(place)"
+                >
+                  Remove
+                </button>
+              </div>
             </li>
           </ul>
         </div>
@@ -670,6 +694,7 @@ export default {
       selectedPlaceId: "",
       pinEditorPlace: null,
       pinEditorPin: null,
+      pinEditorMemoryOnly: false,
       pinEditorError: "",
       customPlaceOpen: false,
       customPlaceName: "",
@@ -1178,6 +1203,7 @@ export default {
     closePinEditor() {
       this.pinEditorPlace = null
       this.pinEditorPin = null
+      this.pinEditorMemoryOnly = false
       this.pinEditorError = ""
       this.pendingCustomPlace = null
     },
@@ -1189,6 +1215,7 @@ export default {
       }
       this.pinEditorPlace = place
       this.pinEditorPin = null
+      this.pinEditorMemoryOnly = false
       this.pinEditorError = ""
     },
     beginCustomPlace() {
@@ -1245,14 +1272,19 @@ export default {
         coordinates: [...customPlace.coordinates],
       }
       this.pinEditorPin = null
+      this.pinEditorMemoryOnly = false
       this.pinEditorError = ""
       this.customPlaceOpen = false
       this.customPlaceError = ""
     },
-    openExistingPin(place) {
+    openExistingPin(place, { memoryOnly = false } = {}) {
       this.addPlaceOpen = true
+      this.visitedOpen = false
+      this.toolsOpen = false
+      this.$refs.planner?.closePlanner()
       this.pinEditorPlace = place
       this.pinEditorPin = this.pins.find(pin => pin.placeId === place.placeId)
+      this.pinEditorMemoryOnly = memoryOnly
       this.pinEditorError = ""
     },
     async savePinDetails({ visitedDates, memory }) {
@@ -1936,6 +1968,23 @@ export default {
   overflow-wrap: anywhere;
 }
 
+.my-atlas-selected-memory-empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #91a49e;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+.my-atlas-selected .my-atlas-selected-memory-action {
+  grid-column: 1 / -1;
+  justify-self: center;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
+  color: #132023;
+  background: #e6ba68;
+}
+
 .my-atlas-intro h1 {
   max-width: 10em;
   margin: 0;
@@ -2610,6 +2659,13 @@ export default {
   cursor: pointer;
 }
 
+.my-atlas-pin-actions {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: end;
+  gap: 0.05rem;
+}
+
 .my-atlas-pins .remove {
   padding: 0.45rem;
   border: 0;
@@ -2623,6 +2679,15 @@ export default {
   padding: 0.45rem;
   border: 0;
   color: #e6ba68;
+  background: transparent;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+
+.my-atlas-pins .visit-edit {
+  padding: 0.45rem;
+  border: 0;
+  color: #b8cbc5;
   background: transparent;
   font-size: 0.65rem;
   cursor: pointer;

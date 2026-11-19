@@ -15,6 +15,7 @@ related:
   - my-atlas-geography
   - my-atlas-trip-planning
   - my-atlas-trip-planning-implementation
+  - my-atlas-destination-memory-photo-implementation
   - docs-index
 supersedes: []
 superseded_by: []
@@ -379,6 +380,9 @@ ceiling before inviting external users.
 - [x] Reveal a favorite memory when its standalone map pin is selected, and add
       an optional owner and public control for shortened previews on all visible
       standalone pins without expanding low-zoom clusters.
+- [x] Expose Add memory or Edit memory directly from the selected destination
+      card and every visited destination row. The focused memory editor reuses
+      the existing pin patch while preserving visit dates.
 - [x] Add an undated state, multiple optional visit years, and year editing
       after pin creation. Retain optional month compatibility in the API while
       keeping the current editor and timeline at year precision.
@@ -485,13 +489,12 @@ completed handoff evidence is:
       procedures are approved and tested.
 - [ ] Keep ads, photos, Facebook, recaps, public people discovery, and editorial
       content outside the beta.
-- [ ] Design memory images as a separate media release. Before implementation,
-      choose the per-pin image count and retention policy, then enforce JPEG or
-      PNG decoded signatures, raw-byte and pixel ceilings, metadata stripping,
-      server-controlled re-encoding, owner-scoped object keys, authenticated
-      deletion, private delivery, storage quotas, and abuse handling. Do not
-      store image bytes in the profile Durable Object or trust extensions and
-      browser MIME types as validation.
+- [ ] Implement the audited single photo release tracked by
+      [My Atlas destination memory and single photo](my-atlas-destination-memory-photo.md).
+      The accepted boundary is one private image per visited pin. It requires a
+      dedicated traveler media bucket and a verified server Images binding
+      before upload UI can ship. Do not store image bytes in the profile Durable
+      Object or trust browser MIME types as validation.
 - [x] Implement the first private planned-destination lifecycle separately from
       visited pins, as tracked by
       [My Atlas trip planning](my-atlas-trip-planning.md). It does not enter
