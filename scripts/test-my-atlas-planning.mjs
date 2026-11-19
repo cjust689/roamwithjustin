@@ -76,6 +76,10 @@ const plannerComponent = fs.readFileSync(
   ),
   "utf8"
 )
+const apiClient = fs.readFileSync(
+  new URL("../src/features/my-atlas/api/client.mjs", import.meta.url),
+  "utf8"
+)
 const mapComponent = fs.readFileSync(
   new URL(
     "../src/features/my-atlas/components/MyAtlasMap.vue",
@@ -207,8 +211,10 @@ assert.doesNotMatch(
 )
 assert.match(
   plannerComponent,
-  /error\?\.code === "revision_conflict"[\s\S]*preservePlanDraft: true/
+  /error\?\.code === "revision_conflict"[\s\S]*refreshPlanningRevision\(accessToken\)[\s\S]*applyMutation\(accessToken\)/
 )
+assert.match(apiClient, /path: "\/v1\/me\/planning"/)
+assert.match(apiClient, /fetchMyAtlasProfile[\s\S]*path: "\/v1\/me"/)
 assert.match(
   plannerComponent,
   /value <= this\.plannerRevision[\s\S]*return await applyMutation/
@@ -339,8 +345,14 @@ assert.equal(
   flightUrl.pathname,
   "/go/flight/search/oneway/2027-04-18/2027-04-18"
 )
-assert.equal(flightUrl.searchParams.get("FromAirport"), "Atlanta, Georgia, United States")
-assert.equal(flightUrl.searchParams.get("ToAirport"), "Moab, Utah, United States")
+assert.equal(
+  flightUrl.searchParams.get("FromAirport"),
+  "Atlanta, Georgia, United States"
+)
+assert.equal(
+  flightUrl.searchParams.get("ToAirport"),
+  "Moab, Utah, United States"
+)
 assert.throws(
   () =>
     buildExpediaFlightSearchUrl({

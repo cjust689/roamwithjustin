@@ -168,6 +168,8 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `DELETE /v1/me/pins/{pinId}` removes it;
 - `GET|POST /v1/me/bucket-list` pages or creates private wishlist entries;
 - `PATCH|DELETE /v1/me/bucket-list/{wishId}` edits or removes one entry;
+- `GET /v1/me/planning` returns wishlist and saved-plan state from one atomic
+  owner snapshot;
 - `GET|POST /v1/me/trip-plans` reads or creates the single beta plan;
 - `PATCH|DELETE /v1/me/trip-plans/{planId}` replaces or removes that plan;
 - `POST /v1/me/trip-plans/{planId}/keep` explicitly refreshes retention;
@@ -214,9 +216,12 @@ HTTP 412 without changing state. Allowed browser origins can read `ETag` and
 `X-Request-Id` through `Access-Control-Expose-Headers`. This is required for
 the browser to accept the new revision after a successful cross-origin write.
 Browser revision state is monotonic. A planning read that began before a pin or
-profile write cannot replace a newer revision after it finishes. If the two
-planning reads observe different revisions, the client repeats the complete
-read once so wishlist and saved-plan state come from one account version.
+profile write cannot replace a newer revision after it finishes. The primary
+planning read now returns wishlist and plan records from the same Durable Object
+snapshot and one ETag. The older two-request reader remains only as a temporary
+fallback while a frontend and Worker deployment overlap. After an HTTP 412, the
+planner reads the authoritative owner profile revision from `GET /v1/me` and
+retries the intended mutation once. A second conflict is not replayed.
 
 ## Pin state
 
@@ -334,21 +339,17 @@ never enters the public pin projection, analytics, or storage before an
 explicit plan save.
 
 A successful plan create, replacement, or Keep response immediately becomes
-the browser's last confirmed plan snapshot before the companion read begins. If
-that follow-up trip-plan read fails while the bucket list still loads, the
-browser retains and displays the confirmed snapshot, labels it as needing a
-refresh, and disables plan editing until a complete read succeeds. A successful
-delete response clears the local plan immediately, so the same partial-read
-path cannot resurrect a deleted snapshot. This fallback changes no stored
-state and never substitutes for the Worker's revision checks.
+the browser's last confirmed plan snapshot before the atomic planning refresh
+begins. If that refresh fails, the browser retains and displays the confirmed
+snapshot. A successful delete response clears the local plan immediately, so a
+failed refresh cannot resurrect a deleted snapshot. This fallback changes no
+stored state and never substitutes for the Worker's revision checks.
 
-Wishlist and saved-trip reads are presented as separate availability domains.
-If the bucket-list pages load with a valid revision but the companion saved-trip
-request fails, the browser retains and renders the private destinations, their
-editing controls, and the wishlist revision. It disables the saved-trip editor
-and shows a targeted retry message with the safe Worker request reference. A
-trip-plan failure no longer discards an otherwise valid wishlist response or
-misstates that the entire private planner failed.
+The compatibility reader still presents wishlist and saved-trip reads as
+separate availability domains when it is used against an older Worker. If its
+bucket-list pages load but the companion saved-trip request fails, the browser
+retains the destinations and safe request reference. The atomic endpoint is the
+normal path and does not combine records from different revisions.
 
 One `plan:` record may exist in the first slice. It stores title, lifecycle
 status, optional year and note, a start snapshot, an ordered destination list,
