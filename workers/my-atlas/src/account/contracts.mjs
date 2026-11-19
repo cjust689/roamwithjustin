@@ -10,6 +10,8 @@ const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
 const COUNTRY_PLACE_ID_PATTERN = /^iso-country:[A-Z]{2}$/
 const GEONAMES_PLACE_ID_PATTERN = /^geonames:[1-9][0-9]{0,11}$/
+const OFFICIAL_PARK_PLACE_ID_PATTERN =
+  /^park:(?:us:nps|ca:pca|mx:conanp):[a-z0-9-]+$/
 
 function cleanString(value) {
   return typeof value === "string" ? value.trim() : ""
@@ -46,7 +48,8 @@ export function normalizePlaceId(value) {
   const placeId = cleanString(value)
   if (
     !COUNTRY_PLACE_ID_PATTERN.test(placeId) &&
-    !GEONAMES_PLACE_ID_PATTERN.test(placeId)
+    !GEONAMES_PLACE_ID_PATTERN.test(placeId) &&
+    !OFFICIAL_PARK_PLACE_ID_PATTERN.test(placeId)
   ) {
     throw new RegistrationValidationError("Canonical place ID is invalid.")
   }
