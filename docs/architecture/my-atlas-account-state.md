@@ -59,6 +59,7 @@ verification:
   evidence:
     - npm run my-atlas:worker:test
     - Workers runtime deletion coverage verifies that completed deletion releases both the identity and handle assignments, preserves exact retry safety, and permits the same identity and handle to register again with a new invitation and user ID
+    - Client deletion recovery coverage verifies stale DELETE, authoritative profile revision read, persisted revision replacement, and one retry with the original idempotency key across both the active planner and reload-resume paths
     - Client planning tests verify recovery from a successful plan mutation with an incomplete response by reading the authoritative revision and saved plan before reporting failure
     - npm run my-atlas:worker:durable:test
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
@@ -445,6 +446,12 @@ active identity and handle assignments, and the user object erases profile,
 pins, wishlist, plans, indexes, mutation history, and policy acceptance state.
 A minimal operation tombstone supports an exact retry after a cross-object
 partial failure. It retains no handle, profile, content, or qualified identity.
+The browser persists an in-flight deletion revision and idempotency key so an
+interrupted exact request can resume. If the Worker definitively rejects that
+revision with HTTP 412, the browser reads the authoritative profile revision,
+replaces only the stored revision, and retries once with the original
+idempotency key. Reload recovery uses the same bounded path, so a stale stored
+revision cannot create a permanent conflict loop.
 The released handle can be registered again through the ordinary invitation
 flow. Public lookup returns the generic 404 response after deletion.
 This operation does not delete the upstream Google or Auth0 identity.
