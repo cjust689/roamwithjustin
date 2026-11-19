@@ -54,8 +54,11 @@ record.
 The local part of Phase 2 is now implemented. `gear:prepare` validates one
 reviewed creator-owned JPEG or PNG, renders deterministic metadata-stripped
 WebP derivatives, and writes a scoped manifest without a fake Journey. It does
-not download remote images, upload to R2, create a receipt, or update canonical
-Gear state. Those publication steps remain proposal work.
+not download remote images or update canonical Gear state. `gear:upload` now
+revalidates that package, sends only its listed WebP derivatives through the
+authenticated immutable Worker contract, and writes a checksum receipt only
+after complete remote verification. Canonical Gear image publication remains
+proposal work.
 
 ## 0. Product objective and non-negotiables
 

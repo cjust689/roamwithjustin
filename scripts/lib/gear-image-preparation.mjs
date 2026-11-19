@@ -13,6 +13,8 @@ const ownerPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const maximumSourceBytes = 50 * 1024 * 1024
 const maximumSourcePixels = 80_000_000
 const preparationVersion = 1
+const checksumPattern = /^[a-f0-9]{64}$/
+const contentHashPattern = /^[a-f0-9]{24}$/
 
 const sourceFormats = Object.freeze({
   ".jpeg": { format: "jpeg", mimeType: "image/jpeg" },
@@ -273,6 +275,7 @@ function createManifest(options, source, derivatives) {
     schemaVersion: 1,
     manifestType: "gear-image-publication",
     batchId: "gear-image-" + options.gearId + "-" + contentHash,
+    uploadBatchId: contentHash,
     gearId: options.gearId,
     contentHash,
     source: {
@@ -312,21 +315,301 @@ function createManifest(options, source, derivatives) {
   }
 }
 
+function isPositiveInteger(value) {
+  return Number.isInteger(value) && value > 0
+}
+
+function addManifestError(errors, condition, message) {
+  if (!condition) errors.push(message)
+}
+
+export function validateGearImageManifest(manifest) {
+  const errors = []
+  if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
+    return { errors: ["Gear image manifest must be an object"] }
+  }
+
+  addManifestError(
+    errors,
+    manifest.schemaVersion === 1,
+    "schemaVersion must be 1"
+  )
+  addManifestError(
+    errors,
+    manifest.manifestType === "gear-image-publication",
+    "manifestType must be gear-image-publication"
+  )
+  addManifestError(
+    errors,
+    typeof manifest.gearId === "string" && gearIdPattern.test(manifest.gearId),
+    "gearId must be lowercase ASCII kebab-case"
+  )
+  addManifestError(
+    errors,
+    typeof manifest.contentHash === "string" &&
+      contentHashPattern.test(manifest.contentHash),
+    "contentHash must be 24 lowercase hexadecimal characters"
+  )
+
+  const expectedBatchId =
+    typeof manifest.gearId === "string" &&
+    typeof manifest.contentHash === "string"
+      ? "gear-image-" + manifest.gearId + "-" + manifest.contentHash
+      : null
+  const expectedPrefix =
+    typeof manifest.gearId === "string" &&
+    typeof manifest.contentHash === "string"
+      ? "images/gear/" + manifest.gearId + "/" + manifest.contentHash + "/"
+      : null
+  addManifestError(
+    errors,
+    expectedBatchId !== null && manifest.batchId === expectedBatchId,
+    "batchId does not match gearId and contentHash"
+  )
+  addManifestError(
+    errors,
+    manifest.uploadBatchId === manifest.contentHash,
+    "uploadBatchId must equal contentHash"
+  )
+  addManifestError(
+    errors,
+    expectedPrefix !== null && manifest.r2Prefix === expectedPrefix,
+    "r2Prefix does not match the immutable Gear image prefix"
+  )
+
+  const source = manifest.source
+  addManifestError(
+    errors,
+    source && typeof source === "object" && !Array.isArray(source),
+    "source must be an object"
+  )
+  if (source && typeof source === "object" && !Array.isArray(source)) {
+    addManifestError(
+      errors,
+      typeof source.originalFilename === "string" &&
+        source.originalFilename.length > 0 &&
+        path.basename(source.originalFilename) === source.originalFilename &&
+        !/[\u0000-\u001f\u007f]/.test(source.originalFilename),
+      "source.originalFilename must be a plain filename"
+    )
+    addManifestError(
+      errors,
+      ["image/jpeg", "image/png"].includes(source.mimeType),
+      "source.mimeType must be image/jpeg or image/png"
+    )
+    addManifestError(
+      errors,
+      isPositiveInteger(source.width),
+      "source.width must be a positive integer"
+    )
+    addManifestError(
+      errors,
+      isPositiveInteger(source.height),
+      "source.height must be a positive integer"
+    )
+    addManifestError(
+      errors,
+      isPositiveInteger(source.byteSize),
+      "source.byteSize must be a positive integer"
+    )
+    addManifestError(
+      errors,
+      typeof source.sha256 === "string" && checksumPattern.test(source.sha256),
+      "source.sha256 must be a lowercase hexadecimal SHA-256 digest"
+    )
+  }
+
+  const rights = manifest.rights
+  addManifestError(
+    errors,
+    rights && typeof rights === "object" && !Array.isArray(rights),
+    "rights must be an object"
+  )
+  if (rights && typeof rights === "object" && !Array.isArray(rights)) {
+    addManifestError(
+      errors,
+      typeof rights.owner === "string" && ownerPattern.test(rights.owner),
+      "rights.owner must be lowercase ASCII kebab-case"
+    )
+    addManifestError(
+      errors,
+      rights.status === "owned",
+      "rights.status must be owned"
+    )
+    addManifestError(
+      errors,
+      rights.reviewed === true,
+      "rights.reviewed must be true"
+    )
+  }
+
+  addManifestError(
+    errors,
+    typeof manifest.alt === "string" &&
+      manifest.alt.length > 0 &&
+      manifest.alt.length <= 240 &&
+      manifest.alt.trim() === manifest.alt &&
+      !/[\u0000-\u001f\u007f]/.test(manifest.alt),
+    "alt must be reviewed text between 1 and 240 characters"
+  )
+
+  const processing = manifest.processing
+  const expectedProcessing = {
+    version: preparationVersion,
+    format: "webp",
+    fit: "inside",
+    colourspace: "srgb",
+    metadata: "stripped",
+    withoutEnlargement: true,
+  }
+  addManifestError(
+    errors,
+    processing &&
+      typeof processing === "object" &&
+      !Array.isArray(processing) &&
+      Object.entries(expectedProcessing).every(
+        ([key, value]) => processing[key] === value
+      ),
+    "processing does not match the supported Gear image policy"
+  )
+
+  addManifestError(
+    errors,
+    Array.isArray(manifest.derivatives) &&
+      manifest.derivatives.length === gearDerivativeSpecs.length,
+    "derivatives must contain the three supported Gear image outputs"
+  )
+  if (Array.isArray(manifest.derivatives)) {
+    const relativePaths = new Set()
+    const objectKeys = new Set()
+    manifest.derivatives.forEach((derivative, index) => {
+      const spec = gearDerivativeSpecs[index]
+      const label = "derivatives[" + index + "]"
+      if (
+        !derivative ||
+        typeof derivative !== "object" ||
+        Array.isArray(derivative)
+      ) {
+        errors.push(label + " must be an object")
+        return
+      }
+      if (!spec) {
+        errors.push(label + " is not a supported Gear image derivative")
+        return
+      }
+      const expectedRelativePath = spec.width + ".webp"
+      addManifestError(
+        errors,
+        derivative.role === spec.role,
+        label + ".role is invalid"
+      )
+      addManifestError(
+        errors,
+        derivative.targetWidth === spec.width,
+        label + ".targetWidth is invalid"
+      )
+      addManifestError(
+        errors,
+        isPositiveInteger(derivative.width) && derivative.width <= spec.width,
+        label + ".width is invalid"
+      )
+      addManifestError(
+        errors,
+        isPositiveInteger(derivative.height) && derivative.height <= spec.width,
+        label + ".height is invalid"
+      )
+      addManifestError(
+        errors,
+        derivative.relativePath === expectedRelativePath,
+        label + ".relativePath is invalid"
+      )
+      addManifestError(
+        errors,
+        expectedPrefix !== null &&
+          derivative.objectKey === expectedPrefix + expectedRelativePath,
+        label + ".objectKey is invalid"
+      )
+      addManifestError(
+        errors,
+        derivative.mimeType === "image/webp",
+        label + ".mimeType must be image/webp"
+      )
+      addManifestError(
+        errors,
+        isPositiveInteger(derivative.byteSize),
+        label + ".byteSize must be a positive integer"
+      )
+      addManifestError(
+        errors,
+        typeof derivative.sha256 === "string" &&
+          checksumPattern.test(derivative.sha256),
+        label + ".sha256 must be a lowercase hexadecimal SHA-256 digest"
+      )
+      if (relativePaths.has(derivative.relativePath)) {
+        errors.push(label + ".relativePath is duplicated")
+      }
+      if (objectKeys.has(derivative.objectKey)) {
+        errors.push(label + ".objectKey is duplicated")
+      }
+      relativePaths.add(derivative.relativePath)
+      objectKeys.add(derivative.objectKey)
+    })
+  }
+
+  if (
+    source &&
+    typeof source.sha256 === "string" &&
+    checksumPattern.test(source.sha256) &&
+    Array.isArray(manifest.derivatives) &&
+    manifest.derivatives.length === gearDerivativeSpecs.length &&
+    manifest.derivatives.every(
+      derivative =>
+        derivative &&
+        typeof derivative.sha256 === "string" &&
+        checksumPattern.test(derivative.sha256)
+    )
+  ) {
+    const expectedContentHash = sha256(
+      JSON.stringify({
+        preparationVersion,
+        sourceSha256: source.sha256,
+        derivatives: manifest.derivatives.map(derivative => ({
+          role: derivative.role,
+          targetWidth: derivative.targetWidth,
+          sha256: derivative.sha256,
+        })),
+      })
+    ).slice(0, 24)
+    addManifestError(
+      errors,
+      manifest.contentHash === expectedContentHash,
+      "contentHash does not match the prepared source and derivative checksums"
+    )
+  }
+
+  return { errors }
+}
+
 function serializeManifest(manifest) {
   return JSON.stringify(manifest, null, 2) + "\n"
 }
 
 async function validateExistingPackage(packageDirectory, manifest, derivatives) {
-  const expectedNames = new Set([
+  const requiredNames = new Set([
     "gear-image-manifest.json",
     ...derivatives.map(derivative => derivative.relativePath),
+  ])
+  const allowedNames = new Set([
+    ...requiredNames,
+    "gear-r2-verification.json",
   ])
   const entries = await fs.promises.readdir(packageDirectory, {
     withFileTypes: true,
   })
+  const entryNames = new Set(entries.map(entry => entry.name))
   if (
-    entries.some(entry => !entry.isFile() || !expectedNames.has(entry.name)) ||
-    entries.length !== expectedNames.size
+    entries.some(entry => !entry.isFile() || !allowedNames.has(entry.name)) ||
+    [...requiredNames].some(name => !entryNames.has(name))
   ) {
     throw new Error(
       "Existing Gear image package differs from the deterministic file set: " +
@@ -407,6 +690,13 @@ export async function prepareGearImage(options, { log = console.log } = {}) {
     source,
     derivatives
   )
+  const manifestValidation = validateGearImageManifest(manifest)
+  if (manifestValidation.errors.length) {
+    throw new Error(
+      "Generated Gear image manifest is invalid:\n- " +
+        manifestValidation.errors.join("\n- ")
+    )
+  }
   const packageDirectory = path.join(
     outputDirectory,
     options.gearId + "-" + manifest.contentHash

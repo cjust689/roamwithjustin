@@ -331,8 +331,16 @@ npm run gear:prepare -- --gear-id camera-accessory --source ./gear-inbox/camera-
 ```
 
 See [the Gear image preparation guide](docs/reference/gear-image-preparation.md)
-before using `--apply`. Prepared packages are local review artifacts, not R2
-receipts or published Gear records.
+before using `--apply`. After review, validate an applied package without a
+network write:
+
+```bash
+npm run gear:upload -- --manifest ./gear-ready/camera-accessory-<content-hash>/gear-image-manifest.json --dry-run
+```
+
+The same command without `--dry-run` reuses the authenticated immutable media
+Worker and creates a checksum receipt. A prepared or uploaded package is not a
+published Gear record until the separate reviewed canonical update exists.
 
 ## How production works
 
