@@ -1528,6 +1528,40 @@ export class UserProfileDurableObject extends DurableObject {
     return Object.freeze({ ok: true, profile: owner.profile, plans })
   }
 
+  getOwnerPlanning(identityDigest) {
+    if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
+    const owner = ownerProfile(this.ctx.storage, identityDigest)
+    if (!owner.ok) return owner
+    const wishes = Array.from(
+      this.ctx.storage.kv.list({ prefix: "wish:", limit: 251 }),
+      ([, value]) => value
+    )
+    if (
+      wishes.length > 250 ||
+      wishes.some(value => !validStoredWish(value)) ||
+      wishes.length !== (owner.profile.wishCount || 0)
+    ) {
+      return failure("wishlist_inconsistent")
+    }
+    const plans = Array.from(
+      this.ctx.storage.kv.list({ prefix: "plan:", limit: 2 }),
+      ([, value]) => value
+    )
+    if (
+      plans.length > 1 ||
+      plans.some(value => !validStoredPlan(value)) ||
+      plans.length !== (owner.profile.planCount || 0)
+    ) {
+      return failure("plans_inconsistent")
+    }
+    return Object.freeze({
+      ok: true,
+      profile: owner.profile,
+      wishes,
+      plans,
+    })
+  }
+
   async createOwnerPlan(command) {
     const candidate = {
       planId: command?.planId,

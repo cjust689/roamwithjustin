@@ -66,6 +66,7 @@ import {
   deleteMyPlan,
   deleteMyWish,
   keepMyPlan,
+  getMyPlanning,
   listMyPlans,
   listMyWishes,
   markMyPlanVisited,
@@ -516,6 +517,7 @@ export async function handleRequest(
   )
   const isMyWish = Boolean(myWishMatch)
   const isMyPlans = url.pathname === "/v1/me/trip-plans"
+  const isMyPlanning = url.pathname === "/v1/me/planning"
   const myPlanMatch = url.pathname.match(
     /^\/v1\/me\/trip-plans\/(plan_[a-f0-9]{24})$/
   )
@@ -536,6 +538,7 @@ export async function handleRequest(
     isMyPin ||
     isMyWishes ||
     isMyWish ||
+    isMyPlanning ||
     isMyPlans ||
     isMyPlan ||
     isMyPlanKeep ||
@@ -564,6 +567,7 @@ export async function handleRequest(
     (isMyPin && !["PATCH", "DELETE"].includes(request.method)) ||
     (isMyWishes && !["GET", "POST"].includes(request.method)) ||
     (isMyWish && !["PATCH", "DELETE"].includes(request.method)) ||
+    (isMyPlanning && request.method !== "GET") ||
     (isMyPlans && !["GET", "POST"].includes(request.method)) ||
     (isMyPlan && !["PATCH", "DELETE"].includes(request.method)) ||
     (isMyPlanKeep && request.method !== "POST") ||
@@ -877,6 +881,21 @@ export async function handleRequest(
         })
         return accountJsonResponse(
           { deleted: true },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+
+      if (isMyPlanning) {
+        const service = dependencies.getMyPlanning || getMyPlanning
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          { wishes: result.wishes, plans: result.plans },
           200,
           context,
           result.profile.revision
