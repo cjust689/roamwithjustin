@@ -4,10 +4,11 @@ title: Gear Ingestion CLI
 kind: reference
 status: implemented
 implementation_state: complete
-updated: 2026-11-14
+updated: 2026-11-19
 related:
   - gear-system
   - gear-sheet-workflow
+  - gear-authoring-workflow
   - gear-affiliate-readiness-2026-11-17
 supersedes:
   - gear-ingestion-architecture-brief
@@ -34,6 +35,10 @@ idempotent upserts.
 For spreadsheet authoring, use the generated workbook and Google Sheet path in
 [Gear Sheet workflow](gear-sheet-workflow.md). Both entry points use the same
 canonical validator and generated registry.
+
+For one file that coordinates the record and creator-owned image checkpoints,
+use [Gear authoring workflow](gear-authoring-workflow.md). It calls this same
+ingestor and does not create another record contract.
 
 It does not upload files, scrape retailers, invent product identities, edit
 Journey narratives, or publish example gear. The generated registry starts

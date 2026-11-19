@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -51,6 +51,7 @@ verification:
     - Local Chrome accessibility tree checks for mobile dialog, mobile map peek region, and desktop split region semantics
     - Local Chrome mobile detail hierarchy checks at 320 and 390 CSS pixels
     - Local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels
+    - Local Chrome Atlas invitation checks at 390 and 1280 CSS pixels
 ---
 
 # Atlas integrated story reader
@@ -115,6 +116,13 @@ The root `/` route now renders `AtlasView.vue` directly without an intermediate
 redirect. Feature-enabled builds expose one My Atlas control in the Atlas
 toolbar, using the same flag that registers `/my-atlas`; disabled builds expose
 neither the route nor its control.
+
+The Atlas to My Atlas handoff now also includes a dismissible invitation that
+appears once per browser tab when the same feature flag is enabled. It links
+directly to `/my-atlas`, stays out of story-reader state, and moves clear of the
+desktop inspector and mobile detail dock. Sparse Journey cards and panels no
+longer expose internal editorial workflow labels. They present only established
+places and content with the same exploration action as other Journeys.
 
 The public `/trips/:id` URL remains available and retains its commercial and
 advertising modules. The embedded Atlas reader deliberately excludes ads,
@@ -197,6 +205,10 @@ remains the indexable representation.
 - [x] Preserve `/atlas` and all existing Journey, Place, and story deep links.
 - [x] Verify root startup, My Atlas handoff, browser Back, mobile toolbar fit,
   and desktop reachability with the My Atlas flag enabled.
+- [x] Add and browser-check a once-per-session My Atlas invitation outside
+  story state at mobile and desktop widths.
+- [x] Remove visitor-facing sparse-content workflow labels from Atlas cards and
+  detail panels.
 
 ## Verified flow after Phase 3
 

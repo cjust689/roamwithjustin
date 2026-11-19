@@ -114,7 +114,10 @@ assert.match(mapComponent, /renderPlannerMarkers/)
 assert.match(mapComponent, /showPlannerOverview/)
 assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
-assert.match(ownerView, /class="my-atlas-profile-menu"/)
+assert.match(ownerView, /class="my-atlas-account-card"/)
+assert.match(ownerView, /class="my-atlas-tools my-atlas-workflow-section"/)
+assert.match(ownerView, />\s*Share and export\s*</)
+assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /openAtlasPanel\('visited'\)/)
 assert.match(ownerView, /class="my-atlas-planner-action"/)
@@ -126,6 +129,11 @@ assert.match(
   plannerComponent,
   /async revealPlanner\(\)[\s\S]*scrollIntoView[\s\S]*planner-heading/
 )
+assert.match(plannerComponent, /closePlanner\(\)[\s\S]*this\.open = false/)
+assert.match(
+  ownerView,
+  /openAtlasPanel\(panel\)[\s\S]*this\.\$refs\.planner\?\.closePlanner\(\)/
+)
 assert.match(
   ownerView,
   /revision <= this\.accountProfile\.revision[\s\S]*withAccountRevisionRetry/
@@ -136,7 +144,7 @@ assert.match(
 )
 assert.match(
   ownerView,
-  /\.my-atlas-profile-button:focus[\s\S]*background: rgba\(230, 186, 104, 0\.14\)/
+  /\.my-atlas-account-card button:focus[\s\S]*background: rgba\(230, 186, 104, 0\.14\)/
 )
 assert.match(
   ownerView,
@@ -144,7 +152,11 @@ assert.match(
 )
 assert.match(
   ownerView,
-  /\.my-atlas-profile-button strong,[\s\S]*\.my-atlas-profile-button small \{[\s\S]*line-height: 1\.2;/
+  /\.my-atlas-account-card strong,[\s\S]*\.my-atlas-account-card small \{[\s\S]*line-height: 1\.2;/
+)
+assert.match(
+  ownerView,
+  /\.my-atlas-panel\.is-planning \{[\s\S]*width: min\(52rem, calc\(100vw - 2rem\)\)/
 )
 assert.doesNotMatch(ownerView, /<strong id="my-atlas-sharing-title">/)
 assert.doesNotMatch(ownerView, /<p>My Atlas by RoamWithJustin\.com<\/p>/)

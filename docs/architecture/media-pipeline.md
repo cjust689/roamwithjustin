@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - content-model
   - journey-media-ingestion
@@ -175,9 +175,11 @@ maximum part size are configurable through `MAX_VIDEO_UPLOAD_BYTES` and
 `MAX_MULTIPART_PART_BYTES`. Automatic quality-changing compression is
 intentionally absent.
 
-The Worker source and bundle are locally verified. Deployment state in the
-owner's Cloudflare account and the credentials available to the new
-single-command publisher remain externally unverified.
+The Worker source and bundle are locally verified. The file-based Gear
+workflow now composes preparation, upload, and image publication through two
+reviewed checkpoints. Deployment state in the owner's Cloudflare account and
+the credentials needed for its first publish checkpoint remain externally
+unverified.
 
 ## Sheet and Git publication orchestration
 

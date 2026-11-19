@@ -1,6 +1,7 @@
 <template>
   <section
     class="my-atlas-planner"
+    :class="{ 'is-open': open }"
     aria-labelledby="my-atlas-planner-title"
     :aria-busy="String(pending)"
   >
@@ -16,16 +17,24 @@
           {{ plan ? plan.title : "Plan future travel" }}
         </strong>
       </span>
-      <b>{{ open ? "Hide" : plan ? "Open trip" : "Plan a trip" }}</b>
+      <b>{{ open ? "Close planner" : plan ? "Open trip" : "Plan a trip" }}</b>
     </button>
 
     <div v-if="open" id="my-atlas-planner-content" class="planner-content">
       <p class="planner-disclosure">
-        Future destinations stay private and never appear in your shared Visited
-        Atlas. Saved trips require an explicit keep or edit every six months,
-        followed by a 30 day deletion grace period.
+        Build a private route with a start, stops, and finish. Planned places
+        never appear in your shared Visited Atlas.
       </p>
-      <p v-if="error" class="planner-error" role="alert">{{ error }}</p>
+      <p class="planner-retention-note">
+        Saved trips need a keep or edit every six months. A 30 day grace period
+        follows.
+      </p>
+      <div v-if="error" class="planner-error-block" role="alert">
+        <p class="planner-error">{{ error }}</p>
+        <button type="button" :disabled="pending" @click="loadPlanning">
+          Retry planner
+        </button>
+      </div>
       <p v-if="pending" class="planner-status" role="status">
         Updating your private planner
       </p>
@@ -1303,6 +1312,9 @@ export default {
       })
       this.$el.querySelector(".planner-heading")?.focus({ preventScroll: true })
     },
+    closePlanner() {
+      if (this.open) this.open = false
+    },
     async toggleOpen() {
       this.open = !this.open
       if (this.open && !this.planningLoaded && !this.pending) {
@@ -2240,8 +2252,13 @@ export default {
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.025);
 }
+.my-atlas-planner.is-open {
+  border-color: rgba(230, 186, 104, 0.38);
+  background: rgba(8, 21, 23, 0.82);
+}
 .planner-content {
   display: grid;
+  min-width: 0;
   gap: 0.8rem;
   padding: 0.8rem;
   border-top: 1px solid rgba(255, 255, 255, 0.09);
@@ -2611,6 +2628,7 @@ export default {
 .planner-block-heading h3,
 .planner-heading strong,
 .planner-disclosure,
+.planner-retention-note,
 .planner-status,
 .planner-error,
 .planner-empty,
@@ -2676,6 +2694,7 @@ export default {
   cursor: pointer;
 }
 .planner-disclosure,
+.planner-retention-note,
 .planner-status,
 .planner-empty,
 .planner-custom p,
@@ -2685,7 +2704,36 @@ export default {
   font-size: 0.66rem;
   line-height: 1.5;
 }
+.planner-retention-note {
+  margin: -0.4rem 0 0;
+  color: #71857f;
+  font-size: 0.6rem;
+}
+.planner-error-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid rgba(230, 168, 161, 0.3);
+  border-radius: 0.7rem;
+  background: rgba(179, 91, 82, 0.08);
+}
+.planner-error-block button {
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(230, 186, 104, 0.42);
+  border-radius: 0.65rem;
+  color: #f4d38f;
+  background: rgba(230, 186, 104, 0.08);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  cursor: pointer;
+}
 .planner-error {
+  margin: 0;
   color: #e6a8a1;
   font-size: 0.68rem;
 }
@@ -3261,6 +3309,10 @@ export default {
   clip: rect(0, 0, 0, 0);
 }
 @media (max-width: 480px) {
+  .planner-error-block {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .planner-itinerary-heading,
   .planner-next-actions {
     align-items: flex-start;
@@ -3285,7 +3337,17 @@ export default {
     width: 100%;
   }
   .planner-block-heading {
+    display: grid;
     align-items: flex-start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .planner-block-heading > .planner-block-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .planner-block-actions button {
+    width: 100%;
   }
   .planner-directions-default,
   .planner-route-modes label {

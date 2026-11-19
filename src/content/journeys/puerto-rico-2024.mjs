@@ -125,7 +125,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "attraction",
       droneAllowed: false,
       description:
-        "We land around 8:00 p.m. on a Friday and are in the rental car within half an hour. The short drive into San Juan tightens into narrow, busy streets near the center; then the night loosens again over tacos across from Don Rafa and a quick pass along Ashford Avenue. It is not a full city night, just enough music and motion to make arrival feel immediate.",
+        "We land around 8:00 p.m. on a Friday and are in the rental car within half an hour. The short drive into San Juan tightens into narrow, busy streets near the center. Then the night loosens again over tacos across from Don Rafa and a quick pass along Ashford Avenue. It is not a full city night, just enough music and motion to make arrival feel immediate.",
       summary:
         "Airport, rental keys, narrow streets, tacos, and one quick look at San Juan after dark. The trip begins before we ever unpack.",
       notes: ["Grabbed rental car", "Checked in", "Quick bite to eat"],
@@ -153,7 +153,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "lodging",
       droneAllowed: false,
       description:
-        "Don Rafa gives the San Juan days a center. We arrive after dark, use the Miramar hotel as the launch point for Old San Juan and the city's nightlife, then come back to the rooftop pool when the afternoon heat makes slowing down feel earned. It is not just where we leave the bags; it becomes part of how the city days breathe.",
+        "Don Rafa gives the San Juan days a center. We arrive after dark, use the Miramar hotel as the launch point for Old San Juan and the city's nightlife, then come back to the rooftop pool when the afternoon heat makes slowing down feel earned. It is not just where we leave the bags. It becomes part of how the city days breathe.",
       summary:
         "A Miramar base that connects late arrival, Old San Juan, and the rooftop pause between the city's busiest hours.",
       notes: [
@@ -190,7 +190,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "attraction",
       droneAllowed: false,
       description:
-        "We start early, moving from the heavy walls of Castillo San Cristóbal into streets where bright facades keep pulling the camera sideways. Lunch at La Carreta gives us a stopping point; the rooftop pool back at Don Rafa gives us a way to come down from the heat and all that visual noise. Old San Juan works best when we let the morning unfold on foot instead of turning it into a checklist.",
+        "We start early, moving from the heavy walls of Castillo San Cristóbal into streets where bright facades keep pulling the camera sideways. Lunch at La Carreta gives us a stopping point. The rooftop pool back at Don Rafa gives us a way to come down from the heat and all that visual noise. Old San Juan works best when we let the morning unfold on foot instead of turning it into a checklist.",
       summary:
         "Fort walls, bright facades, lunch at La Carreta, then a rooftop reset before the city changes into night.",
       notes: [
@@ -266,7 +266,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "nightlife",
       droneAllowed: false,
       description:
-        "The music changes every few doors, moving through salsa, reggaetón, hip hop, dance, and electronic. The crowd stretches from people in their twenties to people old enough to have stopped caring what anyone thinks. We move from bar to bar until one room finally fits our mood. The point is not finding the universally best place; it is letting the street keep offering another version of the night.",
+        "The music changes every few doors, moving through salsa, reggaetón, hip hop, dance, and electronic. The crowd stretches from people in their twenties to people old enough to have stopped caring what anyone thinks. We move from bar to bar until one room finally fits our mood. The point is not finding the universally best place. It is letting the street keep offering another version of the night.",
       summary:
         "We follow the music door to door until the right room finally finds us.",
       notes: [
@@ -289,15 +289,15 @@ export const puertoRico2024Journey = Object.freeze({
       type: "landscape",
       droneAllowed: true,
       description:
-        "A short walk from the road ends at a coastline that suddenly drops away. From above, the limestone forms a huge dark opening with the Atlantic pushing through beneath it; from the edge, the rough water is a reminder not to let the camera pull us too close. There are no amenities here, just rock, water, and enough scale to slow the whole group down.",
+        "A short walk from the road ends at a coastline that suddenly drops away. From above, the limestone forms a huge dark opening with the Atlantic pushing through beneath it. From the edge, the rough water is a reminder not to let the camera pull us too close. There are no amenities here, just rock, water, and enough scale to slow the whole group down.",
       summary:
-        "The trail is short; the shift from roadside to open Atlantic cliffs is not.",
+        "The trail is short. The shift from roadside to open Atlantic cliffs is not.",
       notes: [
         "Easy parking just off the road",
         "Short walk to cliffside overlook and sea caves",
         "No bathrooms or amenities",
         "The limestone arch and open coast read clearly in drone and wide angle frames",
-        "Waves below are rough; stay clear of edges",
+        "Waves below are rough. Stay clear of edges",
       ],
       hero: {
         assetId: "image-puerto-rico-cueva-del-indio",
@@ -361,7 +361,7 @@ export const puertoRico2024Journey = Object.freeze({
       notes: [
         "A quick roadside stop with small informal pullout spaces for parking",
         "Depicts a Taíno chief carved into the coastal rockface",
-        "No amenities or facilities; purely a photo opportunity",
+        "No amenities or facilities. This is purely a photo opportunity",
         "Located just minutes from Playa Pastillo and other scenic spots",
         "Works well as a brief cultural stop on the scenic north coast drive",
       ],
@@ -389,17 +389,17 @@ export const puertoRico2024Journey = Object.freeze({
       type: "lodging",
       droneAllowed: true,
       description:
-        "After San Juan and a full day moving west, the road climbs into the hills near Moca and ends at stacked shipping containers, a long pool, and open mountain views. The first instinct is to treat Hacienda Florecer as a practical base; the better realization is that it is one of the trip's real locations. Some evenings, staying here and watching the light fall across the hills is the plan.",
+        "After San Juan and a full day moving west, the road climbs into the hills near Moca and ends at stacked shipping containers, a long pool, and open mountain views. The first instinct is to treat Hacienda Florecer as a practical base. The better realization is that it is one of the trip's real locations. Some evenings, staying here and watching the light fall across the hills is the plan.",
       summary:
         "The Airbnb stops feeling like lodging the moment the pool and mountain horizon come into the same frame.",
       notes: [
-        "Three bedrooms, three bathrooms in a modern container‑based villa with industrial‑chic design.",
+        "Three bedrooms, three bathrooms in a modern container villa with an industrial design.",
         "Infinity pool, hot tub, fire pit, outdoor kitchen and BBQ area set amid tropical gardens.",
-        "Free private parking at the property; roads are accessible and no 4×4 is needed.",
-        "Fully equipped kitchen, laundry, free Wi‑Fi, air conditioning in all rooms.",
-        "Pet‑friendly property (up to 3 pets, 50 lb max).",
+        "Free private parking is available at the property. Roads are accessible and no 4×4 is needed.",
+        "Fully equipped kitchen, laundry, free wireless internet, and air conditioning in all rooms.",
+        "The property welcomes up to 3 pets weighing no more than 50 lb each.",
         "The mountain breeze, quiet setting, and pool made the house a useful reset after coastal drives.",
-        "A true sanctuary: very private and peaceful, but still about 20 to 30 minutes from Aguadilla, Isabela, or Rincón.",
+        "It feels like a true sanctuary, very private and peaceful, but still about 20 to 30 minutes from Aguadilla, Isabela, or Rincón.",
       ],
       hero: {
         assetId: "image-puerto-rico-florecer-5",
@@ -499,7 +499,7 @@ export const puertoRico2024Journey = Object.freeze({
       summary:
         "A view between the horse's ears, a coast framed by palms, and a guide singing through the ride change the pace of the whole morning.",
       notes: [
-        "About a 25‑minute drive from Hacienda Florecer to the ranch (on Carr 107).",
+        "About a 25 minute drive from Hacienda Florecer to the ranch on Carr 107.",
         "The private guided tour lasted about one to one and a half hours through fields, forest edge, beachside trails, and ruins.",
         "Paso Fino horses brought a smooth gait, a gentle pace for beginners, and a calm demeanor.",
       ],
@@ -547,14 +547,14 @@ export const puertoRico2024Journey = Object.freeze({
       type: "beach",
       droneAllowed: true,
       description:
-        "Clear water, a reef line, and very little between the road and the sea make Shacks feel open and complete on its own. It is the kind of stop that asks us to bring everything we need and read the water carefully: calm near shore does not erase the stronger currents farther out.",
+        "Clear water, a reef line, and very little between the road and the sea make Shacks feel open and complete on its own. It is the kind of stop that asks us to bring everything we need and read the water carefully. Calm near shore does not erase the stronger currents farther out.",
       summary:
         "Clear shallows and an offshore reef make this a quieter stop. The water, not the amenities, sets the terms.",
       notes: [
         "Excellent for snorkeling and kite surfing,",
-        "Calm, clear waters closer to shore; stronger currents near reefs,",
+        "Calm, clear waters closer to shore, with stronger currents near reefs,",
         "No formal facilities or lifeguards,",
-        "Limited roadside parking; arrive early for a spot,",
+        "Limited roadside parking means arriving early helps secure a spot,",
         "Quiet and relaxed, popular with locals and adventure travelers",
       ],
       hero: {
@@ -588,7 +588,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "beach",
       droneAllowed: true,
       description:
-        "Peña Blanca compresses the beach day into a small cove: rock around the edges, calmer water inside, and no formal facilities to distract from it. We do not need a long agenda here. The value is the pause between larger stops, when swimming and a few frames are enough.",
+        "Peña Blanca compresses the beach day into a small cove with rock around the edges, calmer water inside, and no formal facilities to distract from it. We do not need a long agenda here. The value is the pause between larger stops, when swimming and a few frames are enough.",
       summary:
         "A small cove gives the day a quiet middle with calm water, roadside access, and no need to manufacture more.",
       notes: [
@@ -661,17 +661,17 @@ export const puertoRico2024Journey = Object.freeze({
       type: "dining",
       droneAllowed: false,
       description:
-        "By dinner, the day already holds horses, several beaches, drone flights, and time underwater. ARTe puts us above Aguadilla Bay with food, tropical drinks, and the last light doing most of the decorating. The rooftop is not another activity to conquer; it is where the day finally catches up with us.",
+        "By dinner, the day already holds horses, several beaches, drone flights, and time underwater. ARTe puts us above Aguadilla Bay with food, tropical drinks, and the last light doing most of the decorating. The rooftop is not another activity to conquer. It is where the day finally catches up with us.",
       summary:
         "We end a packed coastal day above the bay, letting dinner and the sunset slow everything back down.",
       notes: [
         "Centrally located in Aguadilla pueblo, just steps from the waterfront promenade.",
         "Dining terrace overlooks Aguadilla Bay and Rompeolas Beach at sunset.",
-        "Creative ‘Criollo fusion’ menu and tropical cocktails; evening ambiance with subtle music.",
-        "Friendly and attentive service; good street parking or valet options in town.",
-        "There were no live bands; background lounge music kept dinner conversational.",
+        "Creative ‘Criollo fusion’ menu and tropical cocktails, with evening ambiance and subtle music.",
+        "Friendly and attentive service, with good street parking or valet options in town.",
+        "There were no live bands. Background lounge music kept dinner conversational.",
         "Accessible via short walk from downtown plaza (Parroquia San Carlos Borromeo & El Parterre area).",
-        "Popular on weekends; reservations recommended if you want a table at dusk.",
+        "Popular on weekends. Reservations are recommended if you want a table at dusk.",
       ],
       hero: {
         assetId: "image-puerto-rico-aguadilla-1",
@@ -702,7 +702,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "hike",
       droneAllowed: true,
       description:
-        "We arrive at opening and reach the main pool before the day gets loud. Light cuts through the trees toward the water while one swimmer crosses beneath the falls; for a while, the frame is mostly rock, green water, and space. After swimming, we take the extra 10 to 15 minutes to the upper falls, then watch the quiet version of Gozalandia disappear as more people arrive.",
+        "We arrive at opening and reach the main pool before the day gets loud. Light cuts through the trees toward the water while one swimmer crosses beneath the falls. For a while, the frame is mostly rock, green water, and space. After swimming, we take the extra 10 to 15 minutes to the upper falls, then watch the quiet version of Gozalandia disappear as more people arrive.",
       summary:
         "Opening time buys us one quiet swim before Gozalandia becomes everyone else's day too.",
       notes: [
@@ -749,7 +749,7 @@ export const puertoRico2024Journey = Object.freeze({
       type: "beach",
       droneAllowed: true,
       description:
-        "The rock barrier does something the photographs explain better than a beach guide. Outside is open coast; inside is a compact pocket of calmer water. Mar Chiquita makes sense as a final day stop because it can be as brief as we need. One walk, a swim if time allows, and a last look at the coast are enough before the airport route takes over.",
+        "The rock barrier does something the photographs explain better than a beach guide. Outside is open coast. Inside is a compact pocket of calmer water. Mar Chiquita makes sense as a final day stop because it can be as brief as we need. One walk, a swim if time allows, and a last look at the coast are enough before the airport route takes over.",
       summary:
         "Rock walls hold a small calm pocket inside the larger Atlantic coast, giving us one last easy stop before the drive east.",
       notes: [
@@ -840,12 +840,12 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 2: Old San Juan and Nightlife",
       summary:
-        "We start early at Castillo San Cristóbal, then let Old San Juan pull us through cobblestone streets, bright facades, small squares, and the coast. Lunch at La Carreta gives the morning an endpoint; the rooftop pool at Don Rafa gives us a reset. After dark, we dress up for the Fairmont, then trade that polished calm for Calle C. Canals, where the music changes every few doors. We keep moving until one place finally matches our mood.",
+        "We start early at Castillo San Cristóbal, then let Old San Juan pull us through cobblestone streets, bright facades, small squares, and the coast. Lunch at La Carreta gives the morning an endpoint. The rooftop pool at Don Rafa gives us a reset. After dark, we dress up for the Fairmont, then trade that polished calm for Calle C. Canals, where the music changes every few doors. We keep moving until one place finally matches our mood.",
       visits: [
         {
           visitId: "puerto-rico-2024-old-san-juan",
           notes:
-            "The fort gives us the wide view; the streets give us the details. Starting early leaves enough room to notice both before the afternoon heat pushes us back to the hotel.",
+            "The fort gives us the wide view. The streets give us the details. Starting early leaves enough room to notice both before the afternoon heat pushes us back to the hotel.",
         },
         {
           visitId: "puerto-rico-2024-don-rafa-boutique-hotel",
@@ -874,7 +874,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-cueva-del-indio",
           notes:
-            "The short approach makes the reveal feel abrupt: roadside one minute, open limestone and rough Atlantic water the next. We keep back from the edge and let the wide frames carry the scale.",
+            "The short approach makes the reveal feel abrupt. It is roadside one minute, then open limestone and rough Atlantic water the next. We keep back from the edge and let the wide frames carry the scale.",
         },
         {
           visitId: "puerto-rico-2024-estatua-de-colon",
@@ -884,7 +884,7 @@ export const puertoRico2024Journey = Object.freeze({
         {
           visitId: "puerto-rico-2024-la-cara-del-indio",
           notes:
-            "We pull into one of the small roadside spaces, photograph the carved face, and leave within minutes. The brevity does not make it meaningless; it lets the stop sit inside the drive instead of becoming a performance.",
+            "We pull into one of the small roadside spaces, photograph the carved face, and leave within minutes. The brevity does not make it meaningless. It lets the stop sit inside the drive instead of becoming a performance.",
         },
         {
           visitId: "puerto-rico-2024-hacienda-florecer",
@@ -903,7 +903,7 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 4: Horseback Riding, Beach Hopping, and Rooftop Dinner",
       summary:
-        "About 25 minutes from the house, I am looking at the coast between a Paso Fino's ears while our guide sings through the 60 to 90 minute ride. The day then keeps changing beaches: clear water and reef at Shacks, the smaller calm of Peña Blanca, and finally the piers, people, underwater footage, and golden hour energy of Crash Boat. By the time we reach ARTe above Aguadilla Bay, dinner is less a final activity than a chance to let the whole day catch up with us.",
+        "About 25 minutes from the house, I am looking at the coast between a Paso Fino's ears while our guide sings through the 60 to 90 minute ride. The day then keeps changing beaches through clear water and reef at Shacks, the smaller calm of Peña Blanca, and finally the piers, people, underwater footage, and golden hour energy of Crash Boat. By the time we reach ARTe above Aguadilla Bay, dinner is less a final activity than a chance to let the whole day catch up with us.",
       visits: [
         {
           visitId: "puerto-rico-2024-playuelas-horse-rides",
@@ -936,7 +936,7 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 5: Gozalandia Waterfall and Poolside Airbnb",
       summary:
-        "We reach Gozalandia at opening and get the quiet version first: a swimmer crossing the green pool, the falls dropping through dark rock, and light cutting between the trees. After the main pool, we walk another 10 to 15 minutes to the upper falls. The crowd begins filling in as we leave, which makes returning to Hacienda Florecer feel like a deliberate second half rather than downtime. We have the pool, the mountains, and nowhere else we need to be.",
+        "We reach Gozalandia at opening and get the quiet version first. A swimmer crosses the green pool, the falls drop through dark rock, and light cuts between the trees. After the main pool, we walk another 10 to 15 minutes to the upper falls. The crowd begins filling in as we leave, which makes returning to Hacienda Florecer feel like a deliberate second half rather than downtime. We have the pool, the mountains, and nowhere else we need to be.",
       visits: [
         {
           visitId: "puerto-rico-2024-gozalandia",
@@ -954,12 +954,12 @@ export const puertoRico2024Journey = Object.freeze({
     {
       label: "Day 6: Mar Chiquita, Playa Pastillo, and Departure",
       summary:
-        "We check out and point east, leaving room for two final coastal stops before the airport. Mar Chiquita holds a calmer pocket of water behind its rock barrier; Playa Pastillo answers with rougher surf, an undeveloped shoreline, and a cave about a mile from the main access. The contrast gives the coast a proper final scene. From there, returning the rental car at SJU takes over and the road trip ends where it started.",
+        "We check out and point east, leaving room for two final coastal stops before the airport. Mar Chiquita holds a calmer pocket of water behind its rock barrier. Playa Pastillo answers with rougher surf, an undeveloped shoreline, and a cave about a mile from the main access. The contrast gives the coast a proper final scene. From there, returning the rental car at SJU takes over and the road trip ends where it started.",
       visits: [
         {
           visitId: "puerto-rico-2024-mar-chiquita",
           notes:
-            "The rock barrier makes the cove legible at a glance: open Atlantic beyond it, calmer water inside. It works because the stop can stay short without feeling incomplete.",
+            "The rock barrier makes the cove legible at a glance, with open Atlantic beyond it and calmer water inside. It works because the stop can stay short without feeling incomplete.",
         },
         {
           visitId: "puerto-rico-2024-playa-pastillo",
@@ -1005,7 +1005,7 @@ export const puertoRico2024Journey = Object.freeze({
     "calle-c-canals":
       "The music changes every few doors, so we keep moving from bar to bar until one room finally matches our mood.",
     "cueva-del-indio":
-      "A short trail opens abruptly onto limestone arches and rough Atlantic water; we keep back from the edge and let the wide frames carry the scale.",
+      "A short trail opens abruptly onto limestone arches and rough Atlantic water. We keep back from the edge and let the wide frames carry the scale.",
     "estatua-de-colon":
       "The statue appears at highway scale before we decide to stop, turning a quick pullout into a complicated pause for history and context.",
     "la-cara-del-indio":

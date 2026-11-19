@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-18
+updated: 2026-11-19
 related:
   - gear-system
   - gear-ingestion-cli
@@ -18,6 +18,8 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/ingest-gear.js
+  - scripts/gear-workflow.mjs
+  - scripts/test-gear-workflow.mjs
   - scripts/ingest-gear-sheet.mjs
   - scripts/generate-gear-workbook.mjs
   - scripts/prepare-gear-image.mjs
@@ -65,6 +67,7 @@ verification:
     - Pages runs 44447213314, 44449597304, and 44452107546
     - production image-workflow merges 98211b8fa5223ba2617755ef01ed75ea3fd36e35, 87ce942cf443101c1f7dcfff7fb23ae26c3c14c1, and f84cc34f8ba04ef09dd049385ca8f7eafc8f56a2
     - live https://roamwithjustin.com/gear rendered and bundle markers verified 2026-11-18
+    - node scripts/test-gear-workflow.mjs
 ---
 
 # Gear publishing implementation
@@ -101,6 +104,11 @@ with an original image into a repeatable publishing workflow.
   qualification.
 - [x] Canonical Amazon Associates Partner identity and bounded host allowlist
   for complete owner-generated URLs. No automatic Amazon tag rule is active.
+- [x] One file-based `gear:workflow` command with a no-write preview, local
+  prepare checkpoint, and separately approved publish checkpoint.
+- [x] Workflow rollback restores the prior canonical Gear file when record,
+  preparation, upload, or image publication fails. Immutable uploaded objects
+  remain available for a safe rerun.
 
 ## Production release, 2026-11-18
 
@@ -157,6 +165,20 @@ with an original image into a repeatable publishing workflow.
 - [ ] Add the canonical Partner only after relationship and destination hosts
   are established. Repository presence is not proof of external approval.
 - [ ] Preview and review the resulting card before publication.
+
+## Authoring orchestration, 2026-11-19
+
+- [x] Accept one versioned JSON workflow that binds one exact Gear ID,
+  canonical Journey, existing record source, and reviewed local image input.
+- [x] Resolve workflow paths relative to the workflow file so the command is
+  replayable from any working directory.
+- [x] Repeat record and image preview before either apply checkpoint.
+- [x] Refuse publish unless the deterministic package already exists from an
+  earlier prepare checkpoint and `--approve-card` is present.
+- [x] Reuse the existing Gear ingestor, image preparation, upload receipt, and
+  canonical publication implementations instead of copying their contracts.
+- [x] Keep credentials in private environment variables and keep Git, branch
+  promotion, deployment, remote image intake, and AI outside the command.
 
 ## Journey-independent image phase
 
