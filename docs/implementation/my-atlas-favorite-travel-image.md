@@ -53,6 +53,10 @@ verification:
     - The local development server compiled the owner visibility control and public profile hero successfully
     - Staging Worker version 1113afaf-4600-4777-b92d-b2eb40e43826 deployed the public image route, explicit visibility mutation, and revised privacy version
     - Remote staging returned 200 health, 204 for the allowed PATCH preflight, and the closed 404 `atlas_image_not_found` response for an unknown public image handle
+    - Pull request 196 passed validation run 44657690886 and merged to develop as 03a188025480129e57156d75243bc70f3a67d229; develop validation run 44657932409 then succeeded
+    - Pull request 197 passed production validation run 44658215573 and merged to main as d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246
+    - Pages run 44658409109 deployed the production merge successfully
+    - Live chunks 371.07c466f0.js and 917.6e99172f.js returned 200 and together contained the Favorite travel image, View full image, Show on public profile, Share saved trip, and Share Visited Atlas markers
     - Authenticated visibility mutation and real public profile image acceptance remain externally unverified
 ---
 
@@ -122,6 +126,9 @@ not changed by this media scope.
       `MY_ATLAS_IMAGE_RATE_LIMITER` bindings.
 - [x] Promote the owner UI through protected develop and main pull requests,
       deploy it through Pages, and verify its exact live bundle markers.
+- [x] Promote the public profile hero, explicit visibility control, and separate
+      sharing workflows through pull requests 196 and 197, then verify their
+      exact live bundle markers after Pages run 44658409109.
 - [ ] Use a disposable authenticated beta account to upload representative
       portrait, landscape, PNG, and WebP samples. Record source dimensions,
       source bytes, output dimensions, output bytes, and metadata inspection.
