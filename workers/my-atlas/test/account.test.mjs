@@ -55,8 +55,11 @@ function registry() {
   return env.MY_ATLAS_REGISTRY.getByName(REGISTRY_OBJECT_NAME)
 }
 
-async function registerOwner() {
-  const inviteCode = "account_test_invitation_1234567890"
+async function registerOwner({
+  userId = USER_ID,
+  inviteCode = "account_test_invitation_1234567890",
+  registrationKey = "11111111-1111-4111-8111-111111111111",
+} = {}) {
   const digest = await hashInviteCode(inviteCode, PEPPER)
   await registry().issueInvitation({
     digest,
@@ -73,7 +76,7 @@ async function registerOwner() {
       acceptTerms: true,
       acceptPrivacy: true,
     },
-    "11111111-1111-4111-8111-111111111111"
+    registrationKey
   )
   return registerBetaAccount({
     environment: environment(),
@@ -81,7 +84,7 @@ async function registerOwner() {
     input,
     now: NOW,
     turnstileVerifier: async () => true,
-    userIdFactory: () => USER_ID,
+    userIdFactory: () => userId,
   })
 }
 
@@ -161,6 +164,269 @@ beforeEach(async () => {
 })
 
 describe("private owner profile and pin services", () => {
+  it("cannot replay a deleted account operation against a newly registered account", async () => {
+    const input = {
+      confirmation: "DELETE MY ATLAS",
+      expectedRevision: 1,
+      idempotencyKey: "abababab-abab-4bab-8bab-abababababab",
+    }
+    await deleteMyAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    const recreatedId = "usr_eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+    await registerOwner({
+      userId: recreatedId,
+      inviteCode: "new_account_invitation_1234567890",
+      registrationKey: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+    })
+    const replay = await deleteMyAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    expect(replay.idempotent).toBe(true)
+    expect(
+      (await getMyProfile({ environment: environment(), identity: IDENTITY }))
+        .profile.userId
+    ).toBe(recreatedId)
+    await expect(
+      deleteMyAccount({
+        environment: environment(),
+        identity: IDENTITY,
+        input: { ...input, expectedRevision: 2 },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "idempotency_conflict" })
+    await expect(
+      deleteMyAccount({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          ...input,
+          accountId: USER_ID,
+          idempotencyKey: "babababa-baba-4aba-8aba-babababababa",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "account_changed" })
+    expect(
+      (await getMyProfile({ environment: environment(), identity: IDENTITY }))
+        .profile.status
+    ).toBe("active")
+  })
+  it("keeps private visit experiences independent, revisioned, exportable and removable", async () => {
+    let sequence = 100,
+      revision = 1
+    const key = () =>
+      `${String(++sequence).padStart(8, "0")}-1111-4111-8111-111111111111`
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        customPlace: { name: "Private visit", coordinates: [16.44, 43.51] },
+        visitedYears: [2026],
+        memory: "Keep this memory",
+        expectedRevision: revision,
+        idempotencyKey: key(),
+      },
+      now: NOW,
+    })
+    revision = created.profile.revision
+    const pinId = created.pin.pinId
+    const first = {
+      action: "add",
+      id: "exp_" + "1".repeat(32),
+      title: "Boat excursion",
+      operatorName: "Private operator",
+      operatorWebsite: "https://operator.example.com/",
+    }
+    const firstInput = {
+      pinId,
+      patch: { experienceChange: first },
+      expectedRevision: revision,
+      idempotencyKey: key(),
+    }
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    const before = await runInDurableObject(
+      user,
+      (_instance, state) => state.storage.kv.get("profile").publicAtlasUpdatedAt
+    )
+    expect(before).toBe(NOW)
+    const saved = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: firstInput,
+      now: "2026-11-16T18:00:00.000Z",
+    })
+    revision = saved.profile.revision
+    expect(saved.pin.experiences).toHaveLength(1)
+    expect(saved.pin.memory).toBe("Keep this memory")
+    expect(saved.pin.visitedYears).toEqual([2026])
+    expect(
+      await runInDurableObject(
+        user,
+        (_instance, state) =>
+          state.storage.kv.get("profile").publicAtlasUpdatedAt
+      )
+    ).toBe(before)
+    const replay = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: firstInput,
+      now: NOW,
+    })
+    expect(replay.idempotent).toBe(true)
+    expect(replay.profile.revision).toBe(revision)
+    const change = async value => {
+      const result = await updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          pinId,
+          patch: { experienceChange: value },
+          expectedRevision: revision,
+          idempotencyKey: key(),
+        },
+        now: NOW,
+      })
+      revision = result.profile.revision
+      return result
+    }
+    await change({
+      action: "add",
+      id: "exp_" + "2".repeat(32),
+      title: "Snorkeling",
+    })
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          pinId,
+          patch: {
+            experienceChange: {
+              ...first,
+              action: "edit",
+              title: "Stale change",
+            },
+          },
+          expectedRevision: 2,
+          idempotencyKey: key(),
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "revision_conflict" })
+    const edited = await change({
+      ...first,
+      action: "edit",
+      title: "Private edited activity",
+    })
+    expect(edited.pin.experiences.map(e => e.title)).toEqual([
+      "Private edited activity",
+      "Snorkeling",
+    ])
+    const state = await getMyAtlasState({
+      environment: environment(),
+      identity: IDENTITY,
+      placeCatalog: { resolveMany: async () => [] },
+    })
+    expect(state.pins[0].experiences).toHaveLength(2)
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.pins[0].experiences[0].operatorWebsite).toBe(
+      first.operatorWebsite
+    )
+    await registerSecondOwner()
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+        input: {
+          pinId,
+          patch: { experienceChange: first },
+          expectedRevision: 1,
+          idempotencyKey: key(),
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "pin_not_found" })
+    const published = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true, discoverable: true },
+        expectedRevision: revision,
+        idempotencyKey: key(),
+      },
+      now: NOW,
+    })
+    revision = published.profile.revision
+    for (const result of [
+      await user.getPublicAtlas(),
+      await user.getPublicAtlasDiscovery(),
+    ]) {
+      expect(JSON.stringify(result)).not.toContain("experiences")
+      expect(JSON.stringify(result)).not.toContain(first.operatorWebsite)
+    }
+    await change({ action: "remove", id: first.id })
+    const remaining = (
+      await getMyAtlasState({
+        environment: environment(),
+        identity: IDENTITY,
+        placeCatalog: { resolveMany: async () => [] },
+      })
+    ).pins[0]
+    expect(remaining.experiences.map(e => e.title)).toEqual(["Snorkeling"])
+    expect(remaining.memory).toBe("Keep this memory")
+    await runInDurableObject(user, (_instance, storageState) => {
+      const cached = JSON.stringify([
+        ...storageState.storage.kv.list({ prefix: "mutation:" }),
+      ])
+      expect(cached).not.toContain("Private operator")
+      expect(cached).not.toContain("Snorkeling")
+    })
+    const deleted = await deleteMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: { pinId, expectedRevision: revision, idempotencyKey: key() },
+      now: NOW,
+    })
+    revision = deleted.profile.revision
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .pins
+    ).toEqual([])
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: firstInput,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "pin_not_found" })
+    await deleteMyAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        confirmation: "DELETE MY ATLAS",
+        expectedRevision: revision,
+        idempotencyKey: key(),
+      },
+      now: NOW,
+    })
+    await runInDurableObject(user, (_instance, storageState) => {
+      expect(JSON.stringify([...storageState.storage.kv.list()])).not.toContain(
+        "Snorkeling"
+      )
+    })
+  })
+
   it("previews all handles and wipes both user accounts through ordinary deletion", async () => {
     await registerSecondOwner()
     const preview = await wipeMyAtlasAccounts({

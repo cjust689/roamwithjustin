@@ -2,13 +2,19 @@
   <section class="my-atlas-registration" aria-labelledby="registration-title">
     <header>
       <div>
-        <p>Owner invitation</p>
+        <p>
+          {{ localDevelopment ? "Local test account" : "Owner invitation" }}
+        </p>
         <strong id="registration-title">Create your private Atlas</strong>
       </div>
-      <span>One use</span>
+      <span>{{ localDevelopment ? "Development" : "One use" }}</span>
     </header>
 
-    <p>
+    <p v-if="localDevelopment">
+      This creates an account only in your local development store. The local
+      invitation is filled in for you.
+    </p>
+    <p v-else>
       Your account begins private. Staging data may be reset while the beta is
       being verified.
     </p>
@@ -87,6 +93,8 @@ import { MY_ATLAS_TURNSTILE_ACTION } from "../config/turnstile.mjs"
 export default {
   name: "MyAtlasRegistrationForm",
   props: {
+    localDevelopment: { type: Boolean, default: false },
+    initialInviteCode: { type: String, default: "" },
     siteKey: { type: String, default: "" },
     initialDisplayName: { type: String, default: "" },
     pending: { type: Boolean, default: false },
@@ -95,7 +103,7 @@ export default {
   emits: ["submit"],
   data() {
     return {
-      inviteCode: "",
+      inviteCode: this.localDevelopment ? this.initialInviteCode : "",
       handle: "",
       displayName: this.initialDisplayName,
       acceptTerms: false,

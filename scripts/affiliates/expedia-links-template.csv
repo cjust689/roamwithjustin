@@ -1,0 +1,2 @@
+id,destination_id,destination_label,country_code,expedia_flights_url,enabled,placement_scope,notes
+expedia-flights-generic,,,,,false,public,Paste a real Expedia-issued generic flight URL before enabling.

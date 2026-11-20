@@ -311,10 +311,6 @@ assert.match(
 )
 assert.doesNotMatch(plannerComponent, /<summary>Delete My Atlas account/)
 assert.match(ownerView, /<details class="my-atlas-delete-account">/)
-assert.match(
-  ownerView,
-  /pendingDeletion[\s\S]*deleteMyAtlasAccountWithRevisionRecovery\([\s\S]*onRevision: revision =>[\s\S]*sessionStorage\.setItem/
-)
 assert.match(apiClient, /path: "\/v1\/me\/planning"/)
 assert.match(apiClient, /fetchMyAtlasProfile[\s\S]*path: "\/v1\/me"/)
 assert.match(

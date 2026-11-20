@@ -1,6 +1,10 @@
 import { isMyAtlasPlaceType } from "../catalog/placeTypes.mjs"
 import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
 import {
+  normalizeExperienceChange,
+  validStoredExperiences,
+} from "../../../../shared/my-atlas-experiences.mjs"
+import {
   publicInstagramHandle,
   normalizeInstagramHandle,
 } from "../../../../shared/my-atlas-instagram.mjs"
@@ -46,6 +50,10 @@ function isVisitedDate(value) {
 }
 
 function normalizedPin(value) {
+  if (!validStoredExperiences(value.experiences))
+    throw new MyAtlasApiError("The experience response is invalid.", {
+      code: "invalid_response",
+    })
   const visitedDates = Array.isArray(value.visitedDates)
     ? value.visitedDates
     : Array.isArray(value.visitedYears)
@@ -571,22 +579,36 @@ export async function updateMyAtlasPin({
   pinId,
   visitedDates,
   memory,
+  experienceChange,
+  idempotencyKey,
   revision,
   fetchImpl = fetch,
 }) {
   const normalizedMemory =
     memory === undefined ? undefined : validatedMemory(memory)
+  const normalizedChange =
+    experienceChange === undefined
+      ? undefined
+      : normalizeExperienceChange(experienceChange)
+  if (normalizedChange === null)
+    throw new MyAtlasApiError(
+      "Enter a title and valid optional experience details.",
+      { code: "invalid_experience" }
+    )
   const { response, payload } = await authenticatedJsonRequest({
     apiBaseUrl,
     accessToken,
     path: `/v1/me/pins/${encodeURIComponent(pinId)}`,
     method: "PATCH",
     body: {
+      ...(normalizedChange === undefined
+        ? {}
+        : { experienceChange: normalizedChange }),
       ...(visitedDates === undefined ? {} : { visitedDates }),
       ...(normalizedMemory === undefined ? {} : { memory: normalizedMemory }),
     },
     revision,
-    idempotencyKey: newIdempotencyKey(),
+    idempotencyKey: idempotencyKey || newIdempotencyKey(),
     fetchImpl,
   })
   if (
@@ -600,8 +622,27 @@ export async function updateMyAtlasPin({
       code: "invalid_response",
     })
   }
+  const pin = normalizedPin(payload.pin)
+  if (normalizedChange) {
+    const saved = pin.experiences?.find(
+      entry => entry.id === normalizedChange.id
+    )
+    if (
+      normalizedChange.action === "remove"
+        ? Boolean(saved)
+        : !saved ||
+          ["title", "operatorName", "operatorWebsite"].some(
+            key => saved[key] !== normalizedChange[key]
+          )
+    ) {
+      throw new MyAtlasApiError(
+        "The experience change could not be confirmed.",
+        { code: "invalid_response" }
+      )
+    }
+  }
   return Object.freeze({
-    pin: normalizedPin(payload.pin),
+    pin,
     revision: revisionFromResponse(response),
   })
 }
@@ -1104,6 +1145,7 @@ export async function deleteMyAtlasAccount({
   apiBaseUrl,
   accessToken,
   revision,
+  accountId,
   idempotencyKey = newIdempotencyKey(),
   fetchImpl = fetch,
 }) {
@@ -1112,7 +1154,10 @@ export async function deleteMyAtlasAccount({
     accessToken,
     path: "/v1/me",
     method: "DELETE",
-    body: { confirmation: "DELETE MY ATLAS" },
+    body: {
+      confirmation: "DELETE MY ATLAS",
+      ...(accountId ? { accountId } : {}),
+    },
     revision,
     idempotencyKey,
     fetchImpl,
@@ -1129,6 +1174,7 @@ export async function deleteMyAtlasAccountWithRevisionRecovery({
   apiBaseUrl,
   accessToken,
   revision,
+  accountId,
   idempotencyKey = newIdempotencyKey(),
   onRevision,
   fetchImpl = fetch,
@@ -1136,6 +1182,7 @@ export async function deleteMyAtlasAccountWithRevisionRecovery({
   const deletion = currentRevision =>
     deleteMyAtlasAccount({
       apiBaseUrl,
+      accountId,
       accessToken,
       revision: currentRevision,
       idempotencyKey,
@@ -1153,6 +1200,11 @@ export async function deleteMyAtlasAccountWithRevisionRecovery({
     accessToken,
     fetchImpl,
   })
+  if (accountId && profile.userId !== accountId)
+    throw new MyAtlasApiError(
+      "The account has changed. Confirm deletion again for the current account.",
+      { code: "account_changed" }
+    )
   if (typeof onRevision === "function") onRevision(profile.revision)
   return deletion(profile.revision)
 }

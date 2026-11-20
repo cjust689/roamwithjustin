@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-18
+updated: 2026-11-20
 related:
   - monetization-analytics-plan
   - ga4-three-day-improvement-roadmap
@@ -154,6 +154,18 @@ received event data require external owner verification.
   `ca-pub-5275158408075125`. It does not contain the AdSense script loader.
 
 ## Important limitations
+
+- A local-only Expedia destination-flight registry and importer now reuse the
+  existing Expedia Partner host policy. Sheet grid hyperlinks, exported Docs
+  tables and CSV inputs are supported with dry-run, strict canonical-city
+  validation and explicit atomic local publication. The artifact contains no
+  active issued links. The configured wrapper always keeps private placement
+  untracked. Existing approved public banners and neutral dated planner
+  handoffs remain unchanged.
+- A separate loopback-only Viator sandbox prototype has no production route,
+  frontend key, product cache or private-planner placement. The current key
+  received HTTP 401; real results and attribution remain unverified. Operational
+  details are in the active location/experience implementation document.
 
 - No ad slot ID or ads.txt seller line is committed. The publisher verification
   meta tag cannot render an ad, so advertising remains off in repository builds

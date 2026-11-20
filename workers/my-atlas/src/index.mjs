@@ -1,4 +1,8 @@
 import {
+  isLocalRegistrationRequest,
+  registerLocalBetaAccount,
+} from "./registration/local.mjs"
+import {
   InsufficientPermissionsError,
   WorkerConfigurationError,
   isJwksAvailabilityError,
@@ -213,7 +217,7 @@ function csvCell(value) {
 
 function exportCsv(result, context) {
   const rows = [
-    "pinId,placeId,customName,longitude,latitude,visitedYears,visitedDates,memory",
+    "pinId,placeId,customName,longitude,latitude,visitedYears,visitedDates,memory,experiences",
   ]
   for (const pin of result.pins) {
     const visitedDates = Array.isArray(pin.visitedDates)
@@ -235,6 +239,7 @@ function exportCsv(result, context) {
           )
           .join("|"),
         pin.memory || "",
+        JSON.stringify(pin.experiences || []),
       ]
         .map(csvCell)
         .join(",")
@@ -1230,8 +1235,12 @@ export async function handleRequest(
 
     const input = await readRegistrationBody(request)
     const registrationService =
-      dependencies.registrationService || registerBetaAccount
+      dependencies.registrationService ||
+      (isLocalRegistrationRequest(request.url, environment)
+        ? registerLocalBetaAccount
+        : registerBetaAccount)
     const result = await registrationService({
+      requestUrl: request.url,
       environment,
       identity: {
         issuer: identity.issuer,
@@ -1281,6 +1290,16 @@ export async function handleRequest(
       return errorResponse(503, "operator_service_unavailable", context)
     }
     if (error instanceof AccountConflictError) {
+      if (
+        [
+          "experience_limit",
+          "duplicate_experience",
+          "experience_not_found",
+        ].includes(error.code)
+      )
+        return errorResponse(409, error.code, context)
+      if (error.code === "invalid_experience")
+        return errorResponse(400, "invalid_request", context)
       if (error.code === "revision_conflict") {
         return errorResponse(412, "revision_conflict", context)
       }

@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-16
+updated: 2026-11-20
 related:
   - my-atlas-api-authentication
   - my-atlas-authentication
@@ -16,6 +16,10 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - scripts/lib/my-atlas-local-registration.cjs
+  - scripts/lib/my-atlas-local-runtime.cjs
+  - workers/my-atlas/src/registration/local.mjs
+  - scripts/test-my-atlas-load-safety.mjs
   - workers/my-atlas/src/registration
   - workers/my-atlas/src/index.mjs
   - workers/my-atlas/src/worker.mjs

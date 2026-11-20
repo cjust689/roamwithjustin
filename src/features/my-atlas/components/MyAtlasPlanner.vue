@@ -559,8 +559,24 @@
             </small>
           </div>
 
-          <details class="planner-custom">
-            <summary>Can't find it? Add your own coordinates</summary>
+          <button
+            class="planner-custom-trigger"
+            type="button"
+            :disabled="pending"
+            @click="beginCustomMapPlacement"
+          >
+            {{
+              wishQuery.trim()
+                ? `Create custom place “${wishQuery.trim()}”`
+                : "Choose a custom place on the map"
+            }}
+          </button>
+          <details
+            class="planner-custom"
+            :open="customPickerOpen"
+            @toggle="handleCustomPickerToggle"
+          >
+            <summary>Custom place and coordinates</summary>
             <div>
               <label>
                 <span>Name</span>
@@ -574,6 +590,7 @@
                   min="-180"
                   max="180"
                   step="0.000001"
+                  @input="syncCustomPlacement"
                 />
               </label>
               <label>
@@ -584,9 +601,28 @@
                   min="-85.051129"
                   max="85.051129"
                   step="0.000001"
+                  @input="syncCustomPlacement"
                 />
               </label>
               <div class="planner-custom-actions">
+                <button
+                  type="button"
+                  :disabled="pending"
+                  @click="beginCustomMapPlacement"
+                >
+                  {{
+                    customMapPlacementActive
+                      ? "Choose another point on the map"
+                      : "Choose on map"
+                  }}
+                </button>
+                <button
+                  v-if="customMapPlacementActive"
+                  type="button"
+                  @click="stopCustomMapPlacement"
+                >
+                  Stop placing pin
+                </button>
                 <button
                   type="button"
                   :disabled="pending || !planStateAvailable"
@@ -1137,6 +1173,10 @@ import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
 import placeCatalog from "../data/place-catalog.proof.json"
 import {
+  normalizeMyAtlasCustomCoordinates,
+  normalizeMyAtlasCustomPlaceName,
+} from "../catalog/customPlace.mjs"
+import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
@@ -1168,6 +1208,7 @@ export default {
     "pins-created",
     "planner-state-change",
     "action-feedback",
+    "location-placement-change",
   ],
   data() {
     return {
@@ -1199,6 +1240,8 @@ export default {
         window.location.origin
       ),
       customName: "",
+      customPickerOpen: false,
+      customMapPlacementActive: false,
       customLongitude: "",
       customLatitude: "",
       planForm: {
@@ -1397,7 +1440,11 @@ export default {
       this.queueWishSearch(value)
     },
     open() {
+      if (!this.open) this.stopCustomMapPlacement()
       this.emitPlannerState()
+    },
+    routeBuilderOpen(value) {
+      if (!value) this.stopCustomMapPlacement()
     },
     plannerMapRoute: {
       deep: true,
@@ -1412,11 +1459,53 @@ export default {
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.stopCustomMapPlacement()
     window.clearTimeout(this.wishSearchTimer)
     if (this.wishSearchAbortController) this.wishSearchAbortController.abort()
     this.$emit("planner-state-change", { active: false, route: [] })
   },
   methods: {
+    beginCustomMapPlacement() {
+      if (this.pending) return
+      if (!this.customName) this.customName = this.wishQuery.trim()
+      this.customPickerOpen = true
+      this.customMapPlacementActive = true
+      this.syncCustomPlacement()
+      this.confirmDraft(
+        "Choose a point on the map. This location is a draft until you save or add it to your trip."
+      )
+    },
+    syncCustomPlacement() {
+      const values = [this.customLongitude, this.customLatitude]
+      const coordinates = values.every(value => String(value).trim() !== "")
+        ? normalizeMyAtlasCustomCoordinates(values.map(Number))
+        : null
+      this.$emit("location-placement-change", {
+        active: this.customMapPlacementActive,
+        coordinates,
+      })
+    },
+    setCustomMapCoordinates(value) {
+      const coordinates = normalizeMyAtlasCustomCoordinates(value)
+      if (!this.customMapPlacementActive || !coordinates) return
+      this.customLongitude = String(coordinates[0])
+      this.customLatitude = String(coordinates[1])
+      this.syncCustomPlacement()
+      this.confirmDraft(
+        "Custom position selected. Review the name and coordinates before saving."
+      )
+    },
+    stopCustomMapPlacement() {
+      this.customMapPlacementActive = false
+      this.$emit("location-placement-change", {
+        active: false,
+        coordinates: null,
+      })
+    },
+    handleCustomPickerToggle(event) {
+      this.customPickerOpen = event.target.open
+      if (!event.target.open) this.stopCustomMapPlacement()
+    },
     announce(message, tone = "success") {
       this.announcement = message
       this.$emit("action-feedback", { message, tone })
@@ -1483,6 +1572,7 @@ export default {
       this.$el.querySelector(".planner-heading")?.focus({ preventScroll: true })
     },
     closePlanner() {
+      this.stopCustomMapPlacement()
       if (this.open) this.open = false
     },
     async toggleOpen() {
@@ -1511,6 +1601,7 @@ export default {
       })
     },
     closeRouteBuilder() {
+      this.stopCustomMapPlacement()
       this.routeBuilderOpen = false
       this.wishlistOpen = false
     },
@@ -1921,7 +2012,9 @@ export default {
       const longitude = Number(this.customLongitude)
       const latitude = Number(this.customLatitude)
       if (
-        !this.customName ||
+        !normalizeMyAtlasCustomPlaceName(this.customName) ||
+        String(this.customLongitude).trim() === "" ||
+        String(this.customLatitude).trim() === "" ||
         !Number.isFinite(longitude) ||
         !Number.isFinite(latitude) ||
         longitude < -180 ||
@@ -1934,7 +2027,7 @@ export default {
       }
       return Object.freeze({
         placeType: "custom",
-        name: this.customName,
+        name: normalizeMyAtlasCustomPlaceName(this.customName),
         coordinates: Object.freeze([longitude, latitude]),
         routeReadiness: "user-coordinate-review",
       })
@@ -1979,6 +2072,7 @@ export default {
         }
       ).then(outcome => {
         if (outcome?.saved) {
+          this.stopCustomMapPlacement()
           this.customName = ""
           this.customLongitude = ""
           this.customLatitude = ""
@@ -1993,7 +2087,10 @@ export default {
     },
     useCustomPlanLocation(role) {
       const place = this.customPlanLocation()
-      if (place) this.usePlanLocation(role, place)
+      if (place) {
+        this.usePlanLocation(role, place)
+        this.stopCustomMapPlacement()
+      }
     },
     usePlanLocation(role, place) {
       this.error = ""
@@ -2460,6 +2557,17 @@ export default {
 </script>
 
 <style scoped>
+.planner-custom-trigger {
+  min-height: 44px;
+  margin-block: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 0.7rem;
+  color: var(--color-accent-soft);
+  background: var(--color-surface-raised);
+  font: inherit;
+  cursor: pointer;
+}
 .my-atlas-planner {
   display: grid;
   margin-top: 0.8rem;

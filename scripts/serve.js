@@ -1,6 +1,10 @@
 const { spawn } = require("child_process")
 const os = require("os")
 const path = require("path")
+const { selectMyAtlasRuntime } = require("./lib/my-atlas-local-runtime.cjs")
+const {
+  prepareLocalRegistration,
+} = require("./lib/my-atlas-local-registration.cjs")
 
 const virtualAdapterPattern =
   /docker|hamachi|hyper-v|nord|openvpn|tap|tailscale|tun|virtual|vmware|vpn|vEthernet|wsl|zerotier/i
@@ -39,14 +43,21 @@ function findLanAddress() {
 }
 
 const argumentsFromCommandLine = process.argv.slice(2)
-const myAtlasLocalSearch = argumentsFromCommandLine.includes("--my-atlas")
+const myAtlasLocalApi = argumentsFromCommandLine.includes(
+  "--my-atlas-local-api"
+)
+const myAtlasLocalSearch =
+  argumentsFromCommandLine.includes("--my-atlas") || myAtlasLocalApi
 const networkFlagFromNpm =
   process.env.npm_config_network &&
   process.env.npm_config_network.toLowerCase() !== "false"
 const serveOnNetwork =
   argumentsFromCommandLine.includes("--network") || networkFlagFromNpm
 const forwardedArguments = argumentsFromCommandLine.filter(
-  argument => argument !== "--network" && argument !== "--my-atlas"
+  argument =>
+    argument !== "--network" &&
+    argument !== "--my-atlas" &&
+    argument !== "--my-atlas-local-api"
 )
 const portArgumentIndex = forwardedArguments.findIndex(
   argument => argument === "--port"
@@ -113,11 +124,27 @@ if (serveOnNetwork && !hasHostArgument) {
 }
 
 const vueCliService = require.resolve("@vue/cli-service/bin/vue-cli-service.js")
+const atlasRuntime = selectMyAtlasRuntime(
+  path.resolve(__dirname, ".."),
+  process.env,
+  argumentsFromCommandLine,
+  () => prepareLocalRegistration(path.resolve(__dirname, ".."))
+)
+if (atlasRuntime) {
+  console.log(
+    `My Atlas API: ${atlasRuntime.environment.VUE_APP_MY_ATLAS_API_URL} (local data, separate from staging)`
+  )
+  console.log(`My Atlas persistent storage: ${atlasRuntime.persistencePath}`)
+} else if (myAtlasLocalSearch) {
+  console.log(
+    "My Atlas uses the configured API and catalog settings. No backend override is applied."
+  )
+}
 const server = spawn(
   process.execPath,
   [vueCliService, "serve", ...forwardedArguments],
   {
-    env: process.env,
+    env: atlasRuntime ? atlasRuntime.environment : process.env,
     stdio: "inherit",
   }
 )
@@ -155,7 +182,9 @@ if (myAtlasLocalSearch) {
       server.kill()
     }
   })
+}
 
+if (myAtlasLocalApi) {
   const wranglerScript = path.join(
     __dirname,
     "..",
@@ -177,6 +206,8 @@ if (myAtlasLocalSearch) {
       wranglerScript,
       "dev",
       "--local",
+      "--persist-to",
+      atlasRuntime.persistencePath,
       "--config",
       workerConfiguration,
       "--port",
