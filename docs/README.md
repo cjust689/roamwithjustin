@@ -107,6 +107,9 @@ corrects the favorite-image visibility route gate so authenticated
 returning HTTP 405. Remote staging returned HTTP 401 for the same request
 without a bearer token, proving that it now passes method routing and reaches
 authentication.
+Pull requests 204 and 205 promoted the correction through protected branches,
+and Pages run 44678154430 deployed production merge
+`84c546e078ce2b50097d20b16803ff5200f94182`.
 
 ## Active work
 
