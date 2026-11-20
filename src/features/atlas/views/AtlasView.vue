@@ -125,7 +125,7 @@
             {{
               welcomeExpanded
                 ? "Choose a place to begin"
-                : `${rootNodes.length} mapped journeys`
+                : `${storyRootNodes.length} stories to explore`
             }}
           </strong>
         </span>
@@ -143,8 +143,7 @@
         <div class="atlas-welcome-intro">
           <h1>The journey starts with a place.</h1>
           <p>
-            Open a mapped journey for its route, stories, photographs, and
-            films.
+            Open a travel story with its mapped route, photographs, and films.
           </p>
         </div>
 
@@ -154,7 +153,7 @@
           aria-label="Mapped journeys"
         >
           <button
-            v-for="node in rootNodes"
+            v-for="node in storyRootNodes"
             :key="node.id"
             type="button"
             @click="
@@ -467,6 +466,9 @@ export default {
     },
     rootNodes() {
       return getAtlasNodes(atlasRootIds)
+    },
+    storyRootNodes() {
+      return this.rootNodes.filter(node => Boolean(node.storyLead))
     },
   },
   watch: {

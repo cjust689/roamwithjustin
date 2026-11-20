@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -29,6 +29,7 @@ code_paths:
   - src/views/roam/RoamTripOverview.vue
   - src/router/index.js
   - scripts/test-atlas-story-discovery.mjs
+  - scripts/test-atlas-journey-readiness.mjs
   - scripts/test-atlas-story-reader.mjs
   - scripts/test-atlas-story-relationships.mjs
   - package.json
@@ -36,6 +37,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run atlas:test verifies that only Utah 2025, Puerto Rico 2024, and St. John 2025 own root story leads and that the welcome rail iterates those story-backed roots
     - npm run atlas:test
     - npm run lint
     - npm run content:validate
@@ -73,6 +75,9 @@ action before Journey stops. `View N stops` scrolls the existing panel to the
 ordered stop list. Google Maps and official Place destinations remain external
 actions under a compact `Useful links` section after editorial media. Incomplete
 Journey roots expose neither the story lead nor the toolbar Story action.
+The root welcome rail now uses that same selector and offers `Explore` only for
+Utah 2025, Puerto Rico 2024, and St. John 2025. Other confirmed map roots remain
+selectable on the map without being presented as finished stories.
 
 Phase 2 extracts `JourneyStoryBody.vue` as the shared canonical presentation
 used by the public Journey page and `AtlasStoryReader.vue`. Atlas reader state
@@ -122,7 +127,8 @@ appears once per browser tab when the same feature flag is enabled. It links
 directly to `/my-atlas`, stays out of story-reader state, and moves clear of the
 desktop inspector and mobile detail dock. Sparse Journey cards and panels no
 longer expose internal editorial workflow labels. They present only established
-places and content with the same exploration action as other Journeys.
+places and content. The welcome rail omits them until the canonical Journey
+owns a substantive published story.
 
 The public `/trips/:id` URL remains available and retains its commercial and
 advertising modules. The embedded Atlas reader deliberately excludes ads,
@@ -209,6 +215,8 @@ remains the indexable representation.
   story state at mobile and desktop widths.
 - [x] Remove visitor-facing sparse-content workflow labels from Atlas cards and
   detail panels.
+- [x] Restrict the welcome rail Explore action to Journey roots with a derived
+      canonical story lead while retaining incomplete Journey map pins.
 
 ## Verified flow after Phase 3
 
