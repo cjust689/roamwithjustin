@@ -89,10 +89,19 @@
         You can add this destination without a year.
       </small>
     </div>
+    <MyAtlasExperiences
+      v-if="pin"
+      :experiences="pin.experiences || []"
+      :pending="experiencePending"
+      :error="experienceError"
+      :saved-sequence="experienceSavedSequence"
+      @change="$emit('experience-change', $event)"
+    />
   </section>
 </template>
 
 <script>
+import MyAtlasExperiences from "./MyAtlasExperiences.vue"
 import {
   formatVisitedDate,
   visitedDatesForPlace,
@@ -104,7 +113,11 @@ import {
 
 export default {
   name: "MyAtlasPinEditor",
+  components: { MyAtlasExperiences },
   props: {
+    experiencePending: Boolean,
+    experienceError: { type: String, default: "" },
+    experienceSavedSequence: { type: Number, default: 0 },
     error: {
       type: String,
       default: "",
@@ -130,7 +143,7 @@ export default {
       default: "",
     },
   },
-  emits: ["cancel", "save"],
+  emits: ["cancel", "save", "experience-change"],
   data() {
     return {
       currentYear: new Date().getFullYear(),

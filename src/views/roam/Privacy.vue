@@ -52,6 +52,13 @@
           your Instagram account.
         </p>
         <p>
+          Optional activity recaps, operator names, and operator websites saved
+          at a visited destination remain private even when your Atlas is
+          public. They are included in your private account export and removed
+          with the visit or account. Opening a recap does not contact the
+          operator. An operator website opens only when you choose its link.
+        </p>
+        <p>
           Publishing a Visited Atlas link does not list it for discovery. You
           can separately choose to include your public Atlas in Explore Atlases.
           Discovery may show your handle, display name, visited place count,

@@ -20,6 +20,11 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/auth/accountDeletion.mjs
+  - scripts/test-my-atlas-load-safety.mjs
+  - scripts/lib/my-atlas-local-runtime.cjs
+  - shared/my-atlas-experiences.mjs
+  - src/features/my-atlas/components/MyAtlasExperiences.vue
   - shared/my-atlas-image-location.mjs
   - scripts/test-my-atlas-image-location.mjs
   - shared/my-atlas-instagram.mjs
@@ -64,6 +69,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Local private experience lifecycle test covers two entries, edit/remove, unchanged memory/dates, idempotent replay, stale revision, owner isolation, public exclusion, export, deletion and no private recap snapshots in mutation receipts
     - npm run build passed all 46 Worker runtime tests for Instagram, Explore freshness and required photo location; local compilation used an uncommitted parallel-false override
     - node scripts/test-my-atlas-profile-discovery.mjs
     - node scripts/test-my-atlas-action-feedback.mjs
@@ -555,15 +561,31 @@ active identity and handle assignments, and the user object erases profile,
 pins, wishlist, plans, indexes, mutation history, and policy acceptance state.
 A minimal operation tombstone supports an exact retry after a cross-object
 partial failure. It retains no handle, profile, content, or qualified identity.
-The browser persists an in-flight deletion revision and idempotency key so an
-interrupted exact request can resume. If the Worker definitively rejects that
-revision with HTTP 412, the browser reads the authoritative profile revision,
-replaces only the stored revision, and retries once with the original
-idempotency key. Reload recovery uses the same bounded path, so a stale stored
-revision cannot create a permanent conflict loop.
+The local safety correction removes automatic deletion recovery from account
+loading. Reload, HMR and sign-in only fetch the account. The old unscoped v1
+browser operation is discarded without issuing a DELETE. A manually confirmed
+deletion can retain its revision and idempotency key under a v2 session key
+scoped to API origin, account ID and account creation time. Explicit retry can
+recover a 412 once, provided the fetched account ID still matches. The browser
+sends the selected account ID in the deletion body; the Worker rejects another
+account generation. Server retry resolution checks an existing operation
+tombstone before the identity's current registration, so replaying an old
+deletion cannot target a newly registered account. Legacy callers without an
+account ID remain compatible, with tombstone-first replay protection.
 The released handle can be registered again through the ordinary invitation
 flow. Public lookup returns the generic 404 response after deletion.
 This operation does not delete the upstream Google or Auth0 identity.
+
+Normal `npm run my-atlas:serve` and `npm run serve` preserve the configured API
+and catalog endpoints. They do not select a separate local account store or
+prepare local registration. The explicit `--my-atlas-local-api` launcher flag
+selects the loopback API/search servers and prints their existing absolute
+persistence path, `workers/my-atlas/.wrangler/state`. That isolated API still
+requires local catalog provisioning before catalog-backed saves can work.
+Local and staging accounts are separate. Cloudflare tests use an isolated runtime with development
+registry discovery disabled; test reset/wipe fixtures do not call the running
+local account API. A controlled 48-test run left a logical fingerprint of the
+current local Durable Object database unchanged.
 
 The repository command `npm run my-atlas:account:wipe` is a guarded local
 development convenience around this same owner endpoint. It requires the owner's
@@ -922,6 +944,18 @@ public image projections carry the location into Explore, public image viewing,
 and both Story exports. `shared/my-atlas-image-location.mjs` governs validation.
 Legacy images without labels remain readable; new uploads and explicit image
 publication require a label. No GPS data is inferred or required.
+
+The local experience extension adds up to ten optional private recaps per owned
+pin through `experienceChange` on the existing pin PATCH route. Each has a
+stable ID, title, optional operator/HTTPS website and server timestamps. It
+does not replace the public favorite memory or change trip/visit identity.
+Owner JSON/CSV exports include recaps; public responses, discovery ranking,
+analytics and affiliate parameters exclude them. New mutation receipts for pins
+with recaps store a reference and replay current state, avoiding retained private
+recap snapshots after removal. Existing records need no migration or read-time
+writes. The browser retains the same operation key on an ambiguous retry and
+requires a reviewed explicit retry after a revision conflict. See the active
+location/experience implementation document for local verification and gates.
 
 Per-destination memory images remain outside the release. The implemented media
 scope is one favorite travel image for the account, public profile, and Atlas

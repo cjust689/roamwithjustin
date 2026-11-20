@@ -337,7 +337,19 @@ export function normalizeMarkPlanVisited(value, planId, headers, currentYear) {
 }
 
 export function normalizeDeleteAccount(value, headers) {
-  assertObject(value, new Set(["confirmation"]), "Account deletion")
+  assertObject(
+    value,
+    new Set(["confirmation", "accountId"]),
+    "Account deletion"
+  )
+  if (
+    value.accountId !== undefined &&
+    (typeof value.accountId !== "string" ||
+      !/^usr_[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/.test(
+        value.accountId
+      ))
+  )
+    throw new RegistrationValidationError("Account deletion target is invalid.")
   if (value.confirmation !== "DELETE MY ATLAS") {
     throw new RegistrationValidationError(
       "Account deletion confirmation is invalid."
@@ -345,6 +357,7 @@ export function normalizeDeleteAccount(value, headers) {
   }
   return Object.freeze({
     confirmation: value.confirmation,
+    ...(value.accountId === undefined ? {} : { accountId: value.accountId }),
     ...mutationHeaders(headers),
   })
 }

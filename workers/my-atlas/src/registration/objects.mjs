@@ -6,6 +6,10 @@ import {
 } from "../../../../shared/my-atlas-instagram.mjs"
 import { isNormalizedPinMemory } from "../account/memory.mjs"
 import {
+  applyExperienceChange,
+  normalizeExperienceChange,
+} from "../../../../shared/my-atlas-experiences.mjs"
+import {
   CUSTOM_PLACE_ID_PATTERN,
   isNormalizedCustomPlace,
 } from "../account/custom-place.mjs"
@@ -1092,15 +1096,37 @@ function ownerProfile(storage, identityDigest) {
 function existingMutation(storage, command) {
   const existing = storage.kv.get(mutationKey(command.operationDigest))
   if (!existing) return null
+  if (
+    existing.requestDigest === command.requestDigest &&
+    existing.pinReference
+  ) {
+    const pin = storage.kv.get(pinKey(existing.pinReference))
+    if (!pin) return failure("pin_not_found")
+    return Object.freeze({
+      ...existing.result,
+      pin,
+      profile: storage.kv.get("profile"),
+      idempotent: true,
+    })
+  }
   return existing.requestDigest === command.requestDigest
     ? Object.freeze({ ...existing.result, idempotent: true })
     : failure("idempotency_conflict")
 }
 
 function storeMutation(storage, command, result) {
+  const pinReference =
+    result.pin?.experiences !== undefined ? result.pin.pinId : null
+  let cachedResult = result
+  if (pinReference) {
+    const pin = { ...result.pin }
+    delete pin.experiences
+    cachedResult = { ...result, pin }
+  }
   storage.kv.put(mutationKey(command.operationDigest), {
     requestDigest: command.requestDigest,
-    result,
+    result: cachedResult,
+    ...(pinReference ? { pinReference } : {}),
     createdAt: command.now,
   })
 }
@@ -1509,6 +1535,7 @@ export class UserProfileDurableObject extends DurableObject {
             "visitedYears",
             "visitedDates",
             "memory",
+            "experienceChange",
           ].includes(key)
       ) ||
       (patch.placeId !== undefined && !PLACE_ID_PATTERN.test(patch.placeId)) ||
@@ -1517,7 +1544,9 @@ export class UserProfileDurableObject extends DurableObject {
         !isNormalizedCustomPlace(patch.customPlace)) ||
       ((patch.visitedYears !== undefined || patch.visitedDates !== undefined) &&
         !validPinTiming(patch)) ||
-      (patch.memory !== undefined && !isNormalizedPinMemory(patch.memory))
+      (patch.memory !== undefined && !isNormalizedPinMemory(patch.memory)) ||
+      (patch.experienceChange !== undefined &&
+        !normalizeExperienceChange(patch.experienceChange))
     ) {
       return failure("invalid_pin")
     }
@@ -1540,9 +1569,21 @@ export class UserProfileDurableObject extends DurableObject {
         }
       }
 
+      const { experienceChange, ...pinPatch } = patch
+      const experienceResult = experienceChange
+        ? applyExperienceChange(
+            current.experiences,
+            experienceChange,
+            command.now
+          )
+        : null
+      if (experienceResult?.error) return failure(experienceResult.error)
       const pin = {
         ...current,
-        ...patch,
+        ...pinPatch,
+        ...(experienceResult
+          ? { experiences: experienceResult.experiences }
+          : {}),
         schemaVersion: 4,
         updatedAt: command.now,
       }
@@ -1550,7 +1591,10 @@ export class UserProfileDurableObject extends DurableObject {
       if (!validStoredPinPlace(pin)) return failure("invalid_pin")
       const profile = {
         ...owner.profile,
-        publicAtlasUpdatedAt: command.now,
+        publicAtlasUpdatedAt:
+          experienceChange && Object.keys(pinPatch).length === 0
+            ? owner.profile.publicAtlasUpdatedAt
+            : command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }

@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - my-atlas-authentication
   - my-atlas-account-state
@@ -399,3 +399,21 @@ source URL, and retrieval date.
 Custom-pin names and positions are supplied by the Atlas owner rather than
 GeoNames. The owner and public views identify that distinction in their
 attribution copy.
+
+## Local custom-location fallback follow-up
+
+The local November 20 slice keeps custom creation available independently of
+catalog success, failure or results. A typed query prefills the custom label.
+Visited entry now has manual latitude/longitude fields as a keyboard alternative
+to an initial map click. Planner custom stops, wishlist items and start/finish
+drafts can use the existing map's click placement through a parent/child event
+bridge. Coordinates come from the actual SDK event, not map center. Blank fields
+are invalid instead of being coerced to zero. Saved custom stops still use
+the existing wish identity and immutable plan snapshots.
+
+Cancel, Escape, closing the custom disclosure/planner and unmount stop placement
+and remove its temporary marker. The map instance remains mounted. Positioning
+and changing start/finish selections are drafts and do not write by themselves.
+Full Maps URL parsing, short-link expansion and shared-picker consolidation
+remain later phases. See the active location/experience implementation document
+for source paths and synthetic 320, 390 and 1440 pixel verification.

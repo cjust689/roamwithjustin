@@ -10,6 +10,7 @@ import { REGISTRY_OBJECT_NAME } from "../registration/service.mjs"
 import { projectCatalogPlace } from "../catalog/projection.mjs"
 import { WorkerPlaceCatalog, createCatalogResolver } from "../catalog/store.mjs"
 import { isNormalizedPinMemory } from "./memory.mjs"
+import { validStoredExperiences } from "../../../../shared/my-atlas-experiences.mjs"
 import {
   CUSTOM_PLACE_ID_PATTERN,
   isNormalizedCustomPlace,
@@ -159,6 +160,11 @@ function ownerPinMemory(pin) {
   return pin.memory
 }
 
+function ownerExperiences(pin) {
+  if (!validStoredExperiences(pin.experiences)) throw new AccountServiceError()
+  return pin.experiences || []
+}
+
 function ownerPinPlaceFields(pin) {
   if (CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)) {
     if (!isNormalizedCustomPlace(pin.customPlace)) {
@@ -178,6 +184,9 @@ function publicOwnerPin(pin) {
     ...ownerPinPlaceFields(pin),
     ...publicPinTiming(pin),
     memory: ownerPinMemory(pin),
+    ...(pin.experiences === undefined
+      ? {}
+      : { experiences: ownerExperiences(pin) }),
   })
 }
 
@@ -216,6 +225,9 @@ async function projectOwnerPins(pins, placeCatalog, environment) {
       ...place,
       ...publicPinTiming(pin),
       memory: ownerPinMemory(pin),
+      ...(pin.experiences === undefined
+        ? {}
+        : { experiences: ownerExperiences(pin) }),
     })
   })
 }
@@ -634,6 +646,7 @@ export async function deleteMyAccount({
       action: "delete-account",
       expectedRevision: input.expectedRevision,
       confirmation: input.confirmation,
+      ...(input.accountId === undefined ? {} : { accountId: input.accountId }),
     })
   )
   const registry = requireNamespace(environment, "MY_ATLAS_REGISTRY").getByName(
@@ -642,16 +655,25 @@ export async function deleteMyAccount({
 
   let userId
   let registryDeleted = false
-  const registration = await registry.getRegistrationByIdentity(identityDigest)
-  if (registration?.ok === true && registration.state === "active") {
-    userId = registration.userId
-  } else {
-    const deletion = expectedResult(
-      await registry.getAccountDeletion(operationDigest, requestDigest)
-    )
-    userId = deletion.userId
+  const priorDeletion = await registry.getAccountDeletion(
+    operationDigest,
+    requestDigest
+  )
+  if (priorDeletion?.ok === true) {
+    userId = priorDeletion.userId
     registryDeleted = true
+  } else {
+    if (priorDeletion?.error !== "account_deletion_not_found")
+      expectedResult(priorDeletion)
+    const registration = expectedResult(
+      await registry.getRegistrationByIdentity(identityDigest)
+    )
+    if (registration.state !== "active")
+      throw new AccountConflictError("account_not_active")
+    userId = registration.userId
   }
+  if (input.accountId && input.accountId !== userId)
+    throw new AccountConflictError("account_changed")
 
   const user = requireNamespace(environment, "MY_ATLAS_USERS").getByName(userId)
   const mediaResult = await user.getOwnerAtlasImageForDeletion(identityDigest)
