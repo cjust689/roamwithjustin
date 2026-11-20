@@ -111,6 +111,29 @@ Pull requests 204 and 205 promoted the correction through protected branches,
 and Pages run 44678154430 deployed production merge
 `84c546e078ce2b50097d20b16803ff5200f94182`.
 
+Explore Atlases is now implemented locally at `/my-atlas/explore`. It lists
+only public profiles whose owners separately opt into discovery, shows the
+handle and approved favorite image, favors public Atlas activity from the prior 24 hours,
+and continues through older profiles with an opaque cursor. The companion
+`npm run my-atlas:account:wipe` command is dry run by default, verifies the
+signed in handle, and reuses permanent My Atlas deletion. It has no access to
+the curated Roam With Justin Atlas. Both features are test verified but not
+frontend deployed or externally accepted. Staging Worker version
+`600da38d-29c5-410d-9290-48dbe89a609f` now serves the directory with HTTP 200
+and production-origin CORS. The admin wipe preview rejects missing tokens
+with HTTP 401. No real account wipe was performed.
+
+The wipe command also supports `--all` using an admin token. It previews active
+handles and requires `WIPE ALL USER MY ATLAS ACCOUNTS` before applying a global
+reset in the selected environment. Pending registrations and invitations remain.
+This mode is locally tested, with no real account wipe performed.
+
+The local owner My Atlas route now requires sign-in and a loaded account
+before showing private map data or account tools. The empty map remains visible
+before sign-in. Signed-out draft exploration is
+removed, while public shared views remain accessible.
+The owner entry screen also links directly to Explore Atlases beside sign-in.
+
 ## Active work
 
 | Work                                                                                   | Status            | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |

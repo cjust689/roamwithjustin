@@ -3,7 +3,7 @@
     <article>
       <header>
         <h1>Privacy and advertising</h1>
-        <p>Effective November 19, 2026</p>
+        <p>Effective November 20, 2026</p>
       </header>
 
       <section>
@@ -43,6 +43,16 @@
           time. Wishlist entries, future trip plans, private notes, desired
           years, and plan retention details are never included in that public
           profile.
+        </p>
+        <p>
+          Publishing a Visited Atlas link does not list it for discovery. You
+          can separately choose to include your public Atlas in Explore Atlases.
+          Discovery may show your handle, display name, visited place count,
+          recent public Atlas activity status, and favorite travel image if you
+          also approved public image use. Private planning activity does not
+          affect discovery. You can remove the Atlas from discovery at any time.
+          Making it private or removing its final visited place also removes it
+          from discovery.
         </p>
         <p>
           Auth0 supports authentication. Cloudflare hosts the application data,
@@ -150,8 +160,8 @@
           My Atlas owners can keep the account private, unpublish a shared
           Atlas, remove individual places, delete wishlist entries and plans,
           change favorite travel image visibility, replace or remove the image,
-          export account data, or permanently delete the application account
-          from the signed in My Atlas screen.
+          change Explore Atlases visibility, export account data, or permanently
+          delete the application account from the signed in My Atlas screen.
         </p>
       </section>
 

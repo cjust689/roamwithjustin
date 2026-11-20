@@ -141,10 +141,7 @@ assert.match(plannerComponent, /aria-controls="planner-directions-panel"/)
 assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
 assert.match(plannerComponent, /planHasUnsavedChanges/)
 assert.match(plannerComponent, /Share saved trip/)
-assert.match(
-  plannerComponent,
-  /Share a read only snapshot of this saved trip/
-)
+assert.match(plannerComponent, /Share a read only snapshot of this saved trip/)
 assert.match(plannerComponent, /v-if="plan && !open"/)
 assert.match(plannerComponent, /v-if="!plan \|\| routeBuilderOpen"/)
 assert.match(plannerComponent, /aria-controls="planner-route-builder"/)
@@ -176,7 +173,10 @@ assert.match(sharedTripView, /:planner-read-only="true"/)
 assert.match(sharedTripView, /buildPlannerMapRoute/)
 assert.match(sharedTripView, /<details open>/)
 assert.match(sharedTripView, />\s*Trip summary\s*</)
-assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
+assert.match(
+  ownerView,
+  /:places="!canUseAtlas \|\| plannerActive \? \[\] : displayedPlaces"/
+)
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)
 assert.match(ownerView, /class="my-atlas-profile-trigger"/)
@@ -185,10 +185,7 @@ assert.match(ownerView, />\s*Share Visited Atlas\s*</)
 assert.match(ownerView, />\s*Your favorite travel image\s*</)
 assert.match(ownerView, />\s*Your Visited Atlas is empty\s*</)
 assert.match(ownerView, />\s*Add a visited place\s*</)
-assert.match(
-  ownerView,
-  /Share a saved trip separately from its\s+trip card/
-)
+assert.match(ownerView, /Share a saved trip separately from its\s+trip card/)
 assert.match(ownerView, /Create public Atlas link/)
 assert.match(ownerView, /storyExportPending/)
 assert.match(ownerView, /Creating Story image/)
@@ -218,7 +215,10 @@ assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /openAtlasPanel\('visited'\)/)
 assert.match(ownerView, /class="my-atlas-planner-action"/)
 assert.match(ownerView, /class="my-atlas-selected-memory-action"/)
-assert.match(ownerView, /openExistingPin\(selectedPlace, \{ memoryOnly: true \}\)/)
+assert.match(
+  ownerView,
+  /openExistingPin\(selectedPlace, \{ memoryOnly: true \}\)/
+)
 assert.match(ownerView, /openExistingPin\(place, \{ memoryOnly: true \}\)/)
 assert.match(ownerView, /openExistingPin\(place\)/)
 assert.match(ownerView, />\s*Visit dates\s*</)
