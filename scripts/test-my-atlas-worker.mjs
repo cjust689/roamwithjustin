@@ -1297,6 +1297,53 @@ assert.equal(
   405
 )
 
+{
+  const token = await signToken()
+  let visibilityServiceReached = false
+  const response = await workerResponse(
+    "/v1/me/atlas-image",
+    {
+      method: "PATCH",
+      origin: ALLOWED_ORIGIN,
+      token,
+      idempotencyKey: "61616161-6161-4161-8161-616161616161",
+      ifMatch: '"rev-7"',
+      json: { publicProfile: true },
+    },
+    {},
+    {
+      updateMyAtlasImageVisibility: async options => {
+        visibilityServiceReached = true
+        assert.deepEqual(options.identity, {
+          issuer: ISSUER,
+          subject: SUBJECT,
+        })
+        assert.deepEqual(options.input, {
+          publicProfile: true,
+          expectedRevision: 7,
+          idempotencyKey: "61616161-6161-4161-8161-616161616161",
+        })
+        return {
+          atlasImage: {
+            imageId: "image_11111111111111111111111111111111",
+            publicProfile: true,
+          },
+          profile: { revision: 8 },
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.equal(visibilityServiceReached, true)
+  assert.equal(response.headers.get("ETag"), '"rev-8"')
+  assert.equal((await readJson(response)).atlasImage.publicProfile, true)
+
+  const unsupported = await workerResponse("/v1/me/atlas-image", {
+    method: "PUT",
+  })
+  assert.equal(unsupported.status, 405)
+}
+
 assert.equal(getMyAtlasApiBaseUrl({}, ALLOWED_ORIGIN), "")
 assert.equal(
   getMyAtlasApiBaseUrl(
