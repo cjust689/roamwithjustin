@@ -5,6 +5,11 @@ import router from "./router"
 import { initializeAnalytics } from "./utils/analytics.mjs"
 import "@/styles/materialize.min.css"
 import "@/styles/style.css"
+import "@/styles/themes.css"
+import ThemeSelector from "./components/ThemeSelector.vue"
+import BrandMark from "./components/BrandMark.vue"
+Vue.component("ThemeSelector", ThemeSelector)
+Vue.component("BrandMark", BrandMark)
 Vue.config.productionTip = false
 // 🧠 Detect current domain
 const hostname = window.location.hostname

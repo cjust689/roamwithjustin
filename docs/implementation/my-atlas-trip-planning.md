@@ -195,6 +195,12 @@ Authenticated owner interaction remains external acceptance.
 
 ## Implemented and test verified
 
+The [trip centric transition](my-atlas-trip-centric-transition.md) now owns the
+next canonical trip, stable stop, migration, and reversible lifecycle work.
+Its first local slice adds independent flight and rental search drafts.
+These tools are explicitly browser-only and do not alter the legacy saved
+plan contract or its retention. Persistent transport details remain pending.
+
 - [x] Permanent owner account deletion route, explicit confirmation, revision
       guard, registry and handle cleanup, per-user erasure, and exact retry
       tombstone.

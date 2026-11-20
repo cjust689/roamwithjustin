@@ -181,9 +181,9 @@ export default {
   gap: 0.8rem;
   margin: 0 0 1.25rem;
   padding: 1rem;
-  border: 1px solid rgba(155, 211, 176, 0.35);
+  border: 1px solid rgba(var(--color-success-rgb, 155, 211, 176), 0.35);
   border-radius: 1rem;
-  background: rgba(155, 211, 176, 0.07);
+  background: rgba(var(--color-success-rgb, 155, 211, 176), 0.07);
 }
 
 .my-atlas-registration header,
@@ -202,14 +202,14 @@ export default {
 .my-atlas-registration p,
 .my-atlas-registration header p {
   margin: 0;
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
   font-size: 0.7rem;
   line-height: 1.45;
 }
 
 .my-atlas-registration header p,
 .my-atlas-registration header span {
-  color: #9bd3b0;
+  color: var(--color-success, #9bd3b0);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.62rem;
@@ -230,10 +230,10 @@ export default {
   box-sizing: border-box;
   width: 100%;
   padding: 0.7rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
   border-radius: 0.7rem;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-text, #fff);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.07);
   font: inherit;
 }
 
@@ -247,7 +247,7 @@ export default {
 }
 
 .my-atlas-registration .check a {
-  color: #d8efdf;
+  color: var(--color-text, #d8efdf);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.16em;
 }
@@ -256,8 +256,8 @@ export default {
   padding: 0.7rem 0.85rem;
   border: 0;
   border-radius: 0.7rem;
-  color: #132023;
-  background: #9bd3b0;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-success, #9bd3b0);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 700;
@@ -274,6 +274,6 @@ export default {
 }
 
 .my-atlas-registration .error {
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
 }
 </style>

@@ -119,20 +119,20 @@ export default {
   gap: clamp(1.5rem, 4vw, 3.5rem);
   align-items: start;
   margin-top: clamp(4rem, 10vw, 9rem);
-  border: 1px solid rgba(246, 189, 96, 0.28);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.28);
   border-radius: 24px;
   padding: clamp(1.4rem, 4vw, 2.6rem);
   background:
     radial-gradient(
       circle at 88% 12%,
-      rgba(246, 189, 96, 0.12),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.12),
       transparent 36%
     ),
-    #11191d;
+    var(--color-surface, #11191d);
 }
 
 .travel-offers__banner > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -149,13 +149,13 @@ export default {
 }
 
 .travel-offers p {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.7));
   font-size: 0.84rem !important;
   line-height: 1.65;
 }
 
 .travel-offers__disclosure {
-  color: rgba(255, 255, 255, 0.54) !important;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.54)) !important;
   font-size: 0.72rem !important;
 }
 
@@ -163,11 +163,11 @@ export default {
   align-self: center;
   justify-self: start;
   min-height: 46px;
-  border: 1px solid #f6bd60;
+  border: 1px solid var(--color-accent, #f6bd60);
   border-radius: 999px;
   padding: 0.7rem 1rem;
-  background: #f6bd60;
-  color: #11191d;
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #11191d);
   cursor: pointer;
   font: inherit;
   font-size: 0.76rem;
@@ -175,7 +175,7 @@ export default {
 }
 
 .travel-offers__activate:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 3px;
 }
 
@@ -204,7 +204,7 @@ export default {
 }
 
 .travel-offers__error {
-  color: #ffb7b7 !important;
+  color: var(--color-error, #ffb7b7) !important;
 }
 
 @media (max-width: 760px) {

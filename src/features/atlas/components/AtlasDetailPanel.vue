@@ -822,11 +822,11 @@ export default {
   bottom: 1.25rem;
   width: min(420px, calc(100vw - 2.5rem));
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 24px;
-  background: rgba(9, 14, 17, 0.94);
+  background: rgba(var(--color-page-rgb, 9, 14, 17), 0.94);
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.54);
-  color: #fff;
+  color: var(--color-text, #fff);
   backdrop-filter: blur(18px);
 }
 
@@ -838,7 +838,8 @@ export default {
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: #f6bd60 rgba(255, 255, 255, 0.08);
+  scrollbar-color: var(--color-accent, #f6bd60)
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   scrollbar-width: thin;
 }
 
@@ -847,12 +848,12 @@ export default {
 }
 
 .atlas-detail-scroll::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.05);
 }
 
 .atlas-detail-scroll::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: #f6bd60;
+  background: var(--color-accent, #f6bd60);
 }
 
 .atlas-scroll-fade {
@@ -864,9 +865,9 @@ export default {
   height: 6.25rem;
   background: linear-gradient(
     180deg,
-    rgba(9, 14, 17, 0),
-    rgba(9, 14, 17, 0.74) 58%,
-    rgba(9, 14, 17, 0.98)
+    rgba(var(--color-page-rgb, 9, 14, 17), 0),
+    rgba(var(--color-page-rgb, 9, 14, 17), 0.74) 58%,
+    rgba(var(--color-page-rgb, 9, 14, 17), 0.98)
   );
   pointer-events: none;
 }
@@ -888,8 +889,8 @@ export default {
   overflow: hidden;
   border: 0;
   padding: 0;
-  background: #10181c;
-  color: #fff;
+  background: var(--color-surface, #10181c);
+  color: var(--color-text, #fff);
   cursor: zoom-in;
 }
 
@@ -897,10 +898,14 @@ export default {
   background:
     radial-gradient(
       circle at 30% 24%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 34%
     ),
-    linear-gradient(145deg, #17272e, #091014);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #17272e),
+      var(--color-page, #091014)
+    );
   cursor: default;
 }
 
@@ -915,11 +920,11 @@ export default {
   z-index: 2;
   top: 1rem;
   left: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.22);
   border-radius: 999px;
   padding: 0.48rem 0.7rem;
-  background: rgba(5, 8, 10, 0.58);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 5, 8, 10), 0.58);
+  color: var(--color-text, #fff);
   font-size: 0.65rem;
   font-weight: 700;
   transform: translateX(-50%);
@@ -928,7 +933,7 @@ export default {
 
 .atlas-detail-hero-image span.is-placeholder {
   top: 50%;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   letter-spacing: 0.1em;
   text-transform: uppercase;
   transform: translate(-50%, -50%);
@@ -937,8 +942,8 @@ export default {
 .atlas-detail-shade {
   background: linear-gradient(
     180deg,
-    rgba(4, 7, 9, 0.18) 20%,
-    rgba(4, 7, 9, 0.96) 100%
+    rgba(var(--color-page-rgb, 4, 7, 9), 0.18) 20%,
+    rgba(var(--color-page-rgb, 4, 7, 9), 0.96) 100%
   );
   pointer-events: none;
 }
@@ -948,9 +953,9 @@ export default {
   position: absolute;
   z-index: 2;
   top: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  background: rgba(5, 8, 10, 0.58);
-  color: #fff;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.22);
+  background: rgba(var(--color-page-rgb, 5, 8, 10), 0.58);
+  color: var(--color-text, #fff);
   backdrop-filter: blur(10px);
   cursor: pointer;
 }
@@ -971,8 +976,8 @@ export default {
 }
 
 .atlas-favorite.active {
-  border-color: #f6bd60;
-  color: #f6bd60;
+  border-color: var(--color-accent, #f6bd60);
+  color: var(--color-accent-soft, #f6bd60);
 }
 
 .atlas-detail-title {
@@ -984,7 +989,7 @@ export default {
 }
 
 .atlas-section-heading span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -1008,7 +1013,7 @@ export default {
 }
 
 .atlas-note {
-  border-left: 2px solid #f6bd60;
+  border-left: 2px solid var(--color-accent, #f6bd60);
   padding-left: 1rem;
 }
 
@@ -1018,7 +1023,7 @@ export default {
 
 .atlas-note p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   line-height: 1.55;
 }
 
@@ -1028,12 +1033,16 @@ export default {
   gap: 1rem;
   overflow: hidden;
   margin: 0 0 1.4rem;
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 18px;
   padding: 0.85rem;
   background:
-    linear-gradient(145deg, rgba(246, 189, 96, 0.12), transparent 65%),
-    rgba(255, 255, 255, 0.035);
+    linear-gradient(
+      145deg,
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.12),
+      transparent 65%
+    ),
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 
 .atlas-stop-story-media {
@@ -1042,7 +1051,7 @@ export default {
   border: 0;
   border-radius: 12px;
   padding: 0;
-  background: #10181c;
+  background: var(--color-surface, #10181c);
   cursor: pointer;
 }
 
@@ -1060,7 +1069,7 @@ export default {
 }
 
 .atlas-stop-story-more > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -1079,7 +1088,7 @@ export default {
   display: -webkit-box;
   overflow: hidden;
   margin: 0.55rem 0 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.7));
   font-size: 0.9rem;
   line-height: 1.5;
   -webkit-box-orient: vertical;
@@ -1090,11 +1099,11 @@ export default {
   align-self: flex-start;
   min-height: 2.65rem;
   margin-top: auto;
-  border: 1px solid #f6bd60;
+  border: 1px solid var(--color-accent, #f6bd60);
   border-radius: 999px;
   padding: 0.62rem 0.82rem;
-  background: #f6bd60;
-  color: #111719;
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111719);
   font: inherit;
   font-size: max(0.875rem, 14px);
   font-weight: 800;
@@ -1105,7 +1114,7 @@ export default {
   display: grid;
   grid-column: 1 / -1;
   gap: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   padding-top: 0.8rem;
 }
 
@@ -1114,11 +1123,11 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 12px;
   padding: 0.7rem 0.75rem;
   background: rgba(0, 0, 0, 0.16);
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -1131,13 +1140,13 @@ export default {
 
 .atlas-stop-story-more small {
   flex: 0 0 auto;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-weight: 800;
 }
 
 .atlas-stop-story button:hover,
 .atlas-stop-story button:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
@@ -1147,10 +1156,10 @@ export default {
   gap: 1rem;
   overflow: hidden;
   margin-top: 1.8rem;
-  border: 1px solid rgba(246, 189, 96, 0.38);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.38);
   border-radius: 18px;
   padding: 0.85rem;
-  background: rgba(246, 189, 96, 0.065);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.065);
 }
 
 .atlas-story-lead-media {
@@ -1161,7 +1170,7 @@ export default {
   border: 0;
   border-radius: 12px;
   padding: 0;
-  background: #10181c;
+  background: var(--color-surface, #10181c);
   cursor: pointer;
 }
 
@@ -1194,7 +1203,7 @@ export default {
   display: -webkit-box;
   overflow: hidden;
   margin: 0.55rem 0 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: 1rem;
   line-height: 1.55;
   -webkit-box-orient: vertical;
@@ -1212,11 +1221,11 @@ export default {
 .atlas-story-lead-actions a,
 .atlas-story-lead-actions button {
   min-height: 2.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
   border-radius: 999px;
   padding: 0.62rem 0.78rem;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   font-size: max(0.875rem, 14px);
   font-weight: 800;
@@ -1226,16 +1235,16 @@ export default {
 }
 
 .atlas-story-lead-actions .is-primary {
-  border-color: #f6bd60;
-  background: #f6bd60;
-  color: #111719;
+  border-color: var(--color-accent, #f6bd60);
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111719);
 }
 
 .atlas-story-lead-actions a:hover,
 .atlas-story-lead-actions a:focus-visible,
 .atlas-story-lead-actions button:hover,
 .atlas-story-lead-actions button:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
@@ -1255,12 +1264,12 @@ export default {
 }
 
 .atlas-section-heading strong {
-  color: rgba(255, 255, 255, 0.46);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.46));
   font-size: 0.72rem;
 }
 
 .atlas-section-heading h2 {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-family: inherit;
   font-size: max(0.875rem, 14px);
   font-weight: 800;
@@ -1275,10 +1284,10 @@ export default {
   width: 100%;
   gap: 0.8rem;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   padding: 0.75rem 0;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   text-align: left;
   cursor: pointer;
 }
@@ -1299,10 +1308,10 @@ export default {
   background:
     radial-gradient(
       circle at 30% 25%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 38%
     ),
-    #142128;
+    var(--color-surface-raised, #142128);
 }
 
 .atlas-discoveries button > span:nth-child(2) {
@@ -1313,7 +1322,7 @@ export default {
 }
 
 .atlas-discoveries small {
-  color: rgba(255, 255, 255, 0.46);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.46));
   font-size: 0.61rem;
   font-weight: 600;
   letter-spacing: 0.12em;
@@ -1337,18 +1346,18 @@ export default {
   min-width: 0;
   flex-direction: column;
   gap: 0.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 12px;
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.04);
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .atlas-adjacent small {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -1362,16 +1371,16 @@ export default {
 
 .atlas-adjacent button:hover,
 .atlas-adjacent button:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
 .atlas-related button {
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 999px;
   padding: 0.62rem 0.85rem;
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.04);
+  color: var(--color-text, #fff);
   cursor: pointer;
 }
 
@@ -1391,7 +1400,7 @@ export default {
   border: 0;
   border-radius: 12px;
   padding: 0;
-  background: #10181c;
+  background: var(--color-surface, #10181c);
   cursor: zoom-in;
   scroll-snap-align: start;
 }
@@ -1420,11 +1429,15 @@ export default {
   background:
     radial-gradient(
       circle at 50% 42%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 42%
     ),
-    linear-gradient(145deg, #17272e, #091014);
-  color: #fff;
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #17272e),
+      var(--color-page, #091014)
+    );
+  color: var(--color-text, #fff);
 }
 
 .atlas-video-tile b {
@@ -1432,10 +1445,10 @@ export default {
   place-items: center;
   width: 2.8rem;
   height: 2.8rem;
-  border: 1px solid rgba(246, 189, 96, 0.72);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.72);
   border-radius: 50%;
-  background: rgba(7, 11, 14, 0.72);
-  color: #f6bd60;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.72);
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 1rem;
   text-indent: 0.12em;
 }
@@ -1460,8 +1473,8 @@ export default {
   height: 1.65rem;
   border-radius: 50%;
   padding: 0 0.38rem;
-  background: rgba(5, 8, 10, 0.74);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 5, 8, 10), 0.74);
+  color: var(--color-text, #fff);
   font-size: 0.68rem;
   font-weight: 800;
   backdrop-filter: blur(8px);
@@ -1469,7 +1482,7 @@ export default {
 
 .atlas-detail-hero-image:focus-visible,
 .atlas-mini-gallery button:focus-visible {
-  outline: 3px solid #f6bd60;
+  outline: 3px solid var(--color-focus, #f6bd60);
   outline-offset: -3px;
 }
 
@@ -1484,10 +1497,10 @@ export default {
 }
 
 .atlas-actions a {
-  border: 1px solid rgba(246, 189, 96, 0.38);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.38);
   border-radius: 999px;
   padding: 0.65rem 0.8rem;
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-size: max(0.875rem, 14px);
   font-weight: 700;
   text-decoration: none;
@@ -1495,7 +1508,7 @@ export default {
 
 .atlas-actions a:hover,
 .atlas-actions a:focus-visible {
-  background: rgba(246, 189, 96, 0.1);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.1);
 }
 
 .atlas-lightbox {
@@ -1506,7 +1519,7 @@ export default {
   grid-template-columns: minmax(3.5rem, 8vw) minmax(0, 1fr) minmax(3.5rem, 8vw);
   align-items: center;
   padding: clamp(1rem, 3vw, 2.5rem);
-  background: rgba(2, 5, 7, 0.96);
+  background: rgba(var(--color-page-rgb, 2, 5, 7), 0.96);
   backdrop-filter: blur(20px);
 }
 
@@ -1521,7 +1534,7 @@ export default {
   display: block;
   width: 100%;
   height: min(78vh, 900px);
-  background: #020507;
+  background: var(--color-page, #020507);
   object-fit: contain;
 }
 
@@ -1531,25 +1544,25 @@ export default {
   justify-content: space-between;
   gap: 1rem;
   margin-top: 0.8rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
 }
 
 .atlas-lightbox figcaption strong {
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .atlas-lightbox button {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.07);
+  color: var(--color-text, #fff);
   cursor: pointer;
   backdrop-filter: blur(10px);
 }
 
 .atlas-lightbox button:hover,
 .atlas-lightbox button:focus-visible {
-  border-color: #f6bd60;
-  color: #f6bd60;
+  border-color: var(--color-accent, #f6bd60);
+  color: var(--color-accent-soft, #f6bd60);
 }
 
 .atlas-lightbox-close {
@@ -1599,8 +1612,8 @@ export default {
   }
 
   .atlas-detail:not(.is-expanded) {
-    border-top-color: rgba(255, 255, 255, 0.18);
-    background: rgba(7, 11, 14, 0.9);
+    border-top-color: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
+    background: rgba(var(--color-page-rgb, 7, 11, 14), 0.9);
   }
 
   /* Leave the journey controls and a useful slice of the map visible while a
@@ -1644,8 +1657,8 @@ export default {
     grid-template-columns: 5rem minmax(0, 1fr) 5rem;
     align-items: stretch;
     min-height: 5.75rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(7, 11, 14, 0.96);
+    border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
+    background: rgba(var(--color-page-rgb, 7, 11, 14), 0.96);
   }
 
   .atlas-detail:not(.is-expanded) .atlas-detail-dock {
@@ -1655,7 +1668,7 @@ export default {
   .atlas-detail-dock button {
     border: 0;
     background: transparent;
-    color: #fff;
+    color: var(--color-text, #fff);
     font: inherit;
     cursor: pointer;
   }
@@ -1667,19 +1680,19 @@ export default {
     align-items: center;
     justify-content: center;
     gap: 0.18rem;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--color-text-muted, rgba(255, 255, 255, 0.7)) !important;
     font-size: 0.76rem !important;
     font-weight: 700 !important;
   }
 
   .atlas-dock-action > .atlas-dock-icon {
-    color: #fff;
+    color: var(--color-text, #fff);
     font-size: 1.35rem;
   }
 
   .atlas-dock-action.active,
   .atlas-dock-action.active > .atlas-dock-icon {
-    color: #f6bd60 !important;
+    color: var(--color-accent-soft, #f6bd60) !important;
   }
 
   .atlas-dock-count {
@@ -1691,8 +1704,8 @@ export default {
     min-width: 1.25rem;
     height: 1.25rem;
     border-radius: 50%;
-    background: #f6bd60;
-    color: #111;
+    background: var(--color-accent, #f6bd60);
+    color: var(--color-accent-contrast, #111);
     font-size: 0.65rem;
     font-weight: 800;
   }
@@ -1736,7 +1749,7 @@ export default {
     flex-direction: column;
     align-items: center;
     gap: 0.1rem;
-    color: rgba(255, 255, 255, 0.62);
+    color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
   }
 
   .atlas-dock-chevron {
@@ -1756,7 +1769,7 @@ export default {
   }
 
   .atlas-dock-toggle > small {
-    color: rgba(255, 255, 255, 0.62);
+    color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0;

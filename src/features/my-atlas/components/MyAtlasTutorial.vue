@@ -257,7 +257,7 @@ export default {
   display: grid;
   padding: 1rem;
   place-items: center;
-  background: rgba(3, 10, 12, 0.78);
+  background: rgba(var(--color-page-rgb, 3, 10, 12), 0.78);
   backdrop-filter: blur(12px);
 }
 
@@ -268,10 +268,10 @@ export default {
   width: min(33rem, 100%);
   max-height: calc(100dvh - 2rem);
   overflow-y: auto;
-  border: 1px solid rgba(230, 186, 104, 0.36);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.36);
   border-radius: 1.4rem;
-  color: #edf7f2;
-  background: #0b1719;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface, #0b1719);
   box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.58);
   font-family: "Poppins", sans-serif;
   outline: none;
@@ -287,10 +287,10 @@ export default {
   height: 2.2rem;
   padding: 0;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
   border-radius: 50%;
-  color: #edf7f2;
-  background: rgba(8, 20, 22, 0.72);
+  color: var(--color-text, #edf7f2);
+  background: rgba(var(--color-page-rgb, 8, 20, 22), 0.72);
   font: inherit;
   font-size: 1.25rem;
   cursor: pointer;
@@ -304,15 +304,19 @@ export default {
   background:
     radial-gradient(
       circle at 22% 28%,
-      rgba(88, 209, 201, 0.24),
+      rgba(var(--color-success-rgb, 88, 209, 201), 0.24),
       transparent 28%
     ),
     radial-gradient(
       circle at 82% 68%,
-      rgba(230, 186, 104, 0.25),
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.25),
       transparent 34%
     ),
-    linear-gradient(145deg, #17363a, #0b191c 68%);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #17363a),
+      var(--color-surface, #0b191c) 68%
+    );
 }
 
 .my-atlas-tutorial-visual::before,
@@ -321,8 +325,15 @@ export default {
   inset: 0;
   content: "";
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+    linear-gradient(
+      rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055) 1px,
+      transparent 1px
+    );
   background-size: 2.5rem 2.5rem;
   mask-image: linear-gradient(
     to right,
@@ -337,7 +348,7 @@ export default {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(230, 186, 104, 0.12),
+    rgba(var(--color-accent-rgb, 230, 186, 104), 0.12),
     transparent
   );
   transform: translateX(-100%);
@@ -353,7 +364,7 @@ export default {
 
 .my-atlas-tutorial-visual path {
   fill: none;
-  stroke: rgba(230, 186, 104, 0.7);
+  stroke: rgba(var(--color-accent-rgb, 230, 186, 104), 0.7);
   stroke-width: 2;
   stroke-dasharray: 7 8;
 }
@@ -362,7 +373,7 @@ export default {
   position: absolute;
   right: 1.2rem;
   bottom: 0.35rem;
-  color: rgba(255, 255, 255, 0.09);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.09));
   font-family: "Poppins", system-ui, sans-serif;
   font-size: 5.5rem;
   line-height: 1;
@@ -374,7 +385,7 @@ export default {
   left: 1.4rem;
   width: 4.3rem;
   height: 4.3rem;
-  border: 1px solid rgba(88, 209, 201, 0.5);
+  border: 1px solid rgba(var(--color-success-rgb, 88, 209, 201), 0.5);
   border-radius: 50%;
   box-shadow: 0 0 2.5rem rgba(88, 209, 201, 0.18);
 }
@@ -386,7 +397,7 @@ export default {
   width: 0.55rem;
   height: 0.55rem;
   border-radius: 50%;
-  background: #58d1c9;
+  background: var(--color-success, #58d1c9);
   box-shadow: 0 0 1rem #58d1c9;
   content: "";
   transform: translate(-50%, -50%);
@@ -396,9 +407,9 @@ export default {
   position: absolute;
   width: 0.85rem;
   height: 0.85rem;
-  border: 2px solid #f7e7c4;
+  border: 2px solid var(--color-accent, #f7e7c4);
   border-radius: 50% 50% 50% 0;
-  background: #e6ba68;
+  background: var(--color-accent, #e6ba68);
   box-shadow: 0 0 1.1rem rgba(230, 186, 104, 0.72);
   opacity: 0.24;
   transform: rotate(-45deg) scale(0.72);
@@ -442,7 +453,7 @@ export default {
   align-items: center;
   justify-content: flex-end;
   gap: 1rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.62rem;
@@ -450,13 +461,13 @@ export default {
 }
 
 .my-atlas-tutorial-meta small {
-  color: #82968f;
+  color: var(--color-text-subtle, #82968f);
   letter-spacing: 0.05em;
 }
 
 .my-atlas-tutorial h2 {
   margin: 0;
-  color: #f3faf6;
+  color: var(--color-text, #f3faf6);
   font-family: "Poppins", system-ui, sans-serif;
   font-size: clamp(1.8rem, 7vw, 2.65rem);
   line-height: 1;
@@ -466,7 +477,7 @@ export default {
 
 .my-atlas-tutorial-copy > p {
   margin: 0;
-  color: #afc0ba;
+  color: var(--color-text-muted, #afc0ba);
   font-size: 0.8rem;
   line-height: 1.6;
 }
@@ -482,7 +493,7 @@ export default {
 .my-atlas-tutorial-copy li {
   position: relative;
   padding-left: 1.1rem;
-  color: #d8e5df;
+  color: var(--color-text, #d8e5df);
   font-size: 0.7rem;
 }
 
@@ -493,7 +504,7 @@ export default {
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 50%;
-  background: #58d1c9;
+  background: var(--color-success, #58d1c9);
   box-shadow: 0 0 0.7rem rgba(88, 209, 201, 0.7);
   content: "";
 }
@@ -508,12 +519,12 @@ export default {
 .my-atlas-tutorial-progress span {
   height: 0.22rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   transition: background 180ms ease;
 }
 
 .my-atlas-tutorial-progress span.is-active {
-  background: #e6ba68;
+  background: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-tutorial footer {
@@ -536,15 +547,15 @@ export default {
 
 .my-atlas-tutorial footer .secondary {
   justify-self: start;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #d9e5df;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
+  color: var(--color-text, #d9e5df);
   background: transparent;
 }
 
 .my-atlas-tutorial footer .primary {
   border: 0;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
 }
 
 @keyframes atlas-tutorial-scan {

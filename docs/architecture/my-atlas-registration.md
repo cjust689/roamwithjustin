@@ -79,6 +79,18 @@ per-user object remains the authoritative owner of private profile state.
 
 ## Registration contract
 
+The safe registration profile projection includes `discoverable` with an
+explicit false default and zero-default pin, wish, and plan counts, matching
+the browser account contract. A successful create must not be reported as a
+failed registration after durable provisioning. The delete/recreate regression
+test passes the actual recreated service response through the browser client
+validator; it proves the released handle can be accepted by both boundaries.
+This correction passed the delete/recreate and browser-response contract
+regressions and was deployed to the existing staging API as Worker version
+`b5b3674c-6219-4053-b024-7cb65cd4e539` on 2026-11-20. Its health endpoint
+returned HTTP 200 after deployment. A new live account was not created as
+part of that verification; no account data migration or wipe was performed.
+
 `POST /v1/beta/register` requires all of these controls before storage is
 accessed:
 

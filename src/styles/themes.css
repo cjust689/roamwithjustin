@@ -1,0 +1,39 @@
+/* Classic declarations retain their audited color as var() fallbacks in the
+   owning component. No Classic override merges its distinct existing palettes.
+   Explorer alone supplies these semantic overrides to the whole document. */
+:root[data-theme="explorer"] {
+  --color-page: #07152b;
+  --color-surface: #10213a;
+  --color-surface-raised: #172c47;
+  --color-text: #fffaf0;
+  --color-text-muted: #b6c5d5;
+  --color-text-subtle: #a5b8ce;
+  --color-accent: #ff8a00;
+  --color-accent-soft: #ffbd59;
+  --color-accent-contrast: #07152b;
+  --color-border: #35506d;
+  --color-control-border: #65819f;
+  --color-focus: #ffbd59;
+  --color-error: #ffb4aa;
+  --color-success: #9bd3b0;
+  --color-info: #bddbe2;
+  --color-page-rgb: 7, 21, 43;
+  --color-surface-rgb: 16, 33, 58;
+  --color-text-rgb: 255, 250, 240;
+  --color-highlight-rgb: 182, 197, 213;
+  --color-accent-rgb: 255, 138, 0;
+  --color-error-rgb: 255, 180, 170;
+  --color-success-rgb: 155, 211, 176;
+}
+
+/* Scoped app rules own ordinary focus styling. Explorer supplies a consistent
+   keyboard ring, including controls inherited from Materialize. No animation
+   is added when the palette changes. */
+:root[data-theme="explorer"] :focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+:root[data-theme="explorer"] ::selection {
+  color: var(--color-accent-contrast);
+  background: var(--color-accent-soft);
+}

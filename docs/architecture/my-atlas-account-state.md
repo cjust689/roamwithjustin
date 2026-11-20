@@ -336,6 +336,12 @@ and memory, or delete and recreate it to relocate or rename it.
 
 ## Private wishlist and plan state
 
+The new [trip centric transition](../implementation/my-atlas-trip-centric-transition.md)
+defines the next persistence target. The contracts below remain the deployed
+legacy behavior, not evidence of a canonical planned/past trip implementation.
+Flights and rental cars now have independent browser-only reviewed search
+drafts. They do not modify endpoints or stored stops and are not saved yet.
+
 Wishlist data uses `wish:` records and a separate uniqueness index inside the
 same owner object. It does not reuse visited `pin:` records and does not enter
 the public projection. Each record stores an owner-qualified ID, a canonical
@@ -469,6 +475,12 @@ unrelated old override. These preferences and generated actions are component
 memory only: they produce no account write and do not refresh plan retention.
 
 ## Permanent application-account deletion
+
+The owner sharing section now exposes Download private account data and an
+expandable Delete My Atlas account control directly below the public/private
+sharing actions. These account actions are no longer nested inside the trip
+planner. Deletion retains the exact typed confirmation, final confirmation,
+saved operation key, bounded revision recovery, and reload recovery behavior.
 
 `DELETE /v1/me` requires the verified owner, write permission, a strong current
 revision, a UUID idempotency key, and the exact confirmation phrase. The user

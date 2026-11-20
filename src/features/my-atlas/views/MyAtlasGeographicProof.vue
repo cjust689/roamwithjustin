@@ -28,9 +28,10 @@
     >
       <header>
         <span class="my-atlas-brand-lockup">
-          <a href="/" aria-label="Roam With Justin home">RWJ</a>
+          <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
           <span>My Atlas</span>
         </span>
+        <ThemeSelector class="my-atlas-theme-selector" />
         <button
           v-if="auth.authenticated"
           type="button"
@@ -535,7 +536,6 @@
         @revision-change="updatePlanningRevision"
         @planner-state-change="handlePlannerStateChange"
         @pins-created="handlePlannerPinsCreated"
-        @account-deleted="handleAccountDeleted"
       />
 
       <section
@@ -714,6 +714,43 @@
               }}
             </button>
           </div>
+          <div class="my-atlas-account-data-actions">
+            <button
+              type="button"
+              :disabled="accountPending"
+              @click="exportAccountData"
+            >
+              Download private account data
+            </button>
+            <details class="my-atlas-delete-account">
+              <summary>Delete My Atlas account</summary>
+              <p>
+                Permanently remove your visited places, memories, private saved
+                places, trips, favorite travel image, handle, and My Atlas
+                account. Your Google account is kept. This cannot be undone.
+              </p>
+              <label>
+                <span>Type DELETE MY ATLAS to confirm</span>
+                <input
+                  v-model="deleteConfirmation"
+                  autocomplete="off"
+                  type="text"
+                  :disabled="accountPending"
+                />
+              </label>
+              <button
+                type="button"
+                :disabled="
+                  accountPending ||
+                  atlasImagePending ||
+                  deleteConfirmation !== 'DELETE MY ATLAS'
+                "
+                @click="deleteAccount"
+              >
+                Permanently delete account
+              </button>
+            </details>
+          </div>
           <p v-if="toolsStatus" class="my-atlas-tools-status" role="status">
             {{ toolsStatus }}
           </p>
@@ -792,6 +829,7 @@ import {
   deleteMyAtlasAccountWithRevisionRecovery,
   deleteMyAtlasPin,
   fetchMyAtlasImage,
+  fetchMyAtlasAccountExport,
   fetchMyAtlasState,
   removeMyAtlasImage,
   registerMyAtlasAccount,
@@ -872,6 +910,7 @@ export default {
       accountProfile: null,
       accountMissing: false,
       accountPending: false,
+      deleteConfirmation: "",
       accountError: "",
       accountLoadFailed: false,
       registrationPending: false,
@@ -1133,6 +1172,7 @@ export default {
       this.visitedOpen = true
     },
     handleAccountDeleted() {
+      this.deleteConfirmation = ""
       this.accountMenuOpen = false
       this.accountProfile = null
       this.accountMissing = true
@@ -1961,6 +2001,94 @@ export default {
         this.toolsStatus = this.announcement
       }
     },
+    async deleteAccount() {
+      if (
+        !this.canUseAtlas ||
+        this.accountPending ||
+        this.atlasImagePending ||
+        this.deleteConfirmation !== "DELETE MY ATLAS"
+      )
+        return
+      if (
+        !window.confirm(
+          "Permanently delete all My Atlas application data? This cannot be undone."
+        )
+      )
+        return
+      this.accountPending = true
+      this.accountError = ""
+      this.toolsStatus = "Deleting your My Atlas account."
+      try {
+        const storageKey = "rwj:my-atlas:account-deletion-operation:v1"
+        let operation = null
+        try {
+          operation = JSON.parse(window.sessionStorage.getItem(storageKey))
+        } catch {
+          /* Replace invalid recovery state below. */
+        }
+        if (
+          !operation?.idempotencyKey ||
+          !Number.isSafeInteger(operation?.revision) ||
+          operation.revision < 1
+        ) {
+          operation = {
+            idempotencyKey: window.crypto.randomUUID(),
+            revision: this.accountProfile.revision,
+          }
+          window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
+        }
+        await deleteMyAtlasAccountWithRevisionRecovery({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: await getMyAtlasApiAccessToken(),
+          revision: operation.revision,
+          idempotencyKey: operation.idempotencyKey,
+          onRevision: revision => {
+            operation = { ...operation, revision }
+            window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
+            this.updatePlanningRevision(revision)
+          },
+        })
+        window.sessionStorage.removeItem(storageKey)
+        this.handleAccountDeleted()
+        logoutFromMyAtlas()
+      } catch (error) {
+        const reference = error?.requestId
+          ? ` Reference: ${error.requestId}.`
+          : ""
+        this.accountError = `Your account could not be deleted. Try again.${reference}`
+        this.toolsStatus = this.accountError
+      } finally {
+        this.accountPending = false
+      }
+    },
+    async exportAccountData() {
+      if (!this.canUseAtlas || this.accountPending) return
+      this.accountPending = true
+      this.accountError = ""
+      try {
+        const value = await fetchMyAtlasAccountExport({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: await getMyAtlasApiAccessToken(),
+        })
+        const blob = new Blob([JSON.stringify(value, null, 2)], {
+          type: "application/json",
+        })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.href = url
+        link.download = `my-atlas-${new Date().toISOString().slice(0, 10)}.json`
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        URL.revokeObjectURL(url)
+        this.toolsStatus = "Your private My Atlas data export was downloaded."
+      } catch {
+        this.toolsStatus =
+          "Your private account data could not be downloaded. Try again."
+      } finally {
+        this.accountPending = false
+      }
+    },
     async toggleDiscovery() {
       this.accountPending = true
       this.accountError = ""
@@ -1998,8 +2126,8 @@ export default {
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
-  color: #edf7f2;
-  background: #0d1719;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-page, #0d1719);
   font-family: "Poppins", sans-serif;
 }
 
@@ -2015,9 +2143,9 @@ export default {
   margin: 1rem;
   padding: 1.25rem;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 1.5rem;
-  background: rgba(10, 20, 22, 0.92);
+  background: rgba(var(--color-page-rgb, 10, 20, 22), 0.92);
   box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(18px);
   transition: width 180ms ease;
@@ -2052,11 +2180,15 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.72rem;
   font-weight: 700;
+}
+
+.my-atlas-theme-selector {
+  margin-left: auto;
 }
 
 .my-atlas-brand-lockup {
@@ -2070,9 +2202,6 @@ export default {
   width: 2.35rem;
   height: 2.35rem;
   place-items: center;
-  border-radius: 50%;
-  color: #132023;
-  background: #e6ba68;
   letter-spacing: 0;
 }
 
@@ -2082,10 +2211,10 @@ export default {
   min-width: 2.35rem;
   min-height: 2.35rem;
   padding: 0.45rem;
-  border: 1px solid rgba(230, 186, 104, 0.55);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.55);
   border-radius: 999px;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.66rem;
   font-weight: 800;
@@ -2096,15 +2225,15 @@ export default {
 .my-atlas-header-sign-in {
   padding-right: 0.85rem;
   padding-left: 0.85rem;
-  color: #f7e6bf;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f7e6bf);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .my-atlas-profile-trigger:focus-visible,
 .my-atlas-header-sign-in:focus-visible {
-  outline: 2px solid rgba(230, 186, 104, 0.5);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.5);
   outline-offset: 0.15rem;
 }
 
@@ -2117,15 +2246,15 @@ export default {
   gap: 0.8rem;
   margin: 0 0 1.25rem;
   padding: 0.9rem;
-  border: 1px solid rgba(230, 186, 104, 0.2);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.2);
   border-radius: 1rem;
   background:
     radial-gradient(
       circle at 100% 0%,
-      rgba(230, 186, 104, 0.12),
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.12),
       transparent 42%
     ),
-    rgba(255, 255, 255, 0.035);
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 
 .my-atlas-overview-actions {
@@ -2133,7 +2262,7 @@ export default {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
   padding-top: 0.7rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 
 .my-atlas-overview-actions.has-planner-action {
@@ -2143,10 +2272,10 @@ export default {
 .my-atlas-overview-actions button {
   min-height: 2.75rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 0.7rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.06);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.06);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2154,8 +2283,8 @@ export default {
 }
 
 .my-atlas-overview-actions button.is-active {
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-overview-actions b {
@@ -2165,15 +2294,15 @@ export default {
 .my-atlas-overview-panel {
   margin-top: -1.26rem;
   margin-bottom: 1.25rem;
-  border-color: rgba(230, 186, 104, 0.2);
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.2);
   border-top: 0;
   border-radius: 0 0 1rem 1rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 
 .my-atlas-panel-label {
   margin: 0 0 0.65rem;
-  color: #d6ba7c;
+  color: var(--color-accent-soft, #d6ba7c);
   font-size: 0.6rem;
   font-weight: 700;
 }
@@ -2191,17 +2320,17 @@ export default {
   padding: 0.55rem 0.35rem;
   border-radius: 0.7rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055);
 }
 
 .my-atlas-stats strong {
-  color: #f0c978;
+  color: var(--color-accent-soft, #f0c978);
   font-size: 1.15rem;
 }
 
 .my-atlas-stats span {
   overflow: hidden;
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   text-overflow: ellipsis;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2228,7 +2357,7 @@ export default {
   display: grid;
   flex: 1 1 10rem;
   gap: 0.2rem;
-  color: #93a69f;
+  color: var(--color-text-muted, #93a69f);
   font-size: 0.62rem;
 }
 
@@ -2236,10 +2365,10 @@ export default {
 .my-atlas-view-controls button,
 .my-atlas-selected button {
   padding: 0.5rem 0.6rem;
-  border: 1px solid rgba(230, 186, 104, 0.4);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
   border-radius: 0.65rem;
-  color: #f7e6bf;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #f7e6bf);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2248,21 +2377,21 @@ export default {
 
 .my-atlas-view-controls select {
   display: block;
-  color: #edf7f2;
-  background: #111f22;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
 }
 
 .my-atlas-timeline-year {
   display: grid;
   gap: 0.12rem;
   margin: 0;
-  color: #f0c978;
+  color: var(--color-accent-soft, #f0c978);
   font-family: "Poppins", system-ui, sans-serif;
   font-size: 1.25rem;
 }
 
 .my-atlas-timeline-year span {
-  color: #94a79f;
+  color: var(--color-text-muted, #94a79f);
   font-family: "Poppins", sans-serif;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2270,7 +2399,7 @@ export default {
 
 .my-atlas-connections-note {
   margin: 0;
-  color: #7f938c;
+  color: var(--color-text-subtle, #7f938c);
   font-size: 0.6rem;
 }
 
@@ -2280,7 +2409,7 @@ export default {
   align-items: center;
   gap: 0.55rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 
 .my-atlas-selected > div {
@@ -2291,7 +2420,7 @@ export default {
 
 .my-atlas-selected strong {
   overflow: hidden;
-  color: #f4fbf7;
+  color: var(--color-text, #f4fbf7);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2299,23 +2428,23 @@ export default {
 .my-atlas-selected span,
 .my-atlas-selected small {
   overflow: hidden;
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.62rem;
 }
 
 .my-atlas-selected small {
-  color: #d9bd80;
+  color: var(--color-accent-soft, #d9bd80);
 }
 
 .my-atlas-selected blockquote {
   grid-column: 1 / -1;
   margin: 0;
   padding: 0.55rem 0.65rem;
-  border-left: 2px solid rgba(230, 186, 104, 0.55);
-  color: #dce9e4;
-  background: rgba(230, 186, 104, 0.06);
+  border-left: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.55);
+  color: var(--color-text, #dce9e4);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.06);
   font-size: 0.68rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -2324,7 +2453,7 @@ export default {
 .my-atlas-selected-memory-empty {
   grid-column: 1 / -1;
   margin: 0;
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   text-align: center;
   font-size: 0.65rem;
 }
@@ -2334,8 +2463,8 @@ export default {
   justify-self: center;
   min-height: 2.75rem;
   padding-inline: 1rem;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-intro h1 {
@@ -2349,7 +2478,7 @@ export default {
 
 .my-atlas-intro-copy {
   margin: 1rem 0 0;
-  color: #b2c2bd;
+  color: var(--color-text-muted, #b2c2bd);
   font-size: 0.88rem;
   line-height: 1.55;
 }
@@ -2361,10 +2490,10 @@ export default {
 
 .my-atlas-intro-actions button {
   padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(230, 186, 104, 0.5);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.5);
   border-radius: 999px;
-  color: #f7e6bf;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f7e6bf);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   font: inherit;
   font-size: 0.7rem;
   font-weight: 700;
@@ -2373,8 +2502,8 @@ export default {
 
 .my-atlas-intro-actions button:hover,
 .my-atlas-intro-actions button:focus-visible {
-  border-color: #e6ba68;
-  background: rgba(230, 186, 104, 0.14);
+  border-color: var(--color-accent, #e6ba68);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.14);
   outline: none;
 }
 
@@ -2394,10 +2523,10 @@ export default {
   min-height: 2.75rem;
   margin: 0 0 1.25rem;
   padding: 0.6rem;
-  border: 1px solid rgba(230, 186, 104, 0.35);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   border-radius: 1rem;
   color: inherit;
-  background: #101d20;
+  background: var(--color-surface, #101d20);
   box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.4);
   line-height: 1.2;
 }
@@ -2412,13 +2541,13 @@ export default {
 }
 
 .my-atlas-account:focus {
-  outline: 2px solid rgba(230, 186, 104, 0.45);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   outline-offset: 0.18rem;
 }
 
 .my-atlas-account-status {
   margin: 0;
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
   font-size: 0.66rem;
 }
 
@@ -2427,10 +2556,10 @@ export default {
 .my-atlas-tools-actions button {
   min-height: 2.75rem;
   padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 999px;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.66rem;
   font-weight: 700;
@@ -2446,10 +2575,10 @@ export default {
   width: 100%;
   min-width: 0;
   padding: 0.55rem 0.6rem 0.55rem 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.35);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   border-radius: 0.85rem;
-  color: #edf7f2;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-text, #edf7f2);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   line-height: 1.2;
 }
 
@@ -2472,24 +2601,24 @@ export default {
 }
 
 .my-atlas-account-card small {
-  color: #aebdb8;
+  color: var(--color-text-muted, #aebdb8);
   font-size: 0.54rem;
 }
 
 .my-atlas-account-card button {
   min-width: 6rem;
   border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
 }
 
 .my-atlas-sign-in:focus,
 .my-atlas-sign-in:focus-visible,
 .my-atlas-account-card button:focus,
 .my-atlas-account-card button:focus-visible {
-  border-color: #e6ba68;
-  background: rgba(230, 186, 104, 0.14);
-  outline: 2px solid rgba(230, 186, 104, 0.35);
+  border-color: var(--color-accent, #e6ba68);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.14);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   outline-offset: 0.12rem;
 }
 
@@ -2502,24 +2631,24 @@ export default {
   margin: 0.4rem 0 0;
   padding: 0.35rem 0.5rem;
   border-radius: 0.5rem;
-  background: #111f22;
+  background: var(--color-surface-raised, #111f22);
   font-size: 0.58rem;
 }
 
 .my-atlas-account > .my-atlas-auth-error {
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
 }
 
 .my-atlas-account > .my-atlas-auth-success {
-  color: #9bd3b0;
+  color: var(--color-success, #9bd3b0);
 }
 
 .my-atlas-workflow-section {
   margin-top: 0.8rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.11);
   border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 
 .my-atlas-section-toggle {
@@ -2546,13 +2675,13 @@ export default {
 }
 
 .my-atlas-section-toggle strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.74rem;
 }
 
 .my-atlas-section-toggle small {
   overflow: hidden;
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.58rem;
@@ -2561,17 +2690,17 @@ export default {
 .my-atlas-section-toggle b {
   flex: 0 0 auto;
   padding: 0.35rem 0.5rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 999px;
-  color: #efc975;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #efc975);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
   font-size: 0.6rem;
   white-space: nowrap;
 }
 
 .my-atlas-section-toggle:hover,
 .my-atlas-section-toggle:focus-visible {
-  background: rgba(230, 186, 104, 0.055);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.055);
   outline: none;
 }
 
@@ -2588,12 +2717,12 @@ export default {
   display: grid;
   gap: 0.75rem;
   padding: 0.8rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 
 .my-atlas-tools-content > p {
   margin: 0;
-  color: #9bada7;
+  color: var(--color-text-muted, #9bada7);
   font-size: 0.66rem;
   line-height: 1.55;
 }
@@ -2602,20 +2731,20 @@ export default {
   display: grid;
   gap: 0.4rem;
   padding: 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.32);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
   border-radius: 0.75rem;
-  background: rgba(230, 186, 104, 0.06);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.06);
 }
 
 .my-atlas-tools-empty strong {
-  color: #f3d38f;
+  color: var(--color-accent-soft, #f3d38f);
   font-size: 0.76rem;
 }
 
 .my-atlas-tools-empty p,
 .my-atlas-tools-status {
   margin: 0;
-  color: #a8bab4;
+  color: var(--color-text-muted, #a8bab4);
   font-size: 0.66rem;
   line-height: 1.5;
 }
@@ -2624,10 +2753,10 @@ export default {
   justify-self: start;
   min-height: 2.75rem;
   padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 0.7rem;
-  color: #102023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #102023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.66rem;
   font-weight: 800;
@@ -2636,9 +2765,9 @@ export default {
 
 .my-atlas-tools-status {
   padding: 0.65rem 0.7rem;
-  border-left: 2px solid rgba(230, 186, 104, 0.65);
-  color: #d6e3de;
-  background: rgba(255, 255, 255, 0.025);
+  border-left: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.65);
+  color: var(--color-text, #d6e3de);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 
 .my-atlas-favorite-image {
@@ -2646,9 +2775,9 @@ export default {
   grid-template-columns: 7.5rem minmax(0, 1fr);
   gap: 0.85rem;
   padding: 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.22);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.22);
   border-radius: 0.85rem;
-  background: rgba(230, 186, 104, 0.045);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.045);
 }
 
 .my-atlas-favorite-image-preview {
@@ -2657,11 +2786,16 @@ export default {
   aspect-ratio: 1;
   overflow: hidden;
   place-items: center;
-  border: 1px solid rgba(230, 186, 104, 0.35);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   border-radius: 0.8rem;
-  color: #d9c58f;
+  color: var(--color-accent-soft, #d9c58f);
   background:
-    linear-gradient(145deg, rgba(230, 186, 104, 0.13), transparent 55%), #102023;
+    linear-gradient(
+      145deg,
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.13),
+      transparent 55%
+    ),
+    var(--color-surface-raised, #102023);
   text-align: center;
   font-size: 0.66rem;
   font-weight: 700;
@@ -2682,20 +2816,20 @@ export default {
 }
 
 .my-atlas-favorite-image-copy > strong {
-  color: #f3d38f;
+  color: var(--color-accent-soft, #f3d38f);
   font-size: 0.76rem;
 }
 
 .my-atlas-favorite-image-copy > p,
 .my-atlas-favorite-image-copy > small {
   margin: 0;
-  color: #a8bab4;
+  color: var(--color-text-muted, #a8bab4);
   font-size: 0.66rem;
   line-height: 1.5;
 }
 
 .my-atlas-favorite-image-copy > small {
-  color: #7f948d;
+  color: var(--color-text-subtle, #7f948d);
   font-size: 0.6rem;
 }
 
@@ -2709,10 +2843,10 @@ export default {
 .my-atlas-favorite-image-actions button {
   min-height: 2.45rem;
   padding: 0.5rem 0.7rem;
-  border: 1px solid rgba(230, 186, 104, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.42);
   border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
   font: inherit;
   font-size: 0.64rem;
   font-weight: 700;
@@ -2725,7 +2859,7 @@ export default {
 }
 
 .my-atlas-favorite-image-error {
-  color: #e6a8a1 !important;
+  color: var(--color-error, #e6a8a1) !important;
 }
 
 .my-atlas-visually-hidden {
@@ -2746,13 +2880,13 @@ export default {
 
 .my-atlas-tools-actions button {
   border-radius: 0.7rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
 }
 
 .my-atlas-tools-actions button:focus-visible {
-  border-color: #e6ba68;
-  outline: 2px solid rgba(230, 186, 104, 0.35);
+  border-color: var(--color-accent, #e6ba68);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   outline-offset: 0.12rem;
 }
 
@@ -2760,13 +2894,89 @@ export default {
   display: grid;
   gap: 0.2rem;
   padding: 0.65rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
+}
+
+.my-atlas-account-data-actions {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
+}
+
+.my-atlas-account-data-actions button {
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.42);
+  border-radius: 0.7rem;
+  color: var(--color-accent-soft, #f4d38f);
+  background: transparent;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-delete-account {
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--color-error-rgb, 213, 135, 126), 0.4);
+  border-radius: 0.8rem;
+  color: var(--color-error, #f3c1bb);
+}
+
+.my-atlas-delete-account summary {
+  padding: 0.4rem 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.my-atlas-delete-account p,
+.my-atlas-delete-account label {
+  margin: 0.7rem 0;
+  color: var(--color-text-muted, #cbd8d4);
+  font-size: 0.66rem;
+  line-height: 1.6;
+}
+
+.my-atlas-delete-account label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.my-atlas-delete-account input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  margin: 0;
+  padding: 0.7rem;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
+  border-radius: 0.6rem;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
+  font: inherit;
+}
+
+.my-atlas-delete-account button {
+  color: var(--color-error, #f3c1bb);
+  border-color: rgba(var(--color-error-rgb, 213, 135, 126), 0.45);
+}
+
+.my-atlas-account-data-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.my-atlas-account-data-actions :focus-visible {
+  outline: 2px solid var(--color-focus, #f4d38f);
+  outline-offset: 3px;
 }
 
 .my-atlas-share-link span {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.56rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -2775,13 +2985,13 @@ export default {
 
 .my-atlas-share-link strong {
   overflow-wrap: anywhere;
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.62rem;
 }
 
 .my-atlas-explore-link {
   justify-self: start;
-  color: #f4d38f;
+  color: var(--color-accent-soft, #f4d38f);
   font-size: 0.66rem;
   font-weight: 700;
   text-underline-offset: 0.2rem;
@@ -2789,7 +2999,7 @@ export default {
 
 .my-atlas-explore-link:focus-visible {
   border-radius: 0.25rem;
-  outline: 2px solid rgba(230, 186, 104, 0.35);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   outline-offset: 0.2rem;
 }
 
@@ -2804,15 +3014,15 @@ export default {
   height: auto;
   margin: 0;
   padding: 0.85rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
   border-radius: 0.9rem;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.07);
+  color: var(--color-text, #fff);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.07);
   font: inherit;
 }
 
 .my-atlas-search input:focus {
-  border-color: #e6ba68;
+  border-color: var(--color-accent, #e6ba68);
   box-shadow: 0 0 0 2px rgba(230, 186, 104, 0.2);
   outline: none;
 }
@@ -2825,24 +3035,24 @@ export default {
 
 .my-atlas-custom-place.is-open {
   padding: 0.9rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 0.95rem;
   background:
     radial-gradient(
       circle at 100% 0%,
-      rgba(230, 186, 104, 0.12),
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.12),
       transparent 45%
     ),
-    rgba(255, 255, 255, 0.035);
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 
 .my-atlas-custom-place-trigger,
 .my-atlas-custom-place-continue,
 .my-atlas-custom-place-heading button {
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 0.72rem;
-  color: #f5d999;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #f5d999);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 700;
@@ -2876,7 +3086,7 @@ export default {
 }
 
 .my-atlas-custom-place-heading p {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.65rem;
@@ -2885,21 +3095,21 @@ export default {
 
 .my-atlas-custom-place-heading span,
 .my-atlas-custom-place-disclosure {
-  color: #94a7a0;
+  color: var(--color-text-muted, #94a7a0);
   font-size: 0.64rem;
   line-height: 1.45;
 }
 
 .my-atlas-custom-place-heading button {
   padding: 0.42rem 0.55rem;
-  color: #d9b96f;
+  color: var(--color-accent-soft, #d9b96f);
   background: transparent;
 }
 
 .my-atlas-custom-place > label {
   display: grid;
   gap: 0.3rem;
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -2908,46 +3118,46 @@ export default {
   box-sizing: border-box;
   width: 100%;
   padding: 0.72rem 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
   border-radius: 0.72rem;
-  color: #fff;
-  background: rgba(5, 14, 16, 0.68);
+  color: var(--color-text, #fff);
+  background: rgba(var(--color-page-rgb, 5, 14, 16), 0.68);
   font: inherit;
   font-weight: 400;
 }
 
 .my-atlas-custom-place > label input:focus {
-  border-color: #e6ba68;
-  outline: 2px solid rgba(230, 186, 104, 0.18);
+  border-color: var(--color-accent, #e6ba68);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.18);
 }
 
 .my-atlas-custom-place > label small {
   justify-self: end;
-  color: #7f938c;
+  color: var(--color-text-subtle, #7f938c);
   font-size: 0.58rem;
   font-weight: 400;
 }
 
 .my-atlas-custom-place > label small.is-error {
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
 }
 
 .my-atlas-custom-place-position {
   display: grid;
   gap: 0.15rem;
   padding: 0.65rem 0.7rem;
-  border-left: 3px solid #e6ba68;
+  border-left: 3px solid var(--color-accent, #e6ba68);
   border-radius: 0.25rem 0.65rem 0.65rem 0.25rem;
-  background: rgba(230, 186, 104, 0.07);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
 }
 
 .my-atlas-custom-place-position strong {
-  color: #f3d28b;
+  color: var(--color-accent-soft, #f3d28b);
   font-size: 0.66rem;
 }
 
 .my-atlas-custom-place-position span {
-  color: #a7b9b3;
+  color: var(--color-text-muted, #a7b9b3);
   font-size: 0.62rem;
   line-height: 1.45;
 }
@@ -2956,10 +3166,10 @@ export default {
   justify-self: start;
   margin-top: 0.35rem;
   padding: 0.45rem 0.6rem;
-  border: 1px solid rgba(230, 186, 104, 0.48);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.48);
   border-radius: 0.6rem;
-  color: #f3d28b;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f3d28b);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2967,15 +3177,15 @@ export default {
 }
 
 .my-atlas-custom-place-error {
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
   font-size: 0.65rem;
 }
 
 .my-atlas-custom-place-continue {
   justify-self: start;
   padding: 0.62rem 0.78rem;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-custom-place button:disabled {
@@ -2985,7 +3195,7 @@ export default {
 
 .my-atlas-search small,
 .my-atlas-search-state {
-  color: #8ea29c;
+  color: var(--color-text-muted, #8ea29c);
   font-size: 0.7rem;
 }
 
@@ -2998,14 +3208,14 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem;
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
 }
 
 .my-atlas-search-state.is-error button {
   padding: 0.4rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.5);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.5);
   border-radius: 999px;
-  color: #f4cf83;
+  color: var(--color-accent-soft, #f4cf83);
   background: transparent;
   font: inherit;
   font-weight: 700;
@@ -3026,14 +3236,14 @@ export default {
   padding-right: 0.2rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: rgba(230, 186, 104, 0.4) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.4) transparent;
 }
 
 .my-atlas-results button,
 .my-atlas-pins li {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   border-radius: 0.85rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.05);
 }
 
 .my-atlas-results button {
@@ -3048,7 +3258,7 @@ export default {
 
 .my-atlas-results button:hover,
 .my-atlas-results button:focus-visible {
-  border-color: #e6ba68;
+  border-color: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-results button:disabled,
@@ -3066,14 +3276,14 @@ export default {
 .my-atlas-results small,
 .my-atlas-pins li small {
   grid-column: 1;
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
   font-size: 0.7rem;
 }
 
 .my-atlas-pins em {
   grid-column: 1;
   margin-top: 0.15rem;
-  color: #d3b879;
+  color: var(--color-accent-soft, #d3b879);
   font-size: 0.62rem;
   font-style: normal;
 }
@@ -3083,7 +3293,7 @@ export default {
   max-width: 36ch;
   margin-top: 0.2rem;
   overflow: hidden;
-  color: #b9c9c4;
+  color: var(--color-text-muted, #b9c9c4);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.62rem;
@@ -3094,7 +3304,7 @@ export default {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: center;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.58rem;
@@ -3106,7 +3316,7 @@ export default {
 
 .my-atlas-empty {
   margin: 0.7rem 0 0;
-  color: #8ea29c;
+  color: var(--color-text-muted, #8ea29c);
   font-size: 0.76rem;
 }
 
@@ -3117,14 +3327,14 @@ export default {
 .my-atlas-sharing p,
 .my-atlas-sharing a {
   margin: 0;
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
   font-size: 0.7rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 
 .my-atlas-sharing a {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
 }
 
 .my-atlas-sharing-content {
@@ -3139,10 +3349,10 @@ export default {
 
 .my-atlas-sharing-actions button {
   padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 0.7rem;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.68rem;
   font-weight: 700;
@@ -3176,7 +3386,7 @@ export default {
 .my-atlas-pins .remove {
   padding: 0.45rem;
   border: 0;
-  color: #d5a19b;
+  color: var(--color-error, #d5a19b);
   background: transparent;
   font-size: 0.65rem;
   cursor: pointer;
@@ -3185,7 +3395,7 @@ export default {
 .my-atlas-pins .edit {
   padding: 0.45rem;
   border: 0;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   background: transparent;
   font-size: 0.65rem;
   cursor: pointer;
@@ -3194,7 +3404,7 @@ export default {
 .my-atlas-pins .visit-edit {
   padding: 0.45rem;
   border: 0;
-  color: #b8cbc5;
+  color: var(--color-text-muted, #b8cbc5);
   background: transparent;
   font-size: 0.65rem;
   cursor: pointer;
@@ -3203,18 +3413,18 @@ export default {
 .my-atlas-beta-note,
 .my-atlas-attribution {
   margin: 1rem 0 0;
-  color: #80938d;
+  color: var(--color-text-subtle, #80938d);
   font-size: 0.65rem;
   line-height: 1.5;
 }
 
 .my-atlas-attribution a {
-  color: #cdb171;
+  color: var(--color-accent-soft, #cdb171);
 }
 
 .my-atlas-brand {
   margin: 1rem 0 0;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.68rem;
   font-weight: 700;
 }
@@ -3251,7 +3461,7 @@ export default {
     border-bottom: 0;
     border-left: 0;
     border-radius: 1.5rem 1.5rem 0 0;
-    background: #0a1416;
+    background: var(--color-page, #0a1416);
   }
 
   .my-atlas-intro {
@@ -3269,17 +3479,17 @@ export default {
     justify-content: space-between;
     width: 100%;
     padding: 0.7rem 0.75rem;
-    border: 1px solid rgba(230, 186, 104, 0.32);
+    border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
     border-radius: 0.75rem;
-    color: #edf7f2;
-    background: rgba(230, 186, 104, 0.07);
+    color: var(--color-text, #edf7f2);
+    background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
     font: inherit;
     font-size: 0.68rem;
     font-weight: 700;
   }
 
   .my-atlas-mobile-controls-toggle strong {
-    color: #e6ba68;
+    color: var(--color-accent-soft, #e6ba68);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.56rem;
@@ -3317,9 +3527,9 @@ export default {
     bottom: 0.5rem;
     z-index: 2;
     padding: 0.7rem;
-    border: 1px solid rgba(230, 186, 104, 0.24);
+    border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.24);
     border-radius: 0.9rem;
-    background: rgba(8, 20, 22, 0.96);
+    background: rgba(var(--color-page-rgb, 8, 20, 22), 0.96);
     box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.35);
   }
 }

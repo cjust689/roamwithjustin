@@ -142,11 +142,11 @@ export default {
 .hero-carousel {
   position: relative;
   overflow: hidden;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .hero-carousel:focus-visible {
-  outline: 3px solid #f6bd60;
+  outline: 3px solid var(--color-focus, #f6bd60);
   outline-offset: -3px;
 }
 
@@ -161,10 +161,14 @@ export default {
   background:
     radial-gradient(
       circle at 72% 24%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 24%
     ),
-    linear-gradient(145deg, #1a2b31, #0b1114 72%);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #1a2b31),
+      var(--color-page, #0b1114) 72%
+    );
 }
 
 .carousel-track {
@@ -193,11 +197,11 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 999px;
   padding: 0.28rem;
-  background: rgba(7, 11, 14, 0.72);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.72);
+  color: var(--color-text, #fff);
   backdrop-filter: blur(12px);
 }
 
@@ -209,20 +213,20 @@ export default {
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   cursor: pointer;
 }
 
 .carousel-controls button:hover,
 .carousel-controls button:focus-visible {
-  background: #f6bd60;
-  color: #111;
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111);
 }
 
 .carousel-controls span {
   min-width: 3.3rem;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-family: "Poppins", sans-serif;
   font-size: 0.7rem;
   font-weight: 800;

@@ -79,8 +79,8 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   overflow: hidden;
-  background: #0b1114;
-  color: white;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, white);
 }
 .parallax-container {
   width: 100%;
@@ -118,7 +118,7 @@ export default {
 }
 
 .parallax-container p {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.78));
   font-size: 1rem;
   line-height: 1.75;
 }

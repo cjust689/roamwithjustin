@@ -23,7 +23,7 @@
 
     <header class="atlas-toolbar">
       <a class="atlas-brand" href="/" aria-label="Roam With Justin home">
-        <span>RWJ</span>
+        <BrandMark />
         <strong>Travel Atlas</strong>
       </a>
       <AtlasBreadcrumbs
@@ -31,6 +31,7 @@
         @select="selectNodeFromBreadcrumbs"
       />
       <div class="atlas-tools">
+        <ThemeSelector align="start" />
         <button
           v-if="storyAvailable && !storyMode"
           class="atlas-story-link"
@@ -1057,8 +1058,8 @@ export default {
   z-index: 1000;
   inset: 0;
   overflow: hidden;
-  background: #0b1114;
-  color: #fff;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -1072,10 +1073,10 @@ export default {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 18px;
   padding: 0.55rem 0.65rem;
-  background: rgba(7, 11, 14, 0.78);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.78);
   box-shadow: 0 14px 48px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(16px);
 }
@@ -1084,18 +1085,15 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  color: #fff;
+  color: var(--color-text, #fff);
   text-decoration: none;
 }
 
-.atlas-brand > span {
+.atlas-brand > .brand-mark {
   display: grid;
   place-items: center;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 50%;
-  background: #f6bd60;
-  color: #15191b;
   font-size: 0.72rem;
   font-weight: 900;
 }
@@ -1122,11 +1120,11 @@ export default {
   justify-content: center;
   box-sizing: border-box;
   gap: 0.35rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 999px;
   padding: 0.68rem 0.9rem;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.06);
+  color: var(--color-text, #fff);
   font: inherit;
   font-size: 0.75rem;
   font-weight: 700;
@@ -1140,12 +1138,12 @@ export default {
 .atlas-tools button:focus-visible,
 .atlas-tools a:hover,
 .atlas-tools a:focus-visible {
-  border-color: #f6bd60;
+  border-color: var(--color-accent, #f6bd60);
 }
 
 .atlas-tools .atlas-story-link {
-  border-color: rgba(246, 189, 96, 0.48);
-  color: #f8d79f;
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.48);
+  color: var(--color-accent-soft, #f8d79f);
 }
 
 .atlas-surprise-mobile {
@@ -1163,8 +1161,8 @@ export default {
   height: 1.25rem;
   margin-left: 0.25rem;
   border-radius: 50%;
-  background: #f6bd60;
-  color: #111;
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111);
   font-size: 0.65rem;
 }
 
@@ -1175,9 +1173,9 @@ export default {
   left: clamp(1rem, 3vw, 2rem);
   width: min(500px, calc(100vw - 2rem));
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 22px;
-  background: rgba(7, 11, 14, 0.88);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.88);
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
   backdrop-filter: blur(18px);
 }
@@ -1195,7 +1193,7 @@ export default {
   border: 0;
   padding: 0.9rem 1rem;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -1203,11 +1201,11 @@ export default {
 
 .atlas-welcome-toggle:hover,
 .atlas-welcome-toggle:focus-visible {
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055);
 }
 
 .atlas-welcome-toggle:focus-visible {
-  outline: 2px solid #f6bd60;
+  outline: 2px solid var(--color-focus, #f6bd60);
   outline-offset: -3px;
 }
 
@@ -1229,7 +1227,7 @@ export default {
   flex: 0 0 auto;
   align-items: center;
   gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -1239,9 +1237,9 @@ export default {
   place-items: center;
   width: 1.7rem;
   height: 1.7rem;
-  border: 1px solid rgba(246, 189, 96, 0.5);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.5);
   border-radius: 50%;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 1rem;
   line-height: 1;
 }
@@ -1251,9 +1249,9 @@ export default {
   max-height: calc(100vh - 10.5rem);
   max-height: calc(100dvh - 10.5rem);
   overflow-y: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   overscroll-behavior: contain;
-  scrollbar-color: rgba(246, 189, 96, 0.55) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.55) transparent;
   scrollbar-width: thin;
 }
 
@@ -1274,7 +1272,7 @@ export default {
 
 .atlas-welcome-intro p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.78));
   font-size: 0.9rem;
   line-height: 1.55;
 }
@@ -1293,11 +1291,11 @@ export default {
   min-height: 4.5rem;
   align-content: center;
   gap: 0.12rem;
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 15px;
   padding: 0.7rem 0.8rem;
-  background: rgba(246, 189, 96, 0.1);
-  color: #fff;
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.1);
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -1305,13 +1303,13 @@ export default {
 
 .atlas-journey-nav button:hover,
 .atlas-journey-nav button:focus-visible {
-  border-color: #f6bd60;
-  background: rgba(246, 189, 96, 0.18);
+  border-color: var(--color-accent, #f6bd60);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.18);
   outline: 0;
 }
 
 .atlas-journey-nav button > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.58rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -1327,7 +1325,7 @@ export default {
 
 .atlas-journey-nav button > small {
   margin-top: 0.18rem;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 0.65rem;
   line-height: 1.35;
 }
@@ -1336,7 +1334,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   padding: 0.8rem 1rem 1rem;
 }
 
@@ -1345,11 +1343,11 @@ export default {
   display: inline-flex;
   min-height: 2.65rem;
   align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.22);
   border-radius: 999px;
   padding: 0.62rem 0.85rem;
-  background: rgba(255, 255, 255, 0.055);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055);
+  color: var(--color-text, #fff);
   font: inherit;
   font-size: 0.72rem;
   font-weight: 700;
@@ -1361,7 +1359,7 @@ export default {
 .atlas-welcome-actions button:focus-visible,
 .atlas-welcome .atlas-journey-library:hover,
 .atlas-welcome .atlas-journey-library:focus-visible {
-  border-color: #f6bd60;
+  border-color: var(--color-accent, #f6bd60);
 }
 
 .atlas-provider-note {
@@ -1371,8 +1369,8 @@ export default {
   bottom: 1.1rem;
   border-radius: 999px;
   padding: 0.45rem 0.65rem;
-  background: rgba(5, 8, 10, 0.68);
-  color: rgba(255, 255, 255, 0.56);
+  background: rgba(var(--color-page-rgb, 5, 8, 10), 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.56));
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.09em;
@@ -1390,9 +1388,9 @@ export default {
   gap: 0.75rem;
   box-sizing: border-box;
   padding: 0.9rem;
-  border: 1px solid rgba(246, 189, 96, 0.48);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.48);
   border-radius: 16px;
-  background: rgba(7, 11, 14, 0.94);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.94);
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(16px);
   animation: atlas-toast-in 220ms ease-out both;
@@ -1409,13 +1407,13 @@ export default {
 }
 
 .atlas-my-atlas-toast strong {
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-size: 0.9rem;
 }
 
 .atlas-my-atlas-toast p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.75));
   font-size: 0.74rem;
   line-height: 1.5;
 }
@@ -1434,10 +1432,10 @@ export default {
   justify-content: center;
   box-sizing: border-box;
   padding: 0.6rem 0.8rem;
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 999px;
-  color: #15191b;
-  background: #f6bd60;
+  color: var(--color-accent-contrast, #15191b);
+  background: var(--color-accent, #f6bd60);
   font: inherit;
   font-size: 0.7rem;
   font-weight: 800;
@@ -1446,13 +1444,13 @@ export default {
 }
 
 .atlas-my-atlas-toast-actions button {
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.76));
   background: transparent;
 }
 
 .atlas-my-atlas-toast-actions a:focus-visible,
 .atlas-my-atlas-toast-actions button:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
@@ -1487,7 +1485,7 @@ export default {
     padding: 0.55rem 0.6rem;
   }
 
-  .atlas-brand > span {
+  .atlas-brand > .brand-mark {
     width: 2.75rem;
     height: 2.75rem;
     font-size: 0.82rem;
@@ -1622,7 +1620,7 @@ export default {
   .atlas-tools {
     grid-column: 1 / -1;
     justify-content: flex-end;
-    border-top: 1px solid rgba(255, 255, 255, 0.09);
+    border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
     padding-top: 0.45rem;
   }
 
@@ -1644,7 +1642,7 @@ export default {
     padding-inline: 0.48rem;
   }
 
-  .atlas-brand > span {
+  .atlas-brand > .brand-mark {
     width: 2.5rem;
     height: 2.5rem;
   }

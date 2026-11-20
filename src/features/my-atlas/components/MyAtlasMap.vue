@@ -988,7 +988,7 @@ export default {
 
 .my-atlas-map-shell {
   overflow: hidden;
-  background: #101b1d;
+  background: var(--color-surface, #101b1d);
 }
 
 .my-atlas-map-status {
@@ -999,14 +999,18 @@ export default {
   place-content: center;
   gap: 0.5rem;
   padding: 2rem;
-  color: #ecf6f1;
+  color: var(--color-text, #ecf6f1);
   text-align: center;
-  background: linear-gradient(145deg, #162529, #0c1417);
+  background: linear-gradient(
+    145deg,
+    var(--color-surface-raised, #162529),
+    var(--color-page, #0c1417)
+  );
 }
 
 .my-atlas-map-status span {
   max-width: 24rem;
-  color: #a9bbb5;
+  color: var(--color-text-muted, #a9bbb5);
 }
 
 .my-atlas-map-status.is-error {
@@ -1036,23 +1040,23 @@ export default {
   gap: 0.12rem;
   max-width: min(18rem, calc(100% - 2rem));
   padding: 0.62rem 0.78rem;
-  border: 1px solid rgba(242, 199, 110, 0.52);
+  border: 1px solid rgba(var(--color-accent-rgb, 242, 199, 110), 0.52);
   border-radius: 0.75rem;
-  color: #edf7f2;
-  background: rgba(8, 17, 19, 0.9);
+  color: var(--color-text, #edf7f2);
+  background: rgba(var(--color-page-rgb, 8, 17, 19), 0.9);
   box-shadow: 0 0.7rem 1.8rem rgba(0, 0, 0, 0.3);
   pointer-events: none;
 }
 
 .my-atlas-planner-map-status strong {
-  color: #f2c76e;
+  color: var(--color-accent-soft, #f2c76e);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.62rem;
 }
 
 .my-atlas-planner-map-status span {
-  color: #b6c7c1;
+  color: var(--color-text-muted, #b6c7c1);
   font-size: 0.6rem;
 }
 
@@ -1062,7 +1066,7 @@ export default {
   gap: 0.28rem;
   margin-top: 0.28rem;
   padding-top: 0.35rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
 }
 
 .my-atlas-planner-map-key i {
@@ -1070,7 +1074,7 @@ export default {
   height: 0.48rem;
   margin-left: 0.3rem;
   border-radius: 50%;
-  background: #f8d58d;
+  background: var(--color-accent, #f8d58d);
   box-shadow: 0 0 0.45rem currentColor;
 }
 
@@ -1084,8 +1088,8 @@ export default {
 }
 
 .my-atlas-planner-map-key .is-route {
-  color: #e6ba68;
-  background: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
+  background: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-planner-map-key .is-finish {
@@ -1102,20 +1106,20 @@ export default {
   max-width: min(19rem, calc(100% - 2rem));
   gap: 0.2rem;
   padding: 0.7rem 0.85rem;
-  border: 1px solid rgba(242, 199, 110, 0.55);
+  border: 1px solid rgba(var(--color-accent-rgb, 242, 199, 110), 0.55);
   border-radius: 0.8rem;
-  color: #edf7f2;
-  background: rgba(8, 17, 19, 0.92);
+  color: var(--color-text, #edf7f2);
+  background: rgba(var(--color-page-rgb, 8, 17, 19), 0.92);
   box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.32);
   font-size: 0.68rem;
 }
 
 .my-atlas-placement-help strong {
-  color: #f2c76e;
+  color: var(--color-accent-soft, #f2c76e);
 }
 
 .my-atlas-placement-help span {
-  color: #b6c7c1;
+  color: var(--color-text-muted, #b6c7c1);
 }
 
 ::v-deep .my-atlas-custom-placement-pin {
@@ -1133,9 +1137,9 @@ export default {
   left: 0.1rem;
   width: 1.8rem;
   height: 1.8rem;
-  border: 3px solid #f7e4b6;
+  border: 3px solid var(--color-accent, #f7e4b6);
   border-radius: 50% 50% 50% 0;
-  background: #e6ba68;
+  background: var(--color-accent, #e6ba68);
   box-shadow:
     0 0 0 5px rgba(230, 186, 104, 0.18),
     0 0.55rem 1.1rem rgba(0, 0, 0, 0.48);
@@ -1148,7 +1152,7 @@ export default {
 }
 
 ::v-deep .my-atlas-custom-placement-pin:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 0.2rem;
 }
 
@@ -1157,10 +1161,10 @@ export default {
   align-items: center;
   gap: 0.28rem;
   padding: 0.28rem 0.45rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 999px;
-  color: #f3f8f5;
-  background: rgba(8, 18, 20, 0.82);
+  color: var(--color-text, #f3f8f5);
+  background: rgba(var(--color-page-rgb, 8, 18, 20), 0.82);
   box-shadow: 0 0.3rem 1rem rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(8px);
   font-size: 0.62rem;
@@ -1183,7 +1187,7 @@ export default {
   padding: 0;
   border: 0;
   overflow: visible;
-  color: #f6fbf8;
+  color: var(--color-text, #f6fbf8);
   background: transparent;
   cursor: pointer;
   transition:
@@ -1194,7 +1198,7 @@ export default {
 ::v-deep .my-atlas-pin-shape {
   position: absolute;
   inset: 0;
-  border: 2px solid rgba(255, 255, 255, 0.72);
+  border: 2px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.72);
   border-radius: 50% 50% 50% 0;
   background: var(--pin-color);
   box-shadow:
@@ -1208,19 +1212,19 @@ export default {
   position: absolute;
   inset: 0.52rem;
   border-radius: 50%;
-  background: #102023;
+  background: var(--color-surface-raised, #102023);
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.16);
 }
 
 ::v-deep .my-atlas-pin-cluster .my-atlas-pin-shape {
   display: grid;
   place-items: center;
-  border-color: #f8e2af;
-  background: #122326;
+  border-color: var(--color-accent, #f8e2af);
+  background: var(--color-surface-raised, #122326);
 }
 
 ::v-deep .my-atlas-pin-cluster .my-atlas-pin-shape strong {
-  color: #f8d58d;
+  color: var(--color-accent-soft, #f8d58d);
   font-size: 0.82rem;
   line-height: 1;
   transform: rotate(45deg);
@@ -1236,7 +1240,7 @@ export default {
   border: 1px solid color-mix(in srgb, var(--pin-color) 58%, transparent);
   border-radius: 0.62rem;
   text-align: left;
-  background: rgba(9, 19, 21, 0.9);
+  background: rgba(var(--color-page-rgb, 9, 19, 21), 0.9);
   box-shadow: 0 0.5rem 1.4rem rgba(0, 0, 0, 0.36);
   backdrop-filter: blur(9px);
   transform: translateX(-50%);
@@ -1271,8 +1275,8 @@ export default {
   margin-top: 0.35rem;
   padding-top: 0.35rem;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
-  color: #dce9e4;
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
+  color: var(--color-text, #dce9e4);
   font-size: 0.62rem;
   font-style: italic;
   line-height: 1.4;
@@ -1304,7 +1308,7 @@ export default {
   width: 2.55rem;
   height: 3rem;
   overflow: visible;
-  color: #102023;
+  color: var(--color-accent-contrast, #102023);
   pointer-events: none;
 }
 
@@ -1313,9 +1317,9 @@ export default {
   inset: 0;
   display: grid;
   place-items: center;
-  border: 3px solid #fff2cf;
+  border: 3px solid var(--color-border, #fff2cf);
   border-radius: 50% 50% 50% 0;
-  background: #e6ba68;
+  background: var(--color-accent, #e6ba68);
   box-shadow:
     0 0 0 0.4rem rgba(230, 186, 104, 0.2),
     0 0.65rem 1.5rem rgba(0, 0, 0, 0.52),
@@ -1332,12 +1336,12 @@ export default {
 }
 
 ::v-deep .my-atlas-plan-pin.has-finish .my-atlas-plan-pin-shape {
-  border-color: #ffd4ca;
+  border-color: var(--color-error, #ffd4ca);
   background: #f08a72;
 }
 
 ::v-deep .my-atlas-plan-pin.has-start.has-finish .my-atlas-plan-pin-shape {
-  border-color: #fff2cf;
+  border-color: var(--color-border, #fff2cf);
   background: linear-gradient(135deg, #58d1c9 0 50%, #f08a72 50% 100%);
 }
 
@@ -1359,11 +1363,11 @@ export default {
   min-width: max-content;
   gap: 0.08rem;
   padding: 0.4rem 0.52rem;
-  border: 1px solid rgba(242, 199, 110, 0.52);
+  border: 1px solid rgba(var(--color-accent-rgb, 242, 199, 110), 0.52);
   border-radius: 0.62rem;
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   text-align: left;
-  background: rgba(7, 16, 18, 0.94);
+  background: rgba(var(--color-page-rgb, 7, 16, 18), 0.94);
   box-shadow: 0 0.5rem 1.4rem rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(9px);
   transform: translateX(-50%);
@@ -1378,7 +1382,7 @@ export default {
 }
 
 ::v-deep .my-atlas-plan-pin-label small {
-  color: #f2c76e;
+  color: var(--color-accent-soft, #f2c76e);
   font-size: 0.57rem;
   font-weight: 800;
 }
@@ -1390,10 +1394,10 @@ export default {
   width: 2.4rem;
   height: 2.4rem;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.72);
   border-radius: 50%;
-  color: #102023;
-  background: #f6cf7d;
+  color: var(--color-accent-contrast, #102023);
+  background: var(--color-accent, #f6cf7d);
   box-shadow:
     0 0 0 0.38rem rgba(242, 199, 110, 0.18),
     0 0 1.4rem rgba(242, 199, 110, 0.8);

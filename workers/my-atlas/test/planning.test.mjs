@@ -1,6 +1,7 @@
 import { env } from "cloudflare:workers"
 import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
+import { registerMyAtlasAccount } from "../../../src/features/my-atlas/api/client.mjs"
 import {
   createMyPin,
   deleteMyAccount,
@@ -873,6 +874,24 @@ describe("private wishlist and trip planning", () => {
         userId: "usr_eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
         handle: "planner-owner",
       },
+    })
+    const browserProfile = await registerMyAtlasAccount({
+      apiBaseUrl: "https://api.example.com",
+      accessToken: "test-token",
+      registration: {},
+      fetchImpl: async () =>
+        Response.json(
+          {
+            registered: true,
+            profile: replacement.profile,
+          },
+          { status: 201 }
+        ),
+    })
+    expect(browserProfile).toMatchObject({
+      handle: "planner-owner",
+      public: false,
+      discoverable: false,
     })
   })
 })

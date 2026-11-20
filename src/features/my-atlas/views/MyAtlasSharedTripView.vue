@@ -12,9 +12,10 @@
 
     <header>
       <router-link to="/atlas" aria-label="Return to the Travel Atlas">
-        RWJ
+        <BrandMark />
       </router-link>
       <span>Shared trip</span>
+      <ThemeSelector />
     </header>
 
     <section v-if="trip" class="shared-trip-card">
@@ -141,8 +142,8 @@ export default {
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
-  color: #edf7f2;
-  background: #0a1416;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-page, #0a1416);
   font-family: "Poppins", sans-serif;
 }
 
@@ -159,10 +160,10 @@ export default {
   align-items: center;
   gap: 0.7rem;
   padding: 0.35rem 0.65rem 0.35rem 0.35rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 999px;
-  color: #e6ba68;
-  background: rgba(8, 17, 19, 0.9);
+  color: var(--color-accent-soft, #e6ba68);
+  background: rgba(var(--color-page-rgb, 8, 17, 19), 0.9);
   box-shadow: 0 0.7rem 1.8rem rgba(0, 0, 0, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -175,9 +176,6 @@ export default {
   width: 2.35rem;
   height: 2.35rem;
   place-items: center;
-  border-radius: 50%;
-  color: #132023;
-  background: #e6ba68;
   letter-spacing: 0;
   text-decoration: none;
 }
@@ -195,9 +193,9 @@ export default {
   box-sizing: border-box;
   padding: 1rem;
   overflow-y: auto;
-  border: 1px solid rgba(230, 186, 104, 0.4);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
   border-radius: 1.15rem;
-  background: rgba(8, 17, 19, 0.92);
+  background: rgba(var(--color-page-rgb, 8, 17, 19), 0.92);
   box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(14px);
 }
@@ -222,7 +220,7 @@ export default {
 }
 
 .shared-trip-heading p {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -236,7 +234,7 @@ export default {
 }
 
 .shared-trip-heading span {
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
 }
 
 .shared-trip-heading button,
@@ -244,10 +242,10 @@ export default {
   min-height: 2.6rem;
   flex: 0 0 auto;
   padding: 0.6rem 0.78rem;
-  border: 1px solid #e6ba68;
+  border: 1px solid var(--color-accent, #e6ba68);
   border-radius: 0.7rem;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.76rem;
   font-weight: 800;
@@ -256,7 +254,7 @@ export default {
 }
 
 .shared-trip-card details {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
 }
 
 .shared-trip-card summary {
@@ -265,7 +263,7 @@ export default {
   justify-content: space-between;
   gap: 1rem;
   min-height: 2.9rem;
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   cursor: pointer;
   list-style: none;
 }
@@ -283,7 +281,7 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
 }
 
 .shared-trip-card summary small::after {
@@ -291,7 +289,7 @@ export default {
   width: 1.35rem;
   height: 1.35rem;
   place-items: center;
-  border: 1px solid rgba(230, 186, 104, 0.5);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.5);
   border-radius: 50%;
   content: "+";
   font-size: 0.82rem;
@@ -322,9 +320,9 @@ export default {
   width: 2.15rem;
   height: 2.15rem;
   place-items: center;
-  border: 1px solid #e6ba68;
+  border: 1px solid var(--color-accent, #e6ba68);
   border-radius: 50%;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.76rem;
 }
 
@@ -339,7 +337,7 @@ export default {
 }
 
 .shared-trip-card li small {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.62rem;
@@ -347,7 +345,7 @@ export default {
 
 .shared-trip-card li span,
 .shared-trip-note {
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
 }
 
 .shared-trip-card li span {
@@ -363,7 +361,7 @@ export default {
 .shared-trip-status {
   min-height: 1.2rem;
   margin: 0;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.72rem;
 }
 

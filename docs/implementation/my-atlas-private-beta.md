@@ -165,6 +165,28 @@ media-upload Worker.
 
 ## Current state
 
+A registration response regression is fixed locally. The discovery release
+made the browser require `profile.discoverable === false`, while the separate
+registration projection omitted that field. A profile could therefore be
+created successfully but presented as a failed creation. The service now
+returns the discovery flag and account counts. The Workers runtime test first
+reproduced the failure after deleting and recreating the same handle, then
+passed after the correction using the real service response through the
+browser validator. `npm run my-atlas:test` passed all 44 runtime tests and
+focused ESLint passed. This does not prove that a particular live HTTP 409
+handle conflict is resolved, and no cloud account records were changed.
+
+Locally, private export and account deletion now sit directly below the
+sharing visibility controls. The trip planner no longer owns or displays
+account deletion. The owner view retains the existing safe retry and reload
+recovery logic. This relocation has not been deployed.
+The My Atlas suite passed with 44 Workers runtime tests, focused lint passed,
+and documentation audit passed. A 390 pixel local Chrome fixture confirmed
+one deletion control inside sharing and outside the planner, disabled before
+the exact phrase, enabled after typing it, and cancellation at the final
+confirmation preserving the account without a deletion request. Root scroll
+width remained 390 pixels. No real account was deleted.
+
 The owner route shows an empty map before sign-in and requires a loaded account
 for private map data, search, destination controls, planner, or guide. The signed-out interactive
 draft proof has been removed. Public shared views remain accessible. This

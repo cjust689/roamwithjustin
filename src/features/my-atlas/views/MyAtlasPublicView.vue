@@ -10,8 +10,9 @@
 
     <section class="my-atlas-public-panel" aria-labelledby="public-atlas-title">
       <header>
-        <a href="/" aria-label="Roam With Justin home">RWJ</a>
+        <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
         <router-link to="/my-atlas/explore">Explore Atlases</router-link>
+        <ThemeSelector />
       </header>
 
       <div v-if="loading" class="my-atlas-public-state" role="status">
@@ -499,8 +500,8 @@ export default {
   position: relative;
   min-height: 100dvh;
   overflow: hidden;
-  color: #edf7f2;
-  background: #0d1719;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface, #0d1719);
   font-family: "Poppins", sans-serif;
 }
 
@@ -513,9 +514,9 @@ export default {
   margin: 1rem;
   padding: 1.25rem;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 1.5rem;
-  background: rgba(10, 20, 22, 0.92);
+  background: rgba(var(--color-page-rgb, 10, 20, 22), 0.92);
   box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(18px);
 }
@@ -524,22 +525,26 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.72rem;
   font-weight: 700;
 }
 
-.my-atlas-public-panel > header a {
+.my-atlas-public-panel > header a:first-child {
   display: grid;
   width: 2.35rem;
   height: 2.35rem;
   place-items: center;
-  border-radius: 50%;
-  color: #132023;
-  background: #e6ba68;
   letter-spacing: 0;
+}
+
+.my-atlas-public-panel > header a:not(:first-child) {
+  margin-left: auto;
+  color: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
 }
 
 .my-atlas-public-profile.has-favorite-image {
@@ -549,9 +554,9 @@ export default {
   align-items: flex-end;
   margin: 1.15rem 0 1rem;
   overflow: hidden;
-  border: 1px solid rgba(230, 186, 104, 0.28);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.28);
   border-radius: 1.1rem;
-  background: #102023;
+  background: var(--color-surface-raised, #102023);
   isolation: isolate;
 }
 
@@ -569,8 +574,16 @@ export default {
   z-index: -1;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(5, 13, 15, 0.08) 15%, rgba(5, 13, 15, 0.92)),
-    linear-gradient(90deg, rgba(5, 13, 15, 0.45), transparent 70%);
+    linear-gradient(
+      180deg,
+      rgba(var(--color-page-rgb, 5, 13, 15), 0.08) 15%,
+      rgba(var(--color-page-rgb, 5, 13, 15), 0.92)
+    ),
+    linear-gradient(
+      90deg,
+      rgba(var(--color-page-rgb, 5, 13, 15), 0.45),
+      transparent 70%
+    );
   content: "";
 }
 
@@ -589,11 +602,11 @@ export default {
   gap: 0.75rem;
   margin-top: 0.8rem;
   padding: 0.6rem 0.7rem;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.24);
   border-radius: 0.72rem;
-  color: #fff8e8;
+  color: var(--color-text, #fff8e8);
   text-align: left;
-  background: rgba(6, 17, 19, 0.72);
+  background: rgba(var(--color-page-rgb, 6, 17, 19), 0.72);
   font: inherit;
   cursor: pointer;
   backdrop-filter: blur(8px);
@@ -606,14 +619,14 @@ export default {
 .my-atlas-public-favorite-action span {
   flex: 0 0 auto;
   margin: 0;
-  color: #f0cc82;
+  color: var(--color-accent-soft, #f0cc82);
   font-size: 0.6rem;
   font-weight: 700;
 }
 
 .my-atlas-public-favorite-action:hover,
 .my-atlas-public-favorite-action:focus-visible {
-  border-color: #e6ba68;
+  border-color: var(--color-accent, #e6ba68);
   outline: none;
 }
 
@@ -624,7 +637,7 @@ export default {
 .my-atlas-public-image-error,
 .my-atlas-public-export-status {
   margin: 0 0 0.8rem;
-  color: #9fb1ab;
+  color: var(--color-text-muted, #9fb1ab);
   font-size: 0.62rem;
   line-height: 1.5;
 }
@@ -634,15 +647,15 @@ export default {
   max-height: calc(100dvh - 2rem);
   padding: 0;
   overflow: hidden;
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 1rem;
-  color: #edf7f2;
-  background: #081416;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-page, #081416);
   box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.55);
 }
 
 .my-atlas-public-image-dialog::backdrop {
-  background: rgba(2, 8, 10, 0.86);
+  background: rgba(var(--color-page-rgb, 2, 8, 10), 0.86);
   backdrop-filter: blur(8px);
 }
 
@@ -656,10 +669,10 @@ export default {
   justify-self: end;
   min-height: 2.75rem;
   padding: 0.5rem 0.8rem;
-  border: 1px solid rgba(230, 186, 104, 0.45);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.45);
   border-radius: 0.65rem;
-  color: #f6e4bc;
-  background: #111f22;
+  color: var(--color-accent-soft, #f6e4bc);
+  background: var(--color-surface-raised, #111f22);
   font: inherit;
   font-size: 0.65rem;
   font-weight: 700;
@@ -674,7 +687,7 @@ export default {
 
 .my-atlas-public-image-dialog p {
   margin: 0;
-  color: #b9cac4;
+  color: var(--color-text-muted, #b9cac4);
   font-size: 0.7rem;
   text-align: center;
 }
@@ -697,12 +710,12 @@ export default {
 .my-atlas-public-intro p,
 .my-atlas-public-intro span {
   margin: 0 0 0.4rem;
-  color: #a8bab4;
+  color: var(--color-text-muted, #a8bab4);
   font-size: 0.76rem;
 }
 
 .my-atlas-public-intro p {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-weight: 700;
 }
 
@@ -724,17 +737,17 @@ export default {
   padding: 0.5rem 0.25rem;
   border-radius: 0.7rem;
   text-align: center;
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.055);
 }
 
 .my-atlas-public-stats strong {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 1.05rem;
 }
 
 .my-atlas-public-stats span {
   overflow: hidden;
-  color: #879b94;
+  color: var(--color-text-subtle, #879b94);
   text-overflow: ellipsis;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -762,7 +775,7 @@ export default {
   display: grid;
   flex: 1 1 10rem;
   gap: 0.2rem;
-  color: #93a69f;
+  color: var(--color-text-muted, #93a69f);
   font-size: 0.6rem;
 }
 
@@ -770,10 +783,10 @@ export default {
 .my-atlas-public-controls button,
 .my-atlas-public-selected button {
   padding: 0.5rem 0.6rem;
-  border: 1px solid rgba(230, 186, 104, 0.38);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.38);
   border-radius: 0.65rem;
-  color: #f6e4bc;
-  background: #111f22;
+  color: var(--color-accent-soft, #f6e4bc);
+  background: var(--color-surface-raised, #111f22);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -792,7 +805,7 @@ export default {
   display: grid;
   gap: 0.08rem;
   margin: 0 0 0.32rem;
-  color: #f0c978;
+  color: var(--color-accent-soft, #f0c978);
 }
 
 .my-atlas-public-timeline strong {
@@ -802,7 +815,7 @@ export default {
 
 .my-atlas-public-timeline span,
 .my-atlas-public-route-note {
-  color: #8fa39c;
+  color: var(--color-text-muted, #8fa39c);
   font-size: 0.6rem;
 }
 
@@ -818,9 +831,9 @@ export default {
   gap: 0.45rem;
   margin-bottom: 0.8rem;
   padding: 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.18);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.18);
   border-radius: 0.8rem;
-  background: rgba(230, 186, 104, 0.05);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.05);
 }
 
 .my-atlas-public-selected > div {
@@ -832,24 +845,24 @@ export default {
 .my-atlas-public-selected span,
 .my-atlas-public-selected small {
   overflow: hidden;
-  color: #94a7a0;
+  color: var(--color-text-muted, #94a7a0);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.6rem;
 }
 
 .my-atlas-public-selected small {
-  color: #d5b979;
+  color: var(--color-accent-soft, #d5b979);
 }
 
 .my-atlas-public-selected blockquote {
   grid-column: 1 / -1;
   margin: 0;
   padding: 0.55rem 0.65rem;
-  border-left: 2px solid rgba(230, 186, 104, 0.55);
-  color: #dce9e4;
+  border-left: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.55);
+  color: var(--color-text, #dce9e4);
   text-align: left;
-  background: rgba(230, 186, 104, 0.06);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.06);
   font-size: 0.68rem;
   line-height: 1.5;
   overflow-wrap: anywhere;
@@ -868,22 +881,22 @@ export default {
   grid-template-columns: 1fr auto;
   width: 100%;
   padding: 0.75rem 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   border-radius: 0.85rem;
   color: inherit;
   text-align: left;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.05);
   cursor: pointer;
 }
 
 .my-atlas-public-places button:hover,
 .my-atlas-public-places button:focus-visible {
-  border-color: #e6ba68;
+  border-color: var(--color-accent, #e6ba68);
 }
 
 .my-atlas-public-places span {
   grid-column: 1;
-  color: #9eb0aa;
+  color: var(--color-text-muted, #9eb0aa);
   font-size: 0.7rem;
 }
 
@@ -891,7 +904,7 @@ export default {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: center;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.66rem;
 }
 
@@ -900,7 +913,7 @@ export default {
   max-width: 36ch;
   margin-top: 0.2rem;
   overflow: hidden;
-  color: #becdc8;
+  color: var(--color-text-muted, #becdc8);
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 0.62rem;
@@ -909,20 +922,20 @@ export default {
 
 .my-atlas-public-attribution {
   margin: 1.1rem 0 0;
-  color: #80938d;
+  color: var(--color-text-subtle, #80938d);
   font-size: 0.65rem;
   line-height: 1.5;
 }
 
 .my-atlas-public-brand {
   margin: 1rem 0 0;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.68rem;
   font-weight: 700;
 }
 
 .my-atlas-public-attribution a {
-  color: #cdb171;
+  color: var(--color-accent-soft, #cdb171);
 }
 
 @media (max-width: 720px) {
@@ -944,7 +957,7 @@ export default {
     border-bottom: 0;
     border-left: 0;
     border-radius: 1.5rem 1.5rem 0 0;
-    background: #0a1416;
+    background: var(--color-page, #0a1416);
   }
 
   .my-atlas-public-state,
@@ -998,10 +1011,10 @@ export default {
     align-self: end;
     margin: 0 0 0.12rem;
     padding: 0.42rem 0.58rem;
-    border: 1px solid rgba(230, 186, 104, 0.24);
+    border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.24);
     border-radius: 999px;
-    color: #d9c58f;
-    background: rgba(230, 186, 104, 0.07);
+    color: var(--color-accent-soft, #d9c58f);
+    background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
     white-space: nowrap;
   }
 
@@ -1012,17 +1025,17 @@ export default {
     width: 100%;
     margin-bottom: 0.8rem;
     padding: 0.7rem 0.75rem;
-    border: 1px solid rgba(230, 186, 104, 0.32);
+    border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
     border-radius: 0.75rem;
-    color: #edf7f2;
-    background: rgba(230, 186, 104, 0.07);
+    color: var(--color-text, #edf7f2);
+    background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
     font: inherit;
     font-size: 0.68rem;
     font-weight: 700;
   }
 
   .my-atlas-public-mobile-controls-toggle strong {
-    color: #e6ba68;
+    color: var(--color-accent-soft, #e6ba68);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.56rem;

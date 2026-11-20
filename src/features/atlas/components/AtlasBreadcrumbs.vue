@@ -54,26 +54,26 @@ export default {
   align-items: center;
   gap: 0.45rem;
   flex: 0 0 auto;
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.42));
 }
 
 .atlas-breadcrumbs button {
   border: 0;
   padding: 0.45rem 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
   font: inherit;
   font-size: 0.78rem;
   cursor: pointer;
 }
 
 .atlas-breadcrumbs button[aria-current="location"] {
-  color: #fff;
+  color: var(--color-text, #fff);
   font-weight: 700;
 }
 
 .atlas-breadcrumbs button:focus-visible {
-  outline: 2px solid #f6bd60;
+  outline: 2px solid var(--color-focus, #f6bd60);
   outline-offset: 3px;
   border-radius: 2px;
 }

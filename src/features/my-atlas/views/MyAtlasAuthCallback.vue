@@ -53,21 +53,21 @@ export default {
   min-height: 100dvh;
   place-items: center;
   padding: 1.5rem;
-  color: #edf7f2;
-  background: #0d1719;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface, #0d1719);
   font-family: "Poppins", sans-serif;
 }
 
 .my-atlas-callback section {
   width: min(30rem, 100%);
   padding: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 1.5rem;
-  background: #0a1416;
+  background: var(--color-page, #0a1416);
 }
 
 .my-atlas-callback a {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
 }
 
 .my-atlas-callback h1 {

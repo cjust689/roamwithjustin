@@ -716,7 +716,7 @@ export default {
 }
 
 .atlas-map {
-  background: #10181c;
+  background: var(--color-surface, #10181c);
 }
 
 .atlas-map .maplibregl-canvas {
@@ -731,7 +731,7 @@ export default {
   display: grid;
   place-items: center;
   transform: translate(-50%, -50%);
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .atlas-route-key {
@@ -741,18 +741,18 @@ export default {
   left: 1.25rem;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(246, 189, 96, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.34);
   border-radius: 13px;
   padding: 0.65rem 0.8rem;
-  background: rgba(7, 11, 14, 0.8);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.8);
   box-shadow: 0 10px 32px rgba(0, 0, 0, 0.28);
-  color: #fff;
+  color: var(--color-text, #fff);
   backdrop-filter: blur(12px);
   pointer-events: none;
 }
 
 .atlas-route-key span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.59rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -767,8 +767,8 @@ export default {
 .atlas-map-loading span {
   width: 38px;
   height: 38px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #f6bd60;
+  border: 2px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
+  border-top-color: var(--color-accent, #f6bd60);
   border-radius: 50%;
   animation: atlas-spin 0.9s linear infinite;
 }
@@ -782,8 +782,8 @@ export default {
 .atlas-map-fallback {
   z-index: 2;
   overflow: hidden;
-  background: #111a1e;
-  color: #fff;
+  background: var(--color-surface, #111a1e);
+  color: var(--color-text, #fff);
 }
 
 .atlas-map-fallback > img {
@@ -796,8 +796,8 @@ export default {
 .atlas-map-fallback > div {
   background: linear-gradient(
     120deg,
-    rgba(5, 9, 11, 0.92),
-    rgba(5, 9, 11, 0.35)
+    rgba(var(--color-page-rgb, 5, 9, 11), 0.92),
+    rgba(var(--color-page-rgb, 5, 9, 11), 0.35)
   );
 }
 
@@ -812,7 +812,7 @@ export default {
 
 .atlas-map-fallback span,
 .atlas-map-preview span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -833,13 +833,13 @@ export default {
   place-items: center;
   width: 2.9rem;
   height: 2.9rem;
-  border: 3px solid #f6bd60;
+  border: 3px solid var(--color-accent, #f6bd60);
   border-radius: 50%;
-  background: rgba(7, 11, 14, 0.94);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.94);
   box-shadow:
     0 0 0 5px rgba(7, 11, 14, 0.38),
     0 10px 28px rgba(0, 0, 0, 0.52);
-  color: #fff;
+  color: var(--color-text, #fff);
   font-size: 1.25rem;
   line-height: 1;
   pointer-events: none;
@@ -858,7 +858,7 @@ export default {
   border: 0;
   padding: 0;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   white-space: nowrap;
   cursor: pointer;
@@ -868,10 +868,10 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.68);
   border-radius: 999px;
   padding: 0.28rem 0.62rem 0.28rem 0.28rem;
-  background: rgba(8, 12, 15, 0.84);
+  background: rgba(var(--color-page-rgb, 8, 12, 15), 0.84);
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(10px);
   transition:
@@ -885,11 +885,11 @@ export default {
   display: block;
   width: 10px;
   height: 10px;
-  border: 2px solid #fff;
+  border: 2px solid var(--color-border, #fff);
   border-radius: 50%;
-  background: #f6bd60;
+  background: var(--color-accent, #f6bd60);
   box-shadow: 0 5px 14px rgba(0, 0, 0, 0.4);
-  color: #111;
+  color: var(--color-accent-contrast, #111);
   pointer-events: none;
 }
 
@@ -909,14 +909,14 @@ export default {
 }
 
 .atlas-coordinate-pin.is-cluster {
-  border-color: #f6bd60;
-  background: #fff;
+  border-color: var(--color-accent, #f6bd60);
+  background: var(--color-surface-raised, #fff);
 }
 
 .atlas-marker:hover .atlas-marker-card,
 .atlas-marker:focus-visible .atlas-marker-card,
 .atlas-marker.selected .atlas-marker-card {
-  border-color: #f6bd60;
+  border-color: var(--color-accent, #f6bd60);
   transform: translateY(-3px);
 }
 
@@ -925,7 +925,7 @@ export default {
 }
 
 .atlas-marker:focus-visible .atlas-marker-card {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
@@ -945,10 +945,10 @@ export default {
   background:
     radial-gradient(
       circle at 30% 25%,
-      rgba(246, 189, 96, 0.28),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.28),
       transparent 38%
     ),
-    #142128;
+    var(--color-surface-raised, #142128);
 }
 
 .atlas-marker-label {
@@ -960,8 +960,8 @@ export default {
 }
 
 .atlas-marker-cluster .atlas-marker-card {
-  border-color: rgba(246, 189, 96, 0.82);
-  background: rgba(8, 12, 15, 0.94);
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.82);
+  background: rgba(var(--color-page-rgb, 8, 12, 15), 0.94);
 }
 
 .atlas-marker-cluster-count {
@@ -971,8 +971,8 @@ export default {
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: #f6bd60;
-  color: #111;
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -985,17 +985,17 @@ export default {
 
 .maplibregl-popup-content {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 16px;
   padding: 0;
-  background: rgba(7, 11, 14, 0.94);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.94);
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.46);
-  color: #fff;
+  color: var(--color-text, #fff);
   backdrop-filter: blur(14px);
 }
 
 .maplibregl-popup-tip {
-  border-top-color: rgba(7, 11, 14, 0.94) !important;
+  border-top-color: rgba(var(--color-page-rgb, 7, 11, 14), 0.94) !important;
 }
 
 .atlas-map-preview > img {
@@ -1019,7 +1019,7 @@ export default {
   display: -webkit-box;
   overflow: hidden;
   margin: 0.38rem 0 0;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.65));
   font-size: 0.75rem;
   line-height: 1.45;
   -webkit-box-orient: vertical;
@@ -1033,9 +1033,9 @@ export default {
 
 .atlas-map .maplibregl-ctrl-group {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   border-radius: 12px;
-  background: rgba(8, 12, 15, 0.78);
+  background: rgba(var(--color-page-rgb, 8, 12, 15), 0.78);
 }
 
 .atlas-map .maplibregl-ctrl-group button span {

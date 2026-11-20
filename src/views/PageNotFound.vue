@@ -36,8 +36,8 @@ export default {
   overflow: hidden;
   place-items: center;
   padding: 2rem 1rem;
-  background: #0b1114;
-  color: #fff;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -55,7 +55,11 @@ export default {
 
 .not-found::after {
   content: "";
-  background: linear-gradient(135deg, rgba(4, 7, 9, 0.52), #0b1114);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--color-page-rgb, 4, 7, 9), 0.52),
+    var(--color-page, #0b1114)
+  );
 }
 
 .not-found-glow {
@@ -64,7 +68,7 @@ export default {
   width: 30rem;
   height: 30rem;
   border-radius: 50%;
-  background: rgba(246, 189, 96, 0.1);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.1);
   filter: blur(80px);
 }
 
@@ -87,7 +91,7 @@ export default {
 .not-found p {
   max-width: 600px;
   margin: 1.2rem auto 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
   font-size: 0.96rem;
   line-height: 1.7;
 }
@@ -101,11 +105,11 @@ export default {
 }
 
 .not-found a {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
   border-radius: 999px;
   padding: 0.8rem 1rem;
-  background: rgba(7, 11, 14, 0.56);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.56);
+  color: var(--color-text, #fff);
   font-size: 0.76rem;
   font-weight: 800;
   text-decoration: none;
@@ -113,8 +117,8 @@ export default {
 }
 
 .not-found a:first-child {
-  border-color: #f6bd60;
-  background: #f6bd60;
-  color: #111719;
+  border-color: var(--color-accent, #f6bd60);
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111719);
 }
 </style>
