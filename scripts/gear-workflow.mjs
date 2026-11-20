@@ -35,6 +35,7 @@ const workflowFields = new Set([
 ])
 const imageFields = new Set([
   "source",
+  "sourceHost",
   "output",
   "rightsOwner",
   "rightsStatus",
@@ -51,14 +52,14 @@ Usage:
   npm run gear:workflow -- --source <workflow.json> --apply --through publish --approve-card [--replace-image] [--build]
 
 The prepare checkpoint writes the canonical Gear record and deterministic local
-image package, but performs no network request. Review those derivatives and the
-card context before running the publish checkpoint. Publish requires that exact
-package to exist already, then reuses authenticated immutable upload, checksum
-receipt, and canonical image publication.
+image package. An authorized remote source performs a bounded HTTPS read. Review
+those derivatives and the card context before running the publish checkpoint.
+Publish requires that exact package to exist already, then reuses authenticated
+immutable upload, checksum receipt, and canonical image publication.
 
 Options:
   --source <file>    Versioned Gear workflow JSON
-  --dry-run          Validate record and image inputs without writes or network
+  --dry-run          Validate without writes; remote sources use bounded HTTPS
   --apply            Run the selected checkpoint after repeating its preview
   --through <stage>  Stop after prepare, or continue through publish
   --approve-card     Required for publish after reviewing the prepared image
@@ -115,7 +116,7 @@ export function parseArguments(args) {
   }
   if (options.apply && options.through === "publish" && !options.approveCard) {
     throw new Error(
-      "Publishing requires --approve-card after local image review"
+      "Publishing requires --approve-card after prepared image review"
     )
   }
   if (
@@ -204,6 +205,8 @@ export async function loadWorkflow(sourceFile) {
     throw new Error("image must be a Gear image workflow object")
   }
   assertKnownFields(workflow.image, imageFields, "image")
+  const imageSource = requireText(workflow.image.source, "image.source")
+  const remoteImageSource = /^[a-z][a-z0-9+.-]*:\/\//i.test(imageSource)
   const image = {
     alt: requireText(workflow.image.alt, "image.alt"),
     output: path.resolve(
@@ -216,18 +219,23 @@ export async function loadWorkflow(sourceFile) {
       workflow.image.rightsStatus,
       "image.rightsStatus"
     ),
-    source: path.resolve(
-      baseDirectory,
-      requireText(workflow.image.source, "image.source")
-    ),
+    source: remoteImageSource
+      ? imageSource
+      : path.resolve(baseDirectory, imageSource),
+    sourceHost: remoteImageSource
+      ? requireText(workflow.image.sourceHost, "image.sourceHost")
+      : null,
   }
   if (image.rightsReviewed !== true) {
     throw new Error("image.rightsReviewed must be true")
   }
   if (image.rightsStatus !== "owned") {
     throw new Error(
-      "image.rightsStatus must be owned for the current local workflow"
+      "image.rightsStatus must be owned for the creator-owned image workflow"
     )
+  }
+  if (!remoteImageSource && workflow.image.sourceHost !== undefined) {
+    throw new Error("image.sourceHost is valid only with a remote HTTPS source")
   }
   return {
     gearId,

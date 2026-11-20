@@ -48,7 +48,7 @@
     "gear:journeys": "node scripts/ingest-gear.js --journeys",
     "gear:list": "node scripts/ingest-gear.js --list",
     "gear:sheet": "node scripts/ingest-gear-sheet.mjs",
-    "gear:test": "node scripts/test-gear-ingestion.js && node scripts/test-gear-sheet.mjs && node scripts/test-gear-image-preparation.mjs && node scripts/test-gear-image-upload.mjs && node scripts/test-gear-image-publication.mjs && node scripts/test-gear-workflow.mjs",
+    "gear:test": "node scripts/test-gear-ingestion.js && node scripts/test-gear-sheet.mjs && node scripts/test-gear-remote-image.mjs && node scripts/test-gear-image-preparation.mjs && node scripts/test-gear-image-upload.mjs && node scripts/test-gear-image-publication.mjs && node scripts/test-gear-workflow.mjs",
     "gear:validate": "node scripts/validate-content.js",
     "gear:workbook": "node scripts/generate-gear-workbook.mjs",
     "build": "npm run docs:audit && npm run content:validate && npm run analytics:test && npm run commerce:test && npm run adsense:test && npm run adsense:validate && npm run my-atlas:test && vue-cli-service build",

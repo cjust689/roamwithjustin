@@ -201,6 +201,69 @@ try {
     ]
   )
 
+  assert.throws(
+    () =>
+      parseGearImageArguments([
+        "--gear-id",
+        "remote-camera-accessory",
+        "--source",
+        "https://images.example.com/camera.jpg",
+        "--output",
+        outputDirectory,
+        "--rights-owner",
+        "roam-with-justin",
+        "--rights-status",
+        "owned",
+        "--rights-reviewed",
+        "--alt",
+        "Camera accessory on a dark background",
+        "--dry-run",
+      ]),
+    /--source-host is required/
+  )
+  const remoteOptions = parseGearImageArguments([
+    "--gear-id",
+    "remote-camera-accessory",
+    "--source",
+    "https://images.example.com/products/camera.jpg?private=token",
+    "--source-host",
+    "images.example.com",
+    "--output",
+    outputDirectory,
+    "--rights-owner",
+    "roam-with-justin",
+    "--rights-status",
+    "owned",
+    "--rights-reviewed",
+    "--alt",
+    "Camera accessory on a dark background",
+    "--dry-run",
+  ])
+  let remoteDownloadCalled = false
+  const remoteResult = await prepareGearImage(remoteOptions, {
+    log() {},
+    remoteDownload: async (source, sourceHost, maximumBytes) => {
+      remoteDownloadCalled = true
+      assert.match(source, /^https:\/\/images\.example\.com\//)
+      assert.equal(sourceHost, "images.example.com")
+      assert.equal(maximumBytes, 50 * 1024 * 1024)
+      return {
+        approvedHost: sourceHost,
+        contract: { format: "jpeg", mimeType: "image/jpeg" },
+        data: sourceBytes,
+        originalFilename: "camera.jpg",
+      }
+    },
+  })
+  assert.equal(remoteDownloadCalled, true)
+  assert.deepEqual(remoteResult.manifest.source.intake, {
+    approvedHost: "images.example.com",
+    type: "https",
+  })
+  assert.equal(remoteResult.manifest.source.originalFilename, "camera.jpg")
+  assert.doesNotMatch(JSON.stringify(remoteResult.manifest), /private=token/)
+  assert.deepEqual(validateGearImageManifest(remoteResult.manifest).errors, [])
+
   console.log("Gear image preparation tests passed.")
 } finally {
   await fs.promises.rm(temporaryRoot, {

@@ -40,9 +40,10 @@ workflow, not implementation evidence. The canonical Gear and Usage ingestor,
 selectors, Journey projection, validation, registry-backed Gear page, Partner
 link integration, and shared `partner_click` path are implemented and
 documented in [Gear registry and Journey usage](../architecture/gear.md). The
-generated registry is empty. Gear image publication and the file-based
-authoring workflow are implemented. A real product slice, remote image intake,
-automatic merchant adapters, and optional AI enrichment remain unimplemented.
+generated registry is empty. Gear image publication, the file-based authoring
+workflow, and exact-host authorized HTTPS image intake are implemented. A real
+product slice, automatic merchant adapters, and optional AI enrichment remain
+unimplemented.
 Review the current source, managed documentation, and actual account and
 affiliate settings before editing code. Adapt this proposal to the verified
 baseline instead of creating a competing model.
@@ -56,17 +57,20 @@ fabricated. A creator-owned product image, exact product identity, firsthand
 usage, and approved merchant destination are still required for the first real
 record.
 
-The local part of Phase 2 is now implemented. `gear:prepare` validates one
-reviewed creator-owned JPEG or PNG, renders deterministic metadata-stripped
-WebP derivatives, and writes a scoped manifest without a fake Journey. It does
-not download remote images or update canonical Gear state. `gear:upload` now
+Phase 2 preparation is now implemented. `gear:prepare` validates one reviewed
+creator-owned JPEG or PNG from a local file or explicitly permitted HTTPS URL,
+renders deterministic metadata-stripped WebP derivatives, and writes a scoped
+manifest without a fake Journey. HTTPS intake requires an exact approved host,
+public-address pinning, bounded same-host redirects, and response and decoded
+image limits. It does not scrape retailers or update canonical Gear state.
+`gear:upload` now
 revalidates that package, sends only its listed WebP derivatives through the
 authenticated immutable Worker contract, and writes a checksum receipt only
 after complete remote verification. `gear:publish-image` then verifies the
 exact receipt, requires explicit card approval, and atomically composes one
 stable Gear image asset into canonical Media while updating only the intended
-existing Gear item. The first real product, optional remote image intake, and
-external Worker deployment remain gated. Phase 3 file-based authoring
+existing Gear item. The first real product and external Worker deployment
+remain gated. Phase 3 file-based authoring
 orchestration is now implemented through a preview, a local prepare checkpoint,
 and a separately approved publish checkpoint.
 
@@ -578,7 +582,7 @@ Proposed structured response:
 ### Phase 2 - Image preparation and R2 publication
 
 - [Implemented locally] Add a Gear-specific prepare, upload, receipt, and canonical publication path reusing existing optimizer and validation libraries without a fake Journey association.
-- Intake one creator-owned local JPEG and one explicitly authorized remote image URL; verify clipping/alpha, compression, EXIF removal and derivative sizes.
+- [Implemented locally] Intake one creator-owned local JPEG or one explicitly authorized remote image URL. Remote intake requires exact-host approval, public-address pinning, same-host redirect limits, a timeout, byte and pixel ceilings, and MIME plus signature checks. Derivative generation verifies metadata removal and deterministic sizes.
 - [Implemented locally] Require review and dry-run success before external upload. Checksum receipt and card approval then gate the idempotent canonical image update.
 - [Implemented locally] Repeated publication of identical content creates no duplicate products or Media, while an explicitly approved changed image advances only its stable intended asset.
 
