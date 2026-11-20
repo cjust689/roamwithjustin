@@ -1561,6 +1561,8 @@ export class UserProfileDurableObject extends DurableObject {
       }
       const current = this.ctx.storage.kv.get(pinKey(command.pinId))
       if (!current) return failure("pin_not_found")
+      if (patch.customPlace && (!current.customPlace || patch.placeId))
+        return failure("invalid_pin")
       const placeId = patch.placeId || current.placeId
       if (placeId !== current.placeId) {
         const place = this.ctx.storage.kv.get(pinPlaceKey(placeId))

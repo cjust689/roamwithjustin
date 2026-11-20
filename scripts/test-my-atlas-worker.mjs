@@ -1743,7 +1743,10 @@ await assert.rejects(
     },
   })
   assert.equal(imageUploadOptions.method, "POST")
-  assert.equal(imageUploadOptions.headers.get("X-Atlas-Image-Location"), "Banff%2C%20Canada")
+  assert.equal(
+    imageUploadOptions.headers.get("X-Atlas-Image-Location"),
+    "Banff%2C%20Canada"
+  )
   assert.equal(imageUploadOptions.headers.get("Content-Type"), "image/jpeg")
   assert.equal(imageUploadOptions.headers.get("If-Match"), '"rev-2"')
   assert.ok(imageUploadOptions.body instanceof Blob)
@@ -2704,6 +2707,87 @@ assert.equal(
   assert.equal(
     recoveredDeletionCalls[0].idempotencyKey,
     recoveredDeletionCalls[2].idempotencyKey
+  )
+}
+
+{
+  const path = "/v1/me/map-links/resolve"
+  const json = { url: "https://maps.app.goo.gl/fixture" }
+  assert.equal(
+    (await workerResponse(path, { method: "POST", json })).status,
+    401
+  )
+  assert.equal((await workerResponse(path)).status, 405)
+  const token = await signToken({ scope: "read:my-atlas" })
+  assert.equal(
+    (await workerResponse(path, { method: "POST", token, json })).status,
+    403
+  )
+  const ownerToken = await signToken()
+  const ownerEnvironment = {
+    MY_ATLAS_REGISTRY: {
+      getByName: () => ({
+        getRegistrationByIdentity: async () => ({
+          ok: true,
+          state: "active",
+          userId: "usr_fixture",
+        }),
+      }),
+    },
+    MY_ATLAS_USERS: { getByName: () => ({}) },
+  }
+  assert.equal(
+    (
+      await workerResponse(
+        path,
+        { method: "POST", token: ownerToken, json },
+        ownerEnvironment
+      )
+    ).status,
+    503,
+    "Missing rate limiter must fail closed"
+  )
+  let rateKey = ""
+  const limited = await workerResponse(
+    path,
+    { method: "POST", token: ownerToken, json },
+    {
+      ...ownerEnvironment,
+      MY_ATLAS_MAP_LINK_RATE_LIMITER: {
+        limit: async ({ key }) => {
+          rateKey = key
+          return { success: false }
+        },
+      },
+    }
+  )
+  assert.equal(limited.status, 429)
+  assert.equal(limited.headers.get("Retry-After"), "60")
+  assert.match(rateKey, /^[a-f0-9]{64}$/)
+  const allowed = {
+    ...ownerEnvironment,
+    MY_ATLAS_MAP_LINK_RATE_LIMITER: { limit: async () => ({ success: true }) },
+  }
+  const invalid = await workerResponse(
+    path,
+    { method: "POST", token: ownerToken, json: { url: "https://127.0.0.1/" } },
+    allowed
+  )
+  assert.equal(invalid.status, 400)
+  assert.equal(invalid.headers.get("Cache-Control"), "no-store")
+  assert.equal(
+    (
+      await workerResponse(
+        path,
+        {
+          method: "POST",
+          token: ownerToken,
+          json: { ...json, notes: "must not send" },
+        },
+        allowed
+      )
+    ).status,
+    400
   )
 }
 

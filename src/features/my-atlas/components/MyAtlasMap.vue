@@ -334,6 +334,17 @@ export default {
       if (this.placementMarker) this.placementMarker.remove()
       this.placementMarker = null
     },
+    focusPlacement() {
+      const coordinates = this.normalizedPlacementCoordinates(
+        this.placementCoordinates
+      )
+      if (this.placementActive && coordinates && this.map)
+        this.map.easeTo({
+          center: coordinates,
+          zoom: Math.max(this.map.getZoom(), 10),
+          duration: 400,
+        })
+    },
     syncPlacementMarker() {
       if (!this.map || !this.ready) return
       this.map.getCanvas().style.cursor = this.placementActive

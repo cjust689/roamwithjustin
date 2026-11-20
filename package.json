@@ -74,7 +74,7 @@
     "media:worker:secret": "wrangler secret put MEDIA_UPLOAD_TOKEN --config workers/media-upload/wrangler.jsonc",
     "lint": "vue-cli-service lint",
     "start": "node server server.js",
-    "my-atlas:foundations:test": "node scripts/test-my-atlas-foundations.mjs",
+    "my-atlas:foundations:test": "node scripts/test-my-atlas-foundations.mjs && node scripts/test-my-atlas-map-links.mjs",
     "affiliates:expedia:import": "node scripts/affiliates/import-expedia-links.mjs",
     "experiences:serve": "wrangler dev --local --ip 127.0.0.1 --port 8789 --var LOCAL_DISCOVERY_ENABLED:true --config workers/experience-discovery/wrangler.jsonc",
     "experiences:check": "wrangler deploy --dry-run --config workers/experience-discovery/wrangler.jsonc"

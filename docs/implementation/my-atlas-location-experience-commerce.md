@@ -14,6 +14,10 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - shared/my-atlas-map-links.mjs
+  - src/features/my-atlas/components/MyAtlasLocationPicker.vue
+  - workers/my-atlas/src/maps/resolve.mjs
+  - scripts/test-my-atlas-map-links.mjs
   - shared/my-atlas-experiences.mjs
   - src/features/my-atlas/components/MyAtlasExperiences.vue
   - src/services/expediaDestinationLinks.mjs
@@ -50,7 +54,7 @@ verification:
 # Local phase audit and implementation
 
 The four owner briefs in `codex-context` are inputs, not implementation
-evidence. This work is local only. Existing production accounts, catalog,
+evidence. The foundation slice is deployed; the follow-up picker slice is local only. Existing accounts, catalog,
 approved banners and private affiliate restrictions are preserved.
 
 ## Phase 0 findings
@@ -107,9 +111,19 @@ only `api.sandbox.viator.com`, never the live API.
 - [x] Verify compatibility, ownership, exports/deletion, privacy and mobile UI.
 - [x] Update as-built docs and run `npm run docs:audit`.
 
-Later shared-picker consolidation, Maps URL parsing/short-link expansion,
-repeat-visit migration, public recaps and Viator planner activation remain
-separate phases. No automatic collection of private notes, analytics payloads,
+- [x] Location Phase 2: reuse one picker for the existing custom entry surfaces.
+- [x] Location Phase 3: full Google/Apple URL candidate previews and confirmation.
+- [x] Location Phase 4: authenticated, rate-limited short-link resolver with security tests.
+- [x] Location Phase 5 supported slice: explicit custom visited-pin rename/reposition, preserved IDs and snapshot boundaries.
+- [x] Experience loop Phase 2 supported slice: visited-list experience count/shortcut and optional recap invitation after Mark Visited.
+- [ ] Canonical trip grouping, repeated visit occurrences and reversible Planned/Past lifecycle acceptance remain in the trip architecture workstream.
+- [ ] Real provider short-link expansion remains externally unverified.
+- [ ] Viator real search, market mapping and referral verification remain blocked by HTTP 401.
+- [ ] Public editorial operator cards and curated related discovery need a separate canonical intake/selector slice with established firsthand content; no private recap promotion.
+- [ ] Public/community contributions and commercial activation retain their moderation/approval gates.
+
+Repeat-visit migration, public recaps and Viator planner activation remain
+separate work. No automatic collection of private notes, analytics payloads,
 provider requests or affiliate tracking is introduced by opening a visit.
 
 ## As-built local slice
@@ -185,7 +199,59 @@ Owner actions remain: correct/activate sandbox key access, review a returned
 Viator market against its canonical city and parent, then verify a real search
 and returned referral URL. Expedia needs actual issued URLs and manual landing
 checks before enabling rows. Private affiliate placement stays gated even when
-a public row is enabled. No new feature code has been pushed or deployed.
+a public row is enabled.
+
+## Release and follow-up evidence
+
+Foundation commit `f49c3babe4435fac560503706d96bd1c51746b1f` was pushed,
+validated in PR 222, merged to develop and promoted through PR 223. Pages run
+44820076141 succeeded for main `e27eca51f2aacd3340c90024e0f032c501b2d220`.
+The compatible staging Worker, also used by the production frontend, deployed
+as `d3286de9-e52a-4e0e-b39c-3a005e5b911f`. The sandbox key was retried in
+this release session and again returned 401 Invalid API Key. No real product
+result or merchant acceptance is claimed.
+
+The local follow-up uses `MyAtlasLocationPicker.vue`,
+`shared/my-atlas-map-links.mjs`, and `workers/my-atlas/src/maps/resolve.mjs`.
+Only explicit user confirmation fills coordinates from a full URL; viewport,
+name-only and route links cannot silently replace the selected point. Existing
+labels/notes survive method changes and errors. No source URL is persisted.
+The resolver's POST endpoint is an owner-authorized read with no account
+revision change. Its dedicated limiter must be configured before activation.
+Unsafe redirects, cyclic chains, three-hop exhaustion, timeouts and responses
+without redirects fail safely. There is no proxy response body or HTML scraping.
+Actual provider redirect behavior remains externally unverified.
+
+The custom-pin PATCH extension preserves stable pin/place IDs, dates, memory,
+recaps and existing immutable plan snapshots. Same-attempt network retries
+reuse the operation key and revision; conflicts keep the draft for explicit
+review. The raw custom mutation response is normalized consistently with an
+account read. The existing visited list provides an experience-count action
+and focuses the private recap editor. Mark Visited offers an optional invitation
+with Not now. This does not implement canonical journey grouping or trip status
+transitions.
+
+Focused checks: `node scripts/test-my-atlas-map-links.mjs`,
+`npm run my-atlas:foundations:test`, `node scripts/test-my-atlas-worker.mjs`
+and the 50-test Workers runtime suite passed. Synthetic Chrome checks at 320,
+390 and 1440 pixels confirmed preview-before-confirmation, unchanged label and
+memory, exact coordinate application, no viewport substitution, unchanged map
+instance, Escape cleanup and zero horizontal overflow. Screenshots and report
+are under ignored `.state/theme/map-picker-*`; the 390 pixel capture was
+visually inspected. No real account was written by these browser checks.
+
+The full local `npm run build` passed with hash `c0ec366b406ac858`, all 50
+Workers runtime tests and the existing bundle-size warnings. `npm run lint`
+passed. After removing a duplicate map button, the final frontend compile
+passed with hash `eba8551f3669e0a2`. The Worker dry-run bundled the new limiter and resolver successfully;
+its default log path was outside the sandbox, so a workspace log path was used
+for clean verification. The foundation release's root page, API health and
+Atlanta catalog search returned 200. The direct `/my-atlas` URL uses the
+existing GitHub Pages 404 SPA fallback. Configured-localhost browser readback
+still showed the staging API/catalog, no injected local invitation, and an
+Atlanta search returning 200. The new resolver and custom-location PATCH
+extension require the follow-up Worker deployment before they work against
+that shared staging backend; no backend switch or account wipe was performed.
 
 References checked: [Viator technical specification](https://docs.viator.com/partner-api/technical/)
 and [Basic Golden Path](https://partnerresources.viator.com/travel-commerce/affiliate/basic-access/golden-path/).

@@ -163,6 +163,7 @@ const dependencies = {
   formatPlaceTypeLabel: () => "",
   MyAtlasActionFeedback: {},
   MyAtlasMap: {},
+  MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
   MyAtlasRegistrationForm: {},

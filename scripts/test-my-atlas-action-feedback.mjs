@@ -29,6 +29,7 @@ const dependencies = {
   normalizeMyAtlasCustomPlaceName,
   normalizeMyAtlasCustomCoordinates,
   MyAtlasTravelSearch: {},
+  MyAtlasLocationPicker: {},
   MAX_PLAN_DESTINATIONS,
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,

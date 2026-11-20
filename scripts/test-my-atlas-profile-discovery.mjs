@@ -110,6 +110,7 @@ const ownerDependencies = {
   formatPlaceTypeLabel: () => "",
   MyAtlasActionFeedback: {},
   MyAtlasMap: {},
+  MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
   MyAtlasRegistrationForm: {},

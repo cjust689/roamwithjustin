@@ -1,3 +1,5 @@
+import { MapLinkError, resolveShortMapLink } from "./maps/resolve.mjs"
+import { ownerContext } from "./account/service.mjs"
 import {
   isLocalRegistrationRequest,
   registerLocalBetaAccount,
@@ -643,6 +645,7 @@ export async function handleRequest(
   const isMyProfile = url.pathname === "/v1/me"
   const isMyAtlasState = url.pathname === "/v1/me/atlas"
   const isMyAtlasImage = url.pathname === "/v1/me/atlas-image"
+  const isMapLinkResolve = url.pathname === "/v1/me/map-links/resolve"
   const isMyPins = url.pathname === "/v1/me/pins"
   const myPinMatch = url.pathname.match(/^\/v1\/me\/pins\/(pin_[a-f0-9]{24})$/)
   const isMyPin = Boolean(myPinMatch)
@@ -667,6 +670,7 @@ export async function handleRequest(
   const isMyPlanVisited = Boolean(myPlanVisitedMatch)
   const isMyExport = url.pathname === "/v1/me/export"
   const isAccountRoute =
+    isMapLinkResolve ||
     isMyProfile ||
     isMyAtlasState ||
     isMyAtlasImage ||
@@ -692,6 +696,7 @@ export async function handleRequest(
   }
 
   if (
+    (isMapLinkResolve && request.method !== "POST") ||
     (isAuthCheck && request.method !== "GET") ||
     (isAccountWipe && request.method !== "POST") ||
     (isRegistration && request.method !== "POST") ||
@@ -836,6 +841,37 @@ export async function handleRequest(
       const isMutation = ["POST", "PATCH", "DELETE"].includes(request.method)
       if (isMutation && !identity.permissions.includes("write:my-atlas")) {
         throw new InsufficientPermissionsError()
+      }
+
+      if (isMapLinkResolve) {
+        await ownerContext(environment, accountIdentity)
+        const limiter = environment.MY_ATLAS_MAP_LINK_RATE_LIMITER
+        if (typeof limiter?.limit !== "function")
+          return errorResponse(503, "map_link_unavailable", context)
+        const limited = await limiter.limit({
+          key: await hashQualifiedIdentity(accountIdentity),
+        })
+        if (limited?.success !== true) {
+          const response = errorResponse(429, "rate_limited", context)
+          response.headers.set("Retry-After", "60")
+          return response
+        }
+        const body = await readJsonBody(request)
+        if (
+          !body ||
+          typeof body !== "object" ||
+          Object.keys(body).length !== 1 ||
+          typeof body.url !== "string"
+        )
+          return errorResponse(400, "invalid_map_link", context)
+        try {
+          const candidate = await resolveShortMapLink(body.url)
+          return jsonResponse({ candidate }, 200, context)
+        } catch (error) {
+          if (error instanceof MapLinkError)
+            return errorResponse(error.status, error.code, context)
+          throw error
+        }
       }
 
       if (isMyAtlasState) {

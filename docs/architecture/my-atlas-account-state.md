@@ -963,3 +963,17 @@ Story export.
 Remote staging transformation evidence, real-device acceptance, spend alerts,
 and orphan reconciliation remain required before a broader invited beta. Image
 bytes are stored only in private R2, never in the profile Durable Object.
+
+## Local custom-pin editing follow-up
+
+The existing pin PATCH route now accepts optional `customPlace: {name,
+coordinates}`. Validation rejects malformed data and simultaneous `placeId`.
+The owned Durable Object permits this change only on an existing custom pin;
+its `pinId` and `placeId` remain unchanged. Memories, dates, nested experiences
+and plan snapshots are preserved. Export reflects the new custom place, and
+ordinary deletion removes it. No migration or canonical-trip lifecycle change
+is introduced. Browser edits reuse the shared picker and mounted SDK map.
+Ambiguous retries keep the same operation key and revision. Revision conflicts
+refresh account state and retain the editor draft for explicit review, without
+automatically applying it over the newer state. This follow-up is local only;
+the preceding recap/deletion-safety foundations are deployed through PRs 222/223.

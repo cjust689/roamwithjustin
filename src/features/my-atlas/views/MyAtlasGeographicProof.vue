@@ -12,13 +12,16 @@
       :show-memories="showMemories"
       :playback-active="canUseAtlas && timelinePlaying"
       :placement-active="
-        canUseAtlas && (customPlaceOpen || plannerPlacement.active)
+        canUseAtlas &&
+        (customPlaceOpen || plannerPlacement.active || editPlacement.active)
       "
       :placement-coordinates="
         canUseAtlas
-          ? plannerPlacement.active
-            ? plannerPlacement.coordinates
-            : customPlaceCoordinates
+          ? editPlacement.active
+            ? editPlacement.coordinates
+            : plannerPlacement.active
+              ? plannerPlacement.coordinates
+              : customPlaceCoordinates
           : null
       "
       :planner-active="canUseAtlas && plannerActive"
@@ -378,66 +381,20 @@
                 </div>
                 <button type="button" @click="cancelCustomPlace">Cancel</button>
               </div>
-              <label>
-                <span>Place name</span>
-                <input
-                  ref="customNameInput"
-                  v-model="customPlaceName"
-                  type="text"
-                  maxlength="160"
-                  autocomplete="off"
-                  placeholder="Krka National Park"
-                />
-                <small>
-                  {{ customPlaceCharacterCount }} of
-                  {{ customPlaceMaxCharacters }} characters
-                </small>
-                <small v-if="customPlaceNameError" class="is-error">
-                  {{ customPlaceNameError }}
-                </small>
-              </label>
-              <div class="my-atlas-custom-place-position">
-                <strong>{{
-                  customPlaceCoordinates
-                    ? "Position selected"
-                    : "Position needed"
-                }}</strong>
-                <span v-if="customPlaceCoordinates">
-                  {{ customPlaceCoordinates[1].toFixed(4) }},
-                  {{ customPlaceCoordinates[0].toFixed(4) }}
-                </span>
-                <span v-else>
-                  Click or tap the map. You can then drag the gold pin or adjust
-                  it with the arrow keys.
-                </span>
-                <button
-                  v-if="!customPlaceCoordinates"
-                  type="button"
-                  @click="focusMapForPlacement"
-                >
-                  Choose on map
-                </button>
-              </div>
-              <div class="my-atlas-custom-coordinate-fields">
-                <label
-                  >Latitude<input
-                    v-model="customLatitudeDraft"
-                    type="number"
-                    min="-85.051129"
-                    max="85.051129"
-                    step="0.000001"
-                    @input="applyCustomCoordinateFields"
-                /></label>
-                <label
-                  >Longitude<input
-                    v-model="customLongitudeDraft"
-                    type="number"
-                    min="-180"
-                    max="180"
-                    step="0.000001"
-                    @input="applyCustomCoordinateFields"
-                /></label>
-              </div>
+              <MyAtlasLocationPicker
+                ref="locationPicker"
+                :name="customPlaceName"
+                :latitude="customLatitudeDraft"
+                :longitude="customLongitudeDraft"
+                :pending="accountPending"
+                :resolve-link="resolveMapLink"
+                @update:name="customPlaceName = $event"
+                @update:latitude="customLatitudeDraft = $event"
+                @update:longitude="customLongitudeDraft = $event"
+                @coordinates-change="applyCustomCoordinateFields"
+                @choose-map="focusMapForPlacement"
+                @search="$refs.searchInput.focus()"
+              />
               <p v-if="customPlaceError" class="my-atlas-custom-place-error">
                 {{ customPlaceError }}
               </p>
@@ -458,6 +415,7 @@
 
           <MyAtlasPinEditor
             v-if="pinEditorPlace"
+            ref="pinEditor"
             :key="pinEditorKey"
             :place="pinEditorPlace"
             :place-label="placeLabel(pinEditorPlace)"
@@ -468,6 +426,8 @@
             :experience-pending="experiencePending"
             :experience-error="experienceError"
             :experience-saved-sequence="experienceSavedSequence"
+            :resolve-link="resolveMapLink"
+            @location-placement-change="handleEditPlacement"
             @experience-change="saveVisitExperience"
             @cancel="closePinEditor"
             @save="savePinDetails"
@@ -519,6 +479,13 @@
           class="my-atlas-section-content"
           aria-label="Visited destinations"
         >
+          <p v-if="recapInvitation" class="my-atlas-recap-invitation">
+            Your places are marked visited. Add what you did at any stop, now or
+            later.
+            <button type="button" @click="recapInvitation = false">
+              Not now
+            </button>
+          </p>
           <p class="my-atlas-panel-label">{{ filterLabel }}</p>
           <p v-if="!pinnedPlaces.length" class="my-atlas-empty">
             Your first destination will appear here and on the map.
@@ -552,6 +519,17 @@
                   @click="openExistingPin(place)"
                 >
                   Visit dates
+                </button>
+                <button
+                  type="button"
+                  :disabled="accountPending"
+                  @click="openVisitExperiences(place)"
+                >
+                  {{
+                    experienceCount(place)
+                      ? `Experiences ${experienceCount(place)}`
+                      : "Add experience"
+                  }}
                 </button>
                 <button
                   class="remove"
@@ -920,6 +898,7 @@
 </template>
 
 <script>
+import MyAtlasLocationPicker from "../components/MyAtlasLocationPicker.vue"
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
 import MyAtlasPlanner from "../components/MyAtlasPlanner.vue"
@@ -956,6 +935,7 @@ import {
   fetchMyAtlasState,
   removeMyAtlasImage,
   registerMyAtlasAccount,
+  resolveMyAtlasMapLink,
   replaceMyAtlasImage,
   updateMyAtlasImageVisibility,
   updateMyAtlasPin,
@@ -991,6 +971,7 @@ const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasLocationPicker,
     MyAtlasActionFeedback,
     MyAtlasMap,
     MyAtlasPinEditor,
@@ -1032,6 +1013,9 @@ export default {
       pinEditorMemoryOnly: false,
       pinEditorError: "",
       customPlaceOpen: false,
+      editPlacement: { active: false, coordinates: null },
+      locationAttempt: null,
+      recapInvitation: false,
       customPlaceName: "",
       customPlaceCoordinates: null,
       customPlaceError: "",
@@ -1234,6 +1218,13 @@ export default {
     },
   },
   watch: {
+    addPlaceOpen(value) {
+      if (!value) {
+        this.cancelCustomPlace()
+        this.$refs.pinEditor?.stopLocationPlacement()
+        this.editPlacement = { active: false, coordinates: null }
+      }
+    },
     "atlasImage.location": {
       immediate: true,
       handler(value) {
@@ -1279,14 +1270,31 @@ export default {
       }
     },
     handleLocationPlacement(value) {
-      if (this.plannerPlacement.active)
+      if (this.editPlacement.active)
+        this.$refs.pinEditor?.setLocationCoordinates(value)
+      else if (this.plannerPlacement.active)
         this.$refs.planner?.setCustomMapCoordinates(value)
       else this.setCustomPlaceCoordinates(value)
     },
     cancelLocationPlacement() {
+      this.$refs.pinEditor?.stopLocationPlacement()
+      this.editPlacement = { active: false, coordinates: null }
       this.cancelCustomPlace()
       this.$refs.planner?.stopCustomMapPlacement()
       this.plannerPlacement = { active: false, coordinates: null }
+    },
+    handleEditPlacement(value) {
+      const wasActive = this.editPlacement.active
+      this.editPlacement = value
+      if (value.active && !wasActive)
+        this.$nextTick(() => this.focusMapForPlacement())
+    },
+    async resolveMapLink(url) {
+      return resolveMyAtlasMapLink({
+        apiBaseUrl: this.apiBaseUrl,
+        accessToken: await getMyAtlasApiAccessToken(),
+        url,
+      })
     },
     applyCustomCoordinateFields() {
       const values = [this.customLongitudeDraft, this.customLatitudeDraft]
@@ -1513,6 +1521,7 @@ export default {
       }
       this.addPlaceOpen = false
       this.visitedOpen = true
+      this.recapInvitation = pins.length > 0
     },
     handleAccountDeleted() {
       this.deleteConfirmation = ""
@@ -1876,6 +1885,8 @@ export default {
       return label.replace(place.name + ", ", "")
     },
     closePinEditor() {
+      this.locationAttempt = null
+      this.editPlacement = { active: false, coordinates: null }
       this.experienceAttempt = null
       this.experienceError = ""
       this.pinEditorPlace = null
@@ -1907,7 +1918,7 @@ export default {
       this.customPlaceName = queryName || this.query.trim().slice(0, 160)
       this.announcement =
         "Custom pin placement is active. Choose a position on the map."
-      this.$nextTick(() => this.$refs.customNameInput?.focus())
+      this.$nextTick(() => this.$refs.locationPicker?.focusName())
     },
     setCustomPlaceCoordinates(value) {
       if (!this.customPlaceOpen) return
@@ -1923,6 +1934,7 @@ export default {
       this.announcement = "Custom pin position selected."
     },
     focusMapForPlacement() {
+      this.$nextTick(() => this.$refs.atlasMap?.focusPlacement())
       this.$refs.atlasMap?.$el?.scrollIntoView({
         behavior: "smooth",
         block: "start",
@@ -1958,6 +1970,22 @@ export default {
       this.customPlaceOpen = false
       this.customPlaceError = ""
     },
+    experienceCount(place) {
+      return (
+        this.pins.find(pin => pin.placeId === place.placeId)?.experiences
+          ?.length || 0
+      )
+    },
+    openVisitExperiences(place) {
+      this.recapInvitation = false
+      this.openExistingPin(place)
+      this.$nextTick(() => {
+        const section =
+          this.$refs.pinEditor?.$el?.querySelector(".visit-experiences")
+        section?.scrollIntoView({ behavior: "smooth", block: "center" })
+        section?.querySelector("input")?.focus({ preventScroll: true })
+      })
+    },
     openExistingPin(place, { memoryOnly = false } = {}) {
       this.addPlaceOpen = true
       this.visitedOpen = false
@@ -1968,9 +1996,14 @@ export default {
       this.pinEditorMemoryOnly = memoryOnly
       this.pinEditorError = ""
     },
-    async savePinDetails({ visitedDates, memory }) {
+    async savePinDetails({ visitedDates, memory, customPlace }) {
       if (this.pinEditorPin) {
-        await this.updatePlaceDetails(this.pinEditorPin, visitedDates, memory)
+        await this.updatePlaceDetails(
+          this.pinEditorPin,
+          visitedDates,
+          memory,
+          customPlace
+        )
       } else {
         await this.addPlace(this.pinEditorPlace, visitedDates, memory)
       }
@@ -2050,7 +2083,7 @@ export default {
         return
       }
     },
-    async updatePlaceDetails(pin, visitedDates, memory) {
+    async updatePlaceDetails(pin, visitedDates, memory, customPlace) {
       if (!this.accountProfile) return
       this.accountPending = true
       this.pinEditorError = ""
@@ -2060,21 +2093,46 @@ export default {
       })
       try {
         const token = await getMyAtlasApiAccessToken()
-        const result = await this.withAccountRevisionRetry(token, revision =>
+        if (customPlace) {
+          const fingerprint = JSON.stringify({
+            pinId: pin.pinId,
+            visitedDates,
+            memory,
+            customPlace,
+          })
+          if (this.locationAttempt?.fingerprint !== fingerprint)
+            this.locationAttempt = {
+              fingerprint,
+              revision: this.accountProfile.revision,
+              key: crypto.randomUUID(),
+            }
+        }
+        const write = revision =>
           updateMyAtlasPin({
             apiBaseUrl: this.apiBaseUrl,
             accessToken: token,
             pinId: pin.pinId,
             visitedDates,
             memory,
+            ...(customPlace ? { customPlace } : {}),
+            ...(customPlace
+              ? { idempotencyKey: this.locationAttempt.key }
+              : {}),
             revision,
           })
-        )
+        const result = customPlace
+          ? await write(this.locationAttempt.revision)
+          : await this.withAccountRevisionRetry(token, write)
         this.pins = this.pins.map(candidate =>
           candidate.pinId === pin.pinId
             ? { ...candidate, ...result.pin }
             : candidate
         )
+        if (customPlace)
+          this.$set(this.loadedPlaces, result.pin.placeId, {
+            ...this.loadedPlaces[result.pin.placeId],
+            ...result.pin,
+          })
         this.accountProfile = {
           ...this.accountProfile,
           revision: result.revision,
@@ -2083,7 +2141,18 @@ export default {
         this.announcement = "Destination details were updated."
         this.showActionFeedback({ message: this.announcement })
       } catch (error) {
-        this.pinEditorError = "These destination details could not be saved."
+        if (customPlace && error.code === "revision_conflict") {
+          this.locationAttempt = null
+          try {
+            await this.refreshAccountState()
+          } catch {
+            /* Keep the draft available. */
+          }
+        }
+        this.pinEditorError =
+          error.code === "revision_conflict"
+            ? "Your Atlas changed. Review this location draft and retry saving."
+            : "These destination details could not be saved. Your draft is still here."
         this.showActionFeedback({ message: this.pinEditorError, tone: "error" })
       } finally {
         this.accountPending = false

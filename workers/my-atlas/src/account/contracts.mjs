@@ -270,12 +270,19 @@ export function normalizePatchPin(value, pinId, headers, currentYear) {
       "visitedDates",
       "memory",
       "experienceChange",
+      "customPlace",
     ]),
     "Pin patch"
   )
   if (Object.keys(value).length === 0) {
     throw new RegistrationValidationError("Pin patch cannot be empty.")
   }
+  const customPlace =
+    value.customPlace === undefined
+      ? undefined
+      : normalizeCustomPlace(value.customPlace)
+  if (customPlace === null || (customPlace && value.placeId !== undefined))
+    throw new RegistrationValidationError("Custom place is invalid.")
   const experienceChange =
     value.experienceChange === undefined
       ? undefined
@@ -286,6 +293,7 @@ export function normalizePatchPin(value, pinId, headers, currentYear) {
     pinId: normalizePinId(pinId),
     patch: Object.freeze({
       ...(experienceChange === undefined ? {} : { experienceChange }),
+      ...(customPlace === undefined ? {} : { customPlace }),
       ...(value.placeId === undefined
         ? {}
         : { placeId: normalizePlaceId(value.placeId) }),

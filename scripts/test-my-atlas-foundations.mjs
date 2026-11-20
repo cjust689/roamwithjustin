@@ -161,6 +161,7 @@ const dependencies = {
   formatPlaceTypeLabel: () => "",
   MyAtlasActionFeedback: {},
   MyAtlasMap: {},
+  MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
   MyAtlasRegistrationForm: {},
@@ -172,6 +173,12 @@ const dependencies = {
     return {
       pin: {
         ...pin,
+        ...(request.customPlace
+          ? {
+              name: request.customPlace.name,
+              coordinates: request.customPlace.coordinates,
+            }
+          : {}),
         experiences: applyExperienceChange(undefined, activity, now)
           .experiences,
       },
@@ -224,6 +231,50 @@ assert.equal(
   "conflicts must not clear the edit form"
 )
 assert.equal(owner.accountProfile.revision, 4)
+
+owner.$set = (object, key, value) => {
+  object[key] = value
+}
+owner.loadedPlaces = {}
+owner.pinEditorError = ""
+owner.closePinEditor = () => {
+  owner.locationAttempt = null
+}
+owner.withAccountRevisionRetry = () => {
+  throw Error("Custom location must not auto-overwrite a revision conflict")
+}
+const customPlace = { name: "Corrected location", coordinates: [16.45, 43.52] }
+failure = "unavailable"
+await ownerComponent.methods.updatePlaceDetails.call(
+  owner,
+  pin,
+  [{ year: 2025 }],
+  pin.memory,
+  customPlace
+)
+const locationAttempt = owner.locationAttempt
+assert.ok(locationAttempt.key)
+failure = ""
+await ownerComponent.methods.updatePlaceDetails.call(
+  owner,
+  pin,
+  [{ year: 2025 }],
+  pin.memory,
+  customPlace
+)
+assert.equal(attempts.at(-1).idempotencyKey, locationAttempt.key)
+assert.equal(attempts.at(-1).revision, locationAttempt.revision)
+assert.equal(owner.locationAttempt, null)
+failure = "revision_conflict"
+await ownerComponent.methods.updatePlaceDetails.call(
+  owner,
+  pin,
+  [{ year: 2025 }],
+  pin.memory,
+  customPlace
+)
+assert.equal(owner.locationAttempt, null)
+assert.match(owner.pinEditorError, /Review this location draft/)
 
 const exact =
   "https://www.expedia.com/affiliates/flight?x=a%2Fb&token=A+B&order=2"

@@ -218,6 +218,132 @@ describe("private owner profile and pin services", () => {
         .profile.status
     ).toBe("active")
   })
+  it("renames and repositions an owned custom pin without replacing its identity or visit data", async () => {
+    const created = await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: pinInput({
+        customPlace: {
+          name: "Original custom stop",
+          coordinates: [16.44, 43.51],
+        },
+        visitedYears: [2025],
+        memory: "Keep this memory",
+        expectedRevision: 1,
+        idempotencyKey: "eeeeeeee-1111-4111-8111-111111111111",
+      }),
+      now: NOW,
+    })
+    const experience = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        pinId: created.pin.pinId,
+        patch: {
+          experienceChange: {
+            action: "add",
+            id: "exp_" + "e".repeat(32),
+            title: "Keep this activity",
+            operatorName: "",
+            operatorWebsite: "",
+          },
+        },
+        expectedRevision: 2,
+        idempotencyKey: "eeeeeeee-2222-4222-8222-222222222222",
+      },
+      now: NOW,
+    })
+    const input = {
+      pinId: created.pin.pinId,
+      patch: {
+        customPlace: {
+          name: "Corrected custom stop",
+          coordinates: [16.45, 43.52],
+        },
+      },
+      expectedRevision: 3,
+      idempotencyKey: "eeeeeeee-3333-4333-8333-333333333333",
+    }
+    const updated = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    expect(updated.pin).toMatchObject({
+      pinId: created.pin.pinId,
+      placeId: created.pin.placeId,
+      customPlace: input.patch.customPlace,
+      memory: created.pin.memory,
+      visitedYears: created.pin.visitedYears,
+      experiences: experience.pin.experiences,
+    })
+    const replay = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    expect(replay.idempotent).toBe(true)
+    expect(replay.profile.revision).toBe(4)
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.pins).toHaveLength(1)
+    expect(exported.pins[0].customPlace).toEqual(input.patch.customPlace)
+    const reloaded = await getMyAtlasState({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(reloaded.pins[0]).toMatchObject({
+      name: "Corrected custom stop",
+      coordinates: [16.45, 43.52],
+      pinId: created.pin.pinId,
+      memory: created.pin.memory,
+      experiences: experience.pin.experiences,
+    })
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          ...input,
+          expectedRevision: 2,
+          idempotencyKey: "eeeeeeee-4444-4444-8444-444444444444",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "revision_conflict" })
+    await registerSecondOwner()
+    await expect(
+      updateMyPin({
+        environment: environment(),
+        identity: SECOND_IDENTITY,
+        input: {
+          ...input,
+          expectedRevision: 1,
+          idempotencyKey: "eeeeeeee-5555-4555-8555-555555555555",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "pin_not_found" })
+    await deleteMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        pinId: created.pin.pinId,
+        expectedRevision: 4,
+        idempotencyKey: "eeeeeeee-6666-4666-8666-666666666666",
+      },
+      now: NOW,
+    })
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .pins
+    ).toEqual([])
+  })
+
   it("keeps private visit experiences independent, revisioned, exportable and removable", async () => {
     let sequence = 100,
       revision = 1
