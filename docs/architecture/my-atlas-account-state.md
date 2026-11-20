@@ -57,6 +57,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
+    - Pages run 44737312245 deployed the production merge; a live shared-trip render exposed the read only itinerary and map shell, and chunk 481.a92fe951.js contained the Route key and Saved trip order markers
     - Client planning tests verify that a shared snapshot mounts the existing semantic planner route projection in read only mode while retaining the compact itinerary summary
     - Local Chrome verified the settled shared route camera at desktop and a 390 by 844 CSS pixel recipient layout with a reachable Copy link and zero horizontal overflow
     - Authenticated local Chrome against the staging Worker observed an idempotent wishlist create return HTTP 200 with a complete Wish body and the exposed representation ETag W/"rev-9"; after browser normalization the write completed at revision 9 without an invalid-response state
