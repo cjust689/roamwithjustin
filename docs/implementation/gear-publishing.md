@@ -71,6 +71,10 @@ verification:
     - live https://roamwithjustin.com/gear rendered and bundle markers verified 2026-11-18
     - node scripts/test-gear-workflow.mjs
     - node scripts/test-gear-remote-image.mjs
+    - pull request 200 and validation run 44662736340
+    - develop validation run 44662941195
+    - pull request 201 and validation run 44663199175
+    - Pages run 44663455644 for production merge 2c2244f77eeb3282bce00b06aff68ef48d0b3ae9
 ---
 
 # Gear publishing implementation
@@ -171,6 +175,20 @@ with an original image into a repeatable publishing workflow.
 - [ ] Add the canonical Partner only after relationship and destination hosts
   are established. Repository presence is not proof of external approval.
 - [ ] Preview and review the resulting card before publication.
+
+## Authorized remote image release, 2026-11-19
+
+- [x] Pull request 200 passed validation run 44662736340 and merged the
+  bounded remote intake into `develop` as
+  `eb12eb2d2a0406631d3c4efa31f00ddbbe697827`.
+- [x] The resulting `develop` merge passed independent validation run
+  44662941195 before production promotion opened.
+- [x] Pull request 201 passed validation run 44663199175 and merged to `main`
+  as `2c2244f77eeb3282bce00b06aff68ef48d0b3ae9`.
+- [x] Pages run 44663455644 built and deployed that exact production merge.
+- [x] The release created no Gear product, affiliate data, R2 object, upload
+  Worker deployment, or public content. Those owner-controlled gates remain
+  unchanged.
 
 ## Authoring orchestration, 2026-11-19
 
