@@ -60,7 +60,10 @@ for (const saved of [null, "", "dark", "EXPLORER", "system", "{}", "current"]) {
   assert.equal(attributes.get("data-theme"), "current")
 }
 const selected = browser({ saved: "explorer" })
-assert.equal(selected.favicon.get("href"), "/favicon-explorer.svg")
+assert.equal(
+  selected.favicon.get("href"),
+  "/favicon-explorer.svg?v=mountain-r1"
+)
 assert.equal(
   selected.attributes.get("data-theme"),
   "explorer",
@@ -68,7 +71,7 @@ assert.equal(
 )
 selected.storage.set("unrelated:account", "preserved")
 selected.window.RWJTheme.set("current")
-assert.equal(selected.favicon.get("href"), "/favicon.svg")
+assert.equal(selected.favicon.get("href"), "/favicon.svg?v=mountain-r1")
 assert.equal(selected.storage.get("rwj:theme:v1"), "current")
 selected.window.RWJTheme.set("explorer")
 selected.boot()

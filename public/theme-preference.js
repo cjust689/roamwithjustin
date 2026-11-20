@@ -12,7 +12,8 @@
     if (favicon) {
       favicon.setAttribute(
         "href",
-        theme === "explorer" ? "/favicon-explorer.svg" : "/favicon.svg"
+        (theme === "explorer" ? "/favicon-explorer.svg" : "/favicon.svg") +
+          "?v=mountain-r1"
       )
     }
   }

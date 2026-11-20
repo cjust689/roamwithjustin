@@ -134,6 +134,8 @@ before the application and its stylesheet links. `favicon.svg` and
 `favicon-explorer.svg` wrap the supplied geometry in a padded dark tile so
 the white R stays visible against light and dark browser chrome. A theme
 change deliberately updates the favicon URL as well as the root attribute.
+The `mountain-r1` URL revision prevents reuse of the previous cached favicon
+when the approved mountain mark first ships.
 
 `npm run icons:build` regenerates the checked-in SVG, PNG and ICO derivatives.
 PNG sizes are 16, 32, 48, 96, 180, 192 and 512. ICO contains 16, 32 and 48
