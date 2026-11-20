@@ -362,7 +362,7 @@ export default {
 
 <style scoped>
 .journey-story-body {
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .journey-story-section {
@@ -397,7 +397,7 @@ export default {
 
 .journey-section-intro > p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: max(1rem, 16px);
   line-height: 1.7;
 }
@@ -415,7 +415,7 @@ export default {
   display: grid;
   grid-template-columns: minmax(190px, 0.34fr) minmax(0, 1fr);
   column-gap: clamp(2rem, 7vw, 7rem);
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   padding: clamp(2.5rem, 6vw, 5rem) 0;
 }
 
@@ -435,9 +435,9 @@ export default {
   width: 3rem;
   height: 3rem;
   flex: 0 0 auto;
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 50%;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: max(0.875rem, 14px);
   font-weight: 800;
 }
@@ -448,7 +448,7 @@ export default {
 .journey-experience-links span,
 .journey-route-links span {
   margin: 0;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: max(0.875rem, 14px);
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -477,7 +477,7 @@ export default {
 
 .journey-day-summary {
   margin: 0 0 1.3rem;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
   font-size: max(1rem, 16px);
   line-height: 1.75;
   white-space: pre-line;
@@ -496,10 +496,10 @@ export default {
   display: grid;
   min-height: 3rem;
   align-content: center;
-  border: 1px solid rgba(246, 189, 96, 0.3);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.3);
   border-radius: 14px;
   padding: 0.7rem 0.85rem;
-  color: #fff;
+  color: var(--color-text, #fff);
   font-size: max(0.875rem, 14px);
   text-decoration: none;
 }
@@ -512,7 +512,7 @@ export default {
 
 .journey-experience-links small,
 .journey-route-links small {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
 }
 
 .journey-location-grid {
@@ -523,9 +523,9 @@ export default {
 
 .journey-location-card {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 20px;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .journey-location-card > button:first-child {
@@ -534,7 +534,7 @@ export default {
   border: 0;
   padding: 0;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -544,7 +544,7 @@ export default {
   display: block;
   height: 220px;
   overflow: hidden;
-  background: #17242a;
+  background: var(--color-surface-raised, #17242a);
 }
 
 .journey-location-image img,
@@ -562,10 +562,10 @@ export default {
   background:
     radial-gradient(
       circle at 30% 25%,
-      rgba(246, 189, 96, 0.18),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.18),
       transparent 38%
     ),
-    #142128;
+    var(--color-surface-raised, #142128);
 }
 
 .journey-location-copy {
@@ -581,13 +581,13 @@ export default {
 }
 
 .journey-location-copy small {
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: max(1rem, 16px);
   line-height: 1.6;
 }
 
 .journey-location-copy b {
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-size: max(0.875rem, 14px);
 }
 
@@ -598,10 +598,10 @@ export default {
   align-items: center;
   justify-content: center;
   border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   padding: 0.7rem;
-  background: rgba(246, 189, 96, 0.08);
-  color: #f8d79f;
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.08);
+  color: var(--color-accent-soft, #f8d79f);
   font: inherit;
   font-size: max(0.875rem, 14px);
   font-weight: 800;
@@ -610,7 +610,7 @@ export default {
 }
 
 .journey-experience-story {
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   padding: clamp(2.5rem, 6vw, 5rem) 0;
 }
 
@@ -626,7 +626,7 @@ export default {
 
 .journey-experience-story > header p,
 .journey-moment-copy p {
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: max(1rem, 16px);
   line-height: 1.75;
   white-space: pre-line;
@@ -637,10 +637,10 @@ export default {
   grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1.35fr);
   gap: clamp(1.5rem, 5vw, 4rem);
   margin-top: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 22px;
   padding: clamp(1.2rem, 4vw, 2rem);
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .journey-moment-copy h4 {
@@ -671,7 +671,7 @@ export default {
   border: 0;
   border-radius: 14px;
   padding: 0;
-  background: #111b20;
+  background: var(--color-surface, #111b20);
   aspect-ratio: 4 / 3;
 }
 
@@ -694,10 +694,10 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 22px;
   padding: 1.25rem;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .journey-notes-grid h3 {
@@ -708,7 +708,7 @@ export default {
 .journey-notes-grid ul {
   margin: 0.8rem 0 0;
   padding-left: 1.2rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.7));
   font-size: max(1rem, 16px);
   line-height: 1.7;
 }
@@ -753,7 +753,7 @@ export default {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #f6bd60;
+  outline: 3px solid var(--color-focus, #f6bd60);
   outline-offset: 3px;
 }
 

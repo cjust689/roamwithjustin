@@ -7,6 +7,8 @@ implementation_state: complete
 created: 2026-11-14
 updated: 2026-11-19
 related:
+  - visual-themes
+  - theme-toggle-implementation
   - content-model
   - media-pipeline
   - gear-system
@@ -63,6 +65,11 @@ verification:
 ---
 
 # Roam With Justin documentation
+
+Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
+and [theme implementation and verification](implementation/theme-toggle.md).
+The owner-approved amber and orange SVG marks now follow the selected theme;
+the same masters produce the browser favicons and stable amber app icons.
 
 Start here before using an older implementation brief.
 
@@ -133,8 +140,21 @@ before showing private map data or account tools. The empty map remains visible
 before sign-in. Signed-out draft exploration is
 removed, while public shared views remain accessible.
 The owner entry screen also links directly to Explore Atlases beside sign-in.
+Local account deletion and private export controls now sit below the
+public/private sharing controls instead of inside the trip planner.
+The branch also corrects a locally reproduced registration response mismatch
+that made the browser reject a successfully created profile after handle
+reuse. The registration response now includes discovery visibility and account
+counts. This server correction remains undeployed; specific live handle
+conflicts still require their response status and error code to distinguish.
 
 ## Active work
+
+The [trip centric transition](implementation/my-atlas-trip-centric-transition.md)
+reconciles the new canonical-trip and flight/rental briefs with the existing
+single-plan storage. Independent browser flight and rental tools are implemented
+locally. Canonical trip migration, reversible lifecycle, persistent logistics,
+and grouped trip maps remain in the recorded implementation sequence.
 
 | Work                                                                                   | Status            | What remains                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | -------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -292,4 +312,4 @@ structure only; it cannot prove application behavior.
   and any optional Utah 2026 Salt Lake City Airport transit Visit remain
   externally unverified.
 
-**Last repository documentation audit:** 2026-11-19.
+**Last repository documentation audit:** 2026-11-20.

@@ -102,8 +102,8 @@ export default {
 .ad-placement {
   width: min(960px, calc(100% - 2rem));
   margin: clamp(4.5rem, 10vw, 8rem) auto 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   padding: 1.25rem 0;
   text-align: center;
 }
@@ -111,7 +111,7 @@ export default {
 .ad-placement-label {
   display: block;
   margin-bottom: 0.65rem;
-  color: rgba(255, 255, 255, 0.38);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.38));
   font-family: "Poppins", system-ui, sans-serif;
   font-size: 0.58rem;
   font-weight: 700;

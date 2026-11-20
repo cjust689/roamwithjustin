@@ -222,15 +222,15 @@ export default {
   gap: 1rem;
   margin: 1rem 0;
   padding: 1rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 1.1rem;
   background:
     radial-gradient(
       circle at 90% 0%,
-      rgba(230, 186, 104, 0.13),
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.13),
       transparent 45%
     ),
-    rgba(255, 255, 255, 0.045);
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.045);
 }
 
 .pin-editor-heading,
@@ -249,7 +249,7 @@ export default {
 .pin-editor-heading p,
 .pin-editor-dates p {
   margin: 0;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.62rem;
@@ -258,7 +258,7 @@ export default {
 
 .pin-editor-heading h2 {
   margin: 0.2rem 0;
-  color: #f4fbf7;
+  color: var(--color-text, #f4fbf7);
   font-family: "Poppins", system-ui, sans-serif;
   font-size: 1.35rem;
 }
@@ -266,7 +266,7 @@ export default {
 .pin-editor-heading span,
 .pin-editor-dates > span,
 .pin-editor-actions small {
-  color: #91a59f;
+  color: var(--color-text-muted, #91a59f);
   font-size: 0.68rem;
 }
 
@@ -278,10 +278,10 @@ export default {
 
 .pin-editor button {
   padding: 0.55rem 0.7rem;
-  border: 1px solid rgba(230, 186, 104, 0.48);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.48);
   border-radius: 0.7rem;
-  color: #f8e6bd;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f8e6bd);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   cursor: pointer;
 }
 
@@ -310,15 +310,15 @@ export default {
   gap: 0.35rem;
   padding: 0.25rem 0.35rem 0.25rem 0.55rem;
   border-radius: 999px;
-  color: #dce9e4;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text, #dce9e4);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   font-size: 0.65rem;
 }
 
 .pin-editor-dates li button {
   padding: 0.25rem 0.4rem;
   border: 0;
-  color: #d9aaa5;
+  color: var(--color-error, #d9aaa5);
   background: transparent;
   font-size: 0.58rem;
 }
@@ -331,7 +331,7 @@ export default {
   display: grid;
   flex: 1;
   gap: 0.25rem;
-  color: #b6c6c1;
+  color: var(--color-text-muted, #b6c6c1);
   font-size: 0.65rem;
 }
 
@@ -342,21 +342,21 @@ export default {
   min-width: 0;
   width: 100%;
   padding: 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.15);
   border-radius: 0.65rem;
-  color: #f4fbf7;
-  background: #111f22;
+  color: var(--color-text, #f4fbf7);
+  background: var(--color-surface-raised, #111f22);
 }
 
 .pin-editor-memory {
   display: grid;
   gap: 0.4rem;
-  color: #b6c6c1;
+  color: var(--color-text-muted, #b6c6c1);
   font-size: 0.65rem;
 }
 
 .pin-editor-memory > span:first-child {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.62rem;
@@ -365,7 +365,7 @@ export default {
 
 .pin-editor-memory small,
 .pin-editor-memory-count {
-  color: #91a59f;
+  color: var(--color-text-muted, #91a59f);
   line-height: 1.45;
 }
 
@@ -376,21 +376,21 @@ export default {
   margin: 0;
   padding: 0.7rem;
   resize: vertical;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.15);
   border-radius: 0.65rem;
-  color: #f4fbf7;
-  background: #111f22;
+  color: var(--color-text, #f4fbf7);
+  background: var(--color-surface-raised, #111f22);
   line-height: 1.5;
 }
 
 .pin-editor-memory textarea:focus {
-  border-color: #e6ba68;
+  border-color: var(--color-accent, #e6ba68);
   box-shadow: 0 0 0 2px rgba(230, 186, 104, 0.16);
   outline: none;
 }
 
 .pin-editor-memory textarea[aria-invalid="true"] {
-  border-color: #d58f88;
+  border-color: var(--color-error, #d58f88);
 }
 
 .pin-editor-memory-count {
@@ -409,13 +409,13 @@ export default {
 }
 
 .pin-editor-actions > button {
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font-weight: 800;
 }
 
 .pin-editor-error {
-  color: #e7aaa4 !important;
+  color: var(--color-error, #e7aaa4) !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
 }

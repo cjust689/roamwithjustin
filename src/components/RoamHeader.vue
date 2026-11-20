@@ -2,7 +2,7 @@
   <header class="site-header">
     <nav class="site-nav" aria-label="Primary navigation">
       <router-link class="site-brand" to="/" aria-label="Roam With Justin home">
-        <span>RWJ</span>
+        <BrandMark />
         <strong>Roam With Justin</strong>
       </router-link>
 
@@ -15,6 +15,7 @@
         <router-link class="site-link" to="/about">About</router-link>
       </div>
 
+      <ThemeSelector />
       <button
         class="menu-toggle"
         type="button"
@@ -87,8 +88,8 @@ export default {
   height: 72px !important;
   line-height: normal !important;
   padding: 0 clamp(1rem, 4vw, 4rem);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(7, 11, 14, 0.9);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.9);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(18px);
 }
@@ -98,18 +99,15 @@ export default {
   align-items: center;
   gap: 0.7rem;
   height: auto;
-  color: #fff;
+  color: var(--color-text, #fff);
   text-decoration: none;
 }
 
-.site-brand > span {
+.site-brand > .brand-mark {
   display: grid;
   place-items: center;
   width: 2.45rem;
   height: 2.45rem;
-  border-radius: 50%;
-  background: #f6bd60;
-  color: #111719;
   font-size: 0.7rem;
   font-weight: 900;
 }
@@ -128,7 +126,7 @@ export default {
 .site-link {
   border-radius: 999px;
   padding: 0.65rem 0.9rem;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -141,22 +139,22 @@ export default {
 .site-link:hover,
 .site-link:focus-visible,
 .site-link.router-link-active {
-  background: rgba(255, 255, 255, 0.07);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.07);
+  color: var(--color-text, #fff);
 }
 
 .site-link.atlas-link {
-  border: 1px solid rgba(246, 189, 96, 0.45);
-  color: #f8d79f;
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.45);
+  color: var(--color-accent-soft, #f8d79f);
 }
 
 .menu-toggle {
   display: none;
   width: 3rem;
   height: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.05);
   cursor: pointer;
 }
 
@@ -165,7 +163,7 @@ export default {
   width: 1.15rem;
   height: 2px;
   margin: 0.28rem auto;
-  background: #fff;
+  background: var(--color-surface-raised, #fff);
 }
 
 .mobile-menu {
@@ -178,8 +176,8 @@ export default {
   height: auto !important;
   line-height: normal !important;
   padding: 0.75rem 1rem 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(7, 11, 14, 0.98);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.98);
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.4);
 }
 
@@ -187,8 +185,8 @@ export default {
   display: flex;
   align-items: center;
   min-height: 3.6rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
+  color: var(--color-text, #fff);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.35rem;
   text-decoration: none;
@@ -196,7 +194,7 @@ export default {
 
 .mobile-menu a span {
   width: 2.4rem;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-family: "Poppins", sans-serif;
   font-size: 0.65rem;
   font-weight: 800;

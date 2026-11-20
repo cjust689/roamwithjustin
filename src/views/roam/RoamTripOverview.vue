@@ -351,8 +351,8 @@ export default {
 <style scoped>
 .trip-story {
   overflow: hidden;
-  background: #0b1114;
-  color: #fff;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -371,7 +371,7 @@ export default {
 
 .experience-story {
   scroll-margin-top: 6rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   padding: clamp(2.5rem, 6vw, 5rem) 0;
 }
 
@@ -390,7 +390,7 @@ export default {
 
 .experience-story > header p,
 .moment-copy p {
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 0.9rem !important;
   font-weight: 400;
   line-height: 1.75;
@@ -402,14 +402,14 @@ export default {
   grid-template-columns: minmax(220px, 0.65fr) minmax(0, 1.35fr);
   gap: clamp(1.5rem, 5vw, 4rem);
   margin-top: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 22px;
   padding: clamp(1.2rem, 4vw, 2rem);
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .moment-copy > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.66rem;
   font-weight: 800;
   letter-spacing: 0.11em;
@@ -436,7 +436,7 @@ export default {
   overflow: hidden;
   width: 100%;
   border-radius: 14px;
-  background: #0b1114;
+  background: var(--color-page, #0b1114);
   aspect-ratio: 4 / 3;
 }
 
@@ -458,7 +458,7 @@ export default {
   display: block;
   overflow: hidden;
   border-radius: 1rem;
-  background: #111b20;
+  background: var(--color-surface, #111b20);
   aspect-ratio: 4 / 3;
 }
 
@@ -500,8 +500,16 @@ export default {
   z-index: 1;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(5, 9, 11, 0.88), rgba(5, 9, 11, 0.22) 70%),
-    linear-gradient(180deg, rgba(5, 9, 11, 0.18), #0b1114 98%);
+    linear-gradient(
+      90deg,
+      rgba(var(--color-page-rgb, 5, 9, 11), 0.88),
+      rgba(var(--color-page-rgb, 5, 9, 11), 0.22) 70%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(var(--color-page-rgb, 5, 9, 11), 0.18),
+      var(--color-page, #0b1114) 98%
+    );
 }
 
 .story-hero-content {
@@ -518,7 +526,7 @@ export default {
   position: absolute;
   top: 1.5rem;
   left: 0;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
   font-size: 0.76rem;
   font-weight: 700;
   text-decoration: none;
@@ -536,7 +544,7 @@ export default {
 .day-heading p,
 .location-copy > span,
 .lodging-card > div > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -555,7 +563,7 @@ export default {
 
 .story-hero-copy > .story-date {
   margin-top: 0.85rem;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.86rem !important;
   font-weight: 700;
 }
@@ -563,7 +571,7 @@ export default {
 .story-hero-copy > p {
   max-width: 690px;
   margin: 1.3rem 0 0;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.76));
   font-size: clamp(0.98rem, 1.5vw, 1.12rem) !important;
   font-weight: 400;
   line-height: 1.65;
@@ -579,11 +587,11 @@ export default {
 
 .story-hero-actions a,
 .handoff-actions a {
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
   border-radius: 999px;
   padding: 0.8rem 1rem;
-  background: rgba(7, 11, 14, 0.44);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.44);
+  color: var(--color-text, #fff);
   font-size: 0.76rem;
   font-weight: 800;
   text-decoration: none;
@@ -592,9 +600,9 @@ export default {
 
 .story-hero-actions a:first-child,
 .handoff-actions a:first-child {
-  border-color: #f6bd60;
-  background: #f6bd60;
-  color: #111719;
+  border-color: var(--color-accent, #f6bd60);
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111719);
 }
 
 .story-facts {
@@ -602,7 +610,7 @@ export default {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   max-width: 850px;
   margin: clamp(2rem, 5vw, 4rem) 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
 }
 
 .story-facts div {
@@ -612,7 +620,7 @@ export default {
 
 .story-facts dd {
   margin: 0.35rem 0 0;
-  color: rgba(255, 255, 255, 0.84);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.84));
   font-size: 0.86rem;
   line-height: 1.4;
 }
@@ -622,23 +630,23 @@ export default {
   background:
     radial-gradient(
       circle at 90% 12%,
-      rgba(246, 189, 96, 0.07),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.07),
       transparent 28%
     ),
-    #0b1114;
+    var(--color-page, #0b1114);
 }
 
 .journey-preview {
-  border: 1px solid rgba(246, 189, 96, 0.22);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.22);
   border-radius: 28px;
   padding: clamp(1.5rem, 5vw, 3.5rem);
   background:
     radial-gradient(
       circle at 92% 4%,
-      rgba(246, 189, 96, 0.12),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.12),
       transparent 32%
     ),
-    #11191d;
+    var(--color-surface, #11191d);
 }
 
 .journey-preview h2 {
@@ -660,12 +668,12 @@ export default {
 
 .preview-destinations article {
   min-width: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   padding: 1rem 0.2rem 0;
 }
 
 .preview-destinations span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -682,7 +690,7 @@ export default {
 
 .preview-destinations p {
   margin: 0.65rem 0 0;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.78rem !important;
   font-weight: 400;
   line-height: 1.6;
@@ -711,7 +719,7 @@ export default {
   grid-row: 1 / span 2;
   grid-column: 2;
   margin: 0;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.88rem !important;
   font-weight: 400;
   line-height: 1.7;
@@ -725,7 +733,7 @@ export default {
   display: grid;
   grid-template-columns: minmax(190px, 0.34fr) minmax(0, 1fr);
   column-gap: clamp(2rem, 7vw, 7rem);
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   padding: clamp(2.5rem, 6vw, 5rem) 0;
 }
 
@@ -745,14 +753,14 @@ export default {
   width: 3rem;
   height: 3rem;
   flex: 0 0 auto;
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 50%;
   font-size: 0.72rem;
 }
 
 .day-heading p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.42));
 }
 
 .day-heading h3 {
@@ -785,16 +793,16 @@ export default {
   gap: 0.22rem;
   width: 100%;
   max-width: 520px;
-  border: 1px solid rgba(246, 189, 96, 0.28);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.28);
   border-radius: 16px;
   padding: 0.8rem 0.95rem;
-  background: rgba(246, 189, 96, 0.05);
-  color: #fff;
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.05);
+  color: var(--color-text, #fff);
   text-decoration: none;
 }
 
 .experience-links span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -806,7 +814,7 @@ export default {
 }
 
 .experience-links small {
-  color: rgba(255, 255, 255, 0.52);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.52));
   font-size: 0.66rem;
   line-height: 1.45;
 }
@@ -814,7 +822,7 @@ export default {
 .day-summary {
   max-width: 760px;
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: 0.94rem !important;
   font-weight: 400;
   line-height: 1.75;
@@ -832,24 +840,24 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   border-radius: 999px;
   padding: 0.6rem 0.75rem;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.78));
   font-size: 0.76rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .route-links a > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.62rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .route-links small {
-  color: rgba(255, 255, 255, 0.44);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.44));
 }
 
 .location-grid {
@@ -862,9 +870,9 @@ export default {
 .location-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 20px;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
   transition:
     transform 240ms ease,
     border-color 240ms ease;
@@ -872,7 +880,7 @@ export default {
 
 .location-card:hover,
 .location-card:focus-within {
-  border-color: rgba(246, 189, 96, 0.42);
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   transform: translateY(-3px);
 }
 
@@ -882,7 +890,7 @@ export default {
   border: 0;
   padding: 0;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -896,10 +904,14 @@ export default {
   background:
     radial-gradient(
       circle at 28% 22%,
-      rgba(246, 189, 96, 0.18),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.18),
       transparent 35%
     ),
-    linear-gradient(145deg, #15242a, #091014);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #15242a),
+      var(--color-page, #091014)
+    );
 }
 
 .location-image-placeholder {
@@ -940,7 +952,7 @@ export default {
   display: -webkit-box;
   overflow: hidden;
   margin-top: 0.65rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.78rem;
   line-height: 1.55;
   -webkit-box-orient: vertical;
@@ -950,7 +962,7 @@ export default {
 .location-copy b {
   margin-top: auto;
   padding-top: 1rem;
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-size: 0.72rem;
 }
 
@@ -958,11 +970,11 @@ export default {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
-  border: 1px solid rgba(246, 189, 96, 0.5);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.5);
   border-radius: 999px;
   padding: 0.48rem 0.65rem;
-  background: rgba(7, 11, 14, 0.78);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.78);
+  color: var(--color-text, #fff);
   font-size: 0.66rem;
   font-weight: 800;
   text-decoration: none;
@@ -985,9 +997,9 @@ export default {
   display: grid;
   grid-template-columns: minmax(150px, 0.75fr) minmax(0, 1.25fr);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 22px;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .lodging-card > img,
@@ -1008,11 +1020,15 @@ export default {
   background:
     radial-gradient(
       circle at 70% 20%,
-      rgba(246, 189, 96, 0.18),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.18),
       transparent 34%
     ),
-    linear-gradient(145deg, #18252b, #0b1114);
-  color: rgba(255, 255, 255, 0.58);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #18252b),
+      var(--color-page, #0b1114)
+    );
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -1034,7 +1050,7 @@ export default {
 
 .lodging-card p,
 .atlas-handoff p {
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.82rem !important;
   font-weight: 400;
   line-height: 1.65;
@@ -1043,7 +1059,7 @@ export default {
 .lodging-card a {
   display: inline-block;
   margin-top: 0.5rem;
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-size: 0.74rem;
   font-weight: 800;
   text-decoration: none;
@@ -1056,10 +1072,10 @@ export default {
 }
 
 .story-detail-card {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 24px;
   padding: clamp(1.4rem, 4vw, 2.5rem);
-  background: #11191d;
+  background: var(--color-surface, #11191d);
 }
 
 .story-detail-card h2 {
@@ -1074,23 +1090,23 @@ export default {
 }
 
 .gear-list > * {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 999px;
   padding: 0.55rem 0.7rem;
-  color: rgba(255, 255, 255, 0.74);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.74));
   font-size: 0.7rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .gear-list a {
-  border-color: rgba(246, 189, 96, 0.35);
-  color: #f8d79f;
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.35);
+  color: var(--color-accent-soft, #f8d79f);
 }
 
 .gear-disclosure {
   margin: 1rem 0 0;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.72rem;
   line-height: 1.55;
 }
@@ -1104,14 +1120,14 @@ export default {
 
 .notes-grid h3 {
   margin: 0;
-  color: #fff;
+  color: var(--color-text, #fff);
   font-size: 0.84rem;
 }
 
 .notes-grid ul {
   margin: 0.75rem 0 0;
   padding-left: 1.15rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.76rem;
   line-height: 1.65;
 }
@@ -1126,11 +1142,16 @@ export default {
   align-items: end;
   gap: 3rem;
   overflow: hidden;
-  border: 1px solid rgba(246, 189, 96, 0.3);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.3);
   border-radius: 28px;
   padding: clamp(1.5rem, 5vw, 3.5rem);
   background:
-    linear-gradient(120deg, rgba(246, 189, 96, 0.1), transparent 45%), #11191d;
+    linear-gradient(
+      120deg,
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.1),
+      transparent 45%
+    ),
+    var(--color-surface, #11191d);
 }
 
 .atlas-handoff h2 {
@@ -1199,8 +1220,16 @@ export default {
 
   .story-hero-shade {
     background:
-      linear-gradient(180deg, rgba(5, 9, 11, 0.2), #0b1114 91%),
-      linear-gradient(90deg, rgba(5, 9, 11, 0.55), transparent);
+      linear-gradient(
+        180deg,
+        rgba(var(--color-page-rgb, 5, 9, 11), 0.2),
+        var(--color-page, #0b1114) 91%
+      ),
+      linear-gradient(
+        90deg,
+        rgba(var(--color-page-rgb, 5, 9, 11), 0.55),
+        transparent
+      );
   }
 
   .story-hero h1 {

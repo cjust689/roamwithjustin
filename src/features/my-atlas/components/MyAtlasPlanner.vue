@@ -167,6 +167,22 @@
               </button>
               <button
                 type="button"
+                :aria-expanded="String(nextActionOpen === 'flights')"
+                aria-controls="planner-flights-panel"
+                @click="toggleNextAction('flights')"
+              >
+                Flights
+              </button>
+              <button
+                type="button"
+                :aria-expanded="String(nextActionOpen === 'rental')"
+                aria-controls="planner-rental-panel"
+                @click="toggleNextAction('rental')"
+              >
+                Rental cars
+              </button>
+              <button
+                type="button"
                 :aria-expanded="String(nextActionOpen === 'prompt')"
                 aria-controls="planner-prompt-panel"
                 @click="toggleNextAction('prompt')"
@@ -175,6 +191,19 @@
               </button>
             </div>
           </div>
+
+          <MyAtlasTravelSearch
+            v-show="['flights', 'rental'].includes(nextActionOpen)"
+            :id="
+              nextActionOpen === 'rental'
+                ? 'planner-rental-panel'
+                : 'planner-flights-panel'
+            "
+            v-model="travelSearchDraft"
+            :tool="nextActionOpen === 'rental' ? 'rental' : 'flights'"
+            :explicit-fly-pairs="explicitFlyPairs"
+            :context-changed="travelSearchContextChanged"
+          />
 
           <div
             v-if="nextActionOpen === 'directions'"
@@ -311,29 +340,9 @@
                     Search for this flight or ferry separately.
                   </span>
                   <template v-if="handoff.mode === 'fly'">
-                    <label>
-                      <span>Departure date</span>
-                      <input
-                        :value="flightDates[handoff.pairKey] || ''"
-                        type="date"
-                        @input="
-                          setFlightDate(handoff.pairKey, $event.target.value)
-                        "
-                      />
-                    </label>
-                    <a
-                      v-if="flightHandoffUrl(handoff)"
-                      :href="flightHandoffUrl(handoff)"
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                    >
-                      Search this flight on Expedia
-                    </a>
-                    <small>
-                      Expedia receives the two place names and departure date
-                      only after you open the search. Prices and availability
-                      are not checked by My Atlas.
-                    </small>
+                    <button type="button" @click="toggleNextAction('flights')">
+                      Review flight gateways
+                    </button>
                   </template>
                 </div>
               </template>
@@ -1038,34 +1047,6 @@
           </button>
         </details>
       </section>
-
-      <details class="planner-delete-account">
-        <summary>Delete My Atlas account</summary>
-        <p>
-          This permanently removes your Visited Atlas, private wishlist, saved
-          trip, handle, and app registration. It does not delete your Google or
-          Auth0 identity.
-        </p>
-        <label>
-          <span>Type DELETE MY ATLAS to confirm</span>
-          <input v-model="deleteConfirmation" autocomplete="off" type="text" />
-        </label>
-        <button
-          type="button"
-          :disabled="pending || deleteConfirmation !== 'DELETE MY ATLAS'"
-          @click="deleteAccount"
-        >
-          Permanently delete account
-        </button>
-      </details>
-      <button
-        class="planner-export"
-        type="button"
-        :disabled="pending"
-        @click="exportAccountData"
-      >
-        Download private account data
-      </button>
     </div>
     <p class="planner-announcement" aria-live="polite">{{ announcement }}</p>
   </section>
@@ -1074,10 +1055,8 @@
 <script>
 import {
   createMyAtlasWish,
-  deleteMyAtlasAccountWithRevisionRecovery,
   deleteMyAtlasPlan,
   deleteMyAtlasWish,
-  fetchMyAtlasAccountExport,
   fetchMyAtlasPlanning,
   fetchMyAtlasProfile,
   keepMyAtlasPlan,
@@ -1085,7 +1064,7 @@ import {
   saveMyAtlasPlan,
   updateMyAtlasWish,
 } from "../api/client.mjs"
-import { getMyAtlasApiAccessToken, logoutFromMyAtlas } from "../auth/auth0"
+import { getMyAtlasApiAccessToken } from "../auth/auth0"
 import {
   formatMyAtlasPlaceSearchError,
   searchMyAtlasPlaces,
@@ -1097,12 +1076,13 @@ import {
   MAX_PLAN_DESTINATIONS,
   MyAtlasHandoffError,
   buildAiPlanningPrompt,
-  buildExpediaFlightSearchUrl,
   buildGoogleMapsRouteHandoffs,
   buildPlanRoutePairs,
   buildPlanRoutePoints,
 } from "../planning/handoffs.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
+import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
+import { emptyTravelSearchDraft } from "../planning/travelSearch.mjs"
 import {
   formatMyAtlasPlanLoadError,
   formatMyAtlasPlannerError,
@@ -1112,18 +1092,14 @@ import { buildPlannerMapRoute } from "../planning/mapProjection.mjs"
 
 export default {
   name: "MyAtlasPlanner",
+  components: { MyAtlasTravelSearch },
   props: {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
     pins: { type: Array, default: () => [] },
     profilePublic: { type: Boolean, default: false },
   },
-  emits: [
-    "revision-change",
-    "pins-created",
-    "account-deleted",
-    "planner-state-change",
-  ],
+  emits: ["revision-change", "pins-created", "planner-state-change"],
   data() {
     return {
       open: false,
@@ -1175,7 +1151,8 @@ export default {
       directionsPairModes: {},
       directionsPlanKey: "",
       routeHandoffs: [],
-      flightDates: {},
+      travelSearchDraft: emptyTravelSearchDraft(),
+      travelSearchContextChanged: false,
       visitDrafts: {},
       monthNames: [
         "January",
@@ -1191,10 +1168,12 @@ export default {
         "November",
         "December",
       ],
-      deleteConfirmation: "",
     }
   },
   computed: {
+    explicitFlyPairs() {
+      return this.directionsPairs.filter(pair => pair.mode === "fly")
+    },
     currentYear() {
       return new Date().getUTCFullYear()
     },
@@ -1571,6 +1550,7 @@ export default {
         ])
       )
       if (planKey === this.directionsPlanKey) return
+      if (this.directionsPlanKey) this.travelSearchContextChanged = true
       this.directionsPlanKey = planKey
       this.directionsDefaultMode = "driving"
       this.directionsIncludedPointKeys = points.map(point => point.pointKey)
@@ -2116,20 +2096,6 @@ export default {
     clearPreparedDirections() {
       this.routeHandoffs = []
     },
-    setFlightDate(pairKey, value) {
-      this.$set(this.flightDates, pairKey, value)
-    },
-    flightHandoffUrl(handoff) {
-      try {
-        return buildExpediaFlightSearchUrl({
-          origin: handoff.origin,
-          destination: handoff.destination,
-          departureDate: this.flightDates[handoff.pairKey],
-        })
-      } catch {
-        return ""
-      }
-    },
     setDirectionsPairMode(pairKey, mode) {
       if (mode) this.$set(this.directionsPairModes, pairKey, mode)
       else this.$delete(this.directionsPairModes, pairKey)
@@ -2252,75 +2218,6 @@ export default {
           "The browser could not copy this prompt. Select the text and copy it manually."
       }
     },
-    async deleteAccount() {
-      if (
-        !window.confirm(
-          "Permanently delete all My Atlas application data? This cannot be undone."
-        )
-      )
-        return
-      this.pending = true
-      this.error = ""
-      try {
-        const storageKey = "rwj:my-atlas:account-deletion-operation:v1"
-        let operation = null
-        try {
-          operation = JSON.parse(window.sessionStorage.getItem(storageKey))
-        } catch {
-          // An invalid local recovery record is replaced below.
-        }
-        if (!operation?.idempotencyKey || !operation?.revision) {
-          operation = {
-            idempotencyKey: window.crypto.randomUUID(),
-            revision: this.plannerRevision,
-          }
-          window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
-        }
-        await deleteMyAtlasAccountWithRevisionRecovery({
-          apiBaseUrl: this.apiBaseUrl,
-          accessToken: await this.token(),
-          revision: operation.revision,
-          idempotencyKey: operation.idempotencyKey,
-          onRevision: revision => {
-            operation = { ...operation, revision }
-            window.sessionStorage.setItem(storageKey, JSON.stringify(operation))
-            this.emitRevision(revision)
-          },
-        })
-        window.sessionStorage.removeItem(storageKey)
-        this.$emit("account-deleted")
-        logoutFromMyAtlas()
-      } catch (error) {
-        this.error = this.errorMessage(error)
-        this.pending = false
-      }
-    },
-    async exportAccountData() {
-      this.pending = true
-      this.error = ""
-      try {
-        const value = await fetchMyAtlasAccountExport({
-          apiBaseUrl: this.apiBaseUrl,
-          accessToken: await this.token(),
-        })
-        const blob = new Blob([JSON.stringify(value, null, 2)], {
-          type: "application/json",
-        })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement("a")
-        link.href = url
-        link.download = `my-atlas-${new Date().toISOString().slice(0, 10)}.json`
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        URL.revokeObjectURL(url)
-        this.announcement = "Your private My Atlas data export was downloaded."
-      } catch (error) {
-        this.error = this.errorMessage(error)
-      } finally {
-        this.pending = false
-      }
-    },
     locationContext(place) {
       if (place.unavailable) return "Catalog entry unavailable"
       return (
@@ -2371,13 +2268,13 @@ export default {
   display: grid;
   margin-top: 0.8rem;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.11);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.11);
   border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 .my-atlas-planner.is-open {
-  border-color: rgba(230, 186, 104, 0.38);
-  background: rgba(8, 21, 23, 0.82);
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.38);
+  background: rgba(var(--color-page-rgb, 8, 21, 23), 0.82);
 }
 .planner-heading-row {
   display: grid;
@@ -2389,10 +2286,10 @@ export default {
   align-self: center;
   margin: 0.5rem 0.65rem 0.5rem 0;
   padding: 0.5rem 0.7rem;
-  border: 1px solid rgba(230, 186, 104, 0.52);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.52);
   border-radius: 0.65rem;
-  color: #102023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #102023);
+  background: var(--color-accent, #e6ba68);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 800;
@@ -2401,10 +2298,10 @@ export default {
 }
 .planner-heading-share:hover,
 .planner-heading-share:focus-visible {
-  background: #f0c979;
+  background: var(--color-accent, #f0c979);
 }
 .planner-heading-share:focus-visible {
-  outline: 2px solid #f4d38f;
+  outline: 2px solid var(--color-focus, #f4d38f);
   outline-offset: 2px;
 }
 .planner-content {
@@ -2412,17 +2309,21 @@ export default {
   min-width: 0;
   gap: 0.8rem;
   padding: 0.8rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 .planner-itinerary-card {
   display: grid;
   gap: 0.85rem;
   padding: 0.95rem;
-  border: 1px solid rgba(230, 186, 104, 0.38);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.38);
   border-radius: 0.9rem;
   background:
-    linear-gradient(145deg, rgba(230, 186, 104, 0.08), transparent 52%),
-    rgba(8, 21, 23, 0.72);
+    linear-gradient(
+      145deg,
+      rgba(var(--color-accent-rgb, 230, 186, 104), 0.08),
+      transparent 52%
+    ),
+    rgba(var(--color-page-rgb, 8, 21, 23), 0.72);
 }
 .planner-itinerary-heading,
 .planner-itinerary-actions,
@@ -2450,7 +2351,7 @@ export default {
 .planner-itinerary-heading small,
 .planner-itinerary-empty > small,
 .planner-next-actions small {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-size: 0.58rem;
@@ -2459,7 +2360,7 @@ export default {
 .planner-itinerary-heading h3,
 .planner-itinerary-empty h3 {
   margin: 0;
-  color: #f2f8f5;
+  color: var(--color-text, #f2f8f5);
   font-family: inherit;
   font-size: clamp(1rem, 3.5vw, 1.35rem);
   line-height: 1.1;
@@ -2469,30 +2370,30 @@ export default {
 .planner-itinerary-empty p,
 .planner-editor-collapsed {
   margin: 0;
-  color: #9bada7;
+  color: var(--color-text-muted, #9bada7);
   font-size: 0.64rem;
   line-height: 1.5;
 }
 .planner-save-state {
   flex: 0 0 auto;
   padding: 0.32rem 0.48rem;
-  border: 1px solid rgba(126, 191, 151, 0.34);
+  border: 1px solid rgba(var(--color-success-rgb, 126, 191, 151), 0.34);
   border-radius: 999px;
-  color: #a8d9ba;
-  background: rgba(81, 139, 103, 0.11);
+  color: var(--color-success, #a8d9ba);
+  background: rgba(var(--color-success-rgb, 81, 139, 103), 0.11);
   font-size: 0.58rem;
   font-weight: 800;
   white-space: nowrap;
 }
 .planner-save-state.is-dirty {
-  border-color: rgba(230, 186, 104, 0.48);
-  color: #f2cc7d;
-  background: rgba(230, 186, 104, 0.1);
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.48);
+  color: var(--color-accent-soft, #f2cc7d);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.1);
 }
 .planner-itinerary-note {
   padding: 0.65rem 0.7rem;
-  border-left: 2px solid rgba(230, 186, 104, 0.55);
-  background: rgba(255, 255, 255, 0.025);
+  border-left: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.55);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 .planner-itinerary {
   display: grid;
@@ -2503,7 +2404,7 @@ export default {
   overflow-y: auto;
   overscroll-behavior: contain;
   list-style: none;
-  scrollbar-color: rgba(230, 186, 104, 0.4) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.4) transparent;
 }
 .planner-itinerary li {
   position: relative;
@@ -2521,8 +2422,8 @@ export default {
   width: 1px;
   background: linear-gradient(
     to bottom,
-    rgba(230, 186, 104, 0.58),
-    rgba(230, 186, 104, 0.15)
+    rgba(var(--color-accent-rgb, 230, 186, 104), 0.58),
+    rgba(var(--color-accent-rgb, 230, 186, 104), 0.15)
   );
   content: "";
 }
@@ -2535,16 +2436,16 @@ export default {
   box-sizing: border-box;
   width: 2rem;
   height: 2rem;
-  border: 1px solid rgba(230, 186, 104, 0.58);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.58);
   border-radius: 50%;
-  color: #f3d18a;
-  background: #142528;
+  color: var(--color-accent-soft, #f3d18a);
+  background: var(--color-surface-raised, #142528);
   font-size: 0.62rem;
   font-weight: 800;
 }
 .planner-itinerary .is-endpoint .planner-itinerary-marker {
-  color: #102023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #102023);
+  background: var(--color-accent, #e6ba68);
 }
 .planner-itinerary li > div {
   display: grid;
@@ -2554,27 +2455,27 @@ export default {
   padding-top: 0.12rem;
 }
 .planner-itinerary li small {
-  color: #d1ae69;
+  color: var(--color-accent-soft, #d1ae69);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.53rem;
   font-weight: 800;
 }
 .planner-itinerary li strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.76rem;
   overflow-wrap: anywhere;
 }
 .planner-itinerary li span:not(.planner-itinerary-marker),
 .planner-itinerary li p {
   margin: 0;
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   font-size: 0.58rem;
   line-height: 1.4;
 }
 .planner-itinerary li p {
   margin-top: 0.18rem;
-  color: #c2cec9;
+  color: var(--color-text-muted, #c2cec9);
 }
 .planner-itinerary-actions,
 .planner-next-action-buttons,
@@ -2585,10 +2486,10 @@ export default {
 .planner-itinerary-card button {
   min-height: 2.75rem;
   padding: 0.5rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.42);
   border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2597,27 +2498,27 @@ export default {
 .planner-next-actions {
   align-items: flex-end;
   padding-top: 0.8rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 .planner-next-actions strong {
-  color: #dce8e4;
+  color: var(--color-text, #dce8e4);
   font-size: 0.68rem;
 }
 .planner-next-action-buttons button[aria-expanded="true"] {
-  border-color: rgba(230, 186, 104, 0.78);
-  color: #102023;
-  background: #e6ba68;
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.78);
+  color: var(--color-accent-contrast, #102023);
+  background: var(--color-accent, #e6ba68);
 }
 .planner-next-action-panel {
   padding: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 .planner-directions-default,
 .planner-directions-points label,
 .planner-route-modes label {
-  color: #cbd8d4;
+  color: var(--color-text-muted, #cbd8d4);
   font-size: 0.62rem;
 }
 .planner-directions-default {
@@ -2632,10 +2533,10 @@ export default {
   width: 100%;
   min-width: 0;
   padding: 0.58rem 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 0.6rem;
-  color: #edf7f2;
-  background: #111f22;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
   font: inherit;
 }
 .planner-directions-points {
@@ -2646,12 +2547,12 @@ export default {
   padding: 0.65rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   border-radius: 0.7rem;
 }
 .planner-directions-points legend {
   padding: 0 0.2rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.64rem;
 }
 .planner-directions-points label {
@@ -2674,12 +2575,12 @@ export default {
 }
 .planner-directions-points strong,
 .planner-route-modes strong {
-  color: #dce8e4;
+  color: var(--color-text, #dce8e4);
   font-size: 0.64rem;
 }
 .planner-directions-points small,
 .planner-route-modes small {
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   font-size: 0.56rem;
 }
 .planner-route-preview,
@@ -2687,27 +2588,27 @@ export default {
   display: grid;
   gap: 0.18rem;
   padding: 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.28);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.28);
   border-radius: 0.7rem;
-  background: rgba(230, 186, 104, 0.045);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.045);
 }
 .planner-route-preview span,
 .planner-coordinate-preview > span {
-  color: #d4b875;
+  color: var(--color-accent-soft, #d4b875);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.54rem;
   font-weight: 800;
 }
 .planner-route-preview strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.68rem;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
 .planner-route-preview small,
 .planner-coordinate-preview small {
-  color: #9bada7;
+  color: var(--color-text-muted, #9bada7);
   font-size: 0.56rem;
   line-height: 1.45;
 }
@@ -2716,7 +2617,7 @@ export default {
   gap: 0.45rem;
 }
 .planner-route-modes > p {
-  color: #dce8e4;
+  color: var(--color-text, #dce8e4);
 }
 .planner-route-modes label {
   display: grid;
@@ -2724,9 +2625,9 @@ export default {
   align-items: center;
   gap: 0.65rem;
   padding: 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.02);
 }
 .planner-route-boundary {
   display: grid;
@@ -2737,11 +2638,11 @@ export default {
   background: rgba(80, 125, 145, 0.08);
 }
 .planner-route-boundary strong {
-  color: #bddbe2;
+  color: var(--color-text, #bddbe2);
   font-size: 0.64rem;
 }
 .planner-route-boundary span {
-  color: #91a9ae;
+  color: var(--color-text-muted, #91a9ae);
   font-size: 0.57rem;
   line-height: 1.45;
 }
@@ -2755,10 +2656,10 @@ export default {
   width: 100%;
   min-height: 2.75rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 0.6rem;
-  color: #edf7f2;
-  background: #111f22;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
   font: inherit;
 }
 .planner-route-boundary a {
@@ -2767,7 +2668,7 @@ export default {
 .planner-route-boundary small {
   display: block;
   margin-top: 0.55rem;
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   font-size: 0.58rem;
   line-height: 1.5;
 }
@@ -2823,28 +2724,28 @@ export default {
 }
 .planner-block-heading h3 {
   margin: 0;
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-family: inherit;
   font-size: 0.9rem;
   line-height: 1.25;
 }
 .planner-heading strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.74rem;
 }
 .planner-heading b {
   flex: 0 0 auto;
   padding: 0.35rem 0.5rem;
-  border: 1px solid rgba(230, 186, 104, 0.34);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 999px;
-  color: #efc975;
-  background: rgba(230, 186, 104, 0.07);
+  color: var(--color-accent-soft, #efc975);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
   font-size: 0.6rem;
   white-space: nowrap;
 }
 .planner-heading:hover,
 .planner-heading:focus-visible {
-  background: rgba(230, 186, 104, 0.055);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.055);
   outline: none;
 }
 .planner-heading:focus-visible {
@@ -2854,23 +2755,10 @@ export default {
 .planner-delete-account button {
   min-height: 2.75rem;
   padding: 0.5rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.42);
   border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.08);
-  font: inherit;
-  font-size: 0.62rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-.planner-export {
-  justify-self: start;
-  min-height: 2.75rem;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.36);
-  border-radius: 0.65rem;
-  color: #e7cf9b;
-  background: transparent;
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2883,13 +2771,13 @@ export default {
 .planner-custom p,
 .planner-handoffs p,
 .planner-delete-account p {
-  color: #93a69f;
+  color: var(--color-text-muted, #93a69f);
   font-size: 0.66rem;
   line-height: 1.5;
 }
 .planner-retention-note {
   margin: -0.4rem 0 0;
-  color: #71857f;
+  color: var(--color-text-subtle, #71857f);
   font-size: 0.6rem;
 }
 .planner-error-block {
@@ -2898,18 +2786,18 @@ export default {
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.65rem 0.7rem;
-  border: 1px solid rgba(230, 168, 161, 0.3);
+  border: 1px solid rgba(var(--color-error-rgb, 230, 168, 161), 0.3);
   border-radius: 0.7rem;
-  background: rgba(179, 91, 82, 0.08);
+  background: rgba(var(--color-error-rgb, 179, 91, 82), 0.08);
 }
 .planner-error-block button {
   flex: 0 0 auto;
   min-height: 2.5rem;
   padding: 0.45rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.42);
   border-radius: 0.65rem;
-  color: #f4d38f;
-  background: rgba(230, 186, 104, 0.08);
+  color: var(--color-accent-soft, #f4d38f);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
@@ -2917,16 +2805,16 @@ export default {
 }
 .planner-error {
   margin: 0;
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
   font-size: 0.68rem;
 }
 .planner-block {
   display: grid;
   gap: 0.75rem;
   padding: 0.85rem;
-  border: 1px solid rgba(230, 186, 104, 0.22);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.22);
   border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 .planner-plan-dialog {
   position: fixed;
@@ -2938,23 +2826,23 @@ export default {
   max-height: 90vh;
   overflow-y: auto;
   transform: translateX(-50%);
-  border-color: rgba(230, 186, 104, 0.52);
-  background: #0d1b1e;
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.52);
+  background: var(--color-surface, #0d1b1e);
   box-shadow:
     0 0 0 100vmax rgba(2, 8, 9, 0.78),
     0 1.5rem 4rem rgba(0, 0, 0, 0.5);
 }
 .planner-plan-dialog:focus {
-  outline: 2px solid rgba(230, 186, 104, 0.62);
+  outline: 2px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.62);
   outline-offset: 0.2rem;
 }
 .planner-saved-wishes {
   display: grid;
   gap: 0.55rem;
   padding: 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   border-radius: 0.75rem;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.02);
 }
 .planner-wish-route-actions {
   display: grid;
@@ -2966,9 +2854,9 @@ export default {
   display: grid;
   gap: 0.65rem;
   padding: 0.75rem;
-  border: 1px solid rgba(230, 186, 104, 0.32);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
   border-radius: 0.8rem;
-  background: rgba(230, 186, 104, 0.045);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.045);
 }
 .planner-draft-route-heading {
   display: flex;
@@ -2983,7 +2871,7 @@ export default {
 }
 .planner-draft-route-heading small,
 .planner-draft-route li small {
-  color: #d4b875;
+  color: var(--color-accent-soft, #d4b875);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.52rem;
@@ -2991,11 +2879,11 @@ export default {
 }
 .planner-draft-route-heading strong,
 .planner-draft-route li strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.68rem;
 }
 .planner-draft-route-heading > span {
-  color: #9bada7;
+  color: var(--color-text-muted, #9bada7);
   font-size: 0.58rem;
 }
 .planner-draft-route ol {
@@ -3013,7 +2901,7 @@ export default {
   min-height: 2.6rem;
   padding: 0.35rem 0.45rem;
   border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.035);
 }
 .planner-draft-route li > b {
   display: grid;
@@ -3021,21 +2909,21 @@ export default {
   height: 1.8rem;
   place-items: center;
   border-radius: 50%;
-  color: #132023;
-  background: #e6ba68;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
   font-size: 0.58rem;
 }
 .planner-draft-route li.is-missing {
-  border: 1px dashed rgba(230, 186, 104, 0.3);
+  border: 1px dashed rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
   background: transparent;
 }
 .planner-draft-route li.is-missing > b {
-  color: #d4b875;
-  background: rgba(230, 186, 104, 0.1);
+  color: var(--color-accent-soft, #d4b875);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.1);
 }
 .planner-draft-route li > button {
   min-height: 2.1rem;
-  color: #d9a09a;
+  color: var(--color-error, #d9a09a);
 }
 .planner-finish-mode {
   grid-template-columns: minmax(0, 1fr) minmax(9rem, 0.8fr);
@@ -3043,21 +2931,21 @@ export default {
 }
 .planner-route-guidance {
   margin: 0;
-  color: #9bada7;
+  color: var(--color-text-muted, #9bada7);
   font-size: 0.61rem;
   line-height: 1.5;
 }
 .planner-review-trip {
   justify-self: start;
-  color: #132023 !important;
-  background: #e6ba68 !important;
+  color: var(--color-accent-contrast, #132023) !important;
+  background: var(--color-accent, #e6ba68) !important;
 }
 .planner-block-heading span {
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   font-size: 0.6rem;
 }
 .planner-place-search small {
-  color: #8fa29c;
+  color: var(--color-text-muted, #8fa29c);
   font-size: 0.58rem;
   line-height: 1.45;
 }
@@ -3067,18 +2955,18 @@ export default {
   justify-content: space-between;
   gap: 0.55rem;
   margin: 0;
-  color: #9aada7;
+  color: var(--color-text-muted, #9aada7);
   font-size: 0.64rem;
 }
 .planner-search-state.is-error {
-  color: #e6a8a1;
+  color: var(--color-error, #e6a8a1);
 }
 .planner-search-results {
   display: grid;
   gap: 0.45rem;
 }
 .planner-search-results > span {
-  color: #aabbb5;
+  color: var(--color-text-muted, #aabbb5);
   font-size: 0.64rem;
 }
 .planner-search-results ul {
@@ -3094,9 +2982,9 @@ export default {
   align-items: center;
   gap: 0.45rem;
   padding: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025);
 }
 .planner-search-result-copy {
   display: grid;
@@ -3104,17 +2992,17 @@ export default {
   min-width: 0;
 }
 .planner-search-results strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.7rem;
 }
 .planner-search-results small {
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   font-size: 0.56rem;
   font-weight: 500;
   overflow-wrap: anywhere;
 }
 .planner-search-results b {
-  color: #d4b875;
+  color: var(--color-accent-soft, #d4b875);
   font-size: 0.56rem;
   white-space: nowrap;
 }
@@ -3124,9 +3012,9 @@ export default {
   gap: 0.55rem;
   margin-top: 0.75rem;
   padding: 0.7rem;
-  border: 1px solid rgba(230, 190, 105, 0.35);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 190, 105), 0.35);
   border-radius: 0.7rem;
-  background: rgba(230, 190, 105, 0.06);
+  background: rgba(var(--color-accent-rgb, 230, 190, 105), 0.06);
 }
 .planner-search-selections p {
   display: grid;
@@ -3135,11 +3023,11 @@ export default {
 }
 .planner-search-selections span,
 .planner-search-selections > small {
-  color: #98a3a1;
+  color: var(--color-text-muted, #98a3a1);
   font-size: 0.68rem;
 }
 .planner-search-selections strong {
-  color: #f2cc7d;
+  color: var(--color-accent-soft, #f2cc7d);
   font-size: 0.82rem;
 }
 .planner-search-selections > small {
@@ -3172,7 +3060,7 @@ export default {
   grid-column: 1 / -1;
 }
 .planner-custom summary {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.68rem;
   cursor: pointer;
 }
@@ -3180,7 +3068,7 @@ export default {
 .planner-delete-account label {
   display: grid;
   gap: 0.22rem;
-  color: #cbd8d4;
+  color: var(--color-text-muted, #cbd8d4);
   font-size: 0.62rem;
 }
 .planner-block input,
@@ -3191,10 +3079,10 @@ export default {
   width: 100%;
   min-width: 0;
   padding: 0.58rem 0.65rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 0.6rem;
-  color: #edf7f2;
-  background: #111f22;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
   font: inherit;
 }
 .planner-wishes {
@@ -3205,7 +3093,7 @@ export default {
   padding: 0 0.2rem 0 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: rgba(230, 186, 104, 0.4) transparent;
+  scrollbar-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.4) transparent;
   list-style: none;
 }
 .planner-wishes li {
@@ -3214,7 +3102,7 @@ export default {
   gap: 0.5rem;
   padding: 0.65rem;
   border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.04);
 }
 .planner-wishes li > div:first-child,
 .planner-note,
@@ -3225,63 +3113,63 @@ export default {
   display: grid;
 }
 .planner-wishes strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.72rem;
 }
 .planner-wishes span,
 .planner-wishes small {
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   font-size: 0.58rem;
 }
 .planner-wishes small {
-  color: #d4b875;
+  color: var(--color-accent-soft, #d4b875);
 }
 .planner-row-actions {
   justify-content: flex-start;
   flex-wrap: wrap;
 }
 .planner-row-actions button:last-child {
-  color: #d9a09a;
+  color: var(--color-error, #d9a09a);
 }
 .planner-retention {
   display: grid;
   gap: 0.4rem;
   padding: 0.65rem;
-  border: 1px solid rgba(220, 149, 112, 0.4);
+  border: 1px solid rgba(var(--color-accent-rgb, 220, 149, 112), 0.4);
   border-radius: 0.7rem;
   background: rgba(130, 65, 45, 0.14);
 }
 .planner-retention strong {
-  color: #f0c193;
+  color: var(--color-accent-soft, #f0c193);
   font-size: 0.72rem;
 }
 .planner-retention span {
-  color: #c9b0a1;
+  color: var(--color-text-muted, #c9b0a1);
   font-size: 0.62rem;
 }
 .planner-direct-location {
   display: grid;
   gap: 0.18rem;
   padding: 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.3);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
   border-radius: 0.7rem;
-  background: rgba(230, 186, 104, 0.055);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.055);
 }
 .planner-direct-location > span {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.56rem;
   font-weight: 800;
 }
 .planner-direct-location strong {
-  color: #edf7f2;
+  color: var(--color-text, #edf7f2);
   font-size: 0.72rem;
 }
 .planner-direct-location small,
 .planner-direct-location p {
   margin: 0;
-  color: #91a49e;
+  color: var(--color-text-muted, #91a49e);
   font-size: 0.58rem;
   line-height: 1.45;
 }
@@ -3297,11 +3185,11 @@ export default {
   padding: 0.65rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   border-radius: 0.7rem;
 }
 .planner-block legend {
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.64rem;
 }
 .planner-block fieldset label,
@@ -3328,7 +3216,7 @@ export default {
   grid-template-columns: 1fr auto auto;
   align-items: center;
   gap: 0.35rem;
-  color: #dce8e4;
+  color: var(--color-text, #dce8e4);
   font-size: 0.66rem;
 }
 .planner-stop-order li > span {
@@ -3339,14 +3227,14 @@ export default {
   display: grid;
   gap: 0.3rem;
   padding: 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.24);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.24);
   border-radius: 0.7rem;
-  color: #aabbb5;
-  background: rgba(230, 186, 104, 0.045);
+  color: var(--color-text-muted, #aabbb5);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.045);
   font-size: 0.62rem;
 }
 .planner-save-requirements strong {
-  color: #efc975;
+  color: var(--color-accent-soft, #efc975);
 }
 .planner-save-requirements ul {
   display: grid;
@@ -3358,19 +3246,19 @@ export default {
   display: grid;
   gap: 0.55rem;
   padding-top: 0.7rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
 }
 
 .planner-mark-visited {
   margin-top: 1rem;
   padding: 0.9rem;
-  border: 1px solid rgba(230, 190, 105, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 190, 105), 0.42);
   border-radius: 0.8rem;
-  background: rgba(230, 190, 105, 0.05);
+  background: rgba(var(--color-accent-rgb, 230, 190, 105), 0.05);
 }
 
 .planner-mark-visited summary {
-  color: #f2cc7d;
+  color: var(--color-accent-soft, #f2cc7d);
   font-weight: 700;
   cursor: pointer;
 }
@@ -3378,18 +3266,18 @@ export default {
 .planner-mark-visited > p,
 .planner-public-warning {
   margin: 0.7rem 0;
-  color: #aeb9b7;
+  color: var(--color-text-muted, #aeb9b7);
   font-size: 0.82rem;
   line-height: 1.45;
 }
 
 .planner-public-warning {
-  color: #f2cc7d;
+  color: var(--color-accent-soft, #f2cc7d);
 }
 
 .planner-visit-stop {
   padding: 0.7rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
 }
 
 .planner-visit-stop:first-of-type {
@@ -3411,7 +3299,7 @@ export default {
 .planner-visit-stop small {
   display: block;
   margin-top: 0.2rem;
-  color: #8e9997;
+  color: var(--color-text-subtle, #8e9997);
 }
 
 .planner-visit-details {
@@ -3439,9 +3327,9 @@ export default {
   box-sizing: border-box;
   min-height: 2.75rem;
   padding: 0.55rem 0.65rem;
-  border: 1px solid rgba(230, 186, 104, 0.32);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
   border-radius: 0.6rem;
-  color: #f4d38f;
+  color: var(--color-accent-soft, #f4d38f);
   font-size: 0.64rem;
   line-height: 1.4;
   text-decoration: none;
@@ -3449,16 +3337,16 @@ export default {
 }
 .planner-map-legs a:focus-visible,
 .planner-map-legs a:hover {
-  border-color: rgba(230, 186, 104, 0.72);
-  background: rgba(230, 186, 104, 0.08);
+  border-color: rgba(var(--color-accent-rgb, 230, 186, 104), 0.72);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
 }
 .planner-delete-account {
   padding: 0.7rem;
-  border: 1px solid rgba(213, 135, 126, 0.25);
+  border: 1px solid rgba(var(--color-error-rgb, 213, 135, 126), 0.25);
   border-radius: 0.8rem;
 }
 .planner-delete-account summary {
-  color: #d9a09a;
+  color: var(--color-error, #d9a09a);
   font-size: 0.68rem;
   cursor: pointer;
 }
@@ -3466,8 +3354,8 @@ export default {
   margin: 0.7rem 0;
 }
 .planner-delete-account button {
-  color: #f3c1bb;
-  border-color: rgba(213, 135, 126, 0.45);
+  color: var(--color-error, #f3c1bb);
+  border-color: rgba(var(--color-error-rgb, 213, 135, 126), 0.45);
 }
 .planner-block button:disabled,
 .planner-itinerary-card button:disabled,
@@ -3481,15 +3369,15 @@ export default {
 .planner-export:focus-visible,
 .planner-custom summary:focus-visible,
 .planner-delete-account summary:focus-visible {
-  outline: 2px solid #f4d38f;
+  outline: 2px solid var(--color-focus, #f4d38f);
   outline-offset: 3px;
 }
 .planner-announcement {
   margin: 0;
   padding: 0.65rem 0.8rem;
-  border-top: 1px solid rgba(230, 186, 104, 0.22);
-  color: #cbdad5;
-  background: rgba(230, 186, 104, 0.055);
+  border-top: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.22);
+  color: var(--color-text-muted, #cbdad5);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.055);
   font-size: 0.64rem;
   line-height: 1.5;
 }

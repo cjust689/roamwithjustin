@@ -86,7 +86,7 @@ export default {
   position: absolute;
   inset: 0;
   border: 0;
-  background: rgba(2, 5, 8, 0.68);
+  background: rgba(var(--color-page-rgb, 2, 5, 8), 0.68);
   backdrop-filter: blur(8px);
 }
 
@@ -98,9 +98,9 @@ export default {
   width: min(420px, 92vw);
   overflow-y: auto;
   padding: 1.5rem;
-  background: #0c1115;
+  background: var(--color-page, #0c1115);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.38);
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .atlas-saved header,
@@ -123,7 +123,7 @@ export default {
 }
 
 .atlas-saved header span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -136,12 +136,12 @@ export default {
 }
 
 .atlas-saved header button {
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 50%;
   width: 2.5rem;
   height: 2.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.06);
+  color: var(--color-text, #fff);
   font-size: 1.6rem;
   cursor: pointer;
 }
@@ -152,14 +152,14 @@ export default {
 
 .atlas-saved h3 {
   margin: 0 0 0.9rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.74rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .atlas-saved-empty {
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
   line-height: 1.6;
 }
 
@@ -171,7 +171,7 @@ export default {
   border-radius: 14px;
   padding: 0.55rem;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   text-align: left;
   cursor: pointer;
 }
@@ -180,7 +180,7 @@ export default {
 .atlas-saved-card:focus-visible,
 .atlas-recent:hover,
 .atlas-recent:focus-visible {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.07);
 }
 
 .atlas-saved-card img,
@@ -199,10 +199,10 @@ export default {
   background:
     radial-gradient(
       circle at 30% 25%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 38%
     ),
-    #142128;
+    var(--color-surface-raised, #142128);
 }
 
 .atlas-saved-copy {
@@ -217,10 +217,10 @@ export default {
   justify-content: space-between;
   width: 100%;
   border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   padding: 0.9rem 0.6rem;
   background: transparent;
-  color: #fff;
+  color: var(--color-text, #fff);
   cursor: pointer;
 }
 

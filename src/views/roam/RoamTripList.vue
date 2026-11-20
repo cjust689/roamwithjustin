@@ -78,11 +78,11 @@ export default {
   background:
     radial-gradient(
       circle at 84% 4%,
-      rgba(246, 189, 96, 0.09),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.09),
       transparent 30%
     ),
-    #0b1114;
-  color: #fff;
+    var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -96,7 +96,7 @@ export default {
 
 .story-status,
 .story-body > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -115,7 +115,7 @@ export default {
 
 .intro-copy p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 0.94rem !important;
   font-weight: 400;
   line-height: 1.7;
@@ -124,8 +124,8 @@ export default {
 .intro-copy a {
   display: inline-block;
   margin-top: 1.15rem;
-  border-bottom: 1px solid rgba(246, 189, 96, 0.6);
-  color: #f8d79f;
+  border-bottom: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.6);
+  color: var(--color-accent-soft, #f8d79f);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.04em;
@@ -141,9 +141,9 @@ export default {
 
 .story-card {
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 26px;
-  background: #11191d;
+  background: var(--color-surface, #11191d);
   box-shadow: 0 22px 70px rgba(0, 0, 0, 0.22);
   transition:
     transform 300ms ease,
@@ -151,7 +151,7 @@ export default {
 }
 
 .story-card:hover {
-  border-color: rgba(246, 189, 96, 0.42);
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   transform: translateY(-5px);
 }
 
@@ -179,10 +179,14 @@ export default {
   background:
     radial-gradient(
       circle at 72% 24%,
-      rgba(246, 189, 96, 0.2),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.2),
       transparent 24%
     ),
-    linear-gradient(145deg, #1a2b31, #0b1114 72%);
+    linear-gradient(
+      145deg,
+      var(--color-surface-raised, #1a2b31),
+      var(--color-page, #0b1114) 72%
+    );
 }
 
 .story-card:hover .story-image img {
@@ -190,18 +194,22 @@ export default {
 }
 
 .story-shade {
-  background: linear-gradient(180deg, transparent 45%, rgba(5, 9, 11, 0.8));
+  background: linear-gradient(
+    180deg,
+    transparent 45%,
+    rgba(var(--color-page-rgb, 5, 9, 11), 0.8)
+  );
 }
 
 .story-status {
   position: absolute;
   right: 1.1rem;
   bottom: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.18);
   border-radius: 999px;
   padding: 0.45rem 0.65rem;
-  background: rgba(7, 11, 14, 0.68);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.68);
+  color: var(--color-text, #fff);
   letter-spacing: 0.08em;
   backdrop-filter: blur(10px);
 }
@@ -223,7 +231,7 @@ export default {
   display: -webkit-box;
   overflow: hidden;
   margin: 0.9rem 0 0;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
   font-size: 0.88rem !important;
   font-weight: 400;
   line-height: 1.65;
@@ -246,13 +254,13 @@ export default {
 }
 
 .story-primary {
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .story-primary b {
   display: inline-block;
   margin-left: 0.25rem;
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   transition: transform 180ms ease;
 }
 
@@ -262,15 +270,20 @@ export default {
 }
 
 .story-atlas {
-  border: 1px solid rgba(246, 189, 96, 0.42);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.42);
   border-radius: 999px;
   padding: 0.6rem 0.75rem;
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
 }
 
 .story-card.is-coming-soon {
   background:
-    linear-gradient(145deg, rgba(246, 189, 96, 0.045), transparent 45%), #11191d;
+    linear-gradient(
+      145deg,
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.045),
+      transparent 45%
+    ),
+    var(--color-surface, #11191d);
 }
 
 @media (max-width: 760px) {

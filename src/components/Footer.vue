@@ -42,9 +42,9 @@ export default {
 <style scoped>
 .site-footer {
   flex-shrink: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background: #070b0e;
-  color: #fff;
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
+  background: var(--color-page, #070b0e);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -62,7 +62,7 @@ export default {
 }
 
 .footer-message span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.16em;
@@ -72,7 +72,7 @@ export default {
 .footer-message p {
   max-width: 720px;
   margin: 0.75rem 0 0;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(var(--color-text-rgb, 255, 255, 255), 0.86);
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(1.45rem, 3vw, 2.65rem) !important;
   font-weight: 400;
@@ -86,9 +86,9 @@ export default {
 }
 
 .footer-links a {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   padding: 0.7rem 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: 0.86rem;
   font-weight: 700;
   text-decoration: none;
@@ -98,15 +98,15 @@ export default {
 .footer-links a:focus-visible,
 .footer-meta a:hover,
 .footer-meta a:focus-visible {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
 }
 
 .footer-meta {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.09);
   padding: 1rem 0 1.25rem;
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.42));
   font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
