@@ -658,7 +658,8 @@ export async function handleRequest(
     (isReconciliation && request.method !== "POST") ||
     (isMyProfile && !["GET", "PATCH", "DELETE"].includes(request.method)) ||
     (isMyAtlasState && request.method !== "GET") ||
-    (isMyAtlasImage && !["GET", "POST", "DELETE"].includes(request.method)) ||
+    (isMyAtlasImage &&
+      !["GET", "POST", "PATCH", "DELETE"].includes(request.method)) ||
     (isMyPins && !["GET", "POST"].includes(request.method)) ||
     (isMyPin && !["PATCH", "DELETE"].includes(request.method)) ||
     (isMyWishes && !["GET", "POST"].includes(request.method)) ||

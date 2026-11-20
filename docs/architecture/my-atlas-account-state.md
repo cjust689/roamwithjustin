@@ -73,6 +73,7 @@ verification:
     - Staging Worker 1113afaf-4600-4777-b92d-b2eb40e43826 deployed explicit favorite-image visibility, gated public image delivery, and the revised privacy version; remote health, PATCH preflight, and closed unknown-handle image checks passed
     - Pull requests 196 and 197 passed validation runs 44657690886 and 44658215573, merged through protected develop and main as 03a188025480129e57156d75243bc70f3a67d229 and d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246, and develop validation run 44657932409 succeeded
     - Pages run 44658409109 deployed the separate sharing workflows and public favorite image presentation; live chunks 371.07c466f0.js and 917.6e99172f.js contained their exact release markers
+    - Staging Worker version 242ef647-283c-415d-99d5-493e4be38313 corrected the favorite-image PATCH route gate; a remote unauthenticated PATCH returned 401 instead of the prior 405
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
@@ -196,6 +197,12 @@ ID is resolved only inside the Durable Object selected from the caller's own
 registry assignment. A second active owner can pin the same Place but receives
 a distinct owner-qualified pin ID and cannot read, update, export, or delete the
 first owner's pin. An unregistered verified identity resolves to no account.
+
+The account-route method gate explicitly admits all four implemented
+favorite-image methods. A boundary regression test sends an authenticated
+`PATCH /v1/me/atlas-image`, proves it reaches the visibility service with the
+normalized revision and idempotency key, and retains HTTP 405 for unsupported
+methods.
 
 Owner routes do not pass through the public catalog and shared Atlas weighted
 limiter. A public search 429 therefore cannot directly prevent
