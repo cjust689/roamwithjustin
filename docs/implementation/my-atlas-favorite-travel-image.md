@@ -57,6 +57,8 @@ verification:
     - Pull request 197 passed production validation run 44658215573 and merged to main as d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246
     - Pages run 44658409109 deployed the production merge successfully
     - Live chunks 371.07c466f0.js and 917.6e99172f.js returned 200 and together contained the Favorite travel image, View full image, Show on public profile, Share saved trip, and Share Visited Atlas markers
+    - npm run my-atlas:test passed after adding an authenticated Worker route regression for PATCH /v1/me/atlas-image
+    - Staging Worker version 242ef647-283c-415d-99d5-493e4be38313 deployed the corrected route gate; remote health returned 200 and an unauthenticated allowed-origin PATCH returned 401 instead of 405
     - Authenticated visibility mutation and real public profile image acceptance remain externally unverified
 ---
 
@@ -76,6 +78,9 @@ not changed by this media scope.
 
 - [x] Add authenticated owner-only `GET`, `POST`, `PATCH`, and `DELETE`
       `/v1/me/atlas-image` boundary.
+- [x] Admit `PATCH` through the account-route method gate and cover the actual
+      Worker request boundary so the public visibility mutation cannot regress
+      to an early HTTP 405.
 - [x] Accept JPEG, PNG, and WebP inputs up to 10 MiB, reject encoded type
       mismatches and animation, and cap decoded source images at 36 megapixels.
 - [x] Use the Cloudflare Images binding to apply orientation, crop to 1200 by
@@ -137,6 +142,9 @@ not changed by this media scope.
 - [x] Deploy the public image route and explicit visibility mutation to staging
       and verify its health, allowed PATCH preflight, and closed unknown-handle
       response.
+- [x] Deploy staging Worker version
+      `242ef647-283c-415d-99d5-493e4be38313` with the corrected visibility
+      method gate and verify an unauthenticated PATCH advances to HTTP 401.
 - [ ] Verify with a disposable authenticated account that private profiles,
       empty profiles, and images kept private all return the same public not
       found behavior.
