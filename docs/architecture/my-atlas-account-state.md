@@ -71,6 +71,8 @@ verification:
     - npm run my-atlas:test verified favorite-image signature, animation, byte, pixel, square WebP, owner isolation, immutable replacement, private projection, removal, and account-deletion contracts
     - Staging Worker 8fbb0a9e-76bc-4be2-9a53-637be432db5c deployed the private R2, Images, image rate-limit, and November 19 privacy-version configuration; remote health, unauthenticated denial, foreign-origin denial, and allowed preflight checks passed
     - Staging Worker 1113afaf-4600-4777-b92d-b2eb40e43826 deployed explicit favorite-image visibility, gated public image delivery, and the revised privacy version; remote health, PATCH preflight, and closed unknown-handle image checks passed
+    - Pull requests 196 and 197 passed validation runs 44657690886 and 44658215573, merged through protected develop and main as 03a188025480129e57156d75243bc70f3a67d229 and d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246, and develop validation run 44657932409 succeeded
+    - Pages run 44658409109 deployed the separate sharing workflows and public favorite image presentation; live chunks 371.07c466f0.js and 917.6e99172f.js contained their exact release markers
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
