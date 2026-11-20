@@ -90,7 +90,8 @@ verification:
       metadata; verify missing-location upload/publication guards and public
       image/dialog labels. Test the actual export caption drawing function,
       including bounded wrapping and Unicode-safe truncation.
-- [ ] Deploy the compatible Worker and frontend and record release evidence.
+- [x] Deploy the compatible Worker API and verify its live boundaries.
+- [x] Promote the frontend through protected develop and main pull requests.
 
 The implementation uses `shared/my-atlas-image-location.mjs`, the existing
 account image contracts/service and Durable Object, and the existing image UI
@@ -103,6 +104,31 @@ and the staging Worker dry run. The full production build passed with the same
 source and a local `parallel: false` override after the default local compiler
 worker pool stalled. This override is not a repository configuration change.
 Browser checks used synthetic records and did not modify live owner profiles.
+
+Release evidence for this follow-up:
+
+- Pull request 218 passed validation run 44796421213 and merged to develop as
+  `46c59ffac2528d6378093d5357415e03a202f605`. Develop push validation run
+  44796779935 succeeded.
+- Pull request 219 passed production validation run 44796790271 and merged to
+  main as `9a9138eaf93a374e748929fb917c03cd130cde9b`.
+- Pages run 44797186548 successfully deployed that exact main merge. Live
+  `/my-atlas`, `/my-atlas/explore`, and the closed unknown-profile view rendered
+  without document overflow at 390 pixels. Explore exposed Refresh Atlases.
+  Loaded production scripts contained Photo location (required), Save photo
+  location, X-Atlas-Image-Location, Instagram handle, the fixed Instagram URL,
+  Refresh Atlases, and the mobile action-feedback component markers.
+- The existing production-used staging Worker deployed version
+  `be1ba21b-f0a4-4017-86f8-1c53bfd16c38`. Live checks returned 200 health,
+  204 upload preflight with `x-atlas-image-location` allowed, 401 for an
+  unauthenticated image PATCH, and 404 for an unknown public image.
+- Final local mobile review verified a 120-character unbroken location label
+  wraps inside the public image action at 320 pixels. Location spans no longer
+  inherit the profile's place-count badge styles.
+
+Real authenticated remote uploads, location edits, and image transformation
+acceptance remain externally unverified. No live profile was modified for
+these release checks.
 
 The first traveler image release uses one optional favorite travel
 image for the whole Atlas. It does not attach images to visited pins. The image

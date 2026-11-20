@@ -113,7 +113,9 @@ false success, and preservation of an acknowledged write after refresh
 failure. Keyboard Enter dismissed the visible notification. Separate method
 tests verify eight-second success/draft expiry and persistent busy/error/
 warning states. No real user profile was mutated. Hosted authenticated
-acceptance and deployment of this follow-up remain unverified.
+acceptance remains unverified. This follow-up was promoted through protected
+pull requests 218 and 219 together with the profile and image-location changes;
+exact release evidence is recorded in `my-atlas-favorite-travel-image.md`.
 
 ## Audit of actual behavior
 
