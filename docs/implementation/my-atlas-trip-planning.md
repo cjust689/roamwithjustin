@@ -41,6 +41,9 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Pull request 196 passed validation run 44657690886 and merged the weak ETag recovery plus separate saved trip and Visited Atlas sharing workflows to develop as 03a188025480129e57156d75243bc70f3a67d229; develop validation run 44657932409 then succeeded
+    - Pull request 197 passed production validation run 44658215573 and merged to main as d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246; Pages run 44658409109 deployed it successfully
+    - Live chunk 917.6e99172f.js returned 200 with Share saved trip, Share Visited Atlas, and Show on public profile together
     - Source assertions and the production compile verify that Share saved trip remains visible beside a collapsed saved plan, uses the existing private-field-filtered read only snapshot, and reports copy success or failure outside the expanded planner; the separate owner workflow is named Share Visited Atlas
     - Authenticated local Chrome against staging observed an idempotent POST /v1/me/bucket-list return HTTP 200, a complete Wish body, and W/"rev-9"; the normalized local client retained revision 9, refreshed the atomic planning snapshot at W/"rev-10", and showed the new destination without a planner error
     - npm run my-atlas:test passed after client coverage was expanded to accept the observed weak revision ETag on a valid idempotent wishlist response
