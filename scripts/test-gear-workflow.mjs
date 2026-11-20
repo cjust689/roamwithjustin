@@ -82,6 +82,35 @@ try {
   assert.equal(workflow.recordSource, recordSource)
   assert.equal(workflow.image.source, imageSource)
 
+  const remoteWorkflowSource = path.join(
+    temporaryDirectory,
+    "remote-workflow.json"
+  )
+  await fs.promises.writeFile(
+    remoteWorkflowSource,
+    JSON.stringify({
+      schemaVersion: 1,
+      gearId: "creator-camera-bag",
+      journeyId: "test-journey",
+      recordSource: "./product.json",
+      image: {
+        source: "https://images.example.com/product.jpg",
+        sourceHost: "images.example.com",
+        output: "./ready",
+        rightsOwner: "roam-with-justin",
+        rightsStatus: "owned",
+        rightsReviewed: true,
+        alt: "Creator camera bag on a table",
+      },
+    })
+  )
+  const remoteWorkflow = await loadWorkflow(remoteWorkflowSource)
+  assert.equal(
+    remoteWorkflow.image.source,
+    "https://images.example.com/product.jpg"
+  )
+  assert.equal(remoteWorkflow.image.sourceHost, "images.example.com")
+
   const calls = []
   const packageDirectory = path.join(temporaryDirectory, "ready", "package")
   const dependencies = {

@@ -28,9 +28,11 @@ code_paths:
   - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-remote-image.mjs
   - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-remote-image.mjs
   - scripts/test-gear-image-upload.mjs
   - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
@@ -94,12 +96,16 @@ The generated Gear and Usage arrays are currently empty. The CLI and selector
 path are implemented and tested, but no example product from a planning brief
 was treated as confirmed production input.
 
-The local `gear:prepare` path now accepts one reviewed creator-owned JPEG or
-PNG without requiring a Journey. It reuses the media pipeline's Sharp
-normalization primitive, strips private source metadata, and produces
-deterministic 320, 640, and 960 pixel WebP derivatives plus a Gear-specific
-manifest. Dry run writes nothing, apply is atomic, and an identical rerun
-verifies the package as unchanged.
+The trusted `gear:prepare` path now accepts one reviewed creator-owned JPEG or
+PNG without requiring a Journey. The source can be a local file or an
+explicitly permitted HTTPS URL paired with one exact approved hostname. Remote
+intake resolves and pins publicly routable DNS addresses for every request,
+allows at most three same-host redirects, and enforces HTTPS, timeout, response
+size, content type, byte signature, decoded format, and pixel limits. It
+reuses the media pipeline's Sharp normalization primitive, strips private
+source metadata, and produces deterministic 320, 640, and 960 pixel WebP
+derivatives plus a Gear-specific manifest. Dry run writes no files, apply is
+atomic, and an identical rerun verifies the package as unchanged.
 
 `gear:upload` revalidates that manifest and every local WebP before adapting
 the derivatives into the existing authenticated immutable upload transport.
@@ -122,7 +128,9 @@ build failure restores both generated files.
 
 `gear:workflow` now composes record ingestion and the complete image path from
 one versioned local JSON file. A no-write preview validates the canonical
-record and renders image derivatives in memory. The first apply checkpoint
+record and renders image derivatives in memory. A remote source causes that
+preview to perform the same bounded HTTPS read, but it still writes nothing.
+The first apply checkpoint
 creates the deterministic local package for review. A second explicitly
 approved checkpoint accepts only that existing package, performs authenticated
 immutable upload, verifies the receipt, and invokes the existing canonical
@@ -155,9 +163,13 @@ contract and commands.
 - Gear links can render only on their explicit public surfaces. Affiliate
   links require a canonical affiliate Partner and a permitted destination
   host. Ordinary links remain noncommissionable and use `trackingMode: none`.
-- Local product-image preparation, receipt-backed R2 upload, and canonical
+- Local or authorized remote product-image preparation, receipt-backed R2 upload, and canonical
   Gear image publication are Journey independent and create no fake Journey
   placement.
+- Remote intake remains a trusted publisher operation. It requires reviewed
+  creator-owned rights and an exact approved source host. It does not scrape a
+  retailer, infer permission from public availability, hotlink in the browser,
+  or broaden the canonical rights contract.
 - Worker source accepts Gear WebP, but the external Cloudflare deployment and
   a first real Gear object upload remain unverified.
 - Product identity, usage, links, notes, rights, and the rendered card still

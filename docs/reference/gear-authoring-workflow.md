@@ -18,6 +18,7 @@ code_paths:
   - scripts/test-gear-workflow.mjs
   - scripts/ingest-gear.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-remote-image.mjs
   - scripts/upload-media.js
   - scripts/publish-gear-image.mjs
 verification:
@@ -29,15 +30,19 @@ verification:
 
 # Gear authoring workflow
 
-`gear:workflow` gives one product record and one creator-owned local image a
-single replayable authoring path. It composes the existing Gear ingestor,
+`gear:workflow` gives one product record and one reviewed creator-owned image a
+single replayable authoring path. The image can be a local JPEG or PNG, or an
+explicitly permitted HTTPS source paired with one exact approved hostname. It
+composes the existing Gear ingestor,
 deterministic image preparer, authenticated immutable uploader, and canonical
 image publisher. It does not introduce another Gear registry or bypass any
 existing validation.
 
 The workflow deliberately has two apply checkpoints. `prepare` creates the
-local product record and deterministic image package without a network
-request. The operator reviews the generated WebP derivatives and card context.
+local product record and deterministic image package. A local source performs
+no network request. A remote source performs only the bounded HTTPS intake
+described in the Gear image preparation guide. The operator reviews the
+generated WebP derivatives and card context.
 `publish` accepts only that already prepared package, requires explicit card
 approval, uploads immutable objects, verifies the checksum receipt, and runs
 the canonical publication transaction.
@@ -69,6 +74,16 @@ The example is a contract template, not production inventory. Exact product
 identity, Journey usage, firsthand notes, image rights, and merchant links
 must come from the owner.
 
+For an authorized remote source, replace the local `source` and add the exact
+approved hostname:
+
+```json
+{
+  "source": "https://images.example.com/owned/product.jpg",
+  "sourceHost": "images.example.com"
+}
+```
+
 ## Preview
 
 ```bash
@@ -76,8 +91,9 @@ npm run gear:workflow -- --source ./gear-inbox/product-workflow.json --dry-run -
 ```
 
 Preview runs canonical record planning and renders every derivative in memory.
-It writes nothing, makes no network request, and reports that upload and
-publication remain gated.
+It writes nothing and reports that upload and publication remain gated. A
+remote source performs its bounded HTTPS download during preview. A local
+source makes no network request.
 
 ## Prepare checkpoint
 
@@ -106,9 +122,11 @@ record is restored and immutable remote objects are retained for a safe rerun.
 
 ## Boundaries
 
-- Local image intake remains JPEG or PNG with reviewed creator-owned rights.
-- Remote image downloads, automatic affiliate tagging, AI research, Git
-  commits, branch promotion, and deployment remain outside this command.
+- Local and authorized remote intake remain JPEG or PNG with reviewed
+  creator-owned rights. Remote intake requires one exact approved HTTPS host
+  and does not scrape, hotlink, or infer permission.
+- Automatic affiliate tagging, AI research, Git commits, branch promotion,
+  and deployment remain outside this command.
 - Upload credentials are accepted only through private environment variables.
 - The first real publication still needs exact owner inputs and an externally
   deployed upload Worker.

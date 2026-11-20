@@ -27,9 +27,11 @@ code_paths:
   - scripts/upload-media.js
   - scripts/lib/gear-ingestion.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-remote-image.mjs
   - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-remote-image.mjs
   - scripts/test-gear-image-upload.mjs
   - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
@@ -68,6 +70,7 @@ verification:
     - production image-workflow merges 98211b8fa5223ba2617755ef01ed75ea3fd36e35, 87ce942cf443101c1f7dcfff7fb23ae26c3c14c1, and f84cc34f8ba04ef09dd049385ca8f7eafc8f56a2
     - live https://roamwithjustin.com/gear rendered and bundle markers verified 2026-11-18
     - node scripts/test-gear-workflow.mjs
+    - node scripts/test-gear-remote-image.mjs
 ---
 
 # Gear publishing implementation
@@ -109,6 +112,9 @@ with an original image into a repeatable publishing workflow.
 - [x] Workflow rollback restores the prior canonical Gear file when record,
   preparation, upload, or image publication fails. Immutable uploaded objects
   remain available for a safe rerun.
+- [x] Authorized remote image intake requires an HTTPS URL, one exact manually
+  approved host, reviewed creator-owned rights, public DNS resolution, pinned
+  connections, same-host redirects, and bounded image bytes and pixels.
 
 ## Production release, 2026-11-18
 
@@ -169,7 +175,8 @@ with an original image into a repeatable publishing workflow.
 ## Authoring orchestration, 2026-11-19
 
 - [x] Accept one versioned JSON workflow that binds one exact Gear ID,
-  canonical Journey, existing record source, and reviewed local image input.
+  canonical Journey, existing record source, and reviewed local or authorized
+  remote image input.
 - [x] Resolve workflow paths relative to the workflow file so the command is
   replayable from any working directory.
 - [x] Repeat record and image preview before either apply checkpoint.
@@ -178,12 +185,16 @@ with an original image into a repeatable publishing workflow.
 - [x] Reuse the existing Gear ingestor, image preparation, upload receipt, and
   canonical publication implementations instead of copying their contracts.
 - [x] Keep credentials in private environment variables and keep Git, branch
-  promotion, deployment, remote image intake, and AI outside the command.
+  promotion, deployment, and AI outside the command.
 
 ## Journey-independent image phase
 
 - [x] Add `gear:prepare --dry-run` for a local JPEG or PNG with explicit
   creator-owned rights.
+- [x] Add explicitly permitted HTTPS intake with exact-host approval, public
+  address pinning, redirect and timeout limits, byte and pixel ceilings, MIME
+  and image-signature checks, and no source URL or query stored in the
+  manifest.
 - [x] Reuse the current Sharp normalization and metadata-stripping primitives.
 - [x] Produce deterministic product derivatives and a scoped manifest without
   a fake Journey, Visit, Place, or media placement.
@@ -199,10 +210,9 @@ with an original image into a repeatable publishing workflow.
 - [x] Make receipt-backed canonical publication idempotent and preserve the
   prior record if validation or build fails.
 
-Remote image download, automatic Amazon tagging, additional merchant adapters,
-product detail routes, and AI research remain outside the next slice. Local
-image preparation does not make a product public. The generated Gear registry
-remains empty until real owner input satisfies the gate above and the
-first reviewed product is deliberately published. Worker source accepts the
-Gear WebP contract, but its external Cloudflare deployment and the first real
-Gear upload remain unverified.
+Automatic Amazon tagging, additional merchant adapters, product detail routes,
+and AI research remain outside the next slice. Image preparation does not make
+a product public. The generated Gear registry remains empty until real owner
+input satisfies the gate above and the first reviewed product is deliberately
+published. Worker source accepts the Gear WebP contract, but its external
+Cloudflare deployment and the first real Gear upload remain unverified.

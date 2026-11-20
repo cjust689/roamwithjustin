@@ -19,9 +19,11 @@ code_paths:
   - scripts/publish-gear-image.mjs
   - scripts/upload-media.js
   - scripts/lib/gear-image-preparation.mjs
+  - scripts/lib/gear-remote-image.mjs
   - scripts/lib/gear-image-publication.mjs
   - scripts/lib/image-normalization.js
   - scripts/test-gear-image-preparation.mjs
+  - scripts/test-gear-remote-image.mjs
   - scripts/test-gear-image-upload.mjs
   - scripts/test-gear-image-publication.mjs
   - workers/media-upload/src/index.mjs
@@ -41,10 +43,10 @@ verification:
 
 `gear:prepare` creates a deterministic local product-image package without a
 fake Journey, Visit, Place, or Media placement. It accepts one local JPEG or
-PNG only after the operator explicitly confirms reviewed creator-owned rights.
-It never downloads a remote image, edits the canonical Gear registry, commits,
-pushes, or deploys. A separate `gear:upload` command can upload an applied
-package after local review.
+PNG, or one explicitly permitted HTTPS source, only after the operator
+confirms reviewed creator-owned rights. It never edits the canonical Gear
+registry, commits, pushes, or deploys. A separate `gear:upload` command can
+upload an applied package after local review.
 
 The root-level `gear-inbox/` and `gear-ready/` directories are ignored so
 private source photographs and prepared local packages are not staged by
@@ -61,6 +63,29 @@ checks the extension against the decoded format, enforces a 50 MiB and 80
 megapixel ceiling, rejects animated or multi-page input, verifies that private
 EXIF, IPTC, and XMP metadata are absent from the outputs, and reports the exact
 package path and future object-key prefix. It writes nothing.
+
+## Authorized HTTPS source
+
+Remote intake is available only in the trusted local publisher. It is not a
+retailer scraper and public availability is not evidence of image rights. The
+operator must supply the exact approved hostname separately from the URL.
+
+```bash
+npm run gear:prepare -- --gear-id camera-accessory --source "https://images.example.com/owned/camera-accessory.jpg" --source-host images.example.com --output ./gear-ready --rights-owner roam-with-justin --rights-status owned --rights-reviewed --alt "Camera accessory on a dark background" --dry-run
+```
+
+The request must use HTTPS on the standard port and cannot contain URL
+credentials. Every request resolves the exact approved hostname, rejects any
+private, loopback, link-local, multicast, or reserved address, and pins the
+connection to the validated result. At most three redirects are allowed and
+each redirect must retain the exact approved hostname. Each request has a 15
+second timeout. Declared and streamed bytes share the 50 MiB ceiling. Only
+JPEG and PNG content types and signatures are accepted before Sharp repeats
+decoded format, single-page, and 80 megapixel checks.
+
+A remote dry run performs this bounded network read but writes no files. The
+manifest stores the approved hostname and a safe source filename. It does not
+store the source URL, query parameters, credentials, or response metadata.
 
 ## Apply
 
@@ -94,8 +119,9 @@ content hash. It contains:
   rights, alt text, processing policy, derivative checksums, and future
   immutable object keys below `images/gear/<gear-id>/<content-hash>/`.
 
-The manifest records only the source filename, never its absolute local path
-or retained source metadata.
+The manifest records only the safe source filename and, for remote intake, the
+approved hostname. It never records an absolute local path, remote URL, query
+parameters, or retained source metadata.
 
 ## Upload dry run
 
