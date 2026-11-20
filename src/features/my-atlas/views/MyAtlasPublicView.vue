@@ -45,9 +45,11 @@
               @click="openFavoriteImage"
             >
               <strong>Favorite travel image</strong>
-              <span v-if="atlas.favoriteImage.location">{{
-                atlas.favoriteImage.location
-              }}</span>
+              <span
+                v-if="atlas.favoriteImage.location"
+                class="my-atlas-public-favorite-location"
+                >{{ atlas.favoriteImage.location }}</span
+              >
               <span>View full image</span>
             </button>
           </div>
@@ -630,7 +632,8 @@ export default {
 }
 
 .my-atlas-public-favorite-action {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
   min-height: 2.75rem;
   align-items: center;
@@ -664,6 +667,18 @@ export default {
 .my-atlas-public-favorite-action:focus-visible {
   border-color: var(--color-accent, #e6ba68);
   outline: none;
+}
+
+.my-atlas-public-favorite-action > span:last-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.my-atlas-public-favorite-location {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  overflow-wrap: anywhere;
+  text-align: left;
 }
 
 .my-atlas-public-favorite-action:focus-visible {
@@ -722,6 +737,7 @@ export default {
 }
 
 .my-atlas-public-image-dialog p {
+  overflow-wrap: anywhere;
   margin: 0;
   color: var(--color-text-muted, #b9cac4);
   font-size: 0.7rem;
