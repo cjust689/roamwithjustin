@@ -104,6 +104,16 @@ load the expected SVG, retain the existing accessible home-link names and
 stay within the viewport. The masters and generated exports are included in
 the release; local QA state and the owner's editable artwork are excluded.
 
+## Release progress
+
+Feature branch `feature/my-atlas-trip-foundation-and-travel-tools` contains
+registration correction commit `a3622c2` and theme/branding/travel-tools commit
+`092a13a`. Pull request 214 targets develop and is awaiting the required
+validation check. The registration correction was separately deployed to the
+existing staging API as `b5b3674c-6219-4053-b024-7cb65cd4e539`; its health
+endpoint returned HTTP 200. This does not establish a new live registration
+or a frontend Pages deployment. No account wipe or migration was performed.
+
 ## Theme verification
 
 `npm run theme:test` passes. It executes the actual head bootstrap in isolated
