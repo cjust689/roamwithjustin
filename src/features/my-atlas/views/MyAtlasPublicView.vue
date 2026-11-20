@@ -11,7 +11,7 @@
     <section class="my-atlas-public-panel" aria-labelledby="public-atlas-title">
       <header>
         <a href="/" aria-label="Roam With Justin home">RWJ</a>
-        <span>Shared Atlas</span>
+        <router-link to="/my-atlas/explore">Explore Atlases</router-link>
       </header>
 
       <div v-if="loading" class="my-atlas-public-state" role="status">

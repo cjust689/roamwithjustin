@@ -134,12 +134,22 @@ export function normalizeMemory(value) {
 }
 
 export function normalizeProfilePatch(value, headers) {
-  assertObject(value, new Set(["displayName", "public"]), "Profile patch")
+  assertObject(
+    value,
+    new Set(["displayName", "public", "discoverable"]),
+    "Profile patch"
+  )
   if (Object.keys(value).length === 0) {
     throw new RegistrationValidationError("Profile patch cannot be empty.")
   }
   if (value.public !== undefined && typeof value.public !== "boolean") {
     throw new RegistrationValidationError("Profile visibility is invalid.")
+  }
+  if (
+    value.discoverable !== undefined &&
+    typeof value.discoverable !== "boolean"
+  ) {
+    throw new RegistrationValidationError("Profile discovery is invalid.")
   }
   return Object.freeze({
     patch: Object.freeze({
@@ -147,6 +157,9 @@ export function normalizeProfilePatch(value, headers) {
         ? {}
         : { displayName: normalizeDisplayName(value.displayName) }),
       ...(value.public === undefined ? {} : { public: value.public }),
+      ...(value.discoverable === undefined
+        ? {}
+        : { discoverable: value.discoverable }),
     }),
     expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
     idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),

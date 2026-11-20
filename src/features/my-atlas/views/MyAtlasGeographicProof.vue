@@ -2,20 +2,20 @@
   <main class="my-atlas-proof">
     <MyAtlasMap
       ref="atlasMap"
-      :places="plannerActive ? [] : displayedPlaces"
-      :selected-place-id="selectedPlaceId"
+      :places="!canUseAtlas || plannerActive ? [] : displayedPlaces"
+      :selected-place-id="canUseAtlas ? selectedPlaceId : ''"
       :show-connections="showConnections"
       :show-memories="showMemories"
-      :playback-active="timelinePlaying"
-      :placement-active="customPlaceOpen"
-      :placement-coordinates="customPlaceCoordinates"
-      :planner-active="plannerActive"
-      :planner-route="plannerRoute"
+      :playback-active="canUseAtlas && timelinePlaying"
+      :placement-active="canUseAtlas && customPlaceOpen"
+      :placement-coordinates="canUseAtlas ? customPlaceCoordinates : null"
+      :planner-active="canUseAtlas && plannerActive"
+      :planner-route="canUseAtlas ? plannerRoute : []"
       @select="selectPin"
       @place-custom="setCustomPlaceCoordinates"
     />
     <MyAtlasTutorial
-      v-if="tutorialOpen"
+      v-if="canUseAtlas && tutorialOpen"
       :variant="tutorialVariant"
       @close="closeTutorial"
       @complete="completeTutorial"
@@ -62,20 +62,31 @@
             Your changes are saved to your private beta account.
           </template>
           <template v-else>
-            This local proof does not save or publish your selections.
+            Sign in to build your Atlas and save your travels.
           </template>
         </p>
-        <div class="my-atlas-intro-actions">
-          <button
-            type="button"
-            @click="openTutorial(accountProfile ? 'account' : 'preview')"
-          >
-            {{ accountProfile ? "Quick start guide" : "See how it works" }}
+        <div v-if="canUseAtlas" class="my-atlas-intro-actions">
+          <button type="button" @click="openTutorial('account')">
+            Quick start guide
           </button>
+          <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
+            Explore Atlases
+          </router-link>
+        </div>
+        <div
+          v-else-if="!auth.loading && !auth.authenticated"
+          class="my-atlas-intro-actions"
+        >
+          <button type="button" :disabled="!auth.configured" @click="signIn">
+            Sign in with Google
+          </button>
+          <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
+            Explore Atlases
+          </router-link>
         </div>
       </div>
 
-      <section class="my-atlas-overview">
+      <section v-if="canUseAtlas" class="my-atlas-overview">
         <div class="my-atlas-stats" aria-label="Atlas statistics">
           <div>
             <strong>{{ visibleStats.places }}</strong>
@@ -299,6 +310,7 @@
       />
 
       <section
+        v-if="canUseAtlas"
         v-show="addPlaceOpen"
         class="my-atlas-workflow-section my-atlas-add-place my-atlas-overview-panel"
       >
@@ -455,6 +467,7 @@
       </section>
 
       <section
+        v-if="canUseAtlas"
         v-show="visitedOpen"
         class="my-atlas-pins my-atlas-workflow-section my-atlas-overview-panel"
       >
@@ -513,7 +526,7 @@
       </section>
 
       <MyAtlasPlanner
-        v-if="accountProfile"
+        v-if="canUseAtlas"
         ref="planner"
         :api-base-url="apiBaseUrl"
         :pins="pins"
@@ -526,7 +539,7 @@
       />
 
       <section
-        v-if="accountProfile"
+        v-if="canUseAtlas"
         class="my-atlas-tools my-atlas-workflow-section"
       >
         <button
@@ -676,6 +689,18 @@
               Copy public link
             </button>
             <button
+              v-if="accountProfile.public"
+              type="button"
+              :disabled="accountPending"
+              @click="toggleDiscovery"
+            >
+              {{
+                accountProfile.discoverable
+                  ? "Remove from Explore Atlases"
+                  : "List in Explore Atlases"
+              }}
+            </button>
+            <button
               type="button"
               :disabled="
                 !pinnedPlaces.length || atlasImagePending || storyExportPending
@@ -696,6 +721,16 @@
             <span>Public link</span>
             <strong>{{ shareUrl }}</strong>
           </p>
+          <p v-if="accountProfile.public" class="my-atlas-tools-status">
+            {{
+              accountProfile.discoverable
+                ? "Your handle and public favorite image can appear in Explore Atlases."
+                : "Your Atlas stays out of Explore Atlases until you choose to list it."
+            }}
+          </p>
+          <router-link class="my-atlas-explore-link" to="/my-atlas/explore"
+            >Explore public Atlases</router-link
+          >
         </div>
       </section>
 
@@ -747,7 +782,6 @@ import {
   normalizeMyAtlasCustomPlace,
   normalizeMyAtlasCustomPlaceName,
 } from "../catalog/customPlace.mjs"
-import { addDraftPin, removeDraftPin } from "../catalog/pinDraft.mjs"
 import {
   formatMyAtlasPlaceSearchError,
   searchMyAtlasPlaces,
@@ -764,6 +798,7 @@ import {
   replaceMyAtlasImage,
   updateMyAtlasImageVisibility,
   updateMyAtlasPin,
+  updateMyAtlasDiscovery,
   updateMyAtlasSharing,
 } from "../api/client.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
@@ -850,6 +885,13 @@ export default {
     }
   },
   computed: {
+    canUseAtlas() {
+      return (
+        !this.auth.loading &&
+        this.auth.authenticated &&
+        Boolean(this.accountProfile)
+      )
+    },
     authDisplayName() {
       return this.auth.user?.name || this.auth.user?.email || "Signed in"
     },
@@ -1018,6 +1060,7 @@ export default {
       if (active && this.timelinePlaying) this.pauseTimeline()
     },
     openAtlasPanel(panel) {
+      if (!this.canUseAtlas) return
       const nextAdd = panel === "add" && !this.addPlaceOpen
       const nextVisited = panel === "visited" && !this.visitedOpen
       this.addPlaceOpen = nextAdd
@@ -1292,12 +1335,13 @@ export default {
       this.searchResults = []
       this.searchError = ""
       const request = ++this.searchRequest
-      if (value.trim().length < 4) {
+      if (!this.canUseAtlas || value.trim().length < 4) {
         this.searchPending = false
         return
       }
       this.searchPending = true
       this.searchTimer = window.setTimeout(async () => {
+        if (!this.canUseAtlas) return
         this.searchAbortController = new AbortController()
         try {
           const results = await searchMyAtlasPlaces({
@@ -1559,6 +1603,7 @@ export default {
       }
     },
     async addPlace(place, visitedDates = [], memory = "") {
+      if (!this.canUseAtlas) return
       if (this.accountProfile) {
         if (place.placeType === "custom" && !this.pendingCustomPlace) {
           this.pinEditorError =
@@ -1622,20 +1667,6 @@ export default {
         }
         return
       }
-      try {
-        this.pins = addDraftPin(this.pins, place.placeId, this.runtimeCatalog)
-        this.pins = this.pins.map(pin =>
-          pin.placeId === place.placeId ? { ...pin, visitedDates, memory } : pin
-        )
-        this.selectedPlaceId = place.placeId
-        this.query = ""
-        this.closePinEditor()
-        this.addPlaceOpen = false
-        this.visitedOpen = true
-        this.announcement = place.name + " was added to your map."
-      } catch (error) {
-        this.announcement = error.message
-      }
     },
     async updatePlaceDetails(pin, visitedDates, memory) {
       if (!this.accountProfile) return
@@ -1671,6 +1702,7 @@ export default {
       }
     },
     async removePlace(place) {
+      if (!this.canUseAtlas) return
       if (this.accountProfile) {
         const pin = this.pins.find(item => item.placeId === place.placeId)
         if (!pin) return
@@ -1710,9 +1742,6 @@ export default {
         }
         return
       }
-      this.pins = removeDraftPin(this.pins, place.placeId)
-      if (this.selectedPlaceId === place.placeId) this.selectedPlaceId = ""
-      this.announcement = place.name + " was removed from your map."
     },
     selectPin(placeId) {
       if (this.timelinePlaying) this.pauseTimeline()
@@ -1736,13 +1765,14 @@ export default {
       this.selectedPlaceId = this.displayedPlaces[nextIndex].placeId
     },
     handleKeyboardNavigation(event) {
-      if (this.tutorialOpen) return
+      if (!this.canUseAtlas || this.tutorialOpen) return
       const tag = event.target?.tagName?.toLowerCase()
       if (["input", "select", "textarea", "button"].includes(tag)) return
       if (event.key === "ArrowLeft") this.cyclePin(-1)
       if (event.key === "ArrowRight") this.cyclePin(1)
     },
     openTutorial(variant = "preview") {
+      if (!this.canUseAtlas) return
       this.tutorialVariant = variant === "account" ? "account" : "preview"
       this.tutorialOpen = true
     },
@@ -1929,6 +1959,34 @@ export default {
       } catch (error) {
         this.announcement = "Copy the visible Atlas link to share it."
         this.toolsStatus = this.announcement
+      }
+    },
+    async toggleDiscovery() {
+      this.accountPending = true
+      this.accountError = ""
+      this.toolsStatus = "Updating your Atlas discovery setting."
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const discoverable = !this.accountProfile.discoverable
+        this.accountProfile = await this.withAccountRevisionRetry(
+          token,
+          revision =>
+            updateMyAtlasDiscovery({
+              apiBaseUrl: this.apiBaseUrl,
+              accessToken: token,
+              discoverable,
+              revision,
+            })
+        )
+        this.announcement = discoverable
+          ? "Your Atlas can now appear in Explore Atlases."
+          : "Your Atlas was removed from Explore Atlases."
+        this.toolsStatus = this.announcement
+      } catch {
+        this.accountError = "Your discovery setting could not be changed."
+        this.toolsStatus = this.accountError
+      } finally {
+        this.accountPending = false
       }
     },
   },
@@ -2719,6 +2777,20 @@ export default {
   overflow-wrap: anywhere;
   color: #edf7f2;
   font-size: 0.62rem;
+}
+
+.my-atlas-explore-link {
+  justify-self: start;
+  color: #f4d38f;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-underline-offset: 0.2rem;
+}
+
+.my-atlas-explore-link:focus-visible {
+  border-radius: 0.25rem;
+  outline: 2px solid rgba(230, 186, 104, 0.35);
+  outline-offset: 0.2rem;
 }
 
 .my-atlas-search > span {

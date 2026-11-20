@@ -11,7 +11,9 @@ import {
   PublicAtlasNotFoundError,
   PublicAtlasServiceError,
   getPublicAtlas,
+  getPublicAtlasDirectory,
   getPublicAtlasImage,
+  rankPublicAtlasDiscoveries,
 } from "../src/public/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
@@ -103,6 +105,118 @@ beforeEach(async () => {
 })
 
 describe("public Atlas projection", () => {
+  it("requires separate discovery consent and favors activity from the last day", async () => {
+    await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        placeId: "geonames:3621138",
+        visitedYears: [2024],
+        expectedRevision: 1,
+        idempotencyKey: "10101010-1010-4010-8010-101010101010",
+      },
+      catalogResolver: async placeId => ({
+        placeId,
+        placeType: "city",
+        name: "Uvita",
+        countryCode: "CR",
+        countryName: "Costa Rica",
+        deprecated: false,
+        coordinates: [-83.7395, 9.17039],
+      }),
+      now: NOW,
+    })
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: 2,
+        idempotencyKey: "11111111-1111-4111-8111-111111111112",
+      },
+      now: NOW,
+    })
+    expect(
+      await getPublicAtlasDirectory({
+        environment: environment(),
+        input: { limit: 12, cursor: null },
+        now: NOW,
+      })
+    ).toMatchObject({ atlases: [], nextCursor: null })
+
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { discoverable: true },
+        expectedRevision: 3,
+        idempotencyKey: "12121212-1212-4212-8212-121212121213",
+      },
+      now: NOW,
+    })
+    expect(
+      await getPublicAtlasDirectory({
+        environment: environment(),
+        input: { limit: 12, cursor: null },
+        now: NOW,
+      })
+    ).toEqual({
+      schemaVersion: 1,
+      atlases: [
+        {
+          handle: "public-owner",
+          displayName: "Public Owner",
+          placeCount: 1,
+          recent: true,
+          favoriteImage: null,
+        },
+      ],
+      nextCursor: null,
+    })
+
+    const ranked = rankPublicAtlasDiscoveries(
+      [
+        {
+          profile: {
+            handle: "older-owner",
+            updatedAt: "2026-11-14T18:00:00.000Z",
+          },
+        },
+        {
+          profile: {
+            handle: "recent-owner",
+            updatedAt: "2026-11-16T17:00:00.000Z",
+          },
+        },
+      ],
+      NOW
+    )
+    expect(ranked.map(value => value.profile.handle)).toEqual([
+      "recent-owner",
+      "older-owner",
+    ])
+    const unpublished = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: false },
+        expectedRevision: 4,
+        idempotencyKey: "13131313-1313-4313-8313-131313131314",
+      },
+      now: NOW,
+    })
+    expect(unpublished.profile.discoverable).toBe(false)
+    expect(
+      (
+        await getPublicAtlasDirectory({
+          environment: environment(),
+          input: { limit: 12, cursor: null },
+          now: NOW,
+        })
+      ).atlases
+    ).toEqual([])
+  })
+
   it("is private by default and exposes only the safe published projection", async () => {
     await expect(
       getPublicAtlas({

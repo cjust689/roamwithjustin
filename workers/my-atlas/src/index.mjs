@@ -94,9 +94,13 @@ import {
 import {
   PublicAtlasNotFoundError,
   PublicAtlasServiceError,
+  PublicAtlasValidationError,
   getPublicAtlas,
+  getPublicAtlasDirectory,
   getPublicAtlasImage,
+  normalizePublicAtlasDirectoryQuery,
 } from "./public/service.mjs"
+import { wipeMyAtlasAccounts } from "./registration/wipe.mjs"
 
 const SERVICE_NAME = "roamwithjustin-my-atlas-api"
 
@@ -512,6 +516,36 @@ export async function handleRequest(
     })
   }
 
+  if (url.pathname === "/v1/public/atlases") {
+    if (request.method !== "GET") {
+      return errorResponse(405, "method_not_allowed", context)
+    }
+    const limited = await publicReadRateLimit({
+      request,
+      environment,
+      dependencies,
+      context,
+      scope: "public-atlas-directory",
+      weight: 4,
+    })
+    if (limited) return limited
+    try {
+      const service =
+        dependencies.getPublicAtlasDirectory || getPublicAtlasDirectory
+      const result = await service({
+        environment,
+        input: normalizePublicAtlasDirectoryQuery(url),
+      })
+      return jsonResponse(result, 200, context)
+    } catch (error) {
+      if (error instanceof PublicAtlasValidationError) {
+        return errorResponse(400, "invalid_request", context)
+      }
+      console.error("public_atlas_directory_failed", error)
+      return errorResponse(503, "public_atlas_unavailable", context)
+    }
+  }
+
   const publicAtlasImageMatch = url.pathname.match(
     /^\/v1\/public\/atlases\/([a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9]))\/image$/
   )
@@ -595,6 +629,7 @@ export async function handleRequest(
   const isInvitationRevoke = url.pathname === "/v1/admin/invitations/revoke"
   const isPendingRegistrations =
     url.pathname === "/v1/admin/registrations/pending"
+  const isAccountWipe = url.pathname === "/v1/admin/accounts/wipe"
   const reconciliationMatch = url.pathname.match(
     /^\/v1\/admin\/registrations\/(usr_[0-9a-f-]{36})\/reconcile$/
   )
@@ -640,6 +675,7 @@ export async function handleRequest(
     isMyPlanVisited ||
     isMyExport
   const isAdminRoute =
+    isAccountWipe ||
     isInvitationIssue ||
     isInvitationRevoke ||
     isPendingRegistrations ||
@@ -651,6 +687,7 @@ export async function handleRequest(
 
   if (
     (isAuthCheck && request.method !== "GET") ||
+    (isAccountWipe && request.method !== "POST") ||
     (isRegistration && request.method !== "POST") ||
     (isInvitationIssue && request.method !== "POST") ||
     (isInvitationRevoke && request.method !== "POST") ||
@@ -733,6 +770,13 @@ export async function handleRequest(
       }
 
       const body = await readJsonBody(request)
+      if (isAccountWipe) {
+        return jsonResponse(
+          await wipeMyAtlasAccounts({ environment, body }),
+          200,
+          context
+        )
+      }
       if (isInvitationIssue) {
         const service = dependencies.issueBetaInvitation || issueBetaInvitation
         const result = await service({

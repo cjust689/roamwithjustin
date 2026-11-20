@@ -11,6 +11,7 @@ import {
   fetchMyAtlasPlanning,
   fetchMyAtlasProfile,
   fetchPublicAtlas,
+  fetchPublicAtlasDirectory,
   fetchPublicAtlasImage,
   fetchMyAtlasState,
   markMyAtlasPlanVisited,
@@ -20,6 +21,7 @@ import {
   saveMyAtlasPlan,
   updateMyAtlasImageVisibility,
   updateMyAtlasPin,
+  updateMyAtlasDiscovery,
   updateMyAtlasSharing,
   verifyMyAtlasApiAccess,
 } from "../src/features/my-atlas/api/client.mjs"
@@ -135,6 +137,23 @@ async function readJson(response) {
 }
 
 {
+  const ordinaryToken = await signToken()
+  const denied = await workerResponse("/v1/admin/accounts/wipe", {
+    method: "POST",
+    token: ordinaryToken,
+    json: { apply: false },
+  })
+  assert.equal(denied.status, 403)
+  const adminToken = await signToken({ scope: "read:my-atlas admin:my-atlas" })
+  const invalid = await workerResponse("/v1/admin/accounts/wipe", {
+    method: "POST",
+    token: adminToken,
+    json: { apply: true, confirmation: "wrong" },
+  })
+  assert.equal(invalid.status, 400)
+}
+
+{
   const response = await workerResponse("/health")
   assert.equal(response.status, 200)
   assert.deepEqual(await readJson(response), {
@@ -143,6 +162,48 @@ async function readJson(response) {
     phase: "2c",
   })
   assert.equal(response.headers.get("Cache-Control"), "no-store")
+}
+
+{
+  const directory = {
+    schemaVersion: 1,
+    atlases: [
+      {
+        handle: "justin-travels",
+        displayName: "Justin Traveler",
+        placeCount: 4,
+        recent: true,
+        favoriteImage: null,
+      },
+    ],
+    nextCursor: "eyJ2ZXJzaW9uIjoxfQ",
+  }
+  const response = await workerResponse(
+    "/v1/public/atlases?limit=12",
+    { cfConnectingIp: "192.0.2.44" },
+    {},
+    {
+      getPublicAtlasDirectory: async ({ input }) => {
+        assert.deepEqual(input, { limit: 12, cursor: null })
+        return directory
+      },
+      publicRateLimiter: {
+        async limit(input) {
+          assert.deepEqual(input, {
+            key: "public-atlas-directory:192.0.2.44",
+            delta: 4,
+          })
+          return { success: true }
+        },
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.deepEqual(await readJson(response), directory)
+
+  const invalid = await workerResponse("/v1/public/atlases?limit=100")
+  assert.equal(invalid.status, 400)
+  assert.equal((await readJson(invalid)).error, "invalid_request")
 }
 
 {
@@ -675,6 +736,7 @@ for (const token of [
             handle: "owner",
             displayName: "Owner",
             public: false,
+            discoverable: false,
             status: "active",
             pinCount: 0,
             revision: 1,
@@ -741,6 +803,7 @@ for (const token of [
             handle: "owner",
             displayName: "Owner",
             public: false,
+            discoverable: false,
             pinCount: 1,
             revision: 2,
           },
@@ -1124,6 +1187,7 @@ for (const memory of [
         handle: "justin-travels",
         displayName: "Justin Traveler",
         public: false,
+        discoverable: false,
         status: "active",
         revision: 1,
       },
@@ -1447,6 +1511,7 @@ await assert.rejects(
             handle: "justin-travels",
             displayName: "Justin Traveler",
             public: false,
+            discoverable: false,
             status: "active",
             revision: 1,
           },
@@ -1543,6 +1608,31 @@ await assert.rejects(
     "image_11111111111111111111111111111111"
   )
 
+  const directory = await fetchPublicAtlasDirectory({
+    apiBaseUrl: "https://api.example.com",
+    fetchImpl: async url => {
+      assert.equal(url, "https://api.example.com/v1/public/atlases?limit=12")
+      return new Response(
+        JSON.stringify({
+          schemaVersion: 1,
+          atlases: [
+            {
+              handle: "justin-travels",
+              displayName: "Justin Traveler",
+              placeCount: 3,
+              recent: true,
+              favoriteImage: responseBody.atlas.favoriteImage,
+            },
+          ],
+          nextCursor: null,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    },
+  })
+  assert.equal(directory.atlases[0].handle, "justin-travels")
+  assert.equal(directory.atlases[0].recent, true)
+
   const publicImage = await fetchPublicAtlasImage({
     apiBaseUrl: "https://api.example.com",
     handle: "justin-travels",
@@ -1585,6 +1675,7 @@ await assert.rejects(
             handle: "justin-travels",
             displayName: "Justin Traveler",
             public: false,
+            discoverable: false,
             pinCount: 1,
             revision: 2,
           },
@@ -1611,6 +1702,7 @@ await assert.rejects(
             handle: "justin-travels",
             displayName: "Justin Traveler",
             public: false,
+            discoverable: false,
             pinCount: 1,
             revision: 2,
           },
@@ -1880,20 +1972,43 @@ await assert.rejects(
   assert.equal(published.public, true)
   assert.equal(published.revision, 5)
 
+  const discoverable = await updateMyAtlasDiscovery({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    discoverable: true,
+    revision: 5,
+    fetchImpl: async (_url, options) => {
+      assert.deepEqual(JSON.parse(options.body), { discoverable: true })
+      return new Response(
+        JSON.stringify({
+          profile: {
+            handle: "justin-travels",
+            public: true,
+            discoverable: true,
+            revision: 6,
+          },
+        }),
+        { status: 200, headers: { ETag: '"rev-6"' } }
+      )
+    },
+  })
+  assert.equal(discoverable.discoverable, true)
+  assert.equal(discoverable.revision, 6)
+
   const deletedRevision = await deleteMyAtlasPin({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
     pinId: pin.pinId,
-    revision: 5,
+    revision: 6,
     fetchImpl: async (_url, options) => {
       assert.equal(options.method, "DELETE")
       return new Response(JSON.stringify({ deleted: true }), {
         status: 200,
-        headers: { ETag: '"rev-6"' },
+        headers: { ETag: '"rev-7"' },
       })
     },
   })
-  assert.equal(deletedRevision, 6)
+  assert.equal(deletedRevision, 7)
 }
 
 {
@@ -2358,6 +2473,7 @@ assert.equal(
             handle: "owner",
             displayName: "Owner",
             public: false,
+            discoverable: false,
             revision: 9,
           },
         }),
@@ -2547,6 +2663,7 @@ assert.equal(
               handle: "owner",
               displayName: "Owner",
               public: false,
+              discoverable: false,
               revision: 7,
             },
           }),

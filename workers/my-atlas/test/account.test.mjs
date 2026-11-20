@@ -16,6 +16,7 @@ import {
   updateMyProfile,
 } from "../src/account/service.mjs"
 import { normalizeDeleteAccount } from "../src/planning/contracts.mjs"
+import { wipeMyAtlasAccounts } from "../src/registration/wipe.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
 import {
@@ -159,6 +160,44 @@ beforeEach(async () => {
 })
 
 describe("private owner profile and pin services", () => {
+  it("previews all handles and wipes both user accounts through ordinary deletion", async () => {
+    await registerSecondOwner()
+    const preview = await wipeMyAtlasAccounts({
+      environment: environment(),
+      body: { apply: false },
+    })
+    expect(preview.handles.sort()).toEqual(["account-owner", "second-owner"])
+    expect(
+      (await getMyProfile({ environment: environment(), identity: IDENTITY }))
+        .profile.status
+    ).toBe("active")
+    await expect(
+      wipeMyAtlasAccounts({
+        environment: environment(),
+        body: { apply: true, confirmation: "wrong" },
+      })
+    ).rejects.toThrow()
+    const body = {
+      apply: true,
+      confirmation: "WIPE ALL USER MY ATLAS ACCOUNTS",
+    }
+    expect(
+      (await wipeMyAtlasAccounts({ environment: environment(), body })).deleted
+    ).toBe(true)
+    expect(
+      (await wipeMyAtlasAccounts({ environment: environment(), body })).deleted
+    ).toBe(true)
+    expect(
+      await wipeMyAtlasAccounts({ environment: environment(), body })
+    ).toEqual({ complete: true, deleted: false })
+    await expect(
+      getMyProfile({ environment: environment(), identity: IDENTITY })
+    ).rejects.toMatchObject({ code: "registration_not_found" })
+    await expect(
+      getMyProfile({ environment: environment(), identity: SECOND_IDENTITY })
+    ).rejects.toMatchObject({ code: "registration_not_found" })
+  })
+
   it("stores one private Atlas image, replaces it atomically, and removes it", async () => {
     let imageSequence = 0
     const imageTransformer = async ({ bytes }) => {
@@ -859,35 +898,53 @@ describe("private owner profile and pin services", () => {
     })
     expect(published.profile).toMatchObject({ public: true, revision: 5 })
 
+    const discoverable = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { discoverable: true },
+        expectedRevision: 5,
+        idempotencyKey: "91919191-9191-4191-8191-919191919191",
+      },
+      now: NOW,
+    })
+    expect(discoverable.profile).toMatchObject({
+      public: true,
+      discoverable: true,
+      revision: 6,
+    })
+
     const afterFirstDelete = await deleteMyPin({
       environment: environment(),
       identity: IDENTITY,
       input: {
         pinId: first.pin.pinId,
-        expectedRevision: 5,
+        expectedRevision: 6,
         idempotencyKey: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaab",
       },
       now: NOW,
     })
     expect(afterFirstDelete.profile).toMatchObject({
       public: true,
+      discoverable: true,
       pinCount: 1,
-      revision: 6,
+      revision: 7,
     })
     const empty = await deleteMyPin({
       environment: environment(),
       identity: IDENTITY,
       input: {
         pinId: second.pin.pinId,
-        expectedRevision: 6,
+        expectedRevision: 7,
         idempotencyKey: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbc",
       },
       now: NOW,
     })
     expect(empty.profile).toMatchObject({
       public: false,
+      discoverable: false,
       pinCount: 0,
-      revision: 7,
+      revision: 8,
     })
   })
 

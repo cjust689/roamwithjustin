@@ -517,6 +517,99 @@ export class RegistrationRegistryDurableObject extends DurableObject {
     })
   }
 
+  listActiveRegistrations(command) {
+    if (
+      !command ||
+      !Number.isInteger(command.limit) ||
+      command.limit < 1 ||
+      command.limit > 100 ||
+      (command.cursor && !USER_ID_PATTERN.test(command.cursor))
+    ) {
+      return failure("invalid_active_registration_query")
+    }
+
+    const options = {
+      prefix: "registration:",
+      limit: command.limit + 1,
+    }
+    if (command.cursor) {
+      options.startAfter = registrationKey(command.cursor)
+    }
+    const registrations = Array.from(
+      this.ctx.storage.kv.list(options),
+      ([, value]) => value
+    )
+    const truncated = registrations.length > command.limit
+    const scanned = registrations.slice(0, command.limit)
+    const page = scanned.filter(registration => registration.state === "active")
+    return Object.freeze({
+      ok: true,
+      registrations: Object.freeze(
+        page.map(registration =>
+          Object.freeze({
+            userId: registration.userId,
+            handle: registration.handle,
+          })
+        )
+      ),
+      nextCursor: truncated ? scanned[scanned.length - 1].userId : null,
+    })
+  }
+
+  getGlobalWipeBatch() {
+    const tasks = Array.from(
+      this.ctx.storage.kv.list({ prefix: "global-wipe:", limit: 1 }),
+      ([, value]) => value
+    )
+    const registrations = Array.from(
+      this.ctx.storage.kv.list({ prefix: "registration:" }),
+      ([, value]) => value
+    ).filter(value => value.state === "active")
+    return {
+      ok: true,
+      task: tasks[0] || null,
+      registrations: registrations.map(value => ({
+        userId: value.userId,
+        handle: value.handle,
+      })),
+    }
+  }
+
+  prepareGlobalWipeTask(command) {
+    if (
+      !USER_ID_PATTERN.test(command?.userId) ||
+      !Number.isSafeInteger(command.expectedRevision) ||
+      command.expectedRevision < 1
+    )
+      return failure("invalid_account_deletion")
+    return this.ctx.storage.transactionSync(() => {
+      const key = `global-wipe:${command.userId}`
+      const existing = this.ctx.storage.kv.get(key)
+      if (existing) return { ok: true, task: existing }
+      const registration = this.ctx.storage.kv.get(
+        registrationKey(command.userId)
+      )
+      if (registration?.state !== "active")
+        return failure("registration_not_found")
+      const task = {
+        userId: registration.userId,
+        handle: registration.handle,
+        identity: registration.identity,
+        expectedRevision: command.expectedRevision,
+        idempotencyKey: crypto.randomUUID(),
+      }
+      this.ctx.storage.kv.put(key, task)
+      return { ok: true, task }
+    })
+  }
+
+  finishGlobalWipeTask(userId) {
+    if (!USER_ID_PATTERN.test(userId))
+      return failure("invalid_account_deletion")
+    this.ctx.storage.kv.delete(`global-wipe:${userId}`)
+    return { ok: true }
+  }
+
   getRegistrationForReconciliation(userId) {
     if (!USER_ID_PATTERN.test(userId)) {
       return failure("invalid_registration")
@@ -1037,6 +1130,7 @@ export class UserProfileDurableObject extends DurableObject {
         handle: command.handle,
         displayName: command.displayName,
         public: false,
+        discoverable: false,
         status: "active",
         pinCount: 0,
         wishCount: 0,
@@ -1044,6 +1138,7 @@ export class UserProfileDurableObject extends DurableObject {
         acceptedTermsVersion: command.termsVersion,
         acceptedPrivacyVersion: command.privacyVersion,
         acceptedAt: command.now,
+        publicAtlasUpdatedAt: command.now,
         revision: 1,
         createdAt: command.now,
         updatedAt: command.now,
@@ -1113,6 +1208,7 @@ export class UserProfileDurableObject extends DurableObject {
       }
       const profile = {
         ...owner.profile,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1157,6 +1253,7 @@ export class UserProfileDurableObject extends DurableObject {
       })
       const profile = {
         ...owner.profile,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1190,6 +1287,7 @@ export class UserProfileDurableObject extends DurableObject {
       }
       const profile = {
         ...owner.profile,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1215,13 +1313,15 @@ export class UserProfileDurableObject extends DurableObject {
       Array.isArray(patch) ||
       Object.keys(patch).length === 0 ||
       Object.keys(patch).some(
-        key => !["displayName", "public"].includes(key)
+        key => !["displayName", "public", "discoverable"].includes(key)
       ) ||
       (patch.displayName !== undefined &&
         (typeof patch.displayName !== "string" ||
           patch.displayName.length < 2 ||
           patch.displayName.length > 50)) ||
-      (patch.public !== undefined && typeof patch.public !== "boolean")
+      (patch.public !== undefined && typeof patch.public !== "boolean") ||
+      (patch.discoverable !== undefined &&
+        typeof patch.discoverable !== "boolean")
     ) {
       return failure("invalid_profile_update")
     }
@@ -1237,10 +1337,20 @@ export class UserProfileDurableObject extends DurableObject {
       if (patch.public === true && (owner.profile.pinCount || 0) < 1) {
         return failure("profile_requires_pin")
       }
+      const nextPublic = patch.public ?? owner.profile.public
+      const nextDiscoverable =
+        patch.discoverable !== undefined
+          ? patch.discoverable
+          : owner.profile.discoverable === true
+      if (patch.discoverable === true && nextPublic !== true) {
+        return failure("discovery_requires_public_profile")
+      }
 
       const profile = {
         ...owner.profile,
         ...patch,
+        discoverable: nextPublic === true ? nextDiscoverable : false,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1327,6 +1437,7 @@ export class UserProfileDurableObject extends DurableObject {
       const profile = {
         ...owner.profile,
         pinCount: (owner.profile.pinCount || 0) + 1,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1402,6 +1513,7 @@ export class UserProfileDurableObject extends DurableObject {
       if (!validStoredPinPlace(pin)) return failure("invalid_pin")
       const profile = {
         ...owner.profile,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1441,7 +1553,10 @@ export class UserProfileDurableObject extends DurableObject {
       const profile = {
         ...owner.profile,
         public: pinCount === 0 ? false : owner.profile.public,
+        discoverable:
+          pinCount === 0 ? false : owner.profile.discoverable === true,
         pinCount,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -1980,6 +2095,7 @@ export class UserProfileDurableObject extends DurableObject {
       const profile = {
         ...owner.profile,
         pinCount: (owner.profile.pinCount || 0) + pins.length,
+        publicAtlasUpdatedAt: command.now,
         revision: owner.profile.revision + 1,
         updatedAt: command.now,
       }
@@ -2141,6 +2257,7 @@ export class UserProfileDurableObject extends DurableObject {
       const deletingProfile = {
         ...profile,
         public: false,
+        discoverable: false,
         status: "deleting",
         revision: profile.revision + 1,
         updatedAt: command.now,
@@ -2285,6 +2402,33 @@ export class UserProfileDurableObject extends DurableObject {
           })
         )
       ),
+      atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,
+    })
+  }
+
+  getPublicAtlasDiscovery() {
+    const profile = this.ctx.storage.kv.get("profile")
+    if (
+      !profile ||
+      profile.status !== "active" ||
+      profile.public !== true ||
+      profile.discoverable !== true ||
+      (profile.pinCount || 0) < 1
+    ) {
+      return failure("public_atlas_not_discoverable")
+    }
+    const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+    if (atlasImage && !validStoredAtlasImage(atlasImage)) {
+      return failure("public_atlas_inconsistent")
+    }
+    return Object.freeze({
+      ok: true,
+      profile: Object.freeze({
+        handle: profile.handle,
+        displayName: profile.displayName,
+        pinCount: profile.pinCount,
+        updatedAt: profile.publicAtlasUpdatedAt || profile.updatedAt,
+      }),
       atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,
     })
   }
