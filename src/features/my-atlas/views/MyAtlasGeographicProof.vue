@@ -537,12 +537,14 @@
           @click="openTools"
         >
           <span>
-            <strong>Share and export</strong>
+            <strong>Share Visited Atlas</strong>
             <small>
               {{
                 accountProfile.public
                   ? "Your Visited Atlas has a public link"
-                  : "Your Visited Atlas is private"
+                  : !pins.length
+                    ? "Add a visited place to share or export"
+                    : "Your Visited Atlas is private"
               }}
             </small>
           </span>
@@ -554,9 +556,24 @@
           class="my-atlas-section-content my-atlas-tools-content"
         >
           <p>
-            Choose who can see your Visited Atlas, copy its public link, or
-            create a Story image from the destinations currently on the map.
+            Create a public link for the places marked Visited, or export those
+            places as a Story image. Planned trips are shared separately.
           </p>
+          <div v-if="!pins.length" class="my-atlas-tools-empty" role="status">
+            <strong>Your Visited Atlas is empty</strong>
+            <p>
+              {{
+                atlasImage
+                  ? "Your favorite image is saved. Add at least one visited place before sharing your Atlas or exporting a Story image."
+                  : "Add at least one visited place before sharing your Atlas or exporting a Story image."
+              }}
+              Saved places stay private. Share a saved trip separately from its
+              trip card above.
+            </p>
+            <button type="button" @click="openAtlasPanel('add')">
+              Add a visited place
+            </button>
+          </div>
           <div class="my-atlas-favorite-image">
             <div class="my-atlas-favorite-image-preview">
               <img
@@ -571,8 +588,8 @@
               <strong>Your favorite travel image</strong>
               <p>
                 Choose one image that feels like your travels. It is cropped to
-                a square and used on every Atlas Story image you export. It
-                stays private and is not added to your public Atlas.
+                a square and used on Atlas Story images. You choose whether it
+                also becomes the favorite image on your public Visited Atlas.
               </p>
               <small>
                 JPEG, PNG, or WebP. Up to 10 MiB before processing and 1 MiB
@@ -603,11 +620,30 @@
                   v-if="atlasImage"
                   type="button"
                   :disabled="atlasImagePending || accountPending"
+                  @click="toggleFavoriteImageVisibility"
+                >
+                  {{
+                    atlasImage.publicProfile
+                      ? "Keep image private"
+                      : "Show on public profile"
+                  }}
+                </button>
+                <button
+                  v-if="atlasImage"
+                  type="button"
+                  :disabled="atlasImagePending || accountPending"
                   @click="removeFavoriteImage"
                 >
                   Remove image
                 </button>
               </div>
+              <p v-if="atlasImage" class="my-atlas-favorite-image-visibility">
+                {{
+                  atlasImage.publicProfile
+                    ? "Shown on your public Visited Atlas"
+                    : "Only visible to you and in Story images you export"
+                }}
+              </p>
               <p
                 v-if="atlasImageError"
                 class="my-atlas-favorite-image-error"
@@ -625,7 +661,11 @@
               "
               @click="toggleSharing"
             >
-              {{ accountProfile.public ? "Make Atlas private" : "Share Atlas" }}
+              {{
+                accountProfile.public
+                  ? "Make Visited Atlas private"
+                  : "Create public Atlas link"
+              }}
             </button>
             <button
               v-if="accountProfile.public"
@@ -637,12 +677,21 @@
             </button>
             <button
               type="button"
-              :disabled="!pinnedPlaces.length || atlasImagePending"
+              :disabled="
+                !pinnedPlaces.length || atlasImagePending || storyExportPending
+              "
               @click="exportStory"
             >
-              Export Story image
+              {{
+                storyExportPending
+                  ? "Creating Story image"
+                  : "Export Story image"
+              }}
             </button>
           </div>
+          <p v-if="toolsStatus" class="my-atlas-tools-status" role="status">
+            {{ toolsStatus }}
+          </p>
           <p v-if="accountProfile.public" class="my-atlas-share-link">
             <span>Public link</span>
             <strong>{{ shareUrl }}</strong>
@@ -713,6 +762,7 @@ import {
   removeMyAtlasImage,
   registerMyAtlasAccount,
   replaceMyAtlasImage,
+  updateMyAtlasImageVisibility,
   updateMyAtlasPin,
   updateMyAtlasSharing,
 } from "../api/client.mjs"
@@ -779,6 +829,8 @@ export default {
       atlasImageUrl: "",
       atlasImagePending: false,
       atlasImageError: "",
+      storyExportPending: false,
+      toolsStatus: "",
       workflowSectionsInitialized: false,
       announcement: "",
       auth: myAtlasAuthState,
@@ -985,6 +1037,7 @@ export default {
       const opening = !this.toolsOpen
       this.toolsOpen = opening
       if (!opening) return
+      this.toolsStatus = ""
       this.addPlaceOpen = false
       this.visitedOpen = false
       this.$refs.planner?.closePlanner()
@@ -1045,6 +1098,7 @@ export default {
       this.addPlaceOpen = false
       this.visitedOpen = false
       this.toolsOpen = false
+      this.toolsStatus = ""
       this.clearAtlasImage()
       this.plannerActive = false
       this.plannerRoute = []
@@ -1166,7 +1220,7 @@ export default {
         this.updatePlanningRevision(result.revision)
         await this.loadAtlasImage(token)
         this.announcement =
-          "Your favorite travel image will be used on Atlas Story exports."
+          "Your favorite travel image will be used on Story exports. Choose Show on public profile to share it there."
       } catch (error) {
         this.atlasImageError = this.atlasImageErrorMessage(error)
       } finally {
@@ -1191,6 +1245,32 @@ export default {
         this.updatePlanningRevision(revision)
         this.clearAtlasImage()
         this.announcement = "Your favorite travel image was removed."
+      } catch (error) {
+        this.atlasImageError = this.atlasImageErrorMessage(error)
+      } finally {
+        this.atlasImagePending = false
+      }
+    },
+    async toggleFavoriteImageVisibility() {
+      if (!this.atlasImage || !this.accountProfile) return
+      this.atlasImagePending = true
+      this.atlasImageError = ""
+      const publicProfile = !this.atlasImage.publicProfile
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const result = await this.withAccountRevisionRetry(token, revision =>
+          updateMyAtlasImageVisibility({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            publicProfile,
+            revision,
+          })
+        )
+        this.atlasImage = result.atlasImage
+        this.updatePlanningRevision(result.revision)
+        this.announcement = publicProfile
+          ? "Your favorite travel image will appear on your public Visited Atlas."
+          : "Your favorite travel image is now private."
       } catch (error) {
         this.atlasImageError = this.atlasImageErrorMessage(error)
       } finally {
@@ -1776,6 +1856,14 @@ export default {
       this.scheduleTimelineStep()
     },
     async exportStory() {
+      if (this.storyExportPending) return
+      if (!this.pinnedPlaces.length) {
+        this.toolsStatus =
+          "Add at least one visited place before exporting a Story image."
+        return
+      }
+      this.storyExportPending = true
+      this.toolsStatus = "Creating your Story image."
       try {
         if (this.atlasImage && !this.atlasImageUrl) {
           const token = await getMyAtlasApiAccessToken()
@@ -1785,7 +1873,7 @@ export default {
         await this.$nextTick()
         const favoriteImage = this.$refs.favoriteImagePreview || null
         if (favoriteImage?.decode) await favoriteImage.decode()
-        downloadMyAtlasStory({
+        const filename = await downloadMyAtlasStory({
           displayName: this.accountProfile?.displayName || this.authDisplayName,
           favoriteImage,
           filterLabel: this.filterLabel,
@@ -1793,10 +1881,14 @@ export default {
           places: this.displayedPlaces,
           stats: this.visibleStats,
         })
-        this.announcement = "Your Instagram Story image was created."
+        this.toolsStatus = `${filename} was downloaded.`
+        this.announcement = this.toolsStatus
       } catch {
         this.atlasImageError =
           "Your Atlas Story image could not be created. Try again."
+        this.toolsStatus = this.atlasImageError
+      } finally {
+        this.storyExportPending = false
       }
     },
     formatVisitedDates,
@@ -1804,6 +1896,7 @@ export default {
     async toggleSharing() {
       this.accountPending = true
       this.accountError = ""
+      this.toolsStatus = "Updating your Atlas sharing setting."
       try {
         const token = await getMyAtlasApiAccessToken()
         const publish = !this.accountProfile.public
@@ -1820,8 +1913,10 @@ export default {
         this.announcement = this.accountProfile.public
           ? "Your Atlas is now available through your share link."
           : "Your Atlas is private."
+        this.toolsStatus = this.announcement
       } catch (error) {
         this.accountError = "Your sharing setting could not be changed."
+        this.toolsStatus = this.accountError
       } finally {
         this.accountPending = false
       }
@@ -1830,8 +1925,10 @@ export default {
       try {
         await navigator.clipboard.writeText(this.shareUrl)
         this.announcement = "Your Atlas link was copied."
+        this.toolsStatus = this.announcement
       } catch (error) {
         this.announcement = "Copy the visible Atlas link to share it."
+        this.toolsStatus = this.announcement
       }
     },
   },
@@ -2441,6 +2538,49 @@ export default {
   color: #9bada7;
   font-size: 0.66rem;
   line-height: 1.55;
+}
+
+.my-atlas-tools-empty {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(230, 186, 104, 0.32);
+  border-radius: 0.75rem;
+  background: rgba(230, 186, 104, 0.06);
+}
+
+.my-atlas-tools-empty strong {
+  color: #f3d38f;
+  font-size: 0.76rem;
+}
+
+.my-atlas-tools-empty p,
+.my-atlas-tools-status {
+  margin: 0;
+  color: #a8bab4;
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.my-atlas-tools-empty button {
+  justify-self: start;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(230, 186, 104, 0.45);
+  border-radius: 0.7rem;
+  color: #102023;
+  background: #e6ba68;
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.my-atlas-tools-status {
+  padding: 0.65rem 0.7rem;
+  border-left: 2px solid rgba(230, 186, 104, 0.65);
+  color: #d6e3de;
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .my-atlas-favorite-image {

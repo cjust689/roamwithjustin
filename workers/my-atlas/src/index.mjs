@@ -31,6 +31,7 @@ import { hashQualifiedIdentity } from "./registration/hashing.mjs"
 import {
   formatRevisionEtag,
   normalizeAtlasImageMutation,
+  normalizeAtlasImageVisibility,
   normalizeCreatePin,
   normalizeDeletePin,
   normalizeExportQuery,
@@ -51,6 +52,7 @@ import {
   listMyPins,
   removeMyAtlasImage,
   replaceMyAtlasImage,
+  updateMyAtlasImageVisibility,
   updateMyPin,
   updateMyProfile,
 } from "./account/service.mjs"
@@ -93,6 +95,7 @@ import {
   PublicAtlasNotFoundError,
   PublicAtlasServiceError,
   getPublicAtlas,
+  getPublicAtlasImage,
 } from "./public/service.mjs"
 
 const SERVICE_NAME = "roamwithjustin-my-atlas-api"
@@ -178,6 +181,18 @@ function atlasImageResponse(result, context) {
   const headers = responseHeaders(context)
   headers.set("Content-Type", "image/webp")
   headers.set("Content-Disposition", 'inline; filename="my-atlas-image.webp"')
+  headers.set("Content-Length", String(result.atlasImage.byteLength))
+  if (result.object.httpEtag) headers.set("ETag", result.object.httpEtag)
+  return new Response(result.object.body, { status: 200, headers })
+}
+
+function publicAtlasImageResponse(result, context) {
+  const headers = responseHeaders(context)
+  headers.set("Content-Type", "image/webp")
+  headers.set(
+    "Content-Disposition",
+    'inline; filename="favorite-travel-image.webp"'
+  )
   headers.set("Content-Length", String(result.atlasImage.byteLength))
   if (result.object.httpEtag) headers.set("ETag", result.object.httpEtag)
   return new Response(result.object.body, { status: 200, headers })
@@ -497,6 +512,39 @@ export async function handleRequest(
     })
   }
 
+  const publicAtlasImageMatch = url.pathname.match(
+    /^\/v1\/public\/atlases\/([a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9]))\/image$/
+  )
+  if (publicAtlasImageMatch) {
+    if (request.method !== "GET") {
+      return errorResponse(405, "method_not_allowed", context)
+    }
+    if ([...url.searchParams.keys()].length > 0) {
+      return errorResponse(400, "invalid_request", context)
+    }
+    const limited = await publicReadRateLimit({
+      request,
+      environment,
+      dependencies,
+      context,
+      scope: "public-atlas",
+    })
+    if (limited) return limited
+    try {
+      const service = dependencies.getPublicAtlasImage || getPublicAtlasImage
+      const result = await service({
+        environment,
+        handle: publicAtlasImageMatch[1],
+      })
+      return publicAtlasImageResponse(result, context)
+    } catch (error) {
+      if (error instanceof PublicAtlasNotFoundError) {
+        return errorResponse(404, "atlas_image_not_found", context)
+      }
+      return errorResponse(503, "public_atlas_unavailable", context)
+    }
+  }
+
   const publicAtlasMatch = url.pathname.match(
     /^\/v1\/public\/atlases\/([a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9]))$/
   )
@@ -788,7 +836,26 @@ export async function handleRequest(
           result.profile.revision
         )
       }
-      if (isMyAtlasImage) {
+      if (isMyAtlasImage && request.method === "PATCH") {
+        const service =
+          dependencies.updateMyAtlasImageVisibility ||
+          updateMyAtlasImageVisibility
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          input: normalizeAtlasImageVisibility(
+            await readJsonBody(request),
+            request.headers
+          ),
+        })
+        return accountJsonResponse(
+          { atlasImage: result.atlasImage },
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isMyAtlasImage && request.method === "DELETE") {
         const service = dependencies.removeMyAtlasImage || removeMyAtlasImage
         const result = await service({
           environment,
@@ -801,6 +868,9 @@ export async function handleRequest(
           context,
           result.profile.revision
         )
+      }
+      if (isMyAtlasImage) {
+        return errorResponse(405, "method_not_allowed", context)
       }
 
       if (isMyProfile && request.method === "GET") {

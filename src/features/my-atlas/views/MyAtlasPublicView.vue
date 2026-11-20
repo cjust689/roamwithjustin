@@ -22,11 +22,56 @@
         <p>This Atlas is not available to view.</p>
       </div>
       <template v-else>
-        <div class="my-atlas-public-intro">
-          <p>@{{ atlas.handle }}</p>
-          <h1 id="public-atlas-title">{{ atlas.displayName }}</h1>
-          <span>{{ places.length }} {{ placeCountLabel }}</span>
+        <div
+          class="my-atlas-public-profile"
+          :class="{ 'has-favorite-image': favoriteImageUrl }"
+        >
+          <img
+            v-if="favoriteImageUrl"
+            ref="favoriteImagePreview"
+            class="my-atlas-public-favorite-image"
+            :src="favoriteImageUrl"
+            :alt="`${atlas.displayName}'s favorite travel image`"
+          />
+          <div class="my-atlas-public-intro">
+            <p>@{{ atlas.handle }}</p>
+            <h1 id="public-atlas-title">{{ atlas.displayName }}</h1>
+            <span>{{ places.length }} {{ placeCountLabel }}</span>
+            <button
+              v-if="favoriteImageUrl"
+              type="button"
+              class="my-atlas-public-favorite-action"
+              @click="openFavoriteImage"
+            >
+              <strong>Favorite travel image</strong>
+              <span>View full image</span>
+            </button>
+          </div>
         </div>
+        <p
+          v-if="favoriteImageError"
+          class="my-atlas-public-image-error"
+          role="status"
+        >
+          The favorite travel image is temporarily unavailable.
+        </p>
+
+        <dialog
+          v-if="favoriteImageUrl"
+          ref="favoriteImageDialog"
+          class="my-atlas-public-image-dialog"
+        >
+          <div>
+            <button type="button" autofocus @click="closeFavoriteImage">
+              Close
+            </button>
+            <img
+              :src="favoriteImageUrl"
+              :alt="`${atlas.displayName}'s favorite travel image`"
+            />
+            <p>Favorite travel image chosen by {{ atlas.displayName }}</p>
+          </div>
+        </dialog>
 
         <div class="my-atlas-public-stats" aria-label="Atlas statistics">
           <div>
@@ -80,7 +125,13 @@
             >
               {{ timelineButtonLabel }}
             </button>
-            <button type="button" @click="exportStory">Story image</button>
+            <button
+              type="button"
+              :disabled="storyExportPending"
+              @click="exportStory"
+            >
+              {{ storyExportPending ? "Creating image" : "Story image" }}
+            </button>
             <button
               type="button"
               :aria-pressed="String(showMemories)"
@@ -101,6 +152,13 @@
           <p class="my-atlas-public-route-note">
             Playback follows visit years. Hops within a year are a visual
             sequence, not a recorded travel route.
+          </p>
+          <p
+            v-if="storyExportStatus"
+            class="my-atlas-public-export-status"
+            role="status"
+          >
+            {{ storyExportStatus }}
           </p>
         </div>
 
@@ -152,7 +210,7 @@
 
 <script>
 import MyAtlasMap from "../components/MyAtlasMap.vue"
-import { fetchPublicAtlas } from "../api/client.mjs"
+import { fetchPublicAtlas, fetchPublicAtlasImage } from "../api/client.mjs"
 import {
   atlasTimelineSequence,
   atlasStats,
@@ -187,6 +245,11 @@ export default {
       yearFilter: "all",
       showMemories: false,
       mobileControlsOpen: false,
+      apiBaseUrl: "",
+      favoriteImageUrl: "",
+      favoriteImageError: "",
+      storyExportPending: false,
+      storyExportStatus: "",
       previousTitle: "",
       robotsMeta: null,
       previousRobotsContent: null,
@@ -286,6 +349,7 @@ export default {
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
     window.clearTimeout(this.timelineTimer)
+    if (this.favoriteImageUrl) URL.revokeObjectURL(this.favoriteImageUrl)
     document.title = this.previousTitle
     if (this.createdRobotsMeta) this.robotsMeta?.remove()
     else if (this.previousRobotsContent === null) {
@@ -297,14 +361,15 @@ export default {
   methods: {
     async loadAtlas() {
       try {
-        const apiBaseUrl = getMyAtlasApiBaseUrl(
+        this.apiBaseUrl = getMyAtlasApiBaseUrl(
           process.env,
           window.location.origin
         )
         this.atlas = await fetchPublicAtlas({
-          apiBaseUrl,
+          apiBaseUrl: this.apiBaseUrl,
           handle: this.handle,
         })
+        if (this.atlas.favoriteImage) await this.loadFavoriteImage()
         document.title = `${this.atlas.displayName} | My Atlas`
       } catch (error) {
         this.error = "atlas_unavailable"
@@ -312,6 +377,25 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+    async loadFavoriteImage() {
+      try {
+        const blob = await fetchPublicAtlasImage({
+          apiBaseUrl: this.apiBaseUrl,
+          handle: this.handle,
+        })
+        if (this.favoriteImageUrl) URL.revokeObjectURL(this.favoriteImageUrl)
+        this.favoriteImageUrl = URL.createObjectURL(blob)
+        this.favoriteImageError = ""
+      } catch {
+        this.favoriteImageError = "favorite_image_unavailable"
+      }
+    },
+    openFavoriteImage() {
+      this.$refs.favoriteImageDialog?.showModal()
+    },
+    closeFavoriteImage() {
+      this.$refs.favoriteImageDialog?.close()
     },
     selectPlace(placeId) {
       if (this.timelinePlaying) this.pauseTimeline()
@@ -375,14 +459,28 @@ export default {
       this.timelinePlaying = true
       this.scheduleTimelineStep()
     },
-    exportStory() {
-      downloadMyAtlasStory({
-        displayName: this.atlas.displayName,
-        filterLabel: this.filterLabel,
-        handle: this.atlas.handle,
-        places: this.displayedPlaces,
-        stats: this.visibleStats,
-      })
+    async exportStory() {
+      if (this.storyExportPending) return
+      this.storyExportPending = true
+      this.storyExportStatus = "Creating the Story image."
+      try {
+        const favoriteImage = this.$refs.favoriteImagePreview || null
+        if (favoriteImage?.decode) await favoriteImage.decode()
+        const filename = await downloadMyAtlasStory({
+          displayName: this.atlas.displayName,
+          favoriteImage,
+          filterLabel: this.filterLabel,
+          handle: this.atlas.handle,
+          places: this.displayedPlaces,
+          stats: this.visibleStats,
+        })
+        this.storyExportStatus = `${filename} was downloaded.`
+      } catch {
+        this.storyExportStatus =
+          "The Story image could not be created. Try again."
+      } finally {
+        this.storyExportPending = false
+      }
     },
     formatVisitedDates,
     placeLabel(place) {
@@ -442,6 +540,143 @@ export default {
   color: #132023;
   background: #e6ba68;
   letter-spacing: 0;
+}
+
+.my-atlas-public-profile.has-favorite-image {
+  position: relative;
+  display: flex;
+  min-height: 16rem;
+  align-items: flex-end;
+  margin: 1.15rem 0 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(230, 186, 104, 0.28);
+  border-radius: 1.1rem;
+  background: #102023;
+  isolation: isolate;
+}
+
+.my-atlas-public-favorite-image {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-atlas-public-profile.has-favorite-image::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 13, 15, 0.08) 15%, rgba(5, 13, 15, 0.92)),
+    linear-gradient(90deg, rgba(5, 13, 15, 0.45), transparent 70%);
+  content: "";
+}
+
+.my-atlas-public-profile.has-favorite-image .my-atlas-public-intro {
+  width: 100%;
+  margin: 0;
+  padding: 1rem;
+}
+
+.my-atlas-public-favorite-action {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.8rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 0.72rem;
+  color: #fff8e8;
+  text-align: left;
+  background: rgba(6, 17, 19, 0.72);
+  font: inherit;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.my-atlas-public-favorite-action strong {
+  font-size: 0.68rem;
+}
+
+.my-atlas-public-favorite-action span {
+  flex: 0 0 auto;
+  margin: 0;
+  color: #f0cc82;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.my-atlas-public-favorite-action:hover,
+.my-atlas-public-favorite-action:focus-visible {
+  border-color: #e6ba68;
+  outline: none;
+}
+
+.my-atlas-public-favorite-action:focus-visible {
+  box-shadow: 0 0 0 3px rgba(230, 186, 104, 0.28);
+}
+
+.my-atlas-public-image-error,
+.my-atlas-public-export-status {
+  margin: 0 0 0.8rem;
+  color: #9fb1ab;
+  font-size: 0.62rem;
+  line-height: 1.5;
+}
+
+.my-atlas-public-image-dialog {
+  width: min(42rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(230, 186, 104, 0.45);
+  border-radius: 1rem;
+  color: #edf7f2;
+  background: #081416;
+  box-shadow: 0 1.4rem 4rem rgba(0, 0, 0, 0.55);
+}
+
+.my-atlas-public-image-dialog::backdrop {
+  background: rgba(2, 8, 10, 0.86);
+  backdrop-filter: blur(8px);
+}
+
+.my-atlas-public-image-dialog > div {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.my-atlas-public-image-dialog button {
+  justify-self: end;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid rgba(230, 186, 104, 0.45);
+  border-radius: 0.65rem;
+  color: #f6e4bc;
+  background: #111f22;
+  font: inherit;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.my-atlas-public-image-dialog img {
+  width: 100%;
+  max-height: calc(100dvh - 8rem);
+  border-radius: 0.7rem;
+  object-fit: contain;
+}
+
+.my-atlas-public-image-dialog p {
+  margin: 0;
+  color: #b9cac4;
+  font-size: 0.7rem;
+  text-align: center;
 }
 
 .my-atlas-public-state,
@@ -546,6 +781,11 @@ export default {
 
 .my-atlas-public-controls select {
   display: block;
+}
+
+.my-atlas-public-controls button:disabled {
+  cursor: wait;
+  opacity: 0.56;
 }
 
 .my-atlas-public-timeline {
@@ -710,6 +950,20 @@ export default {
   .my-atlas-public-state,
   .my-atlas-public-intro {
     margin: 0.9rem 0 0.85rem;
+  }
+
+  .my-atlas-public-profile.has-favorite-image {
+    min-height: 14rem;
+    margin-top: 0.9rem;
+  }
+
+  .my-atlas-public-profile.has-favorite-image .my-atlas-public-intro {
+    margin: 0;
+    padding: 0.9rem;
+  }
+
+  .my-atlas-public-favorite-action {
+    grid-column: 1 / -1;
   }
 
   .my-atlas-public-intro {

@@ -41,6 +41,11 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Source assertions and the production compile verify that Share saved trip remains visible beside a collapsed saved plan, uses the existing private-field-filtered read only snapshot, and reports copy success or failure outside the expanded planner; the separate owner workflow is named Share Visited Atlas
+    - Authenticated local Chrome against staging observed an idempotent POST /v1/me/bucket-list return HTTP 200, a complete Wish body, and W/"rev-9"; the normalized local client retained revision 9, refreshed the atomic planning snapshot at W/"rev-10", and showed the new destination without a planner error
+    - npm run my-atlas:test passed after client coverage was expanded to accept the observed weak revision ETag on a valid idempotent wishlist response
+    - npm run atlas:test passed while the monitored MapTiler teardown warnings were traced to map.remove cleanup during development hot reload rather than a live request or render failure
+    - Local Chrome component-state verification at 1280 by 900 and 390 by 844 confirmed that a saved trip hides the route builder, exposes Copy share link in its heading, uses Edit trip and Trip tools as the only primary actions, and replaces the long itinerary with a compact header while editing; the editor uses the stable Saved places disclosure
     - npm run my-atlas:test
     - npm run lint
     - Pull request 180 passed validation run 44574292911 and merged the semantic route and memory slice to develop as 72bfc9f497b8e80ede8dad00fa37b8eb7864ffdf; develop validation run 44574697970 then succeeded
@@ -215,7 +220,10 @@ Authenticated owner interaction remains external acceptance.
 - [x] Immutable catalog/custom location snapshots with source-wish references,
       route-readiness state, and catalog revision.
 - [x] Account-global ETag, `If-Match`, and idempotency behavior across wishlist,
-      plan, Keep, Mark Visited, and deletion writes.
+      plan, Keep, Mark Visited, and deletion writes. The browser accepts either
+      a strong `"rev-N"` or weak `W/"rev-N"` response validator when recovering
+      the numeric revision, while every mutation continues to send a strong
+      `If-Match: "rev-N"` value.
 - [x] Six-calendar-month retention, 30-day deletion grace, visible Keep/Delete
       review, per-owner alarm scheduling, and automatic plan-only expiry.
 - [x] Client-only Google Maps URL and privacy-filtered AI prompt builders.
@@ -277,7 +285,7 @@ Authenticated owner interaction remains external acceptance.
 - [x] The planner starts collapsed within the owner workflow. Its expanded
       wishlist, destination chooser, and ordered-stop collections use bounded
       scrolling so large private lists do not lengthen the whole Atlas panel.
-- [x] Opening the planner closes Add destination, Visited, and Share and export
+- [x] Opening the planner closes Add destination, Visited, and Share Visited Atlas
       sections, expands the desktop owner panel to a readable working width,
       and preserves every direct child at its natural height so overflow scrolls
       instead of flex-shrinking the planner into horizontal strips.
@@ -318,9 +326,15 @@ Authenticated owner interaction remains external acceptance.
 - [x] The owner page now uses progressive disclosure around that planner. Sign in
       or the signed-in profile menu occupies one compact account control, while
       Add destination and Visited are attached to the Atlas overview. The planner
-      leads with start, ordered stops, and finish, nests the Want to go list,
-      hides empty itinerary chrome, and opens trip naming and persistence in a
-      modal only after the route has a start, at least one stop, and a finish.
+      leads with start, ordered stops, and finish, keeps the route builder closed
+      for an existing saved trip, and names the private destination disclosure
+      Saved places. A collapsed saved trip exposes Share saved trip without
+      requiring the planner to open, and the expanded itinerary repeats that
+      action. Both copy the same read only snapshot and show visible success or
+      failure feedback. Edit trip reveals route management and Trip tools
+      contains Directions and the planning prompt. Trip naming and persistence
+      open in a modal only after the route has a start, at least one stop, and a
+      finish.
 - [x] A rejected stale mutation still relies on the Worker `If-Match` boundary.
       The browser treats revisions as monotonic, fetches the authoritative
       profile revision after an explicit HTTP 412, preserves the local itinerary
