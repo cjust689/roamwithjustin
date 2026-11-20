@@ -1,8 +1,9 @@
 <template>
   <main class="my-atlas-explore">
     <header class="my-atlas-explore-header">
-      <a href="/" aria-label="Roam With Justin home">RWJ</a>
+      <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
       <router-link to="/my-atlas">My Atlas</router-link>
+      <ThemeSelector />
     </header>
 
     <section class="my-atlas-explore-intro" aria-labelledby="explore-title">
@@ -168,11 +169,11 @@ export default {
   background:
     radial-gradient(
       circle at 85% 5%,
-      rgba(238, 184, 87, 0.15),
+      rgba(var(--color-accent-rgb, 238, 184, 87), 0.15),
       transparent 28rem
     ),
-    #081315;
-  color: #f7f2e7;
+    var(--color-page, #081315);
+  color: var(--color-text, #f7f2e7);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -190,7 +191,7 @@ export default {
 }
 
 .my-atlas-explore-header a {
-  color: #f4c66f;
+  color: var(--color-accent-soft, #f4c66f);
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -204,7 +205,7 @@ export default {
 
 .my-atlas-explore-intro > p:first-child {
   margin: 0 0 1rem;
-  color: #f4c66f;
+  color: var(--color-accent-soft, #f4c66f);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -224,7 +225,7 @@ export default {
 .my-atlas-explore-intro > p:last-child {
   max-width: 680px;
   margin: 1.75rem 0 0;
-  color: rgba(247, 242, 231, 0.68);
+  color: var(--color-text-muted, rgba(247, 242, 231, 0.68));
   line-height: 1.7;
 }
 
@@ -236,9 +237,9 @@ export default {
 
 .my-atlas-explore-card {
   overflow: hidden;
-  border: 1px solid rgba(244, 198, 111, 0.25);
+  border: 1px solid rgba(var(--color-accent-rgb, 244, 198, 111), 0.25);
   border-radius: 1.35rem;
-  background: #101c1e;
+  background: var(--color-surface, #101c1e);
   color: inherit;
   text-decoration: none;
   transition:
@@ -248,7 +249,7 @@ export default {
 
 .my-atlas-explore-card:hover,
 .my-atlas-explore-card:focus-visible {
-  border-color: #f4c66f;
+  border-color: var(--color-accent, #f4c66f);
   outline: none;
   transform: translateY(-4px);
 }
@@ -260,7 +261,12 @@ export default {
   place-items: center;
   overflow: hidden;
   background:
-    linear-gradient(145deg, rgba(244, 198, 111, 0.2), transparent 55%), #1b292a;
+    linear-gradient(
+      145deg,
+      rgba(var(--color-accent-rgb, 244, 198, 111), 0.2),
+      transparent 55%
+    ),
+    var(--color-surface-raised, #1b292a);
 }
 
 .my-atlas-explore-image img {
@@ -270,7 +276,7 @@ export default {
 }
 
 .my-atlas-explore-image > span {
-  color: rgba(247, 242, 231, 0.62);
+  color: var(--color-text-muted, rgba(247, 242, 231, 0.62));
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 8vw, 5rem);
 }
@@ -281,8 +287,8 @@ export default {
   bottom: 0.75rem;
   padding: 0.45rem 0.65rem;
   border-radius: 999px;
-  background: rgba(8, 19, 21, 0.88);
-  color: #f4c66f;
+  background: rgba(var(--color-page-rgb, 8, 19, 21), 0.88);
+  color: var(--color-accent-soft, #f4c66f);
   font-size: 0.62rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -296,7 +302,7 @@ export default {
 
 .my-atlas-explore-card-copy span,
 .my-atlas-explore-card-copy small {
-  color: rgba(247, 242, 231, 0.6);
+  color: var(--color-text-muted, rgba(247, 242, 231, 0.6));
   font-size: 0.72rem;
 }
 
@@ -310,19 +316,19 @@ export default {
   justify-items: start;
   gap: 1rem;
   padding: 2rem;
-  border: 1px solid rgba(244, 198, 111, 0.2);
+  border: 1px solid rgba(var(--color-accent-rgb, 244, 198, 111), 0.2);
   border-radius: 1rem;
-  color: rgba(247, 242, 231, 0.72);
+  color: var(--color-text-muted, rgba(247, 242, 231, 0.72));
 }
 
 .my-atlas-explore-state button,
 .my-atlas-explore-state a,
 .my-atlas-explore-more {
   padding: 0.7rem 1rem;
-  border: 1px solid #f4c66f;
+  border: 1px solid var(--color-accent, #f4c66f);
   border-radius: 999px;
   background: transparent;
-  color: #f4c66f;
+  color: var(--color-accent-soft, #f4c66f);
   font: inherit;
   font-size: 0.75rem;
   font-weight: 800;

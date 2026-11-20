@@ -62,8 +62,8 @@ body,
   min-height: 100dvh;
   overflow-x: clip;
   padding-top: 72px;
-  background: #0b1114;
-  color: #fff;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   isolation: isolate;
 }
 </style>

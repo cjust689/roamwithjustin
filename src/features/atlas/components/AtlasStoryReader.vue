@@ -341,11 +341,11 @@ export default {
   min-width: 540px;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 24px;
-  background: #0b1114;
+  background: var(--color-page, #0b1114);
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.6);
-  color: #fff;
+  color: var(--color-text, #fff);
 }
 
 .atlas-reader-toolbar {
@@ -354,19 +354,19 @@ export default {
   align-items: center;
   gap: 0.55rem;
   min-height: 4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   padding: 0.65rem 0.8rem;
-  background: rgba(7, 11, 14, 0.98);
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.98);
 }
 
 .atlas-reader-toolbar button,
 .atlas-reader-footer button {
   min-height: 2.75rem;
-  border: 1px solid rgba(246, 189, 96, 0.44);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.44);
   border-radius: 999px;
   padding: 0.62rem 0.85rem;
-  background: rgba(246, 189, 96, 0.08);
-  color: #fff;
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.08);
+  color: var(--color-text, #fff);
   font: inherit;
   font-size: max(0.875rem, 14px);
   font-weight: 800;
@@ -375,7 +375,7 @@ export default {
 
 .atlas-reader-toolbar > span {
   min-width: 2.6rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
   font-size: max(0.875rem, 14px);
   font-weight: 800;
   text-align: right;
@@ -391,12 +391,13 @@ export default {
   overflow-y: auto;
   overscroll-behavior: contain;
   scroll-padding-bottom: 3rem;
-  scrollbar-color: #f6bd60 rgba(255, 255, 255, 0.08);
+  scrollbar-color: var(--color-accent, #f6bd60)
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
   scrollbar-width: thin;
 }
 
 .atlas-reader-scroll:focus-visible {
-  outline: 3px solid #f6bd60;
+  outline: 3px solid var(--color-focus, #f6bd60);
   outline-offset: -3px;
 }
 
@@ -406,7 +407,7 @@ export default {
   min-height: min(68vh, 660px);
   align-items: flex-end;
   overflow: hidden;
-  background: #152229;
+  background: var(--color-surface-raised, #152229);
 }
 
 .atlas-reader-hero > img,
@@ -422,7 +423,11 @@ export default {
 }
 
 .atlas-reader-hero-shade {
-  background: linear-gradient(180deg, rgba(4, 7, 9, 0.08), #0b1114 94%);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--color-page-rgb, 4, 7, 9), 0.08),
+    var(--color-page, #0b1114) 94%
+  );
 }
 
 .atlas-reader-heading {
@@ -432,7 +437,7 @@ export default {
 }
 
 .atlas-reader-heading > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: max(0.875rem, 14px);
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -453,7 +458,7 @@ export default {
 .atlas-reader-heading p {
   max-width: 640px;
   margin: 1.2rem 0 0;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.8));
   font-size: max(1rem, 16px);
   line-height: 1.7;
 }
@@ -467,13 +472,13 @@ export default {
   justify-items: start;
   gap: 0.8rem;
   margin-top: 4rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
   padding-top: 1.5rem;
 }
 
 .atlas-reader-footer p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: max(1rem, 16px);
 }
 
@@ -484,7 +489,7 @@ export default {
   display: grid;
   place-items: center;
   padding: clamp(1rem, 4vw, 3rem);
-  background: rgba(2, 5, 7, 0.96);
+  background: rgba(var(--color-page-rgb, 2, 5, 7), 0.96);
   backdrop-filter: blur(18px);
 }
 
@@ -494,10 +499,10 @@ export default {
   right: max(1rem, env(safe-area-inset-right));
   width: 3rem;
   height: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.28);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
+  color: var(--color-text, #fff);
   font-size: 1.8rem;
   cursor: pointer;
 }
@@ -516,12 +521,12 @@ export default {
 
 .atlas-reader-lightbox figcaption {
   margin-top: 0.75rem;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.76));
   font-size: max(1rem, 16px);
 }
 
 button:focus-visible {
-  outline: 3px solid #fff;
+  outline: 3px solid var(--color-focus, #fff);
   outline-offset: 2px;
 }
 
@@ -546,7 +551,7 @@ button:focus-visible {
 
   .atlas-story-reader.is-map-preview {
     top: 32dvh;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
     border-radius: 22px 22px 0 0;
   }
 

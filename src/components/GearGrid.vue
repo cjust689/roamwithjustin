@@ -107,14 +107,14 @@ header {
 
 .page-title {
   margin: 0;
-  color: #f4f7f4;
+  color: var(--color-text, #f4f7f4);
   font-size: clamp(2.3rem, 6vw, 4.8rem);
   line-height: 0.95;
 }
 
 .subtitle,
 .gear-empty p {
-  color: #aeb9b7;
+  color: var(--color-text-muted, #aeb9b7);
   line-height: 1.65;
 }
 
@@ -127,9 +127,9 @@ header {
 .gallery-card,
 .gear-empty {
   overflow: hidden;
-  border: 1px solid rgba(230, 186, 104, 0.25);
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.25);
   border-radius: 1rem;
-  background: #111b1c;
+  background: var(--color-surface, #111b1c);
 }
 
 .card-banner {
@@ -146,7 +146,7 @@ header {
 
 .card-content > p:first-child {
   margin: 0 0 0.35rem;
-  color: #e6ba68;
+  color: var(--color-accent-soft, #e6ba68);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -156,17 +156,17 @@ header {
 .card-content h2,
 .gear-empty h2 {
   margin: 0;
-  color: #f4f7f4;
+  color: var(--color-text, #f4f7f4);
 }
 
 .card-content p {
-  color: #aeb9b7;
+  color: var(--color-text-muted, #aeb9b7);
   line-height: 1.55;
 }
 
 .card-content .gear-link-disclosure {
   margin: 0.75rem 0 0;
-  color: #c9d0ce;
+  color: var(--color-text-muted, #c9d0ce);
   font-size: 0.76rem;
 }
 
@@ -180,15 +180,15 @@ header {
 .gear-actions a {
   min-height: 2.75rem;
   padding: 0.72rem 0.9rem;
-  border: 1px solid #e6ba68;
+  border: 1px solid var(--color-accent, #e6ba68);
   border-radius: 999px;
-  color: #f4d38f;
+  color: var(--color-accent-soft, #f4d38f);
   text-decoration: none;
 }
 
 .gear-actions a:hover,
 .gear-actions a:focus-visible {
-  background: rgba(230, 186, 104, 0.12);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.12);
 }
 
 .gear-empty {

@@ -65,8 +65,8 @@ export default {
   min-height: calc(100dvh - 72px);
   margin: 0 auto;
   padding: clamp(3rem, 8vw, 7rem) 0;
-  background: #0b1114;
-  color: #fff;
+  background: var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", sans-serif;
 }
 
@@ -82,7 +82,7 @@ export default {
 .intro {
   max-width: 720px;
   margin: 1rem 0 3rem;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -95,7 +95,7 @@ export default {
 .affiliate-card {
   height: 200px;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   border-radius: 18px;
   overflow: hidden;
   background-size: cover;
@@ -121,9 +121,9 @@ export default {
   gap: 0.75rem;
 }
 .gear-pill {
-  border: 1px solid rgba(246, 189, 96, 0.34);
-  background: rgba(246, 189, 96, 0.08);
-  color: #f8d79f;
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.34);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.08);
+  color: var(--color-accent-soft, #f8d79f);
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -138,7 +138,7 @@ export default {
   margin-right: 0.5rem;
 }
 .gear-pill:hover {
-  background: rgba(246, 189, 96, 0.14);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.14);
 }
 .card-background {
   display: block;
@@ -152,7 +152,7 @@ export default {
 }
 .card-overlay {
   background: rgba(0, 0, 0, 0.55);
-  color: white;
+  color: var(--color-text, white);
   padding: 1rem;
   width: 100%;
   text-align: center;

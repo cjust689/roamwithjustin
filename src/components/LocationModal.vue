@@ -156,8 +156,8 @@ export default {
   inset: 0;
   overflow-y: auto;
   padding: clamp(0.6rem, 3vw, 2rem);
-  background: rgba(3, 6, 8, 0.88);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 3, 6, 8), 0.88);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
   backdrop-filter: blur(16px);
 }
@@ -168,12 +168,16 @@ export default {
   min-height: calc(100vh - 4rem);
   margin: 0 auto;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
   border-radius: 28px;
   padding: clamp(1.25rem, 5vw, 4rem);
   background:
-    radial-gradient(circle at 90% 0, rgba(246, 189, 96, 0.08), transparent 25%),
-    #0b1114;
+    radial-gradient(
+      circle at 90% 0,
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.08),
+      transparent 25%
+    ),
+    var(--color-page, #0b1114);
   box-shadow: 0 28px 90px rgba(0, 0, 0, 0.48);
 }
 
@@ -186,10 +190,10 @@ export default {
   place-items: center;
   width: 3rem;
   height: 3rem;
-  border: 1px solid rgba(255, 255, 255, 0.17);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.17);
   border-radius: 50%;
-  background: rgba(7, 11, 14, 0.8);
-  color: #fff;
+  background: rgba(var(--color-page-rgb, 7, 11, 14), 0.8);
+  color: var(--color-text, #fff);
   font-size: 1.45rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
@@ -202,7 +206,7 @@ export default {
 
 .location-header > span,
 .field-notes > span {
-  color: #f6bd60;
+  color: var(--color-accent-soft, #f6bd60);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -221,7 +225,7 @@ export default {
 .location-header > p {
   max-width: 720px;
   margin: 1.1rem 0 0;
-  color: rgba(255, 255, 255, 0.66);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.66));
   font-size: 0.94rem !important;
   font-weight: 400;
   line-height: 1.7;
@@ -236,19 +240,19 @@ export default {
 
 .location-actions a,
 .reel-link {
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.16);
   border-radius: 999px;
   padding: 0.75rem 0.9rem;
-  color: #fff;
+  color: var(--color-text, #fff);
   font-size: 0.74rem;
   font-weight: 800;
   text-decoration: none;
 }
 
 .location-actions a:first-child {
-  border-color: #f6bd60;
-  background: #f6bd60;
-  color: #111719;
+  border-color: var(--color-accent, #f6bd60);
+  background: var(--color-accent, #f6bd60);
+  color: var(--color-accent-contrast, #111719);
 }
 
 .location-meta {
@@ -261,13 +265,13 @@ export default {
 .location-meta > span {
   border-radius: 999px;
   padding: 0.45rem 0.6rem;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.56);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.06);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.56));
   font-size: 0.68rem;
 }
 
 .location-meta strong {
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.82));
 }
 
 .location-gallery {
@@ -281,7 +285,7 @@ export default {
   overflow: hidden;
   margin: 0;
   border-radius: 20px;
-  background: #05080a;
+  background: var(--color-page, #05080a);
 }
 
 .location-gallery img,
@@ -289,7 +293,7 @@ export default {
   display: block;
   width: 100%;
   height: min(520px, 54vw);
-  background: #05080a;
+  background: var(--color-page, #05080a);
   object-fit: cover;
 }
 
@@ -299,14 +303,14 @@ export default {
 
 .location-gallery figcaption {
   padding: 0.7rem 0.9rem;
-  color: rgba(255, 255, 255, 0.58);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
   font-size: 0.72rem;
   line-height: 1.5;
 }
 
 .field-notes {
   margin-top: 3rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   padding-top: 2rem;
 }
 
@@ -320,7 +324,7 @@ export default {
 .field-notes ul {
   max-width: 760px;
   padding-left: 1.25rem;
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.62));
   font-size: 0.82rem;
   line-height: 1.7;
 }
@@ -328,7 +332,7 @@ export default {
 .reel-link {
   display: inline-block;
   margin-top: 1.5rem;
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
 }
 
 @media (max-width: 680px) {

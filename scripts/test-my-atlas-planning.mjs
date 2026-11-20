@@ -148,7 +148,7 @@ assert.match(plannerComponent, /aria-controls="planner-route-builder"/)
 assert.match(plannerComponent, /aria-controls="planner-trip-tools"/)
 assert.match(plannerComponent, /Close editor/)
 assert.match(plannerComponent, /Include possible stops and activities/)
-assert.match(plannerComponent, /Search this flight on Expedia/)
+assert.match(plannerComponent, /Review flight gateways/)
 assert.match(plannerComponent, /@media \(min-width: 721px\)/)
 assert.match(plannerComponent, /v-model="directionsIncludedPointKeys"/)
 assert.match(plannerComponent, /v-model="directionsDefaultMode"/)
@@ -252,7 +252,7 @@ assert.match(
 )
 assert.match(
   ownerView,
-  /\.my-atlas-account-card button:focus[\s\S]*background: rgba\(230, 186, 104, 0\.14\)/
+  /\.my-atlas-account-card button:focus[\s\S]*background: rgba\(var\(--color-accent-rgb, 230, 186, 104\), 0\.14\)/
 )
 assert.match(
   ownerView,
@@ -306,9 +306,11 @@ assert.match(
   /error\?\.code === "revision_conflict"[\s\S]*refreshPlanningRevision\(accessToken\)[\s\S]*applyMutation\(accessToken\)/
 )
 assert.match(
-  plannerComponent,
+  ownerView,
   /deleteMyAtlasAccountWithRevisionRecovery\([\s\S]*onRevision: revision =>[\s\S]*sessionStorage\.setItem/
 )
+assert.doesNotMatch(plannerComponent, /<summary>Delete My Atlas account/)
+assert.match(ownerView, /<details class="my-atlas-delete-account">/)
 assert.match(
   ownerView,
   /pendingDeletion[\s\S]*deleteMyAtlasAccountWithRevisionRecovery\([\s\S]*onRevision: revision =>[\s\S]*sessionStorage\.setItem/

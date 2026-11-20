@@ -195,11 +195,11 @@ export default {
   background:
     radial-gradient(
       circle at 88% 8%,
-      rgba(246, 189, 96, 0.08),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.08),
       transparent 28%
     ),
-    #0b1114;
-  color: #fff;
+    var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
   font-family: "Poppins", system-ui, sans-serif;
 }
 
@@ -209,7 +209,7 @@ export default {
 }
 
 .privacy-page header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
   padding-bottom: clamp(2rem, 5vw, 3.5rem);
 }
 
@@ -224,13 +224,13 @@ export default {
 
 .privacy-page header p,
 .privacy-page section p {
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: 0.9rem !important;
   line-height: 1.75;
 }
 
 .privacy-page section {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
   padding: clamp(2rem, 5vw, 3.5rem) 0;
 }
 
@@ -246,7 +246,7 @@ export default {
 }
 
 .privacy-page a {
-  color: #f8d79f;
+  color: var(--color-accent-soft, #f8d79f);
   font-weight: 700;
 }
 </style>

@@ -23,11 +23,11 @@ export default {
   background:
     radial-gradient(
       circle at 85% 5%,
-      rgba(246, 189, 96, 0.08),
+      rgba(var(--color-accent-rgb, 246, 189, 96), 0.08),
       transparent 28%
     ),
-    #0b1114;
-  color: #fff;
+    var(--color-page, #0b1114);
+  color: var(--color-text, #fff);
 }
 
 .gear > .row {
