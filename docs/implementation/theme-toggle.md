@@ -88,7 +88,7 @@ implemented as described below.
 - [x] Update the manifest launch background and existing icon paths.
 - [x] Verify responsive brand rendering on six routes, two themes and two
       viewport widths, including a 320-pixel mobile layout.
-- [ ] Verify the live release after promotion.
+- [x] Verify the live release after promotion.
 
 The master assets retain their original viewBox and path geometry. Raster
 and favicon wrappers add padding and a dark tile; no source art is redrawn.
@@ -108,11 +108,31 @@ the release; local QA state and the owner's editable artwork are excluded.
 
 Feature branch `feature/my-atlas-trip-foundation-and-travel-tools` contains
 registration correction commit `a3622c2` and theme/branding/travel-tools commit
-`092a13a`. Pull request 214 targets develop and is awaiting the required
-validation check. The registration correction was separately deployed to the
+`092a13a`. Pull request 214 passed validation run `44778931177` and merged
+to develop as `c2432153aa46d2d3a643fbbf5010290914cb52d2`. Develop push
+validation run `44779356342` succeeded. Pull request 215 passed production
+validation run `44779441081` and merged to main as
+`ab0bc958d2d8fc1828178f07e7f1124fcd2716c3`. The registration correction was
+separately deployed to the
 existing staging API as `b5b3674c-6219-4053-b024-7cb65cd4e539`; its health
-endpoint returned HTTP 200. This does not establish a new live registration
-or a frontend Pages deployment. No account wipe or migration was performed.
+endpoint returned HTTP 200. This does not establish a new live registration.
+No account wipe or migration was performed. Pages run `44779910068` succeeded
+and deployed that exact main merge.
+
+Live Chrome verified 24 combinations across homepage, Stories, owner My Atlas,
+Explore, public Atlas and shared-trip headers at 320 and 1440 CSS pixels in
+both themes. Every mark decoded, used the expected amber/orange SVG, retained
+the home link's accessible name and stayed within the viewport. Both favicon
+URLs followed the selected theme with the `mountain-r1` revision. There was
+no horizontal overflow. Public/shared unavailable states were used for the
+last two header checks; no account was created or modified. The report is
+`.state/theme/brand-live-qa.json`, with `brand-live-*.png` screenshots.
+
+Direct live reads returned HTTP 200 with the expected media types for both
+favicon SVGs, both supplied SVG masters, `site.webmanifest`, the Apple icon
+and both Android/app icon sizes. The live raster byte sizes matched local
+exports. This confirms the deployed assets and browser behavior without
+claiming an installed-app cache refresh or hosted Auth0 round trip.
 
 ## Theme verification
 
@@ -171,8 +191,8 @@ popover alignment correction also passed targeted ESLint and browser compile
 checks. The earlier literal-color focus regression assertion now recognizes
 the same gold fallback through the semantic accent token.
 
-Deployment and actual hosted Auth0 round-trip verification are not part of the
-current local implementation. Manual screen-reader testing, installed-app
+The frontend deployment and live browser checks are recorded above. Actual
+hosted Auth0 round-trip verification, manual screen-reader testing, installed-app
 behavior and every provider-owned frame are externally unverified. No new
 optional map-basemap design is included. The approved SVG brand replacement
 is included; there is no installed-app theme-switching guarantee.

@@ -70,6 +70,11 @@ Site appearance: [Classic and Explorer architecture](architecture/visual-themes.
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;
 the same masters produce the browser favicons and stable amber app icons.
+Pull requests 214 and 215 promoted the release through develop and main.
+Pages run 44779910068 succeeded, and live Chrome passed 24 theme/brand/favicon
+checks across six header routes at mobile and desktop widths. The existing
+My Atlas API also serves the registration response correction as Worker
+version `b5b3674c-6219-4053-b024-7cb65cd4e539`.
 
 Start here before using an older implementation brief.
 
