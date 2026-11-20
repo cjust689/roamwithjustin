@@ -97,6 +97,17 @@ const ownerView = fs.readFileSync(
   ),
   "utf8"
 )
+const publicView = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/views/MyAtlasPublicView.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
+const storyExport = fs.readFileSync(
+  new URL("../src/features/my-atlas/export/storyExport.mjs", import.meta.url),
+  "utf8"
+)
 const pinEditorComponent = fs.readFileSync(
   new URL(
     "../src/features/my-atlas/components/MyAtlasPinEditor.vue",
@@ -114,14 +125,24 @@ assert.match(plannerComponent, /v-if="planEditorOpen"/)
 assert.match(plannerComponent, /Add trip details/)
 assert.match(plannerComponent, /<h3 id="bucket-list-title">/)
 assert.match(plannerComponent, /<h3 id="trip-plan-title">/)
-assert.match(plannerComponent, /Want to go \(\$\{wishes\.length\}\)/)
+assert.match(plannerComponent, /Saved places \(\{\{ wishes\.length \}\}\)/)
+assert.doesNotMatch(plannerComponent, /Hide want to go/)
+assert.doesNotMatch(plannerComponent, /Want to go \(/)
 assert.doesNotMatch(plannerComponent, /Choose destinations/)
 assert.doesNotMatch(plannerComponent, /Private trip planning beta/)
 assert.match(plannerComponent, /aria-controls="planner-directions-panel"/)
 assert.match(plannerComponent, /aria-controls="planner-prompt-panel"/)
 assert.match(plannerComponent, /planHasUnsavedChanges/)
-assert.match(plannerComponent, /Copy read only trip link/)
-assert.match(plannerComponent, /place names, and map\s+coordinates/)
+assert.match(plannerComponent, /Share saved trip/)
+assert.match(
+  plannerComponent,
+  /Share a read only snapshot of this saved trip/
+)
+assert.match(plannerComponent, /v-if="plan && !open"/)
+assert.match(plannerComponent, /v-if="!plan \|\| routeBuilderOpen"/)
+assert.match(plannerComponent, /aria-controls="planner-route-builder"/)
+assert.match(plannerComponent, /aria-controls="planner-trip-tools"/)
+assert.match(plannerComponent, /Close editor/)
 assert.match(plannerComponent, /Include possible stops and activities/)
 assert.match(plannerComponent, /Search this flight on Expedia/)
 assert.match(plannerComponent, /@media \(min-width: 721px\)/)
@@ -145,13 +166,38 @@ assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)
 assert.match(ownerView, /class="my-atlas-profile-trigger"/)
 assert.match(ownerView, /class="my-atlas-tools my-atlas-workflow-section"/)
-assert.match(ownerView, />\s*Share and export\s*</)
+assert.match(ownerView, />\s*Share Visited Atlas\s*</)
 assert.match(ownerView, />\s*Your favorite travel image\s*</)
-assert.match(ownerView, /used on every Atlas Story image you export/)
+assert.match(ownerView, />\s*Your Visited Atlas is empty\s*</)
+assert.match(ownerView, />\s*Add a visited place\s*</)
+assert.match(
+  ownerView,
+  /Share a saved trip separately from its\s+trip card/
+)
+assert.match(ownerView, /Create public Atlas link/)
+assert.match(ownerView, /storyExportPending/)
+assert.match(ownerView, /Creating Story image/)
+assert.match(ownerView, /toolsStatus/)
+assert.match(storyExport, /canvas\.toBlob/)
+assert.match(storyExport, /document\.body\.appendChild\(link\)/)
+assert.match(storyExport, /URL\.revokeObjectURL\(url\)/)
+assert.doesNotMatch(storyExport, /canvas\.toDataURL/)
+assert.match(ownerView, /used on Atlas Story images/)
+assert.match(ownerView, /favorite image on your public Visited Atlas/)
 assert.match(ownerView, /accept="image\/jpeg,image\/png,image\/webp"/)
 assert.match(ownerView, /replaceMyAtlasImage/)
 assert.match(ownerView, /removeMyAtlasImage/)
+assert.match(ownerView, /updateMyAtlasImageVisibility/)
+assert.match(ownerView, /Show on public profile/)
+assert.match(ownerView, /Keep image private/)
+assert.match(ownerView, /Shown on your public Visited Atlas/)
 assert.match(ownerView, /favoriteImagePreview/)
+assert.match(publicView, /class="my-atlas-public-profile"/)
+assert.match(publicView, />\s*Favorite travel image\s*</)
+assert.match(publicView, /View full image/)
+assert.match(publicView, /favoriteImageDialog/)
+assert.match(publicView, /fetchPublicAtlasImage/)
+assert.match(publicView, /favoriteImage,/)
 assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /openAtlasPanel\('visited'\)/)

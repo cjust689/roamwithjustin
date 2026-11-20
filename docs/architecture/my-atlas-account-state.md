@@ -57,6 +57,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Authenticated local Chrome against the staging Worker observed an idempotent wishlist create return HTTP 200 with a complete Wish body and the exposed representation ETag W/"rev-9"; after browser normalization the write completed at revision 9 without an invalid-response state
+    - npm run my-atlas:test verifies that browser reads accept strong and weak revision ETags while subsequent mutations continue sending the required strong If-Match value
     - npm run my-atlas:worker:test
     - Workers runtime deletion coverage verifies that completed deletion releases both the identity and handle assignments, preserves exact retry safety, and permits the same identity and handle to register again with a new invitation and user ID
     - Client deletion recovery coverage verifies stale DELETE, authoritative profile revision read, persisted revision replacement, and one retry with the original idempotency key across both the active planner and reload-resume paths
@@ -68,6 +70,7 @@ verification:
     - npm run my-atlas:test verified private planning contracts, direct catalog/custom endpoints, and client-only handoffs
     - npm run my-atlas:test verified favorite-image signature, animation, byte, pixel, square WebP, owner isolation, immutable replacement, private projection, removal, and account-deletion contracts
     - Staging Worker 8fbb0a9e-76bc-4be2-9a53-637be432db5c deployed the private R2, Images, image rate-limit, and November 19 privacy-version configuration; remote health, unauthenticated denial, foreign-origin denial, and allowed preflight checks passed
+    - Staging Worker 1113afaf-4600-4777-b92d-b2eb40e43826 deployed explicit favorite-image visibility, gated public image delivery, and the revised privacy version; remote health, PATCH preflight, and closed unknown-handle image checks passed
     - npm run my-atlas:test verified that planner catalog search preserves canonical result coordinates and shared rate-limit error presentation
     - npm run my-atlas:test verified the readable saved-itinerary source contract and revision-conflict recovery copy
     - Local Chrome fixture verification at 1280 and 390 CSS pixels confirmed the compact account menu, overview actions, route-first planner, readiness-gated trip-details dialog, and zero horizontal overflow
@@ -168,8 +171,8 @@ Read routes require `read:my-atlas`. Mutations additionally require
 - `GET /v1/me` reads the private owner profile;
 - `GET /v1/me/atlas` returns the owner profile and resolved pins in one bounded
   browser bootstrap response;
-- `GET|POST|DELETE /v1/me/atlas-image` privately reads, replaces, or removes
-  the owner's single favorite travel image;
+- `GET|POST|PATCH|DELETE /v1/me/atlas-image` privately reads, replaces, changes
+  public profile use, or removes the owner's single favorite travel image;
 - `PATCH /v1/me` changes display name or visibility;
 - `GET /v1/me/pins` returns at most 100 stored pins and a stable cursor;
 - `POST /v1/me/pins` creates one catalog pin or one owner-created custom pin;
@@ -220,17 +223,21 @@ atomically recheck the stored deadline and advance this same revision when they
 mark or delete a plan. Reads, exports, map handoffs, prompt copies, and passive
 login do not advance retention.
 
-Responses expose the current revision as a strong ETag. Stale mutations return
-HTTP 412 without changing state. Allowed browser origins can read `ETag` and
-`X-Request-Id` through `Access-Control-Expose-Headers`. This is required for
-the browser to accept the new revision after a successful cross-origin write.
-Browser revision state is monotonic. A planning read that began before a pin or
-profile write cannot replace a newer revision after it finishes. The primary
-planning read now returns wishlist and plan records from the same Durable Object
-snapshot and one ETag. The older two-request reader remains only as a temporary
-fallback while a frontend and Worker deployment overlap. After an HTTP 412, the
-planner reads the authoritative owner profile revision from `GET /v1/me` and
-retries the intended mutation once. A second conflict is not replayed.
+The Worker emits the current revision as a strong ETag. An intermediary may
+expose that representation validator to the browser as either `"rev-N"` or
+`W/"rev-N"`. The browser accepts both forms only to recover the monotonic
+revision number. Every mutation still sends the required strong
+`If-Match: "rev-N"` value. Stale mutations return HTTP 412 without changing
+state. Allowed browser origins can read `ETag` and `X-Request-Id` through
+`Access-Control-Expose-Headers`. This is required for the browser to accept the
+new revision after a successful cross-origin write. Browser revision state is
+monotonic. A planning read that began before a pin or profile write cannot
+replace a newer revision after it finishes. The primary planning read now
+returns wishlist and plan records from the same Durable Object snapshot and one
+ETag. The older two-request reader remains only as a temporary fallback while a
+frontend and Worker deployment overlap. After an HTTP 412, the planner reads
+the authoritative owner profile revision from `GET /v1/me` and retries the
+intended mutation once. A second conflict is not replayed.
 
 ## Pin state
 
@@ -268,9 +275,10 @@ keeps explicit Close and Save memory actions. It does not add a second memory
 record or mutation route.
 
 Visited pins do not store image references. One optional account-level favorite
-travel image is stored separately from pins, wishlist entries, plans, and the
-public Atlas projection. Owner state exposes only safe image metadata. The raw
-R2 key and source digest remain inside the Worker and Durable Object boundary.
+travel image is stored separately from pins, wishlist entries, and plans. Owner
+state exposes only safe image metadata and whether public profile use was
+approved. The raw R2 key and source digest remain inside the Worker and Durable
+Object boundary.
 
 The browser accepts JPEG, PNG, or WebP input up to 10 MiB. The Worker verifies
 the encoded type and animation boundary, uses Cloudflare Images to enforce a
@@ -286,6 +294,11 @@ After a successful commit, the Worker removes the superseded object. Explicit
 image removal clears the pointer before object cleanup. Account deletion removes
 the active object before the Durable Object is finalized. The bucket has no
 public route, development URL, or direct browser access.
+
+New uploads begin private. An owner can explicitly allow public profile use
+through the revision guarded image mutation. Legacy image records without the
+field are also treated as private, so an image uploaded under the earlier
+private wording is never exposed silently.
 
 Pin IDs are deterministically derived from the internal user ID and stored
 place ID at creation. A custom place ID is first deterministically derived from
@@ -518,6 +531,14 @@ cannot enter that response even when the visited Atlas is public.
 Internal user IDs, pin IDs, qualified identities, invitations, accepted-policy
 records, timestamps, and mutation history do not enter that response.
 
+The public Atlas projection includes safe favorite image metadata only when the
+owner explicitly allows public profile use. The image bytes remain in private
+R2 and are delivered through `GET /v1/public/atlases/{handle}/image`. That route
+resolves the active handle and rechecks the public profile, nonempty pin set,
+and image visibility choice before reading R2. It never exposes the storage key
+or source digest. The profile hero identifies the image as `Favorite travel
+image` and offers a full image dialog.
+
 Private, absent, and inactive profiles share the same public 404 behavior.
 Public responses are `no-store`, and the client adds `noindex, nofollow` while a
 shared Atlas is mounted. This is public-link behavior, not a secret-link access
@@ -604,7 +625,7 @@ the selected action is visible before alternate matches.
 
 The signed-in owner panel keeps its travel overview visible, then follows the
 working sequence of Add destination, Visited destinations, Plan future travel,
-and Share and export. Those four flows have independent accessible disclosure
+and Share Visited Atlas. Those four flows have independent accessible disclosure
 controls. Existing accounts start with the disclosures closed so large saved
 collections do not dominate the page; empty accounts open Add destination to
 preserve onboarding. Adding a destination closes its entry flow and opens the
@@ -668,9 +689,19 @@ The signed-in identity is now a circular control in the upper right of the
 owner panel. It opens a compact popover with the display name, handle, recovery
 action when needed, and direct Sign out action.
 Public visibility, public-link copying, and Story image export live together in
-a named collapsible Share and export workflow with explanatory copy. Account
+a named collapsible Share Visited Atlas workflow with explanatory copy. Account
 recovery remains adjacent to the identity only when it is needed. Opening any
-large owner workflow closes the others.
+large owner workflow closes the others. An account with no visited pins sees a
+direct Add a visited place action and an explanation that saved trips and Saved
+places stay private. Sharing and Story export remain unavailable until the
+Visited Atlas contains at least one place.
+
+A saved trip has a separate Share saved trip action. It remains available while
+the planner is collapsed and does not depend on Visited Atlas pins. The action
+copies a versioned read only route snapshot that excludes private notes, Wish
+IDs, plan IDs, account identity, and live location. Its visible result message
+remains outside the expanded planner so a collapsed share action cannot appear
+unresponsive.
 
 On desktop, an open planner widens the owner panel to a bounded 52 rem maximum.
 Direct panel children do not flex-shrink, so planner and sharing sections retain
@@ -698,12 +729,15 @@ state, and remains absent from story-reader mode.
 
 The browser can generate a 1080 by 1920 PNG Story card locally. It includes the
 visible statistics, pins, decorative connections, a recognizable world land
-silhouette, the optional owner-authenticated favorite travel image, and the
+silhouette, the optional favorite travel image, and the
 label `My Atlas by RoamWithJustin.com`. The silhouette uses bundled Natural
 Earth 1:110m land geometry from `world-atlas`, decoded by `topojson-client` and
-projected into the canvas by `d3-geo`. Export makes no tile-provider request and
-does not upload the generated Story image. Signed-out public Atlas exports do
-not receive the private favorite image.
+projected into the canvas by `d3-geo`. Export asynchronously encodes the canvas
+to a PNG Blob, downloads it through a temporary object URL, and reports
+creating, success, or failure status in the open workflow. It makes no
+tile-provider request and does not upload the generated Story image. Signed out
+public Atlas exports use the same image only when its public profile use is
+approved and the Visited Atlas is public.
 
 ## Deliberately incomplete
 
@@ -724,7 +758,8 @@ durable-state behavior are locally test verified, but its Worker deployment and
 authenticated owner acceptance are not yet claimed.
 
 Per-destination memory images remain outside the release. The implemented media
-scope is one favorite travel image for the account and Atlas Story export.
+scope is one favorite travel image for the account, public profile, and Atlas
+Story export.
 Remote staging transformation evidence, real-device acceptance, spend alerts,
 and orphan reconciliation remain required before a broader invited beta. Image
 bytes are stored only in private R2, never in the profile Durable Object.

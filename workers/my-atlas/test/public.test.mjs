@@ -1,11 +1,17 @@
 import { env } from "cloudflare:workers"
 import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
-import { createMyPin, updateMyProfile } from "../src/account/service.mjs"
+import {
+  createMyPin,
+  replaceMyAtlasImage,
+  updateMyAtlasImageVisibility,
+  updateMyProfile,
+} from "../src/account/service.mjs"
 import {
   PublicAtlasNotFoundError,
   PublicAtlasServiceError,
   getPublicAtlas,
+  getPublicAtlasImage,
 } from "../src/public/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
@@ -148,6 +154,7 @@ describe("public Atlas projection", () => {
       atlas: {
         handle: "public-owner",
         displayName: "Public Owner",
+        favoriteImage: null,
         places: [
           {
             placeId: "geonames:3621138",
@@ -191,6 +198,153 @@ describe("public Atlas projection", () => {
         environment: environment(),
         handle: "public-owner",
         placeCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
+  })
+
+  it("publishes the favorite image only while the Atlas is public", async () => {
+    await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        placeId: "geonames:3621138",
+        visitedYears: [2024],
+        expectedRevision: 1,
+        idempotencyKey: "73737373-7373-4373-8373-737373737373",
+      },
+      catalogResolver: async placeId => ({
+        placeId,
+        placeType: "city",
+        name: "Uvita",
+        countryCode: "CR",
+        countryName: "Costa Rica",
+        deprecated: false,
+        coordinates: [-83.7395, 9.17039],
+      }),
+      now: NOW,
+    })
+    const imageBytes = new Uint8Array([82, 73, 70, 70, 1])
+    await replaceMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 2,
+        idempotencyKey: "74747474-7474-4474-8474-747474747474",
+      },
+      upload: {
+        bytes: new Uint8Array([1]).buffer,
+        contentType: "image/jpeg",
+      },
+      imageTransformer: async () => ({
+        bytes: imageBytes.buffer,
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: imageBytes.byteLength,
+        sourceSha256: "1".repeat(64),
+      }),
+      imageIdFactory: () => "image_33333333333333333333333333333333",
+      now: NOW,
+    })
+
+    await expect(
+      getPublicAtlasImage({
+        environment: environment(),
+        handle: "public-owner",
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
+
+    await updateMyAtlasImageVisibility({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        publicProfile: true,
+        expectedRevision: 3,
+        idempotencyKey: "79797979-7979-4979-8979-797979797979",
+      },
+      now: NOW,
+    })
+
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: 4,
+        idempotencyKey: "75757575-7575-4575-8575-757575757575",
+      },
+      now: NOW,
+    })
+
+    const atlas = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog,
+    })
+    expect(atlas.atlas.favoriteImage).toMatchObject({
+      imageId: "image_33333333333333333333333333333333",
+      contentType: "image/webp",
+      width: 1200,
+      height: 1200,
+      byteLength: imageBytes.byteLength,
+    })
+    expect(JSON.stringify(atlas)).not.toContain("storageKey")
+    expect(JSON.stringify(atlas)).not.toContain("sourceSha256")
+
+    const image = await getPublicAtlasImage({
+      environment: environment(),
+      handle: "public-owner",
+    })
+    expect(await image.object.arrayBuffer()).toEqual(imageBytes.buffer)
+
+    await updateMyAtlasImageVisibility({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        publicProfile: false,
+        expectedRevision: 5,
+        idempotencyKey: "77777777-7777-4777-8777-777777777777",
+      },
+      now: NOW,
+    })
+    const atlasWithoutImage = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog,
+    })
+    expect(atlasWithoutImage.atlas.favoriteImage).toBeNull()
+    await expect(
+      getPublicAtlasImage({
+        environment: environment(),
+        handle: "public-owner",
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
+
+    await updateMyAtlasImageVisibility({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        publicProfile: true,
+        expectedRevision: 6,
+        idempotencyKey: "78787878-7878-4878-8878-787878787878",
+      },
+      now: NOW,
+    })
+
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: false },
+        expectedRevision: 7,
+        idempotencyKey: "76767676-7676-4676-8676-767676767676",
+      },
+      now: NOW,
+    })
+    await expect(
+      getPublicAtlasImage({
+        environment: environment(),
+        handle: "public-owner",
       })
     ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
   })

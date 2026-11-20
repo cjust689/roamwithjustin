@@ -88,7 +88,9 @@ function isPublicPlace(value) {
 }
 
 function revisionFromResponse(response, fallback = 0) {
-  const match = response.headers.get("ETag")?.match(/^"rev-([1-9][0-9]*)"$/)
+  const match = response.headers
+    .get("ETag")
+    ?.match(/^(?:W\/)?"rev-([1-9][0-9]*)"$/)
   const revision = match ? Number(match[1]) : Number(fallback)
   if (!Number.isSafeInteger(revision) || revision < 1) {
     throw new MyAtlasApiError("The My Atlas revision is invalid.", {
@@ -110,6 +112,8 @@ function normalizedAtlasImage(value) {
     !Number.isSafeInteger(value.byteLength) ||
     value.byteLength < 1 ||
     value.byteLength > MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES ||
+    (value.publicProfile !== undefined &&
+      typeof value.publicProfile !== "boolean") ||
     typeof value.updatedAt !== "string"
   ) {
     throw new MyAtlasApiError("The Atlas image response is invalid.", {
@@ -362,6 +366,34 @@ export async function removeMyAtlasImage({
     })
   }
   return revisionFromResponse(response)
+}
+
+export async function updateMyAtlasImageVisibility({
+  apiBaseUrl,
+  accessToken,
+  publicProfile,
+  revision,
+  fetchImpl = fetch,
+}) {
+  if (typeof publicProfile !== "boolean") {
+    throw new MyAtlasApiError("Choose whether to show this image publicly.", {
+      code: "invalid_image_visibility",
+    })
+  }
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/atlas-image",
+    method: "PATCH",
+    body: { publicProfile },
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  return Object.freeze({
+    atlasImage: normalizedAtlasImage(payload.atlasImage),
+    revision: revisionFromResponse(response),
+  })
 }
 
 export async function fetchMyAtlasProfile({
@@ -1090,9 +1122,57 @@ export async function fetchPublicAtlas({
   return Object.freeze({
     handle: body.atlas.handle,
     displayName: body.atlas.displayName,
+    favoriteImage: normalizedAtlasImage(body.atlas.favoriteImage),
     places: Object.freeze(body.atlas.places.map(normalizedPin)),
     catalog: Object.freeze({ ...body.catalog }),
   })
+}
+
+export async function fetchPublicAtlasImage({
+  apiBaseUrl,
+  handle,
+  fetchImpl = fetch,
+}) {
+  if (!apiBaseUrl || !PUBLIC_HANDLE_PATTERN.test(handle)) {
+    throw new MyAtlasApiError("The shared Atlas image is not configured.", {
+      code: "not_configured",
+    })
+  }
+
+  let response
+  try {
+    response = await fetchImpl(
+      `${apiBaseUrl}/v1/public/atlases/${encodeURIComponent(handle)}/image`,
+      {
+        method: "GET",
+        headers: { Accept: "image/webp" },
+        cache: "no-store",
+      }
+    )
+  } catch {
+    throw new MyAtlasApiError("The shared Atlas image could not be reached.", {
+      code: "unavailable",
+    })
+  }
+
+  if (!response.ok) {
+    throw new MyAtlasApiError("The shared Atlas image is unavailable.", {
+      status: response.status,
+      code: "rejected",
+    })
+  }
+  const blob = await response.blob()
+  if (
+    blob.type !== "image/webp" ||
+    blob.size < 1 ||
+    blob.size > MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES
+  ) {
+    throw new MyAtlasApiError("The shared Atlas image response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return blob
 }
 
 export async function verifyMyAtlasApiAccess({

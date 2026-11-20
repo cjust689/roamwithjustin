@@ -280,10 +280,27 @@ export function createMyAtlasStoryCanvas({
   return canvas
 }
 
-export function downloadMyAtlasStory(options) {
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (blob) resolve(blob)
+      else reject(new Error("The Atlas Story image could not be encoded."))
+    }, "image/png")
+  })
+}
+
+export async function downloadMyAtlasStory(options) {
   const canvas = createMyAtlasStoryCanvas(options)
+  const blob = await canvasToBlob(canvas)
+  const filename = `my-atlas-${options.handle || "story"}.png`
+  const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
-  link.download = `my-atlas-${options.handle || "story"}.png`
-  link.href = canvas.toDataURL("image/png")
+  link.download = filename
+  link.href = url
+  link.hidden = true
+  document.body.appendChild(link)
   link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+  return filename
 }

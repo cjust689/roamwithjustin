@@ -82,7 +82,7 @@
         "TURNSTILE_ACTION": "my-atlas-register",
         "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1,roamwithjustin.com,www.roamwithjustin.com",
         "BETA_TERMS_VERSION": "staging-beta-1",
-        "BETA_PRIVACY_VERSION": "my-atlas-privacy-2026-11-19",
+        "BETA_PRIVACY_VERSION": "my-atlas-privacy-2026-11-19-public-image",
         "BETA_INVITE_USE_CEILING": "1",
         "BETA_INVITE_MAX_TTL_SECONDS": "86400",
         "REGISTRATION_PENDING_LEASE_SECONDS": "900",
