@@ -122,7 +122,7 @@ only `api.sandbox.viator.com`, never the live API.
 - [x] Location Phase 4: authenticated, rate-limited short-link resolver with security tests.
 - [x] Location Phase 5 supported slice: explicit custom visited-pin rename/reposition, preserved IDs and snapshot boundaries.
 - [x] Experience loop Phase 2 supported slice: visited-list experience count/shortcut and optional recap invitation after Mark Visited.
-- [ ] Canonical trip grouping, repeated visit occurrences and reversible Planned/Past lifecycle acceptance remain in the trip architecture workstream.
+- [ ] Canonical trip grouping is the next owner-prioritized workstream. Initial occurrence contracts and read-only upgrade preview are local and tested; persistence, repeated-visit UI and reversible account lifecycle acceptance remain in `my-atlas-trip-centric-transition.md`.
 - [ ] Real provider short-link expansion remains externally unverified.
 - [ ] Viator real search, market mapping and referral verification remain blocked by HTTP 401.
 - [x] Experience loop Phase 3 code: canonical curated intake, exact Visit/Place cards, shared story rendering and independent official operator links.

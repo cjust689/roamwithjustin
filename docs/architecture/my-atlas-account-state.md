@@ -20,6 +20,8 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - shared/my-atlas-trips.mjs
+  - workers/my-atlas/src/trips/preview.mjs
   - src/features/my-atlas/auth/accountDeletion.mjs
   - scripts/test-my-atlas-load-safety.mjs
   - scripts/lib/my-atlas-local-runtime.cjs
@@ -977,3 +979,21 @@ Ambiguous retries keep the same operation key and revision. Revision conflicts
 refresh account state and retain the editor draft for explicit review, without
 automatically applying it over the newer state. This follow-up is local only;
 the preceding recap/deletion-safety foundations are deployed through PRs 222/223.
+
+## Local trip-organization preview
+
+`GET /v1/me/trips/upgrade-preview` is an authenticated owner-only read. It builds
+canonical trip candidates from the legacy per-owner export without storing
+anything or changing the account revision, current source records or retention
+alarm. The API exposes only group/stop names and IDs, counts, fingerprint and
+blocking issues. Private memories, experience entries, raw legacy metadata,
+image keys and identity digests remain outside the response. Catalog resolution
+is read-only and skipped for empty/custom-only sources. No apply/upgrade write
+route or automatic migration on account load is enabled.
+
+The pure versioned model distinguishes trips from stop occurrences and Place
+identity. It supports reversible explicit lifecycle and single-stop trips,
+with content-preserving transitions and stop-removal safeguards. Actual account
+trip persistence, Combine into Trip, rollback, history-safe retention and
+creator/shared UI remain outstanding. The active trip-centric transition record
+contains the implementation checklist and verified runtime boundary.

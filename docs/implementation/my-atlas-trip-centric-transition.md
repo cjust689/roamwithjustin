@@ -15,6 +15,9 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - shared/my-atlas-trips.mjs
+  - workers/my-atlas/src/trips/preview.mjs
+  - scripts/test-my-atlas-trips.mjs
   - src/features/my-atlas/components/MyAtlasPlanner.vue
   - src/features/my-atlas/components/MyAtlasActionFeedback.vue
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
@@ -30,6 +33,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run my-atlas:trips:test verifies canonical occurrence identity, reversible pure lifecycle transitions, repeated-Place separation, endpoint preservation and deterministic preview mappings
+    - Workers runtime preview test verifies unchanged account KV, revision and alarm, private-field exclusion and owner isolation
     - node scripts/test-my-atlas-action-feedback.mjs verifies repeated draft selections, stop limits, pending/success/failure outcomes, confirmed-write refresh failures and notification lifetimes
     - Local Chrome checked centered Explore actions and viewport notifications at 320, 390 and 1440 CSS pixels, with zero horizontal overflow, keyboard dismissal and no owner API requests from local draft selections
     - npm run build passed on 2026-11-20, including the full My Atlas suite and 44 Workers runtime tests; the build retained existing asset-size warnings
@@ -56,15 +61,15 @@ retains `pin:`, `wish:` and `plan:` storage, the deterministic first-private-pla
 identity, and workflow states `draft | saved | archived`. The existing
 Mark Visited action creates visited pins; it does not change a trip to Past.
 
-| Brief acceptance flow | Current result | Remaining implementation |
-| --- | --- | --- |
-| A. Plan to Past | Not met | A canonical trip and reversible lifecycle with stable stop/memory IDs |
-| B. Direct Past creation | Not met | Add Past Trip, optional endpoints and an owner persistence API |
-| C. Past to Planned | Not met | An in-place status update that preserves all trip content |
-| D. Repeated destination | Not met | Visit occurrence IDs and memories isolated by trip/stop; current visited pins are unique per Place |
-| E. Single-stop trip without synthetic endpoints | Not met | Remove mandatory start from the canonical trip contract; the existing planner still requires a start and a destination |
-| F. Correct mistaken lifecycle status | Not met | Reversible transitions and field-equality/ID regression coverage |
-| G. Migration integrity | Not met | Explicit idempotent upgrade, rollback snapshot, mappings, retention/alarm safety and Combine into Trip |
+| Brief acceptance flow                           | Current result | Remaining implementation                                                                                               |
+| ----------------------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| A. Plan to Past                                 | Not met        | A canonical trip and reversible lifecycle with stable stop/memory IDs                                                  |
+| B. Direct Past creation                         | Not met        | Add Past Trip, optional endpoints and an owner persistence API                                                         |
+| C. Past to Planned                              | Not met        | An in-place status update that preserves all trip content                                                              |
+| D. Repeated destination                         | Not met        | Visit occurrence IDs and memories isolated by trip/stop; current visited pins are unique per Place                     |
+| E. Single-stop trip without synthetic endpoints | Not met        | Remove mandatory start from the canonical trip contract; the existing planner still requires a start and a destination |
+| F. Correct mistaken lifecycle status            | Not met        | Reversible transitions and field-equality/ID regression coverage                                                       |
+| G. Migration integrity                          | Not met        | Explicit idempotent upgrade, rollback snapshot, mappings, retention/alarm safety and Combine into Trip                 |
 
 Supporting pieces exist: authenticated account ownership, catalog/custom
 places, private wishlist and saved-plan editing, ordered planner map
@@ -119,20 +124,20 @@ exact release evidence is recorded in `my-atlas-favorite-travel-image.md`.
 
 ## Audit of actual behavior
 
-| Concern | Actual implementation | Required change |
-| --- | --- | --- |
-| Persistence | One per-owner Durable Object stores `pin:`, `wish:`, and `plan:` records | Keep the same ownership boundary and introduce one canonical trip representation |
-| Plan identity | `planning/service.mjs` derives one deterministic first-private-plan ID | Support multiple trips and preserve migrated plan IDs |
-| Stop identity | Snapshots use Place and source Wish references, with index-based Mark Visited input | Assign stable occurrence IDs and preserve them across edits and reordering |
-| Lifecycle | `draft`, `saved`, and `archived` are plan workflow statuses | Add independent `planned` and `past` lifecycle; never infer travel from dates |
-| History | Mark Visited creates owner-qualified pins; duplicate Places are rejected | Change lifecycle on the existing trip, preserving its stops, memories, and logistics |
-| Endpoints | Save requires a start and at least one unique Wish stop | Accept a single-stop journey without origin, home, airport, or return markers |
-| Retention | One plan expires after six months and a 30 day grace | Prevent legacy alarms from erasing past trip history or preserved memories |
-| Public Atlas | Safe projection enumerates only visited pins | Derive visited geography from explicitly shared past trips after migration, keeping repeated visits distinct internally |
-| Export and deletion | Schema 2 exports pins, wishes, and one plan; deletion erases the whole user object and account image | Include canonical trips, migration mappings, and logistics without exposing them to public views |
-| Map | Visited pins and planner overlay are separate projections on one MapTiler instance | Group canonical stop occurrences by trip ID, with one marker and no connector for single stops |
-| Flights | Directions previously linked each Fly pair directly to a one way Expedia search | Review independent gateways and flight shape before prefilled click-out |
-| Rentals | No rental tool existed | Add optional independent pickup and drop off details without editing stops |
+| Concern             | Actual implementation                                                                                | Required change                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Persistence         | One per-owner Durable Object stores `pin:`, `wish:`, and `plan:` records                             | Keep the same ownership boundary and introduce one canonical trip representation                                        |
+| Plan identity       | `planning/service.mjs` derives one deterministic first-private-plan ID                               | Support multiple trips and preserve migrated plan IDs                                                                   |
+| Stop identity       | Snapshots use Place and source Wish references, with index-based Mark Visited input                  | Assign stable occurrence IDs and preserve them across edits and reordering                                              |
+| Lifecycle           | `draft`, `saved`, and `archived` are plan workflow statuses                                          | Add independent `planned` and `past` lifecycle; never infer travel from dates                                           |
+| History             | Mark Visited creates owner-qualified pins; duplicate Places are rejected                             | Change lifecycle on the existing trip, preserving its stops, memories, and logistics                                    |
+| Endpoints           | Save requires a start and at least one unique Wish stop                                              | Accept a single-stop journey without origin, home, airport, or return markers                                           |
+| Retention           | One plan expires after six months and a 30 day grace                                                 | Prevent legacy alarms from erasing past trip history or preserved memories                                              |
+| Public Atlas        | Safe projection enumerates only visited pins                                                         | Derive visited geography from explicitly shared past trips after migration, keeping repeated visits distinct internally |
+| Export and deletion | Schema 2 exports pins, wishes, and one plan; deletion erases the whole user object and account image | Include canonical trips, migration mappings, and logistics without exposing them to public views                        |
+| Map                 | Visited pins and planner overlay are separate projections on one MapTiler instance                   | Group canonical stop occurrences by trip ID, with one marker and no connector for single stops                          |
+| Flights             | Directions previously linked each Fly pair directly to a one way Expedia search                      | Review independent gateways and flight shape before prefilled click-out                                                 |
+| Rentals             | No rental tool existed                                                                               | Add optional independent pickup and drop off details without editing stops                                              |
 
 The current return Fly pair uses the final retained route point before the
 finish. That is a schematic itinerary leg, not evidence of a chosen return
@@ -255,3 +260,76 @@ No booking iframe, SDK, tracking pixel, analytics event, or AdSense request is
 added to private planning. Existing public Journey affiliate settings are not
 reused. Full saved-trip transport acceptance remains incomplete until the
 canonical persistence phases above are implemented.
+
+## Creator-first trip organization, next workstream
+
+The owner clarified the priority on November 20: the creator must clearly
+organize destinations by trip; shared viewers should then receive that same
+trip structure. A recipient-only redesign or trip labels attached to global
+unique-Place pins would not satisfy this requirement. Public creator editorial
+cards remain an ingestion workflow, while private traveler experience recaps
+remain in-app. Commercial relationship activation is a separate workstream.
+
+The first local slice establishes `shared/my-atlas-trips.mjs` and an authenticated
+read-only `GET /v1/me/trips/upgrade-preview`. The deployed account schema,
+planner, public views and existing shared links remain unchanged. This is not
+an implemented migration, grouping editor, trip repository or lifecycle API.
+No upgrade/apply endpoint exists yet.
+
+The contract uses stable owner-qualified trip, stop-occurrence and memory IDs.
+Legacy plan IDs remain valid trip IDs. Explicit `planned | past` lifecycle is
+independent of `draft | saved | archived` workflow and dates. Planned and actual
+dates remain separate, with existing year/month precision preserved as a list.
+Repeated Places can occur across or within trips with separate stop/memory
+identities. Pure transition helpers change only lifecycle/version/audit fields;
+repeating the same status is a no-op. Stop reordering preserves attached data,
+and removal refuses a stop with memories, experiences, visit dates or plan
+notes. A single-stop map projection has no synthetic origin or finish.
+These helpers are not exposed as account write operations yet. Logistics arrays
+are reserved model slots; persistence and independent ownership validation of
+managed trip media/logistics remain later work.
+
+`workers/my-atlas/src/trips/preview.mjs` reads the existing per-owner export.
+Each legacy pin becomes a separate one-stop past candidate, preserving its
+complete source record, favorite memory, original dates and private recaps.
+The legacy plan remains one planned candidate with the same ID and ordered
+stop snapshots. Origin/finish, original retention fields and all raw plan
+metadata are preserved in private legacy metadata, without manufacturing
+visited stops. Existing wishes and the account image are left in place.
+Existing public-pin publication choices are represented in candidates; private
+plans remain private. No sharing projection of these candidates is enabled.
+
+Missing/invalid source geography produces a blocking issue instead of invented
+coordinates or a ready candidate with discarded data. IDs are deterministic;
+a fingerprint includes owner, revision, all source data and resolved candidates
+so catalog changes also invalidate a stale preview. The authenticated endpoint
+returns only review groups, stable mappings, counts, issues and fingerprint.
+It omits raw snapshots, private notes/recaps, image keys and identity digests.
+Responses have the owner revision ETag and `no-store`. Read-only permission is
+sufficient; anonymous calls and non-GET methods are rejected. Empty/custom-only
+accounts need no catalog binding or provider request.
+
+- [x] Record the creator-first requirement and audit current one-plan/unique-Place limits.
+- [x] Define canonical trip, occurrence and memory contracts with reversible pure transitions.
+- [x] Build deterministic, nonmutating migration candidates and an owner-only preview summary.
+- [x] Verify IDs, field preservation, repeated-Place isolation, unavailable-source blocking and zero account/alarm writes.
+- [ ] Implement canonical persistence, transactional explicit upgrade, rollback snapshot and legacy-write boundary.
+- [ ] Resolve retention before activating migration so history and preserved memories cannot expire.
+- [ ] Add the creator trip collection, explicit Combine into Trip, repeated-visit editing and lifecycle controls.
+- [ ] Extend the existing map and shared reader from the same canonical trips, with explicit sharing scope and legacy link compatibility.
+
+Verification: `npm run my-atlas:trips:test` and `node scripts/test-my-atlas-worker.mjs`
+passed. All 51 Workers runtime tests passed, including the new preview case.
+The runtime case compares complete stored KV and the scheduled alarm before
+and after repeated previews, and verifies another owner receives no groups
+from the first account. No real account was mutated and no Worker was deployed.
+Large real-account preview performance and actual upgrade/rollback acceptance
+remain unverified. The full acceptance matrix above remains not met until
+persistence, migration and creator/shared UI slices are implemented.
+
+Final verification for this foundation slice also passed `npm run my-atlas:test`
+with all 51 Worker runtime tests, explicit ESLint of the added MJS modules,
+`npm run my-atlas:worker:check:staging` with workspace-local Wrangler logging,
+and `npm run docs:audit` (74 managed documents, 12 existing warnings). No frontend
+or recipient UI was changed in this slice. The checked baseline remains
+read-only; durable migration and creator grouping are still unchecked above.

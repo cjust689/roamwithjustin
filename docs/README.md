@@ -81,6 +81,11 @@ Start here before using an older implementation brief.
 
 My Atlas mobile action feedback and the explicit trip-architecture acceptance
 audit are tracked in [Trip centric transition](implementation/my-atlas-trip-centric-transition.md).
+Creator-first trip organization is now the next priority. The local foundation
+adds canonical occurrence contracts and an owner-only migration preview with
+no account or alarm writes. Trip persistence, explicit upgrade, grouping and
+shared-reader integration remain tracked in that active implementation record.
+
 The full canonical trip architecture remains partial; the current UI fix
 does not perform a data migration or introduce Planned/Past transitions.
 The account-state architecture also describes the optional Instagram profile

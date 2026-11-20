@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers"
+import { getMyTripUpgradePreview } from "../src/trips/preview.mjs"
 import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
 import {
@@ -164,6 +165,64 @@ beforeEach(async () => {
 })
 
 describe("private owner profile and pin services", () => {
+  it("previews trip organization without writing records, revision or retention alarms", async () => {
+    await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: pinInput({
+        customPlace: { name: "A visited place", coordinates: [16.44, 43.51] },
+        visitedYears: [2025],
+        memory: "Private favorite memory",
+        expectedRevision: 1,
+        idempotencyKey: "dededede-1111-4111-8111-111111111111",
+      }),
+      now: NOW,
+    })
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    const snapshot = () =>
+      runInDurableObject(user, async (_instance, state) => ({
+        records: [...state.storage.kv.list()],
+        alarm: await state.storage.getAlarm(),
+      }))
+    const before = await snapshot()
+    const preview = await getMyTripUpgradePreview({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(preview.ready).toBe(true)
+    expect(preview.revision).toBe(2)
+    expect(preview.counts).toMatchObject({
+      sourcePins: 1,
+      sourcePlans: 0,
+      candidateTrips: 1,
+      candidateStops: 1,
+    })
+    expect(preview.groups[0]).toMatchObject({
+      title: "A visited place",
+      lifecycle: "past",
+      source: "pin",
+    })
+    expect(JSON.stringify(preview)).not.toContain("Private favorite memory")
+    expect(JSON.stringify(preview)).not.toContain("identityDigest")
+    expect(JSON.stringify(preview)).not.toContain("legacy")
+    expect(await snapshot()).toEqual(before)
+    expect(
+      (
+        await getMyTripUpgradePreview({
+          environment: environment(),
+          identity: IDENTITY,
+        })
+      ).fingerprint
+    ).toBe(preview.fingerprint)
+    await registerSecondOwner()
+    const other = await getMyTripUpgradePreview({
+      environment: environment(),
+      identity: SECOND_IDENTITY,
+    })
+    expect(other.groups).toEqual([])
+    expect(other.counts.candidateTrips).toBe(0)
+    expect(await snapshot()).toEqual(before)
+  })
   it("cannot replay a deleted account operation against a newly registered account", async () => {
     const input = {
       confirmation: "DELETE MY ATLAS",

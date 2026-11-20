@@ -2791,4 +2791,45 @@ assert.equal(
   )
 }
 
+{
+  const path = "/v1/me/trips/upgrade-preview"
+  assert.equal((await workerResponse(path)).status, 401)
+  assert.equal(
+    (
+      await workerResponse(path, {
+        method: "POST",
+        token: await signToken(),
+        json: {},
+      })
+    ).status,
+    405
+  )
+  const token = await signToken({ scope: "read:my-atlas" })
+  let calls = 0
+  const response = await workerResponse(
+    path,
+    { token, origin: ALLOWED_ORIGIN },
+    {},
+    {
+      getMyTripUpgradePreview: async ({ identity }) => {
+        calls++
+        assert.equal(identity.subject, SUBJECT)
+        return {
+          schemaVersion: 1,
+          revision: 7,
+          fingerprint: "a".repeat(64),
+          ready: true,
+          counts: { candidateTrips: 0 },
+          groups: [],
+          issues: [],
+        }
+      },
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get("ETag"), '"rev-7"')
+  assert.equal(response.headers.get("Cache-Control"), "no-store")
+  assert.equal(calls, 1)
+}
+
 console.log("My Atlas Worker, sharing, and planning boundary tests passed.")

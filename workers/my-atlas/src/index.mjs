@@ -1,4 +1,5 @@
 import { MapLinkError, resolveShortMapLink } from "./maps/resolve.mjs"
+import { getMyTripUpgradePreview } from "./trips/preview.mjs"
 import { ownerContext } from "./account/service.mjs"
 import {
   isLocalRegistrationRequest,
@@ -646,6 +647,7 @@ export async function handleRequest(
   const isMyAtlasState = url.pathname === "/v1/me/atlas"
   const isMyAtlasImage = url.pathname === "/v1/me/atlas-image"
   const isMapLinkResolve = url.pathname === "/v1/me/map-links/resolve"
+  const isTripUpgradePreview = url.pathname === "/v1/me/trips/upgrade-preview"
   const isMyPins = url.pathname === "/v1/me/pins"
   const myPinMatch = url.pathname.match(/^\/v1\/me\/pins\/(pin_[a-f0-9]{24})$/)
   const isMyPin = Boolean(myPinMatch)
@@ -670,6 +672,7 @@ export async function handleRequest(
   const isMyPlanVisited = Boolean(myPlanVisitedMatch)
   const isMyExport = url.pathname === "/v1/me/export"
   const isAccountRoute =
+    isTripUpgradePreview ||
     isMapLinkResolve ||
     isMyProfile ||
     isMyAtlasState ||
@@ -697,6 +700,7 @@ export async function handleRequest(
 
   if (
     (isMapLinkResolve && request.method !== "POST") ||
+    (isTripUpgradePreview && request.method !== "GET") ||
     (isAuthCheck && request.method !== "GET") ||
     (isAccountWipe && request.method !== "POST") ||
     (isRegistration && request.method !== "POST") ||
@@ -843,6 +847,16 @@ export async function handleRequest(
         throw new InsufficientPermissionsError()
       }
 
+      if (isTripUpgradePreview) {
+        const service =
+          dependencies.getMyTripUpgradePreview || getMyTripUpgradePreview
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(result, 200, context, result.revision)
+      }
       if (isMapLinkResolve) {
         await ownerContext(environment, accountIdentity)
         const limiter = environment.MY_ATLAS_MAP_LINK_RATE_LIMITER
