@@ -41,6 +41,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
+    - Pages run 44737312245 deployed the production merge; live rendering verified the shared itinerary and map shell, while chunk 481.a92fe951.js contained the exact Route key and Saved trip order markers
     - Client planning tests verify the shared MapTiler route projection, read only map copy, compact itinerary summary, and unchanged privacy-filtered snapshot contract
     - Local Chrome verified the settled shared route camera at desktop and a 390 by 844 CSS pixel recipient layout with a reachable Copy link and zero horizontal overflow
     - Pull request 196 passed validation run 44657690886 and merged the weak ETag recovery plus separate saved trip and Visited Atlas sharing workflows to develop as 03a188025480129e57156d75243bc70f3a67d229; develop validation run 44657932409 then succeeded

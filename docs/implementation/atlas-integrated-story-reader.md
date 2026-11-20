@@ -37,6 +37,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
+    - Pages run 44737312245 deployed the production merge; the live Atlas rail rendered exactly three Explore actions for Utah 2025, Puerto Rico 2024, and St. John 2025, and chunk 852.ccfda71b.js contained the stories-to-explore marker
     - npm run atlas:test verifies that only Utah 2025, Puerto Rico 2024, and St. John 2025 own root story leads and that the welcome rail iterates those story-backed roots
     - npm run atlas:test
     - npm run lint
