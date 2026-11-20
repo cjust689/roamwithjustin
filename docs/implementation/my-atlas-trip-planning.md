@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-17
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - my-atlas-trip-planning
   - my-atlas-trip-planner-ux-routes-flights-lodging
@@ -41,6 +41,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Client planning tests verify the shared MapTiler route projection, read only map copy, compact itinerary summary, and unchanged privacy-filtered snapshot contract
+    - Local Chrome verified the settled shared route camera at desktop and a 390 by 844 CSS pixel recipient layout with a reachable Copy link and zero horizontal overflow
     - Pull request 196 passed validation run 44657690886 and merged the weak ETag recovery plus separate saved trip and Visited Atlas sharing workflows to develop as 03a188025480129e57156d75243bc70f3a67d229; develop validation run 44657932409 then succeeded
     - Pull request 197 passed production validation run 44658215573 and merged to main as d0fba5c3da9d054b36ef6f9d7a070dcdd39f3246; Pages run 44658409109 deployed it successfully
     - Live chunk 917.6e99172f.js returned 200 with Share saved trip, Share Visited Atlas, and Show on public profile together
@@ -238,6 +240,9 @@ Authenticated owner interaction remains external acceptance.
       URL. They include broad place labels, coordinates, order, finish mode,
       title, and optional year. They exclude notes, plan IDs, Wish IDs, account
       identity, and live location. The recipient route performs no account read.
+      It now opens the same MapTiler route projection as the owner planner and
+      keeps the existing itinerary as a compact collapsible map overlay. No
+      account or route editing controls are mounted for the recipient.
 - [x] Explicit Fly boundaries can open a dated one way Expedia search after the
       owner enters a departure date. The click sends only the two displayed
       place names and date. My Atlas does not claim price, availability, airport
@@ -366,6 +371,10 @@ Authenticated owner interaction remains external acceptance.
       intermediate travel in gold, and the final finish or return leg in coral.
       The map key names Start, Route, and Finish or Return, while shared start
       and return coordinates retain their combined marker.
+- [x] Shared saved-trip links reuse that semantic route projection in read only
+      form. Local Chrome verified a settled desktop route camera and a 390 by
+      844 CSS pixel layout with a visible copy action, compact itinerary, and
+      zero horizontal overflow.
 
 ## Partial or not yet verified
 

@@ -515,8 +515,8 @@ export default {
       element.setAttribute(
         "aria-label",
         journeyIndex >= 0
-          ? `Stop ${journeyIndex + 1}: Explore ${node.title}`
-          : `Explore ${node.title}`
+          ? `Stop ${journeyIndex + 1}. Open ${node.title} on the map`
+          : `Open ${node.title} on the map`
       )
       card.className = "atlas-marker-card"
       label.className = "atlas-marker-label"

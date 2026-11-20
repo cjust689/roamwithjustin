@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - my-atlas-registration
   - my-atlas-api-authentication
@@ -57,6 +57,8 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - Client planning tests verify that a shared snapshot mounts the existing semantic planner route projection in read only mode while retaining the compact itinerary summary
+    - Local Chrome verified the settled shared route camera at desktop and a 390 by 844 CSS pixel recipient layout with a reachable Copy link and zero horizontal overflow
     - Authenticated local Chrome against the staging Worker observed an idempotent wishlist create return HTTP 200 with a complete Wish body and the exposed representation ETag W/"rev-9"; after browser normalization the write completed at revision 9 without an invalid-response state
     - npm run my-atlas:test verifies that browser reads accept strong and weak revision ETags while subsequent mutations continue sending the required strong If-Match value
     - npm run my-atlas:worker:test
@@ -713,6 +715,13 @@ copies a versioned read only route snapshot that excludes private notes, Wish
 IDs, plan IDs, account identity, and live location. Its visible result message
 remains outside the expanded planner so a collapsed share action cannot appear
 unresponsive.
+
+The recipient route mounts the same MapTiler route projection used by the
+owner planner without mounting account or editing controls. It draws the saved
+start, ordered stops, effective finish or return, and semantic route segments
+from the URL snapshot. The prior itinerary remains available as a collapsible
+summary over the map. The route performs no API read and still describes the
+lines as saved order rather than turn by turn directions.
 
 On desktop, an open planner widens the owner panel to a bounded 52 rem maximum.
 Direct panel children do not flex-shrink, so planner and sharing sections retain

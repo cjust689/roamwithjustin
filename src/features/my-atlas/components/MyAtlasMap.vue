@@ -1,10 +1,5 @@
 <template>
-  <section
-    class="my-atlas-map-shell"
-    :aria-label="
-      plannerActive ? 'Private trip planning map' : 'Personal travel map'
-    "
-  >
+  <section class="my-atlas-map-shell" :aria-label="mapAriaLabel">
     <div
       ref="map"
       class="my-atlas-map"
@@ -23,13 +18,9 @@
       </span>
     </div>
     <div v-if="ready && plannerActive" class="my-atlas-planner-map-status">
-      <strong>Trip planner</strong>
+      <strong>{{ plannerStatusTitle }}</strong>
       <span>
-        {{
-          plannerRoute.length
-            ? "Your private draft route"
-            : "Add a start or destination to begin"
-        }}
+        {{ plannerStatusDescription }}
       </span>
       <span v-if="plannerRoute.length" class="my-atlas-planner-map-key">
         <i class="is-departure" aria-hidden="true"></i>Start
@@ -148,6 +139,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    plannerReadOnly: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -165,6 +160,21 @@ export default {
     }
   },
   computed: {
+    mapAriaLabel() {
+      if (!this.plannerActive) return "Personal travel map"
+      return this.plannerReadOnly
+        ? "Shared trip map"
+        : "Private trip planning map"
+    },
+    plannerStatusTitle() {
+      return this.plannerReadOnly ? "Route key" : "Trip planner"
+    },
+    plannerStatusDescription() {
+      if (this.plannerReadOnly) return "Saved trip order"
+      return this.plannerRoute.length
+        ? "Your private draft route"
+        : "Add a start or destination to begin"
+    },
     plannerReturnsToStart() {
       const start = this.plannerRoute.find(node => node.role === "start")
       const finish = [...this.plannerRoute]
