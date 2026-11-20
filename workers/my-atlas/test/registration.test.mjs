@@ -3,6 +3,11 @@ import { evictDurableObject, reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
 import {
+  isLocalRegistrationRequest,
+  registerLocalBetaAccount,
+} from "../src/registration/local.mjs"
+import { verifyTurnstile } from "../src/registration/turnstile.mjs"
+import {
   hashInviteCode,
   hashQualifiedIdentity,
   hashRegistrationOperation,
@@ -73,6 +78,71 @@ async function reservationCommand(index, inviteDigest) {
 
 beforeEach(async () => {
   await reset()
+})
+
+it("provisions a bounded local invitation while retaining real authentication and strict remote challenge checks", async () => {
+  const local = {
+    ...operatorEnvironment(),
+    BETA_TERMS_VERSION: TERMS_VERSION,
+    BETA_PRIVACY_VERSION: PRIVACY_VERSION,
+    TURNSTILE_ACTION: "my-atlas-register",
+    TURNSTILE_HOSTNAMES: "localhost,127.0.0.1",
+    MY_ATLAS_LOCAL_REGISTRATION: "true",
+    TURNSTILE_SECRET_KEY: "1x0000000000000000000000000000000AA",
+    LOCAL_REGISTRATION_INVITE_CODE: "local_invitation_for_test_1234567890",
+    LOCAL_REGISTRATION_INVITE_CREATED: NOW,
+    LOCAL_REGISTRATION_INVITE_EXPIRES: EXPIRES,
+  }
+  expect(
+    isLocalRegistrationRequest("http://127.0.0.1:8787/v1/beta/register", local)
+  ).toBe(true)
+  for (const url of [
+    "https://127.0.0.1/v1/beta/register",
+    "https://api.example.com/v1/beta/register",
+    "http://127.0.0.1.evil.example/v1/beta/register",
+  ])
+    expect(isLocalRegistrationRequest(url, local)).toBe(false)
+  expect(
+    isLocalRegistrationRequest("http://localhost:8787/", {
+      ...local,
+      MY_ATLAS_LOCAL_REGISTRATION: "false",
+    })
+  ).toBe(false)
+  const fetchImpl = async () =>
+    Response.json({ success: true, hostname: "example.com" })
+  expect(
+    await verifyTurnstile({
+      secret: local.TURNSTILE_SECRET_KEY,
+      token: "XXXX.DUMMY.TOKEN.XXXX",
+      expectedAction: "my-atlas-register",
+      expectedHostnames: ["localhost"],
+      fetchImpl,
+    })
+  ).toBe(false)
+  const result = await registerLocalBetaAccount({
+    environment: local,
+    requestUrl: "http://127.0.0.1:8787/v1/beta/register",
+    identity: {
+      issuer: "https://roamwithjustin.us.auth0.com/",
+      subject: "google-oauth2|local-test",
+    },
+    input: normalizeRegistrationInput(
+      {
+        inviteCode: local.LOCAL_REGISTRATION_INVITE_CODE,
+        handle: "local-owner",
+        displayName: "Local Owner",
+        turnstileToken: "XXXX.DUMMY.TOKEN.XXXX",
+        acceptTerms: true,
+        acceptPrivacy: true,
+      },
+      "fefefefe-fefe-4efe-8efe-fefefefefefe"
+    ),
+    turnstileFetchImpl: fetchImpl,
+    now: NOW,
+  })
+  expect(result.created).toBe(true)
+  expect(result.profile.public).toBe(false)
+  expect(result.profile.acceptedTermsVersion).toBe(TERMS_VERSION)
 })
 
 describe("registration registry Durable Object", () => {

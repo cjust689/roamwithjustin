@@ -8,6 +8,7 @@ export async function verifyTurnstile({
   remoteIp = "",
   expectedAction,
   expectedHostnames,
+  allowLocalTestResponse = false,
   fetchImpl = fetch,
 }) {
   const controller = new AbortController()
@@ -28,6 +29,15 @@ export async function verifyTurnstile({
     if (!response.ok) return false
 
     const result = await response.json()
+    if (
+      allowLocalTestResponse &&
+      secret === "1x0000000000000000000000000000000AA"
+    )
+      return (
+        result?.success === true &&
+        result.hostname === "example.com" &&
+        result.action === undefined
+      )
     return (
       result?.success === true &&
       result.action === expectedAction &&

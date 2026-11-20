@@ -3,6 +3,10 @@ import fs from "node:fs/promises"
 import compiler from "vue-template-compiler"
 import { MAX_PLAN_DESTINATIONS } from "../src/features/my-atlas/planning/handoffs.mjs"
 import {
+  normalizeMyAtlasCustomPlaceName,
+  normalizeMyAtlasCustomCoordinates,
+} from "../src/features/my-atlas/catalog/customPlace.mjs"
+import {
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
 } from "../src/features/my-atlas/planning/errors.mjs"
@@ -22,6 +26,8 @@ const script = compiler
   .replace("export default", "return")
 let apiCalls = 0
 const dependencies = {
+  normalizeMyAtlasCustomPlaceName,
+  normalizeMyAtlasCustomCoordinates,
   MyAtlasTravelSearch: {},
   MAX_PLAN_DESTINATIONS,
   formatMyAtlasPlannerError,
@@ -73,6 +79,38 @@ function fixture() {
 }
 
 const draft = fixture()
+const customMap = fixture()
+Object.assign(customMap.context, {
+  wishQuery: "Remote fixture place",
+  customName: "",
+  customLongitude: "",
+  customLatitude: "",
+  customMapPlacementActive: false,
+})
+customMap.context.beginCustomMapPlacement()
+assert.equal(customMap.context.customName, "Remote fixture place")
+assert.equal(
+  customMap.events.find(event => event.name === "location-placement-change")
+    .coordinates,
+  null
+)
+assert.equal(
+  customMap.context.customPlanLocation(),
+  null,
+  "blank coordinate fields must not create a zero coordinate"
+)
+customMap.context.setCustomMapCoordinates([16.44, 43.51])
+assert.deepEqual(
+  customMap.context.customPlanLocation().coordinates,
+  [16.44, 43.51]
+)
+customMap.context.useCustomPlanLocation("start")
+assert.deepEqual(
+  customMap.context.planForm.startDirect.coordinates,
+  [16.44, 43.51]
+)
+assert.equal(customMap.context.customMapPlacementActive, false)
+assert.equal(apiCalls, 0)
 draft.context.usePlanLocation("start", draft.wishes[0])
 assert.equal(draft.context.isPlanLocation("start", draft.wishes[0]), true)
 assert.equal(draft.feedback().at(-1).tone, "draft")

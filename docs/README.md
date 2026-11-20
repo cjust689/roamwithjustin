@@ -7,6 +7,7 @@ implementation_state: complete
 created: 2026-11-14
 updated: 2026-11-20
 related:
+  - my-atlas-location-experience-commerce
   - visual-themes
   - theme-toggle-implementation
   - content-model
@@ -161,6 +162,20 @@ counts. This server correction remains undeployed; specific live handle
 conflicts still require their response status and error code to distinguish.
 
 ## Active work
+
+The local My Atlas reload safety correction removes automatic replay of stored
+account deletion on loading/HMR, binds explicit retries to the selected account,
+and preserves the configured backend during normal local development. A
+controlled 48-test Worker run left the running local database unchanged.
+Details and verification are in the private-beta checklist and account-state
+architecture. Local and staging account stores remain separate.
+
+The local [location, recap and destination-link foundations](implementation/my-atlas-location-experience-commerce.md)
+implement the first bounded phases of the four November 20 briefs: custom map
+fallback, private per-pin experience recaps, Expedia Sheet/file ingestion and
+a separate loopback-only Viator sandbox prototype. Real Viator search remains
+blocked by an API-key rejection; real affiliate URLs and placement approval
+remain owner actions. These changes are local and not deployed.
 
 The November 20 My Atlas release adds optional Instagram handles, refreshable
 Explore image cards, mobile action confirmations, and required favorite-photo

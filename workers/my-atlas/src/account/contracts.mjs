@@ -4,6 +4,7 @@ import {
   normalizeIdempotencyKey,
 } from "../registration/contracts.mjs"
 import { normalizePinMemory } from "./memory.mjs"
+import { normalizeExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
 import { normalizeCustomPlace } from "./custom-place.mjs"
 import { normalizeInstagramHandle } from "../../../../shared/my-atlas-instagram.mjs"
 import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
@@ -263,15 +264,28 @@ export function normalizeCreatePin(value, headers, currentYear) {
 export function normalizePatchPin(value, pinId, headers, currentYear) {
   assertObject(
     value,
-    new Set(["placeId", "visitedYears", "visitedDates", "memory"]),
+    new Set([
+      "placeId",
+      "visitedYears",
+      "visitedDates",
+      "memory",
+      "experienceChange",
+    ]),
     "Pin patch"
   )
   if (Object.keys(value).length === 0) {
     throw new RegistrationValidationError("Pin patch cannot be empty.")
   }
+  const experienceChange =
+    value.experienceChange === undefined
+      ? undefined
+      : normalizeExperienceChange(value.experienceChange)
+  if (experienceChange === null)
+    throw new RegistrationValidationError("Experience details are invalid.")
   return Object.freeze({
     pinId: normalizePinId(pinId),
     patch: Object.freeze({
+      ...(experienceChange === undefined ? {} : { experienceChange }),
       ...(value.placeId === undefined
         ? {}
         : { placeId: normalizePlaceId(value.placeId) }),

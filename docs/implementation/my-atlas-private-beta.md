@@ -733,6 +733,70 @@ used. Reports and screenshots are under `.state/theme/profile-discovery-*`
 and `.state/theme/instagram-owner-*`. These are local verification artifacts,
 not evidence of production deployment or a genuine-token owner save.
 
+## Local account reload and test-isolation correction, November 20
+
+- [x] Reproduce the unsafe code path: `loadAccount` used to automatically
+      replay the global session deletion operation on page load or HMR.
+- [x] Remove all automatic account deletion from loading and discard the old
+      unscoped operation. User-confirmed deletion remains available.
+- [x] Scope explicit retry state by API origin, selected account and creation
+      time; send the account ID and stop revision recovery on an account change.
+- [x] Resolve old server deletion receipts before a new active registration;
+      test delete, re-register, replay and mismatched-revision/target cases.
+- [x] Preserve the configured API/catalog by default. Isolated local API and
+      registration setup require the explicit `--my-atlas-local-api` flag and
+      retain their existing data directory. No data was deleted or moved.
+- [x] Test actual load/reload methods with old and new stored retries and assert
+      zero DELETE calls. The same test checks endpoint/persistence selection.
+- [x] Compare logical SQLite fingerprints of the running development store
+      before/after all 48 Worker tests. The development data was unchanged.
+
+Evidence: `node scripts/test-my-atlas-load-safety.mjs`,
+`npm run my-atlas:worker:durable:test`, and local ignored report
+`.state/theme/local-store-isolation.json`. This verifies the current run, not
+the exact cause of an earlier reported disappearance. The inspected development
+environment file selected staging while the active full-stack process selected
+loopback; changing targets can also make a different account store appear empty.
+These corrections are local and have not been deployed.
+
+The owner rejected the automatic backend switch. Normal local development now
+uses the original configured staging API/catalog again. The separate local
+account created during debugging remains on disk, without migration or deletion.
+Its local catalog dependency is incomplete, so isolated API mode is optional
+development infrastructure rather than the default route for testing the app.
+
+Browser verification after restoring the configured backend confirmed the
+staging API and staging search URL, local registration disabled, and no local
+invitation in the frontend. A read-only Atlanta catalog search returned HTTP
+200. Default startup is regression-tested to avoid preparing local registration
+or overriding backend configuration; only `--my-atlas-local-api` opts in.
+
+The full `npm run build` passed with all 48 Worker tests after removing the
+old source-shape assertion that required automatic deletion recovery on load.
+The replacement executes the actual load method with both legacy and scoped
+saved retries and verifies only reads occur. Targeted ESLint and
+`node --check scripts/serve.js` passed; the launcher is CommonJS and retains its
+existing top-level return for the network-wrapper branch.
+
+## Local registration follow-up
+
+During isolated API testing, signup returned HTTP 500 because the local Worker
+had no registration secrets or policy versions. The explicit isolated launcher
+now prepares an ignored local configuration with a stable random invitation
+pepper and a bounded local invitation. It uses Cloudflare's documented dummy
+challenge keys only under an HTTP loopback request, an explicit local flag and
+the exact test secret. Genuine Auth0 authentication and write permission remain
+required. The local form identifies the development store and prefills its
+invitation. Normal configured-backend mode does not prepare or enable this path.
+
+The real local browser challenge passed and the owner completed signup with
+HTTP 201. Unauthenticated registration remained HTTP 401. All 49 Worker tests
+passed, including the strict remote-host guard and default challenge checks.
+The isolated catalog binding was not provisioned; normal local UI development
+was restored to the configured staging backend rather than silently changing
+that architecture. Actual code paths include `registration/local.mjs`,
+`my-atlas-local-registration.cjs` and `MyAtlasRegistrationForm.vue`.
+
 ## External references checked
 
 - GeoNames export and license: https://www.geonames.org/export/

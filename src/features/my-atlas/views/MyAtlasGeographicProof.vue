@@ -1,5 +1,5 @@
 <template>
-  <main class="my-atlas-proof">
+  <main class="my-atlas-proof" @keydown.esc="cancelLocationPlacement">
     <MyAtlasActionFeedback
       :feedback="actionFeedback"
       @dismiss="dismissActionFeedback"
@@ -11,12 +11,20 @@
       :show-connections="showConnections"
       :show-memories="showMemories"
       :playback-active="canUseAtlas && timelinePlaying"
-      :placement-active="canUseAtlas && customPlaceOpen"
-      :placement-coordinates="canUseAtlas ? customPlaceCoordinates : null"
+      :placement-active="
+        canUseAtlas && (customPlaceOpen || plannerPlacement.active)
+      "
+      :placement-coordinates="
+        canUseAtlas
+          ? plannerPlacement.active
+            ? plannerPlacement.coordinates
+            : customPlaceCoordinates
+          : null
+      "
       :planner-active="canUseAtlas && plannerActive"
       :planner-route="canUseAtlas ? plannerRoute : []"
       @select="selectPin"
-      @place-custom="setCustomPlaceCoordinates"
+      @place-custom="handleLocationPlacement"
     />
     <MyAtlasTutorial
       v-if="canUseAtlas && tutorialOpen"
@@ -308,6 +316,8 @@
         v-if="auth.authenticated && accountMissing"
         ref="registration"
         :site-key="turnstileSiteKey"
+        :local-development="localRegistration"
+        :initial-invite-code="localRegistration ? localInviteCode : ''"
         :initial-display-name="authDisplayName"
         :pending="registrationPending"
         :error="registrationError"
@@ -352,7 +362,11 @@
               :disabled="accountPending"
               @click="beginCustomPlace"
             >
-              Can't find it? Add a custom pin
+              {{
+                query.trim()
+                  ? `Create custom place “${query.trim()}”`
+                  : "Drop a custom pin"
+              }}
             </button>
             <template v-else>
               <div class="my-atlas-custom-place-heading">
@@ -404,6 +418,26 @@
                   Choose on map
                 </button>
               </div>
+              <div class="my-atlas-custom-coordinate-fields">
+                <label
+                  >Latitude<input
+                    v-model="customLatitudeDraft"
+                    type="number"
+                    min="-85.051129"
+                    max="85.051129"
+                    step="0.000001"
+                    @input="applyCustomCoordinateFields"
+                /></label>
+                <label
+                  >Longitude<input
+                    v-model="customLongitudeDraft"
+                    type="number"
+                    min="-180"
+                    max="180"
+                    step="0.000001"
+                    @input="applyCustomCoordinateFields"
+                /></label>
+              </div>
               <p v-if="customPlaceError" class="my-atlas-custom-place-error">
                 {{ customPlaceError }}
               </p>
@@ -431,6 +465,10 @@
             :memory-only="pinEditorMemoryOnly"
             :pending="accountPending"
             :error="pinEditorError"
+            :experience-pending="experiencePending"
+            :experience-error="experienceError"
+            :experience-saved-sequence="experienceSavedSequence"
+            @experience-change="saveVisitExperience"
             @cancel="closePinEditor"
             @save="savePinDetails"
           />
@@ -540,6 +578,7 @@
         @revision-change="updatePlanningRevision"
         @planner-state-change="handlePlannerStateChange"
         @action-feedback="showActionFeedback"
+        @location-placement-change="handlePlannerPlacement"
         @pins-created="handlePlannerPinsCreated"
       />
 
@@ -939,6 +978,10 @@ import {
 import MyAtlasActionFeedback from "../components/MyAtlasActionFeedback.vue"
 import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
 import {
+  accountDeletionStorageKey,
+  discardLegacyDeletion,
+} from "../auth/accountDeletion.mjs"
+import {
   normalizeInstagramHandle,
   instagramProfileUrl,
 } from "../../../../shared/my-atlas-instagram.mjs"
@@ -958,6 +1001,14 @@ export default {
   data() {
     return {
       query: "",
+      localInviteCode: process.env.VUE_APP_MY_ATLAS_LOCAL_INVITE_CODE || "",
+      plannerPlacement: { active: false, coordinates: null },
+      customLatitudeDraft: "",
+      customLongitudeDraft: "",
+      experiencePending: false,
+      experienceError: "",
+      experienceSavedSequence: 0,
+      experienceAttempt: null,
       actionFeedback: null,
       actionFeedbackSequence: 0,
       instagramDraft: "",
@@ -1022,6 +1073,15 @@ export default {
     }
   },
   computed: {
+    localRegistration() {
+      return (
+        process.env.NODE_ENV === "development" &&
+        process.env.VUE_APP_MY_ATLAS_LOCAL_REGISTRATION === "true" &&
+        ["http://localhost:8787", "http://127.0.0.1:8787"].includes(
+          this.apiBaseUrl
+        )
+      )
+    },
     validAtlasImageLocation() {
       return normalizeImageLocation(this.atlasImageLocationDraft)
     },
@@ -1210,6 +1270,101 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    handlePlannerPlacement(value) {
+      const wasActive = this.plannerPlacement.active
+      this.plannerPlacement = value
+      if (value.active && !wasActive) {
+        this.cancelCustomPlace()
+        this.focusMapForPlacement()
+      }
+    },
+    handleLocationPlacement(value) {
+      if (this.plannerPlacement.active)
+        this.$refs.planner?.setCustomMapCoordinates(value)
+      else this.setCustomPlaceCoordinates(value)
+    },
+    cancelLocationPlacement() {
+      this.cancelCustomPlace()
+      this.$refs.planner?.stopCustomMapPlacement()
+      this.plannerPlacement = { active: false, coordinates: null }
+    },
+    applyCustomCoordinateFields() {
+      const values = [this.customLongitudeDraft, this.customLatitudeDraft]
+      const coordinates = values.every(value => String(value).trim() !== "")
+        ? normalizeMyAtlasCustomCoordinates(values.map(Number))
+        : null
+      this.customPlaceCoordinates = coordinates ? [...coordinates] : null
+      this.customPlaceError = coordinates
+        ? ""
+        : "Enter valid latitude and longitude, or choose a point on the map."
+    },
+    async saveVisitExperience(experienceChange) {
+      const pinId = this.pinEditorPin?.pinId
+      if (
+        !pinId ||
+        !this.canUseAtlas ||
+        this.experiencePending ||
+        this.accountPending
+      )
+        return
+      this.experiencePending = true
+      this.accountPending = true
+      this.experienceError = ""
+      let token
+      try {
+        token = await getMyAtlasApiAccessToken()
+        const fingerprint = JSON.stringify({ pinId, experienceChange })
+        if (this.experienceAttempt?.fingerprint !== fingerprint)
+          this.experienceAttempt = {
+            fingerprint,
+            revision: this.accountProfile.revision,
+            idempotencyKey: crypto.randomUUID(),
+          }
+        const result = await updateMyAtlasPin({
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: token,
+          pinId,
+          experienceChange,
+          revision: this.experienceAttempt.revision,
+          idempotencyKey: this.experienceAttempt.idempotencyKey,
+        })
+        this.pins = this.pins.map(pin =>
+          pin.pinId === pinId ? result.pin : pin
+        )
+        this.pinEditorPin = result.pin
+        this.updatePlanningRevision(result.revision)
+        this.experienceSavedSequence++
+        this.experienceAttempt = null
+        this.showActionFeedback({
+          message:
+            experienceChange.action === "remove"
+              ? "Your private experience was removed."
+              : "Your private experience was saved.",
+        })
+      } catch (error) {
+        this.experienceError =
+          error.code === "revision_conflict"
+            ? "Your Atlas changed elsewhere. Your draft is kept. Review the latest entries before saving again."
+            : "The experience could not be saved. Your draft is kept. Please retry."
+        if (error.code === "revision_conflict" && token) {
+          this.experienceAttempt = null
+          try {
+            await this.refreshAccountState(token)
+            this.pinEditorPin =
+              this.pins.find(pin => pin.pinId === pinId) || this.pinEditorPin
+          } catch {
+            /* Preserve the draft and error if refreshing also fails. */
+          }
+        }
+        this.showActionFeedback({
+          message: this.experienceError,
+          tone: "error",
+        })
+      } finally {
+        this.experiencePending = false
+        this.accountPending = false
+      }
+    },
     async saveAtlasImageLocation() {
       const location = this.validAtlasImageLocation
       if (!location || !this.atlasImage || this.atlasImagePending) return
@@ -1281,6 +1436,7 @@ export default {
     handlePlannerStateChange(state) {
       const active = state?.active === true
       this.plannerActive = active
+      if (!active) this.plannerPlacement = { active: false, coordinates: null }
       this.plannerRoute =
         active && Array.isArray(state?.route) ? state.route : []
       if (active && this.timelinePlaying) this.pauseTimeline()
@@ -1385,6 +1541,9 @@ export default {
         visitedDates: pin.visitedDates,
         visitedYears: pin.visitedYears,
         memory: pin.memory,
+        ...(pin.experiences === undefined
+          ? {}
+          : { experiences: pin.experiences }),
       }))
       if (initializeWorkflow && !this.workflowSectionsInitialized) {
         this.addPlaceOpen = false
@@ -1621,37 +1780,7 @@ export default {
       this.accountLoadFailed = false
       try {
         const token = await getMyAtlasApiAccessToken()
-        const deletionKey = "rwj:my-atlas:account-deletion-operation:v1"
-        let pendingDeletion = null
-        try {
-          pendingDeletion = JSON.parse(
-            window.sessionStorage.getItem(deletionKey)
-          )
-        } catch {
-          window.sessionStorage.removeItem(deletionKey)
-        }
-        if (
-          pendingDeletion?.idempotencyKey &&
-          Number.isSafeInteger(pendingDeletion.revision)
-        ) {
-          await deleteMyAtlasAccountWithRevisionRecovery({
-            apiBaseUrl: this.apiBaseUrl,
-            accessToken: token,
-            revision: pendingDeletion.revision,
-            idempotencyKey: pendingDeletion.idempotencyKey,
-            onRevision: revision => {
-              pendingDeletion = { ...pendingDeletion, revision }
-              window.sessionStorage.setItem(
-                deletionKey,
-                JSON.stringify(pendingDeletion)
-              )
-            },
-          })
-          window.sessionStorage.removeItem(deletionKey)
-          this.handleAccountDeleted()
-          logoutFromMyAtlas()
-          return
-        }
+        discardLegacyDeletion(window.sessionStorage)
         const state = await fetchMyAtlasState({
           apiBaseUrl: this.apiBaseUrl,
           accessToken: token,
@@ -1723,6 +1852,8 @@ export default {
         this.$nextTick(() => this.openTutorial("account"))
       } catch (error) {
         const messages = {
+          service_configuration_error:
+            "Account registration is unavailable because the account service is not configured. Your profile has not been created.",
           invalid_registration:
             "Check the invitation code, handle, and required acceptance fields.",
           registration_verification_failed:
@@ -1745,6 +1876,8 @@ export default {
       return label.replace(place.name + ", ", "")
     },
     closePinEditor() {
+      this.experienceAttempt = null
+      this.experienceError = ""
       this.pinEditorPlace = null
       this.pinEditorPin = null
       this.pinEditorMemoryOnly = false
@@ -1767,6 +1900,8 @@ export default {
       this.closePinEditor()
       this.customPlaceOpen = true
       this.customPlaceCoordinates = null
+      this.customLatitudeDraft = ""
+      this.customLongitudeDraft = ""
       this.customPlaceError = ""
       const queryName = normalizeMyAtlasCustomPlaceName(this.query)
       this.customPlaceName = queryName || this.query.trim().slice(0, 160)
@@ -1782,6 +1917,8 @@ export default {
         return
       }
       this.customPlaceCoordinates = [...coordinates]
+      this.customLongitudeDraft = String(coordinates[0])
+      this.customLatitudeDraft = String(coordinates[1])
       this.customPlaceError = ""
       this.announcement = "Custom pin position selected."
     },
@@ -2231,7 +2368,10 @@ export default {
       this.accountError = ""
       this.toolsStatus = "Deleting your My Atlas account."
       try {
-        const storageKey = "rwj:my-atlas:account-deletion-operation:v1"
+        const storageKey = accountDeletionStorageKey(
+          this.apiBaseUrl,
+          this.accountProfile
+        )
         let operation = null
         try {
           operation = JSON.parse(window.sessionStorage.getItem(storageKey))
@@ -2251,6 +2391,7 @@ export default {
         }
         await deleteMyAtlasAccountWithRevisionRecovery({
           apiBaseUrl: this.apiBaseUrl,
+          accountId: this.accountProfile.userId,
           accessToken: await getMyAtlasApiAccessToken(),
           revision: operation.revision,
           idempotencyKey: operation.idempotencyKey,
@@ -2334,6 +2475,28 @@ export default {
 </script>
 
 <style scoped>
+.my-atlas-custom-coordinate-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+.my-atlas-custom-coordinate-fields label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  min-width: 0;
+}
+.my-atlas-custom-coordinate-fields input {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 0.65rem;
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border, #567);
+  border-radius: 0.5rem;
+}
 .my-atlas-proof {
   position: relative;
   min-height: 100dvh;
