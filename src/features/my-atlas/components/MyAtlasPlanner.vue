@@ -5,20 +5,33 @@
     aria-labelledby="my-atlas-planner-title"
     :aria-busy="String(pending)"
   >
-    <button
-      type="button"
-      class="planner-heading"
-      aria-controls="my-atlas-planner-content"
-      :aria-expanded="String(open)"
-      @click="toggleOpen"
-    >
-      <span>
-        <strong id="my-atlas-planner-title">
-          {{ plan ? plan.title : "Plan future travel" }}
-        </strong>
-      </span>
-      <b>{{ open ? "Close planner" : plan ? "Open trip" : "Plan a trip" }}</b>
-    </button>
+    <div class="planner-heading-row">
+      <button
+        type="button"
+        class="planner-heading"
+        aria-controls="my-atlas-planner-content"
+        :aria-expanded="String(open)"
+        @click="toggleOpen"
+      >
+        <span>
+          <strong id="my-atlas-planner-title">
+            {{ plan ? plan.title : "Plan future travel" }}
+          </strong>
+        </span>
+        <b>
+          {{ open ? "Close planner" : plan ? "Open trip" : "Plan a trip" }}
+        </b>
+      </button>
+      <button
+        v-if="plan && !open"
+        type="button"
+        class="planner-heading-share"
+        aria-label="Share a read only snapshot of this saved trip"
+        @click="copySharedTripLink"
+      >
+        Share saved trip
+      </button>
+    </div>
 
     <div v-if="open" id="my-atlas-planner-content" class="planner-content">
       <p class="planner-disclosure">
@@ -55,23 +68,33 @@
               </template>
             </p>
           </div>
-          <span
-            class="planner-save-state"
-            :class="{
-              'is-dirty': planHasUnsavedChanges || !planStateAvailable,
-            }"
-          >
-            {{
-              !planStateAvailable
-                ? "Saved, refresh needed"
-                : planHasUnsavedChanges
-                  ? "Unsaved changes"
-                  : "Saved"
-            }}
-          </span>
+          <div class="planner-itinerary-heading-actions">
+            <span
+              class="planner-save-state"
+              :class="{
+                'is-dirty': planHasUnsavedChanges || !planStateAvailable,
+              }"
+            >
+              {{
+                !planStateAvailable
+                  ? "Saved, refresh needed"
+                  : planHasUnsavedChanges
+                    ? "Unsaved changes"
+                    : "Saved"
+              }}
+            </span>
+            <button
+              v-if="!routeBuilderOpen"
+              type="button"
+              aria-label="Share a read only snapshot of this saved trip"
+              @click="copySharedTripLink"
+            >
+              Share saved trip
+            </button>
+          </div>
         </div>
 
-        <template v-if="plan">
+        <template v-if="plan && !routeBuilderOpen">
           <p v-if="plan.note" class="planner-itinerary-note">
             {{ plan.note }}
           </p>
@@ -109,26 +132,27 @@
           <div class="planner-itinerary-actions">
             <button
               type="button"
-              :disabled="!planStateAvailable"
-              :aria-expanded="String(planEditorOpen)"
-              aria-controls="planner-trip-editor"
-              @click="openPlanDetails"
+              :aria-expanded="String(routeBuilderOpen)"
+              aria-controls="planner-route-builder"
+              @click="focusRouteBuilder"
             >
-              Edit itinerary
+              Edit trip
             </button>
-            <button type="button" @click="focusRouteBuilder">
-              Change route
-            </button>
-            <button type="button" @click="copySharedTripLink">
-              Copy read only trip link
+            <button
+              type="button"
+              :aria-expanded="String(tripToolsOpen)"
+              aria-controls="planner-trip-tools"
+              @click="toggleTripTools"
+            >
+              Trip tools
             </button>
           </div>
-          <small class="planner-share-disclosure">
-            The link includes this route order, place names, and map
-            coordinates. It excludes private notes and account details.
-          </small>
 
-          <div class="planner-next-actions">
+          <div
+            v-if="tripToolsOpen"
+            id="planner-trip-tools"
+            class="planner-next-actions"
+          >
             <div>
               <strong>Use your saved order</strong>
             </div>
@@ -365,18 +389,22 @@
       </section>
 
       <section
+        v-if="!plan || routeBuilderOpen"
+        id="planner-route-builder"
         ref="routeBuilder"
         class="planner-block planner-wishlist-block"
         aria-labelledby="bucket-list-title"
       >
         <div class="planner-block-heading">
           <div>
-            <h3 id="bucket-list-title">Build your itinerary</h3>
+            <h3 id="bucket-list-title">
+              {{ plan ? "Edit trip" : "Build your itinerary" }}
+            </h3>
             <span>Choose a start, stops, and finish</span>
           </div>
           <div class="planner-block-actions">
-            <button type="button" :disabled="pending" @click="loadPlanning">
-              Refresh
+            <button v-if="plan" type="button" @click="closeRouteBuilder">
+              Close editor
             </button>
             <button
               type="button"
@@ -384,11 +412,7 @@
               aria-controls="planner-wishlist-content"
               @click="wishlistOpen = !wishlistOpen"
             >
-              {{
-                wishlistOpen
-                  ? "Hide want to go"
-                  : `Want to go (${wishes.length})`
-              }}
+              Saved places ({{ wishes.length }})
             </button>
           </div>
         </div>
@@ -728,6 +752,8 @@
               v-else
               type="button"
               class="planner-review-trip"
+              :aria-expanded="String(planEditorOpen)"
+              aria-controls="planner-trip-editor"
               @click="openPlanDetails"
             >
               {{ plan ? "Review itinerary changes" : "Add trip details" }}
@@ -1040,8 +1066,8 @@
       >
         Download private account data
       </button>
-      <p class="planner-announcement" aria-live="polite">{{ announcement }}</p>
     </div>
+    <p class="planner-announcement" aria-live="polite">{{ announcement }}</p>
   </section>
 </template>
 
@@ -1103,7 +1129,9 @@ export default {
       open: false,
       planningLoaded: false,
       wishlistOpen: false,
+      routeBuilderOpen: false,
       planEditorOpen: false,
+      tripToolsOpen: false,
       nextActionOpen: "",
       pending: false,
       error: "",
@@ -1371,10 +1399,19 @@ export default {
       })
     },
     focusRouteBuilder() {
-      this.$refs.routeBuilder?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
+      this.routeBuilderOpen = true
+      this.tripToolsOpen = false
+      this.nextActionOpen = ""
+      this.$nextTick(() => {
+        this.$refs.routeBuilder?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        })
       })
+    },
+    closeRouteBuilder() {
+      this.routeBuilderOpen = false
+      this.wishlistOpen = false
     },
     openPlanDetails() {
       if (!this.plan && !this.routeDraftReady) return
@@ -1386,6 +1423,10 @@ export default {
     },
     toggleNextAction(action) {
       this.nextActionOpen = this.nextActionOpen === action ? "" : action
+    },
+    toggleTripTools() {
+      this.tripToolsOpen = !this.tripToolsOpen
+      if (!this.tripToolsOpen) this.nextActionOpen = ""
     },
     emitRevision(value) {
       if (!Number.isSafeInteger(value) || value <= this.plannerRevision) {
@@ -1684,6 +1725,7 @@ export default {
     },
     forgetSavedPlan() {
       this.plan = null
+      this.routeBuilderOpen = true
       this.planEditorOpen = false
       this.syncPlanForm()
       this.syncVisitDrafts()
@@ -1960,7 +2002,11 @@ export default {
           applyResult: result => this.rememberSavedPlan(result),
         }
       ).then(outcome => {
-        if (outcome?.saved) this.planEditorOpen = false
+        if (outcome?.saved) {
+          this.planEditorOpen = false
+          this.routeBuilderOpen = false
+          this.wishlistOpen = false
+        }
         return outcome
       })
     },
@@ -2185,13 +2231,16 @@ export default {
       }
     },
     async copySharedTripLink() {
+      this.error = ""
       try {
         const url = buildSharedTripUrl(this.plan)
         await navigator.clipboard.writeText(url)
-        this.announcement = "The read only trip link was copied."
+        this.announcement =
+          "The read only trip link was copied. Private notes and account details are excluded."
       } catch {
         this.error =
           "The browser could not copy this trip link. Retry after saving the trip."
+        this.announcement = this.error
       }
     },
     async copyPrompt() {
@@ -2330,6 +2379,34 @@ export default {
   border-color: rgba(230, 186, 104, 0.38);
   background: rgba(8, 21, 23, 0.82);
 }
+.planner-heading-row {
+  display: grid;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.planner-heading-share {
+  min-height: 2.75rem;
+  align-self: center;
+  margin: 0.5rem 0.65rem 0.5rem 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(230, 186, 104, 0.52);
+  border-radius: 0.65rem;
+  color: #102023;
+  background: #e6ba68;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.planner-heading-share:hover,
+.planner-heading-share:focus-visible {
+  background: #f0c979;
+}
+.planner-heading-share:focus-visible {
+  outline: 2px solid #f4d38f;
+  outline-offset: 2px;
+}
 .planner-content {
   display: grid;
   min-width: 0;
@@ -2357,12 +2434,18 @@ export default {
   justify-content: space-between;
   gap: 0.55rem;
 }
-.planner-itinerary-heading > div,
+.planner-itinerary-heading > div:first-child,
 .planner-next-actions > div,
 .planner-itinerary-empty {
   display: grid;
   gap: 0.14rem;
   min-width: 0;
+}
+.planner-itinerary-heading-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.5rem;
 }
 .planner-itinerary-heading small,
 .planner-itinerary-empty > small,
@@ -2686,13 +2769,6 @@ export default {
   margin-top: 0.55rem;
   color: #8fa29c;
   font-size: 0.58rem;
-  line-height: 1.5;
-}
-.planner-share-disclosure {
-  display: block;
-  margin-top: 0.55rem;
-  color: #91a49e;
-  font-size: 0.62rem;
   line-height: 1.5;
 }
 .planner-itinerary-empty button {
@@ -3409,11 +3485,16 @@ export default {
   outline-offset: 3px;
 }
 .planner-announcement {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-top: 1px solid rgba(230, 186, 104, 0.22);
+  color: #cbdad5;
+  background: rgba(230, 186, 104, 0.055);
+  font-size: 0.64rem;
+  line-height: 1.5;
+}
+.planner-announcement:empty {
+  display: none;
 }
 @media (min-width: 721px) {
   .planner-itinerary,
@@ -3426,6 +3507,13 @@ export default {
   }
 }
 @media (max-width: 480px) {
+  .planner-heading-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .planner-heading-share {
+    width: calc(100% - 1.6rem);
+    margin: 0 0.8rem 0.8rem;
+  }
   .planner-error-block {
     align-items: stretch;
     flex-direction: column;
@@ -3434,6 +3522,10 @@ export default {
   .planner-next-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+  .planner-itinerary-heading-actions {
+    align-self: stretch;
+    justify-content: space-between;
   }
   .planner-itinerary-actions,
   .planner-next-action-buttons,

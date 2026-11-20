@@ -34,6 +34,37 @@ function requireNamespace(environment, name) {
   return namespace
 }
 
+function publicAtlasImageMetadata(atlasImage) {
+  if (!atlasImage) return null
+  return Object.freeze({
+    imageId: atlasImage.imageId,
+    contentType: atlasImage.contentType,
+    width: atlasImage.width,
+    height: atlasImage.height,
+    byteLength: atlasImage.byteLength,
+    updatedAt: atlasImage.updatedAt,
+  })
+}
+
+async function resolvePublicUser(environment, handle) {
+  if (!HANDLE_PATTERN.test(handle)) throw new PublicAtlasNotFoundError()
+
+  const registry = requireNamespace(environment, "MY_ATLAS_REGISTRY").getByName(
+    REGISTRY_OBJECT_NAME
+  )
+  const registration = await registry.getActiveRegistrationByHandle(handle)
+  if (!registration?.ok) {
+    if (registration?.error === "registration_inconsistent") {
+      throw new PublicAtlasServiceError()
+    }
+    throw new PublicAtlasNotFoundError()
+  }
+
+  return requireNamespace(environment, "MY_ATLAS_USERS").getByName(
+    registration.userId
+  )
+}
+
 function publicPlace(record, pin) {
   if (pin.memory !== undefined && !isNormalizedPinMemory(pin.memory)) {
     throw new PublicAtlasServiceError("A public Atlas memory is invalid.")
@@ -67,22 +98,7 @@ function publicPlace(record, pin) {
 }
 
 export async function getPublicAtlas({ environment, handle, placeCatalog }) {
-  if (!HANDLE_PATTERN.test(handle)) throw new PublicAtlasNotFoundError()
-
-  const registry = requireNamespace(environment, "MY_ATLAS_REGISTRY").getByName(
-    REGISTRY_OBJECT_NAME
-  )
-  const registration = await registry.getActiveRegistrationByHandle(handle)
-  if (!registration?.ok) {
-    if (registration?.error === "registration_inconsistent") {
-      throw new PublicAtlasServiceError()
-    }
-    throw new PublicAtlasNotFoundError()
-  }
-
-  const user = requireNamespace(environment, "MY_ATLAS_USERS").getByName(
-    registration.userId
-  )
+  const user = await resolvePublicUser(environment, handle)
   const snapshot = await user.getPublicAtlas()
   if (!snapshot?.ok) {
     if (snapshot?.error === "public_atlas_inconsistent") {
@@ -120,6 +136,7 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
     atlas: Object.freeze({
       handle: snapshot.profile.handle,
       displayName: snapshot.profile.displayName,
+      favoriteImage: publicAtlasImageMetadata(snapshot.atlasImage),
       places: Object.freeze(places),
     }),
     catalog: Object.freeze({
@@ -132,5 +149,39 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
         }
       })(),
     }),
+  })
+}
+
+export async function getPublicAtlasImage({ environment, handle }) {
+  const user = await resolvePublicUser(environment, handle)
+  const snapshot = await user.getPublicAtlasImage()
+  if (!snapshot?.ok) {
+    if (snapshot?.error === "public_atlas_inconsistent") {
+      throw new PublicAtlasServiceError()
+    }
+    throw new PublicAtlasNotFoundError()
+  }
+
+  const bucket = environment.MY_ATLAS_MEDIA_R2
+  if (!bucket || typeof bucket.get !== "function") {
+    throw new PublicAtlasServiceError()
+  }
+  let object
+  try {
+    object = await bucket.get(snapshot.atlasImage.storageKey)
+  } catch {
+    throw new PublicAtlasServiceError()
+  }
+  if (
+    !object ||
+    !object.body ||
+    object.size !== snapshot.atlasImage.byteLength ||
+    object.httpMetadata?.contentType !== "image/webp"
+  ) {
+    throw new PublicAtlasServiceError()
+  }
+  return Object.freeze({
+    atlasImage: publicAtlasImageMetadata(snapshot.atlasImage),
+    object,
   })
 }

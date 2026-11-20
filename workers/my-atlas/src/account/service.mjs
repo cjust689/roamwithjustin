@@ -183,6 +183,7 @@ function ownerAtlasImageMetadata(atlasImage) {
     width: atlasImage.width,
     height: atlasImage.height,
     byteLength: atlasImage.byteLength,
+    publicProfile: atlasImage.publicProfile === true,
     updatedAt: atlasImage.updatedAt,
   })
 }
@@ -294,6 +295,7 @@ export async function replaceMyAtlasImage({
     width: transformed.width,
     height: transformed.height,
     byteLength: transformed.byteLength,
+    publicProfile: false,
     createdAt: now,
     updatedAt: now,
   })
@@ -351,6 +353,35 @@ export async function replaceMyAtlasImage({
     }
     throw error
   }
+}
+
+export async function updateMyAtlasImageVisibility({
+  environment,
+  identity,
+  input,
+  now = new Date().toISOString(),
+}) {
+  const owner = await ownerContext(environment, identity)
+  const mutation = await mutationMetadata(
+    owner,
+    input,
+    "update-atlas-image-visibility",
+    { publicProfile: input.publicProfile }
+  )
+  const result = expectedResult(
+    await owner.user.updateOwnerAtlasImageVisibility({
+      identityDigest: owner.identityDigest,
+      expectedRevision: input.expectedRevision,
+      publicProfile: input.publicProfile,
+      now,
+      ...mutation,
+    })
+  )
+  return Object.freeze({
+    idempotent: result.idempotent,
+    profile: publicProfile(result.profile),
+    atlasImage: ownerAtlasImageMetadata(result.atlasImage),
+  })
 }
 
 export async function removeMyAtlasImage({

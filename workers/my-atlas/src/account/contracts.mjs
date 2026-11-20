@@ -160,6 +160,18 @@ export function normalizeAtlasImageMutation(headers) {
   })
 }
 
+export function normalizeAtlasImageVisibility(value, headers) {
+  assertObject(value, new Set(["publicProfile"]), "Atlas image visibility")
+  if (typeof value.publicProfile !== "boolean") {
+    throw new RegistrationValidationError("Atlas image visibility is invalid.")
+  }
+  return Object.freeze({
+    publicProfile: value.publicProfile,
+    expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
+    idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),
+  })
+}
+
 export function normalizeCreatePin(value, headers, currentYear) {
   assertObject(
     value,

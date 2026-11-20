@@ -800,6 +800,8 @@ function validStoredAtlasImage(value) {
       Number.isSafeInteger(value.byteLength) &&
       value.byteLength >= 1 &&
       value.byteLength <= 1024 * 1024 &&
+      (value.publicProfile === undefined ||
+        typeof value.publicProfile === "boolean") &&
       validIsoDate(value.createdAt) &&
       validIsoDate(value.updatedAt)
   )
@@ -1122,6 +1124,49 @@ export class UserProfileDurableObject extends DurableObject {
         profile,
         atlasImage: command.image,
         previousAtlasImage,
+      })
+      storeMutation(this.ctx.storage, command, result)
+      return result
+    })
+  }
+
+  updateOwnerAtlasImageVisibility(command) {
+    if (
+      !validOwnerMutation(command) ||
+      typeof command.publicProfile !== "boolean"
+    ) {
+      return failure("invalid_atlas_image")
+    }
+    return this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      const existing = existingMutation(this.ctx.storage, command)
+      if (existing) return existing
+      if (owner.profile.revision !== command.expectedRevision) {
+        return failure("revision_conflict")
+      }
+      const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+      if (!atlasImage) return failure("atlas_image_not_found")
+      if (!validStoredAtlasImage(atlasImage)) {
+        return failure("atlas_image_inconsistent")
+      }
+      const updatedAtlasImage = Object.freeze({
+        ...atlasImage,
+        publicProfile: command.publicProfile,
+        updatedAt: command.now,
+      })
+      const profile = {
+        ...owner.profile,
+        revision: owner.profile.revision + 1,
+        updatedAt: command.now,
+      }
+      this.ctx.storage.kv.put(ATLAS_IMAGE_KEY, updatedAtlasImage)
+      this.ctx.storage.kv.put("profile", profile)
+      const result = Object.freeze({
+        ok: true,
+        idempotent: false,
+        profile,
+        atlasImage: updatedAtlasImage,
       })
       storeMutation(this.ctx.storage, command, result)
       return result
@@ -2220,6 +2265,10 @@ export class UserProfileDurableObject extends DurableObject {
     ) {
       return failure("public_atlas_inconsistent")
     }
+    const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
+    if (atlasImage && !validStoredAtlasImage(atlasImage)) {
+      return failure("public_atlas_inconsistent")
+    }
     return Object.freeze({
       ok: true,
       profile: Object.freeze({
@@ -2236,7 +2285,15 @@ export class UserProfileDurableObject extends DurableObject {
           })
         )
       ),
+      atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,
     })
+  }
+
+  getPublicAtlasImage() {
+    const atlas = this.getPublicAtlas()
+    if (!atlas.ok) return atlas
+    if (!atlas.atlasImage) return failure("public_atlas_image_not_found")
+    return Object.freeze({ ok: true, atlasImage: atlas.atlasImage })
   }
 
   inspectProvisioning(command) {

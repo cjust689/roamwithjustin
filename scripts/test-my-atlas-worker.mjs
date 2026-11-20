@@ -11,12 +11,14 @@ import {
   fetchMyAtlasPlanning,
   fetchMyAtlasProfile,
   fetchPublicAtlas,
+  fetchPublicAtlasImage,
   fetchMyAtlasState,
   markMyAtlasPlanVisited,
   removeMyAtlasImage,
   registerMyAtlasAccount,
   replaceMyAtlasImage,
   saveMyAtlasPlan,
+  updateMyAtlasImageVisibility,
   updateMyAtlasPin,
   updateMyAtlasSharing,
   verifyMyAtlasApiAccess,
@@ -149,6 +151,14 @@ async function readJson(response) {
     atlas: {
       handle: "justin-travels",
       displayName: "Justin Traveler",
+      favoriteImage: {
+        imageId: "image_11111111111111111111111111111111",
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: 4,
+        updatedAt: "2026-11-19T14:00:00.000Z",
+      },
       places: [
         {
           placeId: "geonames:3621138",
@@ -211,6 +221,48 @@ async function readJson(response) {
   )
   assert.equal(missing.status, 404)
   assert.equal((await readJson(missing)).error, "atlas_not_found")
+
+  const imageBytes = Uint8Array.from([82, 73, 70, 70])
+  const imageResponse = await workerResponse(
+    "/v1/public/atlases/justin-travels/image",
+    {},
+    {},
+    {
+      getPublicAtlasImage: async options => {
+        assert.equal(options.handle, "justin-travels")
+        return {
+          atlasImage: {
+            byteLength: imageBytes.byteLength,
+          },
+          object: {
+            body: new Response(imageBytes).body,
+            httpEtag: '"public-image-etag"',
+          },
+        }
+      },
+    }
+  )
+  assert.equal(imageResponse.status, 200)
+  assert.equal(imageResponse.headers.get("Content-Type"), "image/webp")
+  assert.equal(imageResponse.headers.get("Cache-Control"), "no-store")
+  assert.equal(imageResponse.headers.get("ETag"), '"public-image-etag"')
+  assert.deepEqual(
+    new Uint8Array(await imageResponse.arrayBuffer()),
+    imageBytes
+  )
+
+  const missingImage = await workerResponse(
+    "/v1/public/atlases/private-owner/image",
+    {},
+    {},
+    {
+      getPublicAtlasImage: async () => {
+        throw new PublicAtlasNotFoundError()
+      },
+    }
+  )
+  assert.equal(missingImage.status, 404)
+  assert.equal((await readJson(missingImage)).error, "atlas_image_not_found")
 }
 
 {
@@ -1376,6 +1428,14 @@ await assert.rejects(
     atlas: {
       handle: "justin-travels",
       displayName: "Justin Traveler",
+      favoriteImage: {
+        imageId: "image_11111111111111111111111111111111",
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: 4,
+        updatedAt: "2026-11-19T14:00:00.000Z",
+      },
       places: [
         {
           placeId: "geonames:3621138",
@@ -1431,6 +1491,28 @@ await assert.rejects(
   assert.equal(atlas.places[0].memory, "The tide revealed the whale tail.")
   assert.equal(atlas.places[1].spotKind, "National park")
   assert.equal(atlas.places[2].placeType, "custom")
+  assert.equal(
+    atlas.favoriteImage.imageId,
+    "image_11111111111111111111111111111111"
+  )
+
+  const publicImage = await fetchPublicAtlasImage({
+    apiBaseUrl: "https://api.example.com",
+    handle: "justin-travels",
+    fetchImpl: async (url, options) => {
+      assert.equal(
+        url,
+        "https://api.example.com/v1/public/atlases/justin-travels/image"
+      )
+      assert.equal(options.headers.Accept, "image/webp")
+      return new Response(Uint8Array.from([82, 73, 70, 70]), {
+        status: 200,
+        headers: { "Content-Type": "image/webp" },
+      })
+    },
+  })
+  assert.equal(publicImage.type, "image/webp")
+  assert.equal(publicImage.size, 4)
 }
 
 {
@@ -1500,6 +1582,7 @@ await assert.rejects(
     width: 1200,
     height: 1200,
     byteLength: 4,
+    publicProfile: false,
     updatedAt: "2026-11-19T14:00:00.000Z",
   }
   let imageUploadOptions
@@ -1539,20 +1622,43 @@ await assert.rejects(
   assert.equal(imageBlob.type, "image/webp")
   assert.equal(imageBlob.size, 4)
 
-  const removedImageRevision = await removeMyAtlasImage({
+  const publicImageMetadata = { ...atlasImageMetadata, publicProfile: true }
+  let imageVisibilityOptions
+  const imageVisibility = await updateMyAtlasImageVisibility({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
+    publicProfile: true,
     revision: 3,
     fetchImpl: async (_url, options) => {
-      assert.equal(options.method, "DELETE")
-      assert.equal(options.headers.get("If-Match"), '"rev-3"')
-      return new Response(JSON.stringify({ deleted: true }), {
+      imageVisibilityOptions = options
+      return new Response(JSON.stringify({ atlasImage: publicImageMetadata }), {
         status: 200,
         headers: { ETag: '"rev-4"', "Content-Type": "application/json" },
       })
     },
   })
-  assert.equal(removedImageRevision, 4)
+  assert.equal(imageVisibilityOptions.method, "PATCH")
+  assert.equal(imageVisibilityOptions.headers.get("If-Match"), '"rev-3"')
+  assert.deepEqual(JSON.parse(imageVisibilityOptions.body), {
+    publicProfile: true,
+  })
+  assert.equal(imageVisibility.revision, 4)
+  assert.deepEqual(imageVisibility.atlasImage, publicImageMetadata)
+
+  const removedImageRevision = await removeMyAtlasImage({
+    apiBaseUrl: "https://api.example.com",
+    accessToken: "owner-token",
+    revision: 4,
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.method, "DELETE")
+      assert.equal(options.headers.get("If-Match"), '"rev-4"')
+      return new Response(JSON.stringify({ deleted: true }), {
+        status: 200,
+        headers: { ETag: '"rev-5"', "Content-Type": "application/json" },
+      })
+    },
+  })
+  assert.equal(removedImageRevision, 5)
 
   const created = await createMyAtlasPin({
     apiBaseUrl: "https://api.example.com",
@@ -2214,7 +2320,7 @@ assert.equal(
   })
   assert.equal(profile.revision, 9)
 
-  const created = await createMyAtlasWish({
+  const idempotentWish = await createMyAtlasWish({
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
     value: { placeId: "geonames:3621138", priority: "normal" },
@@ -2229,11 +2335,11 @@ assert.equal(
             placeId: "geonames:3621138",
           },
         }),
-        { status: 201, headers: { ETag: '"rev-5"' } }
+        { status: 200, headers: { ETag: 'W/"rev-9"' } }
       )
     },
   })
-  assert.equal(created.revision, 5)
+  assert.equal(idempotentWish.revision, 9)
 
   let saveCalls = 0
   const recoveredPlan = await saveMyAtlasPlan({

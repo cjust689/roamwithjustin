@@ -28,7 +28,8 @@
           policy acceptance records, and the places, optional visit years,
           favorite memories, private wishlist entries, and trip plans that you
           choose to save. You may also upload one favorite travel image for use
-          in an exported Atlas Story image. Custom pins and private plans may
+          in Atlas Story images. You choose whether it may also appear on your
+          public Visited Atlas profile. Custom pins and private plans may
           include coordinates. Access tokens are kept in browser memory rather
           than permanent browser storage.
         </p>
@@ -36,9 +37,12 @@
           My Atlas accounts begin private. If you publish your Visited Atlas,
           your handle, display name, visited places, optional visit years,
           favorite memories, and custom pin names and positions become available
-          through your public profile link. Wishlist entries, future trip plans,
-          private notes, desired years, plan retention details, and your
-          favorite travel image are never included in that public profile.
+          through your public profile link. Your favorite travel image becomes
+          visible only when you also allow public profile use. You can keep the
+          image private, make the Atlas private, or remove the image at any
+          time. Wishlist entries, future trip plans, private notes, desired
+          years, and plan retention details are never included in that public
+          profile.
         </p>
         <p>
           Auth0 supports authentication. Cloudflare hosts the application data,
@@ -145,9 +149,9 @@
         <p>
           My Atlas owners can keep the account private, unpublish a shared
           Atlas, remove individual places, delete wishlist entries and plans,
-          replace or remove the favorite travel image, export account data, or
-          permanently delete the application account from the signed in My Atlas
-          screen.
+          change favorite travel image visibility, replace or remove the image,
+          export account data, or permanently delete the application account
+          from the signed in My Atlas screen.
         </p>
       </section>
 
