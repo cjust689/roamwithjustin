@@ -55,6 +55,7 @@ export function publicProfile(profile) {
     handle: profile.handle,
     displayName: profile.displayName,
     public: profile.public,
+    discoverable: profile.discoverable === true,
     status: profile.status,
     pinCount: profile.pinCount || 0,
     wishCount: profile.wishCount || 0,

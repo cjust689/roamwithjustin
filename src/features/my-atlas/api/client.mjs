@@ -226,6 +226,7 @@ export async function fetchMyAtlasState({
     typeof payload.profile?.handle !== "string" ||
     typeof payload.profile?.displayName !== "string" ||
     typeof payload.profile?.public !== "boolean" ||
+    typeof payload.profile?.discoverable !== "boolean" ||
     !Array.isArray(payload.pins) ||
     payload.pins.some(
       pin =>
@@ -410,7 +411,8 @@ export async function fetchMyAtlasProfile({
   if (
     typeof payload.profile?.handle !== "string" ||
     typeof payload.profile?.displayName !== "string" ||
-    typeof payload.profile?.public !== "boolean"
+    typeof payload.profile?.public !== "boolean" ||
+    typeof payload.profile?.discoverable !== "boolean"
   ) {
     throw new MyAtlasApiError("The My Atlas profile response is invalid.", {
       status: response.status,
@@ -445,6 +447,7 @@ export async function registerMyAtlasAccount({
     typeof profile?.handle !== "string" ||
     typeof profile?.displayName !== "string" ||
     profile.public !== false ||
+    profile.discoverable !== false ||
     profile.status !== "active" ||
     !Number.isSafeInteger(profile.revision) ||
     profile.revision < 1
@@ -604,6 +607,38 @@ export async function updateMyAtlasSharing({
     payload.profile.public !== publish
   ) {
     throw new MyAtlasApiError("The sharing response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    ...payload.profile,
+    revision: revisionFromResponse(response, payload.profile.revision),
+  })
+}
+
+export async function updateMyAtlasDiscovery({
+  apiBaseUrl,
+  accessToken,
+  discoverable,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me",
+    method: "PATCH",
+    body: { discoverable },
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (
+    typeof payload.profile?.handle !== "string" ||
+    payload.profile.discoverable !== discoverable
+  ) {
+    throw new MyAtlasApiError("The discovery response is invalid.", {
       status: response.status,
       code: "invalid_response",
     })
@@ -1125,6 +1160,83 @@ export async function fetchPublicAtlas({
     favoriteImage: normalizedAtlasImage(body.atlas.favoriteImage),
     places: Object.freeze(body.atlas.places.map(normalizedPin)),
     catalog: Object.freeze({ ...body.catalog }),
+  })
+}
+
+export async function fetchPublicAtlasDirectory({
+  apiBaseUrl,
+  cursor = "",
+  limit = 12,
+  fetchImpl = fetch,
+}) {
+  if (
+    !apiBaseUrl ||
+    !Number.isInteger(limit) ||
+    limit < 1 ||
+    limit > 24 ||
+    typeof cursor !== "string"
+  ) {
+    throw new MyAtlasApiError("Atlas discovery is not configured.", {
+      code: "not_configured",
+    })
+  }
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (cursor) params.set("cursor", cursor)
+  let response
+  try {
+    response = await fetchImpl(
+      `${apiBaseUrl}/v1/public/atlases?${params.toString()}`,
+      {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      }
+    )
+  } catch {
+    throw new MyAtlasApiError("Atlas discovery could not be reached.", {
+      code: "unavailable",
+    })
+  }
+  let body = {}
+  try {
+    body = await response.json()
+  } catch {
+    // Invalid responses are rejected by the contract check below.
+  }
+  if (!response.ok) {
+    throw new MyAtlasApiError("Atlas discovery is unavailable.", {
+      status: response.status,
+      code: typeof body.error === "string" ? body.error : "rejected",
+    })
+  }
+  if (
+    body.schemaVersion !== 1 ||
+    !Array.isArray(body.atlases) ||
+    body.atlases.some(
+      atlas =>
+        !PUBLIC_HANDLE_PATTERN.test(atlas?.handle || "") ||
+        typeof atlas.displayName !== "string" ||
+        !Number.isInteger(atlas.placeCount) ||
+        atlas.placeCount < 1 ||
+        typeof atlas.recent !== "boolean"
+    ) ||
+    (body.nextCursor !== null && typeof body.nextCursor !== "string")
+  ) {
+    throw new MyAtlasApiError("Atlas discovery response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  }
+  return Object.freeze({
+    atlases: Object.freeze(
+      body.atlases.map(atlas =>
+        Object.freeze({
+          ...atlas,
+          favoriteImage: normalizedAtlasImage(atlas.favoriteImage),
+        })
+      )
+    ),
+    nextCursor: body.nextCursor,
   })
 }
 

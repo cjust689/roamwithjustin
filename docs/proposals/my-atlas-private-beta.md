@@ -5,7 +5,7 @@ kind: proposal
 status: approved
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - my-atlas-geography
   - my-atlas-registration
@@ -69,7 +69,7 @@ verification:
 
 **My Atlas** is a lightweight, shareable digital pushpin map. An invited traveler signs in, searches for countries/cities, marks places they have visited, optionally records visited year(s), and shares a public map. It is **not** another Journey authoring system and does not inherit the owner's Stories, Experiences, media pipeline, or business sponsorship controls.
 
-**V1 beta is deliberately minimal:** Google login, invitation redemption, personal profile, country/city search, pin CRUD, explicitly published share link, export, deletion, moderation, and beta reset notices. No end-user image uploads, named attractions, Facebook login, public people search, annual recap art, ad serving, Workers KV, social feed, or per-pin pages.
+**V1 beta is deliberately minimal:** Google login, invitation redemption, personal profile, country/city search, pin CRUD, explicitly published share link, opt-in public Atlas browsing, export, deletion, moderation, and beta reset notices. No handle search, named attractions, Facebook login, social graph, annual recap art, ad serving, Workers KV, social feed, or per-pin pages.
 
 **Important principles:**
 
@@ -370,7 +370,7 @@ Do not use ad blockers, artificial reloads or auto-refresh to force impressions.
 - Keep user-media uploads separate from the existing editorial R2 bucket and prefix. Enforce byte and dimension limits on the server, strip EXIF and GPS data, resize and re-encode, handle orientation, and remove replaced or orphaned objects.
 - The active implementation uses an exact 1200 by 1200 WebP derivative with a 1 MiB stored ceiling. The source is not retained.
 - Any additional profile images, historical image versions, or image-rich annual recaps require a separate product, privacy, retention, moderation, and cost decision.
-- Potential future providers: Facebook/Apple auth, attractions under licensed provider, opt-in user directory, sponsor discovery, and read caching **only with correct privacy revocation**.
+- Potential future providers: Facebook/Apple auth, attractions under licensed provider, handle search, sponsor discovery, and read caching **only with correct privacy revocation**. The current directory is browse only and requires separate owner consent.
 
 ## 11. Repository integration for coding agent
 
@@ -430,7 +430,7 @@ Audit actual repo and configuration before writing code. Prior review reported V
 - [ ] Private/suspended/unknown profiles disclose no personal data (404); deleted/tombstoned handles return 410.
 - [ ] A previously published profile made private cannot be fetched from stale Workers KV, CDN or Workers route caches; no cache layer is present.
 - [ ] Beta profile page is `noindex`; share previews still function; user is warned that external cached previews may remain.
-- [ ] Abuse reporting and admin hide/suspend work; routes never permit public user discovery/enumeration.
+- [ ] Abuse reporting and admin hide/suspend work. Browse discovery includes only separately opted-in public profiles and exposes no private user identifiers.
 - [ ] Route is configured as `roamwithjustin.com/my-atlas/*` (not `{handle}`), valid handle routes produce authoritative share HTML, and `/my-atlas`, reserved login/callback/settings paths, nested paths, site assets, and `/atlas` continue to reach the existing Vue/GitHub Pages application without loops.
 
 **Scope, monetization, operations**

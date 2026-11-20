@@ -1,0 +1,356 @@
+<template>
+  <main class="my-atlas-explore">
+    <header class="my-atlas-explore-header">
+      <a href="/" aria-label="Roam With Justin home">RWJ</a>
+      <router-link to="/my-atlas">My Atlas</router-link>
+    </header>
+
+    <section class="my-atlas-explore-intro" aria-labelledby="explore-title">
+      <p>Explore Atlases</p>
+      <h1 id="explore-title">See where other travelers have been.</h1>
+      <p>
+        Browse public My Atlas maps shared by their owners. Recent public Atlas
+        updates are given more space while older Atlases remain available as you
+        explore.
+      </p>
+    </section>
+
+    <section class="my-atlas-explore-results" aria-live="polite">
+      <div v-if="atlases.length" class="my-atlas-explore-grid">
+        <router-link
+          v-for="atlas in atlases"
+          :key="atlas.handle"
+          class="my-atlas-explore-card"
+          :to="`/my-atlas/${atlas.handle}`"
+        >
+          <div class="my-atlas-explore-image">
+            <img
+              v-if="atlas.favoriteImage && !imageErrors[atlas.handle]"
+              :src="imageUrl(atlas.handle)"
+              :alt="`${atlas.displayName}'s favorite travel image`"
+              loading="lazy"
+              @error="markImageUnavailable(atlas.handle)"
+            />
+            <span v-else aria-hidden="true">{{ atlasInitials(atlas) }}</span>
+            <b v-if="atlas.recent">Active recently</b>
+          </div>
+          <div class="my-atlas-explore-card-copy">
+            <span>@{{ atlas.handle }}</span>
+            <strong>{{ atlas.displayName }}</strong>
+            <small>
+              {{ atlas.placeCount }}
+              {{ atlas.placeCount === 1 ? "place" : "places" }}
+            </small>
+          </div>
+        </router-link>
+      </div>
+
+      <div v-if="loading && !atlases.length" class="my-atlas-explore-state">
+        Finding public Atlases
+      </div>
+      <div v-else-if="error && !atlases.length" class="my-atlas-explore-state">
+        <strong>Explore Atlases is unavailable right now.</strong>
+        <button type="button" @click="loadMore">Try again</button>
+      </div>
+      <div
+        v-else-if="!loading && !atlases.length"
+        class="my-atlas-explore-state"
+      >
+        <strong>No public Atlases are listed yet.</strong>
+        <router-link to="/my-atlas">Build your Atlas</router-link>
+      </div>
+
+      <div
+        ref="sentinel"
+        class="my-atlas-explore-sentinel"
+        aria-hidden="true"
+      ></div>
+      <button
+        v-if="nextCursor"
+        type="button"
+        class="my-atlas-explore-more"
+        :disabled="loading"
+        @click="loadMore"
+      >
+        {{ loading ? "Loading more Atlases" : "Load more Atlases" }}
+      </button>
+      <p
+        v-if="error && atlases.length"
+        class="my-atlas-explore-error"
+        role="status"
+      >
+        More Atlases could not be loaded. You can try again.
+      </p>
+    </section>
+  </main>
+</template>
+
+<script>
+import { fetchPublicAtlasDirectory } from "../api/client.mjs"
+import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
+
+export default {
+  name: "MyAtlasExploreView",
+  data() {
+    return {
+      apiBaseUrl: getMyAtlasApiBaseUrl(process.env, window.location.origin),
+      atlases: [],
+      nextCursor: "",
+      loading: false,
+      error: "",
+      imageErrors: {},
+      observer: null,
+      loadedFirstPage: false,
+    }
+  },
+  mounted() {
+    this.loadMore()
+    if ("IntersectionObserver" in window) {
+      this.observer = new IntersectionObserver(
+        entries => {
+          if (entries.some(entry => entry.isIntersecting)) this.loadMore()
+        },
+        { rootMargin: "400px 0px" }
+      )
+      this.observer.observe(this.$refs.sentinel)
+    }
+  },
+  // Vue 2 cleanup hook.
+  // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
+  beforeDestroy() {
+    this.observer?.disconnect()
+  },
+  methods: {
+    async loadMore() {
+      if (this.loading || (this.loadedFirstPage && !this.nextCursor)) return
+      this.loading = true
+      this.error = ""
+      try {
+        const result = await fetchPublicAtlasDirectory({
+          apiBaseUrl: this.apiBaseUrl,
+          cursor: this.nextCursor,
+        })
+        const knownHandles = new Set(this.atlases.map(atlas => atlas.handle))
+        this.atlases.push(
+          ...result.atlases.filter(atlas => !knownHandles.has(atlas.handle))
+        )
+        this.nextCursor = result.nextCursor || ""
+        this.loadedFirstPage = true
+      } catch {
+        this.error = "unavailable"
+      } finally {
+        this.loading = false
+      }
+    },
+    imageUrl(handle) {
+      return `${this.apiBaseUrl}/v1/public/atlases/${encodeURIComponent(handle)}/image`
+    },
+    markImageUnavailable(handle) {
+      this.$set(this.imageErrors, handle, true)
+    },
+    atlasInitials(atlas) {
+      const initials = atlas.displayName
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(word => word.charAt(0))
+        .join("")
+      return initials.toUpperCase() || "MA"
+    },
+  },
+}
+</script>
+
+<style scoped>
+.my-atlas-explore {
+  min-height: 100vh;
+  padding: clamp(1rem, 3vw, 2rem);
+  background:
+    radial-gradient(
+      circle at 85% 5%,
+      rgba(238, 184, 87, 0.15),
+      transparent 28rem
+    ),
+    #081315;
+  color: #f7f2e7;
+  font-family: "Poppins", system-ui, sans-serif;
+}
+
+.my-atlas-explore-header,
+.my-atlas-explore-intro,
+.my-atlas-explore-results {
+  width: min(1180px, 100%);
+  margin-inline: auto;
+}
+
+.my-atlas-explore-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.my-atlas-explore-header a {
+  color: #f4c66f;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.my-atlas-explore-intro {
+  padding-block: clamp(4rem, 10vw, 8rem) clamp(2.5rem, 6vw, 5rem);
+}
+
+.my-atlas-explore-intro > p:first-child {
+  margin: 0 0 1rem;
+  color: #f4c66f;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.my-atlas-explore-intro h1 {
+  max-width: 850px;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+
+.my-atlas-explore-intro > p:last-child {
+  max-width: 680px;
+  margin: 1.75rem 0 0;
+  color: rgba(247, 242, 231, 0.68);
+  line-height: 1.7;
+}
+
+.my-atlas-explore-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+}
+
+.my-atlas-explore-card {
+  overflow: hidden;
+  border: 1px solid rgba(244, 198, 111, 0.25);
+  border-radius: 1.35rem;
+  background: #101c1e;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+.my-atlas-explore-card:hover,
+.my-atlas-explore-card:focus-visible {
+  border-color: #f4c66f;
+  outline: none;
+  transform: translateY(-4px);
+}
+
+.my-atlas-explore-image {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(244, 198, 111, 0.2), transparent 55%), #1b292a;
+}
+
+.my-atlas-explore-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.my-atlas-explore-image > span {
+  color: rgba(247, 242, 231, 0.62);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3rem, 8vw, 5rem);
+}
+
+.my-atlas-explore-image b {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(8, 19, 21, 0.88);
+  color: #f4c66f;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.my-atlas-explore-card-copy {
+  display: grid;
+  gap: 0.25rem;
+  padding: 1.2rem;
+}
+
+.my-atlas-explore-card-copy span,
+.my-atlas-explore-card-copy small {
+  color: rgba(247, 242, 231, 0.6);
+  font-size: 0.72rem;
+}
+
+.my-atlas-explore-card-copy strong {
+  font-size: 1.05rem;
+}
+
+.my-atlas-explore-state,
+.my-atlas-explore-error {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  padding: 2rem;
+  border: 1px solid rgba(244, 198, 111, 0.2);
+  border-radius: 1rem;
+  color: rgba(247, 242, 231, 0.72);
+}
+
+.my-atlas-explore-state button,
+.my-atlas-explore-state a,
+.my-atlas-explore-more {
+  padding: 0.7rem 1rem;
+  border: 1px solid #f4c66f;
+  border-radius: 999px;
+  background: transparent;
+  color: #f4c66f;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.my-atlas-explore-sentinel {
+  height: 1px;
+}
+
+.my-atlas-explore-more {
+  display: block;
+  margin: 2rem auto;
+}
+
+@media (max-width: 800px) {
+  .my-atlas-explore-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .my-atlas-explore {
+    padding-inline: 0.8rem;
+  }
+
+  .my-atlas-explore-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

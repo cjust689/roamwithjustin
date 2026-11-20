@@ -487,6 +487,27 @@ The released handle can be registered again through the ordinary invitation
 flow. Public lookup returns the generic 404 response after deletion.
 This operation does not delete the upstream Google or Auth0 identity.
 
+The repository command `npm run my-atlas:account:wipe` is a guarded local
+development convenience around this same owner endpoint. It requires the owner's
+access token, reads the current profile, verifies the exact `--handle`, and is
+a dry run unless `--apply` plus the account specific confirmation are present.
+Loopback is the default. A remote HTTPS API requires `--allow-remote`. The
+command has no route, binding, or code path to the curated Roam With Justin
+Atlas, repository travel records, Google account, or Auth0 identity.
+
+Global mode uses `--all` and requires an `admin:my-atlas` access token. Its
+protected `POST /v1/admin/accounts/wipe` endpoint previews all active handles
+with `apply: false`. Applying requires `WIPE ALL USER MY ATLAS ACCOUNTS` and
+deletes one account per request through the same permanent deletion service.
+The CLI repeats until no active accounts remain in the selected environment.
+Pause registration while resetting an environment because new accounts can
+otherwise join the run. Pending registrations and invitation definitions are
+not reset. The registry retains an internal task with the original identity,
+revision, and operation key until that account is erased, permitting recovery
+after cross-object interruption. Completing the task removes its identity.
+Only a definitive revision conflict releases the task for a fresh revision.
+The global endpoint and command are locally tested and not deployed.
+
 ## Catalog boundary
 
 Format validation is not geographic validation. Before a create or place-change
@@ -554,16 +575,48 @@ and image visibility choice before reading R2. It never exposes the storage key
 or source digest. The profile hero identifies the image as `Favorite travel
 image` and offers a full image dialog.
 
+Public link sharing and public discovery are separate owner choices. A profile
+starts with both `public` and `discoverable` false. Publishing creates the
+handle link but does not list the profile. The owner must separately choose
+`List in Explore Atlases`, and the Durable Object rejects discovery unless the
+profile is public and has at least one visited place. Unpublishing or removing
+the final pin atomically clears discovery.
+
+`GET /v1/public/atlases` returns only active profiles that are both public and
+discoverable. Its safe cards contain the handle, display name, visited place
+count, a coarse recent activity flag, and favorite image metadata only when
+public image use is also approved. The endpoint never returns user IDs, exact
+activity timestamps, identities, private plans, wishlist entries, or image
+storage keys. Public Atlas activity within the prior 24 hours ranks first.
+Private wishlist and planning changes do not affect this signal. Older profiles
+remain in a stable daily rotation. An opaque cursor appends up to 24 results at
+a time, and the browser de-duplicates handles while loading more results.
+
+The beta implementation scans at most 1,000 active registrations and asks each
+user object for a safe discovery summary before ranking. It fails closed rather
+than serving a partial directory if that ceiling is exceeded. A dedicated
+privacy preserving discovery index is required before the account population
+approaches that ceiling.
+
 Private, absent, and inactive profiles share the same public 404 behavior.
 Public responses are `no-store`, and the client adds `noindex, nofollow` while a
 shared Atlas is mounted. This is public-link behavior, not a secret-link access
 control. Removing the final pin still makes the profile private atomically.
 
-The local public viewer is client rendered. Profile-specific server HTML, Open
-Graph tags, crawler status behavior, public-directory discovery, and production
-routing are not implemented.
+The local public viewer and Explore Atlases directory are client rendered.
+Profile-specific server HTML, Open Graph tags, crawler status behavior, and
+production routing are not implemented.
 
 ## Browser presentation
+
+The owner route shows an empty map before sign-in. It requires a restored
+signed-in session and a loaded My Atlas profile before displaying private map
+data or owner workflows. Signed-out visitors see the map and sign-in entry.
+Signed-in visitors without a profile receive
+registration, and account load failures retain the existing retry controls.
+Search, local draft pin changes, and the preview walkthrough are unavailable
+before account access. Public shared Atlases and shared trips remain readable.
+This supersedes the earlier pre-account interactive proof and walkthrough.
 
 My Atlas uses the site's existing Poppins family for interface copy, headings,
 tutorials, authentication feedback, pin editing, public profiles, and locally
@@ -767,7 +820,8 @@ The API still needs handle-change coordination with active registry records, abu
 reporting and moderation, and registration or operator rate-limit enforcement.
 Permanent application-account deletion and the six-month plus 30-day plan
 retention contract are implemented and staged, but authenticated deletion still
-requires disposable-account acceptance. Public
+requires disposable-account acceptance. Public discovery is locally test
+verified but not deployed or visually accepted against real profiles. Public
 catalog and Atlas reads have a tested weighted limiter boundary and a deployed
 staging binding. Catalog and public Atlas reads have isolated limiter keys, but
 live exhaustion behavior is not yet verified.
