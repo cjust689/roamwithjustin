@@ -45,10 +45,23 @@
               @click="openFavoriteImage"
             >
               <strong>Favorite travel image</strong>
+              <span v-if="atlas.favoriteImage.location">{{
+                atlas.favoriteImage.location
+              }}</span>
               <span>View full image</span>
             </button>
           </div>
         </div>
+        <p v-if="instagramUrl" class="my-atlas-public-instagram">
+          <a
+            :href="instagramUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            referrerpolicy="no-referrer"
+          >
+            Instagram @{{ atlas.instagramHandle }}
+          </a>
+        </p>
         <p
           v-if="favoriteImageError"
           class="my-atlas-public-image-error"
@@ -70,7 +83,12 @@
               :src="favoriteImageUrl"
               :alt="`${atlas.displayName}'s favorite travel image`"
             />
-            <p>Favorite travel image chosen by {{ atlas.displayName }}</p>
+            <p>
+              Favorite travel image chosen by {{ atlas.displayName
+              }}<template v-if="atlas.favoriteImage.location">
+                · {{ atlas.favoriteImage.location }}</template
+              >
+            </p>
           </div>
         </dialog>
 
@@ -211,6 +229,7 @@
 
 <script>
 import MyAtlasMap from "../components/MyAtlasMap.vue"
+import { instagramProfileUrl } from "../../../../shared/my-atlas-instagram.mjs"
 import { fetchPublicAtlas, fetchPublicAtlasImage } from "../api/client.mjs"
 import {
   atlasTimelineSequence,
@@ -258,6 +277,9 @@ export default {
     }
   },
   computed: {
+    instagramUrl() {
+      return instagramProfileUrl(this.atlas?.instagramHandle)
+    },
     places() {
       return (this.atlas?.places || []).map(place => {
         const country = place.countryCode
@@ -470,6 +492,7 @@ export default {
         const filename = await downloadMyAtlasStory({
           displayName: this.atlas.displayName,
           favoriteImage,
+          favoriteImageLocation: this.atlas.favoriteImage?.location || "",
           filterLabel: this.filterLabel,
           handle: this.atlas.handle,
           places: this.displayedPlaces,
@@ -503,6 +526,19 @@ export default {
   color: var(--color-text, #edf7f2);
   background: var(--color-surface, #0d1719);
   font-family: "Poppins", sans-serif;
+}
+
+.my-atlas-public-instagram {
+  margin: 0.8rem 0;
+}
+.my-atlas-public-instagram a {
+  color: var(--color-accent-soft, #f4d38f);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.my-atlas-public-instagram a:focus-visible {
+  outline: 2px solid var(--color-focus, #f4d38f);
+  outline-offset: 3px;
 }
 
 .my-atlas-public-panel {

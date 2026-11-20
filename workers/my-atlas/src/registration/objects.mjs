@@ -1,4 +1,9 @@
 import { DurableObject } from "cloudflare:workers"
+import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
+import {
+  normalizeInstagramHandle,
+  publicInstagramHandle,
+} from "../../../../shared/my-atlas-instagram.mjs"
 import { isNormalizedPinMemory } from "../account/memory.mjs"
 import {
   CUSTOM_PLACE_ID_PATTERN,
@@ -895,6 +900,9 @@ function validStoredAtlasImage(value) {
       value.byteLength <= 1024 * 1024 &&
       (value.publicProfile === undefined ||
         typeof value.publicProfile === "boolean") &&
+      (value.location === undefined ||
+        (normalizeImageLocation(value.location) !== null &&
+          normalizeImageLocation(value.location) === value.location)) &&
       validIsoDate(value.createdAt) &&
       validIsoDate(value.updatedAt)
   )
@@ -1183,7 +1191,11 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   replaceOwnerAtlasImage(command) {
-    if (!validOwnerMutation(command) || !validStoredAtlasImage(command.image)) {
+    if (
+      !validOwnerMutation(command) ||
+      !validStoredAtlasImage(command.image) ||
+      !normalizeImageLocation(command.image?.location)
+    ) {
       return failure("invalid_atlas_image")
     }
     return this.ctx.storage.transactionSync(() => {
@@ -1229,7 +1241,12 @@ export class UserProfileDurableObject extends DurableObject {
   updateOwnerAtlasImageVisibility(command) {
     if (
       !validOwnerMutation(command) ||
-      typeof command.publicProfile !== "boolean"
+      (command.publicProfile === undefined && command.location === undefined) ||
+      (command.publicProfile !== undefined &&
+        typeof command.publicProfile !== "boolean") ||
+      (command.location !== undefined &&
+        (normalizeImageLocation(command.location) === null ||
+          normalizeImageLocation(command.location) !== command.location))
     ) {
       return failure("invalid_atlas_image")
     }
@@ -1246,9 +1263,19 @@ export class UserProfileDurableObject extends DurableObject {
       if (!validStoredAtlasImage(atlasImage)) {
         return failure("atlas_image_inconsistent")
       }
+      if (
+        command.publicProfile === true &&
+        !normalizeImageLocation(command.location || atlasImage.location)
+      )
+        return failure("atlas_image_location_required")
       const updatedAtlasImage = Object.freeze({
         ...atlasImage,
-        publicProfile: command.publicProfile,
+        ...(command.publicProfile === undefined
+          ? {}
+          : { publicProfile: command.publicProfile }),
+        ...(command.location === undefined
+          ? {}
+          : { location: command.location }),
         updatedAt: command.now,
       })
       const profile = {
@@ -1313,12 +1340,22 @@ export class UserProfileDurableObject extends DurableObject {
       Array.isArray(patch) ||
       Object.keys(patch).length === 0 ||
       Object.keys(patch).some(
-        key => !["displayName", "public", "discoverable"].includes(key)
+        key =>
+          ![
+            "displayName",
+            "public",
+            "discoverable",
+            "instagramHandle",
+          ].includes(key)
       ) ||
       (patch.displayName !== undefined &&
         (typeof patch.displayName !== "string" ||
           patch.displayName.length < 2 ||
           patch.displayName.length > 50)) ||
+      (patch.instagramHandle !== undefined &&
+        (normalizeInstagramHandle(patch.instagramHandle) === null ||
+          normalizeInstagramHandle(patch.instagramHandle) !==
+            patch.instagramHandle)) ||
       (patch.public !== undefined && typeof patch.public !== "boolean") ||
       (patch.discoverable !== undefined &&
         typeof patch.discoverable !== "boolean")
@@ -2391,6 +2428,9 @@ export class UserProfileDurableObject extends DurableObject {
       profile: Object.freeze({
         handle: profile.handle,
         displayName: profile.displayName,
+        ...(publicInstagramHandle(profile.instagramHandle)
+          ? { instagramHandle: profile.instagramHandle }
+          : {}),
       }),
       pins: Object.freeze(
         pins.map(pin =>

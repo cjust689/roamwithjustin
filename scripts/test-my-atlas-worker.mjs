@@ -1716,6 +1716,7 @@ await assert.rejects(
   assert.equal(retriedState.profile.revision, 2)
 
   const atlasImageMetadata = {
+    location: "Banff, Canada",
     imageId: "image_11111111111111111111111111111111",
     contentType: "image/webp",
     width: 1200,
@@ -1726,6 +1727,7 @@ await assert.rejects(
   }
   let imageUploadOptions
   const imageUpload = await replaceMyAtlasImage({
+    location: "Banff, Canada",
     apiBaseUrl: "https://api.example.com",
     accessToken: "owner-token",
     file: new Blob([Uint8Array.from([0xff, 0xd8, 0xff, 0xd9])], {
@@ -1741,6 +1743,7 @@ await assert.rejects(
     },
   })
   assert.equal(imageUploadOptions.method, "POST")
+  assert.equal(imageUploadOptions.headers.get("X-Atlas-Image-Location"), "Banff%2C%20Canada")
   assert.equal(imageUploadOptions.headers.get("Content-Type"), "image/jpeg")
   assert.equal(imageUploadOptions.headers.get("If-Match"), '"rev-2"')
   assert.ok(imageUploadOptions.body instanceof Blob)

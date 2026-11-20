@@ -1,5 +1,9 @@
 <template>
   <main class="my-atlas-proof">
+    <MyAtlasActionFeedback
+      :feedback="actionFeedback"
+      @dismiss="dismissActionFeedback"
+    />
     <MyAtlasMap
       ref="atlasMap"
       :places="!canUseAtlas || plannerActive ? [] : displayedPlaces"
@@ -535,6 +539,7 @@
         :revision="accountProfile.revision"
         @revision-change="updatePlanningRevision"
         @planner-state-change="handlePlannerStateChange"
+        @action-feedback="showActionFeedback"
         @pins-created="handlePlannerPinsCreated"
       />
 
@@ -615,10 +620,33 @@
                 accept="image/jpeg,image/png,image/webp"
                 @change="handleAtlasImageSelection"
               />
+              <label class="my-atlas-image-location">
+                <span>Photo location (required)</span>
+                <input
+                  v-model="atlasImageLocationDraft"
+                  type="text"
+                  maxlength="120"
+                  required
+                  :disabled="atlasImagePending || accountPending"
+                  placeholder="For example, Banff, Canada"
+                  aria-describedby="atlas-image-location-help"
+                />
+              </label>
+              <small id="atlas-image-location-help"
+                >Name the place where the photo was taken. The location appears
+                with shared images and Story exports.</small
+              >
+              <p v-if="atlasImage && !atlasImage.location">
+                Add a location to this saved photo.
+              </p>
               <div class="my-atlas-favorite-image-actions">
                 <button
                   type="button"
-                  :disabled="atlasImagePending || accountPending"
+                  :disabled="
+                    atlasImagePending ||
+                    accountPending ||
+                    !validAtlasImageLocation
+                  "
                   @click="$refs.atlasImageInput.click()"
                 >
                   {{
@@ -632,7 +660,24 @@
                 <button
                   v-if="atlasImage"
                   type="button"
-                  :disabled="atlasImagePending || accountPending"
+                  :disabled="
+                    atlasImagePending ||
+                    accountPending ||
+                    !validAtlasImageLocation ||
+                    validAtlasImageLocation === atlasImage.location
+                  "
+                  @click="saveAtlasImageLocation"
+                >
+                  Save photo location
+                </button>
+                <button
+                  v-if="atlasImage"
+                  type="button"
+                  :disabled="
+                    atlasImagePending ||
+                    accountPending ||
+                    (!atlasImage.publicProfile && !atlasImage.location)
+                  "
                   @click="toggleFavoriteImageVisibility"
                 >
                   {{
@@ -714,6 +759,40 @@
               }}
             </button>
           </div>
+          <details class="my-atlas-profile-links">
+            <summary>Profile links</summary>
+            <form @submit.prevent="saveInstagramHandle">
+              <label for="my-atlas-instagram">Instagram handle</label>
+              <input
+                id="my-atlas-instagram"
+                v-model="instagramDraft"
+                type="text"
+                maxlength="31"
+                autocomplete="off"
+                autocapitalize="off"
+                :spellcheck="false"
+                :disabled="accountPending"
+                aria-describedby="my-atlas-instagram-help"
+                placeholder="@yourhandle"
+              />
+              <p id="my-atlas-instagram-help">
+                Optional. Visible to other visitors when your Atlas is public.
+                Enter a handle, not a URL. Leave blank and save to remove it.
+              </p>
+              <a
+                v-if="savedInstagramUrl"
+                :href="savedInstagramUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                referrerpolicy="no-referrer"
+                >Visit @{{ accountProfile.instagramHandle }} on Instagram</a
+              >
+              <button type="submit" :disabled="accountPending">
+                {{ accountPending ? "Saving" : "Save Instagram link" }}
+              </button>
+              <p v-if="instagramError" role="alert">{{ instagramError }}</p>
+            </form>
+          </details>
           <div class="my-atlas-account-data-actions">
             <button
               type="button"
@@ -791,7 +870,12 @@
         MapTiler SDK JS with session-based map usage.
       </p>
       <p class="my-atlas-brand">My Atlas by RoamWithJustin.com</p>
-      <p class="my-atlas-announcement" aria-live="polite">{{ announcement }}</p>
+      <p
+        class="my-atlas-announcement"
+        :aria-live="actionFeedback ? 'off' : 'polite'"
+      >
+        {{ announcement }}
+      </p>
     </section>
   </main>
 </template>
@@ -838,6 +922,7 @@ import {
   updateMyAtlasPin,
   updateMyAtlasDiscovery,
   updateMyAtlasSharing,
+  updateMyAtlasInstagram,
 } from "../api/client.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
@@ -851,11 +936,19 @@ import {
   myAtlasAuthState,
 } from "../auth/auth0"
 
+import MyAtlasActionFeedback from "../components/MyAtlasActionFeedback.vue"
+import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
+import {
+  normalizeInstagramHandle,
+  instagramProfileUrl,
+} from "../../../../shared/my-atlas-instagram.mjs"
+
 const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasActionFeedback,
     MyAtlasMap,
     MyAtlasPinEditor,
     MyAtlasPlanner,
@@ -865,6 +958,10 @@ export default {
   data() {
     return {
       query: "",
+      actionFeedback: null,
+      actionFeedbackSequence: 0,
+      instagramDraft: "",
+      instagramError: "",
       searchResults: [],
       searchPending: false,
       searchTimer: null,
@@ -899,6 +996,7 @@ export default {
       visitedOpen: false,
       toolsOpen: false,
       atlasImage: null,
+      atlasImageLocationDraft: "",
       atlasImageUrl: "",
       atlasImagePending: false,
       atlasImageError: "",
@@ -924,6 +1022,12 @@ export default {
     }
   },
   computed: {
+    validAtlasImageLocation() {
+      return normalizeImageLocation(this.atlasImageLocationDraft)
+    },
+    savedInstagramUrl() {
+      return instagramProfileUrl(this.accountProfile?.instagramHandle)
+    },
     canUseAtlas() {
       return (
         !this.auth.loading &&
@@ -1070,6 +1174,21 @@ export default {
     },
   },
   watch: {
+    "atlasImage.location": {
+      immediate: true,
+      handler(value) {
+        this.atlasImageLocationDraft = value || ""
+      },
+    },
+    "accountProfile.instagramHandle": {
+      immediate: true,
+      handler(value) {
+        this.instagramDraft = value || ""
+      },
+    },
+    "auth.authenticated"(authenticated) {
+      if (!authenticated) this.actionFeedback = null
+    },
     query(value) {
       this.queuePlaceSearch(value)
     },
@@ -1091,6 +1210,74 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    async saveAtlasImageLocation() {
+      const location = this.validAtlasImageLocation
+      if (!location || !this.atlasImage || this.atlasImagePending) return
+      this.atlasImagePending = true
+      this.atlasImageError = ""
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const result = await this.withAccountRevisionRetry(token, revision =>
+          updateMyAtlasImageVisibility({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            location,
+            revision,
+          })
+        )
+        this.atlasImage = result.atlasImage
+        this.updatePlanningRevision(result.revision)
+        this.showActionFeedback({ message: "Your photo location was saved." })
+      } catch (error) {
+        this.atlasImageError = this.atlasImageErrorMessage(error)
+      } finally {
+        this.atlasImagePending = false
+      }
+    },
+    async saveInstagramHandle() {
+      if (!this.accountProfile || this.accountPending) return
+      const draft = this.instagramDraft
+      const instagramHandle = normalizeInstagramHandle(draft)
+      this.instagramError = ""
+      if (instagramHandle === null) {
+        this.instagramError =
+          "Enter a handle with up to 30 letters, numbers, periods or underscores. Do not include a URL."
+        return
+      }
+      this.accountPending = true
+      try {
+        const token = await getMyAtlasApiAccessToken()
+        const result = await this.withAccountRevisionRetry(token, revision =>
+          updateMyAtlasInstagram({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            instagramHandle,
+            revision,
+          })
+        )
+        this.accountProfile = result
+        this.instagramDraft = instagramHandle
+        this.showActionFeedback({
+          message: instagramHandle
+            ? "Your Instagram link was saved. It is visible when your Atlas is public."
+            : "Your Instagram link was removed.",
+        })
+      } catch {
+        this.instagramDraft = draft
+        this.instagramError =
+          "Your Instagram link could not be saved. Retry shortly."
+        this.showActionFeedback({ message: this.instagramError, tone: "error" })
+      } finally {
+        this.accountPending = false
+      }
+    },
+    showActionFeedback({ message, tone = "success" }) {
+      if (!message) return
+      this.actionFeedback = { id: ++this.actionFeedbackSequence, message, tone }
+    },
+    dismissActionFeedback(id) {
+      if (this.actionFeedback?.id === id) this.actionFeedback = null
+    },
     handlePlannerStateChange(state) {
       const active = state?.active === true
       this.plannerActive = active
@@ -1258,6 +1445,8 @@ export default {
     },
     atlasImageErrorMessage(error) {
       const messages = {
+        atlas_image_location_required:
+          "Enter a photo location before saving or publishing the image.",
         image_empty: "Choose an image before uploading.",
         image_length_required:
           "This browser could not send the image safely. Try another browser.",
@@ -1283,6 +1472,12 @@ export default {
       const file = event.target.files?.[0]
       event.target.value = ""
       if (!file || !this.accountProfile) return
+      const location = this.validAtlasImageLocation
+      if (!location) {
+        this.atlasImageError =
+          "Enter the photo location before choosing an image."
+        return
+      }
       if (file.size > MY_ATLAS_IMAGE_MAX_INPUT_BYTES) {
         this.atlasImageError = "Choose an image smaller than 10 MiB."
         return
@@ -1296,6 +1491,7 @@ export default {
             apiBaseUrl: this.apiBaseUrl,
             accessToken: token,
             file,
+            location,
             revision,
           })
         )
@@ -1652,6 +1848,10 @@ export default {
         }
         this.accountPending = true
         this.accountError = ""
+        this.showActionFeedback({
+          message: `Adding ${place.name} to your Visited Atlas.`,
+          tone: "busy",
+        })
         try {
           const token = await getMyAtlasApiAccessToken()
           const result = await this.withAccountRevisionRetry(token, revision =>
@@ -1692,6 +1892,7 @@ export default {
           this.addPlaceOpen = false
           this.visitedOpen = true
           this.announcement = result.pin.name + " was added to your map."
+          this.showActionFeedback({ message: this.announcement })
         } catch (error) {
           const reference = error?.requestId
             ? ` Reference: ${error.requestId}.`
@@ -1702,6 +1903,10 @@ export default {
               : error.code === "place_unavailable"
                 ? `This catalog destination is temporarily unavailable.${reference}`
                 : `This destination could not be added.${reference}`
+          this.showActionFeedback({
+            message: this.pinEditorError,
+            tone: "error",
+          })
         } finally {
           this.accountPending = false
         }
@@ -1712,6 +1917,10 @@ export default {
       if (!this.accountProfile) return
       this.accountPending = true
       this.pinEditorError = ""
+      this.showActionFeedback({
+        message: `Saving ${pin.name || "destination"} details.`,
+        tone: "busy",
+      })
       try {
         const token = await getMyAtlasApiAccessToken()
         const result = await this.withAccountRevisionRetry(token, revision =>
@@ -1735,8 +1944,10 @@ export default {
         }
         this.closePinEditor()
         this.announcement = "Destination details were updated."
+        this.showActionFeedback({ message: this.announcement })
       } catch (error) {
         this.pinEditorError = "These destination details could not be saved."
+        this.showActionFeedback({ message: this.pinEditorError, tone: "error" })
       } finally {
         this.accountPending = false
       }
@@ -1946,6 +2157,7 @@ export default {
         const filename = await downloadMyAtlasStory({
           displayName: this.accountProfile?.displayName || this.authDisplayName,
           favoriteImage,
+          favoriteImageLocation: this.atlasImage?.location || "",
           filterLabel: this.filterLabel,
           handle: this.accountProfile?.handle || "",
           places: this.displayedPlaces,
@@ -2485,7 +2697,89 @@ export default {
 
 .my-atlas-intro-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
   margin-top: 1rem;
+}
+
+.my-atlas-profile-links {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
+  border-radius: 0.8rem;
+}
+
+.my-atlas-image-location {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  color: var(--color-text, #edf7f2);
+}
+.my-atlas-image-location input {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--color-control-border, #8fa29c);
+  border-radius: 0.5rem;
+  padding: 0.6rem;
+  color: inherit;
+  background: var(--color-surface-raised, #111f22);
+}
+.my-atlas-profile-links summary {
+  color: var(--color-accent-soft, #f4d38f);
+  cursor: pointer;
+  font-weight: 700;
+}
+.my-atlas-profile-links form {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.8rem;
+}
+.my-atlas-profile-links input {
+  box-sizing: border-box;
+  width: 100%;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
+  border: 1px solid var(--color-control-border, #8fa29c);
+  border-radius: 0.5rem;
+  padding: 0.65rem;
+}
+.my-atlas-profile-links label,
+.my-atlas-profile-links p,
+.my-atlas-profile-links a {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.my-atlas-profile-links a {
+  color: var(--color-accent-soft, #f4d38f);
+  overflow-wrap: anywhere;
+}
+.my-atlas-profile-links button {
+  justify-self: start;
+  border: 1px solid var(--color-accent, #e6ba68);
+  border-radius: 999px;
+  padding: 0.6rem 0.85rem;
+  color: var(--color-accent-soft, #f4d38f);
+  background: transparent;
+  cursor: pointer;
+}
+.my-atlas-profile-links :focus-visible {
+  outline: 2px solid var(--color-focus, #f4d38f);
+  outline-offset: 3px;
+}
+
+.my-atlas-intro-actions button,
+.my-atlas-intro-actions .my-atlas-explore-link {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+
+.my-atlas-intro-actions .my-atlas-explore-link {
+  padding: 0.5rem 0.25rem;
 }
 
 .my-atlas-intro-actions button {

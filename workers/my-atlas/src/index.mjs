@@ -31,6 +31,7 @@ import { hashQualifiedIdentity } from "./registration/hashing.mjs"
 import {
   formatRevisionEtag,
   normalizeAtlasImageMutation,
+  normalizeAtlasImageUpload,
   normalizeAtlasImageVisibility,
   normalizeCreatePin,
   normalizeDeletePin,
@@ -469,7 +470,7 @@ export async function handleRequest(
     headers.delete("Content-Type")
     headers.set(
       "Access-Control-Allow-Headers",
-      "authorization, content-type, idempotency-key, if-match"
+      "authorization, content-type, idempotency-key, if-match, x-atlas-image-location"
     )
     headers.set(
       "Access-Control-Allow-Methods",
@@ -871,7 +872,7 @@ export async function handleRequest(
         const result = await service({
           environment,
           identity: accountIdentity,
-          input: normalizeAtlasImageMutation(request.headers),
+          input: normalizeAtlasImageUpload(request.headers),
           upload: await readAtlasImageRequest(request),
         })
         return accountJsonResponse(
