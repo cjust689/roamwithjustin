@@ -5,6 +5,11 @@ import { createRequire } from "node:module"
 
 import sharp from "sharp"
 
+import {
+  downloadAuthorizedGearImage,
+  validateAuthorizedImageUrl,
+} from "./gear-remote-image.mjs"
+
 const require = createRequire(import.meta.url)
 const { gearWebpPipeline } = require("./image-normalization.js")
 
@@ -33,17 +38,19 @@ export function gearImageUsage() {
     "Gear image preparation",
     "",
     "Usage:",
-    "  npm run gear:prepare -- --gear-id <id> --source <file> --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --dry-run",
-    "  npm run gear:prepare -- --gear-id <id> --source <file> --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --apply",
+    "  npm run gear:prepare -- --gear-id <id> --source <file-or-https-url> [--source-host <host>] --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --dry-run",
+    "  npm run gear:prepare -- --gear-id <id> --source <file-or-https-url> [--source-host <host>] --output <directory> --rights-owner <id> --rights-status owned --rights-reviewed --alt <text> --apply",
     "",
-    "This local-only command accepts one JPEG or PNG whose creator-owned rights have",
-    "been reviewed. It creates deterministic 320, 640, and 960 pixel WebP",
+    "This trusted publisher accepts one local JPEG or PNG, or one explicitly approved",
+    "HTTPS source, whose creator-owned rights have been reviewed. It creates",
+    "deterministic 320, 640, and 960 pixel WebP",
     "derivatives plus a Gear-specific manifest. It never uploads, edits canonical",
     "Gear records, creates Journey associations, or overwrites a different package.",
     "",
     "Options:",
     "  --gear-id <id>          Stable lowercase ASCII kebab-case Gear ID",
-    "  --source <file>         Local JPEG or PNG source file",
+    "  --source <value>        Local JPEG/PNG file or explicitly permitted HTTPS URL",
+    "  --source-host <host>    Exact approved DNS host, required for an HTTPS source",
     "  --output <directory>    Parent directory for the prepared package",
     "  --rights-owner <id>     Reviewed creator rights owner identifier",
     "  --rights-status owned   Required creator-owned status for this slice",
@@ -75,6 +82,7 @@ export function parseGearImageArguments(args) {
     rightsReviewed: false,
     rightsStatus: null,
     source: null,
+    sourceHost: null,
   }
   const valueOptions = new Map([
     ["--alt", "alt"],
@@ -83,6 +91,7 @@ export function parseGearImageArguments(args) {
     ["--rights-owner", "rightsOwner"],
     ["--rights-status", "rightsStatus"],
     ["--source", "source"],
+    ["--source-host", "sourceHost"],
   ])
 
   for (let index = 0; index < args.length; index += 1) {
@@ -99,7 +108,9 @@ export function parseGearImageArguments(args) {
         argument.startsWith(option + "=")
       )
       if (!equalsOption) {
-        throw new Error("Unknown argument: " + argument + "\n\n" + gearImageUsage())
+        throw new Error(
+          "Unknown argument: " + argument + "\n\n" + gearImageUsage()
+        )
       }
       options[valueOptions.get(equalsOption)] = argument.slice(
         equalsOption.length + 1
@@ -134,6 +145,16 @@ export function validateGearImageOptions(options) {
     throw new Error("--gear-id must be lowercase ASCII kebab-case")
   }
   options.source = cleanText(options.source, "--source")
+  const isRemote = /^[a-z][a-z0-9+.-]*:\/\//i.test(options.source)
+  if (isRemote) {
+    options.sourceHost = cleanText(options.sourceHost, "--source-host")
+    options.sourceHost = validateAuthorizedImageUrl(
+      options.source,
+      options.sourceHost
+    ).approvedHost
+  } else if (options.sourceHost !== null && options.sourceHost !== undefined) {
+    throw new Error("--source-host is valid only with a remote HTTPS source")
+  }
   options.output = cleanText(options.output, "--output")
   options.rightsOwner = cleanText(options.rightsOwner, "--rights-owner")
   if (!ownerPattern.test(options.rightsOwner)) {
@@ -141,7 +162,7 @@ export function validateGearImageOptions(options) {
   }
   if (options.rightsStatus !== "owned") {
     throw new Error(
-      "--rights-status must be owned for the creator-owned local image slice"
+      "--rights-status must be owned for the creator-owned image slice"
     )
   }
   if (!options.rightsReviewed) {
@@ -169,7 +190,39 @@ async function pathExists(target) {
   }
 }
 
-async function readAndValidateSource(sourcePath) {
+async function validateDecodedSource(data, contract, stats, label) {
+  let metadata
+  try {
+    metadata = await sharp(data, {
+      limitInputPixels: maximumSourcePixels,
+    }).metadata()
+  } catch (error) {
+    throw new Error("Gear image source could not be decoded: " + error.message)
+  }
+  if (metadata.format !== contract.format) {
+    throw new Error(
+      "Gear image " +
+        label +
+        " does not match decoded " +
+        (metadata.format || "unknown") +
+        " bytes"
+    )
+  }
+  if (!metadata.width || !metadata.height) {
+    throw new Error("Gear image source has no measurable dimensions")
+  }
+  if (metadata.width * metadata.height > maximumSourcePixels) {
+    throw new Error(
+      "Gear image source exceeds the 80 megapixel preparation limit"
+    )
+  }
+  if ((metadata.pages || 1) !== 1) {
+    throw new Error("Animated or multi-page images are not supported")
+  }
+  return { contract, data, metadata, stats }
+}
+
+async function readAndValidateLocalSource(sourcePath) {
   const extension = path.extname(sourcePath).toLowerCase()
   const contract = sourceFormats[extension]
   if (!contract) throw new Error("Gear image source must be a JPEG or PNG file")
@@ -188,37 +241,21 @@ async function readAndValidateSource(sourcePath) {
   }
   if (!stats.size) throw new Error("Gear image source is empty")
   if (stats.size > maximumSourceBytes) {
-    throw new Error("Gear image source exceeds the 50 MiB local preparation limit")
+    throw new Error(
+      "Gear image source exceeds the 50 MiB local preparation limit"
+    )
   }
 
   const data = await fs.promises.readFile(sourcePath)
-  let metadata
-  try {
-    metadata = await sharp(data, {
-      limitInputPixels: maximumSourcePixels,
-    }).metadata()
-  } catch (error) {
-    throw new Error("Gear image source could not be decoded: " + error.message)
+  return {
+    ...(await validateDecodedSource(
+      data,
+      contract,
+      stats,
+      "extension " + extension
+    )),
+    originalFilename: path.basename(sourcePath),
   }
-  if (metadata.format !== contract.format) {
-    throw new Error(
-      "Gear image extension " +
-        extension +
-        " does not match decoded " +
-        (metadata.format || "unknown") +
-        " bytes"
-    )
-  }
-  if (!metadata.width || !metadata.height) {
-    throw new Error("Gear image source has no measurable dimensions")
-  }
-  if (metadata.width * metadata.height > maximumSourcePixels) {
-    throw new Error("Gear image source exceeds the 80 megapixel preparation limit")
-  }
-  if ((metadata.pages || 1) !== 1) {
-    throw new Error("Animated or multi-page images are not supported")
-  }
-  return { contract, data, metadata, stats }
 }
 
 async function createDerivatives(sourceData) {
@@ -268,8 +305,7 @@ function createManifest(options, source, derivatives) {
       })),
     })
   ).slice(0, 24)
-  const r2Prefix =
-    "images/gear/" + options.gearId + "/" + contentHash + "/"
+  const r2Prefix = "images/gear/" + options.gearId + "/" + contentHash + "/"
 
   return {
     schemaVersion: 1,
@@ -279,12 +315,20 @@ function createManifest(options, source, derivatives) {
     gearId: options.gearId,
     contentHash,
     source: {
-      originalFilename: path.basename(options.source),
+      originalFilename: source.originalFilename,
       mimeType: source.contract.mimeType,
       width: source.metadata.width,
       height: source.metadata.height,
       byteSize: source.stats.size,
       sha256: sourceSha256,
+      ...(source.approvedHost
+        ? {
+            intake: {
+              type: "https",
+              approvedHost: source.approvedHost,
+            },
+          }
+        : {}),
     },
     rights: {
       owner: options.rightsOwner,
@@ -417,6 +461,29 @@ export function validateGearImageManifest(manifest) {
       typeof source.sha256 === "string" && checksumPattern.test(source.sha256),
       "source.sha256 must be a lowercase hexadecimal SHA-256 digest"
     )
+    if (source.intake !== undefined) {
+      addManifestError(
+        errors,
+        source.intake &&
+          typeof source.intake === "object" &&
+          !Array.isArray(source.intake) &&
+          source.intake.type === "https" &&
+          typeof source.intake.approvedHost === "string",
+        "source.intake must identify an approved HTTPS host"
+      )
+      if (source.intake?.type === "https") {
+        try {
+          validateAuthorizedImageUrl(
+            "https://" + source.intake.approvedHost + "/source",
+            source.intake.approvedHost
+          )
+        } catch {
+          errors.push(
+            "source.intake.approvedHost must be one exact public DNS hostname"
+          )
+        }
+      }
+    }
   }
 
   const rights = manifest.rights
@@ -594,15 +661,16 @@ function serializeManifest(manifest) {
   return JSON.stringify(manifest, null, 2) + "\n"
 }
 
-async function validateExistingPackage(packageDirectory, manifest, derivatives) {
+async function validateExistingPackage(
+  packageDirectory,
+  manifest,
+  derivatives
+) {
   const requiredNames = new Set([
     "gear-image-manifest.json",
     ...derivatives.map(derivative => derivative.relativePath),
   ])
-  const allowedNames = new Set([
-    ...requiredNames,
-    "gear-r2-verification.json",
-  ])
+  const allowedNames = new Set([...requiredNames, "gear-r2-verification.json"])
   const entries = await fs.promises.readdir(packageDirectory, {
     withFileTypes: true,
   })
@@ -679,17 +747,36 @@ async function writePackage(packageDirectory, manifest, derivatives) {
   }
 }
 
-export async function prepareGearImage(options, { log = console.log } = {}) {
+export async function prepareGearImage(
+  options,
+  { log = console.log, remoteDownload = downloadAuthorizedGearImage } = {}
+) {
   validateGearImageOptions(options)
-  const sourcePath = path.resolve(process.cwd(), options.source)
   const outputDirectory = path.resolve(process.cwd(), options.output)
-  const source = await readAndValidateSource(sourcePath)
+  const isRemote = /^[a-z][a-z0-9+.-]*:\/\//i.test(options.source)
+  let source
+  if (isRemote) {
+    const downloaded = await remoteDownload(
+      options.source,
+      options.sourceHost,
+      maximumSourceBytes
+    )
+    source = {
+      ...(await validateDecodedSource(
+        downloaded.data,
+        downloaded.contract,
+        { size: downloaded.data.length },
+        "declared type " + downloaded.contract.mimeType
+      )),
+      approvedHost: downloaded.approvedHost,
+      originalFilename: downloaded.originalFilename,
+    }
+  } else {
+    const sourcePath = path.resolve(process.cwd(), options.source)
+    source = await readAndValidateLocalSource(sourcePath)
+  }
   const derivatives = await createDerivatives(source.data)
-  const manifest = createManifest(
-    { ...options, source: sourcePath },
-    source,
-    derivatives
-  )
+  const manifest = createManifest(options, source, derivatives)
   const manifestValidation = validateGearImageManifest(manifest)
   if (manifestValidation.errors.length) {
     throw new Error(
@@ -729,10 +816,7 @@ export async function prepareGearImage(options, { log = console.log } = {}) {
     )
   }
   log("R2 prefix reserved for later upload: " + manifest.r2Prefix)
-  log(
-    "Manifest: " +
-      path.join(packageDirectory, "gear-image-manifest.json")
-  )
+  log("Manifest: " + path.join(packageDirectory, "gear-image-manifest.json"))
   if (!options.dryRun) {
     log(
       "No upload or canonical Gear update was performed. Receipt-backed publication remains a separate step."
