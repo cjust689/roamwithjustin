@@ -11,6 +11,8 @@ import {
 } from "./hashing.mjs"
 import { verifyTurnstile } from "./turnstile.mjs"
 
+import { publicInstagramHandle } from "../../../../shared/my-atlas-instagram.mjs"
+
 export const REGISTRY_OBJECT_NAME = "beta-registration-v1"
 
 export class RegistrationUnavailableError extends Error {
@@ -42,6 +44,9 @@ function publicProfile(profile) {
     userId: profile.userId,
     handle: profile.handle,
     displayName: profile.displayName,
+    ...(publicInstagramHandle(profile.instagramHandle)
+      ? { instagramHandle: profile.instagramHandle }
+      : {}),
     public: profile.public,
     discoverable: profile.discoverable === true,
     pinCount: profile.pinCount || 0,

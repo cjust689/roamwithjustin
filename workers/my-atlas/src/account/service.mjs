@@ -1,4 +1,6 @@
 import { RegistrationConfigurationError } from "../registration/contracts.mjs"
+import { publicInstagramHandle } from "../../../../shared/my-atlas-instagram.mjs"
+import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
 import {
   hashOperatorOperation,
   hashQualifiedIdentity,
@@ -54,6 +56,9 @@ export function publicProfile(profile) {
     userId: profile.userId,
     handle: profile.handle,
     displayName: profile.displayName,
+    ...(publicInstagramHandle(profile.instagramHandle)
+      ? { instagramHandle: profile.instagramHandle }
+      : {}),
     public: profile.public,
     discoverable: profile.discoverable === true,
     status: profile.status,
@@ -180,6 +185,7 @@ function ownerAtlasImageMetadata(atlasImage) {
   if (!atlasImage) return null
   return Object.freeze({
     imageId: atlasImage.imageId,
+    ...(atlasImage.location ? { location: atlasImage.location } : {}),
     contentType: atlasImage.contentType,
     width: atlasImage.width,
     height: atlasImage.height,
@@ -280,6 +286,8 @@ export async function replaceMyAtlasImage({
   imageIdFactory = () => `image_${crypto.randomUUID().replaceAll("-", "")}`,
   now = new Date().toISOString(),
 }) {
+  const location = normalizeImageLocation(input.location)
+  if (!location) throw new AccountConflictError("atlas_image_location_required")
   const owner = await ownerContext(environment, identity)
   const transformed = await imageTransformer({
     ...upload,
@@ -297,11 +305,13 @@ export async function replaceMyAtlasImage({
     height: transformed.height,
     byteLength: transformed.byteLength,
     publicProfile: false,
+    location,
     createdAt: now,
     updatedAt: now,
   })
   const mutation = await mutationMetadata(owner, input, "replace-atlas-image", {
     sourceSha256: transformed.sourceSha256,
+    location,
   })
   const bucket = requireAtlasImageBucket(environment)
   let stored = false
@@ -367,13 +377,19 @@ export async function updateMyAtlasImageVisibility({
     owner,
     input,
     "update-atlas-image-visibility",
-    { publicProfile: input.publicProfile }
+    {
+      ...(input.publicProfile === undefined
+        ? {}
+        : { publicProfile: input.publicProfile }),
+      ...(input.location === undefined ? {} : { location: input.location }),
+    }
   )
   const result = expectedResult(
     await owner.user.updateOwnerAtlasImageVisibility({
       identityDigest: owner.identityDigest,
       expectedRevision: input.expectedRevision,
       publicProfile: input.publicProfile,
+      location: input.location,
       now,
       ...mutation,
     })
@@ -392,12 +408,9 @@ export async function removeMyAtlasImage({
   now = new Date().toISOString(),
 }) {
   const owner = await ownerContext(environment, identity)
-  const mutation = await mutationMetadata(
-    owner,
-    input,
-    "remove-atlas-image",
-    { remove: true }
-  )
+  const mutation = await mutationMetadata(owner, input, "remove-atlas-image", {
+    remove: true,
+  })
   const result = expectedResult(
     await owner.user.removeOwnerAtlasImage({
       identityDigest: owner.identityDigest,
@@ -411,7 +424,9 @@ export async function removeMyAtlasImage({
       result.removedAtlasImage.storageKey
     )
   } catch {
-    console.error(JSON.stringify({ event: "atlas_image_removal_cleanup_failed" }))
+    console.error(
+      JSON.stringify({ event: "atlas_image_removal_cleanup_failed" })
+    )
   }
   return Object.freeze({
     idempotent: result.idempotent,
@@ -621,10 +636,9 @@ export async function deleteMyAccount({
       confirmation: input.confirmation,
     })
   )
-  const registry = requireNamespace(
-    environment,
-    "MY_ATLAS_REGISTRY"
-  ).getByName(REGISTRY_OBJECT_NAME)
+  const registry = requireNamespace(environment, "MY_ATLAS_REGISTRY").getByName(
+    REGISTRY_OBJECT_NAME
+  )
 
   let userId
   let registryDeleted = false

@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - visual-themes
   - theme-toggle-implementation
@@ -77,6 +77,13 @@ My Atlas API also serves the registration response correction as Worker
 version `b5b3674c-6219-4053-b024-7cb65cd4e539`.
 
 Start here before using an older implementation brief.
+
+My Atlas mobile action feedback and the explicit trip-architecture acceptance
+audit are tracked in [Trip centric transition](implementation/my-atlas-trip-centric-transition.md).
+The full canonical trip architecture remains partial; the current UI fix
+does not perform a data migration or introduce Planned/Past transitions.
+The account-state architecture also describes the optional Instagram profile
+link and Explore image-refresh follow-up, tracked in the private-beta checklist.
 
 The source code and tests determine what exists. Documentation describes that
 verified behavior, records active work, or preserves proposals and history.
@@ -154,6 +161,13 @@ counts. This server correction remains undeployed; specific live handle
 conflicts still require their response status and error code to distinguish.
 
 ## Active work
+
+The current My Atlas follow-up adds optional Instagram handles, refreshable
+Explore image cards, mobile action confirmations, and required favorite-photo
+location labels. New photos and explicit image publication require a label;
+existing photos can receive one without reuploading. Verification and release
+state are tracked in the active private-beta, trip-transition, and
+favorite-travel-image implementation documents.
 
 The [trip centric transition](implementation/my-atlas-trip-centric-transition.md)
 reconciles the new canonical-trip and flight/rental briefs with the existing

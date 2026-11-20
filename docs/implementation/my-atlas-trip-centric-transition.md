@@ -16,6 +16,8 @@ supersedes: []
 superseded_by: []
 code_paths:
   - src/features/my-atlas/components/MyAtlasPlanner.vue
+  - src/features/my-atlas/components/MyAtlasActionFeedback.vue
+  - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/components/MyAtlasTravelSearch.vue
   - src/features/my-atlas/planning/travelSearch.mjs
   - src/features/my-atlas/planning/handoffs.mjs
@@ -24,9 +26,12 @@ code_paths:
   - workers/my-atlas/src/planning/retention.mjs
   - workers/my-atlas/src/registration/objects.mjs
   - scripts/test-my-atlas-travel-search.mjs
+  - scripts/test-my-atlas-action-feedback.mjs
 verification:
   state: verified
   evidence:
+    - node scripts/test-my-atlas-action-feedback.mjs verifies repeated draft selections, stop limits, pending/success/failure outcomes, confirmed-write refresh failures and notification lifetimes
+    - Local Chrome checked centered Explore actions and viewport notifications at 320, 390 and 1440 CSS pixels, with zero horizontal overflow, keyboard dismissal and no owner API requests from local draft selections
     - npm run build passed on 2026-11-20, including the full My Atlas suite and 44 Workers runtime tests; the build retained existing asset-size warnings
     - npx eslint passed for MyAtlasTravelSearch.vue, MyAtlasPlanner.vue, travelSearch.mjs, and test-my-atlas-travel-search.mjs
     - npm run docs:audit passed with 71 managed documents
@@ -42,6 +47,73 @@ Those inputs are proposals, not descriptions of deployed behavior. This target
 changes the earlier single-plan and unique-Place restrictions for future
 canonical trips. Existing contracts remain in effect until their replacement
 is implemented and verified. No account migration is implemented here.
+
+## Architecture acceptance audit, 2026-11-20
+
+The full owner-supplied trip architecture is **not implemented**. This is
+still a partial transition, not a canonical trip release. Current source
+retains `pin:`, `wish:` and `plan:` storage, the deterministic first-private-plan
+identity, and workflow states `draft | saved | archived`. The existing
+Mark Visited action creates visited pins; it does not change a trip to Past.
+
+| Brief acceptance flow | Current result | Remaining implementation |
+| --- | --- | --- |
+| A. Plan to Past | Not met | A canonical trip and reversible lifecycle with stable stop/memory IDs |
+| B. Direct Past creation | Not met | Add Past Trip, optional endpoints and an owner persistence API |
+| C. Past to Planned | Not met | An in-place status update that preserves all trip content |
+| D. Repeated destination | Not met | Visit occurrence IDs and memories isolated by trip/stop; current visited pins are unique per Place |
+| E. Single-stop trip without synthetic endpoints | Not met | Remove mandatory start from the canonical trip contract; the existing planner still requires a start and a destination |
+| F. Correct mistaken lifecycle status | Not met | Reversible transitions and field-equality/ID regression coverage |
+| G. Migration integrity | Not met | Explicit idempotent upgrade, rollback snapshot, mappings, retention/alarm safety and Combine into Trip |
+
+Supporting pieces exist: authenticated account ownership, catalog/custom
+places, private wishlist and saved-plan editing, ordered planner map
+projection without rebuilding the SDK map, read-only route sharing, visited
+place notes/dates and a single account favorite travel image. Flight/rental
+tools are browser drafts and reviewed handoffs. They are not saved trip
+logistics, and the account image is not a trip-level media collection.
+
+Evidence comes from `workers/my-atlas/src/planning/contracts.mjs`
+(`PLAN_STATUSES`, required start and unique Wish destinations),
+`planning/service.mjs` (first-private-plan identity),
+`registration/objects.mjs` (`pin-place:` uniqueness, Mark Visited and legacy
+retention), plus the current owner/map projections. No lifecycle endpoint,
+canonical trip/stop/memory store or migration is enabled by the mobile UI fix.
+
+## Mobile action feedback
+
+- [x] Align the Explore Atlases action with Sign in/Quick start in the intro
+      row using shared height, centered content, wrapping and a real gap.
+- [x] Show a viewport notification for planner actions instead of requiring
+      a scroll to the bottom announcement. Show place names, busy states,
+      failure messages and explicit draft-versus-saved wording.
+- [x] Keep start/finish selections visible on search, saved-place and custom
+      buttons, with pressed-state semantics. Confirm stop removal/reordering,
+      endpoint changes and finish-mode changes without saving implicitly.
+- [x] Preserve confirmed saves when companion refresh fails; show a warning
+      rather than claiming the mutation failed. Do not claim a stop was added
+      when the trip is already at its destination limit.
+- [x] Reuse the same notification for adding/editing a visited destination.
+- [x] Complete responsive, keyboard and API-outcome verification.
+
+`MyAtlasPlanner.vue` emits `action-feedback` events to the owner view.
+`MyAtlasActionFeedback.vue` is a fixed sibling of the scrolling panel, with
+one polite live region and a dismiss button. Routine confirmations last eight
+seconds, pause on hover/focus and restart for repeated actions. Busy, error
+and refresh-warning messages remain until replaced or dismissed. These are
+acknowledgements, not extra blocking confirmation dialogs. No account, route,
+trip schema or retention policy changes are introduced.
+
+Verification artifacts are `.state/theme/mobile-feedback-qa.json`,
+`feedback-intro-*.png` and `feedback-start-390.png`. The browser fixture used
+synthetic owner data and controlled asynchronous write/read outcomes. It
+verified visible confirmation without scrolling, selected button labels,
+repeat notifications, stop addition/removal, pending state, failure without
+false success, and preservation of an acknowledged write after refresh
+failure. Keyboard Enter dismissed the visible notification. Separate method
+tests verify eight-second success/draft expiry and persistent busy/error/
+warning states. No real user profile was mutated. Hosted authenticated
+acceptance and deployment of this follow-up remain unverified.
 
 ## Audit of actual behavior
 

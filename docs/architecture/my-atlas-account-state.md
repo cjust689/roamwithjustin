@@ -20,6 +20,12 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - shared/my-atlas-image-location.mjs
+  - scripts/test-my-atlas-image-location.mjs
+  - shared/my-atlas-instagram.mjs
+  - src/features/my-atlas/discovery/directory.mjs
+  - src/features/my-atlas/views/MyAtlasExploreView.vue
+  - scripts/test-my-atlas-profile-discovery.mjs
   - package.json
   - workers/my-atlas/src/account
   - workers/my-atlas/src/planning
@@ -29,6 +35,7 @@ code_paths:
   - workers/my-atlas/src/index.mjs
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/components/MyAtlasPlanner.vue
+  - src/features/my-atlas/components/MyAtlasActionFeedback.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/planning/handoffs.mjs
   - src/features/my-atlas/planning/sharedTrip.mjs
@@ -57,6 +64,9 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run build passed all 46 Worker runtime tests for Instagram, Explore freshness and required photo location; local compilation used an uncommitted parallel-false override
+    - node scripts/test-my-atlas-profile-discovery.mjs
+    - node scripts/test-my-atlas-action-feedback.mjs
     - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
     - Pages run 44737312245 deployed the production merge; a live shared-trip render exposed the read only itinerary and map shell, and chunk 481.a92fe951.js contained the Route key and Saved trip order markers
     - Client planning tests verify that a shared snapshot mounts the existing semantic planner route projection in read only mode while retaining the compact itinerary summary
@@ -156,6 +166,62 @@ verification:
 ---
 
 # My Atlas local profile, pin, and sharing state
+
+## Optional Instagram profile link
+
+Owners can save `instagramHandle` through the existing revision-checked,
+idempotent `PATCH /v1/me` profile endpoint. The shared local contract accepts
+an optional leading @, lowercases the handle, bounds it to 30 ASCII letters,
+numbers, underscores and periods, and rejects URLs, empty @ input and invalid
+punctuation. Blank input removes the link. The Durable Object separately
+requires canonical normalized input before storage. This is an optional
+profile field, so existing profiles require no migration.
+
+Owner profile responses and private account export retain the handle. A safe
+public profile includes it only through the existing active/public/nonempty
+Atlas gate. Making the Atlas private hides the whole public profile; removing
+the Instagram handle removes the public link. Discovery cards do not gain
+Instagram metadata. The URL builder uses only `https://www.instagram.com/`
+plus a validated handle. Public links use a new tab, `noopener noreferrer`
+and a no-referrer policy. No provider SDK, login, scraping, account verification,
+tracking event or API integration is introduced. The owner edits the value
+under Share/export's Profile links disclosure, with an explicit publication
+notice. A handle is an owner-provided link, not proof of Instagram ownership.
+
+## Explore image freshness
+
+The directory reads live per-owner summaries on each request; there is no
+separate discovery resync job. Favorite image replacement, removal and public
+image permission changes already update the public activity timestamp.
+Uploading or replacing an image still starts it private, even on a public
+Atlas. Public profile use must be enabled explicitly for that image.
+
+Explore offers Refresh Atlases and refreshes when a loaded page returns to a
+visible/focused tab. The focus/visibility events are coalesced with a one-second
+guard; there is no interval polling. A refresh rereads the current loaded
+window from a fresh first page and replaces it atomically, reconciling changes
+and removing profiles no longer present. Failed refreshes retain the current
+cards and offer retry. Loading more also replaces duplicate handles with fresh
+metadata instead of skipping updates.
+
+Image elements are keyed by handle, image ID and image update time. This
+recreates the element on replacement without adding query parameters to the
+strict image endpoint. Error fallbacks are scoped to the image version, and a
+successful refresh clears those failures to retry loading. Public directory
+and image responses remain no-store. The beta directory still scans bounded
+active registrations for each page; this change adds no background poller or
+new discovery index.
+
+Owner action feedback is presented by `MyAtlasActionFeedback.vue`, fixed to
+the viewport outside the scrolling owner panel. Planner actions emit
+`action-feedback` events to the owner view. Start/finish, stop order and
+removal confirmations explicitly describe draft edits that require saving;
+API acknowledgements appear only after the write response. Busy and failure
+states are distinct, and a confirmed write with failed companion refresh
+remains a saved-change warning. Visited-place saves use the same component.
+This adds no persistence or automatic trip lifecycle transition. The
+trip-centric transition document records the still-unimplemented canonical
+trip, reversible Planned/Past, occurrence-memory and migration requirements.
 
 Phase 2B has an owner-state API on the same isolated Worker and per-user SQLite
 Durable Object. Phase 2C adds an opt-in public projection, a signed-out handle
@@ -844,6 +910,17 @@ excluded from visited statistics, playback, and public sharing until the owner
 selects and confirms stops through Mark Visited. The Mark Visited code and
 durable-state behavior are locally test verified, but its Worker deployment and
 authenticated owner acceptance are not yet claimed.
+
+Favorite image uploads require a human-entered location label, limited to 120
+Unicode characters. The browser percent-encodes it in
+`X-Atlas-Image-Location`; the Worker validates it before transformation.
+`PATCH /v1/me/atlas-image` accepts `location`, `publicProfile`, or both. A
+location-only update preserves visibility and bytes, uses the existing revision
+and idempotency guards, and advances public activity metadata. Safe owner and
+public image projections carry the location into Explore, public image viewing,
+and both Story exports. `shared/my-atlas-image-location.mjs` governs validation.
+Legacy images without labels remain readable; new uploads and explicit image
+publication require a label. No GPS data is inferred or required.
 
 Per-destination memory images remain outside the release. The implemented media
 scope is one favorite travel image for the account, public profile, and Atlas

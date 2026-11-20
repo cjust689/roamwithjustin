@@ -12,6 +12,7 @@ import {
   listMyPins,
   removeMyAtlasImage,
   replaceMyAtlasImage,
+  updateMyAtlasImageVisibility,
   updateMyPin,
   updateMyProfile,
 } from "../src/account/service.mjs"
@@ -218,6 +219,7 @@ describe("private owner profile and pin services", () => {
       input: {
         expectedRevision: 1,
         idempotencyKey: "01010101-0101-4101-8101-010101010101",
+        location: "Banff, Canada",
       },
       upload: {
         bytes: new Uint8Array([1]).buffer,
@@ -246,6 +248,7 @@ describe("private owner profile and pin services", () => {
       input: {
         expectedRevision: 2,
         idempotencyKey: "02020202-0202-4202-8202-020202020202",
+        location: "San Juan, Puerto Rico",
       },
       upload: {
         bytes: new Uint8Array([2]).buffer,
@@ -305,6 +308,93 @@ describe("private owner profile and pin services", () => {
     ).rejects.toMatchObject({ code: "atlas_image_not_found" })
   })
 
+  it("requires photo locations and lets legacy owners add one without reuploading", async () => {
+    let transforms = 0
+    const upload = {
+      bytes: new Uint8Array([1]).buffer,
+      contentType: "image/jpeg",
+    }
+    const imageTransformer = async () => {
+      transforms++
+      return {
+        bytes: new Uint8Array([82, 73, 70, 70, 1]).buffer,
+        contentType: "image/webp",
+        width: 1200,
+        height: 1200,
+        byteLength: 5,
+        sourceSha256: "1".repeat(64),
+      }
+    }
+    const input = {
+      expectedRevision: 1,
+      idempotencyKey: "10101010-1010-4010-8010-101010101010",
+    }
+    await expect(
+      replaceMyAtlasImage({
+        environment: environment(),
+        identity: IDENTITY,
+        input,
+        upload,
+        imageTransformer,
+        now: NOW,
+      })
+    ).rejects.toMatchObject({
+      code: "atlas_image_location_required",
+    })
+    expect(transforms).toBe(0)
+    const saved = await replaceMyAtlasImage({
+      environment: environment(),
+      identity: IDENTITY,
+      input: { ...input, location: "Banff, Canada" },
+      upload,
+      imageTransformer,
+      now: NOW,
+    })
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    await runInDurableObject(user, (_instance, state) => {
+      const image = state.storage.kv.get("atlas-image")
+      delete image.location
+      state.storage.kv.put("atlas-image", image)
+    })
+    expect(
+      (
+        await getMyAtlasImage({
+          environment: environment(),
+          identity: IDENTITY,
+        })
+      ).atlasImage.location
+    ).toBeUndefined()
+    await expect(
+      updateMyAtlasImageVisibility({
+        environment: environment(),
+        identity: IDENTITY,
+        input: {
+          expectedRevision: 2,
+          publicProfile: true,
+          idempotencyKey: "20202020-2020-4020-8020-202020202020",
+        },
+        now: NOW,
+      })
+    ).rejects.toMatchObject({ code: "atlas_image_location_required" })
+    const updated = await updateMyAtlasImageVisibility({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        expectedRevision: 2,
+        location: "Montréal, Canada",
+        idempotencyKey: "30303030-3030-4030-8030-303030303030",
+      },
+      now: NOW,
+    })
+    expect(updated.atlasImage).toMatchObject({
+      imageId: saved.atlasImage.imageId,
+      publicProfile: false,
+      location: "Montréal, Canada",
+    })
+    expect(updated.profile.revision).toBe(3)
+    expect(transforms).toBe(1)
+  })
+
   it("purges the private Atlas image before final account deletion", async () => {
     const key = `private/atlas/${USER_ID}/image_33333333333333333333333333333333.webp`
     await replaceMyAtlasImage({
@@ -313,6 +403,7 @@ describe("private owner profile and pin services", () => {
       input: {
         expectedRevision: 1,
         idempotencyKey: "04040404-0404-4404-8404-040404040404",
+        location: "Banff, Canada",
       },
       upload: {
         bytes: new Uint8Array([3]).buffer,

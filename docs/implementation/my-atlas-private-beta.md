@@ -21,6 +21,9 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - shared/my-atlas-instagram.mjs
+  - src/features/my-atlas/discovery/directory.mjs
+  - scripts/test-my-atlas-profile-discovery.mjs
   - package.json
   - src/features/my-atlas
   - src/router/index.js
@@ -686,6 +689,45 @@ content-addressed chunks `101.d8bb49a5.js` and `101.8bcf6225.css` returned 200
 and contained the memory-control text, memory-callout sizing rules, and compact
 mobile public-profile grid. This verifies the deployed static assets without
 claiming an authenticated production interaction.
+
+## Instagram link and Explore freshness follow-up
+
+- [x] Add an optional normalized Instagram handle through the existing owner
+      profile mutation, without a second account store or OAuth integration.
+- [x] Offer save/remove in Profile links and explain that public Atlases show
+      the link. Show a safe Instagram link on the public profile only.
+- [x] Keep image publication explicit, including after a new upload on an
+      already-public profile.
+- [x] Add manual and return-to-tab refresh for Explore, replacing stale cards,
+      retrying failed images and recreating changed image versions.
+- [x] Add contract/client/helper tests and Worker tests for private/public
+      behavior, removal, revision conflicts and idempotent replay.
+- [x] Complete browser checks and production build for this follow-up.
+- [ ] Deploy compatible Worker and frontend changes and verify a real owner
+      save plus live Explore refresh. No live account has been modified here.
+
+The current branch also contains the separately verified mobile action
+feedback work. The canonical trip architecture remains partial; these profile
+and directory changes do not migrate existing records or change trip lifecycle.
+
+`npm run build` passed with all 45 Worker runtime tests, including the new
+private/public Instagram, removal, revision-conflict and idempotent-replay
+checks. `scripts/test-my-atlas-profile-discovery.mjs` verifies normalization,
+safe URLs, the revisioned browser API request, actual owner save/remove/failure
+methods, and directory window reconciliation. Targeted ESLint and docs audit
+passed. The build retains the existing asset and entrypoint size warnings.
+
+Local Chrome used synthetic metadata to verify return-to-tab refresh after
+image publication, failed-image retry, image-element replacement for a new
+image ID, retained cards on refresh failure, removed cards after unlisting
+and listener cleanup on route exit. Profile links were reviewed at 320, 390
+and 1440 CSS pixels without horizontal overflow. The actual public link had
+the expected HTTPS Instagram URL, new-tab target, noreferrer and no-referrer
+policy, and disappeared when the handle was removed. The owner form rejected
+a full URL before token acquisition. No real account or Instagram service was
+used. Reports and screenshots are under `.state/theme/profile-discovery-*`
+and `.state/theme/instagram-owner-*`. These are local verification artifacts,
+not evidence of production deployment or a genuine-token owner save.
 
 ## External references checked
 

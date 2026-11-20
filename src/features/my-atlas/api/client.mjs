@@ -1,4 +1,9 @@
 import { isMyAtlasPlaceType } from "../catalog/placeTypes.mjs"
+import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
+import {
+  publicInstagramHandle,
+  normalizeInstagramHandle,
+} from "../../../../shared/my-atlas-instagram.mjs"
 import {
   isNormalizedMyAtlasMemory,
   normalizeMyAtlasMemory,
@@ -114,6 +119,8 @@ function normalizedAtlasImage(value) {
     value.byteLength > MY_ATLAS_IMAGE_MAX_OUTPUT_BYTES ||
     (value.publicProfile !== undefined &&
       typeof value.publicProfile !== "boolean") ||
+    (value.location !== undefined &&
+      normalizeImageLocation(value.location) !== value.location) ||
     typeof value.updatedAt !== "string"
   ) {
     throw new MyAtlasApiError("The Atlas image response is invalid.", {
@@ -304,9 +311,15 @@ export async function replaceMyAtlasImage({
   apiBaseUrl,
   accessToken,
   file,
+  location,
   revision,
   fetchImpl = fetch,
 }) {
+  const normalizedLocation = normalizeImageLocation(location)
+  if (!normalizedLocation)
+    throw new MyAtlasApiError("Enter the photo location before uploading.", {
+      code: "atlas_image_location_required",
+    })
   if (!(file instanceof Blob) || file.size < 1) {
     throw new MyAtlasApiError("Choose an image to upload.", {
       code: "image_empty",
@@ -335,12 +348,22 @@ export async function replaceMyAtlasImage({
         headers: new Headers({
           ...Object.fromEntries(options.headers),
           "Content-Type": file.type,
+          "X-Atlas-Image-Location": encodeURIComponent(normalizedLocation),
         }),
         body: file,
       }),
   })
+  const atlasImage = normalizedAtlasImage(payload.atlasImage)
+  if (!atlasImage || atlasImage.location !== normalizedLocation) {
+    throw new MyAtlasApiError(
+      "The saved photo location could not be confirmed.",
+      {
+        code: "invalid_response",
+      }
+    )
+  }
   return Object.freeze({
-    atlasImage: normalizedAtlasImage(payload.atlasImage),
+    atlasImage,
     revision: revisionFromResponse(response),
   })
 }
@@ -373,10 +396,17 @@ export async function updateMyAtlasImageVisibility({
   apiBaseUrl,
   accessToken,
   publicProfile,
+  location,
   revision,
   fetchImpl = fetch,
 }) {
-  if (typeof publicProfile !== "boolean") {
+  const normalizedLocation =
+    location === undefined ? undefined : normalizeImageLocation(location)
+  if (
+    (publicProfile === undefined && location === undefined) ||
+    (publicProfile !== undefined && typeof publicProfile !== "boolean") ||
+    normalizedLocation === null
+  ) {
     throw new MyAtlasApiError("Choose whether to show this image publicly.", {
       code: "invalid_image_visibility",
     })
@@ -386,13 +416,29 @@ export async function updateMyAtlasImageVisibility({
     accessToken,
     path: "/v1/me/atlas-image",
     method: "PATCH",
-    body: { publicProfile },
+    body: {
+      ...(publicProfile === undefined ? {} : { publicProfile }),
+      ...(normalizedLocation === undefined
+        ? {}
+        : { location: normalizedLocation }),
+    },
     revision,
     idempotencyKey: newIdempotencyKey(),
     fetchImpl,
   })
+  const atlasImage = normalizedAtlasImage(payload.atlasImage)
+  if (
+    !atlasImage ||
+    (normalizedLocation !== undefined &&
+      atlasImage.location !== normalizedLocation) ||
+    (publicProfile !== undefined && atlasImage.publicProfile !== publicProfile)
+  ) {
+    throw new MyAtlasApiError("The photo update could not be confirmed.", {
+      code: "invalid_response",
+    })
+  }
   return Object.freeze({
-    atlasImage: normalizedAtlasImage(payload.atlasImage),
+    atlasImage,
     revision: revisionFromResponse(response),
   })
 }
@@ -583,6 +629,44 @@ export async function deleteMyAtlasPin({
     })
   }
   return revisionFromResponse(response)
+}
+
+export async function updateMyAtlasInstagram({
+  apiBaseUrl,
+  accessToken,
+  instagramHandle,
+  revision,
+  fetchImpl = fetch,
+}) {
+  const normalized = normalizeInstagramHandle(instagramHandle)
+  if (normalized === null)
+    throw new MyAtlasApiError("Enter a valid Instagram handle.", {
+      code: "invalid_instagram_handle",
+    })
+  const { response, payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me",
+    method: "PATCH",
+    body: { instagramHandle: normalized },
+    revision,
+    idempotencyKey: newIdempotencyKey(),
+    fetchImpl,
+  })
+  if (
+    typeof payload.profile?.handle !== "string" ||
+    typeof payload.profile.public !== "boolean" ||
+    typeof payload.profile.discoverable !== "boolean" ||
+    (payload.profile.instagramHandle ?? "") !== normalized
+  )
+    throw new MyAtlasApiError("The Instagram update response is invalid.", {
+      status: response.status,
+      code: "invalid_response",
+    })
+  return Object.freeze({
+    ...payload.profile,
+    revision: revisionFromResponse(response, payload.profile.revision),
+  })
 }
 
 export async function updateMyAtlasSharing({
@@ -1157,6 +1241,9 @@ export async function fetchPublicAtlas({
   return Object.freeze({
     handle: body.atlas.handle,
     displayName: body.atlas.displayName,
+    ...(publicInstagramHandle(body.atlas.instagramHandle)
+      ? { instagramHandle: body.atlas.instagramHandle }
+      : {}),
     favoriteImage: normalizedAtlasImage(body.atlas.favoriteImage),
     places: Object.freeze(body.atlas.places.map(normalizedPin)),
     catalog: Object.freeze({ ...body.catalog }),

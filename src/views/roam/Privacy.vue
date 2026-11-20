@@ -28,21 +28,28 @@
           policy acceptance records, and the places, optional visit years,
           favorite memories, private wishlist entries, and trip plans that you
           choose to save. You may also upload one favorite travel image for use
-          in Atlas Story images. You choose whether it may also appear on your
-          public Visited Atlas profile. Custom pins and private plans may
-          include coordinates. Access tokens are kept in browser memory rather
-          than permanent browser storage.
+          in Atlas Story images, along with a required location label you enter.
+          This label does not require GPS access. You choose whether it may also
+          appear on your public Visited Atlas profile. Custom pins and private
+          plans may include coordinates. Access tokens are kept in browser
+          memory rather than permanent browser storage.
         </p>
         <p>
           My Atlas accounts begin private. If you publish your Visited Atlas,
           your handle, display name, visited places, optional visit years,
           favorite memories, and custom pin names and positions become available
           through your public profile link. Your favorite travel image becomes
-          visible only when you also allow public profile use. You can keep the
-          image private, make the Atlas private, or remove the image at any
-          time. Wishlist entries, future trip plans, private notes, desired
-          years, and plan retention details are never included in that public
-          profile.
+          visible with its location label only when you also allow public
+          profile use. You can keep the image private, make the Atlas private,
+          or remove the image at any time. Wishlist entries, future trip plans,
+          private notes, desired years, and plan retention details are never
+          included in that public profile.
+        </p>
+        <p>
+          If you add an Instagram handle, the handle and its Instagram link
+          appear when your Atlas is public. You can remove the handle at any
+          time. This feature does not request Instagram sign in or access to
+          your Instagram account.
         </p>
         <p>
           Publishing a Visited Atlas link does not list it for discovery. You

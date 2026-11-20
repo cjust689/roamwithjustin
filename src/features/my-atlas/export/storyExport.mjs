@@ -178,7 +178,7 @@ function drawStat(context, x, y, value, label) {
   context.fillText(label.toUpperCase(), x + 24, y + 126)
 }
 
-function drawFavoriteImage(context, image) {
+function drawFavoriteImage(context, image, location) {
   if (!image) return
   const x = 758
   const y = 62
@@ -194,6 +194,32 @@ function drawFavoriteImage(context, image) {
   shade.addColorStop(1, "rgba(6, 15, 17, 0.2)")
   context.fillStyle = shade
   context.fillRect(x, y, size, size)
+  if (location) {
+    context.font = "600 20px Poppins, Arial, sans-serif"
+    const lines = []
+    let line = ""
+    for (const char of Array.from(location)) {
+      if (context.measureText(line + char).width > size - 28) {
+        lines.push(line)
+        line = char
+      } else line += char
+    }
+    if (line) lines.push(line)
+    if (lines.length > 3) {
+      lines.length = 3
+      let last = lines[2]
+      while (last && context.measureText(last + "…").width > size - 28)
+        last = Array.from(last).slice(0, -1).join("")
+      lines[2] = last + "…"
+    }
+    const height = lines.length * 26 + 22
+    context.fillStyle = "rgba(6, 15, 17, 0.88)"
+    context.fillRect(x, y + size - height, size, height)
+    context.fillStyle = "#fffaf0"
+    lines.forEach((text, index) =>
+      context.fillText(text, x + 14, y + size - height + 28 + index * 26)
+    )
+  }
   context.restore()
   roundedRectangle(context, x, y, size, size, 34)
   context.strokeStyle = "rgba(240, 201, 120, 0.65)"
@@ -204,6 +230,7 @@ function drawFavoriteImage(context, image) {
 export function createMyAtlasStoryCanvas({
   displayName,
   favoriteImage = null,
+  favoriteImageLocation = "",
   filterLabel = "All destinations",
   handle,
   places,
@@ -232,7 +259,7 @@ export function createMyAtlasStoryCanvas({
   context.fillStyle = "#d5e2dd"
   context.font = "600 32px Poppins, Arial, sans-serif"
   context.fillText(filterLabel, 64, 330)
-  drawFavoriteImage(context, favoriteImage)
+  drawFavoriteImage(context, favoriteImage, favoriteImageLocation)
 
   drawMap(context)
   drawConnections(context, places)

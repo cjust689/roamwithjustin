@@ -5,6 +5,8 @@ import {
 } from "../registration/contracts.mjs"
 import { normalizePinMemory } from "./memory.mjs"
 import { normalizeCustomPlace } from "./custom-place.mjs"
+import { normalizeInstagramHandle } from "../../../../shared/my-atlas-instagram.mjs"
+import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
 
 const PIN_ID_PATTERN = /^pin_[a-f0-9]{24}$/
 const USER_ID_PATTERN = /^usr_[0-9a-f-]{36}$/
@@ -136,7 +138,7 @@ export function normalizeMemory(value) {
 export function normalizeProfilePatch(value, headers) {
   assertObject(
     value,
-    new Set(["displayName", "public", "discoverable"]),
+    new Set(["displayName", "public", "discoverable", "instagramHandle"]),
     "Profile patch"
   )
   if (Object.keys(value).length === 0) {
@@ -151,8 +153,15 @@ export function normalizeProfilePatch(value, headers) {
   ) {
     throw new RegistrationValidationError("Profile discovery is invalid.")
   }
+  const instagramHandle =
+    value.instagramHandle === undefined
+      ? undefined
+      : normalizeInstagramHandle(value.instagramHandle)
+  if (instagramHandle === null)
+    throw new RegistrationValidationError("Instagram handle is invalid.")
   return Object.freeze({
     patch: Object.freeze({
+      ...(instagramHandle === undefined ? {} : { instagramHandle }),
       ...(value.displayName === undefined
         ? {}
         : { displayName: normalizeDisplayName(value.displayName) }),
@@ -173,13 +182,43 @@ export function normalizeAtlasImageMutation(headers) {
   })
 }
 
+export function normalizeAtlasImageUpload(headers) {
+  let raw
+  try {
+    raw = decodeURIComponent(headers.get("X-Atlas-Image-Location") || "")
+  } catch {
+    throw new RegistrationValidationError("Image location is invalid.")
+  }
+  const location = normalizeImageLocation(raw)
+  if (!location)
+    throw new RegistrationValidationError("Image location is required.")
+  return Object.freeze({ ...normalizeAtlasImageMutation(headers), location })
+}
+
 export function normalizeAtlasImageVisibility(value, headers) {
-  assertObject(value, new Set(["publicProfile"]), "Atlas image visibility")
-  if (typeof value.publicProfile !== "boolean") {
+  assertObject(
+    value,
+    new Set(["publicProfile", "location"]),
+    "Atlas image details"
+  )
+  if (
+    (value.publicProfile === undefined && value.location === undefined) ||
+    (value.publicProfile !== undefined &&
+      typeof value.publicProfile !== "boolean")
+  ) {
     throw new RegistrationValidationError("Atlas image visibility is invalid.")
   }
+  const location =
+    value.location === undefined
+      ? undefined
+      : normalizeImageLocation(value.location)
+  if (location === null)
+    throw new RegistrationValidationError("Image location is required.")
   return Object.freeze({
-    publicProfile: value.publicProfile,
+    ...(value.publicProfile === undefined
+      ? {}
+      : { publicProfile: value.publicProfile }),
+    ...(location === undefined ? {} : { location }),
     expectedRevision: normalizeExpectedRevision(headers.get("If-Match")),
     idempotencyKey: normalizeIdempotencyKey(headers.get("Idempotency-Key")),
   })

@@ -16,6 +16,7 @@ import {
   rankPublicAtlasDiscoveries,
 } from "../src/public/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
+import { normalizeProfilePatch } from "../src/account/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
 import {
   REGISTRY_OBJECT_NAME,
@@ -105,6 +106,78 @@ beforeEach(async () => {
 })
 
 describe("public Atlas projection", () => {
+  it("keeps an Instagram link owner-only until publication and supports removal", async () => {
+    const patch = (value, revision, digit) =>
+      updateMyProfile({
+        environment: environment(),
+        identity: IDENTITY,
+        input: normalizeProfilePatch(
+          value,
+          new Headers({
+            "If-Match": `"rev-${revision}"`,
+            "Idempotency-Key": `${digit.repeat(8)}-${digit.repeat(4)}-4${digit.repeat(3)}-8${digit.repeat(3)}-${digit.repeat(12)}`,
+          })
+        ),
+        now: NOW,
+      })
+    const saved = await patch({ instagramHandle: " @Travel.Owner " }, 1, "1")
+    expect(saved.profile.instagramHandle).toBe("travel.owner")
+    const replay = await patch({ instagramHandle: " @Travel.Owner " }, 1, "1")
+    expect(replay.profile.revision).toBe(saved.profile.revision)
+    await expect(
+      patch({ instagramHandle: "overwrite" }, 1, "9")
+    ).rejects.toMatchObject({ code: "revision_conflict" })
+    await expect(
+      getPublicAtlas({
+        environment: environment(),
+        handle: "public-owner",
+        placeCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
+    await createMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        placeId: "geonames:3621138",
+        visitedYears: [2024],
+        expectedRevision: 2,
+        idempotencyKey: "22222222-2222-4222-8222-222222222222",
+      },
+      catalogResolver: async placeId => ({
+        placeId,
+        placeType: "city",
+        name: "Uvita",
+        countryCode: "CR",
+        countryName: "Costa Rica",
+        coordinates: [-83.7395, 9.17039],
+        deprecated: false,
+      }),
+      now: NOW,
+    })
+    await patch({ public: true }, 3, "3")
+    const published = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog,
+    })
+    expect(published.atlas.instagramHandle).toBe("travel.owner")
+    await patch({ instagramHandle: "" }, 4, "4")
+    const cleared = await getPublicAtlas({
+      environment: environment(),
+      handle: "public-owner",
+      placeCatalog,
+    })
+    expect(cleared.atlas).not.toHaveProperty("instagramHandle")
+    await patch({ instagramHandle: "another.owner" }, 5, "5")
+    await patch({ public: false }, 6, "6")
+    await expect(
+      getPublicAtlas({
+        environment: environment(),
+        handle: "public-owner",
+        placeCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
+  })
   it("requires separate discovery consent and favors activity from the last day", async () => {
     await createMyPin({
       environment: environment(),
@@ -344,6 +417,7 @@ describe("public Atlas projection", () => {
       input: {
         expectedRevision: 2,
         idempotencyKey: "74747474-7474-4474-8474-747474747474",
+        location: "Banff, Canada",
       },
       upload: {
         bytes: new Uint8Array([1]).buffer,
@@ -396,6 +470,7 @@ describe("public Atlas projection", () => {
       placeCatalog,
     })
     expect(atlas.atlas.favoriteImage).toMatchObject({
+      location: "Banff, Canada",
       imageId: "image_33333333333333333333333333333333",
       contentType: "image/webp",
       width: 1200,
