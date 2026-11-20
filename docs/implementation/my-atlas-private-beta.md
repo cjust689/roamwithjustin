@@ -703,14 +703,18 @@ claiming an authenticated production interaction.
 - [x] Add contract/client/helper tests and Worker tests for private/public
       behavior, removal, revision conflicts and idempotent replay.
 - [x] Complete browser checks and production build for this follow-up.
-- [ ] Deploy compatible Worker and frontend changes and verify a real owner
-      save plus live Explore refresh. No live account has been modified here.
+- [x] Deploy compatible Worker changes and promote the frontend through
+      protected pull requests 218 and 219. Exact release evidence is in
+      `my-atlas-favorite-travel-image.md`.
+- [ ] Verify a genuine-token owner save and a real profile's live Explore
+      image refresh. No live account has been modified for these checks.
 
 The current branch also contains the separately verified mobile action
 feedback work. The canonical trip architecture remains partial; these profile
 and directory changes do not migrate existing records or change trip lifecycle.
 
-`npm run build` passed with all 45 Worker runtime tests, including the new
+`npm run build` passed with all 46 Worker runtime tests, including required
+photo locations and the new
 private/public Instagram, removal, revision-conflict and idempotent-replay
 checks. `scripts/test-my-atlas-profile-discovery.mjs` verifies normalization,
 safe URLs, the revisioned browser API request, actual owner save/remove/failure

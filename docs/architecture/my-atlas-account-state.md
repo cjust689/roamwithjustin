@@ -899,7 +899,8 @@ reporting and moderation, and registration or operator rate-limit enforcement.
 Permanent application-account deletion and the six-month plus 30-day plan
 retention contract are implemented and staged, but authenticated deletion still
 requires disposable-account acceptance. Public discovery is locally test
-verified but not deployed or visually accepted against real profiles. Public
+verified and promoted through pull requests 218 and 219. Real-profile discovery
+acceptance remains externally unverified. Public
 catalog and Atlas reads have a tested weighted limiter boundary and a deployed
 staging binding. Catalog and public Atlas reads have isolated limiter keys, but
 live exhaustion behavior is not yet verified.

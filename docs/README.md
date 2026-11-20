@@ -162,12 +162,15 @@ conflicts still require their response status and error code to distinguish.
 
 ## Active work
 
-The current My Atlas follow-up adds optional Instagram handles, refreshable
+The November 20 My Atlas release adds optional Instagram handles, refreshable
 Explore image cards, mobile action confirmations, and required favorite-photo
 location labels. New photos and explicit image publication require a label;
 existing photos can receive one without reuploading. Verification and release
 state are tracked in the active private-beta, trip-transition, and
-favorite-travel-image implementation documents.
+favorite-travel-image implementation documents. Protected pull requests 218
+and 219 promoted the release; Pages run 44797186548 deployed it successfully.
+The matching Worker is deployed and live page/bundle checks passed. Genuine
+authenticated remote image acceptance remains externally unverified.
 
 The [trip centric transition](implementation/my-atlas-trip-centric-transition.md)
 reconciles the new canonical-trip and flight/rental briefs with the existing
