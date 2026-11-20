@@ -34,6 +34,8 @@ verification:
   state: verified
   evidence:
     - npm run theme:test
+    - Pages run 44779910068 deployed main merge ab0bc958d2d8fc1828178f07e7f1124fcd2716c3 after pull requests 214 and 215 passed required validation
+    - Live Chrome passed 24 brand, favicon, accessible-home-link and viewport checks across six routes in both themes
 ---
 
 # Classic and Explorer
