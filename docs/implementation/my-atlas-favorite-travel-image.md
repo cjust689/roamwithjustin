@@ -51,7 +51,9 @@ verification:
     - Local 2026-11-19 verification passed `npm run my-atlas:test`, including 42 Durable Object tests and the public image visibility boundary
     - Local 2026-11-19 verification passed `npm run atlas:test`, `npm run lint`, `npm run docs:audit`, and `npm run build`
     - The local development server compiled the owner visibility control and public profile hero successfully
-    - The public image route, explicit visibility mutation, and revised privacy version are not deployed or remotely verified
+    - Staging Worker version 1113afaf-4600-4777-b92d-b2eb40e43826 deployed the public image route, explicit visibility mutation, and revised privacy version
+    - Remote staging returned 200 health, 204 for the allowed PATCH preflight, and the closed 404 `atlas_image_not_found` response for an unknown public image handle
+    - Authenticated visibility mutation and real public profile image acceptance remain externally unverified
 ---
 
 # My Atlas favorite travel image implementation
@@ -125,9 +127,12 @@ not changed by this media scope.
       source bytes, output dimensions, output bytes, and metadata inspection.
 - [ ] Repeat replacement, stale revision, removal, sign out, public sharing,
       and application-account deletion checks against remote staging.
-- [ ] Deploy the public image route and explicit visibility mutation to staging,
-      then verify that private profiles, empty profiles, and images kept private
-      all return the same public not found behavior.
+- [x] Deploy the public image route and explicit visibility mutation to staging
+      and verify its health, allowed PATCH preflight, and closed unknown-handle
+      response.
+- [ ] Verify with a disposable authenticated account that private profiles,
+      empty profiles, and images kept private all return the same public not
+      found behavior.
 - [ ] Confirm the Images transformation budget alert and R2 spend alert before
       inviting additional accounts.
 - [ ] Complete mobile, keyboard, screen reader, and real-device acceptance.
