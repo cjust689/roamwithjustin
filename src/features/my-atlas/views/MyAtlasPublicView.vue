@@ -674,10 +674,12 @@ export default {
   grid-row: 1;
 }
 
-.my-atlas-public-favorite-location {
+.my-atlas-public-favorite-action .my-atlas-public-favorite-location {
+  min-width: 0;
   grid-column: 1 / -1;
   grid-row: 2;
   overflow-wrap: anywhere;
+  white-space: normal;
   text-align: left;
 }
 
@@ -760,7 +762,7 @@ export default {
 
 .my-atlas-public-state p,
 .my-atlas-public-intro p,
-.my-atlas-public-intro span {
+.my-atlas-public-intro > span {
   margin: 0 0 0.4rem;
   color: var(--color-text-muted, #a8bab4);
   font-size: 0.76rem;
@@ -771,7 +773,7 @@ export default {
   font-weight: 700;
 }
 
-.my-atlas-public-intro span {
+.my-atlas-public-intro > span {
   display: block;
   margin-top: 0.75rem;
 }
@@ -1057,7 +1059,7 @@ export default {
     font-size: clamp(1.8rem, 10vw, 2.45rem);
   }
 
-  .my-atlas-public-intro span {
+  .my-atlas-public-intro > span {
     grid-column: 2;
     grid-row: 1 / 3;
     align-self: end;
