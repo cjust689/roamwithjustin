@@ -104,6 +104,13 @@ const publicView = fs.readFileSync(
   ),
   "utf8"
 )
+const sharedTripView = fs.readFileSync(
+  new URL(
+    "../src/features/my-atlas/views/MyAtlasSharedTripView.vue",
+    import.meta.url
+  ),
+  "utf8"
+)
 const storyExport = fs.readFileSync(
   new URL("../src/features/my-atlas/export/storyExport.mjs", import.meta.url),
   "utf8"
@@ -161,6 +168,14 @@ assert.match(mapComponent, /showPlannerOverview/)
 assert.match(mapComponent, /buildPlannerMapSegments/)
 assert.match(mapComponent, /plannerReturnsToStart/)
 assert.match(mapComponent, />Start[\s\S]*>Route[\s\S]*plannerFinishLabel/)
+assert.match(mapComponent, /plannerReadOnly/)
+assert.match(mapComponent, /Shared trip map/)
+assert.match(sharedTripView, /<MyAtlasMap/)
+assert.match(sharedTripView, /:planner-route="plannerRoute"/)
+assert.match(sharedTripView, /:planner-read-only="true"/)
+assert.match(sharedTripView, /buildPlannerMapRoute/)
+assert.match(sharedTripView, /<details open>/)
+assert.match(sharedTripView, />\s*Trip summary\s*</)
 assert.match(ownerView, /:places="plannerActive \? \[\] : displayedPlaces"/)
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)

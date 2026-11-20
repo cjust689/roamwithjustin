@@ -189,10 +189,11 @@ poster is reserved for the opened video player; a missing poster remains empty.
 
 Confirmed but incomplete Journeys are registered through
 `src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible. Their navigation cards use the same `Explore`
-action as established Journeys. Missing material stays absent instead of
-rendering empty sections or editorial workflow language in cards or panels.
-Planned-only stops are excluded. The validator requires every internally
+Place summaries remain visible. Their map pins can still open that established
+geography, but the root welcome rail omits its `Explore` action until the
+canonical Journey owns a substantive published story. Missing material stays
+absent instead of rendering empty sections or editorial workflow language in
+cards or panels. Planned-only stops are excluded. The validator requires every internally
 incomplete Journey Visit to resolve to an Atlas node so later media ingestion
 enriches stable IDs instead of creating a parallel map record.
 
