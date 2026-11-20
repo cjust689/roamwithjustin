@@ -59,6 +59,9 @@ verification:
     - Live chunks 371.07c466f0.js and 917.6e99172f.js returned 200 and together contained the Favorite travel image, View full image, Show on public profile, Share saved trip, and Share Visited Atlas markers
     - npm run my-atlas:test passed after adding an authenticated Worker route regression for PATCH /v1/me/atlas-image
     - Staging Worker version 242ef647-283c-415d-99d5-493e4be38313 deployed the corrected route gate; remote health returned 200 and an unauthenticated allowed-origin PATCH returned 401 instead of 405
+    - Pull request 204 passed validation run 44677439710 and merged to develop as 83adc5445d09c0a95128664a9d59e9c5bd31d6cc; develop validation run 44677681228 then succeeded
+    - Pull request 205 passed validation run 44677908485 and merged to main as 84c546e078ce2b50097d20b16803ff5200f94182
+    - Pages run 44678154430 deployed the production merge successfully
     - Authenticated visibility mutation and real public profile image acceptance remain externally unverified
 ---
 
@@ -151,6 +154,20 @@ not changed by this media scope.
 - [ ] Confirm the Images transformation budget alert and R2 spend alert before
       inviting additional accounts.
 - [ ] Complete mobile, keyboard, screen reader, and real-device acceptance.
+
+## Visibility method correction release, 2026-11-20
+
+- [x] Correct the account route method gate to admit the already implemented
+      favorite-image visibility `PATCH` request.
+- [x] Add a request-boundary regression proving the authenticated mutation
+      reaches the service with normalized revision and idempotency state.
+- [x] Deploy staging Worker version
+      `242ef647-283c-415d-99d5-493e4be38313` and verify remote PATCH routing
+      advances to authentication instead of returning HTTP 405.
+- [x] Promote through pull requests 204 and 205 after feature, develop, and
+      production validation runs succeeded.
+- [x] Deploy production merge
+      `84c546e078ce2b50097d20b16803ff5200f94182` through Pages run 44678154430.
 
 ## Failure behavior
 
