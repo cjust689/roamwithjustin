@@ -17,7 +17,7 @@
     "my-atlas:search:local": "node scripts/my-atlas/local-place-search-server.mjs --source-dir .state/my-atlas/geonames --port 8788",
     "my-atlas:serve": "node scripts/serve.js --my-atlas --port 8080",
     "my-atlas:account:wipe": "node scripts/my-atlas/wipe-account.mjs",
-    "my-atlas:test": "node scripts/test-my-atlas-place-catalog.mjs && node scripts/test-my-atlas-planning.mjs && node scripts/test-my-atlas-travel-search.mjs && node scripts/test-my-atlas-account-wipe.mjs && npm run my-atlas:worker:test && npm run my-atlas:worker:durable:test",
+    "my-atlas:test": "node scripts/test-my-atlas-place-catalog.mjs && node scripts/test-my-atlas-planning.mjs && node scripts/test-my-atlas-action-feedback.mjs && node scripts/test-my-atlas-profile-discovery.mjs && node scripts/test-my-atlas-image-location.mjs && node scripts/test-my-atlas-travel-search.mjs && node scripts/test-my-atlas-account-wipe.mjs && npm run my-atlas:worker:test && npm run my-atlas:worker:durable:test",
     "my-atlas:worker:test": "node scripts/test-my-atlas-worker.mjs",
     "my-atlas:worker:durable:test": "vitest run --config workers/my-atlas/vitest.config.mjs",
     "my-atlas:worker:dev": "wrangler dev --local --config workers/my-atlas/wrangler.jsonc",

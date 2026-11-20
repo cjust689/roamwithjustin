@@ -14,9 +14,20 @@
         updates are given more space while older Atlases remain available as you
         explore.
       </p>
+      <button
+        class="my-atlas-explore-refresh"
+        type="button"
+        :disabled="loading"
+        @click="refresh"
+      >
+        {{ refreshing ? "Refreshing Atlases" : "Refresh Atlases" }}
+      </button>
+      <p class="my-atlas-explore-refresh-status" role="status">
+        {{ refreshStatus }}
+      </p>
     </section>
 
-    <section class="my-atlas-explore-results" aria-live="polite">
+    <section class="my-atlas-explore-results" :aria-busy="String(loading)">
       <div v-if="atlases.length" class="my-atlas-explore-grid">
         <router-link
           v-for="atlas in atlases"
@@ -26,14 +37,20 @@
         >
           <div class="my-atlas-explore-image">
             <img
-              v-if="atlas.favoriteImage && !imageErrors[atlas.handle]"
+              v-if="atlas.favoriteImage && !imageErrors[imageVersion(atlas)]"
+              :key="imageVersion(atlas)"
               :src="imageUrl(atlas.handle)"
               :alt="`${atlas.displayName}'s favorite travel image`"
               loading="lazy"
-              @error="markImageUnavailable(atlas.handle)"
+              @error="markImageUnavailable(atlas, $event)"
             />
             <span v-else aria-hidden="true">{{ atlasInitials(atlas) }}</span>
             <b v-if="atlas.recent">Active recently</b>
+            <span
+              v-if="atlas.favoriteImage?.location"
+              class="my-atlas-explore-location"
+              >{{ atlas.favoriteImage.location }}</span
+            >
           </div>
           <div class="my-atlas-explore-card-copy">
             <span>@{{ atlas.handle }}</span>
@@ -51,7 +68,7 @@
       </div>
       <div v-else-if="error && !atlases.length" class="my-atlas-explore-state">
         <strong>Explore Atlases is unavailable right now.</strong>
-        <button type="button" @click="loadMore">Try again</button>
+        <button type="button" @click="refresh">Try again</button>
       </div>
       <div
         v-else-if="!loading && !atlases.length"
@@ -89,6 +106,11 @@
 <script>
 import { fetchPublicAtlasDirectory } from "../api/client.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
+import {
+  directoryImageVersion,
+  mergeDirectoryCards,
+  readDirectoryWindow,
+} from "../discovery/directory.mjs"
 
 export default {
   name: "MyAtlasExploreView",
@@ -102,10 +124,17 @@ export default {
       imageErrors: {},
       observer: null,
       loadedFirstPage: false,
+      refreshing: false,
+      refreshStatus: "",
+      lastRefreshAt: 0,
+      refreshQueued: false,
+      disposed: false,
     }
   },
   mounted() {
     this.loadMore()
+    window.addEventListener("focus", this.refreshOnReturn)
+    document.addEventListener("visibilitychange", this.refreshOnReturn)
     if ("IntersectionObserver" in window) {
       this.observer = new IntersectionObserver(
         entries => {
@@ -119,9 +148,59 @@ export default {
   // Vue 2 cleanup hook.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.disposed = true
     this.observer?.disconnect()
+    window.removeEventListener("focus", this.refreshOnReturn)
+    document.removeEventListener("visibilitychange", this.refreshOnReturn)
   },
   methods: {
+    imageVersion: directoryImageVersion,
+    refreshOnReturn() {
+      if (
+        document.visibilityState !== "visible" ||
+        !this.loadedFirstPage ||
+        this.refreshing ||
+        Date.now() - this.lastRefreshAt < 1000
+      )
+        return
+      if (this.loading) {
+        this.refreshQueued = true
+        return
+      }
+      this.refresh()
+    },
+    async refresh() {
+      if (this.loading || this.disposed) return
+      this.refreshQueued = false
+      this.loading = true
+      this.refreshing = true
+      this.refreshStatus = "Refreshing public Atlases."
+      this.error = ""
+      try {
+        const result = await readDirectoryWindow(
+          cursor =>
+            fetchPublicAtlasDirectory({ apiBaseUrl: this.apiBaseUrl, cursor }),
+          this.atlases.length
+        )
+        if (this.disposed) return
+        this.atlases = result.atlases
+        this.nextCursor = result.nextCursor
+        this.imageErrors = {}
+        this.loadedFirstPage = true
+        this.refreshStatus = "Public Atlases refreshed."
+      } catch {
+        if (this.disposed) return
+        this.error = "unavailable"
+        this.refreshStatus =
+          "The latest Atlases could not be loaded. Try Refresh Atlases again."
+      } finally {
+        if (!this.disposed) {
+          this.lastRefreshAt = Date.now()
+          this.refreshing = false
+          this.loading = false
+        }
+      }
+    },
     async loadMore() {
       if (this.loading || (this.loadedFirstPage && !this.nextCursor)) return
       this.loading = true
@@ -131,23 +210,32 @@ export default {
           apiBaseUrl: this.apiBaseUrl,
           cursor: this.nextCursor,
         })
-        const knownHandles = new Set(this.atlases.map(atlas => atlas.handle))
-        this.atlases.push(
-          ...result.atlases.filter(atlas => !knownHandles.has(atlas.handle))
-        )
+        if (this.disposed) return
+        this.atlases = mergeDirectoryCards(this.atlases, result.atlases)
         this.nextCursor = result.nextCursor || ""
+        if (!this.loadedFirstPage) this.lastRefreshAt = Date.now()
         this.loadedFirstPage = true
       } catch {
+        if (this.disposed) return
         this.error = "unavailable"
       } finally {
         this.loading = false
+        if (
+          !this.disposed &&
+          this.refreshQueued &&
+          document.visibilityState === "visible"
+        ) {
+          this.refreshQueued = false
+          this.refresh()
+        }
       }
     },
     imageUrl(handle) {
       return `${this.apiBaseUrl}/v1/public/atlases/${encodeURIComponent(handle)}/image`
     },
-    markImageUnavailable(handle) {
-      this.$set(this.imageErrors, handle, true)
+    markImageUnavailable(atlas, event) {
+      if (event?.target && !event.target.isConnected) return
+      this.$set(this.imageErrors, directoryImageVersion(atlas), true)
     },
     atlasInitials(atlas) {
       const initials = atlas.displayName
@@ -175,6 +263,49 @@ export default {
     var(--color-page, #081315);
   color: var(--color-text, #f7f2e7);
   font-family: "Poppins", system-ui, sans-serif;
+}
+
+.my-atlas-explore-refresh {
+  margin-top: 1rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--color-accent, #e6ba68);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-accent-soft, #f4d38f);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+}
+.my-atlas-explore-refresh:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.my-atlas-explore-refresh:focus-visible {
+  outline: 2px solid var(--color-focus, #f4d38f);
+  outline-offset: 3px;
+}
+.my-atlas-explore-refresh-status {
+  font-size: 0.78rem;
+}
+.my-atlas-explore-refresh-status:empty {
+  display: none;
+}
+.my-atlas-explore-image > .my-atlas-explore-location {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 0.7rem;
+  background: rgba(var(--color-page-rgb, 7, 16, 18), 0.9);
+  color: var(--color-text, #fffaf0);
+  font-family: inherit;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.my-atlas-explore-image:has(.my-atlas-explore-location) b {
+  top: 0.75rem;
+  bottom: auto;
 }
 
 .my-atlas-explore-header,

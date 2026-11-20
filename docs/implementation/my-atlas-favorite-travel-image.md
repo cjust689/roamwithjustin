@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-19
-updated: 2026-11-19
+updated: 2026-11-20
 related:
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
@@ -16,6 +16,8 @@ supersedes:
   - my-atlas-destination-memory-photo-implementation
 superseded_by: []
 code_paths:
+  - shared/my-atlas-image-location.mjs
+  - scripts/test-my-atlas-image-location.mjs
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
@@ -66,6 +68,41 @@ verification:
 ---
 
 # My Atlas favorite travel image implementation
+
+## Required photo location follow-up, 2026-11-20
+
+- [x] Require a place or city label of at most 120 Unicode characters before
+      uploading a favorite image. No GPS permission or visited pin is required.
+- [x] Send the label in the percent-encoded `X-Atlas-Image-Location` upload
+      header and validate it before transformation or R2 writes.
+- [x] Include the label in safe owner/public image metadata, Explore image
+      cards, the public full-image dialog, and owner/public Atlas Story exports.
+- [x] Let owners correct the label through the revision-guarded image `PATCH`
+      without reuploading or changing its visibility. Fingerprints include the
+      location so idempotency cannot silently accept a different label.
+- [x] Preserve legacy photos without inventing locations. Require a location
+      before a subsequent upload or explicit public-image enable action.
+      Existing published legacy photos remain readable.
+- [x] Test required/invalid labels, Unicode upload headers, missing-location
+      rejection before transformation, legacy reads and location-only updates,
+      public metadata, and client response confirmation.
+- [x] Review the owner editor at 320, 390 and 1440 pixels with synthetic
+      metadata; verify missing-location upload/publication guards and public
+      image/dialog labels. Test the actual export caption drawing function,
+      including bounded wrapping and Unicode-safe truncation.
+- [ ] Deploy the compatible Worker and frontend and record release evidence.
+
+The implementation uses `shared/my-atlas-image-location.mjs`, the existing
+account image contracts/service and Durable Object, and the existing image UI
+and export paths. This is account-level image metadata, not destination memory
+media or a canonical trip migration.
+
+Local verification on November 20 passed the My Atlas suite with 46 Durable
+Object runtime tests, `npm run lint`, `npm run atlas:test`, `npm run docs:audit`,
+and the staging Worker dry run. The full production build passed with the same
+source and a local `parallel: false` override after the default local compiler
+worker pool stalled. This override is not a repository configuration change.
+Browser checks used synthetic records and did not modify live owner profiles.
 
 The first traveler image release uses one optional favorite travel
 image for the whole Atlas. It does not attach images to visited pins. The image

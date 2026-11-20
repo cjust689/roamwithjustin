@@ -47,6 +47,7 @@ function publicAtlasImageMetadata(atlasImage) {
   if (!atlasImage) return null
   return Object.freeze({
     imageId: atlasImage.imageId,
+    ...(atlasImage.location ? { location: atlasImage.location } : {}),
     contentType: atlasImage.contentType,
     width: atlasImage.width,
     height: atlasImage.height,
@@ -291,6 +292,9 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
     atlas: Object.freeze({
       handle: snapshot.profile.handle,
       displayName: snapshot.profile.displayName,
+      ...(snapshot.profile.instagramHandle
+        ? { instagramHandle: snapshot.profile.instagramHandle }
+        : {}),
       favoriteImage: publicAtlasImageMetadata(snapshot.atlasImage),
       places: Object.freeze(places),
     }),

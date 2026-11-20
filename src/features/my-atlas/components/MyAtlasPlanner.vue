@@ -42,7 +42,12 @@
         Saved trips need a keep or edit every six months. A 30 day grace period
         follows.
       </p>
-      <div v-if="error" class="planner-error-block" role="alert">
+      <div
+        v-if="error"
+        class="planner-error-block"
+        role="region"
+        aria-label="Planner error"
+      >
         <p class="planner-error">{{ error }}</p>
         <button type="button" :disabled="pending" @click="loadPlanning">
           Retry planner
@@ -506,17 +511,27 @@
                     </button>
                     <button
                       type="button"
-                      :disabled="!planStateAvailable"
+                      :disabled="pending || !planStateAvailable"
+                      :aria-pressed="String(isPlanLocation('start', place))"
                       @click="usePlanLocation('start', place)"
                     >
-                      Use as start
+                      {{
+                        isPlanLocation("start", place)
+                          ? "Start selected"
+                          : "Use as start"
+                      }}
                     </button>
                     <button
                       type="button"
-                      :disabled="!planStateAvailable"
+                      :disabled="pending || !planStateAvailable"
+                      :aria-pressed="String(isPlanLocation('end', place))"
                       @click="usePlanLocation('end', place)"
                     >
-                      Use as finish
+                      {{
+                        isPlanLocation("end", place)
+                          ? "Finish selected"
+                          : "Use as finish"
+                      }}
                     </button>
                   </div>
                 </article>
@@ -527,7 +542,8 @@
           <div
             v-if="planForm.startDirect || planForm.endDirect"
             class="planner-search-selections"
-            role="status"
+            role="group"
+            aria-label="Draft start and finish"
           >
             <p v-if="planForm.startDirect">
               <span>Selected start</span>
@@ -587,17 +603,27 @@
                 </button>
                 <button
                   type="button"
-                  :disabled="!planStateAvailable"
+                  :disabled="pending || !planStateAvailable"
+                  :aria-pressed="String(isCustomPlanLocation('start'))"
                   @click="useCustomPlanLocation('start')"
                 >
-                  Use as start
+                  {{
+                    isCustomPlanLocation("start")
+                      ? "Start selected"
+                      : "Use as start"
+                  }}
                 </button>
                 <button
                   type="button"
-                  :disabled="!planStateAvailable"
+                  :disabled="pending || !planStateAvailable"
+                  :aria-pressed="String(isCustomPlanLocation('end'))"
                   @click="useCustomPlanLocation('end')"
                 >
-                  Use as finish
+                  {{
+                    isCustomPlanLocation("end")
+                      ? "Finish selected"
+                      : "Use as finish"
+                  }}
                 </button>
               </div>
             </div>
@@ -622,14 +648,23 @@
                 <div class="planner-wish-route-actions">
                   <button
                     type="button"
-                    :disabled="wish.unavailable || !planStateAvailable"
+                    :disabled="
+                      pending || wish.unavailable || !planStateAvailable
+                    "
+                    :aria-pressed="String(isPlanLocation('start', wish))"
                     @click="useSavedPlanLocation('start', wish)"
                   >
-                    Use as start
+                    {{
+                      isPlanLocation("start", wish)
+                        ? "Start selected"
+                        : "Use as start"
+                    }}
                   </button>
                   <button
                     type="button"
-                    :disabled="wish.unavailable || !planStateAvailable"
+                    :disabled="
+                      pending || wish.unavailable || !planStateAvailable
+                    "
                     @click="togglePlanStop(wish.wishId)"
                   >
                     {{
@@ -640,10 +675,17 @@
                   </button>
                   <button
                     type="button"
-                    :disabled="wish.unavailable || !planStateAvailable"
+                    :disabled="
+                      pending || wish.unavailable || !planStateAvailable
+                    "
+                    :aria-pressed="String(isPlanLocation('end', wish))"
                     @click="useSavedPlanLocation('end', wish)"
                   >
-                    Use as finish
+                    {{
+                      isPlanLocation("end", wish)
+                        ? "Finish selected"
+                        : "Use as finish"
+                    }}
                   </button>
                 </div>
                 <label>
@@ -728,6 +770,7 @@
                 <button
                   type="button"
                   :aria-label="`Remove ${stop.name} from this trip`"
+                  :disabled="pending"
                   @click="togglePlanStop(stop.wishId)"
                 >
                   Remove
@@ -747,7 +790,11 @@
             </ol>
             <label class="planner-finish-mode">
               <span>Finish behavior</span>
-              <select v-model="planForm.endMode">
+              <select
+                v-model="planForm.endMode"
+                :disabled="pending"
+                @change="confirmFinishMode"
+              >
                 <option value="last-stop">Finish at last stop</option>
                 <option value="return-to-start">Return to start</option>
                 <option value="selected-end">Use selected finish</option>
@@ -823,7 +870,11 @@
           </label>
           <label>
             <span>Start from a saved destination</span>
-            <select v-model="planForm.startWishId" @change="selectSavedStart">
+            <select
+              v-model="planForm.startWishId"
+              :disabled="pending"
+              @change="selectSavedStart"
+            >
               <option value="" disabled>Choose a saved destination</option>
               <option
                 v-for="wish in wishes"
@@ -840,7 +891,11 @@
             <strong>{{ planForm.startDirect.name }}</strong>
             <small>{{ locationContext(planForm.startDirect) }}</small>
             <small>{{ coordinateLabel(planForm.startDirect) }}</small>
-            <button type="button" @click="clearDirectLocation('start')">
+            <button
+              type="button"
+              :disabled="pending"
+              @click="clearDirectLocation('start')"
+            >
               Use a saved start instead
             </button>
           </div>
@@ -856,7 +911,11 @@
           </label>
           <label>
             <span>Finish</span>
-            <select v-model="planForm.endMode">
+            <select
+              v-model="planForm.endMode"
+              :disabled="pending"
+              @change="confirmFinishMode"
+            >
               <option value="last-stop">Finish at last destination</option>
               <option value="return-to-start">Return to start</option>
               <option value="selected-end">Finish at a selected place</option>
@@ -871,7 +930,11 @@
               <strong>{{ planForm.endDirect.name }}</strong>
               <small>{{ locationContext(planForm.endDirect) }}</small>
               <small>{{ coordinateLabel(planForm.endDirect) }}</small>
-              <button type="button" @click="clearDirectLocation('end')">
+              <button
+                type="button"
+                :disabled="pending"
+                @click="clearDirectLocation('end')"
+              >
                 Choose a different finish
               </button>
             </template>
@@ -901,6 +964,7 @@
                 type="checkbox"
                 :checked="planForm.stopWishIds.includes(wish.wishId)"
                 :disabled="
+                  pending ||
                   wish.unavailable ||
                   (!planForm.stopWishIds.includes(wish.wishId) &&
                     planForm.stopWishIds.length >= maxPlanDestinations)
@@ -915,7 +979,7 @@
               <span>{{ wishById(wishId).name }}</span>
               <button
                 type="button"
-                :disabled="index === 0"
+                :disabled="pending || index === 0"
                 :aria-label="`Move ${wishById(wishId).name} earlier`"
                 @click="moveStop(index, -1)"
               >
@@ -923,7 +987,7 @@
               </button>
               <button
                 type="button"
-                :disabled="index === planForm.stopWishIds.length - 1"
+                :disabled="pending || index === planForm.stopWishIds.length - 1"
                 :aria-label="`Move ${wishById(wishId).name} later`"
                 @click="moveStop(index, 1)"
               >
@@ -1048,7 +1112,7 @@
         </details>
       </section>
     </div>
-    <p class="planner-announcement" aria-live="polite">{{ announcement }}</p>
+    <p class="planner-announcement">{{ announcement }}</p>
   </section>
 </template>
 
@@ -1099,7 +1163,12 @@ export default {
     pins: { type: Array, default: () => [] },
     profilePublic: { type: Boolean, default: false },
   },
-  emits: ["revision-change", "pins-created", "planner-state-change"],
+  emits: [
+    "revision-change",
+    "pins-created",
+    "planner-state-change",
+    "action-feedback",
+  ],
   data() {
     return {
       open: false,
@@ -1348,6 +1417,59 @@ export default {
     this.$emit("planner-state-change", { active: false, route: [] })
   },
   methods: {
+    announce(message, tone = "success") {
+      this.announcement = message
+      this.$emit("action-feedback", { message, tone })
+    },
+    confirmDraft(message) {
+      this.error = ""
+      this.announce(`${message} Save the trip to keep this change.`, "draft")
+    },
+    isCustomPlanLocation(role) {
+      return (
+        Boolean(this.customName) &&
+        this.isPlanLocation(role, {
+          name: this.customName,
+          coordinates: [
+            Number(this.customLongitude),
+            Number(this.customLatitude),
+          ],
+        })
+      )
+    },
+    reportError(message, tone = "error") {
+      this.error = message
+      this.$emit("action-feedback", { message, tone })
+    },
+    isPlanLocation(role, place) {
+      const selected =
+        role === "start"
+          ? this.planStartLocation
+          : this.planForm.endMode === "selected-end"
+            ? this.planForm.endDirect
+            : null
+      if (!selected || !place) return false
+      if (selected.placeId && place.placeId)
+        return selected.placeId === place.placeId
+      return (
+        selected.name === place.name &&
+        selected.coordinates?.length === 2 &&
+        selected.coordinates.every(
+          (value, index) => value === place.coordinates?.[index]
+        )
+      )
+    },
+    confirmFinishMode() {
+      this.clearPreparedDirections()
+      const messages = {
+        "return-to-start": "The trip will return to its start.",
+        "last-stop": "The trip will finish at its last stop.",
+        "selected-end": this.planForm.endDirect
+          ? `${this.planForm.endDirect.name} is selected as the finish.`
+          : "Choose a separate finish from search or your saved places.",
+      }
+      this.confirmDraft(messages[this.planForm.endMode])
+    },
     async revealPlanner() {
       if (!this.open) await this.toggleOpen()
       await this.$nextTick()
@@ -1582,7 +1704,7 @@ export default {
         this.syncDirectionsPreferences()
         return { ok: true, planError: state.planError }
       } catch (error) {
-        if (reportError) this.error = this.errorMessage(error)
+        if (reportError) this.reportError(this.errorMessage(error))
         return { ok: false, error }
       } finally {
         this.pending = false
@@ -1632,22 +1754,31 @@ export default {
     async mutate(
       action,
       success,
-      { preservePlanDraft = false, applyResult = null } = {}
+      {
+        preservePlanDraft = false,
+        applyResult = null,
+        successTone = "success",
+        pendingMessage = "Updating your private planner.",
+      } = {}
     ) {
       this.pending = true
       this.error = ""
+      this.$emit("action-feedback", { message: pendingMessage, tone: "busy" })
       const applyMutation = async accessToken => {
         const result = await action(accessToken)
         if (result?.revision) this.emitRevision(result.revision)
         if (applyResult) applyResult(result)
-        this.announcement = success
+        this.announce(success, successTone)
         const refresh = await this.loadPlanning({
           preservePlanDraft,
           reportError: false,
         })
         const refreshError = refresh.ok ? refresh.planError : refresh.error
         if (refreshError) {
-          this.error = formatMyAtlasPlannerRefreshError(refreshError)
+          this.reportError(
+            formatMyAtlasPlannerRefreshError(refreshError),
+            "warning"
+          )
         }
         return {
           saved: true,
@@ -1665,7 +1796,7 @@ export default {
             await this.refreshPlanningRevision(accessToken)
             return await applyMutation(accessToken)
           } catch (retryError) {
-            this.error = this.errorMessage(retryError)
+            this.reportError(this.errorMessage(retryError))
             return {
               saved: false,
               refreshed: false,
@@ -1673,7 +1804,7 @@ export default {
             }
           }
         } else {
-          this.error = this.errorMessage(error)
+          this.reportError(this.errorMessage(error))
         }
         return { saved: false, refreshed: false, error }
       } finally {
@@ -1714,23 +1845,34 @@ export default {
     appendPlanStop(wish) {
       this.error = ""
       if (!wish?.wishId || wish.unavailable) {
-        this.error = "That destination is not available for this trip."
+        this.reportError("That destination is not available for this trip.")
         return false
       }
       if (this.planForm.stopWishIds.includes(wish.wishId)) {
-        this.announcement = `${wish.name} is already in this trip.`
+        this.announce(`${wish.name} is already in this trip.`)
         return true
       }
       if (this.planForm.stopWishIds.length >= MAX_PLAN_DESTINATIONS) {
-        this.error = `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        this.reportError(
+          `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        )
         return false
       }
       this.planForm.stopWishIds = [...this.planForm.stopWishIds, wish.wishId]
       this.clearPreparedDirections()
-      this.announcement = `${wish.name} was added to the trip.`
+      this.confirmDraft(`${wish.name} was added to the trip draft.`)
       return true
     },
     addCatalogPlaceToPlan(place) {
+      if (
+        this.planForm.stopWishIds.length >= MAX_PLAN_DESTINATIONS &&
+        !this.planStopPlaceIds.has(place.placeId)
+      ) {
+        this.reportError(
+          `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        )
+        return
+      }
       const existingWish = this.wishes.find(
         wish => wish.placeId === place.placeId
       )
@@ -1746,9 +1888,11 @@ export default {
             value: { placeId: place.placeId, priority: "normal" },
             revision: this.plannerRevision,
           }),
-        `${place.name} was added to your trip and private wishlist.`,
+        `${place.name} was saved to your wishlist and added to the trip draft. Save the trip to keep this stop.`,
         {
           preservePlanDraft: true,
+          successTone: "draft",
+          pendingMessage: `Adding ${place.name} to your private wishlist and trip draft.`,
           applyResult: result => {
             this.rememberCreatedWish(result)
             this.appendPlanStop(result?.wish)
@@ -1768,6 +1912,7 @@ export default {
         `${place.name} was added to your private bucket list.`,
         {
           preservePlanDraft: true,
+          pendingMessage: `Saving ${place.name} to your private wishlist.`,
           applyResult: result => this.rememberCreatedWish(result),
         }
       )
@@ -1784,7 +1929,7 @@ export default {
         latitude < -85.051129 ||
         latitude > 85.051129
       ) {
-        this.error = "Enter a name and valid longitude and latitude."
+        this.reportError("Enter a name and valid longitude and latitude.")
         return null
       }
       return Object.freeze({
@@ -1797,6 +1942,15 @@ export default {
     persistCustomWish({ addToPlan = false } = {}) {
       const place = this.customPlanLocation()
       if (!place) return
+      if (
+        addToPlan &&
+        this.planForm.stopWishIds.length >= MAX_PLAN_DESTINATIONS
+      ) {
+        this.reportError(
+          `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        )
+        return
+      }
       return this.mutate(
         token =>
           createMyAtlasWish({
@@ -1812,10 +1966,12 @@ export default {
             revision: this.plannerRevision,
           }),
         addToPlan
-          ? `${this.customName} was added to your trip and private wishlist.`
+          ? `${place.name} was saved to your wishlist and added to the trip draft. Save the trip to keep this stop.`
           : `${this.customName} was added to your private bucket list.`,
         {
           preservePlanDraft: true,
+          successTone: addToPlan ? "draft" : "success",
+          pendingMessage: `Saving ${place.name} to your private wishlist.`,
           applyResult: result => {
             this.rememberCreatedWish(result)
             if (addToPlan) this.appendPlanStop(result?.wish)
@@ -1848,15 +2004,11 @@ export default {
       if (role === "start") {
         this.planForm.startWishId = ""
         this.planForm.startDirect = location
-        this.announcement = `${place.name} will be used as the trip start.`
+        this.confirmDraft(`${place.name} is selected as the trip start.`)
       } else {
         this.planForm.endMode = "selected-end"
         this.planForm.endDirect = location
-        this.announcement = `${place.name} will be used as the trip finish.`
-      }
-      if (!this.wishes.length) {
-        this.announcement +=
-          " Save at least one destination before saving the trip."
+        this.confirmDraft(`${place.name} is selected as the trip finish.`)
       }
       this.clearPreparedDirections()
     },
@@ -1865,7 +2017,7 @@ export default {
       if (role === "start") {
         this.planForm.startWishId = wish.wishId
         this.planForm.startDirect = null
-        this.announcement = `${wish.name} will be used as the trip start.`
+        this.confirmDraft(`${wish.name} is selected as the trip start.`)
         this.clearPreparedDirections()
         return
       }
@@ -1875,10 +2027,19 @@ export default {
       if (role === "start") this.planForm.startDirect = null
       else this.planForm.endDirect = null
       this.clearPreparedDirections()
+      this.confirmDraft(
+        role === "start"
+          ? "Start selection cleared. Choose a saved start."
+          : "Finish selection cleared. Choose a different finish."
+      )
     },
     selectSavedStart() {
       this.planForm.startDirect = null
       this.clearPreparedDirections()
+      if (this.planStartLocation)
+        this.confirmDraft(
+          `${this.planStartLocation.name} is selected as the trip start.`
+        )
     },
     planLocationInput(place) {
       return place.placeType === "custom"
@@ -1935,8 +2096,17 @@ export default {
       const index = stops.indexOf(wishId)
       if (index >= 0) stops.splice(index, 1)
       else if (stops.length < MAX_PLAN_DESTINATIONS) stops.push(wishId)
+      else {
+        this.reportError(
+          `This trip already has ${MAX_PLAN_DESTINATIONS} destinations.`
+        )
+        return
+      }
       this.planForm.stopWishIds = stops
       this.clearPreparedDirections()
+      this.confirmDraft(
+        `${this.wishById(wishId).name} was ${index >= 0 ? "removed from" : "added to"} the trip draft.`
+      )
     },
     moveStop(index, offset) {
       const target = index + offset
@@ -1946,10 +2116,15 @@ export default {
       stops.splice(target, 0, wishId)
       this.planForm.stopWishIds = stops
       this.clearPreparedDirections()
+      this.confirmDraft(
+        `${this.wishById(wishId).name} moved to stop ${target + 1} in the trip draft.`
+      )
     },
     savePlan() {
       if (this.planSaveRequirements.length) {
-        this.error = `Before saving: ${this.planSaveRequirements.join(" ")}`
+        this.reportError(
+          `Before saving: ${this.planSaveRequirements.join(" ")}`
+        )
         return
       }
       const value = {
@@ -2047,7 +2222,9 @@ export default {
               month < 1 ||
               month > 12))
         ) {
-          this.error = `Enter a valid visit year for ${candidate.stop.name} before choosing a month.`
+          this.reportError(
+            `Enter a valid visit year for ${candidate.stop.name} before choosing a month.`
+          )
           return
         }
         visits.push({
@@ -2073,6 +2250,10 @@ export default {
 
       this.pending = true
       this.error = ""
+      this.$emit("action-feedback", {
+        message: "Adding the selected visited destinations to your Atlas.",
+        tone: "busy",
+      })
       try {
         const result = await markMyAtlasPlanVisited({
           apiBaseUrl: this.apiBaseUrl,
@@ -2083,12 +2264,22 @@ export default {
         })
         this.emitRevision(result.revision)
         this.$emit("pins-created", result.pins)
-        await this.loadPlanning()
-        this.announcement = `${result.pins.length} visited ${
-          result.pins.length === 1 ? "destination was" : "destinations were"
-        } added. Your saved trip and bucket list were preserved.`
+        this.announce(
+          `${result.pins.length} visited ${
+            result.pins.length === 1 ? "destination was" : "destinations were"
+          } added. Your saved trip and bucket list were preserved.`
+        )
+        const refresh = await this.loadPlanning({ reportError: false })
+        if (!refresh.ok || refresh.planError) {
+          this.reportError(
+            formatMyAtlasPlannerRefreshError(
+              refresh.error || refresh.planError
+            ),
+            "warning"
+          )
+        }
       } catch (error) {
-        this.error = this.errorMessage(error)
+        this.reportError(this.errorMessage(error))
       } finally {
         this.pending = false
       }
@@ -2165,25 +2356,28 @@ export default {
           handoff => handoff.url
         ).length
         const boundaryCount = this.routeHandoffs.length - linkCount
-        this.announcement = [
-          linkCount
-            ? `${linkCount} Google Maps ${
-                linkCount === 1 ? "handoff is" : "handoffs are"
-              } ready.`
-            : "No Google Maps handoff is needed for these modes.",
-          boundaryCount
-            ? `${boundaryCount} separate travel ${
-                boundaryCount === 1 ? "leg needs" : "legs need"
-              } a flight or ferry handoff.`
-            : "",
-        ]
-          .filter(Boolean)
-          .join(" ")
+        this.announce(
+          [
+            linkCount
+              ? `${linkCount} Google Maps ${
+                  linkCount === 1 ? "handoff is" : "handoffs are"
+                } ready.`
+              : "No Google Maps handoff is needed for these modes.",
+            boundaryCount
+              ? `${boundaryCount} separate travel ${
+                  boundaryCount === 1 ? "leg needs" : "legs need"
+                } a flight or ferry handoff.`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        )
       } catch (error) {
-        this.error =
+        this.reportError(
           error instanceof MyAtlasHandoffError
             ? error.message
             : "Directions could not be prepared."
+        )
       }
     },
     previewPrompt() {
@@ -2193,7 +2387,7 @@ export default {
           includeNearbySuggestions: this.includePromptSuggestions,
         })
       } catch (error) {
-        this.error = "The planning prompt could not be prepared."
+        this.reportError("The planning prompt could not be prepared.")
       }
     },
     async copySharedTripLink() {
@@ -2201,21 +2395,23 @@ export default {
       try {
         const url = buildSharedTripUrl(this.plan)
         await navigator.clipboard.writeText(url)
-        this.announcement =
+        this.announce(
           "The read only trip link was copied. Private notes and account details are excluded."
+        )
       } catch {
-        this.error =
+        this.reportError(
           "The browser could not copy this trip link. Retry after saving the trip."
-        this.announcement = this.error
+        )
       }
     },
     async copyPrompt() {
       try {
         await navigator.clipboard.writeText(this.promptPreview)
-        this.announcement = "The AI planning prompt was copied."
+        this.announce("The AI planning prompt was copied.")
       } catch {
-        this.error =
+        this.reportError(
           "The browser could not copy this prompt. Select the text and copy it manually."
+        )
       }
     },
     locationContext(place) {
@@ -3383,6 +3579,14 @@ export default {
 }
 .planner-announcement:empty {
   display: none;
+}
+
+.planner-search-actions button[aria-pressed="true"],
+.planner-custom-actions button[aria-pressed="true"],
+.planner-wish-route-actions button[aria-pressed="true"] {
+  border-color: var(--color-success, #9bd3b0);
+  color: var(--color-success, #9bd3b0);
+  background: rgba(var(--color-success-rgb, 155, 211, 176), 0.1);
 }
 @media (min-width: 721px) {
   .planner-itinerary,

@@ -45,10 +45,25 @@
               @click="openFavoriteImage"
             >
               <strong>Favorite travel image</strong>
+              <span
+                v-if="atlas.favoriteImage.location"
+                class="my-atlas-public-favorite-location"
+                >{{ atlas.favoriteImage.location }}</span
+              >
               <span>View full image</span>
             </button>
           </div>
         </div>
+        <p v-if="instagramUrl" class="my-atlas-public-instagram">
+          <a
+            :href="instagramUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            referrerpolicy="no-referrer"
+          >
+            Instagram @{{ atlas.instagramHandle }}
+          </a>
+        </p>
         <p
           v-if="favoriteImageError"
           class="my-atlas-public-image-error"
@@ -70,7 +85,12 @@
               :src="favoriteImageUrl"
               :alt="`${atlas.displayName}'s favorite travel image`"
             />
-            <p>Favorite travel image chosen by {{ atlas.displayName }}</p>
+            <p>
+              Favorite travel image chosen by {{ atlas.displayName
+              }}<template v-if="atlas.favoriteImage.location">
+                · {{ atlas.favoriteImage.location }}</template
+              >
+            </p>
           </div>
         </dialog>
 
@@ -211,6 +231,7 @@
 
 <script>
 import MyAtlasMap from "../components/MyAtlasMap.vue"
+import { instagramProfileUrl } from "../../../../shared/my-atlas-instagram.mjs"
 import { fetchPublicAtlas, fetchPublicAtlasImage } from "../api/client.mjs"
 import {
   atlasTimelineSequence,
@@ -258,6 +279,9 @@ export default {
     }
   },
   computed: {
+    instagramUrl() {
+      return instagramProfileUrl(this.atlas?.instagramHandle)
+    },
     places() {
       return (this.atlas?.places || []).map(place => {
         const country = place.countryCode
@@ -470,6 +494,7 @@ export default {
         const filename = await downloadMyAtlasStory({
           displayName: this.atlas.displayName,
           favoriteImage,
+          favoriteImageLocation: this.atlas.favoriteImage?.location || "",
           filterLabel: this.filterLabel,
           handle: this.atlas.handle,
           places: this.displayedPlaces,
@@ -503,6 +528,19 @@ export default {
   color: var(--color-text, #edf7f2);
   background: var(--color-surface, #0d1719);
   font-family: "Poppins", sans-serif;
+}
+
+.my-atlas-public-instagram {
+  margin: 0.8rem 0;
+}
+.my-atlas-public-instagram a {
+  color: var(--color-accent-soft, #f4d38f);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.my-atlas-public-instagram a:focus-visible {
+  outline: 2px solid var(--color-focus, #f4d38f);
+  outline-offset: 3px;
 }
 
 .my-atlas-public-panel {
@@ -594,7 +632,8 @@ export default {
 }
 
 .my-atlas-public-favorite-action {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
   min-height: 2.75rem;
   align-items: center;
@@ -628,6 +667,20 @@ export default {
 .my-atlas-public-favorite-action:focus-visible {
   border-color: var(--color-accent, #e6ba68);
   outline: none;
+}
+
+.my-atlas-public-favorite-action > span:last-child {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.my-atlas-public-favorite-action .my-atlas-public-favorite-location {
+  min-width: 0;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-align: left;
 }
 
 .my-atlas-public-favorite-action:focus-visible {
@@ -686,6 +739,7 @@ export default {
 }
 
 .my-atlas-public-image-dialog p {
+  overflow-wrap: anywhere;
   margin: 0;
   color: var(--color-text-muted, #b9cac4);
   font-size: 0.7rem;
@@ -708,7 +762,7 @@ export default {
 
 .my-atlas-public-state p,
 .my-atlas-public-intro p,
-.my-atlas-public-intro span {
+.my-atlas-public-intro > span {
   margin: 0 0 0.4rem;
   color: var(--color-text-muted, #a8bab4);
   font-size: 0.76rem;
@@ -719,7 +773,7 @@ export default {
   font-weight: 700;
 }
 
-.my-atlas-public-intro span {
+.my-atlas-public-intro > span {
   display: block;
   margin-top: 0.75rem;
 }
@@ -1005,7 +1059,7 @@ export default {
     font-size: clamp(1.8rem, 10vw, 2.45rem);
   }
 
-  .my-atlas-public-intro span {
+  .my-atlas-public-intro > span {
     grid-column: 2;
     grid-row: 1 / 3;
     align-self: end;
