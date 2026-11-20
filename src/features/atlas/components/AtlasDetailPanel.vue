@@ -173,6 +173,20 @@
             </div>
           </section>
           <section
+            v-if="experienceCards.length"
+            class="atlas-experience-cards"
+            aria-label="Experiences from my travels"
+          >
+            <h2>Experiences from my travels</h2>
+            <EditorialExperienceCard
+              v-for="experience in experienceCards"
+              :key="experience.id"
+              :experience="experience.card"
+              readable
+              @read="openStorySection(experience.id)"
+            />
+          </section>
+          <section
             v-if="node.storyLead"
             class="atlas-story-lead"
             :aria-labelledby="`atlas-story-title-${node.id}`"
@@ -433,10 +447,11 @@
 
 <script>
 import AdSlot from "@/components/AdSlot.vue"
+import EditorialExperienceCard from "@/components/EditorialExperienceCard.vue"
 
 export default {
   name: "AtlasDetailPanel",
-  components: { AdSlot },
+  components: { AdSlot, EditorialExperienceCard },
   props: {
     node: {
       type: Object,
@@ -533,6 +548,11 @@ export default {
     usefulActions() {
       return this.node.actions.filter(action => action.type === "external")
     },
+    experienceCards() {
+      return (this.node.storyExperiences || []).filter(
+        experience => experience.card
+      )
+    },
     storySections() {
       return [
         ...(this.node.storyChapters || []).map(chapter => ({
@@ -541,12 +561,14 @@ export default {
           summary: chapter.summary,
           actionLabel: "Read this chapter",
         })),
-        ...(this.node.storyExperiences || []).map(experience => ({
-          id: experience.id,
-          title: experience.title,
-          summary: experience.summary,
-          actionLabel: "Read this experience",
-        })),
+        ...(this.node.storyExperiences || [])
+          .filter(experience => !experience.card)
+          .map(experience => ({
+            id: experience.id,
+            title: experience.title,
+            summary: experience.summary,
+            actionLabel: "Read this experience",
+          })),
       ]
     },
     guidedHeroMedia() {
@@ -814,6 +836,18 @@ export default {
 </script>
 
 <style scoped>
+.atlas-experience-cards {
+  display: grid;
+  gap: 18px;
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.25);
+  border-radius: 16px;
+}
+.atlas-experience-cards > h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
 .atlas-detail {
   position: absolute;
   z-index: 10;

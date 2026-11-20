@@ -176,7 +176,9 @@ shipped its foundation slice through pull requests 222 and 223. Pages run
 Worker version `d3286de9-e52a-4e0e-b39c-3a005e5b911f` serves the compatible
 account changes. The next local slice adds the shared location picker, explicit
 Maps URL previews, guarded short-link resolution, custom-pin editing and recap
-entry shortcuts. These follow-up changes are not yet deployed. Real Viator
+entry shortcuts. The following local editorial phase adds preview-first
+canonical experience intake and shared story/stop cards, with private evidence
+stripped from public records. These follow-up changes are not yet deployed. Real Viator
 search still returns 401; enabled Expedia URLs and merchant placement approval
 remain owner actions. Normal localhost continues using its configured staging
 backend and catalog, with no automatic switch to isolated account storage.

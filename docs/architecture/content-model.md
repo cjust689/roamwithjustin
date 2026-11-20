@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-18
+updated: 2026-11-20
 related:
   - media-pipeline
   - gear-system
@@ -30,6 +30,10 @@ code_paths:
   - src/content/journeys/next-destinations.mjs
   - src/content/atlas/preview-presentation.mjs
   - src/content/partners/index.mjs
+  - src/content/experiences/curated-contract.mjs
+  - src/content/experiences/curated.json
+  - scripts/experiences/import-editorial-experiences.mjs
+  - src/components/EditorialExperienceCard.vue
   - src/content/experiences/index.mjs
   - src/content/editorial/generated/records.json
   - src/content/selectors/experiences.mjs
@@ -78,6 +82,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - npm run experiences:editorial:test
     - npm run content:validate
     - npm run editorial:test
     - npm run editorial:baseline -- --dry-run
@@ -390,3 +395,24 @@ display date never silently determines route order.
   historical Journey and Place bindings are verified. The first real Drive
   and R2 post and creation of an entirely new Journey remain unverified or
   unimplemented.
+
+## Local curated experience intake and cards
+
+The Experience composition root now combines the existing Sheet-generated
+shard with `src/content/experiences/curated.json`. Curated authoring reuses exact
+Journey/Visit/Place IDs and cannot collide with generated identities or slugs.
+Its importer previews by default, validates public copy, requires firsthand
+source references for publication, strips private references and publishes
+atomically only with `--publish`. Missing prior records are refused; draft
+visibility withdraws a record. Registry changes invalidate stale previews.
+No generated Sheet record or media association is rewritten by this command.
+
+The curated contract permits an optional confirmed independent trip-operator
+Partner reference already linked to the exact Visit, and an owned cover image already published there.
+Raw operator URLs, affiliate/sponsor links, unregistered media and private
+My Atlas recaps are excluded from this intake. Shared selectors project compact
+cards with explicit public fields, and `EditorialExperienceCard.vue` renders
+both the Journey story header and exact Atlas stop context. Existing publication
+gates and story-section anchors are preserved. The curated shard remains empty;
+actual Split/Raptor operator and media acceptance is not claimed. This slice
+has local test/browser verification only and is not deployed.

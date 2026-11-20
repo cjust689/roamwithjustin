@@ -14,6 +14,12 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/content/experiences/curated-contract.mjs
+  - src/content/experiences/curated.json
+  - src/components/EditorialExperienceCard.vue
+  - scripts/experiences/import-editorial-experiences.mjs
+  - scripts/lib/curated-experiences.mjs
+  - scripts/test-editorial-experience-intake.mjs
   - shared/my-atlas-map-links.mjs
   - src/features/my-atlas/components/MyAtlasLocationPicker.vue
   - workers/my-atlas/src/maps/resolve.mjs
@@ -119,7 +125,9 @@ only `api.sandbox.viator.com`, never the live API.
 - [ ] Canonical trip grouping, repeated visit occurrences and reversible Planned/Past lifecycle acceptance remain in the trip architecture workstream.
 - [ ] Real provider short-link expansion remains externally unverified.
 - [ ] Viator real search, market mapping and referral verification remain blocked by HTTP 401.
-- [ ] Public editorial operator cards and curated related discovery need a separate canonical intake/selector slice with established firsthand content; no private recap promotion.
+- [x] Experience loop Phase 3 code: canonical curated intake, exact Visit/Place cards, shared story rendering and independent official operator links.
+- [ ] Phase 3 real Split/Raptor acceptance: establish the official operator link and any original cover media before publishing the owner-approved record.
+- [ ] Experience loop Phase 4: curated related discovery and filtering, using the canonical experiences without provider APIs.
 - [ ] Public/community contributions and commercial activation retain their moderation/approval gates.
 
 Repeat-visit migration, public recaps and Viator planner activation remain
@@ -255,3 +263,65 @@ that shared staging backend; no backend switch or account wipe was performed.
 
 References checked: [Viator technical specification](https://docs.viator.com/partner-api/technical/)
 and [Basic Golden Path](https://partnerresources.viator.com/travel-commerce/affiliate/basic-access/golden-path/).
+
+## Experience loop Phase 3, local editorial intake and cards
+
+The Sheet compiler continues to own its generated Experience/Moment shard.
+`src/content/experiences/curated.json` is a separate canonical authoring shard,
+combined once in `src/content/experiences/index.mjs`. Duplicate IDs or Journey
+slugs across both sources fail validation. No new account database, geographic
+pin, provider inventory or private-recap export feeds public editorial data.
+The new shard is empty until an owner supplies actual source-backed entries.
+The existing La Fortuna Airbnb experience still derives from its existing
+published Post and Moments. No new trip narrative or operator was fabricated.
+
+`npm run experiences:editorial:import -- --file PATH.json` previews a complete
+private intake document. `--publish` atomically replaces only the curated local
+registry after validation. It does not deploy, edit the Sheet compiler shard,
+call Google or contact an operator. Missing existing rows fail instead of
+silently deleting records; withdraw an entry with `visibility: draft`.
+Identical input does not rewrite the file. A changed registry invalidates an
+older preview. Copy `scripts/experiences/editorial-intake-template.json` to an
+ignored location such as `.state/editorial/experience-intake.json` and fill its
+`experiences` array. Keep private evidence in that intake, not public source.
+
+| Field                             | Contract                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`, `slug`                      | Stable unique lowercase IDs, at most 120 characters; slug unique within its Journey                                                                                                             |
+| `journeyId`, `visitId`, `placeId` | Exact existing canonical relationship, never inferred from a place name                                                                                                                         |
+| `title`, `summary`                | Required title and optional empty summary; plain public prose with the storytelling punctuation and workflow-label rules                                                                        |
+| `category`                        | `boat-and-water`, `outdoors`, `food`, `culture`, `guided-tour`, `family`, `photography` or `stay`                                                                                               |
+| `firsthand`, `evidenceRefs`       | Explicit firsthand assertion and at least one bounded private source reference for a published entry; references are removed from the public registry                                           |
+| `partnerId`                       | Optional existing confirmed `trip-operator` Partner already linked to this Visit, with an independent HTTPS official URL; arbitrary input websites, tracking links and sponsorship are excluded |
+| `coverAssetId`                    | Optional registered owned image already published at this exact Visit/Place within the Journey                                                                                                  |
+| `visibility`, `sortOrder`         | `draft` or `published`, plus a nonnegative integer order                                                                                                                                        |
+| `disclosure`, `sourceOwner`       | Fixed `independent` and `curated`                                                                                                                                                               |
+
+The public selector exposes only title, summary, category, resolved image,
+canonical IDs and an optional operator projection. Private evidence and intake
+state are omitted. One `EditorialExperienceCard.vue` renders the header inside
+`JourneyStoryBody.vue` and compact exact-stop cards in `AtlasDetailPanel.vue`.
+Read actions use the existing story-section event and anchor, while operator
+links use `noopener noreferrer` and no-referrer. The story reader and standalone
+Journey body therefore share the same source and component. Existing Moment
+copy/media remains unchanged. Cards create no map nodes or new map instances,
+and the existing Journey publication/readiness gates remain in effect.
+
+Verification: `npm run experiences:editorial:test`, `npm run editorial:test`,
+`npm run atlas:test` and `npm run content:validate` passed. Synthetic Chrome
+checks at 320, 390 and 1440 pixels verified the actual La Fortuna card and its
+unchanged Moment, plus an injected Atlas operator-card fixture with safe link
+attributes, no horizontal overflow and the same mounted map. Reports and
+captures are ignored under `.state/theme/experience-card*`. No fixture or
+private account was published. This phase is local only. Real Split/Raptor
+operator/media publication and Phase 4 discovery remain outstanding.
+
+The full build passed with hash `d87253419a7ba31c`, all 50 Worker runtime tests
+and the existing bundle-size warnings. After preserving the original Journey
+heading treatment and tightening exact operator/cover associations, the final
+frontend compile passed with hash `d51bdc2a410f2c10`; focused intake and content
+validation passed on the final contract. `npm run lint` and explicit lint of
+the new MJS code passed. The 390 pixel story and synthetic Atlas-card captures
+were visually inspected. The local server was restarted to clear a stale
+compile overlay and retained its configured staging API/catalog mode. No
+Worker deployment, account mutation or external content publication occurred.
