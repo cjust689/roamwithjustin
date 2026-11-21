@@ -1,6 +1,11 @@
 import { env } from "cloudflare:workers"
 import { getMyTripUpgradePreview } from "../src/trips/preview.mjs"
 import { matchTripRoute, tripRequest } from "../src/trips/service.mjs"
+import { emptyTravelSearchDraft } from "../../../src/features/my-atlas/planning/travelSearch.mjs"
+import {
+  encodeSharedTrip,
+  decodeSharedTrip,
+} from "../../../src/features/my-atlas/planning/sharedTrip.mjs"
 import { createMyPlan, createMyWish } from "../src/planning/service.mjs"
 import { getPublicAtlas } from "../src/public/service.mjs"
 import { reset, runInDurableObject } from "cloudflare:test"
@@ -344,6 +349,292 @@ describe("private owner profile and pin services", () => {
         { disabled: true }
       )
     ).rejects.toMatchObject({ code: "trip_writes_disabled" })
+  })
+  it("moves complete visits between trips and Ungrouped without deleting memories or empty-trip data", async () => {
+    await upgradeTrips()
+    const source = await tripCall("/v1/me/trips", {
+      title: "Source trip",
+      description: "Keep the empty trip overview",
+      lifecycle: "past",
+      stops: [
+        { customPlace: { name: "Repeated visit", coordinates: [1, 2] } },
+        { customPlace: { name: "Repeated visit", coordinates: [1, 2] } },
+      ],
+    })
+    const first = source.trip.stops[0]
+    const edited = await tripCall(
+      `/v1/me/trips/${source.trip.tripId}/stops/${first.stopId}`,
+      {
+        memory: "Keep every memory",
+        actualDates: { arrival: "2026-01-01", departure: "2026-01-03" },
+        experienceChange: {
+          action: "add",
+          id: "exp_" + "b".repeat(32),
+          title: "Private boat trip",
+          operatorName: "",
+          operatorWebsite: "",
+        },
+      },
+      { method: "PATCH" }
+    )
+    const originalVisit = edited.trip.stops[0]
+    const target = await tripCall("/v1/me/trips", {
+      title: "Target trip",
+      lifecycle: "past",
+      stops: [{ customPlace: { name: "Another place", coordinates: [3, 4] } }],
+    })
+    const revision = target.profile.revision,
+      key = tripKey(),
+      transfer = {
+        fromTripId: source.trip.tripId,
+        targetTripId: target.trip.tripId,
+        stopIds: [first.stopId],
+      }
+    const moved = await tripCall("/v1/me/trips/visits/transfer", transfer, {
+      key,
+      revision,
+    })
+    expect(moved.trip.stops[1]).toEqual(originalVisit)
+    expect(
+      (
+        await tripCall("/v1/me/trips/visits/transfer", transfer, {
+          key,
+          revision,
+        })
+      ).idempotent
+    ).toBe(true)
+    await expect(
+      tripCall(
+        "/v1/me/trips/visits/transfer",
+        { ...transfer, stopIds: [source.trip.stops[1].stopId] },
+        { revision }
+      )
+    ).rejects.toMatchObject({ code: "revision_conflict" })
+    await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: target.trip.tripId,
+      targetTripId: null,
+      stopIds: [first.stopId],
+    })
+    let state = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(state.ungroupedVisits[0].stop).toEqual(originalVisit)
+    expect(state.profile.pinCount).toBe(2)
+    await tripCall(
+      `/v1/me/trips/visits/${first.stopId}`,
+      { memory: "Edited while ungrouped" },
+      { method: "PATCH" }
+    )
+    const restored = await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: null,
+      targetTripId: source.trip.tripId,
+      stopIds: [first.stopId],
+    })
+    expect(restored.trip.stops[1].stopId).toBe(first.stopId)
+    expect(restored.trip.stops[1].memories[0].memoryId).toBe(
+      originalVisit.memories[0].memoryId
+    )
+    expect(restored.trip.stops[1].memories[0].text).toBe(
+      "Edited while ungrouped"
+    )
+    expect(restored.trip.stops[1].experiences).toEqual(
+      originalVisit.experiences
+    )
+    await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: source.trip.tripId,
+      targetTripId: null,
+      stopIds: restored.trip.stops.map(stop => stop.stopId),
+    })
+    state = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(state.ungroupedVisits).toHaveLength(2)
+    expect(
+      state.trips.find(trip => trip.tripId === source.trip.tripId)
+    ).toMatchObject({
+      workflow: "draft",
+      stops: [],
+      description: "Keep the empty trip overview",
+    })
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.ungroupedVisits).toHaveLength(2)
+    expect(JSON.stringify(exported)).toContain("Private boat trip")
+    const regrouped = await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: null,
+      targetTripId: null,
+      title: "Explicit regrouped trip",
+      stopIds: [first.stopId],
+    })
+    expect(regrouped.trip.title).toBe("Explicit regrouped trip")
+    expect(regrouped.trip.sharing.publicAtlas).toBe(false)
+    expect(regrouped.trip.stops[0]).toEqual(
+      state.ungroupedVisits.find(visit => visit.stop.stopId === first.stopId)
+        .stop
+    )
+    const split = await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: regrouped.trip.tripId,
+      targetTripId: null,
+      title: "Explicit split trip",
+      stopIds: [first.stopId],
+    })
+    expect(split.trip.stops).toEqual(regrouped.trip.stops)
+    const afterSplit = await tripCall("/v1/me/trips", undefined, {
+      method: "GET",
+    })
+    expect(afterSplit.ungroupedVisits).toHaveLength(1)
+    expect(
+      afterSplit.trips.find(trip => trip.tripId === regrouped.trip.tripId).stops
+    ).toEqual([])
+    await registerSecondOwner()
+    await upgradeTrips({ identity: SECOND_IDENTITY })
+    await expect(
+      tripCall(
+        "/v1/me/trips/visits/transfer",
+        {
+          fromTripId: null,
+          targetTripId: target.trip.tripId,
+          stopIds: [first.stopId],
+        },
+        { identity: SECOND_IDENTITY }
+      )
+    ).rejects.toMatchObject({ code: "trip_not_found" })
+    const before = (
+      await getMyProfile({ environment: environment(), identity: IDENTITY })
+    ).profile
+    await deleteMyAccount({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        confirmation: "DELETE MY ATLAS",
+        expectedRevision: before.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    expect(
+      await runInDurableObject(user, (_instance, state) => [
+        ...state.storage.kv.list({ prefix: "visit:" }),
+      ])
+    ).toEqual([])
+  })
+  it("saves private flight/rental intentions and explicit per-trip Atlas visibility", async () => {
+    await upgradeTrips()
+    const created = await tripCall("/v1/me/trips", {
+      title: "Trip tools",
+      lifecycle: "past",
+      stops: [{ customPlace: { name: "Destination", coordinates: [1, 2] } }],
+    })
+    const path = `/v1/me/trips/${created.trip.tripId}`
+    const draft = emptyTravelSearchDraft()
+    Object.assign(draft.flights, {
+      outboundFrom: "ATL",
+      outboundTo: "MAD",
+      departDate: "2026-12-01",
+      returnDate: "2026-12-10",
+      confirmed: true,
+    })
+    Object.assign(draft.rental, {
+      need: "yes",
+      pickup: "Private rental pickup",
+      pickupAt: "2026-12-02T10:00",
+      dropoffAt: "2026-12-08T10:00",
+    })
+    const saved = await tripCall(
+      path + "/logistics",
+      { draft },
+      { method: "PATCH" }
+    )
+    expect(saved.trip.logistics.flights[0].searchDraft).toEqual(draft.flights)
+    expect(saved.trip.logistics.rentals[0].searchDraft).toEqual(draft.rental)
+    expect(
+      (await tripCall(path + "/logistics", { draft }, { method: "PATCH" })).trip
+        .logistics
+    ).toEqual(saved.trip.logistics)
+    const planned = await tripCall(
+      path + "/lifecycle",
+      { lifecycle: "planned" },
+      { method: "PATCH" }
+    )
+    expect(planned.trip.logistics).toEqual(saved.trip.logistics)
+    await expect(
+      tripCall("/v1/me/trips/visits/transfer", {
+        fromTripId: created.trip.tripId,
+        targetTripId: null,
+        stopIds: [created.trip.stops[0].stopId],
+      })
+    ).rejects.toMatchObject({ code: "visit_lifecycle_mismatch" })
+    await expect(
+      tripCall(
+        path + "/logistics",
+        { draft: { ...draft, secretUrl: "https://example.invalid" } },
+        { method: "PATCH" }
+      )
+    ).rejects.toThrow()
+    await expect(
+      tripCall(
+        path + "/logistics",
+        {
+          draft: {
+            ...draft,
+            rental: { ...draft.rental, dropoffAt: "2026-12-01T10:00" },
+          },
+        },
+        { method: "PATCH" }
+      )
+    ).rejects.toThrow()
+    await tripCall(
+      path + "/lifecycle",
+      { lifecycle: "past" },
+      { method: "PATCH" }
+    )
+    let profile = (
+      await getMyProfile({ environment: environment(), identity: IDENTITY })
+    ).profile
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true, discoverable: true },
+        expectedRevision: profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    expect((await user.getPublicAtlas()).ok).toBe(false)
+    const published = await tripCall(
+      path + "/sharing",
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    expect((await user.getPublicAtlas()).pins).toHaveLength(1)
+    expect(JSON.stringify(await user.getPublicAtlas())).not.toContain(
+      "Private rental pickup"
+    )
+    expect(
+      JSON.stringify(decodeSharedTrip(encodeSharedTrip(published.trip)))
+    ).not.toContain("Private rental pickup")
+    await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: created.trip.tripId,
+      targetTripId: null,
+      stopIds: [created.trip.stops[0].stopId],
+    })
+    expect((await user.getPublicAtlas()).pins).toHaveLength(1)
+    await tripCall("/v1/me/trips/visits/transfer", {
+      fromTripId: null,
+      targetTripId: created.trip.tripId,
+      stopIds: [created.trip.stops[0].stopId],
+    })
+    await tripCall(
+      path + "/sharing",
+      { publicAtlas: false },
+      { method: "PATCH" }
+    )
+    expect((await user.getPublicAtlas()).ok).toBe(false)
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .trips[0].logistics
+    ).toEqual(saved.trip.logistics)
   })
   it("keeps trip writes disabled by default and rejects unreviewed or stale upgrades", async () => {
     await expect(

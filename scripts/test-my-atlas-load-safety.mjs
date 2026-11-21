@@ -157,6 +157,7 @@ const source = compiler
   .replace("export default", "return")
 let reads = 0,
   deletes = 0
+let overviewResponse = { profile, trips: [], legacyPlans: [] }
 const pin = { pinId: "pin_saved", memory: "Persisted memory" }
 const dependencies = {
   formatVisitedDates: () => "",
@@ -167,11 +168,13 @@ const dependencies = {
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
   MyAtlasTrips: {},
+  MyAtlasJourneyCards: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   discardLegacyDeletion,
   window: { sessionStorage },
   getMyAtlasApiAccessToken: async () => "fixture",
+  requestMyAtlasTrips: async () => overviewResponse,
   deleteMyAtlasAccountWithRevisionRecovery: () => {
     deletes++
     throw Error("Account loading must not delete")
@@ -186,6 +189,11 @@ const component = new Function(...Object.keys(dependencies), source)(
 )
 const owner = {
   apiBaseUrl: local,
+  overviewLoads: 0,
+  loadJourneyOverview(token) {
+    assert.equal(token, "fixture")
+    this.overviewLoads++
+  },
   $nextTick: () => {},
   applyAccountState(value) {
     this.state = value
@@ -193,6 +201,12 @@ const owner = {
 }
 await component.methods.loadAccount.call(owner)
 assert.equal(reads, 1)
+assert.equal(
+  owner.overviewLoads,
+  1,
+  "Account load starts the independent Overview read"
+)
+assert.equal(owner.accountLoadFailed, false)
 assert.equal(deletes, 0)
 assert.equal(owner.state.pins[0].memory, "Persisted memory")
 assert.equal(state.has(LEGACY_DELETION_STORAGE_KEY), false)
@@ -204,6 +218,48 @@ assert.equal(
 await component.methods.loadAccount.call(owner)
 assert.equal(reads, 2)
 assert.equal(deletes, 0)
+const overview = {
+  canUseAtlas: true,
+  apiBaseUrl: local,
+  accountProfile: profile,
+  journeyRevision: 0,
+  journeyRequest: 0,
+  overviewTrips: [],
+  overviewLegacyPlans: [],
+}
+overview.handleJourneyCollection =
+  component.methods.handleJourneyCollection.bind(overview)
+await component.methods.loadJourneyOverview.call(overview, "fixture")
+assert.equal(overview.journeyRevision, 1)
+assert.equal(overview.journeysError, false)
+let resolveOverview
+overviewResponse = new Promise(resolve => {
+  resolveOverview = resolve
+})
+const oldRead = component.methods.loadJourneyOverview.call(overview, "fixture")
+overview.accountProfile = { ...profile, userId: "different-owner" }
+resolveOverview({
+  profile,
+  trips: [{ title: "Private old-owner trip" }],
+  legacyPlans: [],
+})
+await oldRead
+assert.deepEqual(
+  overview.overviewTrips,
+  [],
+  "A stale account response cannot expose another owner's trips"
+)
+overview.accountProfile = { ...profile, revision: 3 }
+overviewResponse = {
+  profile: { ...profile, revision: 2 },
+  trips: [{ title: "Stale trip" }],
+}
+await component.methods.loadJourneyOverview.call(overview, "fixture")
+assert.deepEqual(
+  overview.overviewTrips,
+  [],
+  "Older collection revisions cannot replace current Overview state"
+)
 let requests = 0
 await assert.rejects(
   deleteMyAtlasAccountWithRevisionRecovery({

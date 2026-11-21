@@ -231,7 +231,13 @@ async function projectOwnerPins(pins, placeCatalog, environment) {
     return Object.freeze({
       pinId: pin.pinId,
       ...(pin.ungrouped !== undefined
-        ? { ungrouped: pin.ungrouped, tripIds: pin.tripIds || [] }
+        ? {
+            ungrouped: pin.ungrouped,
+            tripIds: pin.tripIds || [],
+            ...(pin.ungroupedVisitIds
+              ? { ungroupedVisitIds: pin.ungroupedVisitIds }
+              : {}),
+          }
         : {}),
       ...place,
       ...publicPinTiming(pin),
@@ -639,6 +645,8 @@ export async function exportMyAtlas({ environment, identity }) {
     ...(result.trips
       ? {
           trips: result.trips,
+          ungroupedVisits: result.ungroupedVisits || [],
+          destinations: (result.destinations || []).map(publicOwnerPin),
           tripUpgrade: {
             schemaVersion: result.tripUpgrade.schemaVersion,
             upgradedAt: result.tripUpgrade.upgradedAt,

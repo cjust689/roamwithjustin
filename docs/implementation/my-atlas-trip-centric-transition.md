@@ -5,8 +5,9 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-21
 related:
+  - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-account-state
   - my-atlas-trip-planning-implementation
   - my-atlas-trip-planner-ux-routes-flights-lodging
@@ -53,6 +54,12 @@ verification:
 ---
 
 # Trip centric transition
+
+The [November 21 integrated trip management checklist](my-atlas-integrated-trip-management-2026-11-21.md)
+now records local visit reassignment and ungrouping, public visibility controls,
+persisted flight/rental searches and actual Overview cards. Earlier descriptions
+of browser-only logistics apply to the legacy planner and historical baseline.
+The independent-destinations correction remains the governing grouping model.
 
 The latest owner-directed independent-destinations correction at the end of
 this record supersedes the earlier automatic one-stop-trip conversion design.

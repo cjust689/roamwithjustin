@@ -440,7 +440,9 @@
             >
               {{
                 organizedTrips && !selectedPlace.ungrouped
-                  ? "View trips"
+                  ? (selectedPlace.ungroupedVisitIds || []).length
+                    ? "View visits"
+                    : "View trips"
                   : selectedPlace.memory
                     ? "Edit memory"
                     : "Add memory"
@@ -453,18 +455,17 @@
               Add visited destination
             </button>
           </div>
-          <div class="my-atlas-overview-journeys">
-            <h2>Journeys</h2>
-            <p>Review past trips or plan your next journey.</p>
-            <div class="my-atlas-tools-actions">
-              <button type="button" @click="selectAtlasTab('past')">
-                Past journeys
-              </button>
-              <button type="button" @click="selectAtlasTab('planning')">
-                Plan a journey
-              </button>
-            </div>
-          </div>
+          <MyAtlasJourneyCards
+            :trips="overviewTrips"
+            :legacy-plans="overviewLegacyPlans"
+            :pending="journeysPending"
+            :error="journeysError"
+            @open="openJourney"
+            @share="shareJourney"
+            @refresh="loadJourneyOverview()"
+            @past="selectAtlasTab('past')"
+            @plan="selectAtlasTab('planning')"
+          />
         </section>
 
         <MyAtlasRegistrationForm
@@ -778,6 +779,7 @@
           :revision="accountProfile.revision"
           :resolve-link="resolveMapLink"
           @changed="handleTripChange"
+          @collection-change="handleJourneyCollection"
           @open-change="tripWorkspaceOpen = $event"
           @action-feedback="showActionFeedback"
           @route-change="tripView = $event"
@@ -1113,6 +1115,9 @@ import MyAtlasLocationPicker from "../components/MyAtlasLocationPicker.vue"
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
 import MyAtlasPlanner from "../components/MyAtlasPlanner.vue"
+import MyAtlasJourneyCards from "../components/MyAtlasJourneyCards.vue"
+import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
+import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import MyAtlasTrips from "../components/MyAtlasTrips.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
 import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
@@ -1184,6 +1189,7 @@ export default {
   name: "MyAtlasGeographicProof",
   components: {
     MyAtlasTrips,
+    MyAtlasJourneyCards,
     MyAtlasLocationPicker,
     MyAtlasActionFeedback,
     MyAtlasMap,
@@ -1268,6 +1274,12 @@ export default {
       plannerActive: false,
       tripView: { active: false, route: [] },
       tripWorkspaceOpen: false,
+      overviewTrips: [],
+      overviewLegacyPlans: [],
+      journeysPending: false,
+      journeysError: false,
+      journeyRevision: 0,
+      journeyRequest: 0,
       activeAtlasTab: "overview",
       atlasTabs: [
         { id: "overview", label: "Overview" },
@@ -1485,7 +1497,14 @@ export default {
       },
     },
     "auth.authenticated"(authenticated) {
-      if (!authenticated) this.actionFeedback = null
+      if (!authenticated) {
+        this.actionFeedback = null
+        this.overviewTrips = []
+        this.overviewLegacyPlans = []
+        this.journeyRequest++
+        this.journeyRevision = 0
+        this.journeysPending = false
+      }
     },
     query(value) {
       this.queuePlaceSearch(value)
@@ -1510,6 +1529,67 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    handleJourneyCollection(state) {
+      if (
+        !this.canUseAtlas ||
+        !Array.isArray(state.trips) ||
+        state.profile.revision < this.journeyRevision ||
+        state.profile.revision < this.accountProfile.revision
+      )
+        return
+      this.overviewTrips = state.trips
+      this.overviewLegacyPlans = state.legacyPlans || []
+      this.journeyRevision = state.profile.revision
+      this.journeysError = false
+    },
+    async loadJourneyOverview(accessToken) {
+      if (!this.canUseAtlas) return
+      const request = ++this.journeyRequest,
+        owner = this.accountProfile.userId
+      this.journeysPending = true
+      this.journeysError = false
+      try {
+        const state = await requestMyAtlasTrips({
+          action: "list",
+          apiBaseUrl: this.apiBaseUrl,
+          accessToken: accessToken || (await getMyAtlasApiAccessToken()),
+        })
+        if (
+          request === this.journeyRequest &&
+          this.accountProfile?.userId === owner
+        )
+          this.handleJourneyCollection(state)
+      } catch {
+        if (request === this.journeyRequest) this.journeysError = true
+      } finally {
+        if (request === this.journeyRequest) this.journeysPending = false
+      }
+    },
+    async openJourney(record) {
+      if (record.legacy) {
+        await this.openPlanner()
+        return
+      }
+      await this.openTripWorkspace(
+        false,
+        record.trip.lifecycle === "past" ? "past" : "planning"
+      )
+      this.$refs.trips?.openTrip(record.trip.tripId)
+    },
+    async shareJourney(record) {
+      try {
+        await navigator.clipboard.writeText(buildSharedTripUrl(record.trip))
+        this.showActionFeedback({
+          message: "Read only trip link copied.",
+          tone: "success",
+        })
+      } catch {
+        this.showActionFeedback({
+          message: "The trip link could not be copied.",
+          tone: "error",
+        })
+      }
+    },
     toggleProfileMenu() {
       if (this.accountMenuOpen) this.closeProfileMenu()
       else {
@@ -1573,6 +1653,11 @@ export default {
       } else if (tab === "past") {
         this.visitedOpen = true
         if (this.organizedTrips) await this.openTripWorkspace(false, "past")
+      } else if (
+        tab === "overview" &&
+        this.journeyRevision < this.accountProfile.revision
+      ) {
+        await this.loadJourneyOverview()
       }
     },
     handleAtlasTabKey(event, tab) {
@@ -1925,6 +2010,12 @@ export default {
       this.activeAtlasTab = "past"
     },
     handleAccountDeleted() {
+      this.journeyRequest++
+      this.overviewTrips = []
+      this.overviewLegacyPlans = []
+      this.journeyRevision = 0
+      this.journeysPending = false
+      this.journeysError = false
       this.deleteConfirmation = ""
       this.accountMenuOpen = false
       this.accountProfile = null
@@ -1951,6 +2042,11 @@ export default {
         visitedDates: pin.visitedDates,
         visitedYears: pin.visitedYears,
         memory: pin.memory,
+        ...(pin.ungrouped === undefined ? {} : { ungrouped: pin.ungrouped }),
+        ...(pin.tripIds === undefined ? {} : { tripIds: pin.tripIds }),
+        ...(pin.ungroupedVisitIds === undefined
+          ? {}
+          : { ungroupedVisitIds: pin.ungroupedVisitIds }),
         ...(pin.experiences === undefined
           ? {}
           : { experiences: pin.experiences }),
@@ -1979,6 +2075,7 @@ export default {
       })
     },
     async refreshAccountState(accessToken) {
+      accessToken ||= await getMyAtlasApiAccessToken()
       const state = await fetchMyAtlasState({
         apiBaseUrl: this.apiBaseUrl,
         accessToken,
@@ -2196,6 +2293,7 @@ export default {
           accessToken: token,
         })
         this.applyAccountState(state, { initializeWorkflow: true })
+        this.loadJourneyOverview(token)
         if (state.atlasImage) await this.loadAtlasImage(token)
         this.$nextTick(() => this.showAccountTutorialIfNeeded())
       } catch (error) {
@@ -3526,23 +3624,6 @@ export default {
 .my-atlas-customization h3 {
   margin: 0;
   font-size: 0.85rem;
-}
-.my-atlas-overview-journeys {
-  display: grid;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.1);
-}
-.my-atlas-overview-journeys h2 {
-  margin: 0;
-  font-size: 0.9rem;
-}
-.my-atlas-overview-journeys p {
-  margin: 0;
-  font-size: 0.72rem;
-  line-height: 1.5;
-  color: var(--color-text-muted, #aebdb8);
 }
 .my-atlas-customization > div > p {
   margin: 0;
