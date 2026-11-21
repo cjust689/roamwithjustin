@@ -4,8 +4,15 @@
     :aria-label="tool === 'flights' ? 'Flight search' : 'Rental cars'"
   >
     <p class="travel-draft-note">
-      These details stay in this view. Copy them before leaving. Saving your
-      trip does not save them yet.
+      <template v-if="persistable">{{
+        dirty
+          ? "Unsaved travel details. Save them to keep them with this trip."
+          : "Travel details are saved with this trip. Review them before opening a provider search."
+      }}</template>
+      <template v-else>
+        These details stay in this view. Copy them before leaving. Saving your
+        trip does not save them yet.
+      </template>
     </p>
     <p v-if="contextChanged" role="status">
       Your itinerary changed. Review your gateways and rental locations before
@@ -298,6 +305,8 @@ export default {
     value: { type: Object, required: true },
     explicitFlyPairs: { type: Array, default: () => [] },
     contextChanged: { type: Boolean, default: false },
+    persistable: { type: Boolean, default: false },
+    dirty: { type: Boolean, default: true },
   },
   emits: ["input"],
   data() {

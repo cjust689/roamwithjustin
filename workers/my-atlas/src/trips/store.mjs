@@ -6,6 +6,7 @@ import {
   TRIP_RETENTION_POLICY,
   tripPlaceProjection,
 } from "../../../../shared/my-atlas-trips.mjs"
+import { storedVisits, visitKey, visitPin } from "./visits.mjs"
 import { applyExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
 
 export const TRIP_MARKER = "trip-schema"
@@ -14,11 +15,11 @@ const key = id => `trip:${id}`
 const fail = error => ({ ok: false, error })
 const copy = value => JSON.parse(JSON.stringify(value))
 // Keep individual SQLite KV values below 2 MiB and bound full-collection reads.
-export function assertTripStorageBudget(trips, backup = null) {
+export function assertTripStorageBudget(trips, backup = null, visits = []) {
   const bytes = value => new TextEncoder().encode(JSON.stringify(value)).length
   if (
     trips.some(trip => bytes(trip) > 1024 * 1024) ||
-    bytes(trips) > 4 * 1024 * 1024 ||
+    bytes(trips) + bytes(visits) > 4 * 1024 * 1024 ||
     (backup && bytes(backup) > 1536 * 1024)
   )
     throw Error("trip_storage_limit")
@@ -29,8 +30,8 @@ export const storedTrips = storage =>
     ([, value]) => value
   )
 
-function validCollection(trips, storage) {
-  assertTripStorageBudget(trips)
+function validCollection(trips, storage, visits = []) {
+  assertTripStorageBudget(trips, null, visits)
   if (trips.length > 501) throw Error("trip_limit_reached")
   const tripIds = new Set(),
     stopIds = new Set(),
@@ -43,11 +44,29 @@ function validCollection(trips, storage) {
   if (storage)
     for (const [, pin] of storage.kv.list({ prefix: "pin:" }))
       pastPlaces.add(pin.placeId)
+  for (const visit of visits) pastPlaces.add(visit.stop.place.placeId)
   if (pastPlaces.size > 300) throw Error("visited_place_limit")
-  for (const trip of trips) {
+  const standalone = visits.map(visit => ({
+    schemaVersion: 1,
+    tripId: "trip_" + visit.stop.stopId.slice(5, 29),
+    title: "Ungrouped visit",
+    description: "",
+    lifecycle: "past",
+    workflow: "saved",
+    version: 1,
+    stops: [visit.stop],
+    memories: [],
+    logistics: { flights: [], rentals: [] },
+    sharing: visit.sharing,
+    createdAt: visit.stop.createdAt,
+    updatedAt: visit.stop.updatedAt,
+    statusChangedAt: null,
+  }))
+  for (const trip of [...trips, ...standalone]) {
     assertCanonicalTrip(trip)
-    if (tripIds.has(trip.tripId)) throw Error("duplicate_trip")
-    tripIds.add(trip.tripId)
+    if (trips.includes(trip) && tripIds.has(trip.tripId))
+      throw Error("duplicate_trip")
+    if (trips.includes(trip)) tripIds.add(trip.tripId)
     for (const stop of trip.stops) {
       if (stopIds.has(stop.stopId)) throw Error("duplicate_stop")
       stopIds.add(stop.stopId)
@@ -70,6 +89,35 @@ export function tripPins(storage, { publicOnly = false } = {}) {
       { ...pin, ungrouped: true, tripIds: [] },
     ])
   )
+  for (const visit of storedVisits(storage)) {
+    if (publicOnly && !visit.sharing.publicAtlas) continue
+    const pin = visitPin(visit, { publicOnly }),
+      existing = byPlace.get(pin.placeId)
+    if (existing) {
+      if (!publicOnly)
+        existing.ungroupedVisitIds = [
+          ...(existing.ungroupedVisitIds || []),
+          visit.stop.stopId,
+        ]
+      else {
+        existing.visitedDates = [
+          ...new Map(
+            [...existing.visitedDates, ...pin.visitedDates].map(date => [
+              JSON.stringify(date),
+              date,
+            ])
+          ).values(),
+        ]
+        existing.visitedYears = [
+          ...new Set(existing.visitedDates.map(date => date.year)),
+        ]
+      }
+    } else
+      byPlace.set(pin.placeId, {
+        ...pin,
+        ungroupedVisitIds: [visit.stop.stopId],
+      })
+  }
   for (const trip of storedTrips(storage).sort(
     (a, b) =>
       b.updatedAt.localeCompare(a.updatedAt) || a.tripId.localeCompare(b.tripId)
@@ -182,6 +230,45 @@ function canonicalCandidate(trip, wasPublic) {
   return candidate
 }
 
+function editVisit(stop, patch, memoryId, now) {
+  const edited = { ...stop, updatedAt: now }
+  if (patch.memory !== undefined) {
+    const index = stop.memories.findIndex(memory => memory.kind === "note")
+    const memories = copy(stop.memories)
+    if (index >= 0)
+      memories[index] = {
+        ...memories[index],
+        text: patch.memory,
+        updatedAt: now,
+      }
+    else if (patch.memory)
+      memories.push({
+        memoryId: memoryId,
+        kind: "note",
+        text: patch.memory,
+        mediaId: null,
+        publicAtlas: false,
+        createdAt: now,
+        updatedAt: now,
+      })
+    edited.memories = memories
+  }
+  for (const field of ["plannedDates", "actualDates"])
+    if (patch[field] !== undefined) edited[field] = patch[field]
+  if (patch.experienceChange) {
+    const result = applyExperienceChange(
+      stop.experiences,
+      patch.experienceChange,
+      now
+    )
+    if (result.error)
+      throw Object.assign(Error(result.error), { code: result.error })
+    edited.experiences = result.experiences
+  }
+
+  return edited
+}
+
 export function mutateTripStore(
   storage,
   profile,
@@ -212,6 +299,7 @@ export function mutateTripStore(
     return fail("revision_conflict")
   const marker = storage.kv.get(TRIP_MARKER)
   const value = command.value || {}
+  let visits = storedVisits(storage)
   let trips = storedTrips(storage),
     targetId = null,
     nextProfile,
@@ -255,7 +343,7 @@ export function mutateTripStore(
       upgradedAt: command.now,
     }
     try {
-      validCollection(trips, storage)
+      validCollection(trips, storage, visits)
       assertTripStorageBudget(trips, backup)
     } catch (error) {
       return fail(
@@ -332,12 +420,115 @@ export function mutateTripStore(
       command.action !== "create" &&
       command.action !== "group-destinations" &&
       command.action !== "combine" &&
+      command.action !== "transfer" &&
+      command.action !== "visit-edit" &&
       !current
     )
       return fail("trip_not_found")
     let updated
     try {
-      if (command.action === "group-destinations") {
+      if (command.action === "transfer") {
+        const source = value.fromTripId
+          ? trips.find(trip => trip.tripId === value.fromTripId)
+          : null
+        let target = value.targetTripId
+          ? trips.find(trip => trip.tripId === value.targetTripId)
+          : null
+        if ((value.fromTripId && !source) || (value.targetTripId && !target))
+          return fail("trip_not_found")
+        const lifecycle = source?.lifecycle || "past"
+        if (value.newTrip) {
+          target = { ...copy(value.newTrip), lifecycle, stops: [] }
+          if (trips.some(trip => trip.tripId === target.tripId))
+            return fail("duplicate_trip")
+          trips.push(target)
+        }
+        if (
+          (!target && lifecycle !== "past") ||
+          (target &&
+            (target.lifecycle !== lifecycle || target.workflow === "archived"))
+        )
+          return fail("visit_lifecycle_mismatch")
+        const available = source
+          ? source.stops
+          : visits.map(visit => visit.stop)
+        const stops = value.stopIds.map(id =>
+          available.find(stop => stop.stopId === id)
+        )
+        if (stops.some(stop => !stop)) return fail("stop_not_found")
+        if (source)
+          trips = trips.map(trip =>
+            trip.tripId === source.tripId
+              ? {
+                  ...trip,
+                  stops: trip.stops.filter(
+                    stop => !value.stopIds.includes(stop.stopId)
+                  ),
+                  workflow:
+                    trip.stops.length === stops.length
+                      ? "draft"
+                      : trip.workflow,
+                  version: trip.version + 1,
+                  updatedAt: command.now,
+                }
+              : trip
+          )
+        else
+          visits = visits.filter(
+            visit => !value.stopIds.includes(visit.stop.stopId)
+          )
+        if (target)
+          trips = trips.map(trip =>
+            trip.tripId === target.tripId
+              ? {
+                  ...trip,
+                  stops: [...trip.stops, ...stops],
+                  workflow: trip.workflow === "draft" ? "saved" : trip.workflow,
+                  version: trip.version + 1,
+                  updatedAt: command.now,
+                }
+              : trip
+          )
+        else
+          visits.push(
+            ...stops.map(stop => ({
+              stop: copy(stop),
+              sharing: { publicAtlas: source.sharing.publicAtlas },
+              releasedAt: command.now,
+            }))
+          )
+        targetId = target?.tripId || source.tripId
+      } else if (command.action === "visit-edit") {
+        const visit = visits.find(item => item.stop.stopId === value.stopId)
+        if (!visit) return fail("stop_not_found")
+        visits = visits.map(item =>
+          item === visit
+            ? {
+                ...item,
+                stop: editVisit(
+                  item.stop,
+                  value.patch,
+                  value.memoryId,
+                  command.now
+                ),
+              }
+            : item
+        )
+      } else if (command.action === "sharing") {
+        updated = {
+          ...current,
+          sharing: { ...current.sharing, publicAtlas: value.publicAtlas },
+          version: current.version + 1,
+          updatedAt: command.now,
+        }
+      } else if (command.action === "logistics") {
+        updated = {
+          ...current,
+          logistics: copy(value.logistics),
+          version: current.version + 1,
+          updatedAt: command.now,
+        }
+      } else if (command.action === "group-destinations") {
         const selected = value.destinations
         if (
           !selected?.length ||
@@ -411,42 +602,7 @@ export function mutateTripStore(
       else if (command.action === "stop-edit") {
         const stop = current.stops.find(stop => stop.stopId === value.stopId)
         if (!stop) return fail("stop_not_found")
-        const patch = value.patch,
-          edited = { ...stop, updatedAt: command.now }
-        if (patch.memory !== undefined) {
-          const index = stop.memories.findIndex(
-            memory => memory.kind === "note"
-          )
-          const memories = copy(stop.memories)
-          if (index >= 0)
-            memories[index] = {
-              ...memories[index],
-              text: patch.memory,
-              updatedAt: command.now,
-            }
-          else if (patch.memory)
-            memories.push({
-              memoryId: value.memoryId,
-              kind: "note",
-              text: patch.memory,
-              mediaId: null,
-              publicAtlas: false,
-              createdAt: command.now,
-              updatedAt: command.now,
-            })
-          edited.memories = memories
-        }
-        for (const field of ["plannedDates", "actualDates"])
-          if (patch[field] !== undefined) edited[field] = patch[field]
-        if (patch.experienceChange) {
-          const result = applyExperienceChange(
-            stop.experiences,
-            patch.experienceChange,
-            command.now
-          )
-          if (result.error) return fail(result.error)
-          edited.experiences = result.experiences
-        }
+        const edited = editVisit(stop, value.patch, value.memoryId, command.now)
         updated = {
           ...current,
           stops: current.stops.map(item =>
@@ -541,12 +697,14 @@ export function mutateTripStore(
         updated &&
         command.action !== "create" &&
         command.action !== "group-destinations" &&
-        command.action !== "combine"
+        command.action !== "combine" &&
+        command.action !== "transfer" &&
+        command.action !== "visit-edit"
       ) {
         targetId = current.tripId
         trips = trips.map(trip => (trip.tripId === targetId ? updated : trip))
       }
-      validCollection(trips, storage)
+      validCollection(trips, storage, visits)
     } catch (error) {
       return fail(
         error.code ||
@@ -570,6 +728,10 @@ export function mutateTripStore(
     }
     storage.kv.delete(TRIP_BACKUP)
   }
+  for (const visit of storedVisits(storage))
+    if (!visits.some(item => item.stop.stopId === visit.stop.stopId))
+      storage.kv.delete(visitKey(visit.stop.stopId))
+  for (const visit of visits) storage.kv.put(visitKey(visit.stop.stopId), visit)
   const old = storedTrips(storage)
   for (const trip of old)
     if (!trips.some(item => item.tripId === trip.tripId))

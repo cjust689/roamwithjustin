@@ -1,6 +1,10 @@
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import compiler from "vue-template-compiler"
+import {
+  normalizeTripTravelDraft,
+  savedTripTravelDraft,
+} from "../shared/my-atlas-trip-logistics.mjs"
 import { assertTripStorageBudget } from "../workers/my-atlas/src/trips/store.mjs"
 import { fetchMyAtlasAccountExport } from "../src/features/my-atlas/api/client.mjs"
 import { requestMyAtlasTrips } from "../src/features/my-atlas/planning/tripClient.mjs"
@@ -15,6 +19,10 @@ import {
   normalizeMyAtlasCustomCoordinates,
 } from "../src/features/my-atlas/catalog/customPlace.mjs"
 import { emptyTravelSearchDraft } from "../src/features/my-atlas/planning/travelSearch.mjs"
+import {
+  journeyCardRecords,
+  journeyCardDate,
+} from "../src/features/my-atlas/planning/journeyCards.mjs"
 import {
   buildGoogleMapsRouteHandoffs,
   buildAiPlanningPrompt,
@@ -218,6 +226,9 @@ let calls = [],
   readFailure = false
 const dependencies = {
   MyAtlasTravelSearch: {},
+  MyAtlasVisitManager: {},
+  normalizeTripTravelDraft,
+  savedTripTravelDraft,
   emptyTravelSearchDraft,
   buildGoogleMapsRouteHandoffs,
   buildAiPlanningPrompt,
@@ -435,4 +446,74 @@ assert.equal(
 )
 console.log(
   "Trip workspace retry, draft preservation, response validation, read-only v2 sharing and legacy link compatibility tests passed."
+)
+
+const savedDraft = normalizeTripTravelDraft(emptyTravelSearchDraft())
+const withLogistics = {
+  ...trip,
+  logistics: {
+    flights: [{ searchDraft: savedDraft.flights }],
+    rentals: [{ searchDraft: savedDraft.rental }],
+  },
+}
+assert.deepEqual(savedTripTravelDraft(withLogistics), savedDraft)
+assert.equal(savedTripTravelDraft(trip), null)
+assert.throws(() =>
+  normalizeTripTravelDraft({
+    ...savedDraft,
+    providerUrl: "https://example.test",
+  })
+)
+const privateSearch = structuredClone(savedDraft)
+privateSearch.flights.outboundFrom = "PRIVATE AIRPORT SEARCH"
+assert.ok(
+  !JSON.stringify(
+    decodeSharedTrip(
+      encodeSharedTrip({
+        ...withLogistics,
+        logistics: {
+          flights: [{ searchDraft: privateSearch.flights }],
+          rentals: [{ searchDraft: privateSearch.rental }],
+        },
+      })
+    )
+  ).includes("PRIVATE AIRPORT SEARCH")
+)
+assert.deepEqual(journeyCardRecords([], []), [])
+assert.equal(journeyCardDate({ trip, legacy: false }), "")
+assert.equal(
+  journeyCardDate({
+    trip: {
+      ...trip,
+      stops: [
+        {
+          ...stop(1),
+          actualDates: { arrival: "2025-03-03", departure: "2025-03-04" },
+        },
+        { ...stop(2), actualDates: { arrival: "2025-02-01", departure: null } },
+      ],
+    },
+    legacy: false,
+  }),
+  "2025-02-01 to 2025-03-04"
+)
+const legacyCard = {
+  planId: "plan_old",
+  title: "Old plan",
+  stops: [place],
+  desiredYear: 2027,
+  updatedAt: "2026-01-01",
+}
+assert.deepEqual(
+  journeyCardRecords([trip], [legacyCard]).map(record => record.legacy),
+  [false, true]
+)
+assert.equal(journeyCardDate({ trip: legacyCard, legacy: true }), "2027")
+assert.equal(
+  journeyCardRecords([{ ...trip, tripId: legacyCard.planId }], [legacyCard])
+    .length,
+  1
+)
+console.log(
+  "Journey dates, canonical/legacy cards, private logistics reload and share exclusion tests passed."
 )

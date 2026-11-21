@@ -5,8 +5,9 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-20
+updated: 2026-11-21
 related:
+  - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-location-experience-commerce
   - visual-themes
   - theme-toggle-implementation
@@ -67,6 +68,13 @@ verification:
 
 # Roam With Justin documentation
 
+Current local work: [Integrated trip management, November 21](implementation/my-atlas-integrated-trip-management-2026-11-21.md)
+connects visit reassignment, per-trip public visibility, saved private travel
+searches and Overview journey cards. It preserves independent destinations and
+full visit identities. Its API is deployed to staging as
+`71692099-3991-455a-b9e9-a8a794433a38`; frontend release and signed-in remote
+acceptance remain outstanding.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;
@@ -85,20 +93,21 @@ trip-workspace source. The inventory separates released code from disabled trip
 writes, unfinished implementation, provider/content dependencies and acceptance.
 
 Latest owner correction: adding a visited destination must not create a trip.
-The new local destination model keeps visits ungrouped until explicitly assigned
+The destination model keeps visits ungrouped until explicitly assigned
 to a named trip. The review now counts destinations separately from existing
 planned trips and replaces the typed phrase with a name and retention checkbox.
 See the independent-destinations correction in the trip transition checklist.
-Staging Worker `21912d9e-652a-4693-ab15-222d0e9eb6b8` now enables this explicit
-version-2 save flow. The matching frontend correction is local on port 8080 and
-has not yet been included in the earlier Pages release.
-The local profile follow-up separates Share Your Atlas, Customize My Atlas and
+Staging Worker `21912d9e-652a-4693-ab15-222d0e9eb6b8` first enabled this explicit
+version-2 save flow; the November 21 staging version above extends it. PRs 226
+and 227 merged the independent-destination correction and profile controls
+through develop and main before the current local integrated feature.
+The profile follow-up separates Share Your Atlas, Customize My Atlas and
 the top-right profile dropdown. Story-image creation stays on Overview; profile
 links, private data export and deletion are in the dropdown. The active trip
 transition and account-state documents record the tested navigation boundaries.
 Owner controls also share local hover/press/focus feedback, 44 pixel touch
 targets and busy indicators for the main save/export actions, with reduced-motion
-support. This interaction follow-up remains part of the pending frontend release.
+support. These controls were included in PRs 226 and 227.
 Explore Atlases in the intro now uses an outlined secondary pill with the same
 height and alignment as Sign in or Quick start.
 Share Your Atlas and Customize My Atlas now use matching disclosure headers

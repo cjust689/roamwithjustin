@@ -136,6 +136,17 @@
       </div>
     </template>
     <template v-if="loaded && upgraded">
+      <MyAtlasVisitManager
+        v-if="scope !== 'planned' && ungroupedVisits.length"
+        :visits="ungroupedVisits"
+        :trips="trips"
+        :pending="busy"
+        :saved-sequence="savedSequence"
+        @transfer="mutate('transfer', $event)"
+        @edit-visit="
+          mutate('editVisit', $event.patch, undefined, $event.stopId)
+        "
+      />
       <div class="trip-controls">
         <label v-if="scope === 'all'"
           >Show<select v-model="filter">
@@ -227,6 +238,51 @@
       </div>
       <article v-if="selected && !creating" class="trip-form">
         <h3>{{ selected.title }}</h3>
+        <p v-if="!selected.stops.length">
+          This trip has no visits. Its overview and travel details are kept. Add
+          visits or delete the trip explicitly.
+        </p>
+        <details>
+          <summary>Public Atlas visibility</summary>
+          <label class="trip-check"
+            ><input
+              v-model="publicAtlasDraft"
+              type="checkbox"
+              :disabled="busy"
+            />Include this trip's destinations in my public Atlas{{
+              selected.lifecycle === "planned" ? " when marked Past" : ""
+            }}.</label
+          >
+          <p>
+            Your Atlas must also be public. Private notes, experiences, flights
+            and rentals stay private. Snapshot trip links are shared separately.
+          </p>
+          <button
+            type="button"
+            :disabled="
+              busy || publicAtlasDraft === selected.sharing.publicAtlas
+            "
+            @click="
+              mutate(
+                'sharing',
+                { publicAtlas: publicAtlasDraft },
+                selected.tripId
+              )
+            "
+          >
+            Save trip visibility
+          </button>
+        </details>
+        <details v-if="selected.stops.length">
+          <summary>Move or ungroup visits</summary>
+          <MyAtlasVisitManager
+            :key="selected.tripId"
+            :source-trip="selected"
+            :trips="trips"
+            :pending="busy"
+            @transfer="mutate('transfer', $event)"
+          />
+        </details>
         <details>
           <summary>Edit trip name and overview</summary>
           <label>Trip name<input v-model="titleDraft" maxlength="80" /></label
@@ -250,7 +306,11 @@
             Save trip details
           </button>
         </details>
-        <button type="button" @click="shareTrip">
+        <button
+          type="button"
+          :disabled="!selected.stops.length"
+          @click="shareTrip"
+        >
           Copy read only trip link
         </button>
         <p>
@@ -394,8 +454,8 @@
         <details>
           <summary>Travel tools</summary>
           <p>
-            Flight and rental searches are browser drafts. They are not saved
-            with this trip.
+            Save your flight and rental details to keep them with this trip.
+            These are planning details, not bookings, and stay private.
           </p>
           <div class="trip-controls">
             <button type="button" @click="travelTool = 'flights'">
@@ -409,7 +469,17 @@
             v-model="selectedTravelDraft"
             :tool="travelTool"
             :context-changed="travelContextChanged"
+            :persistable="true"
+            :dirty="travelDetailsDirty"
           />
+          <button
+            type="button"
+            :disabled="busy || !travelDetailsDirty"
+            :aria-busy="String(pendingAction === 'logistics')"
+            @click="saveTravelDetails"
+          >
+            Save travel details
+          </button>
           <div v-if="selected.stops.length > 1" class="trip-form">
             <label
               >Directions mode<select v-model="directionsMode">
@@ -500,6 +570,11 @@
 import MyAtlasExperiences from "./MyAtlasExperiences.vue"
 import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
+import MyAtlasVisitManager from "./MyAtlasVisitManager.vue"
+import {
+  normalizeTripTravelDraft,
+  savedTripTravelDraft,
+} from "../../../../shared/my-atlas-trip-logistics.mjs"
 import { emptyTravelSearchDraft } from "../planning/travelSearch.mjs"
 import {
   buildGoogleMapsRouteHandoffs,
@@ -522,6 +597,7 @@ export default {
     MyAtlasExperiences,
     MyAtlasLocationPicker,
     MyAtlasTravelSearch,
+    MyAtlasVisitManager,
   },
   props: {
     apiBaseUrl: { type: String, required: true },
@@ -536,6 +612,7 @@ export default {
     "route-change",
     "location-placement-change",
     "open-change",
+    "collection-change",
   ],
   data: () => ({
     open: false,
@@ -564,6 +641,8 @@ export default {
     groupTitle: "",
     groupTargetId: "",
     destinations: [],
+    ungroupedVisits: [],
+    publicAtlasDraft: false,
     destinationGroupResolved: false,
     editingStopId: "",
     memoryDraft: "",
@@ -623,7 +702,11 @@ export default {
     },
     selectedTravelDraft: {
       get() {
-        return this.travelDrafts[this.selectedId] || emptyTravelSearchDraft()
+        return (
+          this.travelDrafts[this.selectedId] ||
+          savedTripTravelDraft(this.selected) ||
+          emptyTravelSearchDraft()
+        )
       },
       set(value) {
         this.$set(this.travelDrafts, this.selectedId, value)
@@ -633,6 +716,13 @@ export default {
           this.selected.stops.map(stop => stop.stopId).join(",")
         )
       },
+    },
+    travelDetailsDirty() {
+      const saved = savedTripTravelDraft(this.selected)
+      return (
+        !saved ||
+        JSON.stringify(this.selectedTravelDraft) !== JSON.stringify(saved)
+      )
     },
     travelContextChanged() {
       return Boolean(
@@ -772,6 +862,7 @@ export default {
       try {
         const state = await this.call({ action: "list" })
         this.destinations = state.destinations || []
+        this.ungroupedVisits = state.ungroupedVisits || []
         this.trips = state.trips
         this.upgraded = state.upgraded
         this.writesEnabled = state.writesEnabled === true
@@ -781,6 +872,7 @@ export default {
         this.refreshNeeded = false
         this.error = ""
         this.$emit("changed", state)
+        this.$emit("collection-change", state)
         this.applyDestinationGroup()
         if (this.selected) this.select(this.selected, true)
         else this.$emit("route-change", { active: false, route: [] })
@@ -823,6 +915,7 @@ export default {
       if (!keepEditor) {
         this.editingStopId = ""
         this.titleDraft = trip.title
+        this.publicAtlasDraft = trip.sharing.publicAtlas
         this.descriptionDraft = trip.description
         this.travelTool = ""
       }
@@ -893,6 +986,7 @@ export default {
           this.selectedId = ""
         }
         this.upgraded = result.upgraded
+        if (action === "logistics") this.$delete(this.travelDrafts, tripId)
         if (action === "groupDestinations") {
           this.groupDestinations = []
           this.groupTitle = ""
@@ -912,10 +1006,12 @@ export default {
         try {
           const state = await this.call({ action: "list" })
           this.destinations = state.destinations || []
+          this.ungroupedVisits = state.ungroupedVisits || []
           this.trips = state.trips
           this.rollbackAvailable = state.rollbackAvailable
           this.currentRevision = state.profile.revision
           this.writesEnabled = state.writesEnabled === true
+          this.$emit("collection-change", state)
           if (action === "upgrade") this.applyDestinationGroup()
           if (["combine", "groupDestinations"].includes(action)) {
             this.groupDestinations = []
@@ -925,7 +1021,9 @@ export default {
           if (this.selected)
             this.select(
               this.selected,
-              !["create", "combine", "groupDestinations"].includes(action)
+              !["create", "combine", "groupDestinations", "transfer"].includes(
+                action
+              )
             )
           else this.$emit("route-change", { active: false, route: [] })
         } catch {
@@ -964,6 +1062,24 @@ export default {
         plannedDeparture: stop.plannedDates.departure || "",
         actualArrival: stop.actualDates.arrival || "",
         actualDeparture: stop.actualDates.departure || "",
+      }
+    },
+    openTrip(id) {
+      const trip = this.trips.find(item => item.tripId === id)
+      if (trip) this.select(trip)
+    },
+    async saveTravelDetails() {
+      try {
+        await this.mutate(
+          "logistics",
+          { draft: normalizeTripTravelDraft(this.selectedTravelDraft) },
+          this.selected.tripId
+        )
+      } catch {
+        this.announce(
+          "Check your travel details and date order before saving.",
+          "error"
+        )
       }
     },
     toolPlan() {
