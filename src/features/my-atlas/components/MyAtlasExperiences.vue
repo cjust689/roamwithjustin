@@ -39,8 +39,7 @@
           placeholder="For example, snorkeling"
           required
       /></label>
-      <details :open="Boolean(editingId)">
-        <summary>More details (optional)</summary>
+      <div class="experience-operator-fields">
         <label
           >Who ran it? (optional)<input
             v-model="operatorName"
@@ -55,7 +54,7 @@
             placeholder="https://"
             :disabled="pending"
         /></label>
-      </details>
+      </div>
       <p v-if="validation || error" role="alert">{{ validation || error }}</p>
       <button type="submit" :disabled="pending">
         {{
@@ -185,7 +184,7 @@ ul {
 li,
 form,
 label,
-details[open] {
+.experience-operator-fields {
   display: grid;
   gap: 0.6rem;
   min-width: 0;
@@ -220,10 +219,6 @@ button {
   border: 1px solid var(--color-accent);
   border-radius: 0.5rem;
   cursor: pointer;
-}
-summary {
-  cursor: pointer;
-  padding-block: 0.5rem;
 }
 a {
   color: var(--color-accent-soft);

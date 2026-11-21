@@ -1212,3 +1212,41 @@ shows three cards initially, and displays only known dates. It does not turn
 independent destinations into cards. Collection notifications refresh these cards;
 revision and account-generation checks reject stale responses. Sign-out and
 account deletion clear the private list and invalidate in-flight requests.
+
+### Compact trip editor, local follow-up
+
+Canonical trip controls share `MyAtlasSwitch`, `MyAtlasInfo` and
+`MyAtlasDialog`. The summary stays compact; editing and long selection forms
+occupy one native dialog with internal tabs. The parent workspace owns drafts,
+revision checks and mutations. The dialog owns focus wrapping/restoration,
+Escape/backdrop dismissal, background scroll locking and an independently
+scrollable body. Dismissal is disabled during writes; failure and refresh status
+remain available inside the dialog.
+
+Public visibility is a single switch calling the existing revisioned mutation.
+Its displayed value stays at server state until acknowledged; there is no
+optimistic public-state change. Other switches retain their existing draft or
+selection semantics. Help uses a nonmodal viewport-bounded popover, and opening
+a dialog dismisses background help. Map placement temporarily removes the
+dialog and restores it after selection without losing parent-owned fields.
+This frontend follow-up is local and does not alter persistence or public data.
+
+The refined summary uses the trip and destination names, with pen icons, as
+editor triggers. A selected single trip does not need a duplicate picker.
+Public Atlas and Traveled are revisioned switches that retain server state
+until acknowledged. Deletion confirmation replaces the title editor's content
+inside the same dialog. Shared hover rules are explicitly overridden in the
+trip workspace to prevent movement and brightness effects on its controls.
+Switches also exclude generic press transforms; their pending spinner overlays
+the track without participating in flex layout, preserving its position while
+the server acknowledges a change.
+
+Destination search keeps confirmation in a non-scrolling dialog status slot,
+while the form body and bounded result list scroll separately. Actions within a
+dialog suppress duplicate background toasts. Canonical place IDs deduplicate
+search hits; region, country, type and known coordinates distinguish same-name
+places. The parent retains selected draft destinations and their display context;
+only original selection references enter the save payload.
+Search selections populate a separate read-only preview. Manual entry is an
+explicit optional mode backed by the existing custom draft, so catalog identity
+is preserved and switching modes does not silently replace or duplicate it.

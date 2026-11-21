@@ -68,12 +68,22 @@ verification:
 
 # Roam With Justin documentation
 
-Current local work: [Integrated trip management, November 21](implementation/my-atlas-integrated-trip-management-2026-11-21.md)
+Current trip work: [Integrated trip management, November 21](implementation/my-atlas-integrated-trip-management-2026-11-21.md)
 connects visit reassignment, per-trip public visibility, saved private travel
 searches and Overview journey cards. It preserves independent destinations and
 full visit identities. Its API is deployed to staging as
-`71692099-3991-455a-b9e9-a8a794433a38`; frontend release and signed-in remote
-acceptance remain outstanding.
+`71692099-3991-455a-b9e9-a8a794433a38`. PRs 228 and 229 released the integrated
+feature, with alignment through PR 230 and successful Pages run 44912326394.
+The latest compact workspace follow-up is local on port 8080: one-row headers,
+info popovers, switches and a single dialog with tabs for larger editors.
+Clickable titles with pen icons replace standalone edit buttons; redundant
+single-trip selection and unusable one-stop controls are hidden.
+Switch press and saving feedback keeps the track in place.
+Destination search now includes scrollable result cards, location context,
+selected draft destinations and confirmation fixed inside the dialog.
+Search selections populate their preview; manual coordinate entry is an
+explicit optional alternative, explained by an info icon.
+Signed-in owner acceptance and release of that UI follow-up remain outstanding.
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).

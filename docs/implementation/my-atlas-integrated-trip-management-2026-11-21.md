@@ -13,6 +13,9 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/components/MyAtlasDialog.vue
+  - src/features/my-atlas/components/MyAtlasInfo.vue
+  - src/features/my-atlas/components/MyAtlasSwitch.vue
   - src/features/my-atlas/components/MyAtlasVisitManager.vue
   - src/features/my-atlas/components/MyAtlasJourneyCards.vue
   - src/features/my-atlas/components/MyAtlasTrips.vue
@@ -39,14 +42,20 @@ verification:
     - node scripts/test-my-atlas-load-safety.mjs verifies initial Overview loading and rejects stale owner/revision responses
     - npm run my-atlas:worker:check:staging passed before deployment
     - Staging Worker deployed as 71692099-3991-455a-b9e9-a8a794433a38; all four new route shapes returned 401 without authentication
+    - Compact workspace follow-up passed npm run my-atlas:test including 59 runtime tests, npm run build, ESLint and npm run docs:audit on November 21
+    - Local Chrome compact workspace checks passed both themes at 320, 390 and 1440 pixels, including 50-visit scrolling, focus wrapping and restoration, viewport-bounded help, single dialogs, failed drafts and map-placement return
 ---
 
 # Integrated trip management
 
 The owner requested the four proposed improvements as one feature. This
 implementation extends the explicit trip model. Adding an independent
-destination still does not create a trip. This record describes local source;
-frontend release and real owner acceptance remain separate work. The additive
+destination still does not create a trip. PRs 228 and 229 released the integrated
+feature, with branch alignment in PR 230. Pages run 44912326394 succeeded for
+main commit `7ee5c30fe6a457bebade61d13d8f4403d0ed66bb`; live owner, Explore and
+unavailable-Atlas routes and shipped feature markers passed browser checks.
+The compact workspace follow-up below remains local. Real owner acceptance
+remains separate work. The additive
 API is deployed to staging as `71692099-3991-455a-b9e9-a8a794433a38`, which is the
 configured API used by localhost. No user data was migrated or written during
 deployment or remote route checks.
@@ -71,7 +80,7 @@ deployment or remote route checks.
       repeated visits, full-record preservation and private share exclusion.
 - [ ] Complete genuine signed-in owner acceptance against deployed new routes.
 - [x] Deploy the additive backend to staging and check authentication boundaries.
-- [ ] Release frontend changes through the normal develop/main release process.
+- [x] Release the integrated frontend through develop/main in PRs 228 and 229.
 
 ## Interfaces and boundaries
 
@@ -105,3 +114,98 @@ upgraded; no background migration or auto-save is introduced.
 Overview cards display established trip metadata. They do not invent trip dates,
 cover photos, trip titles or trips for each destination. Sign-out and account
 deletion clear private Overview state and invalidate outstanding requests.
+
+## Compact workspace follow-up, local
+
+- [x] Keep the trip title, Add trip and Close in one compact header. Match
+      hover/focus styling for dialog controls and remove inherited Materialize
+      navigation colors and line heights.
+- [x] Remove the empty Planning toolbar row and keep header actions next to the
+      heading. Hide the redundant trip picker when its only trip is selected.
+      Make trip and destination titles clickable with pen icons instead of
+      separate Edit trip and Memories buttons. Hide unusable reorder/removal
+      controls for a one-stop trip.
+- [x] Group Public Atlas and Traveled switches together. Both wait for server
+      acknowledgement. Keep Add stop beside Destinations, simplify Share trip,
+      and move deletion into the title editor with confirmation in the same
+      dialog. Experience fields live in their tab without another disclosure.
+- [x] Verify computed desktop hover styling after overriding the shared
+      stylesheet: no transform, brightness filter or glow; editable titles
+      underline and keyboard focus remains visible.
+- [x] Put sharing, lifecycle and visibility explanations behind labeled info
+      buttons. Popovers remain within the viewport and dismiss on outside click,
+      Escape, scrolling and resize.
+- [x] Replace canonical workspace, visit-selection and travel-review checkboxes
+      with keyboard-operable switches. Public visibility saves directly through
+      the existing revisioned write; the displayed value changes only after
+      acknowledgement. Pending or conflicted writes disable further changes.
+- [x] Move trip creation, destination grouping, trip metadata, stop addition,
+      visit management, trip combination and travel tools into a single native
+      dialog. Memory/Dates/Experiences and Flights/Rental cars/Directions use
+      tabs within that same dialog. No dialog opens inside another dialog.
+- [x] Trap keyboard focus, restore it on close, support Escape/backdrop dismissal,
+      lock background scrolling and scroll long forms within the dialog.
+- [x] Temporarily close the dialog for map-pin selection, then return with the
+      selected coordinates. A Return to destination editor action also works
+      before a coordinate is chosen.
+- [x] Keep failed/ambiguous saves and their drafts open. Display mutation status
+      and refresh actions inside the dialog. Disable dismissal while saving.
+- [x] Verify both themes at 320, 390 and 1440 pixels with a 50-visit fixture,
+      single-dialog behavior, focus wrapping, Escape restoration, visibility
+      acknowledgement/duplicate suppression, map selection and failed drafts.
+- [ ] Release the compact workspace follow-up after owner review.
+
+Switch stability correction: switches are excluded from generic hover/press
+transforms. Their saving indicator overlays the fixed-width track rather than
+adding a flex item, so the label and track do not shift during a save. Local
+Chrome mouse press, saving and settled-state measurements passed at 390 and
+1440 pixels, recorded in `.state/theme/switch-stability.json`. This is a local
+visual correction and does not change write or acknowledgement behavior.
+
+`MyAtlasDialog.vue` uses the native dialog top layer; `MyAtlasInfo.vue` uses
+nonmodal native popovers so help does not clip inside the map sidebar. Existing
+legacy planner and registration consent controls retain their prior layouts.
+No API contract, storage, trip lifecycle or privacy projection changes in this
+follow-up. Browser evidence is recorded locally in
+`.state/theme/compact-workspace-browser.json`; script regression coverage remains
+in `scripts/test-my-atlas-trip-workspace.mjs`.
+The affordance follow-up is additionally checked in
+`.state/theme/compact-affordance-browser.json`, including real title clicks,
+visit editor tabs, single-stop controls, acknowledgement of lifecycle changes
+and deletion confirmation without another dialog. The full My Atlas suite
+passed again with 59 runtime tests after these refinements.
+
+### Destination search feedback, local follow-up
+
+- [x] Keep confirmation/error/refresh status in a fixed dialog slot below its
+      tabs. Modal actions do not emit a second toast behind the native dialog.
+- [x] Show selected destinations in the Destinations tab with a count, removal
+      actions and a Review trip details shortcut. The Trip details tab also
+      shows its destination count; repeated visits are labeled explicitly.
+- [x] Render full-width result cards with region, country, place type and known
+      coordinates. Collapse duplicate result IDs while retaining different
+      same-name places. Do not infer that nearby records are duplicates.
+- [x] Bound search results and selected-destination lists with independent
+      scrolling and preserve the 50-stop limit.
+- [x] Extend `scripts/test-my-atlas-trip-workspace.mjs` for identity deduplication,
+      place context, counts, modal-only feedback, repeated visits and limits.
+- [x] Verify at 320, 390 and 1440 pixels with duplicate IDs, same-name places
+      and 32 unique results: full-width padded rows, independent result scrolling,
+      updated counts/selection and confirmation visible after scrolling the body.
+      Evidence is in `.state/theme/trip-search-browser.json`.
+- [ ] Release with the other local compact-workspace changes.
+
+This changes presentation and draft feedback only. Selection payloads sent to
+the API still contain their original place references; display context is not
+stored as canonical geography.
+
+Destination-entry clarification: a selected search result now populates a
+read-only name/latitude/longitude preview labeled Added from search, while
+retaining its catalog place ID. Manual name/coordinate fields are hidden by
+default and explicitly labeled optional when opened. An info popover explains
+that clicking search already adds the destination; manual entry requires its
+own Add custom stop action. Selecting a catalog place does not overwrite an
+existing manual draft. Removing that searched visit also removes its added
+preview. At 320, 390 and 1440 pixels, Chrome verified populated fields, separate
+catalog/custom identities, optional editable manual fields, return to search
+and zero horizontal overflow. Evidence: `.state/theme/destination-entry-browser.json`.

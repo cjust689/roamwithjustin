@@ -19,7 +19,15 @@
       searching. Your entries have been kept.
     </p>
     <template v-if="tool === 'flights'">
-      <h4>What flights do you need?</h4>
+      <div class="travel-heading">
+        <h4>What flights do you need?</h4>
+        <MyAtlasInfo label="About flight gateways"
+          >Enter your chosen gateways. Confirm airport codes before preparing a
+          search. A round trip searches the same gateways in reverse. Your last
+          stop does not choose your return airport or add a ground
+          transfer.</MyAtlasInfo
+        >
+      </div>
       <label>
         <span>Flight search type</span>
         <select v-model="draft.flights.searchType" @change="clearReview">
@@ -32,11 +40,6 @@
         </select>
       </label>
       <template v-if="draft.flights.searchType !== 'individual-legs'">
-        <p>
-          Enter your chosen gateways. A city is useful for copied details.
-          Confirm airport codes before preparing a search. Your last visited
-          stop does not choose your return airport.
-        </p>
         <div class="travel-fields">
           <label
             ><span>Flying from</span
@@ -87,19 +90,8 @@
               @input="clearReview"
           /></label>
         </div>
-        <p v-if="draft.flights.searchType === 'round-trip'">
-          The return search uses the same two gateways in reverse. It does not
-          add a destination or ground transfer.
-        </p>
-        <label class="travel-check"
-          ><input
-            v-model="draft.flights.confirmed"
-            type="checkbox"
-            @change="clearReview"
-          /><span
-            >I reviewed these gateways and entered the airport codes I intend to
-            search.</span
-          ></label
+        <MyAtlasSwitch v-model="draft.flights.confirmed" @change="clearReview"
+          >I reviewed these gateways and airport codes.</MyAtlasSwitch
         >
         <button type="button" @click="reviewFlights">
           Review flight search
@@ -250,12 +242,8 @@
           A different drop off location may have an additional fee. Confirm it
           with the rental provider.
         </p>
-        <label class="travel-check"
-          ><input
-            v-model="draft.rental.confirmed"
-            type="checkbox"
-            @change="clearReview"
-          /><span>I reviewed my pickup and drop off choices.</span></label
+        <MyAtlasSwitch v-model="draft.rental.confirmed" @change="clearReview"
+          >I reviewed my pickup and drop off choices.</MyAtlasSwitch
         >
         <button type="button" @click="reviewRental">
           Review rental details
@@ -291,6 +279,8 @@
 </template>
 
 <script>
+import MyAtlasSwitch from "./MyAtlasSwitch.vue"
+import MyAtlasInfo from "./MyAtlasInfo.vue"
 import {
   emptyTravelSearchDraft,
   reviewFlightSearch,
@@ -300,6 +290,7 @@ import {
 
 export default {
   name: "MyAtlasTravelSearch",
+  components: { MyAtlasSwitch, MyAtlasInfo },
   props: {
     tool: { type: String, required: true },
     value: { type: Object, required: true },
@@ -400,6 +391,15 @@ export default {
 </script>
 
 <style scoped>
+.travel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.travel-heading h4 {
+  margin: 0;
+}
 .travel-search {
   display: grid;
   min-width: 0;

@@ -169,6 +169,7 @@ const dependencies = {
   MyAtlasPlanner: {},
   MyAtlasTrips: {},
   MyAtlasJourneyCards: {},
+  MyAtlasSwitch: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   discardLegacyDeletion,
