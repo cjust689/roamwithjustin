@@ -414,6 +414,28 @@ the existing wish identity and immutable plan snapshots.
 Cancel, Escape, closing the custom disclosure/planner and unmount stop placement
 and remove its temporary marker. The map instance remains mounted. Positioning
 and changing start/finish selections are drafts and do not write by themselves.
-Full Maps URL parsing, short-link expansion and shared-picker consolidation
-remain later phases. See the active location/experience implementation document
-for source paths and synthetic 320, 390 and 1440 pixel verification.
+The subsequent local slice reuses `MyAtlasLocationPicker.vue` for visited,
+wishlist and planner start/stop/finish inputs, and custom visited-pin editing.
+`shared/my-atlas-map-links.mjs` parses full HTTPS Google/Apple URLs locally.
+Explicit coordinate, viewport, name-only, route ambiguity and invalid-coordinate
+results stay distinct. Only explicit coordinates can fill the draft through a
+confirmation button; camera centers require manual placement. Existing labels
+are preserved. Raw links, provider IDs and inferred business details are not
+saved. The map remains the same SDK instance.
+
+`POST /v1/me/map-links/resolve` requires an active authenticated owner and write
+permission, accepts only `{url}`, and uses a dedicated six-per-minute hashed
+identity limiter. Missing limiter configuration fails closed. The resolver
+uses at most three timed HEAD redirects, exact HTTPS Maps host allowlists and
+manual redirect validation; it never downloads final HTML or forwards tokens.
+It returns only the same candidate projection. Tests cover loops, timeouts,
+private-address redirects and arbitrary hosts. Real provider short-link
+expansion is externally unverified. Unreadable links keep manual placement
+available. Source URLs never enter account records, analytics or caches.
+
+Custom visited pins can be renamed/repositioned explicitly while keeping their
+pin and place IDs, dates, memory and private recaps. Existing saved plans retain
+their snapshots. Cancel, Escape and closing the entry panel remove only the
+temporary edit marker. The browser normalizes raw custom mutation responses
+into the same place fields as account reads. See the active implementation
+record for local responsive verification and remaining trip lifecycle limits.

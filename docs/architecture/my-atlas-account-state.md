@@ -20,6 +20,10 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - workers/my-atlas/src/trips/store.mjs
+  - workers/my-atlas/src/trips/service.mjs
+  - shared/my-atlas-trips.mjs
+  - workers/my-atlas/src/trips/preview.mjs
   - src/features/my-atlas/auth/accountDeletion.mjs
   - scripts/test-my-atlas-load-safety.mjs
   - scripts/lib/my-atlas-local-runtime.cjs
@@ -963,3 +967,104 @@ Story export.
 Remote staging transformation evidence, real-device acceptance, spend alerts,
 and orphan reconciliation remain required before a broader invited beta. Image
 bytes are stored only in private R2, never in the profile Durable Object.
+
+## Local custom-pin editing follow-up
+
+The existing pin PATCH route now accepts optional `customPlace: {name,
+coordinates}`. Validation rejects malformed data and simultaneous `placeId`.
+The owned Durable Object permits this change only on an existing custom pin;
+its `pinId` and `placeId` remain unchanged. Memories, dates, nested experiences
+and plan snapshots are preserved. Export reflects the new custom place, and
+ordinary deletion removes it. No migration or canonical-trip lifecycle change
+is introduced. Browser edits reuse the shared picker and mounted SDK map.
+Ambiguous retries keep the same operation key and revision. Revision conflicts
+refresh account state and retain the editor draft for explicit review, without
+automatically applying it over the newer state. This follow-up is local only;
+the preceding recap/deletion-safety foundations are deployed through PRs 222/223.
+
+## Local trip-organization preview
+
+`GET /v1/me/trips/upgrade-preview` is an authenticated owner-only read. It builds
+canonical trip candidates from the legacy per-owner export without storing
+anything or changing the account revision, current source records or retention
+alarm. The API exposes only group/stop names and IDs, counts, fingerprint and
+blocking issues. Private memories, experience entries, raw legacy metadata,
+image keys and identity digests remain outside the response. Catalog resolution
+is read-only and skipped for empty/custom-only sources. The subsequent write API is disabled by default; no automatic migration on account load is enabled.
+
+The pure versioned model distinguishes trips from stop occurrences and Place
+identity. It supports reversible explicit lifecycle and single-stop trips,
+with content-preserving transitions and stop-removal safeguards. Local gated trip persistence, Combine into Trip, rollback and history-safe retention are now verified below. Creator/shared UI is locally fixture-tested with activation still disabled. The active trip-centric transition record
+contains the implementation checklist and verified runtime boundary.
+
+## Gated canonical trip repository
+
+The local trip store uses `trip:{id}`, a `trip-schema` marker and one explicit
+rollback snapshot inside the existing owner object. Default and staging config
+set `MY_ATLAS_TRIP_WRITES_ENABLED=false`. The service cannot enable writes from
+client input. The marker is set only through a fingerprint/revision-checked
+upgrade with typed confirmation and retention acknowledgement. Planned and
+Past trips use the same records and stable stop/memory identities. Legacy
+geometry writes reject after upgrade, while profile, image and wishlist controls
+continue to use the existing ownership boundary.
+
+Organized trips are retained until explicitly deleted. Old plan alarms skip
+these records. Before any subsequent saved account change, rollback can restore
+legacy records and the prior alarm, advancing the revision. The next saved
+change purges the backup, and complete account deletion erases all new keys.
+Mutation receipts store references rather than memory snapshots. Owner export
+includes canonical trips and the sanitized backup while available.
+
+Compatibility visited geography derives from Past stops. Owner/public place
+fields come from immutable canonical snapshots; public projections omit private
+recaps, source Wish IDs, logistics and migration metadata. New trips default
+private, and private experience edits do not advance discovery activity. The
+legacy compatibility map still aggregates repeated places. The local creator
+workspace selects individual trip occurrences on the existing map instance.
+Its version 2 read-only link shares only title, lifecycle and ordered location
+snapshots, preserving repeated places. Notes, recaps, dates, logistics and IDs
+are excluded; legacy version 1 links still open.
+
+The development preview is `/my-atlas?trips=1`; production ignores that query.
+The Visited list also has an explicit Group destinations entry point for signed-in
+owners. It opens the existing workspace on demand without enabling writes or
+upgrading automatically. Selection order is retained through upgrade review.
+Only unambiguous single-stop saved Past trips are preselected for combining;
+already grouped places and repeated occurrences require explicit trip selection.
+Already upgraded accounts always use the trip workspace. The server write gate
+remains authoritative. JSON export uses schema 3 for upgraded accounts, including
+canonical trips and the sanitized rollback snapshot when available. CSV uses
+recordType/recordId/parentId/data rows with quoted JSON payloads. Legacy schema 2
+JSON and flat-pin CSV remain unchanged.
+
+Serialized UTF-8 limits are 1 MiB per trip, 4 MiB per collection and 1.5 MiB for
+the rollback snapshot. An oversized upgrade fails before any source mutation.
+These conservative limits bound whole-collection reads and SQLite KV values.
+See the active transition checklist for endpoint paths, remaining limitations
+and 56-test runtime evidence.
+
+Staging Worker `fc6a784b-7e87-4850-b335-5f292771f276` deploys these backend
+routes with `MY_ATLAS_TRIP_WRITES_ENABLED=false`. Remote health returned 200,
+trip collection and upgrade-preview reads without credentials returned 401,
+and the localhost trip GET preflight returned 204 with the expected origin.
+Authenticated real-owner trip review remains externally unverified. This backend
+deployment does not deploy the new frontend or migrate existing accounts.
+
+## Local owner navigation tabs
+
+`MyAtlasGeographicProof.vue` exposes Overview, Planning and Past for signed-in
+owners. Overview contains statistics, map/timeline controls and Visited Atlas
+sharing/export. Planning contains the existing planner for legacy accounts or
+Planned canonical trips for organized accounts. Past contains visited places,
+destination entry/grouping and Past canonical trips. Trip sharing stays on its
+own trip card. The previous repeated Visited/Plan action row is removed.
+
+Components stay mounted across tab changes to preserve planner drafts and
+grouping selections. Map route visibility follows the active tab; the SDK map
+is not recreated. The shared canonical workspace uses a lifecycle scope, sets
+new-trip defaults from its tab and removes a selection from that tab when its
+lifecycle changes. Arrow keys and Home/End activate/focus tabs, with a shared
+labelled tabpanel. No automatic schema change or server write is introduced.
+Trip load errors distinguish a missing server route from expired sign-in and
+retryable load failures. The prior remote checks do not establish the cause of
+the owner's later authenticated load error; that remains externally unverified.

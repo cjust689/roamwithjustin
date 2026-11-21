@@ -79,6 +79,33 @@
       </span>
     </label>
 
+    <details
+      v-if="pin && place.placeType === 'custom' && !memoryOnly"
+      @toggle="toggleLocationEditor"
+    >
+      <summary>Edit this custom location</summary>
+      <MyAtlasLocationPicker
+        v-if="locationEditing"
+        :name="locationName"
+        :latitude="locationLatitude"
+        :longitude="locationLongitude"
+        :pending="pending"
+        :allow-search="false"
+        :resolve-link="resolveLink"
+        @update:name="locationName = $event"
+        @update:latitude="locationLatitude = $event"
+        @update:longitude="locationLongitude = $event"
+        @coordinates-change="syncLocationPlacement"
+        @choose-map="beginLocationPlacement"
+      />
+      <p>
+        Saving updates this visited pin. Saved trip locations keep their
+        original snapshots.
+      </p>
+      <p v-if="locationError" class="pin-editor-error" role="alert">
+        {{ locationError }}
+      </p>
+    </details>
     <p v-if="error" class="pin-editor-error" role="alert">{{ error }}</p>
 
     <div class="pin-editor-actions">
@@ -102,6 +129,11 @@
 
 <script>
 import MyAtlasExperiences from "./MyAtlasExperiences.vue"
+import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
+import {
+  normalizeMyAtlasCustomPlace,
+  normalizeMyAtlasCustomCoordinates,
+} from "../catalog/customPlace.mjs"
 import {
   formatVisitedDate,
   visitedDatesForPlace,
@@ -113,9 +145,10 @@ import {
 
 export default {
   name: "MyAtlasPinEditor",
-  components: { MyAtlasExperiences },
+  components: { MyAtlasExperiences, MyAtlasLocationPicker },
   props: {
     experiencePending: Boolean,
+    resolveLink: { type: Function, default: null },
     experienceError: { type: String, default: "" },
     experienceSavedSequence: { type: Number, default: 0 },
     error: {
@@ -143,10 +176,16 @@ export default {
       default: "",
     },
   },
-  emits: ["cancel", "save", "experience-change"],
+  emits: ["cancel", "save", "experience-change", "location-placement-change"],
   data() {
     return {
       currentYear: new Date().getFullYear(),
+      locationEditing: false,
+      locationPlacementActive: false,
+      locationName: this.place.name,
+      locationLatitude: String(this.place.coordinates?.[1] ?? ""),
+      locationLongitude: String(this.place.coordinates?.[0] ?? ""),
+      locationError: "",
       dates: [
         ...new Set(visitedDatesForPlace(this.pin || {}).map(date => date.year)),
       ].map(year => ({ year })),
@@ -193,6 +232,38 @@ export default {
     if (this.memoryOnly) this.$nextTick(() => this.$refs.memoryInput?.focus())
   },
   methods: {
+    toggleLocationEditor(event) {
+      this.locationEditing = event.target.open
+      if (!this.locationEditing) this.stopLocationPlacement()
+    },
+    locationCoordinates() {
+      const values = [this.locationLongitude, this.locationLatitude]
+      return values.every(value => String(value).trim() !== "")
+        ? normalizeMyAtlasCustomCoordinates(values.map(Number))
+        : null
+    },
+    syncLocationPlacement() {
+      this.locationError = ""
+      this.$emit("location-placement-change", {
+        active: this.locationPlacementActive,
+        coordinates: this.locationCoordinates(),
+      })
+    },
+    beginLocationPlacement() {
+      this.locationPlacementActive = true
+      this.syncLocationPlacement()
+    },
+    stopLocationPlacement() {
+      this.locationPlacementActive = false
+      this.syncLocationPlacement()
+    },
+    setLocationCoordinates(value) {
+      const coordinates = normalizeMyAtlasCustomCoordinates(value)
+      if (!this.locationPlacementActive || !coordinates) return
+      this.locationLongitude = String(coordinates[0])
+      this.locationLatitude = String(coordinates[1])
+      this.syncLocationPlacement()
+    },
     addDraftDate() {
       if (!this.validDraftDate) return
       this.dates = [...this.dates, { year: this.year }].sort(
@@ -211,6 +282,16 @@ export default {
       )
     },
     submit() {
+      const customPlace = this.locationEditing
+        ? normalizeMyAtlasCustomPlace({
+            name: this.locationName,
+            coordinates: this.locationCoordinates(),
+          })
+        : undefined
+      if (customPlace === null) {
+        this.locationError = "Enter a name and valid coordinates before saving."
+        return
+      }
       if (this.year) this.addDraftDate()
       const memory = normalizeMyAtlasMemory(this.memory)
       if (memory === null) {
@@ -223,6 +304,7 @@ export default {
       this.$emit("save", {
         visitedDates: this.dates.map(date => ({ ...date })),
         memory,
+        ...(customPlace ? { customPlace } : {}),
       })
     },
   },

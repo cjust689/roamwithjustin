@@ -227,9 +227,11 @@ function publicPlace(record, pin) {
   }
   let place
   try {
-    place = CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
-      ? projectCustomPlace(pin.placeId, pin.customPlace)
-      : projectCatalogPlace(record)
+    place =
+      pin.placeSnapshot ||
+      (CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+        ? projectCustomPlace(pin.placeId, pin.customPlace)
+        : projectCatalogPlace(record))
   } catch {
     throw new PublicAtlasServiceError("A public Atlas place is unavailable.")
   }
@@ -263,11 +265,11 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
     throw new PublicAtlasNotFoundError()
   }
 
-  const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
   const catalogPins = snapshot.pins.filter(
-    pin => !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+    pin => !pin.placeSnapshot && !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
   )
   const placeIds = catalogPins.map(pin => pin.placeId)
+  const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
   const records = placeIds.length
     ? typeof catalog.resolveMany === "function"
       ? await catalog.resolveMany(placeIds)

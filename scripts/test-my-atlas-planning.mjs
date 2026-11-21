@@ -90,13 +90,15 @@ const mapComponent = fs.readFileSync(
   ),
   "utf8"
 )
-const ownerView = fs.readFileSync(
-  new URL(
-    "../src/features/my-atlas/views/MyAtlasGeographicProof.vue",
-    import.meta.url
-  ),
-  "utf8"
-)
+const ownerView = fs
+  .readFileSync(
+    new URL(
+      "../src/features/my-atlas/views/MyAtlasGeographicProof.vue",
+      import.meta.url
+    ),
+    "utf8"
+  )
+  .replace(/\s+/g, " ")
 const publicView = fs.readFileSync(
   new URL(
     "../src/features/my-atlas/views/MyAtlasPublicView.vue",
@@ -164,7 +166,7 @@ assert.match(mapComponent, /renderPlannerMarkers/)
 assert.match(mapComponent, /showPlannerOverview/)
 assert.match(mapComponent, /buildPlannerMapSegments/)
 assert.match(mapComponent, /plannerReturnsToStart/)
-assert.match(mapComponent, />Start[\s\S]*>Route[\s\S]*plannerFinishLabel/)
+assert.match(mapComponent, /Start[\s\S]*Route[\s\S]*plannerFinishLabel/)
 assert.match(mapComponent, /plannerReadOnly/)
 assert.match(mapComponent, /Shared trip map/)
 assert.match(sharedTripView, /<MyAtlasMap/)
@@ -175,7 +177,7 @@ assert.match(sharedTripView, /<details open>/)
 assert.match(sharedTripView, />\s*Trip summary\s*</)
 assert.match(
   ownerView,
-  /:places="!canUseAtlas \|\| plannerActive \? \[\] : displayedPlaces"/
+  /:places="\s*!canUseAtlas \|\| plannerMapActive \|\| tripMapActive \? \[\] : displayedPlaces\s*"/
 )
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)
@@ -185,7 +187,7 @@ assert.match(ownerView, />\s*Share Visited Atlas\s*</)
 assert.match(ownerView, />\s*Your favorite travel image\s*</)
 assert.match(ownerView, />\s*Your Visited Atlas is empty\s*</)
 assert.match(ownerView, />\s*Add a visited place\s*</)
-assert.match(ownerView, /Share a saved trip separately from its\s+trip card/)
+assert.match(ownerView, /Share a saved trip from the\s+Planning\s+tab/)
 assert.match(ownerView, /Create public Atlas link/)
 assert.match(ownerView, /storyExportPending/)
 assert.match(ownerView, /Creating Story image/)
@@ -212,8 +214,8 @@ assert.match(publicView, /fetchPublicAtlasImage/)
 assert.match(publicView, /favoriteImage,/)
 assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
-assert.match(ownerView, /openAtlasPanel\('visited'\)/)
-assert.match(ownerView, /class="my-atlas-planner-action"/)
+assert.match(ownerView, /role="tablist"/)
+assert.match(ownerView, /aria-controls="my-atlas-tab-panel"/)
 assert.match(ownerView, /class="my-atlas-selected-memory-action"/)
 assert.match(
   ownerView,

@@ -135,8 +135,11 @@
         class="journey-experience-story"
       >
         <header>
-          <h3 tabindex="-1">{{ experience.title }}</h3>
-          <p v-if="experience.summary">{{ experience.summary }}</p>
+          <EditorialExperienceCard
+            :experience="experience"
+            :show-image="!experience.moments.length"
+            story
+          />
         </header>
 
         <article
@@ -291,11 +294,13 @@
 </template>
 
 <script>
+import EditorialExperienceCard from "./EditorialExperienceCard.vue"
 import commercialLinks from "@/content/commercial-links.js"
 import { trackAnalyticsEvent, trackAtlasOpen } from "@/utils/analytics.mjs"
 
 export default {
   name: "JourneyStoryBody",
+  components: { EditorialExperienceCard },
   props: {
     trip: {
       type: Object,

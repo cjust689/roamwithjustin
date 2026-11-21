@@ -66,6 +66,12 @@ export function publicProfile(profile) {
     pinCount: profile.pinCount || 0,
     wishCount: profile.wishCount || 0,
     planCount: profile.planCount || 0,
+    ...(profile.tripSchemaVersion
+      ? {
+          tripSchemaVersion: profile.tripSchemaVersion,
+          tripCount: profile.tripCount || 0,
+        }
+      : {}),
     acceptedTermsVersion: profile.acceptedTermsVersion,
     acceptedPrivacyVersion: profile.acceptedPrivacyVersion,
     acceptedAt: profile.acceptedAt,
@@ -206,7 +212,7 @@ function ownerAtlasImageMetadata(atlasImage) {
 
 async function projectOwnerPins(pins, placeCatalog, environment) {
   const catalogPins = pins.filter(
-    pin => !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+    pin => !pin.placeSnapshot && !CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
   )
   let records = []
   if (catalogPins.length) {
@@ -217,9 +223,11 @@ async function projectOwnerPins(pins, placeCatalog, environment) {
     catalogPins.map((pin, index) => [pin.placeId, records[index]])
   )
   return pins.map(pin => {
-    const place = CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
-      ? projectCustomPlace(pin.placeId, pin.customPlace)
-      : projectCatalogPlace(recordsByPlaceId.get(pin.placeId))
+    const place =
+      pin.placeSnapshot ||
+      (CUSTOM_PLACE_ID_PATTERN.test(pin.placeId)
+        ? projectCustomPlace(pin.placeId, pin.customPlace)
+        : projectCatalogPlace(recordsByPlaceId.get(pin.placeId)))
     return Object.freeze({
       pinId: pin.pinId,
       ...place,
@@ -619,12 +627,34 @@ export async function exportMyAtlas({ environment, identity }) {
     await owner.user.exportOwnerState(owner.identityDigest)
   )
   return Object.freeze({
-    schemaVersion: 2,
+    schemaVersion: result.trips ? 3 : 2,
     exportedAt: new Date().toISOString(),
     profile: publicProfile(result.profile),
     pins: Object.freeze(result.pins.map(publicOwnerPin)),
     wishlist: Object.freeze(result.wishes || []),
     plans: Object.freeze(result.plans || []),
+    ...(result.trips
+      ? {
+          trips: result.trips,
+          tripUpgrade: {
+            schemaVersion: result.tripUpgrade.schemaVersion,
+            upgradedAt: result.tripUpgrade.upgradedAt,
+            rollbackAvailable: Boolean(result.tripUpgrade.rollbackSnapshot),
+          },
+          ...(result.tripUpgrade.rollbackSnapshot
+            ? {
+                tripRollbackSnapshot: {
+                  profile: publicProfile(
+                    result.tripUpgrade.rollbackSnapshot.source.profile
+                  ),
+                  pins: result.tripUpgrade.rollbackSnapshot.source.pins,
+                  wishlist: result.tripUpgrade.rollbackSnapshot.source.wishes,
+                  plans: result.tripUpgrade.rollbackSnapshot.source.plans,
+                },
+              }
+            : {}),
+        }
+      : {}),
     atlasImage: ownerAtlasImageMetadata(result.atlasImage),
   })
 }

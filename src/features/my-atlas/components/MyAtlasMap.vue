@@ -23,9 +23,15 @@
         {{ plannerStatusDescription }}
       </span>
       <span v-if="plannerRoute.length" class="my-atlas-planner-map-key">
-        <i class="is-departure" aria-hidden="true"></i>Start
-        <i class="is-route" aria-hidden="true"></i>Route
-        <i class="is-finish" aria-hidden="true"></i>{{ plannerFinishLabel }}
+        <template v-if="plannerHasEndpoints"
+          ><i class="is-departure" aria-hidden="true"></i>Start</template
+        >
+        <i class="is-route" aria-hidden="true"></i
+        >{{ plannerHasEndpoints ? "Route" : "Trip order" }}
+        <template v-if="plannerHasEndpoints"
+          ><i class="is-finish" aria-hidden="true"></i
+          >{{ plannerFinishLabel }}</template
+        >
       </span>
     </div>
     <div
@@ -160,6 +166,11 @@ export default {
     }
   },
   computed: {
+    plannerHasEndpoints() {
+      return this.plannerRoute.some(
+        node => node.role === "start" || node.role === "finish"
+      )
+    },
     mapAriaLabel() {
       if (!this.plannerActive) return "Personal travel map"
       return this.plannerReadOnly
@@ -333,6 +344,17 @@ export default {
     removePlacementMarker() {
       if (this.placementMarker) this.placementMarker.remove()
       this.placementMarker = null
+    },
+    focusPlacement() {
+      const coordinates = this.normalizedPlacementCoordinates(
+        this.placementCoordinates
+      )
+      if (this.placementActive && coordinates && this.map)
+        this.map.easeTo({
+          center: coordinates,
+          zoom: Math.max(this.map.getZoom(), 10),
+          duration: 400,
+        })
     },
     syncPlacementMarker() {
       if (!this.map || !this.ready) return
