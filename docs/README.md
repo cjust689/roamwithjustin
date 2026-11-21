@@ -79,6 +79,31 @@ version `b5b3674c-6219-4053-b024-7cb65cd4e539`.
 
 Start here before using an older implementation brief.
 
+Current completion inventory: [Release completion checklist, November 20, 2026](implementation/release-completion-checklist-2026-11-20.md).
+PRs 224 and 225 and Pages run 44847083891 deployed the recent tabs, location and
+trip-workspace source. The inventory separates released code from disabled trip
+writes, unfinished implementation, provider/content dependencies and acceptance.
+
+Latest owner correction: adding a visited destination must not create a trip.
+The new local destination model keeps visits ungrouped until explicitly assigned
+to a named trip. The review now counts destinations separately from existing
+planned trips and replaces the typed phrase with a name and retention checkbox.
+See the independent-destinations correction in the trip transition checklist.
+Staging Worker `21912d9e-652a-4693-ab15-222d0e9eb6b8` now enables this explicit
+version-2 save flow. The matching frontend correction is local on port 8080 and
+has not yet been included in the earlier Pages release.
+The local profile follow-up separates Share Your Atlas, Customize My Atlas and
+the top-right profile dropdown. Story-image creation stays on Overview; profile
+links, private data export and deletion are in the dropdown. The active trip
+transition and account-state documents record the tested navigation boundaries.
+Owner controls also share local hover/press/focus feedback, 44 pixel touch
+targets and busy indicators for the main save/export actions, with reduced-motion
+support. This interaction follow-up remains part of the pending frontend release.
+Explore Atlases in the intro now uses an outlined secondary pill with the same
+height and alignment as Sign in or Quick start.
+Share Your Atlas and Customize My Atlas now use matching disclosure headers
+with the same Open/Hide control and keyboard behavior.
+
 My Atlas mobile action feedback and the explicit trip-architecture acceptance
 audit are tracked in [Trip centric transition](implementation/my-atlas-trip-centric-transition.md).
 Creator-first trip organization is now the next priority. The local foundation

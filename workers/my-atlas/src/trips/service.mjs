@@ -76,7 +76,7 @@ const checked = result => {
 export function matchTripRoute(path) {
   const base = "/v1/me/trips"
   if (path === base) return { action: "collection", methods: ["GET", "POST"] }
-  for (const action of ["upgrade", "rollback", "combine"])
+  for (const action of ["upgrade", "rollback", "combine", "group-destinations"])
     if (path === `${base}/${action}`) return { action, methods: ["POST"] }
   const match = path.match(
     /^\/v1\/me\/trips\/((?:trip|plan)_[a-f0-9]{24})(?:\/(lifecycle|stops)(?:\/(order|stop_[a-f0-9]{32}))?)?$/
@@ -119,6 +119,7 @@ export async function tripRequest({
       upgraded: state.upgraded,
       writesEnabled: environment.MY_ATLAS_TRIP_WRITES_ENABLED === "true",
       trips: state.trips,
+      destinations: state.destinations,
       rollbackAvailable: state.rollbackAvailable,
     }
   }
@@ -174,10 +175,12 @@ export async function tripRequest({
       "fingerprint",
       "confirmation",
       "retentionAcknowledged",
+      "destinationModelVersion",
     ])
     if (
       !/^[a-f0-9]{64}$/.test(input.fingerprint || "") ||
       input.confirmation !== "ORGANIZE MY ATLAS" ||
+      input.destinationModelVersion !== 2 ||
       input.retentionAcknowledged !== true
     )
       bad()
@@ -204,6 +207,90 @@ export async function tripRequest({
       if (!preview.ready) throw new TripApiError("upgrade_needs_review")
     }
     value = { retentionPolicy: TRIP_RETENTION_POLICY }
+  } else if (action === "group-destinations") {
+    input = object(body, ["pinIds", "title", "tripId"])
+    const pinIds = ids(input.pinIds, /^pin_[a-f0-9]{24}$/)
+    if (new Set(pinIds).size !== pinIds.length) bad()
+    if (input.tripId && !tripId.test(input.tripId)) bad()
+    const metadata = await mutationMetadata(
+      owner,
+      { expectedRevision, idempotencyKey },
+      "trip:group-destinations::",
+      input
+    )
+    const replay = checked(
+      await owner.user.replayOwnerTripMutation({
+        identityDigest: owner.identityDigest,
+        expectedRevision,
+        now,
+        ...metadata,
+      })
+    )
+    if (replay.found)
+      return {
+        profile: publicProfile(replay.profile),
+        upgraded: replay.upgraded,
+        trip: replay.trip,
+        idempotent: true,
+      }
+    const state = checked(await owner.user.getOwnerTrips(owner.identityDigest))
+    const selected = pinIds.map(id =>
+      state.destinations.find(pin => pin.pinId === id)
+    )
+    if (selected.some(pin => !pin))
+      throw new TripApiError("destination_selection_changed")
+    const source = {
+      profile: {
+        ...state.profile,
+        pinCount: selected.length,
+        planCount: 0,
+        wishCount: 0,
+      },
+      pins: selected,
+      plans: [],
+      wishes: [],
+    }
+    const candidates = await previewTripUpgrade(source, {
+      resolvePlace: async id => {
+        const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
+        const record =
+          typeof catalog.resolve === "function"
+            ? await catalog.resolve(id)
+            : (await catalog.resolveMany([id]))[0]
+        return record ? projectCatalogPlace(record) : null
+      },
+    })
+    if (!candidates.ready) throw new TripApiError("destination_needs_review")
+    const byId = new Map(
+      candidates.destinations.map(item => [item.pinId, item])
+    )
+    for (const item of byId.values()) {
+      item.stop.stopId = await stable("stop", `destination:${item.pinId}`)
+      for (const [index, memory] of item.stop.memories.entries())
+        memory.memoryId = await stable(
+          "memory",
+          `destination:${item.pinId}:${index}`
+        )
+    }
+    value = {
+      destinations: pinIds.map(id => byId.get(id)),
+      ...(input.tripId ? { tripId: input.tripId } : {}),
+      trip: {
+        schemaVersion: 1,
+        tripId: await stable("trip", "group", 24),
+        title: text(input.title, 80, !input.tripId),
+        description: "",
+        lifecycle: "past",
+        workflow: "saved",
+        memories: [],
+        logistics: { flights: [], rentals: [] },
+        sharing: { publicAtlas: false },
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+        statusChangedAt: null,
+      },
+    }
   } else if (action === "rollback") input = object(body, [])
   else if (action === "collection") {
     action = "create"

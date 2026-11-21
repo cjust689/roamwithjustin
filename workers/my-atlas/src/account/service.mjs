@@ -230,6 +230,9 @@ async function projectOwnerPins(pins, placeCatalog, environment) {
         : projectCatalogPlace(recordsByPlaceId.get(pin.placeId)))
     return Object.freeze({
       pinId: pin.pinId,
+      ...(pin.ungrouped !== undefined
+        ? { ungrouped: pin.ungrouped, tripIds: pin.tripIds || [] }
+        : {}),
       ...place,
       ...publicPinTiming(pin),
       memory: ownerPinMemory(pin),

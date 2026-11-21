@@ -246,3 +246,14 @@ not a bucket URL. It is a Worker response that first confirms the active handle,
 public profile, nonempty Visited Atlas, and explicit image visibility choice.
 Making the profile or image private therefore closes public image delivery
 without moving or duplicating the object.
+
+## Local navigation follow-up
+
+The favorite-image editor, required photo location and image presentation
+controls now live in Customize My Atlas on Overview, also opened from the
+top-right profile dropdown. Share Your Atlas retains public visibility, copy
+link and Create story image. Instagram links, private data export and account
+deletion move into the dropdown. Image processing, replacement semantics,
+public-delivery gates and the open external acceptance checklist are unchanged.
+This frontend correction is local until its next promotion. Responsive fixture
+and focus evidence is recorded in the trip transition implementation document.

@@ -49,6 +49,7 @@ export async function previewTripUpgrade(
     new Set(source.plans.map(plan => plan.planId)).size !== source.plans.length
   )
     throw new AccountServiceError()
+  const destinations = []
   const trips = [],
     mappings = [],
     issues = []
@@ -127,11 +128,15 @@ export async function previewTripUpgrade(
         "pin"
       )
       assertCanonicalTrip(candidate)
-      trips.push(candidate)
+      destinations.push({
+        pinId: pin.pinId,
+        stop: occurrence,
+        snapshot: clone(pin),
+      })
       mappings.push({
         source: "pin",
         sourceId: pin.pinId,
-        tripId: candidate.tripId,
+        tripId: null,
         stopIds: [occurrence.stopId],
       })
     } catch {
@@ -179,7 +184,7 @@ export async function previewTripUpgrade(
     }
   }
   const fingerprint = await digest(
-    JSON.stringify({ sourceSnapshot, trips, issues })
+    JSON.stringify({ sourceSnapshot, trips, destinations, issues })
   )
   return {
     schemaVersion: 1,
@@ -187,12 +192,14 @@ export async function previewTripUpgrade(
     fingerprint,
     ready: !issues.length,
     trips,
+    destinations,
     mappings,
     issues,
     counts: {
       sourcePins: source.pins.length,
       sourcePlans: source.plans.length,
       wishesPreserved: source.wishes.length,
+      ungroupedDestinations: destinations.length,
       candidateTrips: trips.length,
       candidateStops: trips.reduce(
         (total, trip) => total + trip.stops.length,
@@ -236,6 +243,11 @@ export async function getMyTripUpgradePreview({
     ready: result.ready,
     counts: result.counts,
     issues: result.issues,
+    destinations: result.destinations.map(({ pinId, stop }) => ({
+      pinId,
+      placeId: stop.place.placeId,
+      name: stop.place.name,
+    })),
     groups: result.trips.map(trip => ({
       tripId: trip.tripId,
       title: trip.title,

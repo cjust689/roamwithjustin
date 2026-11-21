@@ -19,10 +19,6 @@
       <button type="button" @click="close">Close</button>
     </header>
     <p v-if="error" role="alert">{{ error }}</p>
-    <p v-if="groupDestinations.length">
-      Grouping {{ groupDestinations.map(place => place.name).join(", ") }}.
-      Review the trip name and order before saving.
-    </p>
     <button
       v-if="!loaded || refreshNeeded"
       type="button"
@@ -31,73 +27,112 @@
     >
       Refresh trips
     </button>
-    <template v-if="loaded && !upgraded">
+    <p v-if="loaded && !writesEnabled" role="status">
+      Trip saving is unavailable on this server. Your destinations are
+      unchanged.
+    </p>
+    <section
+      v-if="groupDestinations.length"
+      class="trip-form"
+      aria-label="Organize selected destinations"
+    >
+      <h3>Organize destinations</h3>
       <p>
-        Organize your destinations into trips. Existing visited places start as
-        separate trips so you can choose which belong together.
+        These are visited destinations, not separate trips. Choose a name to
+        create a trip, or add them to an existing trip.
       </p>
-      <p v-if="groupDestinations.length">
-        First review the account upgrade below. Your selection will be carried
-        into the trip grouping form after the upgrade, without saving a group
-        automatically.
+      <ol>
+        <li v-for="place in groupDestinations" :key="place.pinId">
+          {{ place.name }}
+        </li>
+      </ol>
+      <label v-if="upgraded && groupTargets.length"
+        >Add to
+        <select v-model="groupTargetId">
+          <option value="">A new trip</option>
+          <option
+            v-for="trip in groupTargets"
+            :key="trip.tripId"
+            :value="trip.tripId"
+          >
+            {{ trip.title }}
+          </option>
+        </select>
+      </label>
+      <label v-if="!groupTargetId"
+        >Trip name<input v-model="groupTitle" maxlength="80" autocomplete="off"
+      /></label>
+      <p>
+        Destinations are added in the order shown. Their memories and visit
+        dates stay attached. Other destinations remain ungrouped.
+      </p>
+      <p>
+        Grouping keeps the destinations' current Visited Atlas sharing choice.
+      </p>
+      <template v-if="!upgraded && preview">
+        <p>
+          {{ preview.counts.ungroupedDestinations }} ungrouped destinations and
+          {{ preview.counts.sourcePlans }} existing planned trips. Existing
+          plans and your Atlas image are preserved.
+        </p>
+        <label v-if="writesEnabled" class="trip-check"
+          ><input v-model="retentionAcknowledged" type="checkbox" />I understand
+          that organized trips remain until I delete them.</label
+        >
+      </template>
+      <button
+        v-if="writesEnabled"
+        type="button"
+        :disabled="!canSaveDestinationGroup"
+        :aria-busy="String(groupSavePending)"
+        @click="saveDestinationGroup"
+      >
+        {{ groupTargetId ? "Add destinations to trip" : "Create trip" }}
+      </button>
+    </section>
+    <template v-if="loaded && !upgraded && !groupDestinations.length">
+      <p>
+        Your visited destinations stay ungrouped until you choose to add them to
+        a named trip. A trip can have one or more stops.
       </p>
       <button type="button" :disabled="pending" @click="previewUpgrade">
-        Review existing trips
+        Review destinations and plans
       </button>
       <div v-if="preview">
         <p>
-          {{ preview.counts.candidateTrips }} trips with
-          {{ preview.counts.candidateStops }} stops. Your original plan and
-          memories are preserved.
+          {{ preview.counts.ungroupedDestinations }} ungrouped destinations and
+          {{ preview.counts.sourcePlans }} existing planned trips.
         </p>
         <ul>
+          <li
+            v-for="destination in preview.destinations"
+            :key="destination.pinId"
+          >
+            {{ destination.name }}
+          </li>
+        </ul>
+        <ul>
           <li v-for="group in preview.groups" :key="group.tripId">
-            {{ group.title }}
-            <small
-              >{{ group.lifecycle === "past" ? "Past" : "Planned" }} ·
-              {{ group.stops.length }} stops</small
-            >
+            {{ group.title }} · {{ group.stops.length }}
+            {{ group.stops.length === 1 ? "stop" : "stops" }}
           </li>
         </ul>
         <p v-if="!preview.ready">
-          Some places need review before the upgrade can proceed.
+          Some destinations need review before organizing.
         </p>
-        <p>
-          Organized trips are kept until you delete them. You can undo this
-          upgrade before making another saved change.
-        </p>
-        <label class="trip-check"
-          ><input v-model="retentionAcknowledged" type="checkbox" />I understand
-          the trip retention rule.</label
-        >
-        <label
-          >Type ORGANIZE MY ATLAS<input
-            v-model="confirmation"
-            autocomplete="off"
-        /></label>
-        <button
-          type="button"
-          :disabled="
-            pending ||
-            !writesEnabled ||
-            !preview.ready ||
-            !retentionAcknowledged ||
-            confirmation !== 'ORGANIZE MY ATLAS'
-          "
-          @click="
-            mutate('upgrade', {
-              fingerprint: preview.fingerprint,
-              confirmation,
-              retentionAcknowledged,
-            })
-          "
-        >
-          Organize my trips
-        </button>
-        <p v-if="!writesEnabled">
-          The trip upgrade is disabled on this server. Your current Atlas is
-          unchanged.
-        </p>
+        <template v-if="writesEnabled">
+          <label class="trip-check"
+            ><input v-model="retentionAcknowledged" type="checkbox" />I
+            understand that organized trips remain until I delete them.</label
+          >
+          <button
+            type="button"
+            :disabled="pending || !preview.ready || !retentionAcknowledged"
+            @click="enableTripOrganizing"
+          >
+            Enable trip organizing
+          </button>
+        </template>
       </div>
     </template>
     <template v-if="loaded && upgraded">
@@ -126,7 +161,8 @@
             <strong>{{ trip.title }}</strong
             ><small
               >{{ trip.lifecycle === "past" ? "Past" : "Planned" }} ·
-              {{ trip.stops.length }} stops</small
+              {{ trip.stops.length }}
+              {{ trip.stops.length === 1 ? "stop" : "stops" }}</small
             >
           </button>
           <label v-if="trip.lifecycle === 'past'" class="trip-check"
@@ -150,6 +186,7 @@
         <button
           type="button"
           :disabled="busy || !combineTitle.trim()"
+          :aria-busy="String(pendingAction === 'combine')"
           @click="
             mutate('combine', { tripIds: combineIds, title: combineTitle })
           "
@@ -176,6 +213,7 @@
         <button
           type="button"
           :disabled="busy || !draftTitle.trim() || !draftStops.length"
+          :aria-busy="String(pendingAction === 'create')"
           @click="
             mutate('create', {
               title: draftTitle,
@@ -200,6 +238,7 @@
           ><button
             type="button"
             :disabled="busy || !titleDraft.trim()"
+            :aria-busy="String(pendingAction === 'metadata')"
             @click="
               mutate(
                 'metadata',
@@ -488,6 +527,7 @@ export default {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
     resolveLink: { type: Function, default: null },
+    profilePublic: { type: Boolean, default: false },
     scope: { type: String, default: "all" },
   },
   emits: [
@@ -501,6 +541,7 @@ export default {
     open: false,
     loaded: false,
     pending: false,
+    pendingAction: "",
     refreshNeeded: false,
     error: "",
     trips: [],
@@ -520,6 +561,9 @@ export default {
     combineIds: [],
     combineTitle: "",
     groupDestinations: [],
+    groupTitle: "",
+    groupTargetId: "",
+    destinations: [],
     destinationGroupResolved: false,
     editingStopId: "",
     memoryDraft: "",
@@ -552,6 +596,31 @@ export default {
     placementActive: false,
   }),
   computed: {
+    groupSavePending() {
+      return (
+        this.pending &&
+        ["upgrade", "groupDestinations"].includes(this.pendingAction)
+      )
+    },
+    groupTargets() {
+      return this.trips.filter(
+        trip =>
+          trip.lifecycle === "past" &&
+          trip.workflow === "saved" &&
+          trip.sharing.publicAtlas === this.profilePublic
+      )
+    },
+    canSaveDestinationGroup() {
+      return (
+        !this.busy &&
+        this.groupDestinations.length > 0 &&
+        this.groupDestinations.every(place =>
+          /^pin_[a-f0-9]{24}$/.test(place.pinId || "")
+        ) &&
+        Boolean(this.groupTargetId || this.groupTitle.trim()) &&
+        (this.upgraded || (this.preview?.ready && this.retentionAcknowledged))
+      )
+    },
     selectedTravelDraft: {
       get() {
         return this.travelDrafts[this.selectedId] || emptyTravelSearchDraft()
@@ -620,44 +689,46 @@ export default {
     async prepareDestinationGroup(places) {
       this.destinationGroupResolved = false
       this.groupDestinations = places.map(place => ({
+        pinId: place.pinId,
         placeId: place.placeId,
         name: place.name,
       }))
       this.combineIds = []
       this.combineTitle = ""
+      this.groupTitle = ""
+      this.groupTargetId = ""
       if (!this.loaded) return
       if (this.upgraded) this.applyDestinationGroup()
       else await this.previewUpgrade()
     },
     applyDestinationGroup() {
-      if (
-        !this.upgraded ||
-        this.destinationGroupResolved ||
-        !this.groupDestinations.length
-      )
-        return
-      const matches = this.groupDestinations.map(place =>
-        this.trips.filter(
-          trip =>
-            trip.lifecycle === "past" &&
-            trip.workflow === "saved" &&
-            trip.stops.length === 1 &&
-            trip.stops[0].place.placeId === place.placeId
-        )
-      )
-      if (matches.some(trips => trips.length !== 1)) {
-        this.combineIds = []
-        this.error =
-          "Some destinations already belong to trips or have multiple visits. Select the specific Past trips below to group them."
-        return
-      }
+      if (!this.groupDestinations.length) return
       this.filter = "past"
-      this.combineIds = matches.map(trips => trips[0].tripId)
-      this.destinationGroupResolved = true
       this.selectedId = ""
       this.creating = false
       this.adding = false
       this.$emit("route-change", { active: false, route: [] })
+    },
+    async enableTripOrganizing() {
+      if (!this.preview?.ready || !this.retentionAcknowledged || this.busy)
+        return
+      await this.mutate("upgrade", {
+        fingerprint: this.preview.fingerprint,
+        confirmation: "ORGANIZE MY ATLAS",
+        destinationModelVersion: 2,
+        retentionAcknowledged: true,
+      })
+    },
+    async saveDestinationGroup() {
+      if (!this.canSaveDestinationGroup) return
+      if (!this.upgraded) await this.enableTripOrganizing()
+      if (!this.upgraded || this.refreshNeeded) return
+      await this.mutate("groupDestinations", {
+        pinIds: this.groupDestinations.map(place => place.pinId),
+        ...(this.groupTargetId
+          ? { tripId: this.groupTargetId }
+          : { title: this.groupTitle.trim() }),
+      })
     },
     token() {
       return getMyAtlasApiAccessToken()
@@ -700,6 +771,7 @@ export default {
       this.pending = true
       try {
         const state = await this.call({ action: "list" })
+        this.destinations = state.destinations || []
         this.trips = state.trips
         this.upgraded = state.upgraded
         this.writesEnabled = state.writesEnabled === true
@@ -789,6 +861,7 @@ export default {
       this.pending = true
       this.error = ""
       this.announce("Saving trip changes.", "busy")
+      this.pendingAction = action
       try {
         const result = await this.call({
           action,
@@ -820,12 +893,17 @@ export default {
           this.selectedId = ""
         }
         this.upgraded = result.upgraded
+        if (action === "groupDestinations") {
+          this.groupDestinations = []
+          this.groupTitle = ""
+          this.groupTargetId = ""
+        }
         if (action === "rollback") {
           this.preview = null
           this.confirmation = ""
           this.retentionAcknowledged = false
         }
-        this.$emit("changed", result)
+        this.$emit("changed", { ...result, action })
         this.announce(
           action === "lifecycle"
             ? `Trip moved to ${body.lifecycle === "past" ? "Past" : "Planning"}.`
@@ -833,14 +911,22 @@ export default {
         )
         try {
           const state = await this.call({ action: "list" })
+          this.destinations = state.destinations || []
           this.trips = state.trips
           this.rollbackAvailable = state.rollbackAvailable
           this.currentRevision = state.profile.revision
           this.writesEnabled = state.writesEnabled === true
           if (action === "upgrade") this.applyDestinationGroup()
-          if (action === "combine") this.groupDestinations = []
+          if (["combine", "groupDestinations"].includes(action)) {
+            this.groupDestinations = []
+            this.groupTitle = ""
+            this.groupTargetId = ""
+          }
           if (this.selected)
-            this.select(this.selected, !["create", "combine"].includes(action))
+            this.select(
+              this.selected,
+              !["create", "combine", "groupDestinations"].includes(action)
+            )
           else this.$emit("route-change", { active: false, route: [] })
         } catch {
           this.refreshNeeded = true
@@ -866,6 +952,7 @@ export default {
         this.announce(this.error, "error")
       } finally {
         this.pending = false
+        this.pendingAction = ""
       }
     },
     editStop(stop) {

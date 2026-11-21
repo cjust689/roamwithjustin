@@ -46,6 +46,7 @@ export async function requestMyAtlasTrips({
     rollback: [`${base}/rollback`, "POST"],
     create: [base, "POST"],
     combine: [`${base}/combine`, "POST"],
+    groupDestinations: [`${base}/group-destinations`, "POST"],
     metadata: [trip, "PATCH"],
     lifecycle: [`${trip}/lifecycle`, "PATCH"],
     delete: [trip, "DELETE"],

@@ -202,11 +202,149 @@ describe("private owner profile and pin services", () => {
       {
         fingerprint: preview.fingerprint,
         confirmation: "ORGANIZE MY ATLAS",
+        destinationModelVersion: 2,
         retentionAcknowledged: true,
       },
       options
     )
   }
+  it("keeps destinations independent until explicitly grouped, including one-stop trips and repeated visits", async () => {
+    const addDestination = async (name, coordinates, memory = "") => {
+      const profile = (
+        await getMyProfile({ environment: environment(), identity: IDENTITY })
+      ).profile
+      return createMyPin({
+        environment: environment(),
+        identity: IDENTITY,
+        input: pinInput({
+          customPlace: { name, coordinates },
+          memory,
+          visitedYears: [2025],
+          expectedRevision: profile.revision,
+          idempotencyKey: tripKey(),
+        }),
+        now: NOW,
+      })
+    }
+    const first = await addDestination("Uvita", [1, 2], "Original Uvita memory")
+    const second = await addDestination(
+      "Atlanta",
+      [3, 4],
+      "Original Atlanta memory"
+    )
+    const preview = await getMyTripUpgradePreview({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(preview.counts).toMatchObject({
+      ungroupedDestinations: 2,
+      candidateTrips: 0,
+    })
+    await expect(
+      tripCall("/v1/me/trips/upgrade", {
+        fingerprint: preview.fingerprint,
+        confirmation: "ORGANIZE MY ATLAS",
+        retentionAcknowledged: true,
+      })
+    ).rejects.toThrow("Trip details are invalid.")
+    await upgradeTrips()
+    let state = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(state.trips).toEqual([])
+    expect(state.destinations).toHaveLength(2)
+    const third = await addDestination("Another destination", [5, 6])
+    expect(
+      (await tripCall("/v1/me/trips", undefined, { method: "GET" })).trips
+    ).toEqual([])
+    const key = tripKey(),
+      revision = third.profile.revision
+    const body = {
+      title: "A deliberate trip",
+      pinIds: [second.pin.pinId, first.pin.pinId],
+    }
+    const grouped = await tripCall("/v1/me/trips/group-destinations", body, {
+      key,
+      revision,
+    })
+    expect(grouped.trip.stops.map(stop => stop.place.name)).toEqual([
+      "Atlanta",
+      "Uvita",
+    ])
+    expect(grouped.trip.stops.map(stop => stop.memories[0].text)).toEqual([
+      "Original Atlanta memory",
+      "Original Uvita memory",
+    ])
+    expect(grouped.trip.stops[0].visitedDates).toEqual([{ year: 2025 }])
+    expect(
+      (
+        await tripCall("/v1/me/trips/group-destinations", body, {
+          key,
+          revision,
+        })
+      ).idempotent
+    ).toBe(true)
+    state = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(state.trips).toHaveLength(1)
+    expect(state.destinations.map(pin => pin.pinId)).toEqual([third.pin.pinId])
+    expect(state.profile.pinCount).toBe(3)
+    const pins = (
+      await getMyAtlasState({ environment: environment(), identity: IDENTITY })
+    ).pins
+    expect(pins.find(pin => pin.pinId === third.pin.pinId).ungrouped).toBe(true)
+    expect(pins.filter(pin => pin.ungrouped === false)).toHaveLength(2)
+    const appended = await tripCall("/v1/me/trips/group-destinations", {
+      tripId: grouped.trip.tripId,
+      pinIds: [third.pin.pinId],
+    })
+    expect(appended.trip.stops).toHaveLength(3)
+    await expect(
+      tripCall("/v1/me/trips/group-destinations", {
+        title: "Cannot reuse",
+        pinIds: [first.pin.pinId],
+      })
+    ).rejects.toMatchObject({ code: "destination_selection_changed" })
+    const repeat = await addDestination("Uvita", [1, 2], "A different visit")
+    expect(repeat.profile.pinCount).toBe(3)
+    const single = await tripCall("/v1/me/trips/group-destinations", {
+      title: "One-stop trip",
+      pinIds: [repeat.pin.pinId],
+    })
+    expect(single.trip.stops).toHaveLength(1)
+    expect(single.trip.stops[0].stopId).not.toBe(grouped.trip.stops[1].stopId)
+    expect(single.trip.stops[0].memories[0].text).toBe("A different visit")
+    const remaining = await addDestination("Keep ungrouped", [7, 8])
+    const changed = await updateMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        pinId: remaining.pin.pinId,
+        patch: { memory: "Still editable outside trips" },
+        expectedRevision: remaining.profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    await deleteMyPin({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        pinId: remaining.pin.pinId,
+        expectedRevision: changed.profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    state = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(state.destinations).toEqual([])
+    expect(state.trips).toHaveLength(2)
+    expect(state.profile.pinCount).toBe(3)
+    await expect(
+      tripCall(
+        "/v1/me/trips/group-destinations",
+        { title: "No write", pinIds: [first.pin.pinId] },
+        { disabled: true }
+      )
+    ).rejects.toMatchObject({ code: "trip_writes_disabled" })
+  })
   it("keeps trip writes disabled by default and rejects unreviewed or stale upgrades", async () => {
     await expect(
       tripCall(
@@ -227,6 +365,7 @@ describe("private owner profile and pin services", () => {
       tripCall("/v1/me/trips/upgrade", {
         fingerprint: preview.fingerprint,
         confirmation: "ORGANIZE MY ATLAS",
+        destinationModelVersion: 2,
         retentionAcknowledged: false,
       })
     ).rejects.toThrow()
@@ -244,6 +383,7 @@ describe("private owner profile and pin services", () => {
       tripCall("/v1/me/trips/upgrade", {
         fingerprint: preview.fingerprint,
         confirmation: "ORGANIZE MY ATLAS",
+        destinationModelVersion: 2,
         retentionAcknowledged: true,
       })
     ).rejects.toMatchObject({ code: "upgrade_source_changed" })
@@ -296,6 +436,10 @@ describe("private owner profile and pin services", () => {
     })
     await upgradeTrips()
     const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    await tripCall("/v1/me/trips/group-destinations", {
+      title: "Published journey",
+      pinIds: [created.pin.pinId],
+    })
     const listed = await tripCall("/v1/me/trips", undefined, { method: "GET" })
     const trip = listed.trips[0],
       path = `/v1/me/trips/${trip.tripId}/stops/${trip.stops[0].stopId}`
@@ -399,6 +543,7 @@ describe("private owner profile and pin services", () => {
       body = {
         fingerprint: preview.fingerprint,
         confirmation: "ORGANIZE MY ATLAS",
+        destinationModelVersion: 2,
         retentionAcknowledged: true,
       }
     const upgraded = await tripCall("/v1/me/trips/upgrade", body, {
@@ -407,8 +552,8 @@ describe("private owner profile and pin services", () => {
     })
     expect(upgraded.profile).toMatchObject({
       revision: 5,
-      tripSchemaVersion: 1,
-      tripCount: 2,
+      tripSchemaVersion: 2,
+      tripCount: 1,
       planCount: 0,
     })
     const replay = await tripCall("/v1/me/trips/upgrade", body, {
@@ -419,10 +564,7 @@ describe("private owner profile and pin services", () => {
     expect(replay.profile.revision).toBe(5)
     const listed = await tripCall("/v1/me/trips", undefined, { method: "GET" })
     expect(listed.rollbackAvailable).toBe(true)
-    expect(
-      listed.trips.find(trip => trip.lifecycle === "past").stops[0].memories[0]
-        .text
-    ).toBe("Original memory")
+    expect(listed.destinations[0].memory).toBe("Original memory")
     expect(
       listed.trips.find(trip => trip.lifecycle === "planned")
     ).toMatchObject({
@@ -443,7 +585,7 @@ describe("private owner profile and pin services", () => {
     await user.expireOwnerPlans("2035-01-01T00:00:00.000Z")
     expect(
       (await tripCall("/v1/me/trips", undefined, { method: "GET" })).trips
-    ).toHaveLength(2)
+    ).toHaveLength(1)
     await expect(
       updateMyPin({
         environment: environment(),
@@ -451,17 +593,17 @@ describe("private owner profile and pin services", () => {
         input: {
           pinId: pin.pin.pinId,
           patch: { memory: "Legacy overwrite" },
-          expectedRevision: 5,
+          expectedRevision: 4,
           idempotencyKey: tripKey(),
         },
         now: NOW,
       })
-    ).rejects.toMatchObject({ code: "trip_upgrade_required" })
+    ).rejects.toMatchObject({ code: "revision_conflict" })
     const exported = await exportMyAtlas({
       environment: environment(),
       identity: IDENTITY,
     })
-    expect(exported.trips).toHaveLength(2)
+    expect(exported.trips).toHaveLength(1)
     expect(exported.tripRollbackSnapshot.pins).toEqual(before.pins)
     expect(JSON.stringify(exported)).not.toContain("identityDigest")
     const rollbackKey = tripKey()
@@ -757,14 +899,12 @@ describe("private owner profile and pin services", () => {
     expect(preview.counts).toMatchObject({
       sourcePins: 1,
       sourcePlans: 0,
-      candidateTrips: 1,
-      candidateStops: 1,
+      candidateTrips: 0,
+      candidateStops: 0,
+      ungroupedDestinations: 1,
     })
-    expect(preview.groups[0]).toMatchObject({
-      title: "A visited place",
-      lifecycle: "past",
-      source: "pin",
-    })
+    expect(preview.groups).toEqual([])
+    expect(preview.destinations[0].name).toBe("A visited place")
     expect(JSON.stringify(preview)).not.toContain("Private favorite memory")
     expect(JSON.stringify(preview)).not.toContain("identityDigest")
     expect(JSON.stringify(preview)).not.toContain("legacy")
