@@ -5,8 +5,9 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-20
+updated: 2026-11-21
 related:
+  - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-registration
   - my-atlas-api-authentication
   - my-atlas-geography
@@ -1176,3 +1177,38 @@ Atlas, including heading/subtitle typography, padding and Open/Hide pill. Its
 controlled content stays mounted while collapsed. `aria-expanded` and
 `aria-controls` reflect the state; the profile shortcut opens the section and
 focuses its toggle. The older native details triangle/header styling is removed.
+
+## Integrated trip management, local source November 21
+
+The [active implementation record](../implementation/my-atlas-integrated-trip-management-2026-11-21.md)
+extends explicit canonical trips with owner-controlled visit reassignment and
+Ungrouped storage. `visit:{stopId}` holds a complete independent canonical stop;
+it is not a legacy unique-place pin. The collection response adds owner-only
+`ungroupedVisits` and `legacyPlans`. Map projections deduplicate locations while
+retaining occurrence references for the correct editor. Account export includes
+these visits and raw standalone destinations; account deletion erases them with
+the rest of the owner's Durable Object state.
+
+Transfers preserve stop/memory identity and all visit data, validate the complete
+result, and retain an emptied source trip as a draft. They require matching
+lifecycles and the existing trip write gate, owner authorization, revision and
+idempotency controls. New trips require an explicit title and begin private.
+No destination addition implicitly creates a trip.
+
+Trip visibility updates `sharing.publicAtlas` separately from whole-account
+visibility and snapshot links. Public projections still exclude private notes,
+experiences and logistics. Ungrouping retains prior public visibility; assignment
+uses the target trip's setting. Full standalone visits count toward collection
+storage limits and participate in duplicate-ID validation.
+
+Canonical trips can persist normalized private flight/rental search drafts in
+`logistics.flights[].searchDraft` and `logistics.rentals[].searchDraft`, with
+stable logistics IDs. Saving is explicit and revisioned. These are travel search
+intentions, not bookings or provider URLs. The legacy planner keeps its existing
+browser drafts. Public read-only links continue using the allowlisted projection.
+
+Overview independently loads actual canonical trips and legacy saved plans,
+shows three cards initially, and displays only known dates. It does not turn
+independent destinations into cards. Collection notifications refresh these cards;
+revision and account-generation checks reject stale responses. Sign-out and
+account deletion clear the private list and invalidate in-flight requests.

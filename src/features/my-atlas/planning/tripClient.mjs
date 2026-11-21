@@ -17,6 +17,8 @@ export async function requestMyAtlasTrips({
   if (
     ([
       "metadata",
+      "sharing",
+      "logistics",
       "lifecycle",
       "delete",
       "addStop",
@@ -25,7 +27,7 @@ export async function requestMyAtlasTrips({
       "removeStop",
     ].includes(action) &&
       !tripId) ||
-    (["editStop", "removeStop"].includes(action) && !stopId)
+    (["editStop", "removeStop", "editVisit"].includes(action) && !stopId)
   )
     throw new MyAtlasApiError("Trip selection is invalid.", {
       code: "invalid_trip",
@@ -46,6 +48,10 @@ export async function requestMyAtlasTrips({
     rollback: [`${base}/rollback`, "POST"],
     create: [base, "POST"],
     combine: [`${base}/combine`, "POST"],
+    transfer: [`${base}/visits/transfer`, "POST"],
+    editVisit: [`${base}/visits/${stopId}`, "PATCH"],
+    sharing: [`${trip}/sharing`, "PATCH"],
+    logistics: [`${trip}/logistics`, "PATCH"],
     groupDestinations: [`${base}/group-destinations`, "POST"],
     metadata: [trip, "PATCH"],
     lifecycle: [`${trip}/lifecycle`, "PATCH"],

@@ -165,6 +165,7 @@ const dependencies = {
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
   MyAtlasTrips: {},
+  MyAtlasJourneyCards: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   getMyAtlasApiAccessToken: async () => "fixture",

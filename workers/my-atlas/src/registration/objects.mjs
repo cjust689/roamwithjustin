@@ -1,4 +1,5 @@
 import { DurableObject } from "cloudflare:workers"
+import { storedVisits } from "../trips/visits.mjs"
 import {
   TRIP_MARKER,
   TRIP_BACKUP,
@@ -1225,6 +1226,11 @@ export class UserProfileDurableObject extends DurableObject {
       destinations: Array.from(
         this.ctx.storage.kv.list({ prefix: "pin:" }),
         ([, pin]) => pin
+      ),
+      ungroupedVisits: storedVisits(this.ctx.storage),
+      legacyPlans: Array.from(
+        this.ctx.storage.kv.list({ prefix: "plan:" }),
+        ([, plan]) => plan
       ),
       rollbackAvailable: Boolean(this.ctx.storage.kv.get(TRIP_BACKUP)),
     }
@@ -2539,6 +2545,11 @@ export class UserProfileDurableObject extends DurableObject {
         ),
         plans: [],
         trips: storedTrips(this.ctx.storage),
+        ungroupedVisits: storedVisits(this.ctx.storage),
+        destinations: Array.from(
+          this.ctx.storage.kv.list({ prefix: "pin:" }),
+          ([, pin]) => pin
+        ),
         tripUpgrade: {
           ...this.ctx.storage.kv.get(TRIP_MARKER),
           rollbackSnapshot: this.ctx.storage.kv.get(TRIP_BACKUP) || null,

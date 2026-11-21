@@ -16,6 +16,7 @@ import { WorkerPlaceCatalog } from "../catalog/store.mjs"
 import { sha256 } from "../registration/hashing.mjs"
 import { previewTripUpgrade } from "./preview.mjs"
 import { normalizeExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
+import { normalizeTripTravelDraft } from "../../../../shared/my-atlas-trip-logistics.mjs"
 import {
   validTripCalendarDate,
   TRIP_RETENTION_POLICY,
@@ -75,17 +76,26 @@ const checked = result => {
 
 export function matchTripRoute(path) {
   const base = "/v1/me/trips"
+  if (path === `${base}/visits/transfer`)
+    return { action: "transfer", methods: ["POST"] }
+  const standalone = path.match(
+    /^\/v1\/me\/trips\/visits\/(stop_[a-f0-9]{32})$/
+  )
+  if (standalone)
+    return { action: "visit-edit", stopId: standalone[1], methods: ["PATCH"] }
   if (path === base) return { action: "collection", methods: ["GET", "POST"] }
   for (const action of ["upgrade", "rollback", "combine", "group-destinations"])
     if (path === `${base}/${action}`) return { action, methods: ["POST"] }
   const match = path.match(
-    /^\/v1\/me\/trips\/((?:trip|plan)_[a-f0-9]{24})(?:\/(lifecycle|stops)(?:\/(order|stop_[a-f0-9]{32}))?)?$/
+    /^\/v1\/me\/trips\/((?:trip|plan)_[a-f0-9]{24})(?:\/(lifecycle|stops|sharing|logistics)(?:\/(order|stop_[a-f0-9]{32}))?)?$/
   )
   if (!match) return null
   if (!match[2])
     return { action: "trip", tripId: match[1], methods: ["PATCH", "DELETE"] }
   if (match[2] === "lifecycle" && !match[3])
     return { action: "lifecycle", tripId: match[1], methods: ["PATCH"] }
+  if (["sharing", "logistics"].includes(match[2]) && !match[3])
+    return { action: match[2], tripId: match[1], methods: ["PATCH"] }
   if (match[2] === "stops")
     return {
       action: match[3] === "order" ? "reorder" : match[3] ? "stop" : "stop-add",
@@ -120,6 +130,8 @@ export async function tripRequest({
       writesEnabled: environment.MY_ATLAS_TRIP_WRITES_ENABLED === "true",
       trips: state.trips,
       destinations: state.destinations,
+      ungroupedVisits: state.ungroupedVisits,
+      legacyPlans: state.legacyPlans,
       rollbackAvailable: state.rollbackAvailable,
     }
   }
@@ -291,6 +303,69 @@ export async function tripRequest({
         statusChangedAt: null,
       },
     }
+  } else if (action === "transfer") {
+    input = object(body, ["fromTripId", "targetTripId", "stopIds", "title"])
+    if (
+      !(input.fromTripId === null || tripId.test(input.fromTripId || "")) ||
+      !(input.targetTripId === null || tripId.test(input.targetTripId || "")) ||
+      (input.fromTripId === input.targetTripId &&
+        !(input.fromTripId === null && input.title))
+    )
+      bad()
+    const selected = ids(input.stopIds, stopId)
+    if (new Set(selected).size !== selected.length) bad()
+    value = {
+      fromTripId: input.fromTripId,
+      targetTripId: input.targetTripId,
+      stopIds: selected,
+    }
+    if (input.title !== undefined) {
+      if (input.targetTripId !== null) bad()
+      value.newTrip = {
+        schemaVersion: 1,
+        tripId: await stable("trip", "moved-trip", 24),
+        title: text(input.title, 80, true),
+        description: "",
+        lifecycle: "past",
+        workflow: "saved",
+        memories: [],
+        logistics: { flights: [], rentals: [] },
+        sharing: { publicAtlas: false },
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+        statusChangedAt: null,
+      }
+    }
+  } else if (action === "sharing") {
+    input = object(body, ["publicAtlas"])
+    if (typeof input.publicAtlas !== "boolean") bad()
+    value = { tripId: route.tripId, publicAtlas: input.publicAtlas }
+  } else if (action === "logistics") {
+    input = object(body, ["draft"])
+    let draft
+    try {
+      draft = normalizeTripTravelDraft(input.draft)
+    } catch {
+      bad()
+    }
+    value = {
+      tripId: route.tripId,
+      logistics: {
+        flights: [
+          {
+            flightId: `flight_${(await sha256(`${owner.userId}\0${route.tripId}\0main-flight`)).slice(0, 24)}`,
+            searchDraft: draft.flights,
+          },
+        ],
+        rentals: [
+          {
+            rentalId: `rental_${(await sha256(`${owner.userId}\0${route.tripId}\0main-rental`)).slice(0, 24)}`,
+            searchDraft: draft.rental,
+          },
+        ],
+      },
+    }
   } else if (action === "rollback") input = object(body, [])
   else if (action === "collection") {
     action = "create"
@@ -365,7 +440,7 @@ export async function tripRequest({
       afterStopId: input.afterStopId || null,
       stop: await stop(selectionInput, "added-stop"),
     }
-  } else if (action === "stop") {
+  } else if (action === "stop" || action === "visit-edit") {
     value = { tripId: route.tripId, stopId: route.stopId }
     if (method === "DELETE") {
       action = "stop-remove"
@@ -377,7 +452,7 @@ export async function tripRequest({
         bad()
       value.discardContent = input.discardContent === true
     } else {
-      action = "stop-edit"
+      action = action === "visit-edit" ? "visit-edit" : "stop-edit"
       input = object(body, [
         "memory",
         "experienceChange",
