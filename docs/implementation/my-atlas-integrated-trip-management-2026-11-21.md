@@ -153,7 +153,7 @@ deletion clear private Overview state and invalidate outstanding requests.
 - [x] Verify both themes at 320, 390 and 1440 pixels with a 50-visit fixture,
       single-dialog behavior, focus wrapping, Escape restoration, visibility
       acknowledgement/duplicate suppression, map selection and failed drafts.
-- [ ] Release the compact workspace follow-up after owner review.
+- [x] Release the compact workspace follow-up in PRs 231 and 232.
 
 Switch stability correction: switches are excluded from generic hover/press
 transforms. Their saving indicator overlays the fixed-width track rather than
@@ -193,7 +193,7 @@ passed again with 59 runtime tests after these refinements.
       and 32 unique results: full-width padded rows, independent result scrolling,
       updated counts/selection and confirmation visible after scrolling the body.
       Evidence is in `.state/theme/trip-search-browser.json`.
-- [ ] Release with the other local compact-workspace changes.
+- [x] Release with the compact-workspace changes in PRs 231 and 232.
 
 This changes presentation and draft feedback only. Selection payloads sent to
 the API still contain their original place references; display context is not
@@ -209,3 +209,52 @@ existing manual draft. Removing that searched visit also removes its added
 preview. At 320, 390 and 1440 pixels, Chrome verified populated fields, separate
 catalog/custom identities, optional editable manual fields, return to search
 and zero horizontal overflow. Evidence: `.state/theme/destination-entry-browser.json`.
+
+### Registration and map-only feedback batch, local draft
+
+The compact editor release above subsequently shipped through PRs 231 and 232
+and successful Pages run 44918695671. The following changes are a new local
+feedback batch, not part of that deployment.
+
+- [x] Draft clearer handle/name field guidance and list unmet creation
+      requirements, including invitations, name/handle validity, consent and
+      human verification. Disable stale username autofill on the handle field.
+- [x] Draft whole-sidebar hide/open controls, with the restore control at the
+      bottom of the map. Keep form instances mounted and resize the existing
+      SDK map, preserving its camera and current route.
+- [x] Draft map gesture hints and SDK zoom/compass controls.
+- [x] Draft an in-map trip navigator with trip selection, current stop,
+      progress, Previous/Next and collapse/close controls. Canonical visit order
+      is retained, including repeated visits. All destinations is a geographic
+      view, not a generated trip. Navigation changes only the current view.
+- [x] Draft marker containment corrections: explicitly size the mobile map
+      shell, isolate its stacking context, and animate the pin's inner shape
+      rather than overriding the SDK-positioned marker transform.
+- [x] Run registration, sidebar, map and accessibility verification after the
+      owner finishes providing feedback.
+- [x] Run formatting/managed documentation audit and final checks with the
+      completed feedback batch before release.
+- [ ] Complete the owner's authorized develop/main promotion.
+
+The owner initially deferred testing, then explicitly authorized testing,
+resolution and promotion. The map navigator and marker corrections are included
+in this same batch. Source paths are `MyAtlasMapNavigator.vue`, `MyAtlasMap.vue`
+and `MyAtlasGeographicProof.vue`; no SDK map instance is replaced during navigation.
+
+Verification after that authorization:
+
+- [x] Full My Atlas suite passed, including 59 Workers runtime tests.
+- [x] Production build, ESLint and documentation audit passed.
+- [x] Script tests validate registration requirements, signed-out map privacy,
+      repeated-visit navigation, original stop numbering when coordinates are
+      missing, boundary stops and unchanged saved trip data.
+- [x] Chrome checked 320, 390 and 1440 pixels: sidebar restoration, same map
+      instance, viewport bounds, trip switching, repeated visits, collapse and
+      untouched account revision/trip records. Registration fields were exercised
+      with synthetic verification values; no account was created.
+- [x] Mobile city cycling checked selected marker containment, isolated/clipped
+      map rendering and the absence of transform transitions on SDK markers.
+
+Browser evidence: `.state/theme/map-feedback-browser.json` and
+`.state/theme/map-marker-containment.json`. Genuine signed-in acceptance remains
+separate from these synthetic browser fixtures and isolated runtime tests.

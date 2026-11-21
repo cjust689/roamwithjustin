@@ -1250,3 +1250,19 @@ only original selection references enter the save payload.
 Search selections populate a separate read-only preview. Manual entry is an
 explicit optional mode backed by the existing custom draft, so catalog identity
 is preserved and switching modes does not silently replace or duplicate it.
+
+The entire owner sidebar can be hidden while
+remaining mounted, then restored from a bottom map control. The same SDK map
+is resized rather than recreated. This draft adds navigation-control and gesture
+help affordances without changing account permissions or persistence. Testing
+was initially deferred, then authorized and completed as recorded in the active
+implementation checklist.
+
+This batch also adds a navigator rendered inside the map shell. Its
+selection, stop index and collapsed state are local view state; it reads existing
+owner trip metadata without modifying visits, dates or sharing. Canonical stop
+order is preserved; the All destinations choice remains a geographic view.
+Map movement uses the existing SDK instance. The mobile map shell is explicitly
+sized and isolated, and pin selection scales only inner artwork so SDK marker
+positioning transforms remain intact. Browser fixtures verified containment,
+trip navigation and restoration; no real owner data was changed in those checks.

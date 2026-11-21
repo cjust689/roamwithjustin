@@ -34,14 +34,19 @@
         <input
           v-model.trim="handle"
           type="text"
-          autocomplete="username"
+          autocomplete="off"
           minlength="3"
           maxlength="30"
-          pattern="[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])"
-          placeholder="justin-travels"
+          pattern="[a-zA-Z0-9](?:[a-zA-Z0-9-]{1,28}[a-zA-Z0-9])"
+          placeholder="Choose your own handle"
+          aria-describedby="registration-handle-help"
           required
         />
       </label>
+      <small id="registration-handle-help"
+        >3 to 30 letters, numbers or hyphens. Start and end with a letter or
+        number.</small
+      >
       <label>
         <span>Display name</span>
         <input
@@ -50,9 +55,16 @@
           autocomplete="name"
           minlength="2"
           maxlength="50"
+          placeholder="Enter your display name"
+          aria-describedby="registration-name-help"
           required
         />
       </label>
+      <small id="registration-name-help">{{
+        initialDisplayName
+          ? "Filled from your sign-in. You can change it."
+          : "The name you want other travelers to see."
+      }}</small>
 
       <label class="check">
         <input v-model="acceptTerms" type="checkbox" required />
@@ -79,7 +91,25 @@
       </p>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
 
-      <button type="submit" :disabled="!canSubmit">
+      <div
+        v-if="!pending && unmetRequirements.length"
+        id="registration-requirements"
+        class="registration-requirements"
+        role="status"
+        aria-live="polite"
+      >
+        <strong>Before you can create your Atlas</strong>
+        <ul>
+          <li v-for="requirement in unmetRequirements" :key="requirement">
+            {{ requirement }}
+          </li>
+        </ul>
+      </div>
+      <button
+        type="submit"
+        :disabled="!canSubmit"
+        aria-describedby="registration-requirements"
+      >
         {{ pending ? "Creating account" : "Create private Atlas" }}
       </button>
     </form>
@@ -115,16 +145,36 @@ export default {
     }
   },
   computed: {
-    canSubmit() {
-      return Boolean(
-        !this.pending &&
-          this.inviteCode &&
-          this.handle &&
-          this.displayName &&
-          this.acceptTerms &&
-          this.acceptPrivacy &&
-          this.turnstileToken
+    unmetRequirements() {
+      const missing = []
+      if (!this.inviteCode.trim()) missing.push("Enter your invitation code.")
+      if (
+        !/^[a-z0-9](?:[a-z0-9-]{1,28}[a-z0-9])$/.test(
+          this.handle.trim().toLowerCase()
+        )
       )
+        missing.push(
+          "Choose a valid public handle, 3 to 30 letters, numbers or hyphens."
+        )
+      if (
+        this.displayName.trim().length < 2 ||
+        this.displayName.trim().length > 50
+      )
+        missing.push("Enter a display name of 2 to 50 characters.")
+      if (!this.acceptTerms)
+        missing.push("Accept the beta terms and reset notice.")
+      if (!this.acceptPrivacy)
+        missing.push("Accept the privacy and retention notice.")
+      if (!this.turnstileToken)
+        missing.push(
+          this.widgetError
+            ? "Human verification is unavailable. Reload the page to retry."
+            : "Complete the human verification check."
+        )
+      return missing
+    },
+    canSubmit() {
+      return !this.pending && this.unmetRequirements.length === 0
     },
   },
   async mounted() {
@@ -184,6 +234,29 @@ export default {
 </script>
 
 <style scoped>
+.registration-requirements {
+  padding: 12px;
+  border: 1px solid var(--color-control-border, #65819f);
+  border-radius: 10px;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+.registration-requirements ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+.registration-requirements li {
+  list-style: disc;
+}
+.my-atlas-registration small {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #9eb0aa);
+}
+.my-atlas-registration input::placeholder {
+  font-style: italic;
+  opacity: 0.65;
+  color: var(--color-text-muted, #9eb0aa);
+}
 .my-atlas-registration {
   display: grid;
   gap: 0.8rem;

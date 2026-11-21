@@ -17,7 +17,10 @@
         <i :style="{ backgroundColor: item.color }"></i>{{ item.label }}
       </span>
     </div>
-    <div v-if="ready && plannerActive" class="my-atlas-planner-map-status">
+    <div
+      v-if="ready && plannerActive && !navigatorActive"
+      class="my-atlas-planner-map-status"
+    >
       <strong>{{ plannerStatusTitle }}</strong>
       <span>
         {{ plannerStatusDescription }}
@@ -45,6 +48,7 @@
       </span>
       <span v-else>Click or tap the map to choose its position.</span>
     </div>
+    <slot name="navigator" />
   </section>
 </template>
 
@@ -109,6 +113,8 @@ function firstVisitedYear(place) {
 export default {
   name: "MyAtlasMap",
   props: {
+    navigatorActive: Boolean,
+    focusedLocation: { type: Object, default: null },
     places: {
       type: Array,
       default: () => [],
@@ -214,6 +220,12 @@ export default {
     },
   },
   watch: {
+    focusedLocation: {
+      deep: true,
+      handler(location) {
+        if (location) this.focusLocation(location)
+      },
+    },
     places: {
       deep: true,
       handler() {
@@ -279,6 +291,32 @@ export default {
     if (this.map) this.map.remove()
   },
   methods: {
+    focusLocation(location) {
+      if (
+        !this.map ||
+        !this.ready ||
+        !Array.isArray(location?.coordinates) ||
+        location.coordinates.length !== 2 ||
+        !location.coordinates.every(Number.isFinite)
+      )
+        return
+      this.map.stop()
+      this.map.flyTo({
+        center: location.coordinates,
+        zoom: location.placeType === "country" ? 4.4 : 7,
+        pitch: 28,
+        bearing: 0,
+        padding: { top: 45, left: 35, right: 35, bottom: 190 },
+        duration: window.matchMedia?.("(prefers-reduced-motion: reduce)")
+          .matches
+          ? 0
+          : 650,
+        essential: false,
+      })
+    },
+    resizeMap() {
+      this.map?.resize()
+    },
     initializeMap() {
       if (!hasMapTilerKey) {
         this.error = "MapTiler is not configured"
@@ -297,6 +335,10 @@ export default {
           maxPitch: 78,
           cooperativeGestures: true,
         })
+        this.map.addControl(
+          new mapTilerSdk.NavigationControl({ visualizePitch: true }),
+          "top-right"
+        )
         this.collapseInitialAttribution()
         this.map.on("styledata", this.collapseInitialAttribution)
         this.map.on("sourcedata", this.collapseInitialAttribution)
@@ -306,6 +348,7 @@ export default {
           this.renderMarkers()
           this.syncPlacementMarker()
           this.showCurrentOverview()
+          if (this.focusedLocation) this.focusLocation(this.focusedLocation)
         })
         this.map.on("click", this.handlePlacementClick)
         this.map.on("moveend", this.renderMarkers)
@@ -803,10 +846,18 @@ export default {
       })
     },
     showCurrentOverview() {
+      if (this.focusedLocation) {
+        this.focusLocation(this.focusedLocation)
+        return
+      }
       if (this.plannerActive) this.showPlannerOverview()
       else this.showPlacesOverview()
     },
     showPlannerOverview() {
+      if (this.focusedLocation) {
+        this.focusLocation(this.focusedLocation)
+        return
+      }
       if (!this.map || !this.ready) return
       const coordinates = [
         ...new Map(
@@ -891,6 +942,10 @@ export default {
       else this.fitPlaces()
     },
     transitionSelectedPlace(previousId, currentId) {
+      if (this.focusedLocation) {
+        this.focusLocation(this.focusedLocation)
+        return
+      }
       if (!this.map || !this.ready) return
       const current = this.places.find(place => place.placeId === currentId)
       const previous = this.places.find(place => place.placeId === previousId)
@@ -1010,6 +1065,8 @@ export default {
 
 .my-atlas-map-shell {
   overflow: hidden;
+  isolation: isolate;
+  z-index: 0;
   background: var(--color-surface, #101b1d);
 }
 
@@ -1212,9 +1269,7 @@ export default {
   color: var(--color-text, #f6fbf8);
   background: transparent;
   cursor: pointer;
-  transition:
-    transform 180ms ease,
-    filter 180ms ease;
+  transition: filter 180ms ease;
 }
 
 ::v-deep .my-atlas-pin-shape {
@@ -1228,6 +1283,7 @@ export default {
     0 0.5rem 1.4rem rgba(0, 0, 0, 0.46),
     0 0 1.25rem color-mix(in srgb, var(--pin-color) 58%, transparent);
   transform: rotate(-45deg);
+  transition: transform 180ms ease;
 }
 
 ::v-deep .my-atlas-pin-shape i {
@@ -1317,7 +1373,11 @@ export default {
 ::v-deep .my-atlas-pin.is-selected {
   z-index: 4;
   filter: brightness(1.15);
-  transform: scale(1.16);
+}
+::v-deep .my-atlas-pin:hover .my-atlas-pin-shape,
+::v-deep .my-atlas-pin:focus-visible .my-atlas-pin-shape,
+::v-deep .my-atlas-pin.is-selected .my-atlas-pin-shape {
+  transform: rotate(-45deg) scale(1.16);
 }
 
 ::v-deep .my-atlas-pin.is-selected .my-atlas-pin-label {
