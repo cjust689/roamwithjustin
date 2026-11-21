@@ -1,14 +1,56 @@
 <template>
-  <main class="my-atlas-public">
+  <main class="my-atlas-public" :class="{ 'is-map-only': !overviewExpanded }">
     <MyAtlasMap
-      :places="displayedPlaces"
-      :selected-place-id="selectedPlaceId"
+      ref="atlasMap"
+      :places="
+        navigatorTrip
+          ? navigatorTrip.stops.map(stop => stop.place)
+          : displayedPlaces
+      "
+      :selected-place-id="navigatorLocation?.placeId || selectedPlaceId"
+      :focused-location="navigatorLocation"
+      :navigator-active="Boolean(navigatorTrip)"
+      :planner-active="Boolean(navigatorTrip && navigatorTrip.kind === 'trip')"
+      :planner-route="navigatorTrip?.kind === 'trip' ? navigatorRoute : []"
+      :planner-read-only="true"
       :show-memories="showMemories"
       :playback-active="timelinePlaying"
       @select="selectPlace"
-    />
+      ><template #navigator
+        ><MyAtlasMapNavigator
+          v-if="!loading && !error && navigationTrips.length"
+          :trips="navigationTrips"
+          :active-id="navigatorId"
+          :index="navigatorIndex"
+          :open="navigatorOpen"
+          :collapsed="navigatorCollapsed"
+          :menu-hidden="!overviewExpanded"
+          open-label="Explore this Atlas"
+          @open="openNavigator"
+          @close="closeNavigator"
+          @collapse="navigatorCollapsed = !navigatorCollapsed"
+          @choose="chooseTrip"
+          @step="stepTrip" /></template
+    ></MyAtlasMap>
 
-    <section class="my-atlas-public-panel" aria-labelledby="public-atlas-title">
+    <section
+      v-show="overviewExpanded"
+      id="public-atlas-overview"
+      ref="overviewPanel"
+      class="my-atlas-public-panel"
+      aria-labelledby="public-atlas-title"
+    >
+      <button
+        v-if="!loading && !error"
+        ref="overviewHide"
+        class="public-overview-hide"
+        type="button"
+        aria-controls="public-atlas-overview"
+        :aria-expanded="String(overviewExpanded)"
+        @click="toggleOverview"
+      >
+        Hide overview ↓
+      </button>
       <header>
         <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
         <router-link to="/my-atlas/explore">Explore Atlases</router-link>
@@ -226,11 +268,26 @@
         </p>
       </template>
     </section>
+    <button
+      v-if="!overviewExpanded"
+      ref="overviewOpen"
+      class="public-overview-open"
+      type="button"
+      aria-controls="public-atlas-overview"
+      :aria-expanded="String(overviewExpanded)"
+      @click="toggleOverview"
+    >
+      <strong>@{{ atlas.handle }}</strong
+      ><span>Show overview ↑</span>
+    </button>
+    <MyAtlasMapHelp />
   </main>
 </template>
 
 <script>
 import MyAtlasMap from "../components/MyAtlasMap.vue"
+import MyAtlasMapNavigator from "../components/MyAtlasMapNavigator.vue"
+import MyAtlasMapHelp from "../components/MyAtlasMapHelp.vue"
 import { instagramProfileUrl } from "../../../../shared/my-atlas-instagram.mjs"
 import { fetchPublicAtlas, fetchPublicAtlasImage } from "../api/client.mjs"
 import {
@@ -248,7 +305,7 @@ import { downloadMyAtlasStory } from "../export/storyExport.mjs"
 
 export default {
   name: "MyAtlasPublicView",
-  components: { MyAtlasMap },
+  components: { MyAtlasMap, MyAtlasMapNavigator, MyAtlasMapHelp },
   props: {
     handle: {
       type: String,
@@ -258,6 +315,12 @@ export default {
   data() {
     return {
       loading: true,
+      overviewExpanded: true,
+      overviewScroll: 0,
+      navigatorOpen: false,
+      navigatorCollapsed: false,
+      navigatorId: "",
+      navigatorIndex: 0,
       error: "",
       atlas: null,
       selectedPlaceId: "",
@@ -279,6 +342,45 @@ export default {
     }
   },
   computed: {
+    navigationTrips() {
+      return [
+        ...(this.displayedPlaces.length
+          ? [
+              {
+                id: "all-destinations",
+                title: "All destinations",
+                kind: "atlas",
+                stops: this.displayedPlaces.map(place => ({ place })),
+              },
+            ]
+          : []),
+        ...(this.atlas?.trips || []),
+      ]
+    },
+    navigatorTrip() {
+      return this.navigatorOpen
+        ? this.navigationTrips.find(trip => trip.id === this.navigatorId) ||
+            null
+        : null
+    },
+    navigatorLocation() {
+      return this.navigatorTrip?.stops[this.navigatorIndex]?.place || null
+    },
+    navigatorRoute() {
+      return (this.navigatorTrip?.stops || [])
+        .map((stop, index) => ({
+          key: `public:${index}`,
+          role: "stop",
+          label: String(index + 1),
+          location: stop.place,
+        }))
+        .filter(
+          node =>
+            Array.isArray(node.location.coordinates) &&
+            node.location.coordinates.length === 2 &&
+            node.location.coordinates.every(Number.isFinite)
+        )
+    },
     instagramUrl() {
       return instagramProfileUrl(this.atlas?.instagramHandle)
     },
@@ -315,6 +417,7 @@ export default {
       return `Destinations from ${this.yearFilter}`
     },
     selectedPlace() {
+      if (this.navigatorLocation) return this.navigatorLocation
       return (
         this.displayedPlaces.find(
           place => place.placeId === this.selectedPlaceId
@@ -356,6 +459,18 @@ export default {
       return "Play timeline"
     },
   },
+  watch: {
+    navigationTrips(trips) {
+      if (!this.navigatorId) return
+      const trip = trips.find(item => item.id === this.navigatorId)
+      if (!trip) this.closeNavigator()
+      else
+        this.navigatorIndex = Math.max(
+          0,
+          Math.min(this.navigatorIndex, trip.stops.length - 1)
+        )
+    },
+  },
   created() {
     this.previousTitle = document.title
     this.robotsMeta = document.querySelector('meta[name="robots"]')
@@ -384,6 +499,50 @@ export default {
     }
   },
   methods: {
+    toggleOverview() {
+      if (this.overviewExpanded) this.overviewScroll = window.scrollY
+      this.overviewExpanded = !this.overviewExpanded
+      this.$nextTick(() => {
+        this.$refs.atlasMap?.resizeMap()
+        window.scrollTo({
+          top: this.overviewExpanded ? this.overviewScroll : 0,
+          behavior: "instant",
+        })
+        ;(this.overviewExpanded
+          ? this.$refs.overviewHide
+          : this.$refs.overviewOpen
+        )?.focus({ preventScroll: true })
+      })
+    },
+    openNavigator() {
+      this.navigatorOpen = true
+      this.navigatorCollapsed = false
+      if (!this.navigatorTrip)
+        this.chooseTrip(this.navigationTrips[0]?.id || "")
+    },
+    chooseTrip(id) {
+      if (!this.navigationTrips.some(trip => trip.id === id)) return
+      this.pauseTimeline()
+      this.navigatorId = id
+      this.navigatorIndex = 0
+      this.navigatorCollapsed = false
+      if (this.overviewExpanded) this.toggleOverview()
+    },
+    stepTrip(direction) {
+      if (this.navigatorTrip)
+        this.navigatorIndex = Math.max(
+          0,
+          Math.min(
+            this.navigatorTrip.stops.length - 1,
+            this.navigatorIndex + direction
+          )
+        )
+    },
+    closeNavigator() {
+      this.navigatorOpen = false
+      this.navigatorId = ""
+      this.navigatorIndex = 0
+    },
     async loadAtlas() {
       try {
         this.apiBaseUrl = getMyAtlasApiBaseUrl(
@@ -423,10 +582,20 @@ export default {
       this.$refs.favoriteImageDialog?.close()
     },
     selectPlace(placeId) {
+      if (this.navigatorTrip) {
+        const index = this.navigatorTrip.stops.findIndex(
+          stop => stop.place.placeId === placeId
+        )
+        if (index >= 0) this.navigatorIndex = index
+      }
       if (this.timelinePlaying) this.pauseTimeline()
       this.selectedPlaceId = placeId
     },
     cyclePlace(direction) {
+      if (this.navigatorTrip) {
+        this.stepTrip(direction)
+        return
+      }
       if (!this.displayedPlaces.length) return
       if (this.timelinePlaying) this.pauseTimeline()
       const currentIndex = this.displayedPlaces.findIndex(
@@ -999,8 +1168,12 @@ export default {
     overflow: visible;
   }
 
-  .my-atlas-public > :first-child {
+  .my-atlas-public > .my-atlas-map-shell {
     position: relative;
+    inset: auto;
+    height: 54dvh;
+    min-height: 20rem;
+    grid-row: 1;
   }
 
   .my-atlas-public-panel {
@@ -1120,5 +1293,65 @@ export default {
   .my-atlas-public-controls button {
     width: 100%;
   }
+}
+.my-atlas-public.is-map-only {
+  display: block;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+.my-atlas-public.is-map-only > .my-atlas-map-shell {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.public-overview-hide {
+  display: block;
+  margin: 0 0 8px auto;
+  padding: 8px 12px;
+  min-height: 44px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
+  border-radius: 10px;
+  color: var(--color-accent-soft, #e6ba68);
+  background: transparent;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.public-overview-open {
+  position: fixed;
+  z-index: 5;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: min(320px, calc(100vw - 32px));
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
+  border-radius: 16px;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-page, #0a1416);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.public-overview-open strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.public-overview-open span {
+  flex-shrink: 0;
+  color: var(--color-accent-soft, #e6ba68);
+}
+.public-overview-hide:focus-visible,
+.public-overview-open:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: 3px;
 }
 </style>

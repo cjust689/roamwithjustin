@@ -1164,16 +1164,7 @@
       <strong>My Atlas</strong
       ><span>Open menu <b aria-hidden="true">↑</b></span>
     </button>
-    <div class="my-atlas-map-help">
-      <span>Map controls</span
-      ><MyAtlasInfo label="How to navigate the My Atlas map"
-        >Drag to move around. Hold Ctrl or ⌘ while scrolling to zoom, or use the
-        + and − buttons. On a touchscreen, use two fingers to move and pinch to
-        zoom. Use the compass to face north again. Selecting a marker shows that
-        destination; moving the map does not change your saved
-        places.</MyAtlasInfo
-      >
-    </div>
+    <MyAtlasMapHelp />
   </main>
 </template>
 
@@ -1187,7 +1178,7 @@ import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import MyAtlasTrips from "../components/MyAtlasTrips.vue"
 import MyAtlasSwitch from "../components/MyAtlasSwitch.vue"
-import MyAtlasInfo from "../components/MyAtlasInfo.vue"
+import MyAtlasMapHelp from "../components/MyAtlasMapHelp.vue"
 import MyAtlasMapNavigator from "../components/MyAtlasMapNavigator.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
 import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
@@ -1259,7 +1250,7 @@ export default {
   name: "MyAtlasGeographicProof",
   components: {
     MyAtlasMapNavigator,
-    MyAtlasInfo,
+    MyAtlasMapHelp,
     MyAtlasSwitch,
     MyAtlasTrips,
     MyAtlasJourneyCards,

@@ -2651,6 +2651,21 @@ export class UserProfileDurableObject extends DurableObject {
         )
       ),
       atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,
+      trips: upgraded
+        ? storedTrips(this.ctx.storage)
+            .filter(
+              trip =>
+                trip.lifecycle === "past" &&
+                trip.sharing.publicAtlas === true &&
+                trip.workflow !== "archived" &&
+                trip.stops.length
+            )
+            .map((trip, index) => ({
+              id: `public-trip-${index + 1}`,
+              title: trip.title,
+              stops: trip.stops.map(stop => ({ placeId: stop.place.placeId })),
+            }))
+        : [],
     })
   }
 

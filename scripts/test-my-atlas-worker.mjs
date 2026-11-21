@@ -1635,6 +1635,42 @@ await assert.rejects(
     "https://api.example.com/v1/public/atlases/justin-travels"
   )
   assert.equal(atlas.places[0].name, "Uvita")
+  assert.deepEqual(
+    atlas.trips,
+    [],
+    "Older public APIs without trip groups remain supported"
+  )
+  responseBody.atlas.trips = [
+    {
+      id: "public-trip-1",
+      title: "Public journey",
+      lifecycle: "past",
+      stops: [
+        { placeId: responseBody.atlas.places[0].placeId },
+        { placeId: responseBody.atlas.places[0].placeId },
+      ],
+    },
+  ]
+  const grouped = await fetchPublicAtlas({
+    apiBaseUrl: "https://api.example.com",
+    handle: "justin-travels",
+    fetchImpl: async () => Response.json(responseBody),
+  })
+  assert.equal(
+    grouped.trips[0].stops.length,
+    2,
+    "Repeated public visits must remain distinct"
+  )
+  responseBody.atlas.trips[0].stops[0].placeId = "geonames:999999999"
+  await assert.rejects(
+    fetchPublicAtlas({
+      apiBaseUrl: "https://api.example.com",
+      handle: "justin-travels",
+      fetchImpl: async () => Response.json(responseBody),
+    }),
+    { code: "invalid_response" }
+  )
+  delete responseBody.atlas.trips
   assert.equal(atlas.places[0].memory, "The tide revealed the whale tail.")
   assert.equal(atlas.places[1].spotKind, "National park")
   assert.equal(atlas.places[2].placeType, "custom")

@@ -91,6 +91,12 @@ navigator, and marker containment corrections. The owner subsequently authorized
 testing, fixes and promotion. Script and browser verification are recorded in
 the active implementation checklist; deployment is tracked in the release handoff.
 
+Current local follow-up: touch-specific map help and collapsible public-profile
+overviews with read-only in-map stop/trip navigation. Public trip grouping uses
+a new limited API projection. Worker version
+`9761acee-97a3-4cf1-b3e8-5e1ca3ff5232` is deployed; the owner authorized the
+develop/main frontend promotion.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;

@@ -1358,6 +1358,23 @@ export async function fetchPublicAtlas({
     typeof body.atlas?.displayName !== "string" ||
     !Array.isArray(body.atlas?.places) ||
     !body.atlas.places.every(isPublicPlace) ||
+    (body.atlas.trips !== undefined &&
+      (!Array.isArray(body.atlas.trips) ||
+        body.atlas.trips.length > 501 ||
+        body.atlas.trips.some(
+          trip =>
+            !/^public-trip-[1-9]\d*$/.test(trip.id || "") ||
+            typeof trip.title !== "string" ||
+            trip.title.length > 80 ||
+            trip.lifecycle !== "past" ||
+            !Array.isArray(trip.stops) ||
+            !trip.stops.length ||
+            trip.stops.length > 50 ||
+            trip.stops.some(
+              stop =>
+                !body.atlas.places.some(place => place.placeId === stop.placeId)
+            )
+        ))) ||
     typeof body.catalog?.revision !== "string" ||
     typeof body.catalog?.attribution?.provider !== "string" ||
     typeof body.catalog?.attribution?.license !== "string"
@@ -1376,6 +1393,27 @@ export async function fetchPublicAtlas({
       : {}),
     favoriteImage: normalizedAtlasImage(body.atlas.favoriteImage),
     places: Object.freeze(body.atlas.places.map(normalizedPin)),
+    trips: Object.freeze(
+      (body.atlas.trips || []).map(trip =>
+        Object.freeze({
+          id: trip.id,
+          title: trip.title,
+          lifecycle: "past",
+          kind: "trip",
+          stops: Object.freeze(
+            trip.stops.map(stop =>
+              Object.freeze({
+                place: normalizedPin(
+                  body.atlas.places.find(
+                    place => place.placeId === stop.placeId
+                  )
+                ),
+              })
+            )
+          ),
+        })
+      )
+    ),
     catalog: Object.freeze({ ...body.catalog }),
   })
 }

@@ -1266,3 +1266,12 @@ Map movement uses the existing SDK instance. The mobile map shell is explicitly
 sized and isolated, and pin selection scales only inner artwork so SDK marker
 positioning transforms remain intact. Browser fixtures verified containment,
 trip navigation and restoration; no real owner data was changed in those checks.
+
+The local public-view follow-up uses the same navigator and full-overview
+collapse without owner APIs. An optional `atlas.trips` public projection includes
+only public nonarchived Past trip titles and ordered place references, using
+presentation IDs instead of canonical trip/stop IDs. Private fields remain
+excluded; clients resolve references against the already-public places and
+reject references outside that set. Repeated references remain distinct stops.
+Older public responses without trip grouping remain supported. Both map views
+use shared touch-specific help. Deployment of this follow-up is outstanding.

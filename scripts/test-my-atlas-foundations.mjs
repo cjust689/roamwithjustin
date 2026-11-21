@@ -169,6 +169,7 @@ const dependencies = {
   MyAtlasSwitch: {},
   MyAtlasInfo: {},
   MyAtlasMapNavigator: {},
+  MyAtlasMapHelp: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   getMyAtlasApiAccessToken: async () => "fixture",
