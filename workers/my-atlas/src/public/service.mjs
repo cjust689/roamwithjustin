@@ -299,6 +299,25 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
         : {}),
       favoriteImage: publicAtlasImageMetadata(snapshot.atlasImage),
       places: Object.freeze(places),
+      trips: Object.freeze(
+        (snapshot.trips || []).map(trip =>
+          Object.freeze({
+            id: trip.id,
+            title: trip.title,
+            lifecycle: "past",
+            stops: Object.freeze(
+              trip.stops.map(stop => {
+                const place = places.find(item => item.placeId === stop.placeId)
+                if (!place)
+                  throw new PublicAtlasServiceError(
+                    "Published trip geography is inconsistent."
+                  )
+                return Object.freeze({ placeId: place.placeId })
+              })
+            ),
+          })
+        )
+      ),
     }),
     catalog: Object.freeze({
       revision: manifest.catalogRevision,
