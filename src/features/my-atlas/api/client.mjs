@@ -154,7 +154,7 @@ function normalizedAtlasImage(value) {
   return Object.freeze({ ...value })
 }
 
-async function authenticatedJsonRequest({
+export async function authenticatedJsonRequest({
   apiBaseUrl,
   accessToken,
   path,
@@ -1295,7 +1295,7 @@ export async function fetchMyAtlasAccountExport({
     fetchImpl,
   })
   if (
-    payload.schemaVersion !== 2 ||
+    ![2, 3].includes(payload.schemaVersion) ||
     !Array.isArray(payload.pins) ||
     !Array.isArray(payload.wishlist) ||
     !Array.isArray(payload.plans)
@@ -1305,6 +1305,10 @@ export async function fetchMyAtlasAccountExport({
       code: "invalid_response",
     })
   }
+  if (payload.schemaVersion === 3 && !Array.isArray(payload.trips))
+    throw new MyAtlasApiError("The account export response is invalid.", {
+      code: "invalid_response",
+    })
   return payload
 }
 

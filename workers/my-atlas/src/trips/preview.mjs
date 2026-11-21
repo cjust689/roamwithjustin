@@ -211,6 +211,8 @@ export async function getMyTripUpgradePreview({
   const source = await owner.user.exportOwnerState(owner.identityDigest)
   if (source?.ok !== true)
     throw new AccountConflictError(source?.error || "account_not_active")
+  if (source.profile.tripSchemaVersion)
+    throw new AccountConflictError("trip_already_upgraded")
   const ids = [
     ...new Set(
       source.pins.filter(pin => !pin.customPlace).map(pin => pin.placeId)

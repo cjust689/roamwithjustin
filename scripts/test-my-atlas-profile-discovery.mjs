@@ -113,6 +113,7 @@ const ownerDependencies = {
   MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
+  MyAtlasTrips: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   normalizeInstagramHandle,

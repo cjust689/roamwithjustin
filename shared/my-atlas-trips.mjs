@@ -1,6 +1,7 @@
 import { validStoredExperiences } from "./my-atlas-experiences.mjs"
 
 export const TRIP_SCHEMA_VERSION = 1
+export const TRIP_RETENTION_POLICY = "my-atlas-trips-retention-1"
 export const TRIP_LIFECYCLES = Object.freeze(["planned", "past"])
 export const TRIP_ID_PATTERN = /^(?:trip|plan)_[a-f0-9]{24}$/
 export const STOP_ID_PATTERN = /^stop_[a-f0-9]{32}$/
@@ -57,6 +58,31 @@ export function validTripPlace(place) {
       place.coordinates.every(Number.isFinite) &&
       Math.abs(place.coordinates[0]) <= 180 &&
       Math.abs(place.coordinates[1]) <= 85.051129
+  )
+}
+export function tripPlaceProjection(place) {
+  if (!validTripPlace(place)) fail("invalid_place")
+  const fields = [
+    "placeId",
+    "placeType",
+    "name",
+    "coordinates",
+    "countryCode",
+    "countryName",
+    "admin1Name",
+    "continent",
+    "featureCode",
+    "spotCategory",
+    "spotKind",
+    "routeReadiness",
+  ]
+  return Object.fromEntries(
+    fields
+      .filter(field => place[field] !== undefined)
+      .map(field => [
+        field,
+        field === "coordinates" ? [...place.coordinates] : place[field],
+      ])
   )
 }
 

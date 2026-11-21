@@ -15,6 +15,13 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/components/MyAtlasTrips.vue
+  - src/features/my-atlas/planning/tripClient.mjs
+  - src/features/my-atlas/planning/sharedTrip.mjs
+  - src/features/my-atlas/views/MyAtlasSharedTripView.vue
+  - scripts/test-my-atlas-trip-workspace.mjs
+  - workers/my-atlas/src/trips/store.mjs
+  - workers/my-atlas/src/trips/service.mjs
   - shared/my-atlas-trips.mjs
   - workers/my-atlas/src/trips/preview.mjs
   - scripts/test-my-atlas-trips.mjs
@@ -51,13 +58,14 @@ This record reconciles the owner supplied `my-atlas-trip-architecture.md` and
 Those inputs are proposals, not descriptions of deployed behavior. This target
 changes the earlier single-plan and unique-Place restrictions for future
 canonical trips. Existing contracts remain in effect until their replacement
-is implemented and verified. No account migration is implemented here.
+is implemented and verified. A gated local migration and persistence slice is now test-verified below; it is not activated for existing accounts.
 
-## Architecture acceptance audit, 2026-11-20
+## Deployed baseline audit, 2026-11-20
 
-The full owner-supplied trip architecture is **not implemented**. This is
+This table records the deployed baseline before the local slice below.
+The full owner-supplied trip architecture is **not released**. This is
 still a partial transition, not a canonical trip release. Current source
-retains `pin:`, `wish:` and `plan:` storage, the deterministic first-private-plan
+retains `pin:`, `wish:` and `plan:` storage by default, the deterministic first-private-plan
 identity, and workflow states `draft | saved | archived`. The existing
 Mark Visited action creates visited pins; it does not change a trip to Past.
 
@@ -231,12 +239,14 @@ the new travel draft fields are intentionally not part of a saved plan yet.
 
 - [x] Audit existing storage, endpoints, retention, sharing, and flight builder.
 - [x] Implement independent flight/rental browser drafts and reviewed handoffs.
-- [ ] Persist stable trip, stop, memory, and logistics identities.
-- [ ] Prove reversible lifecycle changes preserve field equality and IDs.
-- [ ] Prove single-stop direct-past creation and repeated-Place isolation.
-- [ ] Prove migration retry, rollback, export, account deletion, and alarm safety.
+- [x] Persist stable trip, stop and memory identities in local runtime tests.
+- [ ] Persist reviewed flight/rental logistics through owner APIs and UI.
+- [x] Prove reversible lifecycle changes preserve field equality and IDs in local runtime tests.
+- [x] Prove single-stop direct-past creation and repeated-Place isolation in local runtime tests.
+- [x] Prove migration retry, rollback, export, account deletion, and alarm safety in local runtime tests.
 - [ ] Demonstrate transport save, reopen, export, and lifecycle preservation.
-- [ ] Implement grouped trip map and explicit Combine into Trip.
+- [x] Implement a selected-trip map and explicit Combine into Trip locally.
+- [ ] Add multi-trip route overview and dense overlapping-marker acceptance.
 - [ ] Complete keyboard and phone acceptance with real owner data.
 
 ## Provider evidence and limits
@@ -285,8 +295,9 @@ identities. Pure transition helpers change only lifecycle/version/audit fields;
 repeating the same status is a no-op. Stop reordering preserves attached data,
 and removal refuses a stop with memories, experiences, visit dates or plan
 notes. A single-stop map projection has no synthetic origin or finish.
-These helpers are not exposed as account write operations yet. Logistics arrays
-are reserved model slots; persistence and independent ownership validation of
+This foundation originally exposed no account writes. The subsequent gated
+repository and creator workspace are described below. Logistics arrays remain
+reserved model slots; save/reopen and independent ownership validation of
 managed trip media/logistics remain later work.
 
 `workers/my-atlas/src/trips/preview.mjs` reads the existing per-owner export.
@@ -297,7 +308,8 @@ stop snapshots. Origin/finish, original retention fields and all raw plan
 metadata are preserved in private legacy metadata, without manufacturing
 visited stops. Existing wishes and the account image are left in place.
 Existing public-pin publication choices are represented in candidates; private
-plans remain private. No sharing projection of these candidates is enabled.
+plans remain private. Preview candidates themselves are never shared; version 2 links below project
+only explicitly selected canonical trips.
 
 Missing/invalid source geography produces a blocking issue instead of invented
 coordinates or a ready candidate with discarded data. IDs are deterministic;
@@ -313,10 +325,11 @@ accounts need no catalog binding or provider request.
 - [x] Define canonical trip, occurrence and memory contracts with reversible pure transitions.
 - [x] Build deterministic, nonmutating migration candidates and an owner-only preview summary.
 - [x] Verify IDs, field preservation, repeated-Place isolation, unavailable-source blocking and zero account/alarm writes.
-- [ ] Implement canonical persistence, transactional explicit upgrade, rollback snapshot and legacy-write boundary.
-- [ ] Resolve retention before activating migration so history and preserved memories cannot expire.
-- [ ] Add the creator trip collection, explicit Combine into Trip, repeated-visit editing and lifecycle controls.
-- [ ] Extend the existing map and shared reader from the same canonical trips, with explicit sharing scope and legacy link compatibility.
+- [x] Implement canonical persistence, transactional explicit upgrade, rollback snapshot and legacy-write boundary behind a disabled write gate.
+- [x] Add history-safe retention, explicit policy acknowledgement and privacy copy; activation remains disabled pending creator UI acceptance.
+- [x] Add the local creator trip collection, explicit Combine into Trip, repeated-visit editing and lifecycle controls.
+- [x] Extend the selected-trip map and read-only shared reader from canonical trips, with explicit sharing scope and legacy link compatibility.
+- [ ] Complete genuine-owner upgrade, grouping and sharing acceptance before activation.
 
 Verification: `npm run my-atlas:trips:test` and `node scripts/test-my-atlas-worker.mjs`
 passed. All 51 Workers runtime tests passed, including the new preview case.
@@ -325,11 +338,250 @@ and after repeated previews, and verifies another owner receives no groups
 from the first account. No real account was mutated and no Worker was deployed.
 Large real-account preview performance and actual upgrade/rollback acceptance
 remain unverified. The full acceptance matrix above remains not met until
-persistence, migration and creator/shared UI slices are implemented.
+real-owner upgrade and release acceptance are complete. The original read-only
+foundation results below are historical evidence, not the current local scope.
 
 Final verification for this foundation slice also passed `npm run my-atlas:test`
 with all 51 Worker runtime tests, explicit ESLint of the added MJS modules,
 `npm run my-atlas:worker:check:staging` with workspace-local Wrangler logging,
 and `npm run docs:audit` (74 managed documents, 12 existing warnings). No frontend
-or recipient UI was changed in this slice. The checked baseline remains
-read-only; durable migration and creator grouping are still unchecked above.
+or recipient UI was changed in this slice. That foundation baseline was read-only; subsequent local implementation and
+verification are recorded below.
+
+## Local canonical persistence and migration slice
+
+The next local slice implements the repository and authenticated owner APIs in
+`workers/my-atlas/src/trips/store.mjs` and `service.mjs`. It is disabled by
+`MY_ATLAS_TRIP_WRITES_ENABLED=false` in both default and staging configuration.
+No real account is migrated and no local backend is switched automatically.
+The creator trip collection, upgrade review and shared reader are now also
+implemented locally as described below. The earlier no-write foundation section describes its original
+baseline; write routes now exist but cannot be activated through a browser flag.
+
+| Method         | Path                               | Behavior                                                                                           |
+| -------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| GET / POST     | `/v1/me/trips`                     | Read owner trip collection / create one Planned or Past trip with one to fifty stops               |
+| POST           | `/v1/me/trips/upgrade`             | Explicit fingerprint-bound legacy conversion with typed confirmation and retention acknowledgement |
+| POST           | `/v1/me/trips/rollback`            | Restore the original records before any subsequent saved account change                            |
+| PATCH / DELETE | `/v1/me/trips/{id}`                | Edit title/description / explicitly delete the trip                                                |
+| PATCH          | `/v1/me/trips/{id}/lifecycle`      | Change Planned/Past without copying stops or memories                                              |
+| POST           | `/v1/me/trips/{id}/stops`          | Add another stable occurrence, including a repeated Place                                          |
+| PATCH          | `/v1/me/trips/{id}/stops/order`    | Reorder exact existing stop IDs                                                                    |
+| PATCH / DELETE | `/v1/me/trips/{id}/stops/{stopId}` | Edit memory, private experience or planned/actual dates / guarded removal                          |
+| POST           | `/v1/me/trips/combine`             | Explicitly combine compatible Past trips, preserving stop and memory IDs                           |
+
+All writes require authenticated ownership, write permission, strong `If-Match`
+and an idempotency key. Source selections resolve through the existing catalog
+or validated owner custom coordinates. Clients cannot submit arbitrary place
+snapshots, sharing metadata, operator URLs or logistics through these routes.
+Multiple trips and repeated Places get separate occurrence IDs. A single-stop
+trip needs no origin or finish. Stale writes return 412 rather than overwrite.
+
+Upgrade requires `confirmation: ORGANIZE MY ATLAS`, the current preview
+fingerprint and `retentionAcknowledged: true`. The accepted policy version is
+`my-atlas-trips-retention-1`. Organized trips remain until explicit deletion;
+legacy six-month alarms skip the upgraded object and are cleared. Source pins
+and plans move into one private rollback snapshot; active canonical trips
+become the sole writable source. Wishes and the favorite image stay intact.
+Old pin/plan write methods reject upgraded accounts. The transaction checks
+source snapshots and account revision before changing the marker or records.
+
+Rollback restores original pins, indexes, plan, profile choices and prior alarm,
+while advancing the account revision. It cannot overwrite a later saved change.
+Any subsequent successful trip, profile, image or wishlist mutation removes the
+rollback copy. Canonical receipts contain only digests and IDs and re-read
+current records; they cannot resurrect removed private content. Old geometry
+receipts are converted to references so removed memories/experiences are not
+left in receipt snapshots. Account deletion erases trips, upgrade metadata,
+backup and receipts through the existing complete-object deletion path.
+
+Owner export includes canonical trips and a sanitized rollback snapshot while
+available. Existing owner/public Atlas geography is a derived compatibility
+projection, not a second editable pin store. Snapshots keep names/coordinates
+independent of catalog changes. The public projection includes only Past trips
+with publication permission and previously published favorite notes; private
+recaps, route-source Wish IDs, logistics and rollback metadata are excluded.
+Private recap edits do not advance Explore ranking activity. New trips default
+to private. Trip-specific public Atlas publication controls remain outstanding. Explicit
+read-only snapshot links use the new reader below. The compatibility map still
+aggregates repeated Places; the selected-trip map renders each occurrence.
+
+Combine currently accepts saved Past trips with matching publication choices
+and no flight/rental logistics. Mixed publication scopes or transport details
+require review rather than silent merging. It preserves stop IDs and memories,
+turns nonempty parent descriptions into separate private notes, and records
+source trip IDs. Removing a stop with content requires an explicit discard
+request; the last stop of a saved trip cannot be removed. Current limits are
+501 trips, fifty stops per trip and 300 distinct Past destinations. Serialized
+UTF-8 limits are 1 MiB per trip, 4 MiB for the collection and 1.5 MiB for the
+rollback snapshot. Oversized upgrades reject before changing source records.
+These conservative bounds are below the SQLite KV per-value limit and constrain
+whole-collection reads; see [Cloudflare storage limits](https://developers.cloudflare.com/durable-objects/platform/limits/).
+
+The Add experience action now matches the other visit actions, uses a compact
+count badge and a destination-specific accessible label. Synthetic Chrome
+checks at 320, 390 and 1440 pixels verified transparent styling, a 32 pixel
+button height, count display, no horizontal overflow and focus moving to the
+experience editor. The 390 pixel capture was visually inspected. Artifacts are
+ignored under `.state/theme/experience-action-*`.
+
+All 56 Worker runtime tests pass. New tests cover disabled writes, stale preview,
+exact rollback and alarm restoration, blocked legacy writes, occurrence/memory
+isolation, repeated network requests, status reversibility, stop dates/order,
+guarded removal, explicit Combine, owner isolation, public exclusion, backup
+purging, receipt privacy, owner export and complete account deletion. HTTP tests
+also verify anonymous denial, read-versus-write permission and the disabled
+write-gate response. No genuine-token production migration or deployment is
+claimed; genuine-owner rollout acceptance remains outstanding.
+
+## Local creator workspace and read-only sharing
+
+MyAtlasTrips.vue uses the same authenticated owner APIs and account revision.
+Development can preview it at /my-atlas?trips=1; production ignores the query.
+The optional VUE_APP_MY_ATLAS_TRIPS_ENABLED=true build flag exposes review UI,
+while already upgraded accounts always use the workspace. None of these client
+conditions bypass the disabled server write gate. The normal local server keeps
+its configured staging API and catalog; browser checks used isolated fixtures.
+
+The collection offers All/Planned/Past, explicit Add Trip, title/overview editing,
+ordered stops and occurrence-specific memory, recap and planned/actual date
+editing. Catalog search and the shared custom-location picker reuse existing
+services and the mounted map. Lifecycle changes preserve memories. Combine is
+explicit and bounded by the publication/logistics restrictions above. Removal
+with content and trip deletion require confirmation. Upgrade requires typed
+confirmation and a separate retention acknowledgement. Ambiguous retries retain
+the operation key and revision; conflicts retain drafts for review. Confirmed
+writes followed by failed reads show refresh warnings without claiming failure.
+
+The selected trip is rendered on the existing SDK map with occurrence IDs and
+ordered stop markers, without invented start/finish points. Flight/rental tools
+remain independent browser drafts, keyed by selected trip; they are not saved
+logistics. Directions and planning prompts remain reviewed external handoffs.
+Editing the saved geographic snapshot, trip-level media, multiple-trip route
+overview and per-trip public Atlas publication controls remain later work.
+
+Version 2 snapshot links include only the trip name, explicit lifecycle and
+ordered location names/coordinates. Repeated places remain separate entries.
+Private descriptions, memories, recaps, dates, logistics, source Wish IDs and
+owner/stop IDs are excluded. The creator UI states this before copying. Links
+are transferable snapshots, without automatic updates or revocation. Existing
+version 1 links still open. A one-stop version 2 view has one marker and no
+synthetic connector or start/finish rows. Encoded links above 12,000 characters
+reject rather than producing a link the reader cannot open.
+
+Upgraded JSON export uses schema 3 with canonical records; the client accepts
+schemas 2 and 3 and rejects schema 3 without trips. Upgraded CSV uses quoted
+JSON record rows to preserve nested occurrences and memories. Legacy exports
+remain unchanged. Export tests cover canonical memory/rollback data, quoting
+and the schema boundary; private export content is never the public projection.
+
+Local Chrome fixtures at 320, 390 and 1440 pixels verified two trips, separate
+memories for a repeated destination, reversible lifecycle, no horizontal
+overflow, the same map instance and the version 2 shared reader. The 390 pixel
+capture was visually inspected; native select/checkbox visibility and stop-date
+spacing were corrected. Reports/captures are ignored under
+.state/theme/trip-workspace-*. These checks are synthetic, not real-account
+migration or phone acceptance. No deployment or genuine owner mutation occurred.
+
+Final verification for this local slice passed `npm run build` with hash
+`6c76f8ac94d40e5e`, including the full My Atlas suite and all 56 Worker runtime
+tests. Existing bundle-size warnings remain. Explicit ESLint passed for changed
+frontend, shared contract, service, store and test modules. The staging Worker
+dry run passed with the trip write gate still false. `npm run docs:audit` passed
+with 74 managed documents and 12 existing warnings. The normal local preview
+continues at port 8080 with its configured staging API/catalog.
+
+## Visited-list grouping entry point
+
+- [x] Expose Group destinations inside the existing My Atlas Visited list.
+- [x] Add accessible selection controls, count, cancellation and Group into trip.
+- [x] Carry click order into the canonical grouping form and through the explicit
+      upgrade review, with no automatic migration or Combine write.
+- [x] Refuse automatic selection for already grouped or ambiguous repeated visits;
+      ask the owner to select specific Past trips instead.
+- [x] Preserve reviewed grouping selections on refresh and test the disabled gate.
+
+`MyAtlasGeographicProof.vue` mounts the initially closed trip workspace for
+signed-in owners, without fetching on mount. Grouping selects destinations from
+the visited list, then opens `MyAtlasTrips.vue` and requests the existing private
+read/preview endpoints. Existing accounts must still explicitly acknowledge the
+upgrade. The configured server write gate remains false; missing/older server
+endpoints show the existing load error rather than pretending a group was saved.
+Compatible upgraded accounts review the group name before explicitly combining.
+This entry point does not change the default legacy Plan a trip action.
+
+`npm run my-atlas:trips:test`, explicit ESLint of the changed components/test,
+and `npm run my-atlas:test` passed, including all 56 Worker runtime tests.
+Grouping tests cover selection order, upgrade carryover, ambiguous visits,
+no writes during preparation and preserving reviewed choices after refresh.
+Real-account grouping remains gated and no deployment is claimed.
+
+Chrome fixture checks passed at 320, 390 and 1440 pixels using the actual
+Visited-list buttons and native checkboxes. They verified selected count/order,
+visible controls, no horizontal overflow and selection carryover into upgrade
+review, with zero mutation calls and the disabled server gate preserved. The
+390 pixel screenshot was visually inspected. Materialize's additional checkbox
+decoration was avoided, and the local server's stale lint overlay was cleared;
+the repeated browser check explicitly rejected any compile overlay. Ignored
+artifacts are `.state/theme/visited-grouping-*`. The configured local frontend
+remains on port 8080 using its existing API/catalog settings.
+
+## Staging route availability correction
+
+The owner observed HTTP 404 for `/v1/me/trips` from the local frontend because
+the configured staging Worker still lacked the new backend routes. Deployed the
+tested current Worker using `npx wrangler deploy --env staging --config
+workers/my-atlas/wrangler.jsonc`, with workspace-local Wrangler logging.
+Version `fc6a784b-7e87-4850-b335-5f292771f276` uploaded and deployed successfully.
+The server gate remains `MY_ATLAS_TRIP_WRITES_ENABLED=false`; no upgrade or
+account write was executed and the frontend API/catalog settings were unchanged.
+
+Remote checks returned 200 for `/health`, 401 for unauthenticated
+`/v1/me/trips` and `/v1/me/trips/upgrade-preview`, and 204 for the trip GET
+preflight with `Access-Control-Allow-Origin: http://localhost:8080`. The 401
+responses establish route recognition and authentication enforcement, not a
+successful genuine-owner collection read. Authenticated review and activation
+remain outstanding. The frontend changes remain local; this deployment updates
+only the staging API, which the current hosted frontend also uses.
+
+## Local Overview, Planning and Past tabs
+
+- [x] Replace the stacked owner workflows with Overview, Planning and Past tabs.
+- [x] Keep Visited Atlas sharing/export on Overview and saved-trip sharing on
+      each relevant trip, without a separate Share tab.
+- [x] Keep the legacy planner in Planning and visited entry/grouping in Past.
+- [x] Scope canonical trips to Planned/Past, with matching creation defaults and
+      lifecycle-change feedback; preserve independent trip memories.
+- [x] Preserve mounted planner/workspace state and existing SDK map identity.
+- [x] Add tab semantics, keyboard navigation and mobile layout verification.
+
+`MyAtlasGeographicProof.vue` owns the active tab and limits displayed sections
+and route overlays to that context. Overview retains the existing summary and
+timeline controls, plus one Add visited destination action that opens Past.
+Past exposes Add destination and Group destinations. Overview's selected-memory
+action also opens the Past editor. Existing Plan a trip/Visited action buttons
+are replaced by tabs, avoiding repeated navigation. The canonical workspace
+accepts a lifecycle scope; the development trip-preview flag remains available
+when opening Planning. Account/profile controls remain in the header menu.
+
+`MyAtlasTrips.vue` distinguishes missing-route and sign-in load errors and retains
+the retry path. No authenticated network error cause is asserted from screenshots
+alone. Backend deployment/write-gate settings are unchanged by this UI slice.
+
+`npm run my-atlas:test` passed with all 56 Worker runtime tests before the final
+scope refinement. Focused workspace tests additionally cover lifecycle scoping,
+new Past-trip defaults and preserving memory drafts when switching scope. Chrome
+fixtures at 320, 390 and 1440 pixels verified active-section visibility, relevant
+sharing, preserved planner draft/grouping selection, keyboard End navigation,
+unchanged map identity and zero horizontal overflow. The 390 pixel Past and
+Planning captures were inspected; inherited Materialize nav styling was reset.
+Artifacts are ignored under `.state/theme/atlas-tabs-*`. No real account was
+changed, no feature gate enabled and no frontend deployment performed.
+
+Final `npm run build` passed with hash `d2709bb99dc19c72`, including the full
+My Atlas suite and 56 Worker runtime tests. Explicit ESLint passed for the
+changed components and tests; existing bundle-size warnings remain. A separate
+canonical browser fixture verified Planning/Past filtering, occurrence-specific
+memory editing and Overview map-overlay isolation. `npm run docs:audit` passed
+with 74 managed documents and 12 existing warnings. All frontend verification
+used synthetic data; the server gate remains disabled.

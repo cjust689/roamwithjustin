@@ -325,3 +325,12 @@ the new MJS code passed. The 390 pixel story and synthetic Atlas-card captures
 were visually inspected. The local server was restarted to clear a stale
 compile overlay and retained its configured staging API/catalog mode. No
 Worker deployment, account mutation or external content publication occurred.
+
+
+The local Add experience action now matches the other visit controls, with a
+compact count badge and destination-specific accessible label. Creator-first
+trip grouping has progressed to a gated repository, owner workspace and ordered
+read-only snapshots. See [Trip centric transition](my-atlas-trip-centric-transition.md)
+for runtime/browser evidence and remaining activation, logistics and public
+publication work. Editorial operator intake remains the separate ingestion
+workflow above; private trip recaps do not publish operator records.

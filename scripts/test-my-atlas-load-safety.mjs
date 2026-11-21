@@ -166,6 +166,7 @@ const dependencies = {
   MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
+  MyAtlasTrips: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   discardLegacyDeletion,

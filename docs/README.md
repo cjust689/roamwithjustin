@@ -83,11 +83,22 @@ My Atlas mobile action feedback and the explicit trip-architecture acceptance
 audit are tracked in [Trip centric transition](implementation/my-atlas-trip-centric-transition.md).
 Creator-first trip organization is now the next priority. The local foundation
 adds canonical occurrence contracts and an owner-only migration preview with
-no account or alarm writes. Trip persistence, explicit upgrade, grouping and
-shared-reader integration remain tracked in that active implementation record.
+no account or alarm writes. The following local slice adds canonical persistence, explicit upgrade/rollback,
+occurrence editing and Combine into Trip, with writes disabled by default.
+The local creator workspace now selects trips, edits occurrences, combines Past trips
+and shares ordered read-only snapshots. Upgrade remains gated; the record distinguishes
+fixture-tested behavior from real-account rollout acceptance.
+The Visited list now exposes Group destinations directly, carrying the selected
+places into upgrade review and the trip grouping form without a special URL.
+The local owner UI now separates Overview, Planning and Past tabs. Visited Atlas
+sharing lives on Overview; each saved trip retains its own share action.
+Staging Worker `fc6a784b-7e87-4850-b335-5f292771f276` now serves the trip
+read/preview routes used by localhost. Upgrade writes remain disabled; deployment
+and unauthenticated route/CORS evidence are recorded in the transition checklist.
 
-The full canonical trip architecture remains partial; the current UI fix
-does not perform a data migration or introduce Planned/Past transitions.
+The full canonical trip architecture remains partial. The new explicit
+Planned/Past transitions and migration APIs are locally tested, with writes
+disabled in default and staging configuration. No real account was migrated.
 The account-state architecture also describes the optional Instagram profile
 link and Explore image-refresh follow-up, tracked in the private-beta checklist.
 

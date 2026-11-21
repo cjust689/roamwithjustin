@@ -1166,6 +1166,41 @@ for (const memory of [
 
 {
   const token = await signToken({ scope: "read:my-atlas" })
+  const response = await workerResponse(
+    "/v1/me/export?format=csv",
+    { token },
+    {},
+    {
+      exportMyAtlas: async () => ({
+        schemaVersion: 3,
+        profile: { userId: "owner", revision: 3 },
+        trips: [
+          {
+            tripId: "trip_fixture",
+            title: 'A "quoted" trip',
+            stops: [{ memory: "private export memory" }],
+          },
+        ],
+        wishlist: [],
+        tripRollbackSnapshot: { pins: [{ memory: "rollback memory" }] },
+      }),
+    }
+  )
+  assert.equal(response.status, 200)
+  assert.match(
+    response.headers.get("Content-Disposition"),
+    /my-atlas-trips-export/
+  )
+  const csv = await response.text()
+  assert.ok(csv.startsWith("recordType,recordId,parentId,data\r\n"))
+  assert.match(csv, /trip,trip_fixture,/)
+  assert.match(csv, /private export memory/)
+  assert.match(csv, /rollbackSnapshot/)
+  assert.match(csv, /rollback memory/)
+}
+
+{
+  const token = await signToken({ scope: "read:my-atlas" })
   const response = await workerResponse("/v1/beta/register", {
     method: "POST",
     token,
@@ -2830,6 +2865,76 @@ assert.equal(
   assert.equal(response.headers.get("ETag"), '"rev-7"')
   assert.equal(response.headers.get("Cache-Control"), "no-store")
   assert.equal(calls, 1)
+}
+
+{
+  const paths = [
+    "/v1/me/trips",
+    "/v1/me/trips/upgrade",
+    "/v1/me/trips/rollback",
+    "/v1/me/trips/combine",
+    "/v1/me/trips/trip_" + "a".repeat(24) + "/lifecycle",
+  ]
+  for (const path of paths)
+    assert.equal(
+      (
+        await workerResponse(path, {
+          method: path.endsWith("lifecycle")
+            ? "PATCH"
+            : path.endsWith("trips")
+              ? "GET"
+              : "POST",
+          json: path.endsWith("trips") ? undefined : {},
+        })
+      ).status,
+      401
+    )
+  const namespace = {
+    MY_ATLAS_REGISTRY: {
+      getByName: () => ({
+        getRegistrationByIdentity: async () => ({
+          ok: true,
+          state: "active",
+          userId: "usr_fixture",
+        }),
+      }),
+    },
+    MY_ATLAS_USERS: {
+      getByName: () => ({
+        getOwnerTrips: async () => ({
+          ok: true,
+          profile: { revision: 1, pinCount: 0 },
+          upgraded: false,
+          trips: [],
+          rollbackAvailable: false,
+        }),
+      }),
+    },
+  }
+  const read = await workerResponse(
+    "/v1/me/trips",
+    { token: await signToken({ scope: "read:my-atlas" }) },
+    namespace
+  )
+  assert.equal(read.status, 200)
+  assert.equal((await readJson(read)).upgraded, false)
+  const denied = await workerResponse(
+    "/v1/me/trips/upgrade",
+    {
+      method: "POST",
+      token: await signToken({ scope: "read:my-atlas" }),
+      json: {},
+    },
+    namespace
+  )
+  assert.equal(denied.status, 403)
+  const disabled = await workerResponse(
+    "/v1/me/trips/upgrade",
+    { method: "POST", token: await signToken(), json: {} },
+    namespace
+  )
+  assert.equal(disabled.status, 503)
+  assert.equal((await readJson(disabled)).error, "trip_writes_disabled")
 }
 
 console.log("My Atlas Worker, sharing, and planning boundary tests passed.")

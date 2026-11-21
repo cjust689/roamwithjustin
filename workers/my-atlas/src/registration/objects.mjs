@@ -1,4 +1,11 @@
 import { DurableObject } from "cloudflare:workers"
+import {
+  TRIP_MARKER,
+  TRIP_BACKUP,
+  storedTrips,
+  tripPins,
+  mutateTripStore,
+} from "../trips/store.mjs"
 import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
 import {
   normalizeInstagramHandle,
@@ -1098,6 +1105,24 @@ function existingMutation(storage, command) {
   if (!existing) return null
   if (
     existing.requestDigest === command.requestDigest &&
+    (existing.planReference || existing.pinReferences)
+  ) {
+    const plan = existing.planReference
+      ? storage.kv.get(planKey(existing.planReference))
+      : null
+    const pins = existing.pinReferences?.map(id => storage.kv.get(pinKey(id)))
+    if (existing.planReference && !plan) return failure("plan_not_found")
+    if (pins?.some(pin => !pin)) return failure("pin_not_found")
+    return {
+      ...existing.result,
+      ...(plan ? { plan } : {}),
+      ...(pins ? { pins } : {}),
+      profile: storage.kv.get("profile"),
+      idempotent: true,
+    }
+  }
+  if (
+    existing.requestDigest === command.requestDigest &&
     existing.pinReference
   ) {
     const pin = storage.kv.get(pinKey(existing.pinReference))
@@ -1115,6 +1140,7 @@ function existingMutation(storage, command) {
 }
 
 function storeMutation(storage, command, result) {
+  if (storage.kv.get(TRIP_MARKER)) storage.kv.delete(TRIP_BACKUP)
   const pinReference =
     result.pin?.experiences !== undefined ? result.pin.pinId : null
   let cachedResult = result
@@ -1186,6 +1212,42 @@ export class UserProfileDurableObject extends DurableObject {
     if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
     const result = ownerProfile(this.ctx.storage, identityDigest)
     return result.ok ? profileResult(result.profile, true) : result
+  }
+  getOwnerTrips(identityDigest) {
+    const owner = ownerProfile(this.ctx.storage, identityDigest)
+    if (!owner.ok) return owner
+    return {
+      ok: true,
+      profile: owner.profile,
+      upgraded: Boolean(this.ctx.storage.kv.get(TRIP_MARKER)),
+      trips: storedTrips(this.ctx.storage),
+      rollbackAvailable: Boolean(this.ctx.storage.kv.get(TRIP_BACKUP)),
+    }
+  }
+  async mutateOwnerTrip(command) {
+    if (!validOwnerMutation(command)) return failure("invalid_trip_mutation")
+    const alarm =
+      command.action === "upgrade" ? await this.ctx.storage.getAlarm() : null
+    const result = this.ctx.storage.transactionSync(() => {
+      const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+      if (!owner.ok) return owner
+      return mutateTripStore(this.ctx.storage, owner.profile, command, {
+        source:
+          command.action === "upgrade"
+            ? this.exportOwnerState(command.identityDigest)
+            : null,
+        alarm,
+      })
+    })
+    if (result.ok) {
+      if (command.action === "rollback") {
+        if (result.restoreAlarm)
+          await this.ctx.storage.setAlarm(result.restoreAlarm)
+        else await this.ctx.storage.deleteAlarm()
+      } else if (this.ctx.storage.kv.get(TRIP_MARKER))
+        await this.ctx.storage.deleteAlarm()
+    }
+    return result
   }
 
   getOwnerAtlasImage(identityDigest) {
@@ -1443,10 +1505,12 @@ export class UserProfileDurableObject extends DurableObject {
     if (!owner.ok) return owner
     const options = { prefix: "pin:", limit: command.limit + 1 }
     if (command.cursor) options.startAfter = pinKey(command.cursor)
-    const entries = Array.from(
-      this.ctx.storage.kv.list(options),
-      ([, value]) => value
-    )
+    const entries = this.ctx.storage.kv.get(TRIP_MARKER)
+      ? tripPins(this.ctx.storage)
+          .sort((a, b) => a.pinId.localeCompare(b.pinId))
+          .filter(pin => !command.cursor || pin.pinId > command.cursor)
+          .slice(0, command.limit + 1)
+      : Array.from(this.ctx.storage.kv.list(options), ([, value]) => value)
     const truncated = entries.length > command.limit
     const pins = entries.slice(0, command.limit)
     return Object.freeze({
@@ -1458,6 +1522,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   createOwnerPin(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (
       !validOwnerMutation(command) ||
       !PIN_ID_PATTERN.test(command.pinId) ||
@@ -1519,6 +1587,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   updateOwnerPin(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     const patch = command?.patch
     if (
       !validOwnerMutation(command) ||
@@ -1618,6 +1690,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   deleteOwnerPin(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (!validOwnerMutation(command) || !PIN_ID_PATTERN.test(command.pinId)) {
       return failure("invalid_pin")
     }
@@ -1934,6 +2010,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   async createOwnerPlan(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     const candidate = {
       planId: command?.planId,
       title: command?.title,
@@ -1995,6 +2075,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   async replaceOwnerPlan(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
       return failure("invalid_plan")
     }
@@ -2052,6 +2136,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   async keepOwnerPlan(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
       return failure("invalid_plan")
     }
@@ -2099,6 +2187,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   markOwnerPlanVisited(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (
       !validOwnerMutation(command) ||
       !PLAN_ID_PATTERN.test(command.planId) ||
@@ -2201,6 +2293,10 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   async deleteOwnerPlan(command) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+      const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
+      return owner.ok ? failure("trip_upgrade_required") : owner
+    }
     if (!validOwnerMutation(command) || !PLAN_ID_PATTERN.test(command.planId)) {
       return failure("invalid_plan")
     }
@@ -2238,6 +2334,8 @@ export class UserProfileDurableObject extends DurableObject {
     if (!validIsoDate(now)) return failure("invalid_plan_expiry")
     const result = this.ctx.storage.transactionSync(() => {
       const profile = this.ctx.storage.kv.get("profile")
+      if (this.ctx.storage.kv.get(TRIP_MARKER))
+        return { ok: true, changed: false, nextAlarm: null }
       if (!profile || profile.status !== "active") {
         return Object.freeze({ ok: true, changed: false, nextAlarm: null })
       }
@@ -2399,6 +2497,23 @@ export class UserProfileDurableObject extends DurableObject {
     if (!DIGEST_PATTERN.test(identityDigest)) return failure("invalid_identity")
     const owner = ownerProfile(this.ctx.storage, identityDigest)
     if (!owner.ok) return owner
+    if (this.ctx.storage.kv.get(TRIP_MARKER))
+      return {
+        ok: true,
+        profile: owner.profile,
+        pins: tripPins(this.ctx.storage),
+        wishes: Array.from(
+          this.ctx.storage.kv.list({ prefix: "wish:" }),
+          ([, value]) => value
+        ),
+        plans: [],
+        trips: storedTrips(this.ctx.storage),
+        tripUpgrade: {
+          ...this.ctx.storage.kv.get(TRIP_MARKER),
+          rollbackSnapshot: this.ctx.storage.kv.get(TRIP_BACKUP) || null,
+        },
+        atlasImage: this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null,
+      }
     const pins = Array.from(
       this.ctx.storage.kv.list({ prefix: "pin:", limit: 301 }),
       ([, value]) => value
@@ -2450,13 +2565,16 @@ export class UserProfileDurableObject extends DurableObject {
     ) {
       return failure("public_atlas_not_found")
     }
-    const pins = Array.from(
-      this.ctx.storage.kv.list({ prefix: "pin:", limit: 301 }),
-      ([, value]) => value
-    )
+    const upgraded = Boolean(this.ctx.storage.kv.get(TRIP_MARKER))
+    const pins = upgraded
+      ? tripPins(this.ctx.storage, { publicOnly: true })
+      : Array.from(
+          this.ctx.storage.kv.list({ prefix: "pin:", limit: 301 }),
+          ([, value]) => value
+        )
     if (
       pins.length > 300 ||
-      pins.length !== profile.pinCount ||
+      (!upgraded && pins.length !== profile.pinCount) ||
       pins.some(
         pin =>
           !validStoredPinPlace(pin) ||
@@ -2465,6 +2583,7 @@ export class UserProfileDurableObject extends DurableObject {
     ) {
       return failure("public_atlas_inconsistent")
     }
+    if (!pins.length) return failure("public_atlas_not_found")
     const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
     if (atlasImage && !validStoredAtlasImage(atlasImage)) {
       return failure("public_atlas_inconsistent")
@@ -2482,6 +2601,7 @@ export class UserProfileDurableObject extends DurableObject {
         pins.map(pin =>
           Object.freeze({
             placeId: pin.placeId,
+            ...(pin.placeSnapshot ? { placeSnapshot: pin.placeSnapshot } : {}),
             ...(pin.customPlace ? { customPlace: pin.customPlace } : {}),
             ...publicPinTiming(pin),
             ...(pin.memory ? { memory: pin.memory } : {}),
@@ -2507,12 +2627,16 @@ export class UserProfileDurableObject extends DurableObject {
     if (atlasImage && !validStoredAtlasImage(atlasImage)) {
       return failure("public_atlas_inconsistent")
     }
+    const publicPinCount = this.ctx.storage.kv.get(TRIP_MARKER)
+      ? tripPins(this.ctx.storage, { publicOnly: true }).length
+      : profile.pinCount
+    if (!publicPinCount) return failure("public_atlas_not_discoverable")
     return Object.freeze({
       ok: true,
       profile: Object.freeze({
         handle: profile.handle,
         displayName: profile.displayName,
-        pinCount: profile.pinCount,
+        pinCount: publicPinCount,
         updatedAt: profile.publicAtlasUpdatedAt || profile.updatedAt,
       }),
       atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,

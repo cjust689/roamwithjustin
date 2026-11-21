@@ -19,6 +19,7 @@
     "TURNSTILE_ACTION": "my-atlas-register",
     "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
     "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+    "MY_ATLAS_TRIP_WRITES_ENABLED": "false",
   },
   "images": {
     "binding": "IMAGES",
@@ -95,6 +96,7 @@
         "REGISTRATION_PENDING_LEASE_SECONDS": "900",
         "MY_ATLAS_LOG_CONFIGURATION_ERRORS": "true",
         "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+        "MY_ATLAS_TRIP_WRITES_ENABLED": "false",
       },
       "secrets": {
         "required": [
