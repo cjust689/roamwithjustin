@@ -101,19 +101,28 @@ assert.equal(result.ready, true)
 assert.deepEqual(source, unchanged, "Preview must not mutate source data")
 assert.equal(
   result.trips.length,
-  3,
-  "Do not infer grouping from common dates or places"
+  1,
+  "Only the existing plan is a trip; destinations are not inferred trips"
 )
 assert.equal(
   result.counts.candidateStops,
-  4,
+  2,
   "Endpoints are not fabricated as visits"
 )
 assert.equal(
   result.trips.find(trip => trip.lifecycle === "planned").tripId,
   plan.planId
 )
-const past = result.trips.find(trip => trip.legacy.sourceId === pins[0].pinId)
+assert.equal(result.destinations.length, 2)
+assert.deepEqual(result.destinations[0].snapshot, pins[0])
+const past = {
+  ...result.trips[0],
+  tripId: "trip_" + "e".repeat(24),
+  lifecycle: "past",
+  stops: [result.destinations[0].stop],
+  sharing: { publicAtlas: true },
+  legacy: { snapshot: result.destinations[0].snapshot },
+}
 assert.deepEqual(past.legacy.snapshot, pins[0])
 assert.deepEqual(past.stops[0].visitedDates, pins[0].visitedDates)
 assert.equal(past.stops[0].memories[0].text, pins[0].memory)
@@ -156,10 +165,14 @@ const anotherOwner = await previewTripUpgrade(
   { ...source, profile: { ...source.profile, userId: "usr_another" } },
   { resolvePlace: resolver, digest }
 )
-assert.notEqual(anotherOwner.trips[0].tripId, result.trips[0].tripId)
+assert.equal(
+  anotherOwner.trips[0].tripId,
+  result.trips[0].tripId,
+  "Preserve the original plan ID"
+)
 assert.notEqual(
-  anotherOwner.trips[0].stops[0].stopId,
-  result.trips[0].stops[0].stopId
+  anotherOwner.destinations[0].stop.stopId,
+  result.destinations[0].stop.stopId
 )
 assert.notEqual(
   (

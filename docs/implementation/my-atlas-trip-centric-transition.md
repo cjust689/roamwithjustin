@@ -15,6 +15,7 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/styles/interactions.css
   - src/features/my-atlas/components/MyAtlasTrips.vue
   - src/features/my-atlas/planning/tripClient.mjs
   - src/features/my-atlas/planning/sharedTrip.mjs
@@ -52,6 +53,10 @@ verification:
 ---
 
 # Trip centric transition
+
+The latest owner-directed independent-destinations correction at the end of
+this record supersedes the earlier automatic one-stop-trip conversion design.
+Earlier local/deployed slices below are historical implementation evidence.
 
 This record reconciles the owner supplied `my-atlas-trip-architecture.md` and
 `My_Atlas_Flights_Round_Trip_and_Car_Rental_Addendum.md` briefs against source.
@@ -585,3 +590,154 @@ canonical browser fixture verified Planning/Past filtering, occurrence-specific
 memory editing and Overview map-overlay isolation. `npm run docs:audit` passed
 with 74 managed documents and 12 existing warnings. All frontend verification
 used synthetic data; the server gate remains disabled.
+
+## Independent destinations and explicit trip creation
+
+The owner rejected treating every saved visited destination as a trip. Adding
+Uvita, Atlanta or a custom pin must create a destination that can later be
+assigned to a trip. A deliberately created trip may still have only one stop.
+The existing plan is a trip; five visited destinations plus that plan are not
+six trips. This supersedes the earlier pin migration design and its wording.
+
+- [x] Preserve existing standalone pins on upgrade; convert only existing plans.
+- [x] Return/count ungrouped destinations separately from actual trips.
+- [x] Continue standalone destination creation, editing and deletion afterward.
+- [x] Add explicit named trip creation or attachment to an existing compatible
+      Past trip from ordered owner-selected destination IDs, including one stop.
+- [x] Move visit data atomically, preserving dates, memories, private experiences
+      and publication choices; leave unselected destinations unchanged.
+- [x] Give later visits independent occurrence/memory identities and make retries
+      safe even after their standalone source records have moved.
+- [x] Replace the typed magic phrase with a trip name and retention checkbox.
+- [x] Hide save controls when the server is unavailable for writes rather than
+      asking users to type into a form that can never be submitted.
+- [x] Require destination-model version 2 for upgrade so older clients cannot
+      activate changed storage semantics.
+- [x] Verify the name/acknowledgement enablement and actual Create trip click in
+      isolated browser fixtures at 320, 390 and 1440 pixels.
+
+The grouping API is `POST /v1/me/trips/group-destinations` with ordered `pinIds`
+and either `title` or target `tripId`. The UI first performs explicit account
+upgrade if needed, then performs grouping with its own revision/idempotency key.
+If grouping fails after upgrade, destinations remain standalone and the draft
+stays available. Successful grouping is not reported as failed because a
+companion refresh fails. Current staging configuration enables writes while
+the default local Worker configuration keeps the gate false; no real profile
+has been upgraded by the agent.
+
+All 57 Worker runtime tests passed before the final stale-client guard case,
+including standalone add/edit/delete, zero inferred trips, exact source move,
+order and memory/date preservation, replay, existing-trip attachment, repeated
+Place visits, one-stop trips, aggregate counts, public/private exclusion and
+rollback. Focused client tests verify button enablement without a typed phrase.
+Chrome fixture reports/captures are ignored under
+`.state/theme/destination-model-*`; the 390 pixel image was inspected. These
+fixtures are not real-account acceptance. Deployment and final build evidence
+will be recorded separately when actually completed.
+
+Final correction verification: `npm run build` passed with hash
+`378b3aa12c0c0c67`, all 57 Worker runtime tests and the existing bundle-size
+warnings. Explicit ESLint and staging Worker dry run passed. The stale-client
+test rejects upgrades without `destinationModelVersion: 2` before any mutation.
+Staging Worker `21912d9e-652a-4693-ab15-222d0e9eb6b8` deployed with
+`MY_ATLAS_TRIP_WRITES_ENABLED=true`. Default Worker configuration remains false.
+Remote health returned 200, anonymous collection/preview reads returned 401,
+and localhost trip GET preflight returned 204 with its expected allowed origin.
+No real profile was read with owner credentials, upgraded or modified by the
+agent. Genuine-owner save/reopen acceptance remains for the owner to exercise.
+The corrected frontend is available locally on port 8080; this follow-up has
+not yet been promoted to develop/main or deployed through Pages.
+
+## Sharing and profile organization follow-up
+
+- [x] Rename Share Visited Atlas to Share Your Atlas and keep public visibility,
+      link copying and Create story image on Overview.
+- [x] Move Instagram links, private data export and account deletion into the
+      top-right profile dropdown beside the theme selector.
+- [x] Keep public-link display and Explore Atlases navigation in that dropdown,
+      with Explore described as discovering other publicly shared Atlases.
+- [x] Separate favorite image/location and public presentation/listing controls
+      into Customize My Atlas, reachable from Overview and the dropdown.
+- [x] Keep Overview's journey navigation connected to the existing Past/Planning
+      tabs without implying that ungrouped destinations are journeys.
+- [x] Preserve deletion confirmation, API bindings, image processing and export
+      handlers while changing their presentation.
+- [x] Verify mobile menu sizing/internal scroll, keyboard dismissal, trigger
+      focus restoration, outside-click dismissal and customization focus.
+- [ ] Promote this frontend follow-up together with the independent-destination
+      correction; the staging API correction is already deployed separately.
+
+Chrome fixtures at 320, 390 and 1440 pixels verified account controls exist only
+in the profile dropdown, story-image creation remains in Overview sharing,
+image controls move to customization, existing handler callbacks still fire,
+and deletion remains disabled without its typed confirmation. The expanded menu
+fits the available viewport and no horizontal overflow occurs. A first check
+exposed the need to size the menu from its actual screen position; this was
+corrected and the stricter viewport check passed. The 390 pixel menu and image
+editor captures were visually inspected. Reports and images are ignored under
+`.state/theme/profile-organization-*`, `profile-dropdown-*` and
+`profile-customization-*`. The existing My Atlas suite passed with 57 Worker
+runtime tests before the final layout refinement; targeted ESLint passes on
+the final source. No genuine profile, image or deletion request was submitted.
+
+Final frontend build passed with hash `ece176a00d192b3d`, including the full
+My Atlas suite and all 57 Worker runtime tests. Targeted lint and the repeated
+strict dropdown viewport/focus checks passed on the final source. Existing
+bundle-size warnings remain. `npm run docs:audit` passed with 75 managed
+documents and 12 existing warnings. The matching UI is local at port 8080;
+this follow-up does not deploy a frontend or change backend configuration.
+
+## Local button responsiveness follow-up
+
+- [x] Share hover, immediate pressed, keyboard focus and selected-state feedback
+      across owner controls, including child editors and disclosures.
+- [x] Keep SDK map controls outside the shared interaction styles.
+- [x] Use at least 44 by 44 pixel coarse-pointer targets and touch manipulation.
+- [x] Distinguish disabled controls and actual busy state; add busy semantics
+      for image/export, visit saves and the main canonical trip save actions.
+- [x] Keep progress distinct from acknowledged-save notifications and retain
+      reduced-motion accessibility without moving or spinning controls.
+- [x] Verify real pressed state, focus, busy indicator, coarse-pointer sizing,
+      unchanged map identity and no horizontal overflow in browser fixtures.
+
+`src/features/my-atlas/styles/interactions.css` is imported by the owner view.
+`MyAtlasTrips.vue` tracks `pendingAction` during mutations; failed and completed
+requests clear it in the existing finally path. The pin editor and owner image/
+Story buttons reuse their actual pending properties. No backend or save timing
+is changed. Active press styling applies immediately, with a short release/
+hover transition; touch feedback does not wait for an API response.
+
+Chrome verified a held pointer produces the pressed transform and inset shadow
+with zero transition delay, a keyboard focus ring, a disabled busy Story button
+with progress cursor/indicator, 44 by 44 pixel touch targets at 320/390 pixels,
+unchanged SDK map identity and no horizontal overflow. Reduced-motion emulation
+removed transitions and indicator animation. The report is ignored at
+`.state/theme/button-feedback-qa.json`. Focused canonical/client tests and lint
+passed. A stale development lint overlay was cleared by rebuilding the changed
+template; the browser check rejects an active overlay. The normal configured
+API/catalog and account data were preserved. This frontend work remains local.
+
+Final `npm run build` passed with hash `fffd69d586088aba`, including all 57
+Worker runtime tests and the full My Atlas checks. Existing bundle-size warnings
+remain. `npm run docs:audit` passed with 75 managed documents and 12 existing
+warnings. No deployment, account mutation or provider setting was changed.
+
+Explore intro styling follow-up: the intro's Explore Atlases router link now
+uses a rounded secondary outline and matching button padding, rather than bare
+text beside Sign in. Targeted lint and local Chrome at 320, 390 and 1440 pixels
+passed: equal 44 pixel heights, aligned top edges, visible border and no horizontal
+overflow. The 390 pixel capture was inspected. Route remains `/my-atlas/explore`;
+dropdown links are outside this style override. Artifacts are ignored under
+`.state/theme/explore-button-*`. This small visual change remains local.
+
+Matching disclosure follow-up: Share Your Atlas and Customize My Atlas now use
+the same section-toggle class, heading/subtitle layout and Open/Hide pill.
+Customization uses controlled expanded state rather than a differently styled
+native details summary. Collapsing preserves the image/location editor, and the
+profile shortcut still opens it with focus on its header. Targeted lint passed.
+Chrome at 320, 390 and 1440 pixels verified identical computed header height,
+padding, title color/font/weight and Open labels, plus working Hide state,
+controlled content visibility, keyboard Space collapse and profile-shortcut
+focus. No horizontal overflow occurred. The 390 pixel capture was inspected;
+artifacts are ignored under `.state/theme/matching-sections-*`. The UI remains
+local; no backend or account changes were needed.

@@ -334,31 +334,21 @@ await ui.prepareDestinationGroup([
   secondVisit.stops[0].place,
   firstVisit.stops[0].place,
 ])
-assert.deepEqual(
-  ui.combineIds,
-  [secondVisit.tripId, firstVisit.tripId],
-  "Visited selection order becomes trip order"
-)
+assert.equal(ui.groupDestinations.length, 2)
 assert.equal(ui.filter, "past")
-assert.equal(calls.length, before, "Preparing a group never writes")
-ui.combineIds.reverse()
-ui.applyDestinationGroup()
-assert.deepEqual(
-  ui.combineIds,
-  [firstVisit.tripId, secondVisit.tripId],
-  "Refresh does not reset reviewed selections"
-)
-ui.trips.push({ ...firstVisit, tripId: "trip_" + "c".repeat(24) })
-await ui.prepareDestinationGroup([
-  firstVisit.stops[0].place,
-  secondVisit.stops[0].place,
-])
 assert.deepEqual(
   ui.combineIds,
   [],
-  "Ambiguous repeated visits are not automatically combined"
+  "Selecting destinations does not select or infer existing trips"
 )
-assert.match(ui.error, /multiple visits/)
+assert.equal(calls.length, before, "Preparing a group never writes")
+ui.groupTitle = "Reviewed group name"
+ui.applyDestinationGroup()
+assert.equal(
+  ui.groupTitle,
+  "Reviewed group name",
+  "Refresh preserves the entered name"
+)
 const originalCall = ui.call
 let previewReads = 0
 ui.upgraded = false
@@ -385,7 +375,7 @@ assert.equal(
 ui.trips = [firstVisit, secondVisit]
 ui.upgraded = true
 ui.applyDestinationGroup()
-assert.deepEqual(ui.combineIds, [firstVisit.tripId, secondVisit.tripId])
+assert.deepEqual(ui.combineIds, [])
 ui.call = originalCall
 ui.selectedId = firstVisit.tripId
 ui.memoryDraft = "Unsaved memory across tabs"
@@ -398,6 +388,51 @@ assert.equal(ui.filter, "past")
 ui.scope = "past"
 ui.startNew()
 assert.equal(ui.draftLifecycle, "past", "Add trip follows the active tab")
+ui.pending = false
+ui.refreshNeeded = false
+ui.upgraded = false
+ui.writesEnabled = true
+ui.preview = { ready: true, fingerprint: "a".repeat(64) }
+ui.groupDestinations = [
+  { pinId: "pin_" + "b".repeat(24), name: "Atlanta" },
+  { pinId: "pin_" + "a".repeat(24), name: "Uvita" },
+]
+ui.groupTitle = ""
+ui.retentionAcknowledged = false
+assert.equal(ui.canSaveDestinationGroup, false)
+ui.groupTitle = "My actual trip"
+assert.equal(ui.canSaveDestinationGroup, false)
+ui.retentionAcknowledged = true
+assert.equal(
+  ui.canSaveDestinationGroup,
+  true,
+  "A name and acknowledgement enable Create trip without a typed magic phrase"
+)
+const writes = []
+ui.mutate = async (action, body) => {
+  writes.push({ action, body })
+  if (action === "upgrade") ui.upgraded = true
+}
+await ui.saveDestinationGroup()
+assert.deepEqual(
+  writes.map(write => write.action),
+  ["upgrade", "groupDestinations"]
+)
+assert.deepEqual(writes[1].body, {
+  title: "My actual trip",
+  pinIds: ui.groupDestinations.map(place => place.pinId),
+})
+ui.writesEnabled = false
+await ui.saveDestinationGroup()
+assert.equal(writes.length, 2, "The UI respects a disabled server gate")
+ui.writesEnabled = true
+ui.groupTitle = ""
+ui.groupTargetId = firstVisit.tripId
+assert.equal(
+  ui.canSaveDestinationGroup,
+  true,
+  "An explicit existing trip needs no replacement title"
+)
 console.log(
   "Trip workspace retry, draft preservation, response validation, read-only v2 sharing and legacy link compatibility tests passed."
 )

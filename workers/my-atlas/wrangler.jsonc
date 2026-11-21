@@ -96,7 +96,7 @@
         "REGISTRATION_PENDING_LEASE_SECONDS": "900",
         "MY_ATLAS_LOG_CONFIGURATION_ERRORS": "true",
         "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
-        "MY_ATLAS_TRIP_WRITES_ENABLED": "false",
+        "MY_ATLAS_TRIP_WRITES_ENABLED": "true",
       },
       "secrets": {
         "required": [

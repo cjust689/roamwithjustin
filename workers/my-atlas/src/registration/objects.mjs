@@ -4,6 +4,7 @@ import {
   TRIP_BACKUP,
   storedTrips,
   tripPins,
+  replayTripOperation,
   mutateTripStore,
 } from "../trips/store.mjs"
 import { normalizeImageLocation } from "../../../../shared/my-atlas-image-location.mjs"
@@ -1221,8 +1222,19 @@ export class UserProfileDurableObject extends DurableObject {
       profile: owner.profile,
       upgraded: Boolean(this.ctx.storage.kv.get(TRIP_MARKER)),
       trips: storedTrips(this.ctx.storage),
+      destinations: Array.from(
+        this.ctx.storage.kv.list({ prefix: "pin:" }),
+        ([, pin]) => pin
+      ),
       rollbackAvailable: Boolean(this.ctx.storage.kv.get(TRIP_BACKUP)),
     }
+  }
+  replayOwnerTripMutation(command) {
+    if (!validOwnerMutation(command)) return failure("invalid_trip_mutation")
+    const owner = ownerProfile(this.ctx.storage, command.identityDigest)
+    return owner.ok
+      ? replayTripOperation(this.ctx.storage, owner.profile, command)
+      : owner
   }
   async mutateOwnerTrip(command) {
     if (!validOwnerMutation(command)) return failure("invalid_trip_mutation")
@@ -1522,7 +1534,7 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   createOwnerPin(command) {
-    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)?.schemaVersion === 1) {
       const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
       return owner.ok ? failure("trip_upgrade_required") : owner
     }
@@ -1544,7 +1556,15 @@ export class UserProfileDurableObject extends DurableObject {
       if (owner.profile.revision !== command.expectedRevision) {
         return failure("revision_conflict")
       }
-      if ((owner.profile.pinCount || 0) >= 300) {
+      if (
+        (owner.profile.pinCount || 0) >= 300 &&
+        !(
+          this.ctx.storage.kv.get(TRIP_MARKER)?.schemaVersion === 2 &&
+          tripPins(this.ctx.storage).some(
+            pin => pin.placeId === command.placeId
+          )
+        )
+      ) {
         return failure("pin_limit_reached")
       }
       if (this.ctx.storage.kv.get(pinPlaceKey(command.placeId))) {
@@ -1574,6 +1594,8 @@ export class UserProfileDurableObject extends DurableObject {
       }
       this.ctx.storage.kv.put(pinKey(pin.pinId), pin)
       this.ctx.storage.kv.put(pinPlaceKey(pin.placeId), { pinId: pin.pinId })
+      if (this.ctx.storage.kv.get(TRIP_MARKER))
+        profile.pinCount = tripPins(this.ctx.storage).length
       this.ctx.storage.kv.put("profile", profile)
       const result = Object.freeze({
         ok: true,
@@ -1587,7 +1609,7 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   updateOwnerPin(command) {
-    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)?.schemaVersion === 1) {
       const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
       return owner.ok ? failure("trip_upgrade_required") : owner
     }
@@ -1677,6 +1699,8 @@ export class UserProfileDurableObject extends DurableObject {
         this.ctx.storage.kv.put(pinPlaceKey(placeId), { pinId: current.pinId })
       }
       this.ctx.storage.kv.put(pinKey(pin.pinId), pin)
+      if (this.ctx.storage.kv.get(TRIP_MARKER))
+        profile.pinCount = tripPins(this.ctx.storage).length
       this.ctx.storage.kv.put("profile", profile)
       const result = Object.freeze({
         ok: true,
@@ -1690,7 +1714,7 @@ export class UserProfileDurableObject extends DurableObject {
   }
 
   deleteOwnerPin(command) {
-    if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+    if (this.ctx.storage.kv.get(TRIP_MARKER)?.schemaVersion === 1) {
       const owner = ownerProfile(this.ctx.storage, command?.identityDigest)
       return owner.ok ? failure("trip_upgrade_required") : owner
     }
@@ -1721,6 +1745,13 @@ export class UserProfileDurableObject extends DurableObject {
       }
       this.ctx.storage.kv.delete(pinKey(pin.pinId))
       this.ctx.storage.kv.delete(pinPlaceKey(pin.placeId))
+      if (this.ctx.storage.kv.get(TRIP_MARKER)) {
+        profile.pinCount = tripPins(this.ctx.storage).length
+        if (profile.pinCount) {
+          profile.public = owner.profile.public
+          profile.discoverable = owner.profile.discoverable
+        }
+      }
       this.ctx.storage.kv.put("profile", profile)
       const result = Object.freeze({
         ok: true,

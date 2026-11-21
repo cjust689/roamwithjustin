@@ -109,7 +109,12 @@
     <p v-if="error" class="pin-editor-error" role="alert">{{ error }}</p>
 
     <div class="pin-editor-actions">
-      <button type="button" :disabled="pending" @click="submit">
+      <button
+        type="button"
+        :disabled="pending"
+        :aria-busy="String(pending)"
+        @click="submit"
+      >
         {{ saveLabel }}
       </button>
       <small v-if="!memoryOnly && !dates.length && !year">

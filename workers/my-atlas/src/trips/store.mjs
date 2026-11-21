@@ -29,7 +29,7 @@ export const storedTrips = storage =>
     ([, value]) => value
   )
 
-function validCollection(trips) {
+function validCollection(trips, storage) {
   assertTripStorageBudget(trips)
   if (trips.length > 501) throw Error("trip_limit_reached")
   const tripIds = new Set(),
@@ -40,6 +40,9 @@ function validCollection(trips) {
       .filter(trip => trip.lifecycle === "past")
       .flatMap(trip => trip.stops.map(stop => stop.place.placeId))
   )
+  if (storage)
+    for (const [, pin] of storage.kv.list({ prefix: "pin:" }))
+      pastPlaces.add(pin.placeId)
   if (pastPlaces.size > 300) throw Error("visited_place_limit")
   for (const trip of trips) {
     assertCanonicalTrip(trip)
@@ -61,7 +64,12 @@ function validCollection(trips) {
 
 // Compatibility geography is derived, never maintained as another editable store.
 export function tripPins(storage, { publicOnly = false } = {}) {
-  const byPlace = new Map()
+  const byPlace = new Map(
+    Array.from(storage.kv.list({ prefix: "pin:" }), ([, pin]) => [
+      pin.placeId,
+      { ...pin, ungrouped: true, tripIds: [] },
+    ])
+  )
   for (const trip of storedTrips(storage).sort(
     (a, b) =>
       b.updatedAt.localeCompare(a.updatedAt) || a.tripId.localeCompare(b.tripId)
@@ -75,6 +83,8 @@ export function tripPins(storage, { publicOnly = false } = {}) {
       )
       const existing = byPlace.get(stop.place.placeId)
       if (existing) {
+        if (!publicOnly) existing.tripIds.push(trip.tripId)
+        if (!publicOnly && existing.ungrouped) continue
         existing.visitedDates = [
           ...new Map(
             [...existing.visitedDates, ...stop.visitedDates].map(date => [
@@ -90,6 +100,8 @@ export function tripPins(storage, { publicOnly = false } = {}) {
       }
       const pin = {
         schemaVersion: 4,
+        ungrouped: false,
+        tripIds: [trip.tripId],
         pinId: `pin_${stop.stopId.slice(5, 29)}`,
         placeId: stop.place.placeId,
         placeSnapshot: tripPlaceProjection(stop.place),
@@ -109,6 +121,14 @@ export function tripPins(storage, { publicOnly = false } = {}) {
     }
   }
   return [...byPlace.values()]
+}
+
+export function replayTripOperation(storage, profile, command) {
+  const receipt = storage.kv.get(`trip-operation:${command.operationDigest}`)
+  if (!receipt) return { ok: true, found: false }
+  if (receipt.requestDigest !== command.requestDigest)
+    return fail("idempotency_conflict")
+  return { ...resultFor(storage, profile, receipt, true), found: true }
 }
 
 function resultFor(storage, profile, receipt, idempotent = false) {
@@ -204,7 +224,8 @@ export function mutateTripStore(
       !source?.ok ||
       !command.preview?.ready ||
       command.preview.revision !== profile.revision ||
-      command.preview.trips.length !== source.pins.length + source.plans.length
+      command.preview.trips.length !== source.plans.length ||
+      command.preview.destinations?.length !== source.pins.length
     )
       return fail("upgrade_source_changed")
     const originals = new Map([
@@ -212,6 +233,11 @@ export function mutateTripStore(
       ...source.plans.map(record => [record.planId, record]),
     ])
     if (
+      command.preview.destinations.some(
+        item =>
+          JSON.stringify(item.snapshot) !==
+          JSON.stringify(originals.get(item.pinId))
+      ) ||
       command.preview.trips.some(
         trip =>
           JSON.stringify(trip.legacy?.snapshot) !==
@@ -229,7 +255,7 @@ export function mutateTripStore(
       upgradedAt: command.now,
     }
     try {
-      validCollection(trips)
+      validCollection(trips, storage)
       assertTripStorageBudget(trips, backup)
     } catch (error) {
       return fail(
@@ -238,7 +264,7 @@ export function mutateTripStore(
     }
     storage.kv.put(TRIP_BACKUP, backup)
     storage.kv.put(TRIP_MARKER, {
-      schemaVersion: 1,
+      schemaVersion: 2,
       upgradedAt: command.now,
       upgradedRevision: profile.revision + 1,
       fingerprint: command.preview.fingerprint,
@@ -263,7 +289,7 @@ export function mutateTripStore(
           result: { ok: true, idempotent: false },
         })
     }
-    for (const prefix of ["pin:", "pin-place:", "plan:"])
+    for (const prefix of ["plan:"])
       for (const [legacyKey] of storage.kv.list({ prefix }))
         storage.kv.delete(legacyKey)
   } else if (command.action === "rollback") {
@@ -301,11 +327,59 @@ export function mutateTripStore(
     const current = value.tripId
       ? trips.find(trip => trip.tripId === value.tripId)
       : null
-    if (command.action !== "create" && command.action !== "combine" && !current)
+    if (value.tripId && !current) return fail("trip_not_found")
+    if (
+      command.action !== "create" &&
+      command.action !== "group-destinations" &&
+      command.action !== "combine" &&
+      !current
+    )
       return fail("trip_not_found")
     let updated
     try {
-      if (command.action === "create") {
+      if (command.action === "group-destinations") {
+        const selected = value.destinations
+        if (
+          !selected?.length ||
+          selected.some(
+            item =>
+              JSON.stringify(storage.kv.get(`pin:${item.pinId}`)) !==
+              JSON.stringify(item.snapshot)
+          )
+        )
+          return fail("destination_selection_changed")
+        const stops = selected.map(item => ({
+          ...copy(item.stop),
+          memories: item.stop.memories.map(memory => ({
+            ...memory,
+            publicAtlas: profile.public === true,
+          })),
+        }))
+        if (current) {
+          if (
+            current.lifecycle !== "past" ||
+            current.sharing.publicAtlas !== (profile.public === true)
+          )
+            return fail("group_needs_review")
+          updated = {
+            ...current,
+            stops: [...current.stops, ...stops],
+            version: current.version + 1,
+            updatedAt: command.now,
+          }
+          trips = trips.map(trip =>
+            trip.tripId === current.tripId ? updated : trip
+          )
+        } else {
+          updated = {
+            ...copy(value.trip),
+            stops,
+            sharing: { publicAtlas: profile.public === true },
+          }
+          trips.push(updated)
+        }
+        targetId = updated.tripId
+      } else if (command.action === "create") {
         updated = copy(value.trip)
         targetId = updated.tripId
         if (trips.some(trip => trip.tripId === targetId))
@@ -466,12 +540,13 @@ export function mutateTripStore(
       if (
         updated &&
         command.action !== "create" &&
+        command.action !== "group-destinations" &&
         command.action !== "combine"
       ) {
         targetId = current.tripId
         trips = trips.map(trip => (trip.tripId === targetId ? updated : trip))
       }
-      validCollection(trips)
+      validCollection(trips, storage)
     } catch (error) {
       return fail(
         error.code ||
@@ -487,6 +562,12 @@ export function mutateTripStore(
             : "invalid_trip")
       )
     }
+    if (command.action === "group-destinations") {
+      for (const item of value.destinations) {
+        storage.kv.delete(`pin:${item.pinId}`)
+        storage.kv.delete(`pin-place:${item.snapshot.placeId}`)
+      }
+    }
     storage.kv.delete(TRIP_BACKUP)
   }
   const old = storedTrips(storage)
@@ -496,7 +577,8 @@ export function mutateTripStore(
   for (const trip of trips) storage.kv.put(key(trip.tripId), trip)
   nextProfile = {
     ...profile,
-    tripSchemaVersion: 1,
+    tripSchemaVersion:
+      marker?.schemaVersion || (command.action === "upgrade" ? 2 : 1),
     tripCount: trips.length,
     planCount: 0,
     pinCount: tripPins(storage).length,
