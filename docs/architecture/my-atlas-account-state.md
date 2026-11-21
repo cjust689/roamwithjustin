@@ -1068,3 +1068,111 @@ labelled tabpanel. No automatic schema change or server write is introduced.
 Trip load errors distinguish a missing server route from expired sign-in and
 retryable load failures. The prior remote checks do not establish the cause of
 the owner's later authenticated load error; that remains externally unverified.
+
+## Independent destinations correction
+
+The owner's newer direction supersedes the original pin-to-one-stop-trip
+conversion. Destination-model version 2 leaves existing `pin:` records and
+`pin-place:` indexes intact during upgrade; only existing saved plans become
+canonical trips. Adding a destination remains a pin write and creates no trip.
+The account marker/profile use trip schema version 2 to allow independent
+destination CRUD alongside canonical trips. The original version 1 boundary
+continues to reject legacy geometry writes for any already upgraded v1 object.
+
+`GET /v1/me/trips` returns actual trips and separate ungrouped `destinations`.
+The preview counts ungrouped destinations separately and lists existing plans
+as trips. Upgrade requires `destinationModelVersion: 2` in addition to the
+existing fingerprint/revision and retention controls. Older clients cannot
+activate the changed model accidentally. The UI supplies the version and
+confirmation value after an explicit checkbox; no typed phrase is requested.
+
+`POST /v1/me/trips/group-destinations` accepts ordered `pinIds` and either a
+new `title` or existing Past `tripId`. The service resolves owned source visits;
+the transaction checks their snapshots, moves their memories/dates/experiences
+into stable trip stop occurrences, then removes only those standalone pins and
+indexes. Unselected destinations remain independent and editable. One selected
+destination can form an explicit one-stop trip. Existing-trip attachment must
+preserve the current publication scope. Stop/memory IDs are operation-qualified
+so a later visit to the same place remains independent. An owner-scoped receipt
+is checked before resolving already-moved pins on a retry.
+
+Owner/public compatibility geography derives from standalone destinations plus
+eligible Past trips, deduplicated by Place. Owner responses identify standalone
+destinations with `ungrouped` and list trip references; public projections omit
+those owner-only fields. Standalone editing never merges another trip's dates
+or memories into that destination. Export and complete account deletion retain
+the established boundaries. Upgrade rollback restores the original state before
+any subsequent saved change; grouping purges that backup after success.
+
+Default configuration still disables trip writes. The corrected staging
+configuration enables explicit authenticated writes; deployment evidence is
+recorded in the active transition checklist when performed. No upgrade runs on
+account read, ordinary destination creation or deployment.
+
+The corrected backend is deployed as staging Worker
+`21912d9e-652a-4693-ab15-222d0e9eb6b8`, with explicit trip writes enabled.
+The version-2 upgrade guard prevents older frontends from activating the new
+model. The matching UI correction is local only until its next frontend release.
+Anonymous route/CORS checks pass; genuine-owner save acceptance is not claimed.
+
+## Local sharing, customization and profile navigation
+
+The owner UI now uses these responsibilities. This follow-up remains local
+until the next frontend promotion; no account API or permission change is added.
+
+| Location | Functionality |
+| --- | --- |
+| Overview | Travel statistics, journey navigation, Share Your Atlas |
+| Share Your Atlas | Public visibility, copy link, create story image |
+| Profile dropdown | Profile settings, links, data export, account deletion |
+| Customize My Atlas | Favorite travel image, image location, profile presentation |
+| Explore Atlases | Discover other users' publicly shared Atlases |
+
+Share Your Atlas remains a collapsible Overview section and omits private
+account-management controls. Its story-image button reuses the existing export
+path. The favorite-image editor and Explore listing preference move into a
+separate Customize My Atlas disclosure on Overview, also reachable from the
+profile dropdown. This separates public profile presentation from Atlas sharing.
+Journey controls navigate to the existing Past/Planning tabs without fetching
+or inventing journey records just to populate the summary.
+
+The dropdown opens from the existing profile icon beside the theme selector.
+It includes Instagram links, private JSON data export, the existing guarded
+account deletion flow, public-link display and Explore navigation. Image and
+account deletion retain their existing safeguards. The dropdown closes through
+its Close button, Escape or an outside click; Escape/Close restore trigger focus.
+Its available-height calculation and internal scrolling keep long expanded
+settings reachable on mobile. Customize navigation closes the dropdown, opens
+Overview's disclosure and focuses its summary. Draft values stay on the owner
+component; moving the controls does not save them automatically.
+
+## Local control feedback
+
+`styles/interactions.css`, imported by the owner view, scopes shared feedback to
+the owner panel and notification dismiss control. It leaves MapTiler controls
+untouched. Enabled controls brighten/lift slightly on fine-pointer hover and
+press inward immediately, with an inset shadow on pointer activation. Keyboard
+focus has a visible ring. ARIA selected/pressed/expanded controls and open
+disclosures keep a persistent selected edge. Disabled controls are visibly
+dimmed and do not lift; coarse-pointer targets have 44 pixel minimum dimensions.
+`touch-action: manipulation` retains scrolling and pinch zoom while avoiding
+double-tap delay on these controls.
+
+Story-image processing, image processing, visit saves and the main canonical
+trip saves expose `aria-busy`; busy buttons show an indeterminate indicator and
+progress cursor. The trip component tracks the actual mutation action and clears
+it after success or failure. These cues acknowledge work in progress, not a
+successful save. Existing success/error/refresh notifications remain authoritative.
+Reduced-motion preferences remove transforms/transitions and spinner animation
+while preserving static focus, selection and busy cues. This is visual feedback;
+no device vibration, audio or extra requests are introduced.
+
+The intro Explore Atlases link is styled as an outlined secondary pill beside
+Sign in/Quick start, with matching padding, height and alignment. Its router
+destination and the dropdown's simpler Explore link are unchanged.
+
+Customize My Atlas now uses the same button-based section toggle as Share Your
+Atlas, including heading/subtitle typography, padding and Open/Hide pill. Its
+controlled content stays mounted while collapsed. `aria-expanded` and
+`aria-controls` reflect the state; the profile shortcut opens the section and
+focuses its toggle. The older native details triangle/header styling is removed.
