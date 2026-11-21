@@ -175,9 +175,31 @@ assert.match(sharedTripView, /:planner-read-only="true"/)
 assert.match(sharedTripView, /buildPlannerMapRoute/)
 assert.match(sharedTripView, /<details open>/)
 assert.match(sharedTripView, />\s*Trip summary\s*</)
-assert.match(
-  ownerView,
-  /:places="\s*!canUseAtlas \|\| plannerMapActive \|\| tripMapActive \? \[\] : displayedPlaces\s*"/
+const mapPlaces = new Function(
+  "canUseAtlas",
+  "mapNavigatorTrip",
+  "plannerMapActive",
+  "tripMapActive",
+  "displayedPlaces",
+  `return (${ownerView.match(/:places="([^"]+)"/)[1]})`
+)
+const visible = [{ placeId: "visited" }],
+  guided = { stops: [{ place: { placeId: "trip-stop" } }] }
+assert.deepEqual(
+  mapPlaces(false, guided, false, false, visible),
+  [],
+  "Signed-out maps must not expose owner destinations"
+)
+assert.deepEqual(mapPlaces(true, null, false, false, visible), visible)
+assert.deepEqual(
+  mapPlaces(true, null, true, false, visible),
+  [],
+  "The planner renders its route instead of visited pins"
+)
+assert.deepEqual(
+  mapPlaces(true, guided, false, false, visible),
+  [guided.stops[0].place],
+  "In-map navigation uses the chosen trip"
 )
 assert.match(ownerView, /@planner-state-change="handlePlannerStateChange"/)
 assert.match(ownerView, /class="my-atlas-account-card"/)

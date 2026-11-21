@@ -1,5 +1,9 @@
 <template>
-  <main class="my-atlas-proof" @keydown.esc="cancelLocationPlacement">
+  <main
+    class="my-atlas-proof"
+    :class="{ 'is-map-only': !sidebarExpanded }"
+    @keydown.esc="cancelLocationPlacement"
+  >
     <MyAtlasActionFeedback
       :feedback="actionFeedback"
       @dismiss="dismissActionFeedback"
@@ -7,9 +11,19 @@
     <MyAtlasMap
       ref="atlasMap"
       :places="
-        !canUseAtlas || plannerMapActive || tripMapActive ? [] : displayedPlaces
+        !canUseAtlas
+          ? []
+          : mapNavigatorTrip
+            ? mapNavigatorTrip.stops.map(stop => stop.place)
+            : plannerMapActive || tripMapActive
+              ? []
+              : displayedPlaces
       "
-      :selected-place-id="canUseAtlas ? selectedPlaceId : ''"
+      :selected-place-id="
+        canUseAtlas ? mapNavigatorLocation?.placeId || selectedPlaceId : ''
+      "
+      :focused-location="mapNavigatorLocation"
+      :navigator-active="Boolean(mapNavigatorTrip)"
       :show-connections="showConnections"
       :show-memories="showMemories"
       :playback-active="canUseAtlas && timelinePlaying"
@@ -31,20 +45,41 @@
                 : customPlaceCoordinates
           : null
       "
-      :planner-active="canUseAtlas && (plannerMapActive || tripMapActive)"
+      :planner-active="
+        canUseAtlas &&
+        (mapNavigatorTrip
+          ? mapNavigatorTrip.kind !== 'atlas'
+          : plannerMapActive || tripMapActive)
+      "
       :planner-route="
         canUseAtlas
-          ? tripMapActive
-            ? tripView.route
-            : plannerMapActive
-              ? plannerRoute
-              : []
+          ? mapNavigatorTrip && mapNavigatorTrip.kind !== 'atlas'
+            ? mapNavigatorRoute
+            : tripMapActive
+              ? tripView.route
+              : plannerMapActive
+                ? plannerRoute
+                : []
           : []
       "
-      :planner-read-only="tripMapActive"
+      :planner-read-only="Boolean(mapNavigatorTrip) || tripMapActive"
       @select="selectPin"
       @place-custom="handleLocationPlacement"
-    />
+      ><template #navigator
+        ><MyAtlasMapNavigator
+          v-if="canUseAtlas && mapNavigationTrips.length"
+          :trips="mapNavigationTrips"
+          :active-id="mapNavigatorTripId"
+          :index="mapNavigatorStopIndex"
+          :open="mapNavigatorOpen"
+          :collapsed="mapNavigatorCollapsed"
+          :menu-hidden="!sidebarExpanded"
+          @open="openMapNavigator"
+          @close="closeMapNavigator"
+          @collapse="mapNavigatorCollapsed = !mapNavigatorCollapsed"
+          @choose="chooseMapTrip"
+          @step="stepMapTrip" /></template
+    ></MyAtlasMap>
     <MyAtlasTutorial
       v-if="canUseAtlas && tutorialOpen"
       :variant="tutorialVariant"
@@ -53,10 +88,23 @@
     />
 
     <section
+      v-show="sidebarExpanded"
+      id="my-atlas-sidebar"
+      ref="sidebar"
       class="my-atlas-panel"
       :class="{ 'is-planning': plannerMapActive }"
       aria-labelledby="my-atlas-title"
     >
+      <button
+        ref="sidebarHide"
+        class="my-atlas-sidebar-hide"
+        type="button"
+        aria-controls="my-atlas-sidebar"
+        :aria-expanded="String(sidebarExpanded)"
+        @click="toggleSidebar"
+      >
+        Hide menu <span aria-hidden="true">↓</span>
+      </button>
       <header>
         <span class="my-atlas-brand-lockup">
           <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
@@ -1104,6 +1152,28 @@
         {{ announcement }}
       </p>
     </section>
+    <button
+      v-if="!sidebarExpanded"
+      ref="sidebarOpen"
+      class="my-atlas-sidebar-open"
+      type="button"
+      aria-controls="my-atlas-sidebar"
+      :aria-expanded="String(sidebarExpanded)"
+      @click="toggleSidebar"
+    >
+      <strong>My Atlas</strong
+      ><span>Open menu <b aria-hidden="true">↑</b></span>
+    </button>
+    <div class="my-atlas-map-help">
+      <span>Map controls</span
+      ><MyAtlasInfo label="How to navigate the My Atlas map"
+        >Drag to move around. Hold Ctrl or ⌘ while scrolling to zoom, or use the
+        + and − buttons. On a touchscreen, use two fingers to move and pinch to
+        zoom. Use the compass to face north again. Selecting a marker shows that
+        destination; moving the map does not change your saved
+        places.</MyAtlasInfo
+      >
+    </div>
   </main>
 </template>
 
@@ -1117,6 +1187,8 @@ import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import MyAtlasTrips from "../components/MyAtlasTrips.vue"
 import MyAtlasSwitch from "../components/MyAtlasSwitch.vue"
+import MyAtlasInfo from "../components/MyAtlasInfo.vue"
+import MyAtlasMapNavigator from "../components/MyAtlasMapNavigator.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
 import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
 import placeCatalog from "../data/place-catalog.proof.json"
@@ -1186,6 +1258,8 @@ const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasMapNavigator,
+    MyAtlasInfo,
     MyAtlasSwitch,
     MyAtlasTrips,
     MyAtlasJourneyCards,
@@ -1280,6 +1354,12 @@ export default {
       journeyRevision: 0,
       journeyRequest: 0,
       activeAtlasTab: "overview",
+      sidebarExpanded: true,
+      sidebarPageScroll: 0,
+      mapNavigatorOpen: false,
+      mapNavigatorCollapsed: false,
+      mapNavigatorTripId: "",
+      mapNavigatorStopIndex: 0,
       atlasTabs: [
         { id: "overview", label: "Overview" },
         { id: "planning", label: "Planning" },
@@ -1294,6 +1374,76 @@ export default {
     }
   },
   computed: {
+    mapNavigationTrips() {
+      const trips = this.overviewTrips
+        .filter(trip => trip.stops.length && trip.workflow !== "archived")
+        .map(trip => ({
+          id: trip.tripId,
+          title: trip.title,
+          lifecycle: trip.lifecycle,
+          kind: "trip",
+          stops: trip.stops,
+        }))
+      const legacy = this.overviewLegacyPlans
+        .filter(
+          plan =>
+            plan.stops?.length && !trips.some(trip => trip.id === plan.planId)
+        )
+        .map(plan => ({
+          id: plan.planId,
+          title: plan.title,
+          lifecycle: "planned",
+          kind: "trip",
+          stops: plan.stops.map((stop, index) => ({
+            stopId: `legacy:${index}`,
+            place: stop.place || stop,
+          })),
+        }))
+      return [
+        ...(this.displayedPlaces.length
+          ? [
+              {
+                id: "all-destinations",
+                title: "All destinations",
+                kind: "atlas",
+                stops: this.displayedPlaces.map(place => ({
+                  stopId: place.placeId,
+                  place,
+                })),
+              },
+            ]
+          : []),
+        ...trips,
+        ...legacy,
+      ]
+    },
+    mapNavigatorTrip() {
+      return this.mapNavigatorOpen
+        ? this.mapNavigationTrips.find(
+            trip => trip.id === this.mapNavigatorTripId
+          ) || null
+        : null
+    },
+    mapNavigatorLocation() {
+      return (
+        this.mapNavigatorTrip?.stops[this.mapNavigatorStopIndex]?.place || null
+      )
+    },
+    mapNavigatorRoute() {
+      return (this.mapNavigatorTrip?.stops || [])
+        .map((stop, index) => ({
+          key: stop.stopId || `map:${index}`,
+          role: "stop",
+          label: String(index + 1),
+          location: stop.place,
+        }))
+        .filter(
+          node =>
+            Array.isArray(node.location.coordinates) &&
+            node.location.coordinates.length === 2 &&
+            node.location.coordinates.every(Number.isFinite)
+        )
+    },
     plannerMapActive() {
       return this.activeAtlasTab === "planning" && this.plannerActive
     },
@@ -1476,6 +1626,16 @@ export default {
     },
   },
   watch: {
+    mapNavigationTrips(trips) {
+      if (!this.mapNavigatorTripId) return
+      const trip = trips.find(item => item.id === this.mapNavigatorTripId)
+      if (!trip) this.closeMapNavigator()
+      else
+        this.mapNavigatorStopIndex = Math.max(
+          0,
+          Math.min(this.mapNavigatorStopIndex, trip.stops.length - 1)
+        )
+    },
     addPlaceOpen(value) {
       if (!value) {
         this.cancelCustomPlace()
@@ -1497,6 +1657,7 @@ export default {
     },
     "auth.authenticated"(authenticated) {
       if (!authenticated) {
+        this.closeMapNavigator()
         this.actionFeedback = null
         this.overviewTrips = []
         this.overviewLegacyPlans = []
@@ -1528,6 +1689,63 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    openMapNavigator() {
+      this.mapNavigatorOpen = true
+      this.mapNavigatorCollapsed = false
+      if (
+        !this.mapNavigationTrips.some(
+          trip => trip.id === this.mapNavigatorTripId
+        )
+      )
+        this.chooseMapTrip(
+          this.mapNavigationTrips.find(
+            trip => trip.id === this.$refs.trips?.selectedId
+          )?.id ||
+            this.mapNavigationTrips[0]?.id ||
+            ""
+        )
+    },
+    chooseMapTrip(id) {
+      if (!this.mapNavigationTrips.some(trip => trip.id === id)) return
+      this.pauseTimeline()
+      this.mapNavigatorTripId = id
+      this.mapNavigatorStopIndex = 0
+      this.selectedPlaceId =
+        this.mapNavigatorTrip?.stops[0]?.place.placeId || ""
+      this.mapNavigatorCollapsed = false
+      if (this.sidebarExpanded) this.toggleSidebar()
+    },
+    stepMapTrip(direction) {
+      if (!this.mapNavigatorTrip) return
+      this.mapNavigatorStopIndex = Math.max(
+        0,
+        Math.min(
+          this.mapNavigatorTrip.stops.length - 1,
+          this.mapNavigatorStopIndex + direction
+        )
+      )
+      this.selectedPlaceId = this.mapNavigatorLocation?.placeId || ""
+    },
+    closeMapNavigator() {
+      this.mapNavigatorOpen = false
+      this.mapNavigatorTripId = ""
+      this.mapNavigatorStopIndex = 0
+    },
+    toggleSidebar() {
+      if (this.sidebarExpanded) this.sidebarPageScroll = window.scrollY
+      this.sidebarExpanded = !this.sidebarExpanded
+      this.accountMenuOpen = false
+      this.$nextTick(() => {
+        this.$refs.atlasMap?.resizeMap()
+        if (this.sidebarExpanded) {
+          window.scrollTo({ top: this.sidebarPageScroll, behavior: "instant" })
+          this.$refs.sidebarHide?.focus({ preventScroll: true })
+        } else {
+          window.scrollTo({ top: 0, behavior: "instant" })
+          this.$refs.sidebarOpen?.focus({ preventScroll: true })
+        }
+      })
+    },
     toggleVisitedSelection(id, value) {
       this.selectedVisitedPlaceIds = value
         ? [...this.selectedVisitedPlaceIds, id]
@@ -2014,6 +2232,7 @@ export default {
       this.activeAtlasTab = "past"
     },
     handleAccountDeleted() {
+      this.closeMapNavigator()
       this.journeyRequest++
       this.overviewTrips = []
       this.overviewLegacyPlans = []
@@ -2705,6 +2924,12 @@ export default {
       }
     },
     selectPin(placeId) {
+      if (this.mapNavigatorTrip) {
+        const index = this.mapNavigatorTrip.stops.findIndex(
+          stop => stop.place.placeId === placeId
+        )
+        if (index >= 0) this.mapNavigatorStopIndex = index
+      }
       if (this.timelinePlaying) this.pauseTimeline()
       this.selectedPlaceId = placeId
       const place = this.displayedPlaces.find(item => item.placeId === placeId)
@@ -2713,6 +2938,10 @@ export default {
         : `${place?.name || "Destination"} selected.`
     },
     cyclePin(direction) {
+      if (this.mapNavigatorTrip) {
+        this.stepMapTrip(direction)
+        return
+      }
       if (!this.displayedPlaces.length) return
       if (this.timelinePlaying) this.pauseTimeline()
       const currentIndex = this.displayedPlaces.findIndex(
@@ -4657,8 +4886,12 @@ export default {
     overflow-y: visible;
   }
 
-  .my-atlas-proof > :first-child {
+  .my-atlas-proof > .my-atlas-map-shell {
     position: relative;
+    inset: auto;
+    height: 54dvh;
+    min-height: 20rem;
+    grid-row: 1;
   }
 
   .my-atlas-panel {
@@ -4795,6 +5028,80 @@ export default {
   .my-atlas-panel {
     transition: none;
   }
+}
+.my-atlas-panel > .my-atlas-sidebar-hide {
+  order: -40;
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--color-accent-soft, #e6ba68);
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.my-atlas-sidebar-open {
+  position: fixed;
+  z-index: 5;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: min(320px, calc(100vw - 32px));
+  min-height: 52px;
+  padding: 12px 16px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
+  border-radius: 16px;
+  background: var(--color-page, #0a1416);
+  color: var(--color-text, #edf7f2);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.my-atlas-sidebar-open span {
+  color: var(--color-accent-soft, #e6ba68);
+}
+.my-atlas-map-help {
+  position: absolute;
+  z-index: 4;
+  right: 12px;
+  top: 120px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
+  border-radius: 12px;
+  background: var(--color-page, #0a1416);
+  color: var(--color-text, #edf7f2);
+  font-size: 0.72rem;
+}
+.my-atlas-proof.is-map-only {
+  display: block;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+.my-atlas-proof.is-map-only > .my-atlas-map-shell {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.my-atlas-sidebar-open:focus-visible,
+.my-atlas-sidebar-hide:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: 3px;
 }
 </style>
 <style src="../styles/interactions.css"></style>

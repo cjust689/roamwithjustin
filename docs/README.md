@@ -74,7 +74,7 @@ searches and Overview journey cards. It preserves independent destinations and
 full visit identities. Its API is deployed to staging as
 `71692099-3991-455a-b9e9-a8a794433a38`. PRs 228 and 229 released the integrated
 feature, with alignment through PR 230 and successful Pages run 44912326394.
-The latest compact workspace follow-up is local on port 8080: one-row headers,
+The compact workspace release includes one-row headers,
 info popovers, switches and a single dialog with tabs for larger editors.
 Clickable titles with pen icons replace standalone edit buttons; redundant
 single-trip selection and unusable one-stop controls are hidden.
@@ -83,7 +83,13 @@ Destination search now includes scrollable result cards, location context,
 selected draft destinations and confirmation fixed inside the dialog.
 Search selections populate their preview; manual coordinate entry is an
 explicit optional alternative, explained by an info icon.
-Signed-in owner acceptance and release of that UI follow-up remain outstanding.
+PRs 231 and 232 released this follow-up; Pages run 44918695671 succeeded.
+
+Newest local feedback batch: registration readiness guidance, full-sidebar
+collapse to a bottom restore control, map navigation hints, an in-map trip/stop
+navigator, and marker containment corrections. The owner subsequently authorized
+testing, fixes and promotion. Script and browser verification are recorded in
+the active implementation checklist; deployment is tracked in the release handoff.
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
