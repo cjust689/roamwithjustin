@@ -696,18 +696,15 @@
             </p>
             <ul v-else>
               <li v-for="place in displayedPlaces" :key="place.placeId">
-                <label
+                <MyAtlasSwitch
                   v-if="groupingDestinations && place.ungrouped !== false"
                   class="visited-group-choice"
+                  :value="selectedVisitedPlaceIds.includes(place.placeId)"
+                  :disabled="accountPending"
+                  @input="toggleVisitedSelection(place.placeId, $event)"
                 >
-                  <input
-                    v-model="selectedVisitedPlaceIds"
-                    type="checkbox"
-                    :value="place.placeId"
-                    :disabled="accountPending"
-                  />
                   <b>Include {{ place.name }}</b>
-                </label>
+                </MyAtlasSwitch>
                 <button
                   class="visited-place-main"
                   type="button"
@@ -1119,6 +1116,7 @@ import MyAtlasJourneyCards from "../components/MyAtlasJourneyCards.vue"
 import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import MyAtlasTrips from "../components/MyAtlasTrips.vue"
+import MyAtlasSwitch from "../components/MyAtlasSwitch.vue"
 import MyAtlasRegistrationForm from "../components/MyAtlasRegistrationForm.vue"
 import MyAtlasTutorial from "../components/MyAtlasTutorial.vue"
 import placeCatalog from "../data/place-catalog.proof.json"
@@ -1188,6 +1186,7 @@ const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasSwitch,
     MyAtlasTrips,
     MyAtlasJourneyCards,
     MyAtlasLocationPicker,
@@ -1529,6 +1528,11 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    toggleVisitedSelection(id, value) {
+      this.selectedVisitedPlaceIds = value
+        ? [...this.selectedVisitedPlaceIds, id]
+        : this.selectedVisitedPlaceIds.filter(item => item !== id)
+    },
     handleJourneyCollection(state) {
       if (
         !this.canUseAtlas ||
@@ -4547,16 +4551,6 @@ export default {
   gap: 0.5rem;
   padding: 0.5rem;
   cursor: pointer;
-}
-.visited-group-choice input {
-  position: static;
-  opacity: 1;
-  pointer-events: auto;
-  appearance: auto;
-  width: 1rem;
-  height: 1rem;
-  margin: 0;
-  accent-color: var(--color-accent, #e6ba68);
 }
 .my-atlas-pins .visited-group-choice b {
   font-size: 0.72rem;

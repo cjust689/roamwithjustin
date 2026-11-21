@@ -19,6 +19,7 @@ import {
   normalizeMyAtlasCustomCoordinates,
 } from "../src/features/my-atlas/catalog/customPlace.mjs"
 import { emptyTravelSearchDraft } from "../src/features/my-atlas/planning/travelSearch.mjs"
+import { formatPlaceTypeLabel } from "../src/features/my-atlas/catalog/placeTypes.mjs"
 import {
   journeyCardRecords,
   journeyCardDate,
@@ -225,6 +226,10 @@ let calls = [],
   failure = "unavailable",
   readFailure = false
 const dependencies = {
+  formatPlaceTypeLabel,
+  MyAtlasDialog: {},
+  MyAtlasInfo: {},
+  MyAtlasSwitch: {},
   MyAtlasTravelSearch: {},
   MyAtlasVisitManager: {},
   normalizeTripTravelDraft,
@@ -293,9 +298,19 @@ ui.memoryDraft = "Keep this unsaved draft"
 const edit = {
   experienceChange: { action: "remove", id: "exp_" + "a".repeat(32) },
 }
+ui.openWorkspace("visit")
 await ui.mutate("editStop", edit, trip.tripId, trip.stops[0].stopId)
 assert.ok(ui.attempt)
 assert.equal(ui.memoryDraft, "Keep this unsaved draft")
+assert.equal(
+  ui.workspace,
+  "visit",
+  "An ambiguous write must retain the dialog and draft"
+)
+ui.pending = true
+ui.closeWorkspace()
+assert.equal(ui.workspace, "visit", "A pending write cannot be dismissed")
+ui.pending = false
 failure = ""
 readFailure = true
 await ui.mutate("editStop", edit, trip.tripId, trip.stops[0].stopId)
@@ -303,10 +318,10 @@ assert.equal(calls[0].idempotencyKey, calls[1].idempotencyKey)
 assert.equal(calls[0].revision, calls[1].revision)
 assert.equal(ui.savedSequence, 1)
 assert.equal(ui.refreshNeeded, true)
-assert.ok(
-  events.some(
-    ([name, event]) => name === "action-feedback" && event.tone === "warning"
-  )
+assert.match(
+  ui.workspaceStatus,
+  /saved.*Refresh trips/i,
+  "A confirmed write with failed refresh stays visible inside the dialog"
 )
 readFailure = false
 await ui.load()
@@ -516,4 +531,91 @@ assert.equal(
 )
 console.log(
   "Journey dates, canonical/legacy cards, private logistics reload and share exclusion tests passed."
+)
+
+ui.pending = false
+ui.refreshNeeded = false
+ui.writesEnabled = true
+ui.startNew()
+const costaRica = {
+  ...place,
+  placeId: "geonames:123",
+  name: "Uvita",
+  admin1Name: "Puntarenas",
+  countryName: "Costa Rica",
+  coordinates: [-83.74, 9.17],
+}
+const colombia = {
+  ...costaRica,
+  placeId: "geonames:456",
+  admin1Name: "Boyacá",
+  countryName: "Colombia",
+  coordinates: [-72.55, 6.32],
+}
+ui.results = [costaRica, { ...costaRica }, colombia]
+assert.equal(
+  ui.searchResults.length,
+  2,
+  "Collapse duplicate IDs, retain distinct same-name places"
+)
+assert.match(ui.resultLocation(costaRica), /Puntarenas, Costa Rica/)
+assert.match(ui.resultDescription(costaRica), /9\.1700, -83\.7400/)
+const beforeDraftFeedback = events.filter(
+  ([name]) => name === "action-feedback"
+).length
+ui.choose(
+  { placeId: costaRica.placeId },
+  costaRica.name,
+  ui.resultLocation(costaRica)
+)
+assert.equal(ui.draftPlaceCount(costaRica.placeId), 1)
+assert.match(ui.dialogTabs[0].label, /\(1\)/)
+assert.equal(ui.draftStops[0].context, "Puntarenas, Costa Rica")
+assert.match(ui.workspaceStatus, /Uvita added/)
+assert.equal(
+  events.filter(([name]) => name === "action-feedback").length,
+  beforeDraftFeedback,
+  "Modal feedback must not create a hidden background toast"
+)
+ui.choose({ placeId: costaRica.placeId }, costaRica.name)
+assert.equal(
+  ui.draftPlaceCount(costaRica.placeId),
+  2,
+  "Explicit repeated visits remain possible"
+)
+ui.draftStops = Array.from({ length: 50 }, () => ({
+  selection: { placeId: costaRica.placeId },
+  name: costaRica.name,
+}))
+ui.choose({ placeId: colombia.placeId }, colombia.name)
+assert.equal(ui.draftStops.length, 50)
+assert.match(ui.workspaceStatus, /50 destinations/)
+ui.startNew()
+ui.customName = "Keep my manual draft"
+ui.latitude = "12"
+ui.longitude = "34"
+ui.selectSearchResult(costaRica)
+assert.equal(ui.selectedSearchPlace.name, "Uvita")
+assert.deepEqual(ui.selectedSearchPlace.coordinates, [-83.74, 9.17])
+assert.equal(ui.destinationEntryMode, "search")
+assert.deepEqual(
+  ui.draftStops[0].selection,
+  { placeId: costaRica.placeId },
+  "A search result must retain its catalog identity"
+)
+assert.equal(
+  ui.customName,
+  "Keep my manual draft",
+  "Selecting search must not overwrite a manual draft"
+)
+assert.equal(ui.latitude, "12")
+assert.equal(ui.longitude, "34")
+ui.startNew()
+assert.equal(
+  ui.selectedSearchPlace,
+  null,
+  "A new trip must not show the previous trip's preview"
+)
+console.log(
+  "Search identity deduplication, place context, draft counts, modal-only feedback and destination limits passed."
 )

@@ -3,8 +3,7 @@
     class="visit-manager"
     aria-label="Move visits without deleting their memories"
   >
-    <h4>{{ sourceTrip ? "Move or ungroup visits" : "Ungrouped visits" }}</h4>
-    <p>
+    <p v-if="!editing">
       {{
         sourceTrip
           ? "Choose visits to move. Their memories and dates stay attached. An empty source trip is kept for you to review."
@@ -12,16 +11,13 @@
       }}
     </p>
     <p v-if="!items.length">No ungrouped visits.</p>
-    <ul>
+    <ul v-show="!editing">
       <li v-for="stop in items" :key="stop.stopId">
-        <label class="visit-check"
-          ><input
-            v-model="selectedIds"
-            type="checkbox"
-            :value="stop.stopId"
-            :disabled="pending"
-          />
-          <span>{{ stop.place.name }}</span></label
+        <MyAtlasSwitch
+          :value="selectedIds.includes(stop.stopId)"
+          :disabled="pending"
+          @input="toggleVisit(stop.stopId, $event)"
+          >{{ stop.place.name }}</MyAtlasSwitch
         >
         <button
           v-if="!sourceTrip"
@@ -33,7 +29,7 @@
         </button>
       </li>
     </ul>
-    <div v-if="selectedIds.length" class="visit-form">
+    <div v-if="selectedIds.length && !editing" class="visit-form">
       <label
         >Move to<select v-model="target" :disabled="pending">
           <option v-if="sourceTrip && sourceTrip.lifecycle === 'past'" value="">
@@ -73,25 +69,46 @@
       </button>
     </div>
     <div v-if="editing && !sourceTrip" class="visit-form">
-      <h4>{{ editing.place.name }}</h4>
-      <label
-        >Favorite memory<textarea
-          v-model="memory"
-          maxlength="500"
-          :disabled="pending"
-        />
-      </label>
-      <div class="visit-dates">
-        <label v-for="field in dateFields" :key="field.key"
-          >{{ field.label
-          }}<input v-model="dates[field.key]" type="date" :disabled="pending"
-        /></label>
-      </div>
-      <button type="button" :disabled="pending" @click="save">
-        Save visit details
+      <button type="button" :disabled="pending" @click="editingId = ''">
+        Back to visits
       </button>
-      <button type="button" @click="editingId = ''">Close editor</button>
+      <h4>{{ editing.place.name }}</h4>
+      <div class="visit-editor-tabs" aria-label="Visit editor">
+        <button
+          type="button"
+          :aria-pressed="String(editTab === 'details')"
+          @click="editTab = 'details'"
+        >
+          Memory and dates
+        </button>
+        <button
+          type="button"
+          :aria-pressed="String(editTab === 'experiences')"
+          @click="editTab = 'experiences'"
+        >
+          Experiences
+        </button>
+      </div>
+      <div v-show="editTab === 'details'" class="visit-form">
+        <label
+          >Favorite memory<textarea
+            v-model="memory"
+            maxlength="500"
+            :disabled="pending"
+          />
+        </label>
+        <div class="visit-dates">
+          <label v-for="field in dateFields" :key="field.key"
+            >{{ field.label
+            }}<input v-model="dates[field.key]" type="date" :disabled="pending"
+          /></label>
+        </div>
+        <button type="button" :disabled="pending" @click="save">
+          Save visit details
+        </button>
+      </div>
       <MyAtlasExperiences
+        v-show="editTab === 'experiences'"
         :experiences="editing.experiences"
         :pending="pending"
         :saved-sequence="savedSequence"
@@ -108,9 +125,10 @@
 
 <script>
 import MyAtlasExperiences from "./MyAtlasExperiences.vue"
+import MyAtlasSwitch from "./MyAtlasSwitch.vue"
 export default {
   name: "MyAtlasVisitManager",
-  components: { MyAtlasExperiences },
+  components: { MyAtlasExperiences, MyAtlasSwitch },
   props: {
     sourceTrip: { type: Object, default: null },
     visits: { type: Array, default: () => [] },
@@ -124,6 +142,7 @@ export default {
     target: "new",
     title: "",
     editingId: "",
+    editTab: "details",
     memory: "",
     dates: {},
     dateFields: [
@@ -161,6 +180,11 @@ export default {
     },
   },
   methods: {
+    toggleVisit(id, value) {
+      this.selectedIds = value
+        ? [...this.selectedIds, id]
+        : this.selectedIds.filter(item => item !== id)
+    },
     transfer() {
       if (
         this.pending ||
@@ -178,6 +202,7 @@ export default {
     },
     edit(stop) {
       this.editingId = stop.stopId
+      this.editTab = "details"
       this.memory = stop.memories.find(item => item.kind === "note")?.text || ""
       this.dates = {
         plannedArrival: stop.plannedDates.arrival || "",
@@ -213,10 +238,17 @@ export default {
   gap: 0.7rem;
 }
 .visit-manager {
-  margin-block: 0.8rem;
-  padding: 0.8rem;
-  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.25);
-  border-radius: 0.8rem;
+  margin: 0;
+  padding: 0;
+}
+.visit-editor-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.visit-manager li > .atlas-switch {
+  flex: 1;
+  min-width: 0;
 }
 .visit-manager h4,
 .visit-manager p {
@@ -236,31 +268,6 @@ export default {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-}
-.visit-check {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-.visit-check input {
-  position: static;
-  opacity: 1;
-  appearance: auto;
-  pointer-events: auto;
-  width: 1rem;
-  height: 1rem;
-  flex: 0 0 auto;
-  margin: 0;
-}
-.visit-check span {
-  padding: 0 !important;
-  height: auto !important;
-  line-height: 1.5 !important;
-  font-size: 0.78rem !important;
-}
-.visit-check span::before,
-.visit-check span::after {
-  content: none !important;
 }
 .visit-form label {
   display: grid;
