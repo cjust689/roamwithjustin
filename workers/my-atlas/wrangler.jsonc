@@ -19,10 +19,18 @@
     "TURNSTILE_ACTION": "my-atlas-register",
     "TURNSTILE_HOSTNAMES": "localhost,127.0.0.1",
     "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+    "MY_ATLAS_TRIP_WRITES_ENABLED": "false",
   },
   "images": {
     "binding": "IMAGES",
   },
+  "ratelimits": [
+    {
+      "name": "MY_ATLAS_MAP_LINK_RATE_LIMITER",
+      "namespace_id": "2026112001",
+      "simple": { "limit": 6, "period": 60 },
+    },
+  ],
   "r2_buckets": [
     {
       "binding": "MY_ATLAS_MEDIA_R2",
@@ -88,6 +96,7 @@
         "REGISTRATION_PENDING_LEASE_SECONDS": "900",
         "MY_ATLAS_LOG_CONFIGURATION_ERRORS": "true",
         "MY_ATLAS_CATALOG_MANIFEST_KEY": "catalog/current.json",
+        "MY_ATLAS_TRIP_WRITES_ENABLED": "false",
       },
       "secrets": {
         "required": [
@@ -122,6 +131,11 @@
         "binding": "IMAGES",
       },
       "ratelimits": [
+        {
+          "name": "MY_ATLAS_MAP_LINK_RATE_LIMITER",
+          "namespace_id": "2026112001",
+          "simple": { "limit": 6, "period": 60 },
+        },
         {
           "name": "MY_ATLAS_PUBLIC_RATE_LIMITER",
           "namespace_id": "2026111601",

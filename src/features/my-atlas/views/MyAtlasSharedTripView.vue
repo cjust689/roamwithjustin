@@ -23,6 +23,9 @@
         <div>
           <p>Read only trip</p>
           <h1>{{ trip.title }}</h1>
+          <span v-if="trip.version === 2">{{
+            trip.lifecycle === "past" ? "Past trip" : "Planned trip"
+          }}</span>
           <span v-if="trip.desiredYear">
             Planned for {{ trip.desiredYear }}
           </span>
@@ -37,7 +40,7 @@
         </summary>
 
         <ol aria-label="Shared trip itinerary">
-          <li>
+          <li v-if="trip.start">
             <b>S</b>
             <div>
               <small>Start</small>
@@ -56,7 +59,7 @@
               <span>{{ context(stop) }}</span>
             </div>
           </li>
-          <li>
+          <li v-if="trip.start">
             <b>F</b>
             <div>
               <small>Finish</small>
@@ -111,12 +114,29 @@ export default {
     },
     plannerRoute() {
       if (!this.trip) return []
+      if (this.trip.version === 2)
+        return this.trip.stops.map((location, index) => ({
+          key: `shared:${index}`,
+          role: "stop",
+          label: String(index + 1),
+          location,
+        }))
       return buildPlannerMapRoute({
         start: this.trip.start,
         stops: this.trip.stops,
         endMode: this.trip.endMode,
         end: this.trip.end || null,
       })
+    },
+  },
+  watch: {
+    snapshot(value) {
+      try {
+        this.trip = decodeSharedTrip(value)
+      } catch {
+        this.trip = null
+      }
+      this.announcement = ""
     },
   },
   methods: {

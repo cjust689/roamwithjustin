@@ -1,3 +1,7 @@
+import { MapLinkError, resolveShortMapLink } from "./maps/resolve.mjs"
+import { getMyTripUpgradePreview } from "./trips/preview.mjs"
+import { matchTripRoute, tripRequest, TripApiError } from "./trips/service.mjs"
+import { ownerContext } from "./account/service.mjs"
 import {
   isLocalRegistrationRequest,
   registerLocalBetaAccount,
@@ -216,6 +220,26 @@ function csvCell(value) {
 }
 
 function exportCsv(result, context) {
+  if (result.trips) {
+    const rows = ["recordType,recordId,parentId,data"]
+    const add = (type, id, parent, data) =>
+      rows.push([type, id, parent, JSON.stringify(data)].map(csvCell).join(","))
+    add("profile", result.profile.userId, "", result.profile)
+    for (const trip of result.trips) add("trip", trip.tripId, "", trip)
+    for (const wish of result.wishlist) add("wishlist", wish.wishId, "", wish)
+    if (result.atlasImage)
+      add("favoriteImage", result.atlasImage.imageId, "", result.atlasImage)
+    if (result.tripUpgrade) add("tripUpgrade", "", "", result.tripUpgrade)
+    if (result.tripRollbackSnapshot)
+      add("rollbackSnapshot", "", "", result.tripRollbackSnapshot)
+    const headers = responseHeaders(context)
+    headers.set("Content-Type", "text/csv; charset=utf-8")
+    headers.set(
+      "Content-Disposition",
+      'attachment; filename="my-atlas-trips-export.csv"'
+    )
+    return new Response(`${rows.join("\r\n")}\r\n`, { status: 200, headers })
+  }
   const rows = [
     "pinId,placeId,customName,longitude,latitude,visitedYears,visitedDates,memory,experiences",
   ]
@@ -643,6 +667,9 @@ export async function handleRequest(
   const isMyProfile = url.pathname === "/v1/me"
   const isMyAtlasState = url.pathname === "/v1/me/atlas"
   const isMyAtlasImage = url.pathname === "/v1/me/atlas-image"
+  const isMapLinkResolve = url.pathname === "/v1/me/map-links/resolve"
+  const isTripUpgradePreview = url.pathname === "/v1/me/trips/upgrade-preview"
+  const canonicalTripRoute = matchTripRoute(url.pathname)
   const isMyPins = url.pathname === "/v1/me/pins"
   const myPinMatch = url.pathname.match(/^\/v1\/me\/pins\/(pin_[a-f0-9]{24})$/)
   const isMyPin = Boolean(myPinMatch)
@@ -667,6 +694,9 @@ export async function handleRequest(
   const isMyPlanVisited = Boolean(myPlanVisitedMatch)
   const isMyExport = url.pathname === "/v1/me/export"
   const isAccountRoute =
+    Boolean(canonicalTripRoute) ||
+    isTripUpgradePreview ||
+    isMapLinkResolve ||
     isMyProfile ||
     isMyAtlasState ||
     isMyAtlasImage ||
@@ -692,6 +722,10 @@ export async function handleRequest(
   }
 
   if (
+    (isMapLinkResolve && request.method !== "POST") ||
+    (isTripUpgradePreview && request.method !== "GET") ||
+    (canonicalTripRoute &&
+      !canonicalTripRoute.methods.includes(request.method)) ||
     (isAuthCheck && request.method !== "GET") ||
     (isAccountWipe && request.method !== "POST") ||
     (isRegistration && request.method !== "POST") ||
@@ -836,6 +870,65 @@ export async function handleRequest(
       const isMutation = ["POST", "PATCH", "DELETE"].includes(request.method)
       if (isMutation && !identity.permissions.includes("write:my-atlas")) {
         throw new InsufficientPermissionsError()
+      }
+
+      if (canonicalTripRoute) {
+        const result = await tripRequest({
+          environment,
+          identity: accountIdentity,
+          route: canonicalTripRoute,
+          method: request.method,
+          body:
+            request.method === "GET" ? undefined : await readJsonBody(request),
+          headers: request.headers,
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(
+          result,
+          200,
+          context,
+          result.profile.revision
+        )
+      }
+      if (isTripUpgradePreview) {
+        const service =
+          dependencies.getMyTripUpgradePreview || getMyTripUpgradePreview
+        const result = await service({
+          environment,
+          identity: accountIdentity,
+          placeCatalog: dependencies.placeCatalog,
+        })
+        return accountJsonResponse(result, 200, context, result.revision)
+      }
+      if (isMapLinkResolve) {
+        await ownerContext(environment, accountIdentity)
+        const limiter = environment.MY_ATLAS_MAP_LINK_RATE_LIMITER
+        if (typeof limiter?.limit !== "function")
+          return errorResponse(503, "map_link_unavailable", context)
+        const limited = await limiter.limit({
+          key: await hashQualifiedIdentity(accountIdentity),
+        })
+        if (limited?.success !== true) {
+          const response = errorResponse(429, "rate_limited", context)
+          response.headers.set("Retry-After", "60")
+          return response
+        }
+        const body = await readJsonBody(request)
+        if (
+          !body ||
+          typeof body !== "object" ||
+          Object.keys(body).length !== 1 ||
+          typeof body.url !== "string"
+        )
+          return errorResponse(400, "invalid_map_link", context)
+        try {
+          const candidate = await resolveShortMapLink(body.url)
+          return jsonResponse({ candidate }, 200, context)
+        } catch (error) {
+          if (error instanceof MapLinkError)
+            return errorResponse(error.status, error.code, context)
+          throw error
+        }
       }
 
       if (isMyAtlasState) {
@@ -1289,7 +1382,13 @@ export async function handleRequest(
     if (error instanceof OperatorServiceError) {
       return errorResponse(503, "operator_service_unavailable", context)
     }
+    if (error instanceof TripApiError)
+      return errorResponse(error.status, error.code, context)
     if (error instanceof AccountConflictError) {
+      if (
+        ["trip_upgrade_required", "trip_already_upgraded"].includes(error.code)
+      )
+        return errorResponse(409, error.code, context)
       if (
         [
           "experience_limit",

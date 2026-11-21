@@ -435,6 +435,7 @@
           <label class="planner-place-search">
             <span>Find a start, destination, or finish</span>
             <input
+              ref="locationSearch"
               v-model="wishQuery"
               type="search"
               autocomplete="off"
@@ -578,44 +579,20 @@
           >
             <summary>Custom place and coordinates</summary>
             <div>
-              <label>
-                <span>Name</span>
-                <input v-model.trim="customName" maxlength="80" type="text" />
-              </label>
-              <label>
-                <span>Longitude</span>
-                <input
-                  v-model="customLongitude"
-                  type="number"
-                  min="-180"
-                  max="180"
-                  step="0.000001"
-                  @input="syncCustomPlacement"
-                />
-              </label>
-              <label>
-                <span>Latitude</span>
-                <input
-                  v-model="customLatitude"
-                  type="number"
-                  min="-85.051129"
-                  max="85.051129"
-                  step="0.000001"
-                  @input="syncCustomPlacement"
-                />
-              </label>
+              <MyAtlasLocationPicker
+                :name="customName"
+                :longitude="customLongitude"
+                :latitude="customLatitude"
+                :pending="pending"
+                :resolve-link="resolveMapLink"
+                @update:name="customName = $event"
+                @update:longitude="customLongitude = $event"
+                @update:latitude="customLatitude = $event"
+                @coordinates-change="syncCustomPlacement"
+                @choose-map="beginCustomMapPlacement"
+                @search="$refs.locationSearch.focus()"
+              />
               <div class="planner-custom-actions">
-                <button
-                  type="button"
-                  :disabled="pending"
-                  @click="beginCustomMapPlacement"
-                >
-                  {{
-                    customMapPlacementActive
-                      ? "Choose another point on the map"
-                      : "Choose on map"
-                  }}
-                </button>
                 <button
                   v-if="customMapPlacementActive"
                   type="button"
@@ -1185,6 +1162,8 @@ import {
   buildPlanRoutePoints,
 } from "../planning/handoffs.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
+import { resolveMyAtlasMapLink } from "../api/client.mjs"
+import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
 import { emptyTravelSearchDraft } from "../planning/travelSearch.mjs"
 import {
@@ -1196,7 +1175,7 @@ import { buildPlannerMapRoute } from "../planning/mapProjection.mjs"
 
 export default {
   name: "MyAtlasPlanner",
-  components: { MyAtlasTravelSearch },
+  components: { MyAtlasTravelSearch, MyAtlasLocationPicker },
   props: {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
@@ -1465,6 +1444,13 @@ export default {
     this.$emit("planner-state-change", { active: false, route: [] })
   },
   methods: {
+    async resolveMapLink(url) {
+      return resolveMyAtlasMapLink({
+        apiBaseUrl: this.apiBaseUrl,
+        accessToken: await this.token(),
+        url,
+      })
+    },
     beginCustomMapPlacement() {
       if (this.pending) return
       if (!this.customName) this.customName = this.wishQuery.trim()

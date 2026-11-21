@@ -18,7 +18,7 @@ function normalizedText(value, maximum = 120) {
 function sharedLocation(value) {
   const name = normalizedText(value?.name, 120)
   const coordinates = Array.isArray(value?.coordinates)
-    ? value.coordinates.map(Number)
+    ? [...value.coordinates]
     : []
   if (
     !name ||
@@ -41,6 +41,23 @@ function sharedLocation(value) {
 }
 
 export function sharedTripSnapshot(plan) {
+  if (plan?.version === 2 || (plan?.schemaVersion === 1 && plan?.tripId)) {
+    if (
+      !["planned", "past"].includes(plan.lifecycle) ||
+      !Array.isArray(plan.stops) ||
+      plan.stops.length < 1 ||
+      plan.stops.length > MAX_SHARED_STOPS
+    )
+      throw new SharedTripError("The saved trip cannot be shared.")
+    return Object.freeze({
+      version: 2,
+      title: normalizedText(plan.title, 80) || "Shared trip",
+      lifecycle: plan.lifecycle,
+      stops: Object.freeze(
+        plan.stops.map(stop => sharedLocation(stop.place || stop))
+      ),
+    })
+  }
   if (
     !plan ||
     !Array.isArray(plan.stops) ||
@@ -56,7 +73,9 @@ export function sharedTripSnapshot(plan) {
     version: SHARED_TRIP_VERSION,
     title: normalizedText(plan.title, 80) || "Shared trip",
     desiredYear:
-      Number.isInteger(desiredYear) && desiredYear >= 1900 && desiredYear <= 2200
+      Number.isInteger(desiredYear) &&
+      desiredYear >= 1900 &&
+      desiredYear <= 2200
         ? desiredYear
         : null,
     start: sharedLocation(plan.start),
@@ -80,13 +99,16 @@ function bytesToBase64Url(bytes) {
 }
 
 function base64UrlToBytes(value) {
-  if (!/^[A-Za-z0-9_-]+$/.test(value) || value.length > MAX_SHARED_VALUE_LENGTH) {
+  if (
+    !/^[A-Za-z0-9_-]+$/.test(value) ||
+    value.length > MAX_SHARED_VALUE_LENGTH
+  ) {
     throw new SharedTripError("The shared trip link is invalid.")
   }
-  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(
-    Math.ceil(value.length / 4) * 4,
-    "="
-  )
+  const padded = value
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(value.length / 4) * 4, "=")
   let binary
   try {
     binary = atob(padded)
@@ -98,20 +120,28 @@ function base64UrlToBytes(value) {
 
 export function encodeSharedTrip(plan) {
   const value = JSON.stringify(sharedTripSnapshot(plan))
-  return bytesToBase64Url(new TextEncoder().encode(value))
+  const encoded = bytesToBase64Url(new TextEncoder().encode(value))
+  if (encoded.length > MAX_SHARED_VALUE_LENGTH)
+    throw new SharedTripError(
+      "This trip is too large for a shared link.",
+      "shared_trip_too_large"
+    )
+  return encoded
 }
 
 export function decodeSharedTrip(value) {
   let parsed
   try {
-    parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(
-      base64UrlToBytes(String(value || ""))
-    ))
+    parsed = JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(
+        base64UrlToBytes(String(value || ""))
+      )
+    )
   } catch (error) {
     if (error instanceof SharedTripError) throw error
     throw new SharedTripError("The shared trip link is invalid.")
   }
-  if (parsed?.version !== SHARED_TRIP_VERSION) {
+  if (![SHARED_TRIP_VERSION, 2].includes(parsed?.version)) {
     throw new SharedTripError("This shared trip version is not supported.")
   }
   return sharedTripSnapshot(parsed)

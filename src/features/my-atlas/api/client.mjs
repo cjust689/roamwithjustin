@@ -15,6 +15,7 @@ import {
 import {
   MY_ATLAS_CUSTOM_PLACE_ID_PATTERN,
   isNormalizedMyAtlasCustomPlace,
+  normalizeMyAtlasCustomCoordinates,
   normalizeMyAtlasCustomPlace,
 } from "../catalog/customPlace.mjs"
 
@@ -50,6 +51,14 @@ function isVisitedDate(value) {
 }
 
 function normalizedPin(value) {
+  if (
+    value.customPlace !== undefined &&
+    (!MY_ATLAS_CUSTOM_PLACE_ID_PATTERN.test(value.placeId || "") ||
+      !isNormalizedMyAtlasCustomPlace(value.customPlace))
+  )
+    throw new MyAtlasApiError("The custom location response is invalid.", {
+      code: "invalid_response",
+    })
   if (!validStoredExperiences(value.experiences))
     throw new MyAtlasApiError("The experience response is invalid.", {
       code: "invalid_response",
@@ -61,6 +70,13 @@ function normalizedPin(value) {
       : []
   return Object.freeze({
     ...value,
+    ...(value.customPlace
+      ? {
+          placeType: "custom",
+          name: value.customPlace.name,
+          coordinates: Object.freeze([...value.customPlace.coordinates]),
+        }
+      : {}),
     memory: typeof value.memory === "string" ? value.memory : "",
     visitedDates: Object.freeze(
       visitedDates.map(date => Object.freeze({ ...date }))
@@ -138,7 +154,7 @@ function normalizedAtlasImage(value) {
   return Object.freeze({ ...value })
 }
 
-async function authenticatedJsonRequest({
+export async function authenticatedJsonRequest({
   apiBaseUrl,
   accessToken,
   path,
@@ -224,6 +240,48 @@ function validatedCustomPlace(value) {
     })
   }
   return customPlace
+}
+
+export async function resolveMyAtlasMapLink({
+  apiBaseUrl,
+  accessToken,
+  url,
+  fetchImpl = fetch,
+}) {
+  const { payload } = await authenticatedJsonRequest({
+    apiBaseUrl,
+    accessToken,
+    path: "/v1/me/map-links/resolve",
+    method: "POST",
+    body: { url },
+    fetchImpl,
+  })
+  const candidate = payload.candidate
+  if (
+    !candidate ||
+    !["Google Maps", "Apple Maps"].includes(candidate.provider) ||
+    ![
+      "unknown",
+      "ambiguous",
+      "explicit-coordinate",
+      "view-center",
+      "invalid-coordinate",
+    ].includes(candidate.kind) ||
+    typeof candidate.label !== "string" ||
+    candidate.label.length > 160 ||
+    (candidate.coordinates !== null &&
+      !normalizeMyAtlasCustomCoordinates(candidate.coordinates)) ||
+    (candidate.kind === "explicit-coordinate" && !candidate.coordinates)
+  )
+    throw new MyAtlasApiError("The map link response is invalid.", {
+      code: "invalid_response",
+    })
+  return {
+    provider: candidate.provider,
+    kind: candidate.kind,
+    label: candidate.label,
+    coordinates: candidate.coordinates,
+  }
 }
 
 export async function fetchMyAtlasState({
@@ -579,6 +637,7 @@ export async function updateMyAtlasPin({
   pinId,
   visitedDates,
   memory,
+  customPlace,
   experienceChange,
   idempotencyKey,
   revision,
@@ -586,6 +645,8 @@ export async function updateMyAtlasPin({
 }) {
   const normalizedMemory =
     memory === undefined ? undefined : validatedMemory(memory)
+  const normalizedPlace =
+    customPlace === undefined ? undefined : validatedCustomPlace(customPlace)
   const normalizedChange =
     experienceChange === undefined
       ? undefined
@@ -605,6 +666,9 @@ export async function updateMyAtlasPin({
         ? {}
         : { experienceChange: normalizedChange }),
       ...(visitedDates === undefined ? {} : { visitedDates }),
+      ...(normalizedPlace === undefined
+        ? {}
+        : { customPlace: normalizedPlace }),
       ...(normalizedMemory === undefined ? {} : { memory: normalizedMemory }),
     },
     revision,
@@ -623,6 +687,16 @@ export async function updateMyAtlasPin({
     })
   }
   const pin = normalizedPin(payload.pin)
+  if (
+    normalizedPlace &&
+    (pin.name !== normalizedPlace.name ||
+      !pin.coordinates.every(
+        (value, index) => value === normalizedPlace.coordinates[index]
+      ))
+  )
+    throw new MyAtlasApiError("The location change could not be confirmed.", {
+      code: "invalid_response",
+    })
   if (normalizedChange) {
     const saved = pin.experiences?.find(
       entry => entry.id === normalizedChange.id
@@ -1221,7 +1295,7 @@ export async function fetchMyAtlasAccountExport({
     fetchImpl,
   })
   if (
-    payload.schemaVersion !== 2 ||
+    ![2, 3].includes(payload.schemaVersion) ||
     !Array.isArray(payload.pins) ||
     !Array.isArray(payload.wishlist) ||
     !Array.isArray(payload.plans)
@@ -1231,6 +1305,10 @@ export async function fetchMyAtlasAccountExport({
       code: "invalid_response",
     })
   }
+  if (payload.schemaVersion === 3 && !Array.isArray(payload.trips))
+    throw new MyAtlasApiError("The account export response is invalid.", {
+      code: "invalid_response",
+    })
   return payload
 }
 

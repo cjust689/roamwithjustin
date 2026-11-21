@@ -83,6 +83,13 @@
       <section>
         <h2>Future trip retention</h2>
         <p>
+          The six month cleanup below applies to the original trip planner. An
+          explicit switch to organized trips requires acknowledgement of a
+          different retention rule. Organized Planned and Past trips are kept
+          until you delete them. Changing a trip between Planned and Past does
+          not delete its memories or restart automatic cleanup.
+        </p>
+        <p>
           Creating a trip plan, making a substantive edit, or selecting Keep
           starts a new six calendar month retention period. Signing in, viewing
           the plan, exporting account data, opening Maps links, or copying a
@@ -94,6 +101,12 @@
           can keep or delete it during that period. When the review period ends,
           the trip and its saved location snapshots are deleted automatically.
           Wishlist entries and visited places are not removed by trip expiry.
+        </p>
+        <p>
+          Switching to organized trips keeps a private rollback copy of the
+          original account records. Rollback is available before another account
+          change is saved. That copy is removed after the next saved change or
+          when the account is deleted.
         </p>
       </section>
 

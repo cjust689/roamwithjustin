@@ -1,0 +1,367 @@
+import { normalizeExpectedRevision } from "../account/contracts.mjs"
+import {
+  normalizeIdempotencyKey,
+  RegistrationValidationError,
+} from "../registration/contracts.mjs"
+import { normalizePinMemory } from "../account/memory.mjs"
+import { normalizeCustomPlace } from "../account/custom-place.mjs"
+import {
+  ownerContext,
+  mutationMetadata,
+  publicProfile,
+  assertCatalogPlace,
+} from "../account/service.mjs"
+import { projectCatalogPlace } from "../catalog/projection.mjs"
+import { WorkerPlaceCatalog } from "../catalog/store.mjs"
+import { sha256 } from "../registration/hashing.mjs"
+import { previewTripUpgrade } from "./preview.mjs"
+import { normalizeExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
+import {
+  validTripCalendarDate,
+  TRIP_RETENTION_POLICY,
+} from "../../../../shared/my-atlas-trips.mjs"
+
+export { TRIP_RETENTION_POLICY }
+export class TripApiError extends Error {
+  constructor(code, status = 409) {
+    super("The trip request could not be completed.")
+    this.code = code
+    this.status = status
+  }
+}
+const bad = () => {
+  throw new RegistrationValidationError("Trip details are invalid.")
+}
+const object = (value, fields) => {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value) ||
+    Object.keys(value).some(key => !fields.includes(key))
+  )
+    bad()
+  return value
+}
+const text = (value, max, required = false) => {
+  const normalized = normalizePinMemory(value === undefined ? "" : value)
+  if (
+    normalized === null ||
+    normalized.length > max ||
+    (required && !normalized)
+  )
+    bad()
+  return normalized
+}
+const ids = (value, pattern) => {
+  if (
+    !Array.isArray(value) ||
+    !value.length ||
+    value.length > 50 ||
+    value.some(id => typeof id !== "string" || !pattern.test(id))
+  )
+    bad()
+  return value
+}
+const tripId = /^(?:trip|plan)_[a-f0-9]{24}$/
+const stopId = /^stop_[a-f0-9]{32}$/
+const checked = result => {
+  if (!result?.ok)
+    throw new TripApiError(
+      result?.error || "trip_unavailable",
+      result?.error === "revision_conflict" ? 412 : 409
+    )
+  return result
+}
+
+export function matchTripRoute(path) {
+  const base = "/v1/me/trips"
+  if (path === base) return { action: "collection", methods: ["GET", "POST"] }
+  for (const action of ["upgrade", "rollback", "combine"])
+    if (path === `${base}/${action}`) return { action, methods: ["POST"] }
+  const match = path.match(
+    /^\/v1\/me\/trips\/((?:trip|plan)_[a-f0-9]{24})(?:\/(lifecycle|stops)(?:\/(order|stop_[a-f0-9]{32}))?)?$/
+  )
+  if (!match) return null
+  if (!match[2])
+    return { action: "trip", tripId: match[1], methods: ["PATCH", "DELETE"] }
+  if (match[2] === "lifecycle" && !match[3])
+    return { action: "lifecycle", tripId: match[1], methods: ["PATCH"] }
+  if (match[2] === "stops")
+    return {
+      action: match[3] === "order" ? "reorder" : match[3] ? "stop" : "stop-add",
+      tripId: match[1],
+      ...(stopId.test(match[3] || "") ? { stopId: match[3] } : {}),
+      methods:
+        match[3] === "order"
+          ? ["PATCH"]
+          : match[3]
+            ? ["PATCH", "DELETE"]
+            : ["POST"],
+    }
+  return null
+}
+
+export async function tripRequest({
+  environment,
+  identity,
+  route,
+  method,
+  body,
+  headers,
+  placeCatalog,
+  now = new Date().toISOString(),
+}) {
+  const owner = await ownerContext(environment, identity)
+  if (route.action === "collection" && method === "GET") {
+    const state = checked(await owner.user.getOwnerTrips(owner.identityDigest))
+    return {
+      profile: publicProfile(state.profile),
+      upgraded: state.upgraded,
+      writesEnabled: environment.MY_ATLAS_TRIP_WRITES_ENABLED === "true",
+      trips: state.trips,
+      rollbackAvailable: state.rollbackAvailable,
+    }
+  }
+  if (environment.MY_ATLAS_TRIP_WRITES_ENABLED !== "true")
+    throw new TripApiError("trip_writes_disabled", 503)
+  const expectedRevision = normalizeExpectedRevision(headers.get("If-Match")),
+    idempotencyKey = normalizeIdempotencyKey(headers.get("Idempotency-Key"))
+  let action = route.action,
+    input,
+    value = {},
+    preview
+  const stable = async (prefix, label, length = 32) =>
+    `${prefix}_${(await sha256(`${owner.userId}\0${idempotencyKey}\0${label}`)).slice(0, length)}`
+  const selection = value => {
+    object(value, ["placeId", "customPlace"])
+    if (Boolean(value.placeId) === Boolean(value.customPlace)) bad()
+    if (value.customPlace && !normalizeCustomPlace(value.customPlace)) bad()
+    return value
+  }
+  const place = async input => {
+    selection(input)
+    if (input.customPlace) {
+      const custom = normalizeCustomPlace(input.customPlace)
+      return {
+        placeId: `custom:${(await sha256(`${owner.userId}\0${custom.name}\0${custom.coordinates.join(",")}\0custom-place`)).slice(0, 24)}`,
+        placeType: "custom",
+        ...custom,
+      }
+    }
+    const catalog = placeCatalog || new WorkerPlaceCatalog(environment)
+    const resolver =
+      typeof catalog.resolve === "function"
+        ? id => catalog.resolve(id)
+        : async id => (await catalog.resolveMany([id]))[0]
+    return projectCatalogPlace(
+      await assertCatalogPlace(input.placeId, resolver, environment)
+    )
+  }
+  const stop = async (input, label) => ({
+    stopId: await stable("stop", label),
+    place: await place(input),
+    plannedDates: { arrival: null, departure: null },
+    actualDates: { arrival: null, departure: null },
+    visitedDates: [],
+    planNote: "",
+    memories: [],
+    experiences: [],
+    createdAt: now,
+    updatedAt: now,
+  })
+  if (action === "upgrade") {
+    input = object(body, [
+      "fingerprint",
+      "confirmation",
+      "retentionAcknowledged",
+    ])
+    if (
+      !/^[a-f0-9]{64}$/.test(input.fingerprint || "") ||
+      input.confirmation !== "ORGANIZE MY ATLAS" ||
+      input.retentionAcknowledged !== true
+    )
+      bad()
+    const state = checked(await owner.user.getOwnerTrips(owner.identityDigest))
+    if (!state.upgraded) {
+      const source = checked(
+        await owner.user.exportOwnerState(owner.identityDigest)
+      )
+      let catalog
+      const resolvePlace = async id => {
+        catalog ||= placeCatalog || new WorkerPlaceCatalog(environment)
+        const record =
+          typeof catalog.resolve === "function"
+            ? await catalog.resolve(id)
+            : (await catalog.resolveMany([id]))[0]
+        return record ? projectCatalogPlace(record) : null
+      }
+      preview = await previewTripUpgrade(source, { resolvePlace })
+      if (
+        preview.fingerprint !== input.fingerprint ||
+        preview.revision !== expectedRevision
+      )
+        throw new TripApiError("upgrade_source_changed", 412)
+      if (!preview.ready) throw new TripApiError("upgrade_needs_review")
+    }
+    value = { retentionPolicy: TRIP_RETENTION_POLICY }
+  } else if (action === "rollback") input = object(body, [])
+  else if (action === "collection") {
+    action = "create"
+    input = object(body, ["title", "description", "lifecycle", "stops"])
+    if (
+      !["planned", "past"].includes(input.lifecycle) ||
+      !Array.isArray(input.stops) ||
+      input.stops.length < 1 ||
+      input.stops.length > 50
+    )
+      bad()
+    const stops = await Promise.all(
+      input.stops.map((entry, index) => stop(selection(entry), `stop:${index}`))
+    )
+    value = {
+      trip: {
+        schemaVersion: 1,
+        tripId: await stable("trip", "trip", 24),
+        title: text(input.title, 80, true),
+        description: text(input.description, 500),
+        lifecycle: input.lifecycle,
+        workflow: "saved",
+        stops,
+        memories: [],
+        logistics: { flights: [], rentals: [] },
+        sharing: { publicAtlas: false },
+        version: 1,
+        createdAt: now,
+        updatedAt: now,
+        statusChangedAt: null,
+      },
+    }
+  } else if (action === "trip") {
+    if (method === "DELETE") {
+      action = "delete"
+      input = object(body, ["confirmation"])
+      if (input.confirmation !== "DELETE TRIP") bad()
+      value = { tripId: route.tripId }
+    } else {
+      action = "metadata"
+      input = object(body, ["title", "description"])
+      if (!Object.keys(input).length) bad()
+      value = {
+        tripId: route.tripId,
+        patch: {
+          ...(input.title === undefined
+            ? {}
+            : { title: text(input.title, 80, true) }),
+          ...(input.description === undefined
+            ? {}
+            : { description: text(input.description, 500) }),
+        },
+      }
+    }
+  } else if (action === "lifecycle") {
+    input = object(body, ["lifecycle"])
+    if (!["planned", "past"].includes(input.lifecycle)) bad()
+    value = { tripId: route.tripId, lifecycle: input.lifecycle }
+  } else if (action === "reorder") {
+    input = object(body, ["stopIds"])
+    value = { tripId: route.tripId, stopIds: ids(input.stopIds, stopId) }
+  } else if (action === "stop-add") {
+    input = object(body, ["placeId", "customPlace", "afterStopId"])
+    if (input.afterStopId !== undefined && !stopId.test(input.afterStopId))
+      bad()
+    const selectionInput = {
+      ...(input.placeId ? { placeId: input.placeId } : {}),
+      ...(input.customPlace ? { customPlace: input.customPlace } : {}),
+    }
+    value = {
+      tripId: route.tripId,
+      afterStopId: input.afterStopId || null,
+      stop: await stop(selectionInput, "added-stop"),
+    }
+  } else if (action === "stop") {
+    value = { tripId: route.tripId, stopId: route.stopId }
+    if (method === "DELETE") {
+      action = "stop-remove"
+      input = object(body, ["discardContent"])
+      if (
+        input.discardContent !== undefined &&
+        typeof input.discardContent !== "boolean"
+      )
+        bad()
+      value.discardContent = input.discardContent === true
+    } else {
+      action = "stop-edit"
+      input = object(body, [
+        "memory",
+        "experienceChange",
+        "plannedDates",
+        "actualDates",
+      ])
+      if (!Object.keys(input).length) bad()
+      const patch = {}
+      if (input.memory !== undefined) patch.memory = text(input.memory, 500)
+      if (input.experienceChange !== undefined) {
+        patch.experienceChange = normalizeExperienceChange(
+          input.experienceChange
+        )
+        if (!patch.experienceChange) bad()
+      }
+      for (const field of ["plannedDates", "actualDates"])
+        if (input[field] !== undefined) {
+          const dates = object(input[field], ["arrival", "departure"])
+          if (
+            !validTripCalendarDate(dates.arrival) ||
+            !validTripCalendarDate(dates.departure) ||
+            (dates.arrival &&
+              dates.departure &&
+              dates.arrival > dates.departure)
+          )
+            bad()
+          patch[field] = dates
+        }
+      value = {
+        ...value,
+        patch,
+        memoryId: await stable(
+          "memory",
+          `${route.tripId}:${route.stopId}:favorite`
+        ),
+      }
+    }
+  } else if (action === "combine") {
+    input = object(body, ["tripIds", "title"])
+    const selected = ids(input.tripIds, tripId)
+    value = {
+      tripIds: selected,
+      title: text(input.title, 80, true),
+      combinedId: await stable("trip", "combined", 24),
+      descriptionIds: await Promise.all(
+        selected.map(id => stable("memory", `description:${id}`))
+      ),
+    }
+  } else bad()
+  const metadata = await mutationMetadata(
+    owner,
+    { expectedRevision, idempotencyKey },
+    `trip:${action}:${route.tripId || ""}:${route.stopId || ""}`,
+    input
+  )
+  const result = checked(
+    await owner.user.mutateOwnerTrip({
+      identityDigest: owner.identityDigest,
+      expectedRevision,
+      now,
+      action,
+      value,
+      preview,
+      ...metadata,
+    })
+  )
+  return {
+    profile: publicProfile(result.profile),
+    upgraded: result.upgraded,
+    ...(result.trip ? { trip: result.trip } : {}),
+    ...(result.tripCount === undefined ? {} : { tripCount: result.tripCount }),
+    idempotent: result.idempotent,
+  }
+}

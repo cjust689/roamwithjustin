@@ -14,6 +14,16 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/content/experiences/curated-contract.mjs
+  - src/content/experiences/curated.json
+  - src/components/EditorialExperienceCard.vue
+  - scripts/experiences/import-editorial-experiences.mjs
+  - scripts/lib/curated-experiences.mjs
+  - scripts/test-editorial-experience-intake.mjs
+  - shared/my-atlas-map-links.mjs
+  - src/features/my-atlas/components/MyAtlasLocationPicker.vue
+  - workers/my-atlas/src/maps/resolve.mjs
+  - scripts/test-my-atlas-map-links.mjs
   - shared/my-atlas-experiences.mjs
   - src/features/my-atlas/components/MyAtlasExperiences.vue
   - src/services/expediaDestinationLinks.mjs
@@ -50,7 +60,7 @@ verification:
 # Local phase audit and implementation
 
 The four owner briefs in `codex-context` are inputs, not implementation
-evidence. This work is local only. Existing production accounts, catalog,
+evidence. The foundation slice is deployed; the follow-up picker slice is local only. Existing accounts, catalog,
 approved banners and private affiliate restrictions are preserved.
 
 ## Phase 0 findings
@@ -107,9 +117,21 @@ only `api.sandbox.viator.com`, never the live API.
 - [x] Verify compatibility, ownership, exports/deletion, privacy and mobile UI.
 - [x] Update as-built docs and run `npm run docs:audit`.
 
-Later shared-picker consolidation, Maps URL parsing/short-link expansion,
-repeat-visit migration, public recaps and Viator planner activation remain
-separate phases. No automatic collection of private notes, analytics payloads,
+- [x] Location Phase 2: reuse one picker for the existing custom entry surfaces.
+- [x] Location Phase 3: full Google/Apple URL candidate previews and confirmation.
+- [x] Location Phase 4: authenticated, rate-limited short-link resolver with security tests.
+- [x] Location Phase 5 supported slice: explicit custom visited-pin rename/reposition, preserved IDs and snapshot boundaries.
+- [x] Experience loop Phase 2 supported slice: visited-list experience count/shortcut and optional recap invitation after Mark Visited.
+- [ ] Canonical trip grouping is the next owner-prioritized workstream. Initial occurrence contracts and read-only upgrade preview are local and tested; persistence, repeated-visit UI and reversible account lifecycle acceptance remain in `my-atlas-trip-centric-transition.md`.
+- [ ] Real provider short-link expansion remains externally unverified.
+- [ ] Viator real search, market mapping and referral verification remain blocked by HTTP 401.
+- [x] Experience loop Phase 3 code: canonical curated intake, exact Visit/Place cards, shared story rendering and independent official operator links.
+- [ ] Phase 3 real Split/Raptor acceptance: establish the official operator link and any original cover media before publishing the owner-approved record.
+- [ ] Experience loop Phase 4: curated related discovery and filtering, using the canonical experiences without provider APIs.
+- [ ] Public/community contributions and commercial activation retain their moderation/approval gates.
+
+Repeat-visit migration, public recaps and Viator planner activation remain
+separate work. No automatic collection of private notes, analytics payloads,
 provider requests or affiliate tracking is introduced by opening a visit.
 
 ## As-built local slice
@@ -185,7 +207,130 @@ Owner actions remain: correct/activate sandbox key access, review a returned
 Viator market against its canonical city and parent, then verify a real search
 and returned referral URL. Expedia needs actual issued URLs and manual landing
 checks before enabling rows. Private affiliate placement stays gated even when
-a public row is enabled. No new feature code has been pushed or deployed.
+a public row is enabled.
+
+## Release and follow-up evidence
+
+Foundation commit `f49c3babe4435fac560503706d96bd1c51746b1f` was pushed,
+validated in PR 222, merged to develop and promoted through PR 223. Pages run
+44820076141 succeeded for main `e27eca51f2aacd3340c90024e0f032c501b2d220`.
+The compatible staging Worker, also used by the production frontend, deployed
+as `d3286de9-e52a-4e0e-b39c-3a005e5b911f`. The sandbox key was retried in
+this release session and again returned 401 Invalid API Key. No real product
+result or merchant acceptance is claimed.
+
+The local follow-up uses `MyAtlasLocationPicker.vue`,
+`shared/my-atlas-map-links.mjs`, and `workers/my-atlas/src/maps/resolve.mjs`.
+Only explicit user confirmation fills coordinates from a full URL; viewport,
+name-only and route links cannot silently replace the selected point. Existing
+labels/notes survive method changes and errors. No source URL is persisted.
+The resolver's POST endpoint is an owner-authorized read with no account
+revision change. Its dedicated limiter must be configured before activation.
+Unsafe redirects, cyclic chains, three-hop exhaustion, timeouts and responses
+without redirects fail safely. There is no proxy response body or HTML scraping.
+Actual provider redirect behavior remains externally unverified.
+
+The custom-pin PATCH extension preserves stable pin/place IDs, dates, memory,
+recaps and existing immutable plan snapshots. Same-attempt network retries
+reuse the operation key and revision; conflicts keep the draft for explicit
+review. The raw custom mutation response is normalized consistently with an
+account read. The existing visited list provides an experience-count action
+and focuses the private recap editor. Mark Visited offers an optional invitation
+with Not now. This does not implement canonical journey grouping or trip status
+transitions.
+
+Focused checks: `node scripts/test-my-atlas-map-links.mjs`,
+`npm run my-atlas:foundations:test`, `node scripts/test-my-atlas-worker.mjs`
+and the 50-test Workers runtime suite passed. Synthetic Chrome checks at 320,
+390 and 1440 pixels confirmed preview-before-confirmation, unchanged label and
+memory, exact coordinate application, no viewport substitution, unchanged map
+instance, Escape cleanup and zero horizontal overflow. Screenshots and report
+are under ignored `.state/theme/map-picker-*`; the 390 pixel capture was
+visually inspected. No real account was written by these browser checks.
+
+The full local `npm run build` passed with hash `c0ec366b406ac858`, all 50
+Workers runtime tests and the existing bundle-size warnings. `npm run lint`
+passed. After removing a duplicate map button, the final frontend compile
+passed with hash `eba8551f3669e0a2`. The Worker dry-run bundled the new limiter and resolver successfully;
+its default log path was outside the sandbox, so a workspace log path was used
+for clean verification. The foundation release's root page, API health and
+Atlanta catalog search returned 200. The direct `/my-atlas` URL uses the
+existing GitHub Pages 404 SPA fallback. Configured-localhost browser readback
+still showed the staging API/catalog, no injected local invitation, and an
+Atlanta search returning 200. The new resolver and custom-location PATCH
+extension require the follow-up Worker deployment before they work against
+that shared staging backend; no backend switch or account wipe was performed.
 
 References checked: [Viator technical specification](https://docs.viator.com/partner-api/technical/)
 and [Basic Golden Path](https://partnerresources.viator.com/travel-commerce/affiliate/basic-access/golden-path/).
+
+## Experience loop Phase 3, local editorial intake and cards
+
+The Sheet compiler continues to own its generated Experience/Moment shard.
+`src/content/experiences/curated.json` is a separate canonical authoring shard,
+combined once in `src/content/experiences/index.mjs`. Duplicate IDs or Journey
+slugs across both sources fail validation. No new account database, geographic
+pin, provider inventory or private-recap export feeds public editorial data.
+The new shard is empty until an owner supplies actual source-backed entries.
+The existing La Fortuna Airbnb experience still derives from its existing
+published Post and Moments. No new trip narrative or operator was fabricated.
+
+`npm run experiences:editorial:import -- --file PATH.json` previews a complete
+private intake document. `--publish` atomically replaces only the curated local
+registry after validation. It does not deploy, edit the Sheet compiler shard,
+call Google or contact an operator. Missing existing rows fail instead of
+silently deleting records; withdraw an entry with `visibility: draft`.
+Identical input does not rewrite the file. A changed registry invalidates an
+older preview. Copy `scripts/experiences/editorial-intake-template.json` to an
+ignored location such as `.state/editorial/experience-intake.json` and fill its
+`experiences` array. Keep private evidence in that intake, not public source.
+
+| Field                             | Contract                                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`, `slug`                      | Stable unique lowercase IDs, at most 120 characters; slug unique within its Journey                                                                                                             |
+| `journeyId`, `visitId`, `placeId` | Exact existing canonical relationship, never inferred from a place name                                                                                                                         |
+| `title`, `summary`                | Required title and optional empty summary; plain public prose with the storytelling punctuation and workflow-label rules                                                                        |
+| `category`                        | `boat-and-water`, `outdoors`, `food`, `culture`, `guided-tour`, `family`, `photography` or `stay`                                                                                               |
+| `firsthand`, `evidenceRefs`       | Explicit firsthand assertion and at least one bounded private source reference for a published entry; references are removed from the public registry                                           |
+| `partnerId`                       | Optional existing confirmed `trip-operator` Partner already linked to this Visit, with an independent HTTPS official URL; arbitrary input websites, tracking links and sponsorship are excluded |
+| `coverAssetId`                    | Optional registered owned image already published at this exact Visit/Place within the Journey                                                                                                  |
+| `visibility`, `sortOrder`         | `draft` or `published`, plus a nonnegative integer order                                                                                                                                        |
+| `disclosure`, `sourceOwner`       | Fixed `independent` and `curated`                                                                                                                                                               |
+
+The public selector exposes only title, summary, category, resolved image,
+canonical IDs and an optional operator projection. Private evidence and intake
+state are omitted. One `EditorialExperienceCard.vue` renders the header inside
+`JourneyStoryBody.vue` and compact exact-stop cards in `AtlasDetailPanel.vue`.
+Read actions use the existing story-section event and anchor, while operator
+links use `noopener noreferrer` and no-referrer. The story reader and standalone
+Journey body therefore share the same source and component. Existing Moment
+copy/media remains unchanged. Cards create no map nodes or new map instances,
+and the existing Journey publication/readiness gates remain in effect.
+
+Verification: `npm run experiences:editorial:test`, `npm run editorial:test`,
+`npm run atlas:test` and `npm run content:validate` passed. Synthetic Chrome
+checks at 320, 390 and 1440 pixels verified the actual La Fortuna card and its
+unchanged Moment, plus an injected Atlas operator-card fixture with safe link
+attributes, no horizontal overflow and the same mounted map. Reports and
+captures are ignored under `.state/theme/experience-card*`. No fixture or
+private account was published. This phase is local only. Real Split/Raptor
+operator/media publication and Phase 4 discovery remain outstanding.
+
+The full build passed with hash `d87253419a7ba31c`, all 50 Worker runtime tests
+and the existing bundle-size warnings. After preserving the original Journey
+heading treatment and tightening exact operator/cover associations, the final
+frontend compile passed with hash `d51bdc2a410f2c10`; focused intake and content
+validation passed on the final contract. `npm run lint` and explicit lint of
+the new MJS code passed. The 390 pixel story and synthetic Atlas-card captures
+were visually inspected. The local server was restarted to clear a stale
+compile overlay and retained its configured staging API/catalog mode. No
+Worker deployment, account mutation or external content publication occurred.
+
+
+The local Add experience action now matches the other visit controls, with a
+compact count badge and destination-specific accessible label. Creator-first
+trip grouping has progressed to a gated repository, owner workspace and ordered
+read-only snapshots. See [Trip centric transition](my-atlas-trip-centric-transition.md)
+for runtime/browser evidence and remaining activation, logistics and public
+publication work. Editorial operator intake remains the separate ingestion
+workflow above; private trip recaps do not publish operator records.

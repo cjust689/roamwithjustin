@@ -1,5 +1,9 @@
 import { createIdRegistry } from "../contracts.mjs"
 import generated from "../editorial/generated/data.js"
+import curated from "./curated-data.js"
+import { validateCuratedExperiences } from "./curated-contract.mjs"
+import { getPartner } from "../partners/index.mjs"
+import { getMediaAsset, mediaPlacementRecords } from "../media/index.mjs"
 import { getJourney, getJourneyVisitById } from "../journeys/index.mjs"
 
 const idPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -10,8 +14,17 @@ if (generated.schemaVersion !== 1) {
   )
 }
 
+const curatedErrors = validateCuratedExperiences(curated, {
+  generated: generated.experiences,
+  getJourney,
+  getPartner,
+  getMediaAsset,
+  placements: mediaPlacementRecords,
+})
+if (curatedErrors.length) throw new Error(curatedErrors.join("\n"))
+
 const experienceRegistry = createIdRegistry(
-  generated.experiences || [],
+  [...(generated.experiences || []), ...curated.experiences],
   "Experience registry"
 )
 const momentRegistry = createIdRegistry(
@@ -29,7 +42,10 @@ for (const experience of experienceRegistry.records) {
       `Experience "${experience.id}" references unknown Journey "${experience.journeyId}"`
     )
   }
-  if (!experience.title || !["draft", "published"].includes(experience.visibility)) {
+  if (
+    !experience.title ||
+    !["draft", "published"].includes(experience.visibility)
+  ) {
     throw new Error(`Experience "${experience.id}" has invalid public identity`)
   }
   if ((experience.placeId === null) !== (experience.visitId === null)) {
@@ -82,7 +98,8 @@ export function getMoment(id) {
 export function getJourneyExperiences(journeyId) {
   return experienceRecords.filter(
     experience =>
-      experience.journeyId === journeyId && experience.visibility === "published"
+      experience.journeyId === journeyId &&
+      experience.visibility === "published"
   )
 }
 

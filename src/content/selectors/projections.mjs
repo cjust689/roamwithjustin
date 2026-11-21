@@ -5,12 +5,12 @@ import {
   journeyRecords,
 } from "../journeys/index.mjs"
 import { getPlace } from "../places/index.mjs"
-import {
-  getJourneyCommercialOffers,
-  getPartner,
-} from "../partners/index.mjs"
+import { getJourneyCommercialOffers, getPartner } from "../partners/index.mjs"
 import { getJourneyGear } from "./gear.mjs"
-import { getJourneyExperienceViews } from "./experiences.mjs"
+import {
+  getJourneyExperienceViews,
+  experienceCardView,
+} from "./experiences.mjs"
 import {
   getJourneyPublishedMedia,
   getVisitPublishedMedia,
@@ -118,7 +118,8 @@ function hasPublishedJourneyStory(journey) {
   const hasJourneyChapters = (journey.days || []).some(
     day => day?.summary || day?.visits?.length
   )
-  const hasPublishedExperience = getJourneyExperienceViews(journey.id).length > 0
+  const hasPublishedExperience =
+    getJourneyExperienceViews(journey.id).length > 0
 
   return hasJourneyChapters || hasPublishedExperience
 }
@@ -129,9 +130,7 @@ function journeyChapterViews(journey) {
     position: index + 1,
     label: day.label,
     summary: day.summary || "",
-    visitIds: (day.visits || [])
-      .map(entry => entry.visitId)
-      .filter(Boolean),
+    visitIds: (day.visits || []).map(entry => entry.visitId).filter(Boolean),
   }))
 }
 
@@ -145,7 +144,11 @@ function atlasStoryRelationships(journey, visit) {
     // occurrence instead of collapsing the relationship to a single day.
     storyChapters: journeyChapterViews(journey)
       .filter(chapter => chapter.visitIds.includes(visit.id))
-      .map(({ visitIds, ...chapter }) => chapter),
+      .map(chapter => {
+        const view = { ...chapter }
+        delete view.visitIds
+        return view
+      }),
     // Experiences are stop-specific only when their canonical record owns
     // both the matching Visit and Place IDs.
     storyExperiences: getJourneyExperienceViews(journey.id)
@@ -158,6 +161,7 @@ function atlasStoryRelationships(journey, visit) {
         id: `experience-${experience.slug}`,
         title: experience.title,
         summary: experience.summary,
+        card: experienceCardView(experience),
       })),
   }
 }
@@ -398,9 +402,7 @@ export function addTripAtlasNavigation(trip, atlasNodes = []) {
         node => node.placeId === location.canonicalId
       )
       const storyChapters = trip.days
-        .filter(day =>
-          day.locations.some(entry => entry.ref === location.id)
-        )
+        .filter(day => day.locations.some(entry => entry.ref === location.id))
         .map(day => ({
           id: day.id,
           position: day.position,
@@ -417,6 +419,7 @@ export function addTripAtlasNavigation(trip, atlasNodes = []) {
           id: `experience-${experience.slug}`,
           title: experience.title,
           summary: experience.summary,
+          card: experienceCardView(experience),
         }))
       return {
         ...location,
@@ -474,14 +477,12 @@ export function buildAtlasNodeView(presentation) {
   const publishedMedia = visit
     ? getVisitPublishedMedia(journey.id, visit.id)
     : []
-  const media = uniqueMedia(
-    [
-      ...resolveMediaList(
-        presentation.media || [visit?.hero, ...(visit?.media || [])]
-      ),
-      ...publishedMedia,
-    ]
-  )
+  const media = uniqueMedia([
+    ...resolveMediaList(
+      presentation.media || [visit?.hero, ...(visit?.media || [])]
+    ),
+    ...publishedMedia,
+  ])
   // Curated presentation/Visit heroes are protected. Otherwise, prefer the
   // first verified image placed on this Visit and leave image empty when the
   // Place has none instead of repeating a Journey-level cover across pins.
