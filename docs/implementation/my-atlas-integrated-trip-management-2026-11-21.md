@@ -13,6 +13,9 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/components/MyAtlasMapHelp.vue
+  - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - workers/my-atlas/src/public/service.mjs
   - src/features/my-atlas/components/MyAtlasDialog.vue
   - src/features/my-atlas/components/MyAtlasInfo.vue
   - src/features/my-atlas/components/MyAtlasSwitch.vue
@@ -258,3 +261,35 @@ Verification after that authorization:
 Browser evidence: `.state/theme/map-feedback-browser.json` and
 `.state/theme/map-marker-containment.json`. Genuine signed-in acceptance remains
 separate from these synthetic browser fixtures and isolated runtime tests.
+
+### Public map navigation and touch help, local
+
+- [x] Share responsive map help between owner/public views. Mobile/coarse-pointer
+      help explains two-finger panning, spreading fingers to zoom in and pinching
+      together to zoom out. Desktop help retains drag and Ctrl/Command scroll.
+- [x] Hide the full public overview while retaining its mounted content and the
+      SDK map. Restore it from a bottom control and retain page position.
+- [x] Reuse the in-map navigator for public destinations and published Past trips,
+      preserving repeated stops, progress, close/collapse and Previous/Next.
+- [x] Add an optional public API `trips` array containing opaque presentation IDs,
+      titles, Past lifecycle and ordered public place references. Only explicitly
+      public, nonarchived Past trips appear. Planned/private trips, canonical
+      trip/stop IDs, descriptions, notes, experiences and logistics stay excluded.
+- [x] Keep clients compatible with public API responses without `trips`; the
+      All destinations navigator works with the existing places response.
+- [x] Full My Atlas suite passed, including 60 runtime tests; production build
+      and ESLint passed. Tests cover the public projection and invalid references.
+- [x] Chrome fixtures passed at 320, 390 and 1440 pixels: visible touch/desktop
+      instructions, overview hide/restore, repeated stops, map identity and no
+      horizontal overflow. Evidence: `.state/theme/public-map-browser.json`.
+- [x] Deploy the additive public API before releasing grouped public-trip UI.
+      Worker `9761acee-97a3-4cf1-b3e8-5e1ca3ff5232` deployed after a successful
+      staging dry run. Live health, directory and public-profile reads passed;
+      the checked profile had zero published trips, so grouped-trip acceptance
+      remains covered by the runtime/browser fixtures.
+- [ ] Complete the authorized develop/main frontend promotion.
+
+Owner visibility help now explicitly mentions that public trip names accompany
+their destinations. Browser fixtures do not create accounts or alter real data.
+The backend projection is deployed; frontend promotion was subsequently
+authorized by the owner. No account records were changed by deployment checks.

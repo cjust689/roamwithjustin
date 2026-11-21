@@ -10,7 +10,7 @@
       class="navigator-open"
       @click="$emit('open')"
     >
-      Explore my trips <span aria-hidden="true">↑</span>
+      {{ openLabel }} <span aria-hidden="true">↑</span>
     </button>
     <template v-else>
       <header>
@@ -97,6 +97,7 @@
 export default {
   name: "MyAtlasMapNavigator",
   props: {
+    openLabel: { type: String, default: "Explore my trips" },
     trips: { type: Array, default: () => [] },
     activeId: { type: String, default: "" },
     index: { type: Number, default: 0 },

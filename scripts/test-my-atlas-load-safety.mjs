@@ -172,6 +172,7 @@ const dependencies = {
   MyAtlasSwitch: {},
   MyAtlasInfo: {},
   MyAtlasMapNavigator: {},
+  MyAtlasMapHelp: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   discardLegacyDeletion,

@@ -118,6 +118,7 @@ const ownerDependencies = {
   MyAtlasSwitch: {},
   MyAtlasInfo: {},
   MyAtlasMapNavigator: {},
+  MyAtlasMapHelp: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   normalizeInstagramHandle,
