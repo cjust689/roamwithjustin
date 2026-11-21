@@ -170,6 +170,8 @@ const dependencies = {
   MyAtlasTrips: {},
   MyAtlasJourneyCards: {},
   MyAtlasSwitch: {},
+  MyAtlasInfo: {},
+  MyAtlasMapNavigator: {},
   MyAtlasRegistrationForm: {},
   MyAtlasTutorial: {},
   discardLegacyDeletion,
@@ -296,4 +298,131 @@ assert.equal(
 )
 console.log(
   "Account load/reload never deletes, retry scoping, account-generation guard and local startup isolation tests passed."
+)
+
+const registrationSource = compiler
+  .parseComponent(
+    await fs.readFile(
+      "src/features/my-atlas/components/MyAtlasRegistrationForm.vue",
+      "utf8"
+    )
+  )
+  .script.content.replace(/^import[\s\S]*?from\s+["'][^"']+["']\s*$/gm, "")
+  .replace("export default", "return")
+const registration = new Function(registrationSource)()
+const form = {
+  ...registration.data.call({
+    localDevelopment: false,
+    initialDisplayName: "Justin",
+  }),
+  pending: false,
+}
+for (const [name, getter] of Object.entries(registration.computed))
+  Object.defineProperty(form, name, { get: () => getter.call(form) })
+assert.equal(form.canSubmit, false)
+assert.ok(form.unmetRequirements.some(text => text.includes("invitation")))
+assert.ok(form.unmetRequirements.some(text => text.includes("handle")))
+form.inviteCode = "owner-invitation"
+form.handle = "Justin-Travels"
+form.acceptTerms = true
+form.acceptPrivacy = true
+form.turnstileToken = "test-token"
+assert.equal(
+  form.canSubmit,
+  true,
+  "A real prefilled display name and a valid handle can submit once all requirements are met"
+)
+form.turnstileToken = ""
+assert.equal(form.canSubmit, false)
+form.turnstileToken = "test-token"
+form.handle = "a"
+assert.equal(form.canSubmit, false)
+form.handle = "valid-handle"
+form.displayName = " "
+assert.equal(form.canSubmit, false)
+console.log(
+  "Registration readiness validates handle/name, consent and verification instead of accepting placeholder text."
+)
+
+const tripStops = [
+  {
+    stopId: "first",
+    place: { placeId: "same", name: "Repeated place", coordinates: [1, 2] },
+  },
+  {
+    stopId: "missing",
+    place: { placeId: "missing", name: "No coordinates", coordinates: null },
+  },
+  {
+    stopId: "second",
+    place: { placeId: "same", name: "Repeated place", coordinates: [1, 2] },
+  },
+]
+const navigation = {
+  overviewTrips: [
+    {
+      tripId: "trip-one",
+      title: "Repeated visit trip",
+      lifecycle: "past",
+      workflow: "saved",
+      stops: tripStops,
+    },
+  ],
+  overviewLegacyPlans: [],
+  displayedPlaces: [],
+  mapNavigatorOpen: false,
+  mapNavigatorTripId: "",
+  mapNavigatorStopIndex: 0,
+  sidebarExpanded: true,
+  $refs: { trips: { selectedId: "trip-one" } },
+  pauseTimeline() {},
+  toggleSidebar() {
+    this.sidebarExpanded = false
+  },
+}
+for (const name of [
+  "mapNavigationTrips",
+  "mapNavigatorTrip",
+  "mapNavigatorLocation",
+  "mapNavigatorRoute",
+])
+  Object.defineProperty(navigation, name, {
+    get: () => component.computed[name].call(navigation),
+  })
+for (const name of [
+  "openMapNavigator",
+  "chooseMapTrip",
+  "stepMapTrip",
+  "closeMapNavigator",
+])
+  navigation[name] = component.methods[name].bind(navigation)
+const tripSnapshot = JSON.stringify(navigation.overviewTrips)
+navigation.openMapNavigator()
+assert.equal(navigation.mapNavigatorTripId, "trip-one")
+assert.equal(navigation.sidebarExpanded, false)
+assert.deepEqual(
+  navigation.mapNavigatorRoute.map(node => node.label),
+  ["1", "3"],
+  "Missing coordinates must not renumber actual stops"
+)
+navigation.stepMapTrip(1)
+assert.equal(navigation.mapNavigatorLocation.placeId, "missing")
+navigation.stepMapTrip(1)
+assert.equal(navigation.mapNavigatorLocation.placeId, "same")
+assert.equal(
+  navigation.mapNavigatorStopIndex,
+  2,
+  "Repeated visits remain distinct"
+)
+navigation.stepMapTrip(1)
+assert.equal(navigation.mapNavigatorStopIndex, 2)
+navigation.closeMapNavigator()
+assert.equal(navigation.mapNavigatorTrip, null)
+assert.equal(
+  JSON.stringify(navigation.overviewTrips),
+  tripSnapshot,
+  "Navigation cannot mutate stored trip data"
+)
+console.log(
+  "Trip navigation preserves repeated visits, stop numbering and saved data."
 )
