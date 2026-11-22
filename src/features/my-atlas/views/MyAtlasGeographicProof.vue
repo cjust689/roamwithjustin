@@ -863,8 +863,8 @@
                 {{
                   accountProfile.public
                     ? "Your Atlas has a public link"
-                    : !pins.length
-                      ? "Add a visited place to share or export"
+                    : !hasPublicAtlasContent
+                      ? "Add a destination or publish a trip to share"
                       : "Your Atlas is private"
                 }}
               </small>
@@ -877,20 +877,24 @@
             class="my-atlas-section-content my-atlas-tools-content"
           >
             <p>
-              Create a public link for the places marked Visited, or export
-              those places as a Story image. Planned trips are shared
-              separately.
+              Share visited destinations and trips marked Public Atlas. Planned
+              and Past trips appear in separate views. Create a Story image of
+              your visited destinations, or share an individual trip link.
             </p>
-            <div v-if="!pins.length" class="my-atlas-tools-empty" role="status">
+            <div
+              v-if="!hasPublicAtlasContent"
+              class="my-atlas-tools-empty"
+              role="status"
+            >
               <strong>Your Atlas is empty</strong>
               <p>
                 {{
                   atlasImage
-                    ? "Your favorite image is saved. Add at least one visited place before sharing your Atlas or exporting a Story image."
-                    : "Add at least one visited place before sharing your Atlas or exporting a Story image."
+                    ? "Your favorite image is saved. Add at least one visited place or mark a planned trip Public Atlas to share your profile."
+                    : "Add at least one visited place or mark a planned trip Public Atlas to share your profile."
                 }}
-                Saved places stay private. Share a saved trip from the Planning
-                tab.
+                Story exports from this Overview use visited destinations. Saved
+                places stay private.
               </p>
               <button type="button" @click="openAtlasPanel('add')">
                 Add a visited place
@@ -900,7 +904,8 @@
               <button
                 type="button"
                 :disabled="
-                  accountPending || (!pins.length && !accountProfile.public)
+                  accountPending ||
+                  (!hasPublicAtlasContent && !accountProfile.public)
                 "
                 @click="toggleSharing"
               >
@@ -1368,6 +1373,18 @@ export default {
     }
   },
   computed: {
+    hasPublicAtlasContent() {
+      return (
+        this.pins.length > 0 ||
+        this.overviewTrips.some(
+          trip =>
+            trip.lifecycle === "planned" &&
+            trip.sharing.publicAtlas &&
+            trip.workflow !== "archived" &&
+            trip.stops.length
+        )
+      )
+    },
     mapNavigationTrips() {
       const trips = this.overviewTrips
         .filter(trip => trip.stops.length && trip.workflow !== "archived")
@@ -2899,7 +2916,7 @@ export default {
             ...this.accountProfile,
             revision,
             pinCount: Math.max(0, this.accountProfile.pinCount - 1),
-            public: this.pins.length > 0 && this.accountProfile.public,
+            public: this.hasPublicAtlasContent && this.accountProfile.public,
           }
           if (this.selectedPlaceId === place.placeId) {
             this.selectedPlaceId = ""

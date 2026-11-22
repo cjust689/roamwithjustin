@@ -130,9 +130,9 @@
             >Public Atlas</MyAtlasSwitch
           >
           <MyAtlasInfo label="About public trip visibility"
-            >Show this trip's name and destinations when it is Past and your
-            Atlas is public. Private notes, experiences, flights and rentals
-            stay private. Read only trip links are shared
+            >Show this trip's name, Planned or Past status, and destinations
+            when your Atlas is public. Private notes, experiences, flights and
+            rentals stay private. Read only trip links are shared
             separately.</MyAtlasInfo
           >
         </div>

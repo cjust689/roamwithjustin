@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-21
+updated: 2026-11-22
 related:
   - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-registration
@@ -1288,3 +1288,49 @@ The mobile bottom-menu correction makes owner/public restore controls
 edge-to-edge bottom bars with safe-area padding; the in-map navigator remains
 above them. The SDK's existing attribution control moves to the upper control
 area on mobile and retains its provider links. Desktop placement is unchanged.
+
+### Public grouped browsing, local follow-up
+
+`MyAtlasPublicView.vue` separates Planned, Past and Destinations view states.
+It defaults to Past when published Past trips exist, otherwise Planned when
+public plans exist, otherwise Destinations. Switching states clears navigation
+and filters the cards, pins and route to that view. Empty lifecycle views show
+no pins. A selected trip preserves shared stop order and repeated occurrences;
+pins/statistics deduplicate places. The in-map selector can switch between
+public trips of either lifecycle and visited destinations without owner APIs.
+
+`atlas.places` and `atlas.trips` preserve the existing visited/Past contract.
+An additive `atlas.plannedTrips` array contains opaque public presentation IDs,
+titles, the Planned lifecycle and ordered `{ place }` geographic snapshots.
+These snapshots include empty visit arrays, no memories and no canonical
+trip/stop IDs, descriptions, logistics, experiences or intended travel dates.
+The client validates the additive field and normalizes both lifecycles into
+its read-only trip list. Older responses without the field remain supported;
+older clients ignore it and retain their visited-only view.
+
+Both whole-profile visibility and each trip's `sharing.publicAtlas` must be
+true for publication. Archived trips are excluded. Public planned geometry
+never enters `tripPins`, visited counts, date playback or the Destinations view.
+A profile with a public planned trip can be made public with zero visited
+places. Directory place counts deduplicate all publicly visible map locations,
+including planned stops, while the owner's pin count remains visited-only.
+Trip names, lifecycle, ordering and public geography participate in public
+activity freshness; private content edits do not.
+
+Public visitors cannot create or download another owner's Atlas Story. The
+public view has no export action, export method or Story-export import; the
+owner view retains its export path. Aggregate place dates are not presented
+as dates of individual occurrences.
+Owner visibility help, Share Your Atlas readiness and privacy copy explain
+both lifecycles. The configured privacy version advances to
+`my-atlas-privacy-2026-11-21-public-trips` on the next Worker deployment. This
+local follow-up requires the compatible Worker projection before frontend
+promotion. No production account was changed during implementation checks.
+
+The November 22 simplification moves Planned/Past/Destinations selection into
+one labeled View select inside the existing map shell. Empty lifecycle options
+are disabled. Its responsive placement clears the desktop overview and SDK
+controls and remains available with the overview hidden. The sidebar retains
+profile information, trip cards and ordered stops. Public year playback and
+its extra sidebar control drawer are removed; no alternate year filter silently
+hides pins. Switching View still resets the selected stop and scopes the map.

@@ -5,6 +5,7 @@ import {
   TRIP_BACKUP,
   storedTrips,
   tripPins,
+  publicTripGroups,
   replayTripOperation,
   mutateTripStore,
 } from "../trips/store.mjs"
@@ -1477,7 +1478,11 @@ export class UserProfileDurableObject extends DurableObject {
       if (owner.profile.revision !== command.expectedRevision) {
         return failure("revision_conflict")
       }
-      if (patch.public === true && (owner.profile.pinCount || 0) < 1) {
+      if (
+        patch.public === true &&
+        (owner.profile.pinCount || 0) < 1 &&
+        !publicTripGroups(this.ctx.storage).plannedTrips.length
+      ) {
         return failure("profile_requires_pin")
       }
       const nextPublic = patch.public ?? owner.profile.public
@@ -1753,7 +1758,10 @@ export class UserProfileDurableObject extends DurableObject {
       this.ctx.storage.kv.delete(pinPlaceKey(pin.placeId))
       if (this.ctx.storage.kv.get(TRIP_MARKER)) {
         profile.pinCount = tripPins(this.ctx.storage).length
-        if (profile.pinCount) {
+        if (
+          profile.pinCount ||
+          publicTripGroups(this.ctx.storage).plannedTrips.length
+        ) {
           profile.public = owner.profile.public
           profile.discoverable = owner.profile.discoverable
         }
@@ -2599,12 +2607,7 @@ export class UserProfileDurableObject extends DurableObject {
 
   getPublicAtlas() {
     const profile = this.ctx.storage.kv.get("profile")
-    if (
-      !profile ||
-      profile.status !== "active" ||
-      profile.public !== true ||
-      (profile.pinCount || 0) < 1
-    ) {
+    if (!profile || profile.status !== "active" || profile.public !== true) {
       return failure("public_atlas_not_found")
     }
     const upgraded = Boolean(this.ctx.storage.kv.get(TRIP_MARKER))
@@ -2625,7 +2628,16 @@ export class UserProfileDurableObject extends DurableObject {
     ) {
       return failure("public_atlas_inconsistent")
     }
-    if (!pins.length) return failure("public_atlas_not_found")
+    let groups
+    try {
+      groups = upgraded
+        ? publicTripGroups(this.ctx.storage)
+        : { trips: [], plannedTrips: [] }
+    } catch {
+      return failure("public_atlas_inconsistent")
+    }
+    if (!pins.length && !groups.plannedTrips.length)
+      return failure("public_atlas_not_found")
     const atlasImage = this.ctx.storage.kv.get(ATLAS_IMAGE_KEY) || null
     if (atlasImage && !validStoredAtlasImage(atlasImage)) {
       return failure("public_atlas_inconsistent")
@@ -2651,21 +2663,7 @@ export class UserProfileDurableObject extends DurableObject {
         )
       ),
       atlasImage: atlasImage?.publicProfile === true ? atlasImage : null,
-      trips: upgraded
-        ? storedTrips(this.ctx.storage)
-            .filter(
-              trip =>
-                trip.lifecycle === "past" &&
-                trip.sharing.publicAtlas === true &&
-                trip.workflow !== "archived" &&
-                trip.stops.length
-            )
-            .map((trip, index) => ({
-              id: `public-trip-${index + 1}`,
-              title: trip.title,
-              stops: trip.stops.map(stop => ({ placeId: stop.place.placeId })),
-            }))
-        : [],
+      ...groups,
     })
   }
 
@@ -2675,8 +2673,7 @@ export class UserProfileDurableObject extends DurableObject {
       !profile ||
       profile.status !== "active" ||
       profile.public !== true ||
-      profile.discoverable !== true ||
-      (profile.pinCount || 0) < 1
+      profile.discoverable !== true
     ) {
       return failure("public_atlas_not_discoverable")
     }
@@ -2684,10 +2681,20 @@ export class UserProfileDurableObject extends DurableObject {
     if (atlasImage && !validStoredAtlasImage(atlasImage)) {
       return failure("public_atlas_inconsistent")
     }
-    const publicPinCount = this.ctx.storage.kv.get(TRIP_MARKER)
-      ? tripPins(this.ctx.storage, { publicOnly: true }).length
-      : profile.pinCount
-    if (!publicPinCount) return failure("public_atlas_not_discoverable")
+    const atlas = this.getPublicAtlas()
+    if (!atlas.ok)
+      return failure(
+        atlas.error === "public_atlas_inconsistent"
+          ? atlas.error
+          : "public_atlas_not_discoverable"
+      )
+    // Directory counts are public map locations, not the owner's visited count.
+    const publicPinCount = new Set([
+      ...atlas.pins.map(pin => pin.placeId),
+      ...atlas.plannedTrips.flatMap(trip =>
+        trip.stops.map(stop => stop.place.placeId)
+      ),
+    ]).size
     return Object.freeze({
       ok: true,
       profile: Object.freeze({

@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-22
 related:
   - docs-index
   - my-atlas-trip-centric-transition
@@ -15,6 +15,10 @@ superseded_by: []
 code_paths:
   - src/features/my-atlas/components/MyAtlasMapHelp.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - src/features/my-atlas/api/client.mjs
+  - src/views/roam/Privacy.vue
+  - workers/my-atlas/wrangler.jsonc
+  - workers/my-atlas/test/public.test.mjs
   - workers/my-atlas/src/public/service.mjs
   - src/features/my-atlas/components/MyAtlasDialog.vue
   - src/features/my-atlas/components/MyAtlasInfo.vue
@@ -34,6 +38,7 @@ code_paths:
   - workers/my-atlas/src/index.mjs
   - workers/my-atlas/test/account.test.mjs
   - scripts/test-my-atlas-trip-workspace.mjs
+  - scripts/test-my-atlas-profile-discovery.mjs
 verification:
   state: verified
   evidence:
@@ -325,3 +330,80 @@ established local parallel-false configuration override. Build output is in
 The existing Chrome fixture evidence above covers the layout; profile-photo
 evidence is recorded in the favorite-image implementation checklist. This
 release changes no Viator code or Worker deployment.
+
+### Public grouped trip browsing, local
+
+The owner clarified that Public Atlas applies to both Planned and Past trips.
+This supersedes the initial local Past-only browser design, while retaining
+its repeated-stop navigation and independent destination compatibility.
+
+- [x] Expose Planned, Past and Destinations view states. Each filters cards,
+      pins and routes; empty lifecycle views do not show another view's pins.
+- [x] Show named trip cards, lifecycle labels, stop counts, compact order previews
+      and ordered stops. Bound long pickers/lists with independent scrolling.
+- [x] Scope route order and visible statistics to the selected trip; distinguish
+      unique places from repeated stop occurrences. Public Story export is
+      removed by the November 22 follow-up below.
+- [x] Preserve trip/stop selection when closing controls or restoring Overview.
+      Keep boundary controls disabled at the first/last stop.
+- [x] Publish explicitly public, nonarchived Planned trips in additive
+      `atlas.plannedTrips`, leaving visited/Past response fields compatible.
+      Exclude all private notes, dates, experiences, logistics and canonical IDs.
+- [x] Allow a public planned-only profile without inventing a visited destination.
+      Keep owner visited counts unchanged. Directory counts include unique public
+      map locations, and public trip changes update discovery activity.
+- [x] Update owner visibility help, Share Your Atlas readiness, privacy copy and
+      the next-deployment privacy version for opt-in publication of either status.
+- [x] Extend client/view tests for lifecycle filtering, independent destinations,
+      repeat stops, planned-only/empty states and older-response compatibility.
+- [x] Chrome fixtures passed in both themes at 320, 390 and 1440 pixels: separate
+      pins/cards for each view, unchanged visited counts, ordered repeats,
+      retained SDK instance, no overflow and 44 pixel mode buttons. Planned-only
+      and empty Past views passed; a 40-trip picker scrolled within its bounds.
+      Evidence: `.state/theme/public-view-states-browser.json` and screenshots.
+- [x] Backend runtime tests passed for public/private planned trips, planned-only
+      publication, lifecycle changes, unsharing, archive exclusion and freshness.
+- [x] Planned-only owner readiness passed at 320, 390 and 1440 pixels: public
+      publishing enables only for an opted-in plan; Overview Story export stays
+      disabled without visits. No profile was published. Evidence:
+      `.state/theme/public-planned-owner-browser.json`.
+- [x] Final build passed with hash `8d044a929ca1d3b9`, including the script suites
+      and 61 isolated Worker runtime tests. After the directory count refinement,
+      all 61 runtime tests and focused ESLint passed again. Worker staging dry
+      run and managed docs audit passed. Evidence:
+      `.state/theme/public-view-states-build.log`,
+      `.state/theme/public-view-states-runtime.log`, and
+      `.state/theme/public-view-states-worker-check.log`.
+- [ ] Deploy the additive Worker API, then promote the frontend when requested.
+
+No real account mutation, API switch, migration or production deployment was
+performed by these checks. The configured localhost app still reads the existing
+staging API; new planned publication is covered by isolated runtime/browser
+fixtures until that Worker is promoted.
+
+### Public map controls and owner-only Story export, November 22, local
+
+- [x] Remove the public Story download button, its export method, pending/status
+      state and Story-export import. Preserve owner export and public image viewing.
+- [x] Replace the sidebar view buttons/year controls with one on-map View select
+      for Planned trips, Past trips and Destinations; disable empty trip options.
+- [x] Keep the selector visible with the overview hidden and preserve the existing
+      trip/stop navigator, map instance and view-specific pins.
+- [x] Remove unused public timeline/filter drawer code and styling. The sidebar
+      contains profile, statistics, trip cards and ordered stops.
+- [x] State tests confirm public export is absent and owner export still exists.
+      Profile-discovery and planning checks passed with focused ESLint.
+- [x] Chrome fixtures passed in both themes at 320, 390, 720, 721 and 1440 pixels:
+      44 pixel selector, state-specific pins, unchanged visited counts, no sidebar
+      select, no public export method, hidden-overview selector hit testing,
+      repeated stops, unchanged map identity and no horizontal overflow.
+      Evidence: `.state/theme/public-map-filters-browser.json` and screenshots.
+- [x] Production build passed with hash `3b3fab129699138a`, including all script
+      suites and 61 isolated Worker runtime tests. Focused ESLint and the final
+      managed documentation audit passed with the existing 12 warnings. Build
+      evidence: `.state/theme/public-map-filters-build.log`.
+- [ ] Promote this local follow-up with the pending public-trip API/frontend work.
+
+The owner-only account data export remains authenticated. This change removes
+the public app's Story generation/download path; it does not change photo
+visibility, private R2 delivery, trip permissions or account data.

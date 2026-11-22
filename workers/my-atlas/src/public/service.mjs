@@ -318,6 +318,26 @@ export async function getPublicAtlas({ environment, handle, placeCatalog }) {
           })
         )
       ),
+      // Additive field: older clients still see only visited places/Past trips.
+      plannedTrips: Object.freeze(
+        (snapshot.plannedTrips || []).map(trip =>
+          Object.freeze({
+            id: trip.id,
+            title: trip.title,
+            lifecycle: "planned",
+            stops: Object.freeze(
+              trip.stops.map(stop =>
+                Object.freeze({
+                  place: publicPlace(null, {
+                    placeId: stop.place.placeId,
+                    placeSnapshot: stop.place,
+                  }),
+                })
+              )
+            ),
+          })
+        )
+      ),
     }),
     catalog: Object.freeze({
       revision: manifest.catalogRevision,
