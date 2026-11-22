@@ -23,7 +23,7 @@
         </b>
       </button>
       <button
-        v-if="plan && !open"
+        v-if="savedRouteReady && !open"
         type="button"
         class="planner-heading-share"
         aria-label="Share a read only snapshot of this saved trip"
@@ -33,7 +33,54 @@
       </button>
     </div>
 
+    <MyAtlasDialog
+      v-if="createNameOpen"
+      title="New trip"
+      :pending="pending"
+      @close="createNameOpen = false"
+    >
+      <div class="planner-plan-editor">
+        <label
+          ><span>Trip name</span
+          ><input
+            v-model.trim="planForm.title"
+            maxlength="80"
+            placeholder="Name your trip"
+            :disabled="pending"
+            @keydown.enter.prevent="createNamedPlan"
+        /></label>
+        <p>
+          Save the name first. Choose the start, finish and destinations next.
+        </p>
+        <p v-if="error" role="alert">{{ error }}</p>
+        <button
+          type="button"
+          :disabled="
+            pending ||
+            !planForm.title ||
+            !namedPlanDrafts ||
+            !planStateAvailable
+          "
+          @click="createNamedPlan"
+        >
+          {{ pending ? "Creating trip" : "Create trip and continue" }}
+        </button>
+        <p v-if="!namedPlanDrafts">
+          Named trip drafts are unavailable on this server. Refresh the planner
+          before starting.
+        </p>
+      </div>
+    </MyAtlasDialog>
+
     <div v-if="open" id="my-atlas-planner-content" class="planner-content">
+      <button
+        v-if="planningLoaded && !plan && !createNameOpen && planStateAvailable"
+        type="button"
+        :disabled="pending"
+        @click="createNameOpen = true"
+      >
+        New trip
+      </button>
       <p class="planner-disclosure">
         Build a private route with a start, stops, and finish. Planned places
         never appear in your shared Visited Atlas.
@@ -89,7 +136,7 @@
               }}
             </span>
             <button
-              v-if="!routeBuilderOpen"
+              v-if="!routeBuilderOpen && savedRouteReady"
               type="button"
               aria-label="Share a read only snapshot of this saved trip"
               @click="copySharedTripLink"
@@ -104,7 +151,7 @@
             {{ plan.note }}
           </p>
           <ol class="planner-itinerary" aria-label="Saved trip itinerary">
-            <li class="is-endpoint">
+            <li v-if="plan.start" class="is-endpoint">
               <span class="planner-itinerary-marker">S</span>
               <div>
                 <small>Start</small>
@@ -124,7 +171,7 @@
                 <p v-if="stopNote(stop)">{{ stopNote(stop) }}</p>
               </div>
             </li>
-            <li class="is-endpoint is-finish">
+            <li v-if="itineraryFinish" class="is-endpoint is-finish">
               <span class="planner-itinerary-marker">F</span>
               <div>
                 <small>{{ itineraryFinishLabel }}</small>
@@ -403,7 +450,7 @@
       </section>
 
       <section
-        v-if="!plan || routeBuilderOpen"
+        v-if="plan && routeBuilderOpen"
         id="planner-route-builder"
         ref="routeBuilder"
         class="planner-block planner-wishlist-block"
@@ -432,219 +479,42 @@
         </div>
 
         <div id="planner-wishlist-content" class="planner-collapsible-content">
-          <label class="planner-place-search">
-            <span>Find a start, destination, or finish</span>
-            <input
-              ref="locationSearch"
-              v-model="wishQuery"
-              type="search"
-              autocomplete="off"
-              placeholder="Try Uvita, Yellowstone, or Eiffel Tower"
-              aria-describedby="planner-place-search-help"
-            />
-            <small id="planner-place-search-help">
-              Search the My Atlas catalog. Coordinates appear before you save a
-              destination.
-            </small>
-          </label>
-
-          <div
-            v-if="wishSearchPending"
-            class="planner-search-state"
-            role="status"
+          <label
+            ><span>Use this place as</span
+            ><select v-model="destinationRole" :disabled="pending">
+              <option value="start">Trip start</option>
+              <option value="end">Trip finish</option>
+              <option value="stop">Destination</option>
+            </select></label
           >
-            Searching My Atlas places
-          </div>
-          <div
-            v-else-if="wishSearchError"
-            class="planner-search-state is-error"
-            role="alert"
-          >
-            <span>{{ wishSearchError }}</span>
-            <button type="button" @click="retryWishSearch">Retry search</button>
-          </div>
-          <p
-            v-else-if="
-              wishQuery.trim().length >= 4 && !wishSearchResults.length
+          <MyAtlasDestinationPicker
+            v-model="destinationDraft"
+            :pending="pending || !planStateAvailable"
+            :resolve-link="resolveMapLink"
+            :action-label="
+              destinationRole === 'start'
+                ? 'Set trip start'
+                : destinationRole === 'end'
+                  ? 'Set trip finish'
+                  : 'Add destination'
             "
-            class="planner-search-state"
-            role="status"
-          >
-            No matching country, city, or spot in this catalog.
-          </p>
-          <div v-if="wishSearchResults.length" class="planner-search-results">
-            <span>My Atlas search results</span>
-            <ul>
-              <li v-for="place in wishSearchResults" :key="place.placeId">
-                <article>
-                  <span class="planner-search-result-copy">
-                    <strong>{{ place.name }}</strong>
-                    <small>{{ locationContext(place) }}</small>
-                    <small>{{ coordinateLabel(place) }}</small>
-                  </span>
-                  <b>{{ placeTypeLabel(place) }}</b>
-                  <div class="planner-search-actions">
-                    <button
-                      type="button"
-                      :disabled="
-                        pending ||
-                        !planStateAvailable ||
-                        planStopPlaceIds.has(place.placeId)
-                      "
-                      @click="addCatalogPlaceToPlan(place)"
-                    >
-                      {{
-                        planStopPlaceIds.has(place.placeId)
-                          ? "In trip"
-                          : "Add to trip"
-                      }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="pending || wishPlaceIds.has(place.placeId)"
-                      @click="saveCatalogWish(place)"
-                    >
-                      {{
-                        wishPlaceIds.has(place.placeId)
-                          ? "In wishlist"
-                          : "Save to wishlist"
-                      }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="pending || !planStateAvailable"
-                      :aria-pressed="String(isPlanLocation('start', place))"
-                      @click="usePlanLocation('start', place)"
-                    >
-                      {{
-                        isPlanLocation("start", place)
-                          ? "Start selected"
-                          : "Use as start"
-                      }}
-                    </button>
-                    <button
-                      type="button"
-                      :disabled="pending || !planStateAvailable"
-                      :aria-pressed="String(isPlanLocation('end', place))"
-                      @click="usePlanLocation('end', place)"
-                    >
-                      {{
-                        isPlanLocation("end", place)
-                          ? "Finish selected"
-                          : "Use as finish"
-                      }}
-                    </button>
-                  </div>
-                </article>
-              </li>
-            </ul>
-          </div>
-
-          <div
-            v-if="planForm.startDirect || planForm.endDirect"
-            class="planner-search-selections"
-            role="group"
-            aria-label="Draft start and finish"
-          >
-            <p v-if="planForm.startDirect">
-              <span>Selected start</span>
-              <strong>{{ planForm.startDirect.name }}</strong>
-            </p>
-            <p v-if="planForm.endDirect">
-              <span>Selected finish</span>
-              <strong>{{ planForm.endDirect.name }}</strong>
-            </p>
-            <small>
-              These selections are ready in the route below. Add at least one
-              destination between the start and finish.
-            </small>
-          </div>
-
-          <button
-            class="planner-custom-trigger"
-            type="button"
-            :disabled="pending"
-            @click="beginCustomMapPlacement"
-          >
-            {{
-              wishQuery.trim()
-                ? `Create custom place “${wishQuery.trim()}”`
-                : "Choose a custom place on the map"
-            }}
-          </button>
-          <details
-            class="planner-custom"
-            :open="customPickerOpen"
-            @toggle="handleCustomPickerToggle"
-          >
-            <summary>Custom place and coordinates</summary>
-            <div>
-              <MyAtlasLocationPicker
-                :name="customName"
-                :longitude="customLongitude"
-                :latitude="customLatitude"
-                :pending="pending"
-                :resolve-link="resolveMapLink"
-                @update:name="customName = $event"
-                @update:longitude="customLongitude = $event"
-                @update:latitude="customLatitude = $event"
-                @coordinates-change="syncCustomPlacement"
-                @choose-map="beginCustomMapPlacement"
-                @search="$refs.locationSearch.focus()"
-              />
-              <div class="planner-custom-actions">
-                <button
-                  v-if="customMapPlacementActive"
-                  type="button"
-                  @click="stopCustomMapPlacement"
-                >
-                  Stop placing pin
-                </button>
-                <button
-                  type="button"
-                  :disabled="pending || !planStateAvailable"
-                  @click="addCustomWishToPlan"
-                >
-                  Add to trip
-                </button>
-                <button
-                  type="button"
-                  :disabled="pending"
-                  @click="saveCustomWish"
-                >
-                  Save private location
-                </button>
-                <button
-                  type="button"
-                  :disabled="pending || !planStateAvailable"
-                  :aria-pressed="String(isCustomPlanLocation('start'))"
-                  @click="useCustomPlanLocation('start')"
-                >
-                  {{
-                    isCustomPlanLocation("start")
-                      ? "Start selected"
-                      : "Use as start"
-                  }}
-                </button>
-                <button
-                  type="button"
-                  :disabled="pending || !planStateAvailable"
-                  :aria-pressed="String(isCustomPlanLocation('end'))"
-                  @click="useCustomPlanLocation('end')"
-                >
-                  {{
-                    isCustomPlanLocation("end")
-                      ? "Finish selected"
-                      : "Use as finish"
-                  }}
-                </button>
-              </div>
-            </div>
+            @review="reviewDestination"
+            @choose="chooseDestination"
+          />
+          <div class="planner-search-selections">
             <p>
-              You supply this name and position. Confirm road access before
-              using it for directions.
+              <span>Start</span
+              ><strong>{{
+                planStartLocation?.name || "Not chosen yet"
+              }}</strong>
             </p>
-          </details>
+            <p>
+              <span>Finish</span
+              ><strong>{{
+                planFinishLocation?.name || "Not chosen yet"
+              }}</strong>
+            </p>
+          </div>
 
           <div v-if="wishlistOpen" class="planner-saved-wishes">
             <p v-if="!wishes.length" class="planner-empty">
@@ -818,14 +688,14 @@
               the finish, or select a separate finish from search.
             </p>
             <button
-              v-else
+              v-if="plan || routeDraftReady"
               type="button"
               class="planner-review-trip"
               :aria-expanded="String(planEditorOpen)"
               aria-controls="planner-trip-editor"
               @click="openPlanDetails"
             >
-              {{ plan ? "Review itinerary changes" : "Add trip details" }}
+              {{ plan ? "Trip details" : "Add trip details" }}
             </button>
           </section>
         </div>
@@ -1163,7 +1033,9 @@ import {
 } from "../planning/handoffs.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 import { resolveMyAtlasMapLink } from "../api/client.mjs"
-import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
+import MyAtlasDestinationPicker from "./MyAtlasDestinationPicker.vue"
+import MyAtlasDialog from "./MyAtlasDialog.vue"
+import { emptyDestinationDraft } from "../catalog/destinationDraft.mjs"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
 import { emptyTravelSearchDraft } from "../planning/travelSearch.mjs"
 import {
@@ -1175,7 +1047,7 @@ import { buildPlannerMapRoute } from "../planning/mapProjection.mjs"
 
 export default {
   name: "MyAtlasPlanner",
-  components: { MyAtlasTravelSearch, MyAtlasLocationPicker },
+  components: { MyAtlasTravelSearch, MyAtlasDestinationPicker, MyAtlasDialog },
   props: {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
@@ -1204,6 +1076,11 @@ export default {
       plannerRevision: this.revision,
       wishes: [],
       plan: null,
+      namedPlanDrafts: false,
+      createNameOpen: false,
+      namedPlanAttempt: null,
+      destinationRole: "start",
+      destinationDraft: emptyDestinationDraft(),
       planStateAvailable: true,
       planLoadError: "",
       wishDrafts: {},
@@ -1262,6 +1139,13 @@ export default {
     }
   },
   computed: {
+    savedRouteReady() {
+      return Boolean(
+        this.plan?.start &&
+          this.plan.stops?.length &&
+          (this.plan.endMode !== "selected-end" || this.plan.end)
+      )
+    },
     explicitFlyPairs() {
       return this.directionsPairs.filter(pair => pair.mode === "fly")
     },
@@ -1316,8 +1200,9 @@ export default {
     planSaveRequirements() {
       const requirements = []
       if (!this.planForm.title) requirements.push("Add a trip title.")
-      if (!this.planStartLocation) requirements.push("Choose a trip start.")
-      if (!this.planForm.stopWishIds.length) {
+      if (!this.planStartLocation && !this.namedPlanDrafts)
+        requirements.push("Choose a trip start.")
+      if (!this.planForm.stopWishIds.length && !this.namedPlanDrafts) {
         requirements.push("Add at least one destination to the trip.")
       }
       if (
@@ -1367,7 +1252,7 @@ export default {
       return this.planFormSignature() !== this.savedPlanSignature()
     },
     directionsPoints() {
-      return this.plan ? buildPlanRoutePoints(this.plan) : []
+      return this.savedRouteReady ? buildPlanRoutePoints(this.plan) : []
     },
     directionsSelectedPoints() {
       const included = new Set(this.directionsIncludedPointKeys)
@@ -1468,6 +1353,7 @@ export default {
         : null
       this.$emit("location-placement-change", {
         active: this.customMapPlacementActive,
+        name: this.customName,
         coordinates,
       })
     },
@@ -1476,6 +1362,13 @@ export default {
       if (!this.customMapPlacementActive || !coordinates) return
       this.customLongitude = String(coordinates[0])
       this.customLatitude = String(coordinates[1])
+      this.destinationDraft = {
+        ...this.destinationDraft,
+        name: this.customName || this.destinationDraft.name,
+        place: null,
+        coordinates: [...coordinates],
+        reviewed: true,
+      }
       this.syncCustomPlacement()
       this.confirmDraft(
         "Custom position selected. Review the name and coordinates before saving."
@@ -1483,6 +1376,7 @@ export default {
     },
     stopCustomMapPlacement() {
       this.customMapPlacementActive = false
+      this._destinationReview = null
       this.$emit("location-placement-change", {
         active: false,
         coordinates: null,
@@ -1563,10 +1457,86 @@ export default {
     },
     async toggleOpen() {
       this.open = !this.open
-      if (this.open && !this.planningLoaded && !this.pending) {
+      if (this.open && !this.planningLoaded && !this.pending)
         await this.loadPlanning()
-        this.wishlistOpen = !this.plan
+      if (this.open && this.planningLoaded) {
+        this.createNameOpen = !this.plan
+        if (this.plan?.status === "draft") this.routeBuilderOpen = true
+      }
+    },
+    async createNamedPlan() {
+      if (
+        this.pending ||
+        this.plan ||
+        !this.namedPlanDrafts ||
+        !this.planStateAvailable ||
+        !this.planForm.title.trim()
+      )
+        return
+      const title = this.planForm.title.trim()
+      if (this.namedPlanAttempt?.title !== title)
+        this.namedPlanAttempt = { title, key: crypto.randomUUID() }
+      const outcome = await this.mutate(
+        token =>
+          saveMyAtlasPlan({
+            apiBaseUrl: this.apiBaseUrl,
+            accessToken: token,
+            value: {
+              title,
+              status: "draft",
+              start: null,
+              stopWishIds: [],
+              endMode: "last-stop",
+            },
+            revision: this.plannerRevision,
+            idempotencyKey: this.namedPlanAttempt.key,
+          }),
+        "Trip created. Choose your start and finish next.",
+        { applyResult: result => this.rememberSavedPlan(result) }
+      )
+      if (outcome?.saved) {
+        this.namedPlanAttempt = null
+        this.createNameOpen = false
+        this.routeBuilderOpen = true
+        this.destinationRole = "start"
         this.planEditorOpen = false
+      }
+    },
+    reviewDestination(candidate) {
+      if (this.pending) return
+      this.customName = candidate.name || this.destinationDraft.name
+      this._destinationReview = candidate
+      this.customMapPlacementActive = true
+      this.$emit("location-placement-change", {
+        active: true,
+        coordinates: candidate.coordinates,
+        name: this.customName,
+      })
+    },
+    async chooseDestination(value) {
+      if (this.pending || !this.plan || !this.planStateAvailable) return
+      let outcome
+      if (value.place) {
+        if (this.destinationRole === "stop")
+          outcome = await this.addCatalogPlaceToPlan(value.place)
+        else this.usePlanLocation(this.destinationRole, value.place)
+      } else {
+        const custom = value.selection?.customPlace
+        if (!custom) return
+        this.customName = custom.name
+        this.customLongitude = String(custom.coordinates[0])
+        this.customLatitude = String(custom.coordinates[1])
+        if (this.destinationRole === "stop")
+          outcome = await this.addCustomWishToPlan()
+        else this.useCustomPlanLocation(this.destinationRole)
+      }
+      if (outcome?.saved === false || this.error) return
+      // The trip already exists, so each explicit Add also saves the updated route.
+      const saved = await this.savePlan()
+      if (saved?.saved) {
+        this.routeBuilderOpen = true
+        this.destinationDraft = emptyDestinationDraft()
+        this.destinationRole = this.destinationRole === "start" ? "end" : "stop"
       }
     },
     emitPlannerState() {
@@ -1651,10 +1621,12 @@ export default {
         status: this.plan.status,
         desiredYear: this.plan.desiredYear || "",
         note: this.plan.note || "",
-        startWishId: this.plan.start.sourceWishId || "",
-        startDirect: this.plan.start.sourceWishId
+        startWishId: this.plan.start?.sourceWishId || "",
+        startDirect: this.plan.start?.sourceWishId
           ? null
-          : { ...this.plan.start },
+          : this.plan.start
+            ? { ...this.plan.start }
+            : null,
         stopWishIds: this.plan.stops
           .map(stop => stop.sourceWishId)
           .filter(Boolean),
@@ -1695,8 +1667,8 @@ export default {
         status: this.plan.status,
         desiredYear: this.plan.desiredYear || "",
         note: this.plan.note || "",
-        startWishId: this.plan.start.sourceWishId || "",
-        startDirect: this.plan.start.sourceWishId
+        startWishId: this.plan.start?.sourceWishId || "",
+        startDirect: this.plan.start?.sourceWishId
           ? null
           : this.planLocationSignature(this.plan.start),
         stopWishIds: this.plan.stops
@@ -1740,7 +1712,7 @@ export default {
       this.visitDrafts = drafts
     },
     syncDirectionsPreferences() {
-      const points = this.plan ? buildPlanRoutePoints(this.plan) : []
+      const points = this.savedRouteReady ? buildPlanRoutePoints(this.plan) : []
       const planKey = JSON.stringify(
         points.map(point => [
           point.pointKey,
@@ -1765,12 +1737,14 @@ export default {
           accessToken: await this.token(),
           allowPartial: true,
         })
+        this.namedPlanDrafts = state.capabilities?.namedPlanDrafts === true
         this.wishes = state.wishes
         this.planStateAvailable = !state.planError
         this.planLoadError = state.planError
           ? formatMyAtlasPlanLoadError(state.planError)
           : ""
         if (this.planStateAvailable) this.plan = state.plans[0] || null
+        if (this.plan?.status === "draft") this.routeBuilderOpen = true
         this.wishDrafts = {}
         this.wishes.forEach(this.setWishDraft)
         this.emitRevision(state.revision)
@@ -2063,6 +2037,7 @@ export default {
           this.customLongitude = ""
           this.customLatitude = ""
         }
+        return outcome
       })
     },
     saveCustomWish() {
@@ -2125,6 +2100,7 @@ export default {
         )
     },
     planLocationInput(place) {
+      if (!place) return null
       return place.placeType === "custom"
         ? {
             customPlace: {
@@ -2212,7 +2188,11 @@ export default {
       }
       const value = {
         title: this.planForm.title,
-        status: this.planForm.status,
+        status: this.routeDraftReady
+          ? this.planForm.status === "archived"
+            ? "archived"
+            : "saved"
+          : "draft",
         desiredYear: this.planForm.desiredYear
           ? Number(this.planForm.desiredYear)
           : null,
@@ -2474,6 +2454,7 @@ export default {
       }
     },
     async copySharedTripLink() {
+      if (!this.savedRouteReady) return
       this.error = ""
       try {
         const url = buildSharedTripUrl(this.plan)

@@ -1,5 +1,12 @@
 <template>
-  <section class="my-atlas-map-shell" :aria-label="mapAriaLabel">
+  <section
+    class="my-atlas-map-shell"
+    :class="{
+      'is-placing': placementActive,
+      'is-dragging-placement': placementDragging,
+    }"
+    :aria-label="mapAriaLabel"
+  >
     <div
       ref="map"
       class="my-atlas-map"
@@ -12,13 +19,22 @@
       <strong>Map unavailable</strong>
       <span>Your selected destinations remain listed beside the map.</span>
     </div>
-    <div v-if="ready && yearLegend.length" class="my-atlas-year-legend">
+    <div
+      v-if="ready && !placementActive && yearLegend.length"
+      class="my-atlas-year-legend"
+    >
       <span v-for="item in yearLegend" :key="item.label">
         <i :style="{ backgroundColor: item.color }"></i>{{ item.label }}
       </span>
     </div>
     <div
-      v-if="ready && plannerActive && !navigatorActive && plannerHasEndpoints"
+      v-if="
+        ready &&
+        !placementActive &&
+        plannerActive &&
+        !navigatorActive &&
+        plannerHasEndpoints
+      "
       class="my-atlas-planner-map-status"
     >
       <strong>{{ plannerStatusTitle }}</strong>
@@ -37,16 +53,42 @@
         >
       </span>
     </div>
-    <div
-      v-if="ready && placementActive"
-      class="my-atlas-placement-help"
-      role="status"
-    >
-      <strong>Place your custom pin</strong>
+    <div v-if="placementActive" class="my-atlas-placement-help" role="status">
+      <strong>{{
+        placementCoordinates ? "Review this spot" : "Choose a spot on the map"
+      }}</strong>
       <span v-if="placementCoordinates">
-        Drag the gold pin to refine its position.
+        Drag the gold pin to adjust it, then confirm beside the pin.
       </span>
       <span v-else>Click or tap the map to choose its position.</span>
+      <button
+        v-if="placementReview"
+        type="button"
+        @click="$emit('cancel-placement')"
+      >
+        Back to destination
+      </button>
+    </div>
+    <div
+      v-if="ready && placementReview && placementCoordinates && placementScreen"
+      class="my-atlas-placement-confirm"
+      :style="placementScreen"
+      @click.stop
+      @pointerdown.stop
+    >
+      <strong>{{ placementName || "New destination" }}</strong>
+      <span>Is this the correct spot?</span>
+      <div>
+        <button type="button" @click="$emit('cancel-placement')">
+          No, go back</button
+        ><button
+          type="button"
+          class="placement-yes"
+          @click="$emit('confirm-placement')"
+        >
+          Yes, use this spot
+        </button>
+      </div>
     </div>
     <slot name="navigator" />
   </section>
@@ -143,6 +185,8 @@ export default {
       type: Boolean,
       default: false,
     },
+    placementReview: Boolean,
+    placementName: { type: String, default: "" },
     placementCoordinates: {
       type: Array,
       default: null,
@@ -160,11 +204,14 @@ export default {
       default: false,
     },
   },
+  emits: ["select", "place-custom", "confirm-placement", "cancel-placement"],
   data() {
     return {
       map: null,
       markers: [],
       placementMarker: null,
+      placementDragging: false,
+      placementScreen: null,
       flightMarker: null,
       flightFrame: null,
       flightStartTimer: null,
@@ -274,6 +321,7 @@ export default {
       }
     },
     placementActive() {
+      if (this.placementActive) this.stopFlight()
       this.syncPlacementMarker()
     },
     placementCoordinates: {
@@ -352,9 +400,13 @@ export default {
           this.renderMarkers()
           this.syncPlacementMarker()
           this.showCurrentOverview()
-          if (this.focusedLocation) this.focusLocation(this.focusedLocation)
+          if (this.placementActive) this.focusPlacement()
+          else if (this.focusedLocation)
+            this.focusLocation(this.focusedLocation)
         })
         this.map.on("click", this.handlePlacementClick)
+        this.map.on("move", this.positionPlacementReview)
+        this.map.on("resize", this.positionPlacementReview)
         this.map.on("moveend", this.renderMarkers)
         this.map.on("error", event => {
           if (!this.ready) this.error = event?.error?.message || "Map failed"
@@ -391,6 +443,38 @@ export default {
     removePlacementMarker() {
       if (this.placementMarker) this.placementMarker.remove()
       this.placementMarker = null
+      this.placementDragging = false
+      this.placementScreen = null
+    },
+    positionPlacementReview() {
+      if (!this.map || !this.placementActive || !this.placementCoordinates) {
+        this.placementScreen = null
+        return
+      }
+      const point = this.map.project(this.placementCoordinates)
+      const container = this.map.getContainer()
+      const width = Math.min(300, container.clientWidth - 24)
+      const left = Math.max(
+        12,
+        Math.min(container.clientWidth - width - 12, point.x - width / 2)
+      )
+      // Keep the card beside the pin and inside short mobile viewports.
+      const height =
+        this.$el.querySelector(".my-atlas-placement-confirm")?.offsetHeight ||
+        132
+      const top = point.y > height + 110 ? point.y - height - 42 : point.y + 18
+      this.placementScreen = {
+        width: width + "px",
+        left: left + "px",
+        top:
+          Math.max(12, Math.min(container.clientHeight - height - 28, top)) +
+          "px",
+      }
+    },
+    focusReview() {
+      this.$el
+        .querySelector(".my-atlas-placement-help button")
+        ?.focus({ preventScroll: true })
     },
     focusPlacement() {
       const coordinates = this.normalizedPlacementCoordinates(
@@ -401,6 +485,9 @@ export default {
           center: coordinates,
           zoom: Math.max(this.map.getZoom(), 10),
           duration: 400,
+          offset: this.placementReview
+            ? [0, Math.min(90, this.map.getContainer().clientHeight * 0.14)]
+            : [0, 0],
         })
     },
     syncPlacementMarker() {
@@ -417,6 +504,7 @@ export default {
       }
       if (this.placementMarker) {
         this.placementMarker.setLngLat(coordinates)
+        this.positionPlacementReview()
         return
       }
 
@@ -465,12 +553,17 @@ export default {
       })
         .setLngLat(coordinates)
         .addTo(this.map)
+      this.placementMarker.on("dragstart", () => {
+        this.placementDragging = true
+      })
       this.placementMarker.on("dragend", () => {
+        this.placementDragging = false
         const coordinate = this.placementMarker?.getLngLat()
         if (coordinate) {
           this.emitPlacementCoordinates([coordinate.wrap().lng, coordinate.lat])
         }
       })
+      this.positionPlacementReview()
     },
     collapseInitialAttribution() {
       if (this.attributionCollapsedInitially) return
@@ -1222,13 +1315,24 @@ export default {
   background: #f08a72;
 }
 
+.is-placing ::v-deep .my-atlas-pin,
+.is-placing ::v-deep .my-atlas-plan-pin {
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.is-dragging-placement .my-atlas-placement-help,
+.is-dragging-placement .my-atlas-placement-confirm {
+  pointer-events: none;
+}
+
 .my-atlas-placement-help {
   position: absolute;
   z-index: 3;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   display: grid;
-  max-width: min(19rem, calc(100% - 2rem));
+  max-width: min(19rem, calc(100% - 5rem));
   gap: 0.2rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid rgba(var(--color-accent-rgb, 242, 199, 110), 0.55);
@@ -1237,6 +1341,50 @@ export default {
   background: rgba(var(--color-page-rgb, 8, 17, 19), 0.92);
   box-shadow: 0 0.8rem 2rem rgba(0, 0, 0, 0.32);
   font-size: 0.68rem;
+}
+
+.my-atlas-placement-help button,
+.my-atlas-placement-confirm button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-accent, #e6ba68);
+  border-radius: 8px;
+  color: var(--color-accent-soft, #e6ba68);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+.my-atlas-placement-confirm {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid var(--color-accent, #e6ba68);
+  border-radius: 12px;
+  background: var(--color-page, #081113);
+  color: var(--color-text, #edf7f2);
+  box-shadow: 0 8px 30px #0006;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+.my-atlas-placement-confirm > div {
+  display: flex;
+  gap: 8px;
+}
+.my-atlas-placement-confirm button {
+  flex: 1;
+}
+.my-atlas-placement-confirm .placement-yes {
+  background: var(--color-accent, #e6ba68);
+  color: var(--color-on-accent, #112124);
+  font-weight: 600;
+}
+.my-atlas-placement-confirm button:focus-visible,
+.my-atlas-placement-help button:focus-visible {
+  outline: 2px solid var(--color-focus, #fff);
+  outline-offset: 2px;
 }
 
 .my-atlas-placement-help strong {

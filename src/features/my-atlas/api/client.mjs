@@ -957,6 +957,9 @@ async function fetchMyAtlasPlanningSnapshot({
     })
   }
   return Object.freeze({
+    capabilities: Object.freeze({
+      namedPlanDrafts: payload.capabilities?.namedPlanDrafts === true,
+    }),
     revision: validatedPlanningRevision(response),
     wishes: Object.freeze(
       payload.wishes.map(wish => Object.freeze({ ...wish }))
@@ -1079,6 +1082,7 @@ export async function saveMyAtlasPlan({
   planId = "",
   value,
   revision,
+  idempotencyKey = newIdempotencyKey(),
   fetchImpl = fetch,
 }) {
   const { response, payload } = await authenticatedJsonRequest({
@@ -1090,7 +1094,7 @@ export async function saveMyAtlasPlan({
     method: planId ? "PATCH" : "POST",
     body: value,
     revision,
-    idempotencyKey: newIdempotencyKey(),
+    idempotencyKey,
     fetchImpl,
   })
   const savedRevision = validatedPlanningRevision(response)
