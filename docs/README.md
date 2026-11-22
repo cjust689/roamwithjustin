@@ -91,11 +91,22 @@ navigator, and marker containment corrections. The owner subsequently authorized
 testing, fixes and promotion. Script and browser verification are recorded in
 the active implementation checklist; deployment is tracked in the release handoff.
 
-Current local follow-up: touch-specific map help and collapsible public-profile
+Released follow-up: touch-specific map help and collapsible public-profile
 overviews with read-only in-map stop/trip navigation. Public trip grouping uses
 a new limited API projection. Worker version
-`9761acee-97a3-4cf1-b3e8-5e1ca3ff5232` is deployed; the owner authorized the
-develop/main frontend promotion.
+`9761acee-97a3-4cf1-b3e8-5e1ca3ff5232` is deployed. PRs 235 and 236 promoted
+the frontend through develop/main; Pages run 44962250911 succeeded.
+
+Layout follow-up: full-width mobile bottom restore bars for owner/public
+views and provider information moved beside the upper map controls. This is
+separate from the reported saved-Atlas loading incident, which remains open.
+
+Profile-photo follow-up: uploaded My Atlas photos suppress right-click
+saving and dragging in the owner preview, public profile/full-image dialog and
+Explore cards. Other site and Viator images retain their browser behavior.
+[Favorite travel image implementation](implementation/my-atlas-favorite-travel-image.md#profile-photo-interactions-november-21)
+records verification and limitations. The owner authorized develop/main promotion
+on November 21; release tracking is recorded in the implementation checklist.
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
