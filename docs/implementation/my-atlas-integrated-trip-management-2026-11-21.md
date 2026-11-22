@@ -647,3 +647,32 @@ passed. This bounded CSS fix accompanies the release alignment/handoff PR.
 - [x] Prepare the owner-authorized develop/main release. Protected checks,
       Pages deployment and post-deployment browser acceptance are recorded in
       its release PRs. No Worker deployment or data migration is required.
+
+### Profile modal separation, November 22, local
+
+- [x] Replace the profile dropdown with the shared native modal, using an opaque
+      profile surface and dimmed/blurred backdrop above the map/sidebar. Retain
+      one Close action, internal scrolling and a pinned status/error area.
+- [x] Remove obsolete dropdown positioning, height calculations, click-away
+      listener and transition rules. Preserve nonmodal account-load recovery.
+- [x] Preserve Explore settings, profile links, export and guarded deletion,
+      pending-save protection, local drafts and Customize navigation.
+- [x] Chrome passed 16 both-theme, 320 by 568, 390 by 844, 568 by 320 and
+      1440 by 900 combinations with motion enabled/reduced: one top-layer modal,
+      opaque resting surface, blocked background, contained focus, reachable
+      long forms, pending Escape/backdrop guards, visible status, restored focus
+      and scroll lock, unchanged map/revision and retained Instagram draft.
+      Info help remained a popover within one modal; account-load errors and
+      inline Retry remained available. Customize left the modal cleanly.
+      Evidence: `.state/theme/profile-modal-browser.json`, captures and
+      `.state/my-atlas/profile-modal-browser.mjs`.
+- [x] Owner test harnesses include the shared modal dependency. Retire the old
+      test's exact dropdown-position CSS assertion; behavior is checked in Chrome.
+- [x] Final production build passed with hash `cf3645564797d972`, all script
+      suites and 61 isolated Worker runtime tests, using the established local
+      parallel-false override. Evidence: `.state/theme/profile-modal-build.log`.
+- [x] Focused ESLint, whitespace validation and managed documentation audit
+      passed, retaining the 12 existing unverified-document warnings.
+- [x] Prepare the owner-authorized develop/main release. Protected checks,
+      Pages deployment and post-deployment browser acceptance are recorded in
+      the release PRs. No API or Worker deployment is required.

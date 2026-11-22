@@ -1133,7 +1133,7 @@ until the next frontend promotion; no account API or permission change is added.
 | --- | --- |
 | Overview | Travel statistics, journey navigation, Share Your Atlas |
 | Share Your Atlas | Direct trip-sharing guidance and Story image creation |
-| Profile dropdown | Explore profile visibility, profile link, settings, data export, account deletion |
+| Profile dialog | Explore profile visibility, profile link, settings, data export, account deletion |
 | Customize My Atlas | Favorite travel image, image location, public image presentation |
 | Explore Atlases | Discover other users' publicly shared Atlases |
 
@@ -1146,13 +1146,13 @@ editor. This is now the single profile visibility control in the current UI.
 Journey controls navigate to the existing Past/Planning tabs without fetching
 or inventing journey records just to populate the summary.
 
-The dropdown opens from the existing profile icon beside the theme selector.
+The profile dialog opens from the existing profile icon beside the theme selector.
 It includes Instagram links, private JSON data export, the existing guarded
 account deletion flow, public-link display, Explore listing and Explore navigation. Image and
-account deletion retain their existing safeguards. The dropdown closes through
-its Close button, Escape or an outside click; Escape/Close restore trigger focus.
-Its available-height calculation and internal scrolling keep long expanded
-settings reachable on mobile. Customize navigation closes the dropdown, opens
+account deletion retain their existing safeguards. The native modal closes through
+its Close button, Escape or backdrop click when no save is pending. Close restores
+trigger focus. Its viewport height cap and internal scrolling keep long expanded
+settings reachable on mobile. Customize navigation closes the dialog, opens
 Overview's disclosure and focuses its summary. Draft values stay on the owner
 component; moving the controls does not save them automatically.
 
@@ -1435,3 +1435,26 @@ not revoked by either profile preference; UI help and the tutorial explain this.
 Favorite-image public use stays a separate explicit permission. The existing API
 already accepts both flags atomically. No Worker, storage schema, directory
 ranking or public projection changes accompany this UI update.
+
+### Profile modal separation, November 22, local
+
+`MyAtlasGeographicProof.vue` renders Profile settings inside the existing
+`MyAtlasDialog.vue`, with a profile-specific 480 pixel width cap. Native
+`showModal()` places it in the browser's top layer, independently of sidebar
+stacking and clipping. The surface is opaque; the shared backdrop dims/blurs
+the map and blocks its controls. The header/close action and operation status
+remain outside the scrolling settings body.
+
+The old absolute-positioned account menu, viewport-height calculation, global
+outside-click listener and dropdown animation are removed. Nonmodal session and
+account-load errors retain the inline account card and Retry action while the
+profile dialog is closed. The dialog itself retains those recovery actions and
+shows errors/status in its pinned status area. Existing native focus trapping,
+scroll locking, reduced-motion animations, backdrop/Escape handling and
+pending-save close guards are reused.
+
+Drafts stay in the owner component. Customize closes Profile settings before
+focusing the existing Overview disclosure. Info help uses a popover within the
+single dialog; no nested modal is introduced. The map and account revision are
+unchanged by opening/closing. Profile publication and account API contracts are
+not changed by this presentation correction.
