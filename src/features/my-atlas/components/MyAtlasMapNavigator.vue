@@ -204,7 +204,10 @@ select:focus-visible {
 .navigator-open {
   display: flex;
   width: 100%;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  line-height: 1.25;
   border: 0;
   border-radius: 0;
   padding: 12px 16px;

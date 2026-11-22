@@ -152,6 +152,12 @@ through [develop PR 241](https://github.com/cjust689/roamwithjustin/pull/241).
 tracks protected-branch release status; the integrated trip implementation
 handoff links the checks and Pages workflow.
 
+Explore alignment follow-up: the in-map Explore opener explicitly centers its text
+and arrow vertically, with a consistent line height and retained 44 pixel target.
+Owner and public layouts were checked in both themes with menus open and hidden.
+The owner authorized develop/main promotion; protected checks, Pages status and
+post-deployment acceptance are recorded in the release PRs.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;
