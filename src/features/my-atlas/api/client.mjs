@@ -820,6 +820,7 @@ export async function updateMyAtlasDiscovery({
   apiBaseUrl,
   accessToken,
   discoverable,
+  public: publish,
   revision,
   fetchImpl = fetch,
 }) {
@@ -828,14 +829,18 @@ export async function updateMyAtlasDiscovery({
     accessToken,
     path: "/v1/me",
     method: "PATCH",
-    body: { discoverable },
+    body: {
+      discoverable,
+      ...(typeof publish === "boolean" ? { public: publish } : {}),
+    },
     revision,
     idempotencyKey: newIdempotencyKey(),
     fetchImpl,
   })
   if (
     typeof payload.profile?.handle !== "string" ||
-    payload.profile.discoverable !== discoverable
+    payload.profile.discoverable !== discoverable ||
+    (typeof publish === "boolean" && payload.profile.public !== publish)
   ) {
     throw new MyAtlasApiError("The discovery response is invalid.", {
       status: response.status,

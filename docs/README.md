@@ -158,6 +158,16 @@ Owner and public layouts were checked in both themes with menus open and hidden.
 The owner authorized develop/main promotion; protected checks, Pages status and
 post-deployment acceptance are recorded in the release PRs.
 
+Sharing follow-up: List my profile in Explore Atlases in Profile settings
+is the single profile visibility control. On publishes and lists the profile;
+off removes the listing and makes it private in one atomic save. Overview retains
+direct-trip guidance and Story export without a separate public-profile control.
+Customize My Atlas retains the favorite-image editor; direct trip links remain
+independent. Existing unlisted profiles are not advertised automatically.
+The owner authorized develop/main promotion. The integrated trip implementation
+record tracks verification, and the release PRs record protected checks,
+deployment and post-deployment browser acceptance.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;

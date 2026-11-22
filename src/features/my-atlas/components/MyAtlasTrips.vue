@@ -127,13 +127,14 @@
             :disabled="busy"
             :pending="pendingAction === 'sharing'"
             @input="mutate('sharing', { publicAtlas: $event }, selected.tripId)"
-            >Public Atlas</MyAtlasSwitch
+            >Include on my profile</MyAtlasSwitch
           >
-          <MyAtlasInfo label="About public trip visibility"
-            >Show this trip's name, Planned or Past status, and destinations
-            when your Atlas is public. Private notes, experiences, flights and
-            rentals stay private. Read only trip links are shared
-            separately.</MyAtlasInfo
+          <MyAtlasInfo label="About including trips on your profile"
+            >Include this trip's name, Planned or Past status, and destinations
+            when your profile is shared in Explore Atlases. Private notes,
+            experiences, flights and rentals stay private. Direct read only trip
+            links are shared separately and work while your profile is
+            private.</MyAtlasInfo
           >
         </div>
         <div class="trip-action-row">
@@ -187,7 +188,9 @@
           <MyAtlasInfo label="About shared trip links"
             >Shared links include this trip's name, status and ordered
             destinations. Private memories, experiences and logistics stay
-            private.</MyAtlasInfo
+            private. These links work while your profile is private and do not
+            list your profile in Explore Atlases. Previously copied links keep
+            their saved trip snapshot.</MyAtlasInfo
           >
         </div>
         <div class="trip-itinerary-heading">
