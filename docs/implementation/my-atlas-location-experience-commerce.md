@@ -393,3 +393,25 @@ place ID need manual pin placement; no paid geocoder or HTML scraping was added.
 Implementation references: [Google Maps URLs](https://developers.google.com/maps/documentation/urls/get-started),
 [Apple unified Maps URLs](https://developer.apple.com/documentation/mapkit/unified-map-urls),
 and [Google Open Location Code](https://github.com/google/open-location-code).
+
+### Follow-up, name-first planning and visible map confirmation
+
+Both canonical and legacy trip editors now use
+`src/features/my-atlas/components/MyAtlasDestinationPicker.vue`, backed by the
+same local parsing/security contracts. Search and pasted location formats share
+one input, with clear found, review, confirmed and ready-to-add states. Custom
+locations require a name and explicit map review. Results retain catalog IDs;
+selecting a result previews it before final Add. Request sequence guards reject
+late search/link responses and input edits invalidate old confirmations.
+
+The owner view collapses the menu and suspends native dialogs during review.
+The existing MapTiler instance shows the pin and adjacent Yes/No actions. Map
+interaction stages coordinates, then returns to the original editor; final Add
+persists the destination. This replaces the obscured map transition in trip
+entry. Legacy visited/custom-pin editors retain their shared location parser
+and also benefit from the visible map-review surface.
+
+Name persistence, capability gating, final verification and release tracking
+are in the [active integrated trip checklist](my-atlas-integrated-trip-management-2026-11-21.md).
+Provider-only IDs and unresolvable postal/place text still need a nearby catalog
+match or a manually chosen pin; no general external geocoder was added.

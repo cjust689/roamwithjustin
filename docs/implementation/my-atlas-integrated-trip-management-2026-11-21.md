@@ -13,6 +13,12 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/components/MyAtlasDestinationPicker.vue
+  - src/features/my-atlas/catalog/destinationDraft.mjs
+  - scripts/test-my-atlas-destination-entry.mjs
+  - workers/my-atlas/src/planning/contracts.mjs
+  - workers/my-atlas/src/planning/service.mjs
+  - workers/my-atlas/test/planning.test.mjs
   - src/components/ThemeSelector.vue
   - src/features/my-atlas/styles/interactions.css
   - src/features/my-atlas/components/MyAtlasMap.vue
@@ -853,3 +859,58 @@ visibility setting is preserved rather than restoring the concept's older toggle
 - [x] Prepare the explicitly requested develop/main release. Release PRs record
       protected checks, Pages deployment and live browser acceptance. No Worker
       deployment or account data changes are needed.
+
+### Save the name before planning and confirm locations on the map, November 22
+
+- [x] Save a canonical trip with only its name before opening destination entry.
+      Retain a failed name and retry attempt; remove the old multi-stop unsaved
+      create draft. Keep capability gating and explicit final destination Add.
+- [x] Support the same named-first sequence in the legacy planner without
+      migrating accounts. Add optional `namedPlanDrafts`, nullable start and zero
+      stops for private draft plans, stable creation retry keys and explicit
+      endpoint/stop progress saves. Keep complete saved/archived route validation.
+- [x] Replace both trip editors' split search/manual panels with one location
+      input, preview, clear state guidance, conditional custom name and bounded
+      search results. Keep catalog identity, secured short-link resolution and
+      nearby-city recovery for short Plus Codes.
+- [x] Collapse the menu and suspend blocking native dialogs for map review.
+      Stage clicks/drags, show a named pin with adjacent Yes/No, restore the
+      originating form on either action and save only on the final Add/Set.
+      Keep one map instance and an escape path when the map is unavailable.
+- [x] Focused component scripts passed name-first failure/retry, confirmed
+      creation before destinations, preserved query/name on Yes/No, explicit
+      final Add, null catalog coordinates and stale search/link results.
+      The isolated planning runtime suite passed all 11 tests, including named
+      draft reload, idempotent replay, partial endpoints and completion of the
+      same plan. Evidence: `.state/my-atlas/named-draft-runtime.log`.
+- [x] Clean local Chrome passed eight canonical cases across both themes at
+      320, 390, 568 landscape and 1440 pixels, plus four legacy cases at the same
+      widths. Name creation precedes entry; map review hides the menu/dialog,
+      retains the map, contains its pin card and returns the draft on Yes/No.
+      Explicit Add is the only destination write in the synthetic flow. Real
+      catalog lookup, drop/cancel and unavailable-map escape passed. Actual mouse
+      clicks, marker drags and phone touch drags passed, including release over
+      the confirmation card, with coordinates staged until confirmation. No
+      account writes. Evidence: `.state/theme/location-flow-browser.json`,
+      `.state/theme/location-map-pointer.json`, `.state/theme/location-map-touch.json`
+      and `.state/my-atlas/location-flow-browser.mjs`.
+- [x] Final `npm run build` passed all script suites and 63 isolated Worker
+      runtime tests, hash `381e5c81b37d9b4c`, with the established local
+      parallel-false override and existing bundle-size warnings. Focused ESLint
+      passed. Evidence: `.state/theme/location-flow-build.log`. The final HTTP
+      capability projection is additionally checked from the authenticated
+      Worker handler through the real client in
+      `node scripts/test-my-atlas-worker.mjs`, which passed. Compatible
+      `npm run my-atlas:worker:check:staging` passed in
+      `.state/theme/location-flow-worker-dryrun.log`.
+- [x] Deploy compatible Worker `f7d5a418-420f-4cc9-8501-f6cc4bd14ea4`.
+      Nine remote health/authentication/CORS checks passed without account
+      writes. Evidence: `.state/theme/location-flow-worker-deploy.log` and
+      `.state/my-atlas/location-worker-deployed.json`. Authenticated behavior
+      remains covered by isolated runtime tests rather than real-account writes.
+- [x] Prepare tested source for the owner's authorized develop/main promotion.
+      [Release PR 256](https://github.com/cjust689/roamwithjustin/pull/256)
+      records protected checks, main promotion, Pages and final live synthetic
+      UI acceptance, distinguishing those from real-owner acceptance below.
+- [ ] Genuine owner acceptance with a real saved trip remains separate from
+      synthetic browser and isolated-backend verification.

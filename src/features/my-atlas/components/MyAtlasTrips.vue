@@ -272,6 +272,7 @@
     </button>
     <MyAtlasDialog
       v-if="workspace"
+      ref="workspaceDialog"
       :class="{
         'trip-visit-dialog': workspace === 'visit' || workspace === 'remove',
       }"
@@ -482,192 +483,31 @@
               status later.</small
             >
           </div>
-          <div class="trip-create-destination">
-            <strong>First destination</strong>
-            <p>
-              {{
-                capabilities.emptyTripDrafts
-                  ? "Optional. You can add stops later."
-                  : "Add a first destination to create this trip."
-              }}
-            </p>
-            <button type="button" @click="workspaceTab = 'destinations'">
-              + Add destination
-            </button>
-          </div>
-          <ol>
-            <li v-for="(stop, index) in draftStops" :key="index">
-              {{ stop.name }}
-              <button type="button" @click="draftStops.splice(index, 1)">
-                Remove
-              </button>
-            </li>
-          </ol>
+          <p v-if="!capabilities.emptyTripDrafts">
+            This server needs an update before a trip can be created with just
+            its name.
+          </p>
           <button
             type="button"
             :disabled="!canCreateTrip"
             :aria-busy="String(pendingAction === 'create')"
-            @click="
-              mutate('create', {
-                title: draftTitle,
-                lifecycle: draftLifecycle,
-                stops: draftStops.map(stop => stop.selection),
-              })
-            "
+            @click="createNamedTrip"
           >
             Create trip
           </button>
         </div>
-        <div
-          v-if="workspace === 'create' || workspace === 'add'"
-          v-show="workspace !== 'create' || workspaceTab === 'destinations'"
-          class="trip-form"
-        >
-          <div class="trip-itinerary-heading">
-            <strong>Choose a destination</strong
-            ><MyAtlasInfo label="How destination entry works"
-              >Click a search result to add it directly to your trip draft and
-              fill the preview below. You do not need to complete the manual
-              fields. Manual entry is an alternative for places you cannot find;
-              enter a name and paste a map link, Plus Code or coordinate pair,
-              then choose Add custom stop.</MyAtlasInfo
-            >
-          </div>
-          <div v-show="destinationEntryMode === 'search'" class="trip-form">
-            <label
-              >Find a destination<input
-                ref="search"
-                v-model="query"
-                autocomplete="off"
-                @input="queueSearch"
-            /></label>
-            <p v-if="searchPending" role="status">Searching places</p>
-            <p v-if="searchError" role="alert">{{ searchError }}</p>
-            <ul
-              v-if="searchResults.length"
-              class="trip-search-results"
-              aria-label="Destination search results"
-              tabindex="0"
-            >
-              <li v-for="place in searchResults" :key="place.placeId">
-                <button
-                  class="trip-search-result"
-                  type="button"
-                  :disabled="busy || (creating && draftStops.length >= 50)"
-                  :data-added="draftPlaceCount(place.placeId) > 0"
-                  @click="selectSearchResult(place)"
-                >
-                  <span class="trip-result-heading"
-                    ><strong>{{ place.name }}</strong
-                    ><span class="trip-result-action">{{
-                      draftPlaceCount(place.placeId)
-                        ? `${draftPlaceCount(place.placeId)} added · Add another visit`
-                        : "Add to trip"
-                    }}</span></span
-                  >
-                  <span class="trip-result-location">{{
-                    resultLocation(place)
-                  }}</span>
-                  <small>{{ resultDescription(place) }}</small>
-                </button>
-              </li>
-            </ul>
-          </div>
-          <section
-            v-if="creating && draftStops.length"
-            class="trip-draft-selection"
-            aria-label="Destinations in this trip draft"
-          >
-            <div class="trip-itinerary-heading">
-              <strong>In this trip ({{ draftStops.length }})</strong
-              ><button type="button" @click="workspaceTab = 'details'">
-                Review trip details
-              </button>
-            </div>
-            <ol>
-              <li v-for="(stop, index) in draftStops" :key="index">
-                <span
-                  ><strong>{{ stop.name }}</strong
-                  ><small v-if="stop.context">{{ stop.context }}</small></span
-                ><button
-                  type="button"
-                  :aria-label="`Remove ${stop.name} from this draft`"
-                  @click="draftStops.splice(index, 1)"
-                >
-                  Remove
-                </button>
-              </li>
-            </ol>
-          </section>
-          <section
-            v-if="
-              destinationEntryMode === 'search' &&
-              selectedSearchPlace &&
-              (!creating || draftPlaceCount(selectedSearchPlace.placeId) > 0)
-            "
-            class="trip-search-preview"
-            aria-label="Selected destination preview"
-          >
-            <strong>{{
-              creating ? "Added from search" : "Selected from search"
-            }}</strong>
-            <label
-              >Place name<input :value="selectedSearchPlace.name" readonly
-            /></label>
-            <small>{{ resultLocation(selectedSearchPlace) }}</small>
-            <small v-if="selectedSearchPlace.coordinates"
-              >{{ selectedSearchPlace.coordinates[1].toFixed(6) }},
-              {{ selectedSearchPlace.coordinates[0].toFixed(6) }}</small
-            >
-          </section>
-          <button
-            type="button"
-            :disabled="busy"
-            @click="
-              destinationEntryMode =
-                destinationEntryMode === 'search' ? 'manual' : 'search'
-            "
-          >
-            {{
-              destinationEntryMode === "search"
-                ? draftStops.length
-                  ? "Add another place manually"
-                  : "Enter a place manually instead"
-                : "Back to search"
-            }}
-          </button>
-          <section
-            v-show="destinationEntryMode === 'manual'"
-            class="trip-form"
-            aria-label="Optional manual destination entry"
-          >
-            <strong>Manual entry (optional)</strong>
-            <MyAtlasLocationPicker
-              :name="customName"
-              :latitude="latitude"
-              :longitude="longitude"
-              :pending="busy"
-              :resolve-link="resolveLink"
-              :allow-search="false"
-              @update:name="customName = $event"
-              @update:latitude="latitude = $event"
-              @update:longitude="longitude = $event"
-              @coordinates-change="syncPlacement"
-              @choose-map="beginPlacement"
-              @search="$refs.search.focus()"
-            />
-            <button
-              type="button"
-              :disabled="busy || !customPlace"
-              @click="choose({ customPlace }, customPlace.name)"
-            >
-              Add custom stop
-            </button>
-            <button v-if="placementActive" type="button" @click="stopPlacement">
-              Stop placing pin
-            </button>
-          </section>
-        </div>
+        <section v-if="workspace === 'add'" class="trip-form">
+          <p v-if="selected" class="trip-saved-context">
+            Adding to {{ selected.title }}. Your trip is already saved.
+          </p>
+          <MyAtlasDestinationPicker
+            v-model="destinationDraft"
+            :pending="busy"
+            :resolve-link="resolveLink"
+            @review="beginPlacement"
+            @choose="chooseDestination"
+          />
+        </section>
 
         <section
           v-if="workspace === 'metadata' && selected"
@@ -1176,8 +1016,8 @@ import MyAtlasDialog from "./MyAtlasDialog.vue"
 import MyAtlasInfo from "./MyAtlasInfo.vue"
 import MyAtlasSwitch from "./MyAtlasSwitch.vue"
 import MyAtlasExperiences from "./MyAtlasExperiences.vue"
-import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
-import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
+import MyAtlasDestinationPicker from "./MyAtlasDestinationPicker.vue"
+import { emptyDestinationDraft } from "../catalog/destinationDraft.mjs"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
 import MyAtlasVisitManager from "./MyAtlasVisitManager.vue"
 import MyAtlasTripDestinations from "./MyAtlasTripDestinations.vue"
@@ -1193,14 +1033,9 @@ import {
 } from "../planning/handoffs.mjs"
 import { getMyAtlasApiAccessToken } from "../auth/auth0"
 import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
-import {
-  normalizeMyAtlasCustomPlace,
-  normalizeMyAtlasCustomCoordinates,
-} from "../catalog/customPlace.mjs"
+import { normalizeMyAtlasCustomCoordinates } from "../catalog/customPlace.mjs"
 import { buildCanonicalTripMapRoute } from "../../../../shared/my-atlas-trips.mjs"
 import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
-import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
-import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 
 export default {
@@ -1210,7 +1045,7 @@ export default {
     MyAtlasInfo,
     MyAtlasSwitch,
     MyAtlasExperiences,
-    MyAtlasLocationPicker,
+    MyAtlasDestinationPicker,
     MyAtlasTravelSearch,
     MyAtlasVisitManager,
     MyAtlasTripDestinations,
@@ -1258,7 +1093,7 @@ export default {
     adding: false,
     draftTitle: "",
     draftLifecycle: "planned",
-    draftStops: [],
+    destinationDraft: emptyDestinationDraft(),
     combineIds: [],
     combineTitle: "",
     groupDestinations: [],
@@ -1289,17 +1124,6 @@ export default {
     savedSequence: 0,
     attempt: null,
     currentRevision: 0,
-    query: "",
-    destinationEntryMode: "search",
-    selectedSearchPlace: null,
-    results: [],
-    searchError: "",
-    searchPending: false,
-    searchTimer: null,
-    searchSequence: 0,
-    customName: "",
-    latitude: "",
-    longitude: "",
     placementActive: false,
   }),
   computed: {
@@ -1316,7 +1140,7 @@ export default {
       return (
         !this.busy &&
         Boolean(this.draftTitle.trim()) &&
-        (this.capabilities.emptyTripDrafts || this.draftStops.length > 0)
+        this.capabilities.emptyTripDrafts
       )
     },
     selectedDate() {
@@ -1342,11 +1166,6 @@ export default {
         ...places.get(pin.placeId),
         ...pin,
       }))
-    },
-    searchResults() {
-      return [
-        ...new Map(this.results.map(place => [place.placeId, place])).values(),
-      ]
     },
     editingStop() {
       return (
@@ -1385,16 +1204,6 @@ export default {
           ...(this.selected?.lifecycle === "past"
             ? [{ key: "existing", label: "Add existing" }]
             : []),
-        ]
-      if (this.workspace === "create")
-        return [
-          {
-            key: "details",
-            label: this.draftStops.length
-              ? `Trip details (${this.draftStops.length})`
-              : "Trip details",
-          },
-          { key: "destinations", label: "Destinations" },
         ]
       if (this.workspace === "travel")
         return [
@@ -1473,15 +1282,6 @@ export default {
     busy() {
       return this.pending || this.refreshNeeded || !this.writesEnabled
     },
-    customPlace() {
-      const values = [this.longitude, this.latitude]
-      return normalizeMyAtlasCustomPlace({
-        name: this.customName,
-        coordinates: values.every(value => String(value).trim() !== "")
-          ? values.map(Number)
-          : null,
-      })
-    },
   },
   watch: {
     selectedId(value) {
@@ -1505,67 +1305,34 @@ export default {
   // Vue 2 owns this lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
-    clearTimeout(this.searchTimer)
-    this.searchSequence++
     this.stopPlacement()
   },
   methods: {
+    async createNamedTrip() {
+      if (!this.canCreateTrip) return
+      const result = await this.mutate("create", {
+        title: this.draftTitle.trim(),
+        lifecycle: this.draftLifecycle,
+        stops: [],
+      })
+      if (!result?.trip) return
+      this.openWorkspace("add")
+      this.workspaceStatus = this.refreshNeeded
+        ? "Your trip was created. Refresh trips to continue adding destinations."
+        : "Your trip is saved. Add your first destination next."
+    },
+    chooseDestination(value) {
+      if (this.busy || !this.selected) return
+      return this.mutate("addStop", value.selection, this.selected.tripId)
+    },
     readCapabilities(state) {
       this.capabilities = {
         emptyTripDrafts: state.capabilities?.emptyTripDrafts === true,
         planningNotes: state.capabilities?.planningNotes === true,
       }
     },
-    selectSearchResult(place) {
-      if (this.busy || (this.creating && this.draftStops.length >= 50)) return
-      this.destinationEntryMode = "search"
-      this.selectedSearchPlace = {
-        ...place,
-        coordinates: Array.isArray(place.coordinates)
-          ? [...place.coordinates]
-          : null,
-      }
-      this.choose(
-        { placeId: place.placeId },
-        place.name,
-        this.resultLocation(place)
-      )
-    },
-    resultLocation(place) {
-      return [
-        ...new Set(
-          [
-            place.admin2Name,
-            place.admin1Name,
-            place.countryName || place.countryCode,
-          ].filter(Boolean)
-        ),
-      ].join(", ")
-    },
-    resultDescription(place) {
-      const coordinates = place.coordinates
-      return [
-        formatPlaceTypeLabel(place),
-        Array.isArray(coordinates) &&
-        coordinates.length === 2 &&
-        coordinates.every(Number.isFinite)
-          ? `${coordinates[1].toFixed(4)}, ${coordinates[0].toFixed(4)}`
-          : "",
-      ]
-        .filter(Boolean)
-        .join(" · ")
-    },
-    draftPlaceCount(id) {
-      return this.creating
-        ? this.draftStops.filter(stop => stop.selection.placeId === id).length
-        : 0
-    },
     openWorkspace(value) {
       if (this.pending) return
-      if (value === "create" || value === "add") {
-        this.destinationEntryMode = "search"
-        this.selectedSearchPlace = null
-      }
       this.workspaceStatus = ""
       this.workspace = value
       this.workspaceTab =
@@ -1576,7 +1343,10 @@ export default {
           visit: "memory",
           travel: "flights",
         }[value] || ""
-      if (value === "add") this.adding = true
+      if (value === "add") {
+        this.adding = true
+        this.destinationDraft = emptyDestinationDraft()
+      }
       if (value === "visit" && this.selected?.lifecycle === "planned")
         this.workspaceTab = "planning"
     },
@@ -1610,11 +1380,21 @@ export default {
         .querySelectorAll('[role="tab"]')
         [next].focus()
     },
-    resumePlacementEditor() {
+    resumePlacementEditor(confirmed = false) {
       const workspace = this.placementWorkspace
       this.placementWorkspace = ""
       this.stopPlacement()
       this.workspace = workspace
+      if (!confirmed)
+        this.workspaceStatus =
+          "Location not confirmed. Change the input or review the pin again."
+      this.$nextTick?.(() => {
+        if (
+          this._placementReturnFocus?.isConnected &&
+          this.$refs.workspaceDialog
+        )
+          this.$refs.workspaceDialog.returnFocus = this._placementReturnFocus
+      })
     },
     async prepareDestinationGroup(places) {
       this.openWorkspace("group")
@@ -1802,7 +1582,6 @@ export default {
       this.selectedId = ""
       this.draftTitle = ""
       this.draftLifecycle = this.scope === "past" ? "past" : "planned"
-      this.draftStops = []
       this.$emit("route-change", { active: false, route: [] })
     },
     async mutate(action, body, tripId, stopId) {
@@ -1917,6 +1696,7 @@ export default {
             "warning"
           )
         }
+        return result
       } catch (error) {
         if (
           error.code === "revision_conflict" ||
@@ -2090,63 +1870,19 @@ export default {
       )
         this.mutate("rollback", {})
     },
-    choose(selection, name, context = "") {
-      if (this.creating) {
-        if (this.draftStops.length >= 50) {
-          this.announce("A trip can have up to 50 destinations.", "warning")
-          return
-        }
-        this.draftStops.push({ selection, name, context })
-        this.announce(
-          `${name} added to this trip draft. Save the trip to keep it.`,
-          "draft"
-        )
-        this.stopPlacement()
-      } else if (this.selected)
-        this.mutate("addStop", selection, this.selected.tripId)
-    },
-    queueSearch() {
-      clearTimeout(this.searchTimer)
-      const sequence = ++this.searchSequence
-      this.results = []
-      this.searchError = ""
-      this.searchPending = false
-      if (this.query.trim().length < 4) return
-      this.searchPending = true
-      this.searchTimer = setTimeout(async () => {
-        try {
-          const result = await searchMyAtlasPlaces({
-            query: this.query,
-            endpoint: getMyAtlasPlaceSearchEndpoint(
-              process.env,
-              window.location.origin
-            ),
-          })
-          if (sequence === this.searchSequence)
-            this.results = result.places || result
-        } catch {
-          if (sequence === this.searchSequence)
-            this.searchError =
-              "Search is unavailable. You can still add a custom stop."
-        } finally {
-          if (sequence === this.searchSequence) this.searchPending = false
-        }
-      }, 300)
-    },
     syncPlacement() {
-      const values = [this.longitude, this.latitude]
       this.$emit("location-placement-change", {
         active: this.placementActive,
-        coordinates: values.every(value => String(value).trim() !== "")
-          ? normalizeMyAtlasCustomCoordinates(values.map(Number))
-          : null,
+        name: this._reviewCandidate?.name || this.destinationDraft.name,
+        coordinates: this._reviewCandidate?.coordinates || null,
       })
     },
-    beginPlacement() {
+    beginPlacement(candidate) {
+      this._placementReturnFocus = this.$refs.workspaceDialog?.returnFocus
+      this._reviewCandidate = candidate?.kind ? candidate : null
       this.placementWorkspace = this.workspace
       this.workspace = ""
       this.placementActive = true
-      if (!this.customName) this.customName = this.query
       this.syncPlacement()
     },
     stopPlacement() {
@@ -2155,105 +1891,31 @@ export default {
         active: false,
         coordinates: null,
       })
+      this._reviewCandidate = null
     },
     setCoordinates(value) {
       const coordinates = normalizeMyAtlasCustomCoordinates(value)
       if (!coordinates || !this.placementActive) return
-      this.longitude = String(coordinates[0])
-      this.latitude = String(coordinates[1])
+      const name =
+        this.destinationDraft.name || this._reviewCandidate?.name || ""
+      this.destinationDraft = {
+        ...this.destinationDraft,
+        name,
+        place: null,
+        coordinates: [...coordinates],
+        reviewed: true,
+      }
+      if (this._reviewCandidate)
+        this._reviewCandidate.coordinates = [...coordinates]
       this.syncPlacement()
-      if (this.placementWorkspace) this.resumePlacementEditor()
+      if (this.placementWorkspace) this.resumePlacementEditor(true)
+      this.workspaceStatus = ""
     },
   },
 }
 </script>
 
 <style scoped>
-.trip-search-preview {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.25);
-  border-radius: 10px;
-}
-.trip-search-preview small {
-  color: var(--color-text-muted, #adbcba);
-}
-.atlas-trips .trip-search-preview input[readonly] {
-  background: transparent;
-  border-color: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
-}
-.trip-search-results {
-  display: grid;
-  gap: 8px;
-  max-height: min(300px, 35dvh);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
-  list-style: none;
-  margin: 0;
-  padding: 2px 4px 2px 2px;
-}
-.atlas-trips .trip-search-result {
-  display: grid;
-  gap: 5px;
-  width: 100%;
-  min-height: 76px;
-  padding: 12px 14px;
-  text-align: left;
-  line-height: 1.5;
-  white-space: normal;
-}
-.trip-result-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-}
-.trip-result-action {
-  font-size: 0.68rem;
-}
-.trip-result-location,
-.trip-search-result small {
-  display: block;
-  color: var(--color-text-muted, #adbcba);
-  font-size: 0.73rem;
-}
-.trip-search-result strong {
-  font-size: 0.85rem;
-}
-.trip-search-result[data-added="true"] {
-  border-color: var(--color-accent, #e6ba68);
-  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.08);
-}
-.trip-draft-selection {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
-  border-radius: 10px;
-}
-.trip-draft-selection ol {
-  display: grid;
-  gap: 8px;
-  max-height: 160px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.trip-draft-selection li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.trip-draft-selection small {
-  display: block;
-  color: var(--color-text-muted, #adbcba);
-}
 .atlas-trips,
 .trip-form {
   display: grid;

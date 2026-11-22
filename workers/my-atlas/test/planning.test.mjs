@@ -1,4 +1,4 @@
-import { env } from "cloudflare:workers"
+﻿import { env } from "cloudflare:workers"
 import { reset, runInDurableObject } from "cloudflare:test"
 import { beforeEach, describe, expect, it } from "vitest"
 import { registerMyAtlasAccount } from "../../../src/features/my-atlas/api/client.mjs"
@@ -22,6 +22,7 @@ import {
   updateMyWish,
 } from "../src/planning/service.mjs"
 import { normalizeRegistrationInput } from "../src/registration/contracts.mjs"
+import { normalizeCreatePlan } from "../src/planning/contracts.mjs"
 import { hashInviteCode } from "../src/registration/hashing.mjs"
 import {
   REGISTRY_OBJECT_NAME,
@@ -179,6 +180,104 @@ beforeEach(async () => {
 })
 
 describe("private wishlist and trip planning", () => {
+  it("persists a named private draft before its route, then completes the same record", async () => {
+    const input = normalizeCreatePlan(
+      {
+        title: "Hiking trip",
+        status: "draft",
+        start: null,
+        stopWishIds: [],
+        endMode: "last-stop",
+      },
+      new Headers({
+        "If-Match": '"rev-1"',
+        "Idempotency-Key": "81818181-8181-4181-8181-818181818181",
+      }),
+      2026
+    )
+    const created = await createMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    expect(created.profile).toMatchObject({
+      revision: 2,
+      planCount: 1,
+      public: false,
+    })
+    expect(created.plan).toMatchObject({
+      title: "Hiking trip",
+      status: "draft",
+      start: null,
+      stops: [],
+      retentionState: "active",
+    })
+    const replay = await createMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input,
+      now: NOW,
+    })
+    expect(replay.plan.planId).toBe(created.plan.planId)
+    expect(replay.profile.revision).toBe(2)
+    const reloaded = await getMyPlanning({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(reloaded.capabilities.namedPlanDrafts).toBe(true)
+    expect(reloaded.plans).toEqual([created.plan])
+    const start = {
+      customPlace: { name: "Trail base", coordinates: [-109.5, 38.5] },
+    }
+    const partial = await replaceMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        ...input,
+        planId: created.plan.planId,
+        start,
+        expectedRevision: 2,
+        idempotencyKey: "82828282-8282-4282-8282-828282828282",
+      },
+      now: NOW,
+    })
+    expect(partial.plan.start.name).toBe("Trail base")
+    expect(partial.plan.stops).toEqual([])
+    const wish = await createCustomWish(1, 3)
+    const complete = await replaceMyPlan({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        ...input,
+        planId: created.plan.planId,
+        start,
+        status: "saved",
+        stopWishIds: [wish.wish.wishId],
+        expectedRevision: 4,
+        idempotencyKey: "83838383-8383-4383-8383-838383838383",
+      },
+      now: NOW,
+    })
+    expect(complete.plan.planId).toBe(created.plan.planId)
+    expect(complete.plan.status).toBe("saved")
+    expect(complete.plan.stops).toHaveLength(1)
+    expect(
+      (await listMyPlans({ environment: environment(), identity: IDENTITY }))
+        .plans
+    ).toEqual([complete.plan])
+    for (const status of ["saved", "archived"])
+      expect(() =>
+        normalizeCreatePlan(
+          { title: "Incomplete", status, start: null, stopWishIds: [] },
+          new Headers({
+            "If-Match": '"rev-5"',
+            "Idempotency-Key": "84848484-8484-4484-8484-848484848484",
+          }),
+          2026
+        )
+      ).toThrow()
+  })
   it("stores more than three ordered destinations without weakening snapshots", async () => {
     const wishes = []
     for (let index = 1; index <= 5; index += 1) {

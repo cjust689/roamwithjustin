@@ -1073,9 +1073,10 @@ function validStoredPlan(value) {
           value.desiredYear >= 2000 &&
           value.desiredYear <= 2200)) &&
       isNormalizedPinMemory(value.note) &&
-      validPlanSnapshot(value.start) &&
+      (validPlanSnapshot(value.start) ||
+        (value.status === "draft" && value.start === null)) &&
       Array.isArray(value.stops) &&
-      value.stops.length >= 1 &&
+      value.stops.length >= (value.status === "draft" ? 0 : 1) &&
       value.stops.length <= MAX_PLAN_DESTINATIONS &&
       value.stops.every(validPlanSnapshot) &&
       ["return-to-start", "last-stop", "selected-end"].includes(

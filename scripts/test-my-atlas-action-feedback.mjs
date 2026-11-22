@@ -1,3 +1,4 @@
+import { emptyDestinationDraft } from "../src/features/my-atlas/catalog/destinationDraft.mjs"
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import compiler from "vue-template-compiler"
@@ -25,11 +26,35 @@ const script = compiler
   .script.content.replace(/^import[\s\S]*?from\s+["'][^"']+["']\s*$/gm, "")
   .replace("export default", "return")
 let apiCalls = 0
+let rejectNamedPlan = true
+const namedPlanCalls = []
 const dependencies = {
+  saveMyAtlasPlan: async input => {
+    namedPlanCalls.push(structuredClone(input))
+    if (rejectNamedPlan) throw Object.assign(Error(), { code: "unavailable" })
+    return {
+      revision: 2 + namedPlanCalls.length,
+      plan: {
+        planId: "plan_" + "a".repeat(24),
+        ...input.value,
+        start: input.value.start?.placeId
+          ? {
+              placeId: input.value.start.placeId,
+              placeType: "city",
+              name: "Atlanta",
+              coordinates: [-84, 33],
+            }
+          : null,
+        stops: [],
+      },
+    }
+  },
   normalizeMyAtlasCustomPlaceName,
   normalizeMyAtlasCustomCoordinates,
   MyAtlasTravelSearch: {},
-  MyAtlasLocationPicker: {},
+  MyAtlasDestinationPicker: {},
+  MyAtlasDialog: {},
+  emptyDestinationDraft,
   MAX_PLAN_DESTINATIONS,
   formatMyAtlasPlannerError,
   formatMyAtlasPlannerRefreshError,
@@ -52,6 +77,7 @@ function fixture() {
   }))
   const context = {
     wishes,
+    destinationDraft: emptyDestinationDraft(),
     wishDrafts: {},
     plan: null,
     error: "",
@@ -66,7 +92,7 @@ function fixture() {
       endDirect: null,
       stopWishIds: [],
     },
-    $emit: (name, payload) => events.push({ name, ...payload }),
+    $emit: (name, payload) => events.push({ ...payload, name }),
   }
   for (const [name, method] of Object.entries(component.methods))
     context[name] = method.bind(context)
@@ -281,4 +307,49 @@ for (const tone of ["busy", "error", "warning"]) {
 }
 console.log(
   "My Atlas draft, repeated action, destination limit, mutation outcome and notification lifetime tests passed."
+)
+
+const namedPlan = fixture()
+Object.assign(namedPlan.context, {
+  namedPlanDrafts: true,
+  planStateAvailable: true,
+  createNameOpen: true,
+  destinationRole: "start",
+  customMapPlacementActive: false,
+})
+namedPlan.context.planForm.title = "Hiking trip"
+await namedPlan.context.createNamedPlan()
+assert.equal(namedPlan.context.createNameOpen, true)
+assert.equal(namedPlan.context.planForm.title, "Hiking trip")
+assert.equal(namedPlan.context.plan, null)
+rejectNamedPlan = false
+await namedPlan.context.createNamedPlan()
+assert.equal(namedPlan.context.createNameOpen, false)
+assert.equal(
+  namedPlanCalls[0].idempotencyKey,
+  namedPlanCalls[1].idempotencyKey,
+  "Retrying the same name reuses its creation key"
+)
+assert.equal(namedPlan.context.plan.start, null)
+assert.deepEqual(namedPlan.context.plan.stops, [])
+assert.equal(namedPlan.context.routeBuilderOpen, true)
+const createdCount = namedPlanCalls.length
+await namedPlan.context.createNamedPlan()
+assert.equal(
+  namedPlanCalls.length,
+  createdCount,
+  "Continuing a saved name must not create another plan"
+)
+await namedPlan.context.chooseDestination({
+  place: namedPlan.wishes[0],
+  selection: { placeId: namedPlan.wishes[0].placeId },
+})
+assert.equal(namedPlanCalls.at(-1).planId, namedPlan.context.plan.planId)
+assert.equal(namedPlanCalls.at(-1).value.status, "draft")
+assert.deepEqual(namedPlanCalls.at(-1).value.stopWishIds, [])
+assert.equal(namedPlan.context.plan.start.name, "Atlanta")
+assert.equal(namedPlan.context.destinationRole, "end")
+assert.equal(namedPlan.context.destinationDraft.query, "")
+console.log(
+  "Legacy named drafts retain failed names, prevent duplicate creation and save endpoint progress on the existing record."
 )

@@ -234,12 +234,16 @@ function normalizePlanBody(value, headers, currentYear) {
     )
   }
   const start =
-    value.start !== undefined
-      ? normalizePlanLocation(value.start, "Plan start")
-      : Object.freeze({ wishId: normalizeWishId(value.startWishId) })
+    status === "draft" &&
+    (value.start === null ||
+      (value.start === undefined && value.startWishId === undefined))
+      ? null
+      : value.start !== undefined
+        ? normalizePlanLocation(value.start, "Plan start")
+        : Object.freeze({ wishId: normalizeWishId(value.startWishId) })
   if (
     !Array.isArray(value.stopWishIds) ||
-    value.stopWishIds.length < 1 ||
+    value.stopWishIds.length < (status === "draft" ? 0 : 1) ||
     value.stopWishIds.length > MAX_PLAN_DESTINATIONS
   ) {
     throw new RegistrationValidationError(

@@ -1526,16 +1526,16 @@ are hidden while covered by the full menu. No extra map instance or illustrative
 map asset is introduced.
 
 Planning and Past have distinct list and selected-journey views, with a Back
-action. New trip takes its lifecycle from the current tab and requires a name;
-the first stop is optional when the server advertises support. Management and
+action. New trip takes its lifecycle from the current tab and saves a name
+before opening destination entry. Management and
 sharing stay in the existing native dialog. Overview journey cards open these
 views and do not duplicate editing or sharing controls.
 
 `GET /v1/me/trips` adds optional `capabilities.emptyTripDrafts` and
 `capabilities.planningNotes` booleans. Older responses omit them and remain valid.
-The UI treats absent/nonboolean capabilities as false: saving an empty trip
-requires a first destination on such servers, and planning-note saving is
-disabled with an explanation. Normal local startup continues using its configured
+The UI treats absent/nonboolean capabilities as false: name-first creation and
+planning-note saving are disabled with an explanation on unsupported servers.
+Normal local startup continues using its configured
 API and does not replace, clear or switch the account store.
 
 The collection POST accepts zero stops, storing an explicitly named private
@@ -1577,3 +1577,43 @@ map resize and restore-focus behavior are retained. Loading/unavailable profiles
 retain branding, Explore and theme controls without an unusable collapse action.
 Public data, favorite-image permissions, read-only navigation and API contracts
 are unchanged. The owner requested deployment through develop/main.
+
+### Saved names and explicit map review, November 22
+
+`MyAtlasTrips.vue` saves the named empty record through the existing collection
+POST before opening Add a stop. It retains the name on failed creation and the
+existing idempotency attempt on retry. Each destination is a separate explicit
+write. Empty drafts retain the existing private/public projection boundaries.
+
+For accounts still using `MyAtlasPlanner.vue`, `GET /v1/me/planning` advertises
+optional `capabilities.namedPlanDrafts`. Legacy plan POST/PATCH accepts a null
+start and zero stops only for `status: draft`. Saved and archived routes retain
+their start and minimum-one-stop validation. The same record progresses from
+its saved name through start, finish and destinations. Explicit Set/Add actions
+save route progress; complete routes become saved. Incomplete drafts have no
+share action or directions export. No account migration is performed.
+
+Both trip editors use `MyAtlasDestinationPicker.vue` and a parent-owned
+`destinationDraft.mjs` model. One input first parses coordinates, Maps URLs and
+Plus Codes, then searches the existing catalog for ordinary place text. Search
+selection shows a preview; Add persists it. Short links require explicit Find
+and the existing secured resolver. Short Plus Codes require a nearby catalog
+city. Camera centers and unresolved provider IDs require manual spot selection.
+No paid geocoder, postal-code service or HTML scraping was introduced.
+
+`MyAtlasGeographicProof.vue` owns a transient `locationReview` with its source,
+name and staged coordinates. It collapses the sidebar, hides conflicting map
+widgets and temporarily closes any native dialog without destroying its form.
+`MyAtlasMap.vue` keeps the existing SDK instance and shows a draggable pin with
+a projected, viewport-contained Yes/No card beside it. Map clicks and drags only
+change staged coordinates. Yes copies the position back to the original form;
+No returns without applying map changes. Neither persists a destination. The
+final Add/Set action does. Native-dialog focus and drafts are restored, and a
+Back action remains available when the map cannot load. Trip picker input stays
+in memory across this transition; it is not stored in browser persistence.
+
+Compatible Worker `f7d5a418-420f-4cc9-8501-f6cc4bd14ea4` is deployed. Nine
+remote health, unauthenticated-access and CORS checks passed without account
+writes. Isolated runtime tests cover authenticated persistence and reload.
+The authorized frontend promotion and post-deployment synthetic browser checks
+are recorded in [release PR 256](https://github.com/cjust689/roamwithjustin/pull/256).
