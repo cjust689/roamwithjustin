@@ -379,7 +379,8 @@ workflow above; private trip recaps do not publish operator records.
       `npm run docs:audit` passed for 76 managed documents with the existing 12
       warnings. Evidence: `.state/theme/location-input-build.log` and
       `.state/theme/location-input-worker-dryrun.log`.
-- [ ] Promote the frontend and compatible shared-parser Worker change when requested.
+- [x] Deploy the compatible Worker and include the frontend in develop PR 241;
+      protected main promotion is tracked by PR 242.
 
 External limitation: live Google/Apple short-link redirects remain unverified.
 The configured staging API, also used by production, now runs the compatible

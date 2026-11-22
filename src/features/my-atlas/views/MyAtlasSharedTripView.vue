@@ -417,6 +417,10 @@ export default {
 }
 
 @media (max-width: 720px) {
+  .shared-trip-map ::v-deep .my-atlas-planner-map-status {
+    top: calc(0.65rem + 70px);
+  }
+
   .shared-trip-page > header {
     top: 0.65rem;
     left: 0.65rem;
@@ -448,6 +452,22 @@ export default {
     width: auto;
     max-height: none;
     transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 500px) {
+  .shared-trip-map ::v-deep .my-atlas-planner-map-status > strong,
+  .shared-trip-map
+    ::v-deep
+    .my-atlas-planner-map-status
+    > span:not(.my-atlas-planner-map-key) {
+    display: none;
+  }
+
+  .shared-trip-map ::v-deep .my-atlas-planner-map-key {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 }
 
