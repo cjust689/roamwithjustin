@@ -788,3 +788,46 @@ visibility setting is preserved rather than restoring the concept's older toggle
       PRs record actual commits, check runs, Pages deployment and live evidence.
 - [ ] Complete genuine owner acceptance. No account-store switch or data
       migration was performed; no real account was changed during verification.
+
+### Direct destination reorder and compact editor, November 22
+
+- [x] Expose pointer/touch drag handles and keyboard arrow reordering in the main
+      selected journey's destination list. Keep destination names as editor
+      triggers. Use an info popover for instructions instead of another help row.
+- [x] Retain handles while pending/refresh/read-only states disable reordering.
+      Preserve full stop IDs and the existing revisioned reorder API, with no
+      optimistic persisted order or changes to memories and dates.
+- [x] Scroll the owner sidebar or dialog automatically at the drag edge. Remove
+      document listeners and cancel the scroll animation on release, cancellation,
+      disabled state and component destruction.
+- [x] Replace the six-tab destination toolbar with one labeled native section
+      picker. Open Past visits on Memory and Planned visits on Planning notes.
+      Retain Dates, Experiences and More actions in the same native dialog.
+- [x] Remove the redundant empty Recap/Add memory step and large planning-help
+      card. Keep context and explanations compact, retain draft values between
+      sections and use a single-column date form on narrow phones.
+- [x] Bound the visit dialog to 480 pixels and viewport space; keep its picker,
+      header and operation status outside the internally scrolling form.
+- [x] Script regressions cover direct editor defaults, section choices, retained
+      drafts, read-only/pending reorder guards and occurrence-safe payloads.
+      Command: `node scripts/test-my-atlas-trip-workspace.mjs`.
+- [x] Chrome passed 16 both-theme Planned/Past cases at 320 by 568, 390 by 844,
+      568 by 320 and 1440 by 900. All five editor sections stayed within the
+      dialog width, with zero tab buttons and retained memory/note drafts.
+      Main-list mouse/touch/keyboard reorder, cancellation, private sharing,
+      failed drafts and single-dialog removal passed. A held touch scrolled a
+      50-stop main list by 300 pixels and cancelled without saving or retaining
+      an animation frame. No account writes. Evidence:
+      `.state/theme/compact-destination-browser.json`,
+      `.state/theme/compact-destination-editor-390.png` and
+      `.state/my-atlas/compact-destination-browser.mjs`.
+- [x] Final `npm run build` passed all script suites and 62 isolated Worker
+      runtime tests with the established local parallel-false override, hash
+      `a34010065cd45b52`. Evidence: `.state/theme/compact-destination-build.log`.
+      Focused ESLint, whitespace checks and `npm run docs:audit` passed with the
+      existing 12 unverified-document warnings.
+- [x] Prepare develop/main promotion under the owner's standing instruction to
+      push completed changes. Release PRs record protected checks, Pages and live
+      browser acceptance. No Worker deployment or account migration is needed.
+- [ ] Complete genuine owner acceptance of the condensed editor and direct
+      destination handles.

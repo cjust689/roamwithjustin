@@ -1471,8 +1471,10 @@ destinations and a map action. Dates are never inferred from creation timestamps
 `MyAtlasTripDestinations.vue` shows region/country, an existing note excerpt and
 experience counts when available. It does not invent cover media or events.
 
-Opening a destination starts on a read-only Recap tab. Memory, Dates,
-Experiences and Actions remain tabs of the same native dialog. Actions contains
+Opening a destination uses a compact native section picker in the same dialog,
+with Memory for Past visits and Planning notes for Planned visits as defaults.
+Dates, Experiences and More actions remain available without a tab-button row.
+The redundant Recap/Add memory step is removed. More actions contains
 accessible earlier/later movement and permanent removal; removal replaces the
 dialog content with an explicit confirmation. Moving or ungrouping preserves the
 visit and uses the existing transfer API. No nested dialog is opened.
@@ -1485,12 +1487,15 @@ original pin references. Their existing visibility-matching rule still applies.
 Independent canonical visits use the existing transfer path. Neither destination
 addition nor this presentation change creates a journey implicitly.
 
-Management-only drag handles support pointer gestures and arrow keys. Drag order
+Main-list and management drag handles support pointer gestures and arrow keys. Drag order
 is a local preview until release, then emits the existing full stop-ID reorder
 payload. Repeated place visits remain distinct by stop ID. Cancellation, pending
 writes and failed requests do not mutate prop-owned order. Pointer listeners are
-removed on cancellation, release and destruction. Touch panning is disabled only
-on the handle; the dialog body remains scrollable. Explicit earlier/later buttons
+removed on cancellation, release and destruction. Edge scrolling uses the owner
+sidebar or dialog body and cancels its animation frame when the gesture ends.
+Handles remain in place but disable while saving or awaiting a refresh.
+Touch panning is disabled only on the handle; the dialog body remains scrollable.
+Explicit earlier/later buttons
 provide an alternative to dragging or arrow keys.
 
 Share journey opens a separate read-only explanation and Copy action with pinned
@@ -1541,7 +1546,7 @@ or share snapshot and remain excluded from public trip projections.
 Stop PATCH also accepts `planNote`, stored separately from `memories`. It accepts
 up to 2,000 UTF-16 units of normalized plain text, preserves line breaks and
 rejects markup, invisible formatting, invalid surrogates and control characters.
-Planned stops open on Notes; Past stops open on Recap. Notes survive lifecycle
+Planned stops open on Planning notes; Past stops open on Memory. Notes survive lifecycle
 changes, remain in private exports and are excluded from public/share projections.
 Existing authorization, revision, idempotency and storage limits remain in force.
 

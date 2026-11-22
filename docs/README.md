@@ -192,6 +192,14 @@ authentication and CORS checks passing without account writes. The active
 integrated-trip checklist records verification; protected checks, Pages deployment
 and live frontend acceptance are recorded in the release PRs.
 
+Destination follow-up: the main journey list now exposes drag handles directly,
+including edge scrolling for long lists. The destination editor replaces its
+six-tab row and empty Recap step with one native section picker. Past visits
+open on Memory, Planned visits on Planning notes; Dates, Experiences and More
+actions remain available without a wide toolbar. Local verification passed;
+the integrated-trip checklist and release PRs track protected promotion and
+post-deployment browser acceptance for this follow-up.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;

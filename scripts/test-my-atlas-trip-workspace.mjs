@@ -639,11 +639,16 @@ ui.selected.stops[0].visitedDates = [{ year: 2026 }]
 assert.equal(ui.selectedDate, "2026")
 ui.editingStopId = ""
 ui.editStop(ui.selected.stops[0])
-assert.equal(ui.workspaceTab, "overview")
-assert.equal(ui.savedStopMemory, "Private memory 1")
+assert.equal(ui.workspaceTab, "memory")
+assert.equal(ui.memoryDraft, "Private memory 1")
 assert.deepEqual(
-  ui.dialogTabs.map(tab => tab.key),
-  ["overview", "planning", "memory", "dates", "experiences", "actions"]
+  ui.visitSections.map(section => section.key),
+  ["memory", "planning", "dates", "experiences", "actions"]
+)
+assert.deepEqual(
+  ui.dialogTabs,
+  [],
+  "The destination picker replaces the tab-button row"
 )
 ui.openStopActions(ui.selected.stops[1])
 assert.equal(ui.editingStopId, trip.stops[1].stopId)
@@ -828,6 +833,16 @@ list.move(0, 1)
 list.startDrag(pointer, originalIds[0])
 assert.equal(list.dragId, "")
 assert.equal(destinationEvents.length, 0)
+list.pending = false
+list.reorderDisabled = true
+list.move(0, 1)
+list.startDrag(pointer, originalIds[0])
+assert.equal(list.dragId, "")
+assert.equal(
+  destinationEvents.length,
+  0,
+  "Read-only and refresh states cannot reorder"
+)
 console.log(
-  "Journey recap, explicit management, single-dialog removal, and occurrence-safe pointer/keyboard reordering checks passed."
+  "Compact destination sections, explicit management, single-dialog removal, and occurrence-safe pointer/keyboard reordering checks passed."
 )

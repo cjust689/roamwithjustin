@@ -198,7 +198,14 @@
           This trip has no visits. Its saved details are kept.
         </p>
         <div class="trip-itinerary-heading">
-          <h4>Destinations</h4>
+          <div class="trip-itinerary-title">
+            <h4>Destinations</h4>
+            <MyAtlasInfo label="How to reorder destinations"
+              >Drag a destination's dotted handle to change the order. You can
+              also focus a handle and use the up and down arrow keys. Changes
+              save when you release it.</MyAtlasInfo
+            >
+          </div>
           <button type="button" :disabled="busy" @click="openWorkspace('add')">
             Add stop
           </button>
@@ -206,7 +213,12 @@
         <MyAtlasTripDestinations
           :stops="selected.stops"
           :lifecycle="selected.lifecycle"
+          reorderable
+          :pending="pending"
+          :reorder-disabled="busy"
+          :show-reorder-help="false"
           @open="editStop"
+          @reorder="reorderStops"
         />
         <button
           class="trip-view-map"
@@ -260,13 +272,38 @@
     </button>
     <MyAtlasDialog
       v-if="workspace"
+      :class="{
+        'trip-visit-dialog': workspace === 'visit' || workspace === 'remove',
+      }"
       :title="dialogTitle"
       :status-visible="Boolean(error || workspaceStatus || refreshNeeded)"
       :pending="pending"
       @close="closeWorkspace"
     >
-      <template #tabs
-        ><nav
+      <template #tabs>
+        <div v-if="workspace === 'visit'" class="trip-visit-toolbar">
+          <label :for="'trip-visit-section-' + _uid">Edit</label>
+          <select
+            :id="'trip-visit-section-' + _uid"
+            v-model="workspaceTab"
+            :disabled="pending"
+            aria-label="Destination section"
+          >
+            <option
+              v-for="section in visitSections"
+              :key="section.key"
+              :value="section.key"
+            >
+              {{ section.label }}
+            </option>
+          </select>
+          <MyAtlasInfo label="About destination details"
+            >Memories record what happened. Planning notes keep ideas separate.
+            Dates are optional, and experiences stay private. Reorder or remove
+            a destination under More actions.</MyAtlasInfo
+          >
+        </div>
+        <nav
           v-if="dialogTabs.length"
           class="trip-dialog-tabs"
           role="tablist"
@@ -286,8 +323,8 @@
           >
             {{ tab.label }}
           </button>
-        </nav></template
-      >
+        </nav>
+      </template>
       <template v-if="error || workspaceStatus || refreshNeeded" #status
         ><p v-if="error" role="alert">{{ error }}</p>
         <p
@@ -907,13 +944,22 @@
           </button>
         </section>
         <section v-if="workspace === 'visit' && editingStop" class="trip-form">
+          <p
+            v-if="stopLocation(editingStop) || stopDate(editingStop)"
+            class="trip-visit-context"
+          >
+            {{ stopLocation(editingStop)
+            }}<span v-if="stopLocation(editingStop) && stopDate(editingStop)">
+              · </span
+            >{{ stopDate(editingStop) }}
+          </p>
           <div v-show="workspaceTab === 'planning'" class="trip-form">
             <p>A stop in {{ selected.title }}</p>
             <label
               >Planning notes<textarea
                 v-model="planNoteDraft"
                 maxlength="2000"
-                rows="5"
+                rows="4"
                 placeholder="Things to see, places to stay, reminders…"
                 :disabled="busy || !capabilities.planningNotes"
               />
@@ -938,61 +984,15 @@
             >
               Save planning notes
             </button>
-            <aside class="trip-guidance">
-              <strong>After the trip</strong>
-              <p>
-                Record favorite memories and what you did in Memory and
-                Experiences. Keep those separate from ideas.
-              </p>
-            </aside>
-          </div>
-          <div
-            v-show="workspaceTab === 'overview'"
-            class="trip-form trip-visit-recap"
-          >
-            <p v-if="stopLocation(editingStop)">
-              {{ stopLocation(editingStop) }}
-            </p>
-            <p v-if="stopDate(editingStop)">{{ stopDate(editingStop) }}</p>
-            <blockquote v-if="savedStopMemory">
-              {{ savedStopMemory }}
-            </blockquote>
-            <p v-else>No memory recorded yet.</p>
-            <template v-if="editingStop.planNote"
-              ><h3>Planning notes</h3>
-              <p class="trip-saved-plan-note">
-                {{ editingStop.planNote }}
-              </p></template
-            >
-            <template v-if="editingStop.experiences.length"
-              ><h3>Experiences</h3>
-              <ul>
-                <li v-for="entry in editingStop.experiences" :key="entry.id">
-                  <strong>{{ entry.title }}</strong
-                  ><span v-if="entry.operatorName">
-                    · {{ entry.operatorName }}</span
-                  ><a
-                    v-if="entry.operatorWebsite"
-                    :href="entry.operatorWebsite"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    referrerpolicy="no-referrer"
-                    >Visit operator</a
-                  >
-                </li>
-              </ul></template
-            >
-            <button
-              type="button"
-              :disabled="busy"
-              @click="workspaceTab = 'memory'"
-            >
-              {{ savedStopMemory ? "Edit memory" : "Add memory" }}
-            </button>
           </div>
           <div v-show="workspaceTab === 'memory'" class="trip-form">
             <label
-              >Favorite memory<textarea v-model="memoryDraft" maxlength="500" />
+              >Favorite memory<textarea
+                v-model="memoryDraft"
+                rows="3"
+                maxlength="500"
+                placeholder="What made this place memorable?"
+              />
             </label>
           </div>
           <div v-show="workspaceTab === 'dates'" class="trip-date-fields">
@@ -1039,7 +1039,7 @@
               )
             "
           >
-            Save visit details
+            Save changes
           </button>
           <MyAtlasExperiences
             v-show="workspaceTab === 'experiences'"
@@ -1303,6 +1303,15 @@ export default {
     placementActive: false,
   }),
   computed: {
+    visitSections() {
+      return [
+        { key: "memory", label: "Memory" },
+        { key: "planning", label: "Planning notes" },
+        { key: "dates", label: "Dates" },
+        { key: "experiences", label: "Experiences" },
+        { key: "actions", label: "More actions" },
+      ]
+    },
     canCreateTrip() {
       return (
         !this.busy &&
@@ -1314,12 +1323,6 @@ export default {
       return this.selected
         ? journeyCardDate({ trip: this.selected, legacy: false })
         : ""
-    },
-    savedStopMemory() {
-      return (
-        this.editingStop?.memories.find(memory => memory.kind === "note")
-          ?.text || ""
-      )
     },
     editingStopIndex() {
       return (
@@ -1392,17 +1395,6 @@ export default {
               : "Trip details",
           },
           { key: "destinations", label: "Destinations" },
-        ]
-      if (this.workspace === "visit")
-        return [
-          ...(this.selected?.lifecycle === "past"
-            ? [{ key: "overview", label: "Recap" }]
-            : []),
-          { key: "planning", label: "Notes" },
-          { key: "memory", label: "Memory" },
-          { key: "dates", label: "Dates" },
-          { key: "experiences", label: "Experiences" },
-          { key: "actions", label: "Actions" },
         ]
       if (this.workspace === "travel")
         return [
@@ -1581,7 +1573,7 @@ export default {
           create: "details",
           metadata: "details",
           visits: "order",
-          visit: "overview",
+          visit: "memory",
           travel: "flights",
         }[value] || ""
       if (value === "add") this.adding = true
@@ -2449,19 +2441,6 @@ export default {
   color: var(--color-text, #f3f1e9);
   background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.06);
 }
-.trip-visit-recap blockquote {
-  margin: 0;
-  padding: 10px 14px;
-  border-left: 2px solid var(--color-accent, #e6ba68);
-  font-size: 0.86rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-.trip-visit-recap a {
-  display: block;
-  color: var(--color-accent-soft, #e6ba68);
-}
 .trip-dialog-tabs {
   display: flex;
   flex: 0 0 auto;
@@ -2712,8 +2691,48 @@ export default {
 .trip-create-destination {
   border-top: 1px solid var(--color-control-border, #324959);
 }
-.trip-saved-plan-note {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
+.trip-itinerary-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.atlas-trips .trip-visit-dialog {
+  width: min(480px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+}
+.trip-visit-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.trip-visit-toolbar label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #adbcba);
+}
+.atlas-trips .trip-visit-toolbar select {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+}
+.trip-visit-context {
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.73rem;
+}
+.atlas-trips .trip-visit-dialog textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+@media (max-width: 480px) {
+  .trip-visit-dialog .trip-date-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>
