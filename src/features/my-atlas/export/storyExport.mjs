@@ -316,11 +316,16 @@ function canvasToBlob(canvas) {
   })
 }
 
-export async function downloadMyAtlasStory(options) {
+export async function createMyAtlasStoryPreview(options) {
   const canvas = createMyAtlasStoryCanvas(options)
   const blob = await canvasToBlob(canvas)
   const filename = `my-atlas-${options.handle || "story"}.png`
   const url = URL.createObjectURL(blob)
+  return { url, filename }
+}
+
+export async function downloadMyAtlasStory(options) {
+  const { url, filename } = await createMyAtlasStoryPreview(options)
   const link = document.createElement("a")
   link.download = filename
   link.href = url

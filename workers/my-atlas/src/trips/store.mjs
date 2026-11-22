@@ -263,6 +263,7 @@ function canonicalCandidate(trip, wasPublic) {
 
 function editVisit(stop, patch, memoryId, now) {
   const edited = { ...stop, updatedAt: now }
+  if (patch.planNote !== undefined) edited.planNote = patch.planNote
   if (patch.memory !== undefined) {
     const index = stop.memories.findIndex(memory => memory.kind === "note")
     const memories = copy(stop.memories)
@@ -653,6 +654,7 @@ export function mutateTripStore(
         updated = {
           ...current,
           stops,
+          workflow: current.workflow === "draft" ? "saved" : current.workflow,
           version: current.version + 1,
           updatedAt: command.now,
         }

@@ -1,13 +1,15 @@
 <template>
   <section
     class="visit-manager"
-    aria-label="Move visits without deleting their memories"
+    aria-label="Move destinations without deleting their memories"
   >
     <p v-if="!editing">
       {{
         sourceTrip
-          ? "Choose visits to move. Their memories and dates stay attached. An empty source trip is kept for you to review."
-          : "These visits are outside a trip. Edit them here or add them to a named trip."
+          ? sourceTrip.lifecycle === "past"
+            ? "Choose destinations to move to another journey or return to Ungrouped. Memories and dates stay attached."
+            : "Choose destinations to move to another planned journey. Memories and dates stay attached."
+          : "These destinations are outside a journey. Select them to add to a named journey."
       }}
     </p>
     <p v-if="!items.length">No ungrouped visits.</p>
@@ -135,6 +137,7 @@ export default {
     trips: { type: Array, default: () => [] },
     pending: { type: Boolean, default: false },
     savedSequence: { type: Number, default: 0 },
+    initialTargetId: { type: String, default: "new" },
   },
   emits: ["transfer", "edit-visit"],
   data: () => ({
@@ -178,6 +181,9 @@ export default {
       if (!value.some(stop => stop.stopId === this.editingId))
         this.editingId = ""
     },
+  },
+  created() {
+    this.target = this.initialTargetId
   },
   methods: {
     toggleVisit(id, value) {

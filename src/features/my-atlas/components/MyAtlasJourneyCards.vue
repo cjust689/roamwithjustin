@@ -1,6 +1,7 @@
 <template>
   <section class="journey-cards" aria-label="Your journeys">
     <h2>Your journeys</h2>
+    <p>Past adventures and upcoming plans, together.</p>
     <p v-if="pending" role="status">Loading journeys</p>
     <div v-else-if="error" role="status">
       <p>Your journeys could not be loaded. Your Atlas is unchanged.</p>
@@ -36,16 +37,11 @@
           }}<template v-if="date(record)"> · {{ date(record) }}</template>
         </p>
         <p v-if="!record.trip.stops.length">
-          Empty trip. Its saved details are kept.
+          Add your first destination when you are ready.
         </p>
         <div class="journey-actions">
-          <button type="button" @click="$emit('open', record)">Open trip</button
-          ><button
-            v-if="record.trip.stops.length"
-            type="button"
-            @click="$emit('share', record)"
-          >
-            Share trip
+          <button type="button" @click="$emit('open', record)">
+            Open journey ›
           </button>
         </div>
       </article>
@@ -62,6 +58,9 @@
           Organize destinations</button
         ><button type="button" @click="$emit('plan')">Plan a journey</button>
       </div>
+      <button v-else class="journey-new" type="button" @click="$emit('plan')">
+        + Add a trip
+      </button>
     </template>
   </section>
 </template>
@@ -125,8 +124,9 @@ export default {
   display: grid;
   gap: 0.5rem;
   padding: 0.8rem;
-  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.25);
+  border: 1px solid var(--color-control-border, #324959);
   border-radius: 0.7rem;
+  background: var(--color-surface-raised, #152629);
 }
 .journey-cards article > div:first-child,
 .journey-actions {
@@ -145,5 +145,14 @@ export default {
   font: inherit;
   font-size: 0.72rem;
   cursor: pointer;
+  min-height: 44px;
+}
+.journey-actions > button {
+  width: 100%;
+}
+.journey-cards .journey-new {
+  background: var(--color-accent, #e6ba68);
+  color: var(--color-on-accent, #112124);
+  font-weight: 600;
 }
 </style>
