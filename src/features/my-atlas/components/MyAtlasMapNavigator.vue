@@ -134,6 +134,11 @@ export default {
 .my-atlas-map-navigator.is-menu-hidden {
   bottom: 88px;
 }
+@media (max-width: 720px) {
+  .my-atlas-map-navigator.is-menu-hidden {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
 header {
   display: flex;
   gap: 6px;

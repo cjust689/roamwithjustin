@@ -237,7 +237,7 @@ feedback batch, not part of that deployment.
       owner finishes providing feedback.
 - [x] Run formatting/managed documentation audit and final checks with the
       completed feedback batch before release.
-- [ ] Complete the owner's authorized develop/main promotion.
+- [x] Promote through PRs 233 and 234; Pages run 44939782730 succeeded.
 
 The owner initially deferred testing, then explicitly authorized testing,
 resolution and promotion. The map navigator and marker corrections are included
@@ -287,9 +287,27 @@ separate from these synthetic browser fixtures and isolated runtime tests.
       staging dry run. Live health, directory and public-profile reads passed;
       the checked profile had zero published trips, so grouped-trip acceptance
       remains covered by the runtime/browser fixtures.
-- [ ] Complete the authorized develop/main frontend promotion.
+- [x] Promote through PRs 235 and 236; Pages run 44962250911 succeeded.
 
 Owner visibility help now explicitly mentions that public trip names accompany
 their destinations. Browser fixtures do not create accounts or alter real data.
 The backend projection is deployed; frontend promotion was subsequently
 authorized by the owner. No account records were changed by deployment checks.
+
+### Mobile bottom menu correction
+
+- [x] Make owner and public overview restore controls span the full mobile
+      viewport width, flush with the bottom edge, with safe-area padding.
+      Desktop controls keep their previous compact placement.
+- [x] Keep the trip navigator above the bottom bar, including safe-area spacing.
+- [x] Move the existing compact provider attribution/info control beside the
+      upper zoom controls on mobile, preserving its provider-credit links.
+- [x] Browser geometry checks passed for owner/public views at 320, 390, 720
+      and 1440 pixels with no horizontal overflow or navigator/bar overlap.
+      Evidence: `.state/theme/bottom-bar-browser.json`.
+- [x] Receive owner authorization to promote this correction and profile-photo
+      interactions through develop and main. See release tracking below.
+
+This visual correction does not resolve the separately reported production
+saved-Atlas load error. That incident remains under investigation; no account
+reset or data deletion is part of this work.

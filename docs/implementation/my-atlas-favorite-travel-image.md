@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-19
-updated: 2026-11-20
+updated: 2026-11-21
 related:
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
@@ -22,6 +22,7 @@ code_paths:
   - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
+  - src/features/my-atlas/views/MyAtlasExploreView.vue
   - src/views/roam/Privacy.vue
   - workers/my-atlas/src/account/atlas-image.mjs
   - workers/my-atlas/src/account/contracts.mjs
@@ -257,3 +258,23 @@ deletion move into the dropdown. Image processing, replacement semantics,
 public-delivery gates and the open external acceptance checklist are unchanged.
 This frontend correction is local until its next promotion. Responsive fixture
 and focus evidence is recorded in the trip transition implementation document.
+
+## Profile photo interactions, November 21
+
+- [x] Disable right-click image menus and native dragging only on uploaded
+      favorite travel photos in the owner preview, public profile hero,
+      full-image dialog and Explore cards. Each image uses `draggable="false"`,
+      `@contextmenu.prevent` and `@dragstart.prevent`.
+- [x] Limit interception to user-uploaded profile photos. Editorial/provider
+      images, normal link menus, image viewing and deliberate Story exports
+      retain their existing behavior. Viator code is unchanged.
+- [x] Chrome fixtures verified all four photo surfaces block context menus
+      and dragging, preserve image clicks, and still open the full-image dialog.
+      An unrelated image, link and button retained their context menus.
+      Evidence: `.state/theme/my-atlas-profile-image-browser.json`.
+- [x] Receive owner authorization for develop/main promotion. Release tracking
+      is recorded in the integrated trip implementation checklist.
+
+This deters casual browser saving, not copying loaded image bytes or taking
+screenshots. No R2 access policy, image endpoint, visibility permission or
+account data changes are introduced.
