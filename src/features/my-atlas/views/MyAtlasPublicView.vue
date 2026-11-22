@@ -53,21 +53,50 @@
       class="my-atlas-public-panel"
       aria-labelledby="public-atlas-title"
     >
-      <button
-        v-if="!loading && !error"
-        ref="overviewHide"
-        class="public-overview-hide"
-        type="button"
-        aria-controls="public-atlas-overview"
-        :aria-expanded="String(overviewExpanded)"
-        @click="toggleOverview"
-      >
-        Hide overview ↓
-      </button>
       <header>
-        <a href="/" aria-label="Roam With Justin home"><BrandMark /></a>
-        <router-link to="/my-atlas/explore">Explore Atlases</router-link>
-        <ThemeSelector />
+        <span class="public-atlas-brand-lockup"
+          ><a href="/" aria-label="Roam With Justin home"><BrandMark /></a
+          ><span>My Atlas</span></span
+        >
+        <div class="public-atlas-header-actions">
+          <ThemeSelector />
+          <router-link
+            class="public-atlas-explore"
+            to="/my-atlas/explore"
+            aria-label="Explore Atlases"
+            title="Explore Atlases"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m15.5 8.5-2 5-5 2 2-5z" /></svg
+          ></router-link>
+          <button
+            v-if="!loading && !error"
+            ref="overviewHide"
+            class="public-overview-hide"
+            type="button"
+            aria-label="Hide Atlas overview"
+            title="Hide overview"
+            aria-controls="public-atlas-overview"
+            :aria-expanded="String(overviewExpanded)"
+            @click="toggleOverview"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="m6 9 6 6 6-6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
       </header>
 
       <div v-if="loading" class="my-atlas-public-state" role="status">
@@ -880,7 +909,8 @@ export default {
 .my-atlas-public-panel > header {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
+  justify-content: space-between;
+  gap: 8px;
   color: var(--color-accent-soft, #e6ba68);
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -888,19 +918,59 @@ export default {
   font-weight: 700;
 }
 
-.my-atlas-public-panel > header a:first-child {
+.public-atlas-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+.public-atlas-brand-lockup > a {
   display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: 36px;
+  height: 44px;
   place-items: center;
   letter-spacing: 0;
 }
 
-.my-atlas-public-panel > header a:not(:first-child) {
+.public-atlas-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
   margin-left: auto;
-  color: inherit;
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
+}
+.public-atlas-header-actions ::v-deep .theme-trigger {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+.public-atlas-explore {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.55);
+  border-radius: 999px;
+  color: var(--color-accent-contrast, #132023);
+  background: var(--color-accent, #e6ba68);
+}
+.public-atlas-explore svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.public-atlas-explore:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: 3px;
 }
 
 .my-atlas-public-profile.has-favorite-image {
@@ -1348,9 +1418,13 @@ export default {
   min-height: 0;
 }
 .public-overview-hide {
-  display: block;
-  margin: 0 0 8px auto;
-  padding: 8px 12px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
   min-height: 44px;
   border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
   border-radius: 10px;

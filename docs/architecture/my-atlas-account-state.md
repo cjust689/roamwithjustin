@@ -1565,3 +1565,15 @@ preflights returned 204; a foreign origin returned 403. Authenticated new behavi
 is covered by isolated Worker tests, not real-account mutation acceptance.
 The owner authorized frontend promotion through develop/main; release PRs record
 protected checks, Pages deployment and live synthetic UI acceptance.
+
+### Public Atlas header alignment, November 22
+
+`MyAtlasPublicView.vue` uses the owner overview header's 36 by 44 pixel brand
+target, My Atlas label and spacing. Theme, Explore and collapse controls form
+one aligned row with 44 pixel targets. Explore is an accessible compass link to
+`/my-atlas/explore`; it does not open owner account settings. The previous
+separate Hide overview row is removed, while its ref, expanded-state semantics,
+map resize and restore-focus behavior are retained. Loading/unavailable profiles
+retain branding, Explore and theme controls without an unusable collapse action.
+Public data, favorite-image permissions, read-only navigation and API contracts
+are unchanged. The owner requested deployment through develop/main.
