@@ -763,6 +763,7 @@ for (const token of [
           subject: SUBJECT,
         })
         return {
+          capabilities: { namedPlanDrafts: true },
           profile: { revision: 7 },
           wishes: [
             {
@@ -778,7 +779,15 @@ for (const token of [
   )
   assert.equal(response.status, 200)
   assert.equal(response.headers.get("ETag"), '"rev-7"')
-  assert.equal((await readJson(response)).wishes[0].name, "Atlanta")
+  const planningPayload = await readJson(response.clone())
+  assert.equal(planningPayload.wishes[0].name, "Atlanta")
+  assert.equal(planningPayload.capabilities.namedPlanDrafts, true)
+  const planningClientState = await fetchMyAtlasPlanning({
+    apiBaseUrl: "https://api.example.test",
+    accessToken: "fixture",
+    fetchImpl: async () => response,
+  })
+  assert.equal(planningClientState.capabilities.namedPlanDrafts, true)
 }
 
 {

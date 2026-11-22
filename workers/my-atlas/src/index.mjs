@@ -1210,7 +1210,11 @@ export async function handleRequest(
           placeCatalog: dependencies.placeCatalog,
         })
         return accountJsonResponse(
-          { wishes: result.wishes, plans: result.plans },
+          {
+            wishes: result.wishes,
+            plans: result.plans,
+            capabilities: result.capabilities,
+          },
           200,
           context,
           result.profile.revision

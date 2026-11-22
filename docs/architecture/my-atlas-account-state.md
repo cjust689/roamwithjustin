@@ -1612,8 +1612,8 @@ final Add/Set action does. Native-dialog focus and drafts are restored, and a
 Back action remains available when the map cannot load. Trip picker input stays
 in memory across this transition; it is not stored in browser persistence.
 
-Compatible Worker `80350da7-12bd-4625-84e3-8563bc6c3ab1` is deployed. Nine
+Compatible Worker `f7d5a418-420f-4cc9-8501-f6cc4bd14ea4` is deployed. Nine
 remote health, unauthenticated-access and CORS checks passed without account
 writes. Isolated runtime tests cover authenticated persistence and reload.
 The authorized frontend promotion and post-deployment synthetic browser checks
-are recorded in the release PRs linked from the implementation handoff.
+are recorded in [release PR 256](https://github.com/cjust689/roamwithjustin/pull/256).

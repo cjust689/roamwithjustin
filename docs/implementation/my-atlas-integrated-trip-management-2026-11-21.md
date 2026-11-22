@@ -897,16 +897,20 @@ visibility setting is preserved rather than restoring the concept's older toggle
 - [x] Final `npm run build` passed all script suites and 63 isolated Worker
       runtime tests, hash `381e5c81b37d9b4c`, with the established local
       parallel-false override and existing bundle-size warnings. Focused ESLint
-      passed. Evidence: `.state/theme/location-flow-build.log`. Compatible
+      passed. Evidence: `.state/theme/location-flow-build.log`. The final HTTP
+      capability projection is additionally checked from the authenticated
+      Worker handler through the real client in
+      `node scripts/test-my-atlas-worker.mjs`, which passed. Compatible
       `npm run my-atlas:worker:check:staging` passed in
       `.state/theme/location-flow-worker-dryrun.log`.
-- [x] Deploy compatible Worker `80350da7-12bd-4625-84e3-8563bc6c3ab1`.
+- [x] Deploy compatible Worker `f7d5a418-420f-4cc9-8501-f6cc4bd14ea4`.
       Nine remote health/authentication/CORS checks passed without account
       writes. Evidence: `.state/theme/location-flow-worker-deploy.log` and
       `.state/my-atlas/location-worker-deployed.json`. Authenticated behavior
       remains covered by isolated runtime tests rather than real-account writes.
 - [x] Prepare tested source for the owner's authorized develop/main promotion.
-      Its release PRs record protected checks, Pages and final live synthetic
+      [Release PR 256](https://github.com/cjust689/roamwithjustin/pull/256)
+      records protected checks, main promotion, Pages and final live synthetic
       UI acceptance, distinguishing those from real-owner acceptance below.
 - [ ] Genuine owner acceptance with a real saved trip remains separate from
       synthetic browser and isolated-backend verification.
