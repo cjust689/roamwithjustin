@@ -1,3 +1,4 @@
+import { emptyDestinationDraft } from "../src/features/my-atlas/catalog/destinationDraft.mjs"
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import compiler from "vue-template-compiler"
@@ -241,7 +242,8 @@ const dependencies = {
   buildGoogleMapsRouteHandoffs,
   buildAiPlanningPrompt,
   MyAtlasExperiences: {},
-  MyAtlasLocationPicker: {},
+  MyAtlasDestinationPicker: {},
+  emptyDestinationDraft,
   getMyAtlasApiAccessToken: async () => "fixture",
   requestMyAtlasTrips: async input => {
     calls.push(structuredClone(input))
@@ -541,89 +543,6 @@ ui.pending = false
 ui.refreshNeeded = false
 ui.writesEnabled = true
 ui.startNew()
-const costaRica = {
-  ...place,
-  placeId: "geonames:123",
-  name: "Uvita",
-  admin1Name: "Puntarenas",
-  countryName: "Costa Rica",
-  coordinates: [-83.74, 9.17],
-}
-const colombia = {
-  ...costaRica,
-  placeId: "geonames:456",
-  admin1Name: "Boyacá",
-  countryName: "Colombia",
-  coordinates: [-72.55, 6.32],
-}
-ui.results = [costaRica, { ...costaRica }, colombia]
-assert.equal(
-  ui.searchResults.length,
-  2,
-  "Collapse duplicate IDs, retain distinct same-name places"
-)
-assert.match(ui.resultLocation(costaRica), /Puntarenas, Costa Rica/)
-assert.match(ui.resultDescription(costaRica), /9\.1700, -83\.7400/)
-const beforeDraftFeedback = events.filter(
-  ([name]) => name === "action-feedback"
-).length
-ui.choose(
-  { placeId: costaRica.placeId },
-  costaRica.name,
-  ui.resultLocation(costaRica)
-)
-assert.equal(ui.draftPlaceCount(costaRica.placeId), 1)
-assert.match(ui.dialogTabs[0].label, /\(1\)/)
-assert.equal(ui.draftStops[0].context, "Puntarenas, Costa Rica")
-assert.match(ui.workspaceStatus, /Uvita added/)
-assert.equal(
-  events.filter(([name]) => name === "action-feedback").length,
-  beforeDraftFeedback,
-  "Modal feedback must not create a hidden background toast"
-)
-ui.choose({ placeId: costaRica.placeId }, costaRica.name)
-assert.equal(
-  ui.draftPlaceCount(costaRica.placeId),
-  2,
-  "Explicit repeated visits remain possible"
-)
-ui.draftStops = Array.from({ length: 50 }, () => ({
-  selection: { placeId: costaRica.placeId },
-  name: costaRica.name,
-}))
-ui.choose({ placeId: colombia.placeId }, colombia.name)
-assert.equal(ui.draftStops.length, 50)
-assert.match(ui.workspaceStatus, /50 destinations/)
-ui.startNew()
-ui.customName = "Keep my manual draft"
-ui.latitude = "12"
-ui.longitude = "34"
-ui.selectSearchResult(costaRica)
-assert.equal(ui.selectedSearchPlace.name, "Uvita")
-assert.deepEqual(ui.selectedSearchPlace.coordinates, [-83.74, 9.17])
-assert.equal(ui.destinationEntryMode, "search")
-assert.deepEqual(
-  ui.draftStops[0].selection,
-  { placeId: costaRica.placeId },
-  "A search result must retain its catalog identity"
-)
-assert.equal(
-  ui.customName,
-  "Keep my manual draft",
-  "Selecting search must not overwrite a manual draft"
-)
-assert.equal(ui.latitude, "12")
-assert.equal(ui.longitude, "34")
-ui.startNew()
-assert.equal(
-  ui.selectedSearchPlace,
-  null,
-  "A new trip must not show the previous trip's preview"
-)
-console.log(
-  "Search identity deduplication, place context, draft counts, modal-only feedback and destination limits passed."
-)
-
 // The default journey is a recap. Management still uses the existing guarded
 // actions, and drag previews never change persisted or prop-owned stop order.
 ui.trips = [structuredClone(trip)]
@@ -845,4 +764,83 @@ assert.equal(
 )
 console.log(
   "Compact destination sections, explicit management, single-dialog removal, and occurrence-safe pointer/keyboard reordering checks passed."
+)
+
+// Creating a named record precedes every destination action. A failed create
+// keeps the name in its original form, while a confirmed create advances once.
+ui.mutate = component.methods.mutate.bind(ui)
+ui.scope = "planned"
+ui.filter = "planned"
+ui.pending = false
+ui.refreshNeeded = false
+ui.capabilities = { emptyTripDrafts: true, planningNotes: true }
+ui.startNew()
+ui.draftTitle = "A hike to plan"
+ui.$refs = {}
+const named = {
+  ...structuredClone(trip),
+  title: ui.draftTitle,
+  lifecycle: "planned",
+  workflow: "draft",
+  stops: [],
+}
+const nameCalls = []
+let failName = true
+ui.call = async input => {
+  nameCalls.push(structuredClone(input))
+  if (input.action === "list")
+    return {
+      trips: [named],
+      profile: { revision: 50 },
+      upgraded: true,
+      writesEnabled: true,
+      capabilities: ui.capabilities,
+    }
+  if (failName) throw Object.assign(Error(), { code: "unavailable" })
+  return { trip: named, profile: { revision: 50 }, upgraded: true }
+}
+await ui.createNamedTrip()
+assert.equal(ui.workspace, "create")
+assert.equal(ui.draftTitle, "A hike to plan")
+assert.equal(ui.selectedId, "")
+failName = false
+await ui.createNamedTrip()
+assert.equal(ui.workspace, "add")
+assert.equal(ui.selectedId, named.tripId)
+assert.deepEqual(
+  nameCalls.filter(call => call.action !== "list").map(call => call.body.stops),
+  [[], []]
+)
+ui.destinationDraft = {
+  ...emptyDestinationDraft(),
+  query: "9.17, -83.74",
+  name: "Trailhead",
+}
+const beforeReview = nameCalls.length
+ui.beginPlacement({
+  kind: "explicit-coordinate",
+  name: "Trailhead",
+  coordinates: [-83.74, 9.17],
+})
+assert.equal(ui.workspace, "")
+ui.resumePlacementEditor()
+assert.equal(ui.workspace, "add")
+assert.equal(ui.destinationDraft.reviewed, false)
+assert.equal(ui.destinationDraft.query, "9.17, -83.74")
+ui.beginPlacement({
+  kind: "explicit-coordinate",
+  name: "Trailhead",
+  coordinates: [-83.74, 9.17],
+})
+ui.setCoordinates([-83.8, 9.2])
+assert.equal(ui.workspace, "add")
+assert.equal(ui.destinationDraft.reviewed, true)
+assert.deepEqual(ui.destinationDraft.coordinates, [-83.8, 9.2])
+assert.equal(
+  nameCalls.length,
+  beforeReview,
+  "Review and both return paths never save a destination"
+)
+console.log(
+  "Name-first persistence, failed-create retention and explicit pin-review return tests passed."
 )

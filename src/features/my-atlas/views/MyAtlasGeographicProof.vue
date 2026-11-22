@@ -5,7 +5,7 @@
     @keydown.esc="cancelLocationPlacement"
   >
     <MyAtlasActionFeedback
-      :feedback="actionFeedback"
+      :feedback="locationReview ? null : actionFeedback"
       @dismiss="dismissActionFeedback"
     />
     <MyAtlasMap
@@ -19,24 +19,10 @@
       :show-connections="showConnections"
       :show-memories="showMemories"
       :playback-active="canUseAtlas && timelinePlaying"
-      :placement-active="
-        canUseAtlas &&
-        (customPlaceOpen ||
-          plannerPlacement.active ||
-          editPlacement.active ||
-          tripPlacement.active)
-      "
-      :placement-coordinates="
-        canUseAtlas
-          ? tripPlacement.active
-            ? tripPlacement.coordinates
-            : editPlacement.active
-              ? editPlacement.coordinates
-              : plannerPlacement.active
-                ? plannerPlacement.coordinates
-                : customPlaceCoordinates
-          : null
-      "
+      :placement-active="canUseAtlas && Boolean(locationReview)"
+      :placement-review="Boolean(locationReview)"
+      :placement-coordinates="locationReview?.coordinates || null"
+      :placement-name="locationReview?.name || ''"
       :planner-active="
         canUseAtlas &&
         (mapNavigatorTrip
@@ -55,11 +41,13 @@
           : []
       "
       :planner-read-only="Boolean(mapNavigatorTrip) || tripMapActive"
+      @confirm-placement="confirmLocationReview"
+      @cancel-placement="cancelLocationReview"
       @select="selectPin"
       @place-custom="handleLocationPlacement"
       ><template #navigator
         ><MyAtlasMapNavigator
-          v-if="canUseAtlas && mapNavigationTrips.length"
+          v-if="canUseAtlas && !locationReview && mapNavigationTrips.length"
           :trips="mapNavigationTrips"
           :active-id="mapNavigatorTripId"
           :index="mapNavigatorStopIndex"
@@ -1378,7 +1366,7 @@
     </transition>
     <transition name="atlas-restore">
       <button
-        v-if="!sidebarExpanded"
+        v-if="!sidebarExpanded && !locationReview"
         ref="sidebarOpen"
         :disabled="sidebarExpanded"
         class="my-atlas-sidebar-open"
@@ -1396,6 +1384,7 @@
       </button>
     </transition>
     <MyAtlasMapHelp
+      v-if="!locationReview"
       :hide-on-mobile="mapNavigatorOpen || (canUseAtlas && sidebarExpanded)"
     />
   </main>
@@ -1603,6 +1592,7 @@ export default {
       groupingDestinations: false,
       selectedVisitedPlaceIds: [],
       tripPlacement: { active: false, coordinates: null },
+      locationReview: null,
       plannerRoute: [],
       accountMenuOpen: false,
     }
@@ -1930,6 +1920,7 @@ export default {
     },
     "auth.authenticated"(authenticated) {
       if (!authenticated) {
+        this.locationReview = null
         this.closeStoryPreview()
         this.overviewPlaceOpen = false
         this.overviewEditing = false
@@ -2282,29 +2273,106 @@ export default {
           })
         )
     },
+    startLocationReview(source, value = {}) {
+      if (!this.canUseAtlas) return
+      // Native dialogs sit above CSS stacking contexts. Suspend one without
+      // destroying its form so the map can receive pointer and keyboard input.
+      const dialog = document.querySelector("dialog[open]")
+      this._reviewDialog = dialog
+        ? { element: dialog, focus: document.activeElement }
+        : null
+      dialog?.close()
+      const name =
+        value.name ||
+        (source === "trips"
+          ? this.$refs.trips?.destinationDraft?.name
+          : source === "planner"
+            ? this.$refs.planner?.customName
+            : source === "editor"
+              ? this.$refs.pinEditor?.locationName
+              : this.customPlaceName) ||
+        ""
+      this.locationReview = {
+        source,
+        name,
+        coordinates: normalizeMyAtlasCustomCoordinates(value.coordinates),
+      }
+      this.closeMapNavigator()
+      this.pauseTimeline()
+      if (this.sidebarExpanded) this.toggleSidebar()
+      this.$nextTick(() => {
+        this.$refs.atlasMap?.resizeMap()
+        this.$refs.atlasMap?.focusPlacement()
+        this.$refs.atlasMap?.focusReview()
+      })
+    },
+    finishLocationReview() {
+      const dialog = this._reviewDialog
+      this._reviewDialog = null
+      this.locationReview = null
+      if (!this.sidebarExpanded) this.toggleSidebar()
+      this.$nextTick(() => {
+        this.$refs.atlasMap?.resizeMap()
+        if (dialog?.element.isConnected && !dialog.element.open) {
+          dialog.element.showModal()
+          if (dialog.focus?.isConnected)
+            dialog.focus.focus({ preventScroll: true })
+        }
+      })
+    },
     handleTripPlacement(value) {
-      const active = this.tripPlacement.active
+      const wasActive = this.tripPlacement.active
       this.tripPlacement = value
-      if (value.active && !active)
-        this.$nextTick(() => this.focusMapForPlacement())
+      if (value.active && !wasActive) this.startLocationReview("trips", value)
+      else if (!value.active && this.locationReview?.source === "trips")
+        this.finishLocationReview()
     },
     handlePlannerPlacement(value) {
       const wasActive = this.plannerPlacement.active
       this.plannerPlacement = value
-      if (value.active && !wasActive) {
-        this.cancelCustomPlace()
-        this.focusMapForPlacement()
-      }
+      if (value.active && !wasActive) this.startLocationReview("planner", value)
+      else if (!value.active && this.locationReview?.source === "planner")
+        this.finishLocationReview()
     },
     handleLocationPlacement(value) {
-      if (this.tripPlacement.active) this.$refs.trips?.setCoordinates(value)
-      else if (this.editPlacement.active)
-        this.$refs.pinEditor?.setLocationCoordinates(value)
-      else if (this.plannerPlacement.active)
-        this.$refs.planner?.setCustomMapCoordinates(value)
-      else this.setCustomPlaceCoordinates(value)
+      const coordinates = normalizeMyAtlasCustomCoordinates(value)
+      if (this.locationReview && coordinates) {
+        this.locationReview = { ...this.locationReview, coordinates }
+        return
+      }
+    },
+    confirmLocationReview() {
+      if (!this.canUseAtlas) return
+      const review = this.locationReview
+      if (!review?.coordinates) return
+      if (review.source === "trips")
+        this.$refs.trips?.setCoordinates(review.coordinates)
+      else if (review.source === "planner") {
+        this.$refs.planner?.setCustomMapCoordinates(review.coordinates)
+        this.$refs.planner?.stopCustomMapPlacement()
+      } else if (review.source === "editor") {
+        this.$refs.pinEditor?.setLocationCoordinates(review.coordinates)
+        this.$refs.pinEditor?.stopLocationPlacement()
+      } else this.setCustomPlaceCoordinates(review.coordinates)
+      if (this.locationReview) this.finishLocationReview()
+    },
+    cancelLocationReview() {
+      const source = this.locationReview?.source
+      if (source === "trips") this.$refs.trips?.resumePlacementEditor()
+      else if (source === "planner") {
+        this.$refs.planner?.stopCustomMapPlacement()
+        this.$refs.planner?.confirmDraft(
+          "Location not confirmed. Change the input or review the pin again."
+        )
+      } else if (source === "editor")
+        this.$refs.pinEditor?.stopLocationPlacement()
+      if (this.locationReview) this.finishLocationReview()
     },
     cancelLocationPlacement() {
+      if (this.locationReview) {
+        this.cancelLocationReview()
+        return
+      }
       this.$refs.trips?.stopPlacement()
       this.$refs.pinEditor?.stopLocationPlacement()
       this.editPlacement = { active: false, coordinates: null }
@@ -2315,8 +2383,9 @@ export default {
     handleEditPlacement(value) {
       const wasActive = this.editPlacement.active
       this.editPlacement = value
-      if (value.active && !wasActive)
-        this.$nextTick(() => this.focusMapForPlacement())
+      if (value.active && !wasActive) this.startLocationReview("editor", value)
+      else if (!value.active && this.locationReview?.source === "editor")
+        this.finishLocationReview()
     },
     async resolveMapLink(url) {
       return resolveMyAtlasMapLink({
@@ -2547,6 +2616,7 @@ export default {
       this.activeAtlasTab = "past"
     },
     handleAccountDeleted() {
+      this.locationReview = null
       this.closeMapNavigator()
       this.journeyRequest++
       this.overviewTrips = []
@@ -2973,11 +3043,12 @@ export default {
       this.announcement = "Custom pin position selected."
     },
     focusMapForPlacement() {
-      this.$nextTick(() => this.$refs.atlasMap?.focusPlacement())
-      this.$refs.atlasMap?.$el?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
+      if (!this.locationReview)
+        this.startLocationReview("visited", {
+          coordinates: this.customPlaceCoordinates,
+          name: this.customPlaceName,
+        })
+      else this.$nextTick(() => this.$refs.atlasMap?.focusPlacement())
     },
     cancelCustomPlace() {
       this.customPlaceOpen = false

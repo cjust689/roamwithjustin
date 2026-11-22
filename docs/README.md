@@ -68,6 +68,14 @@ verification:
 
 # Roam With Justin documentation
 
+Current follow-up: save a trip name before destination entry, use one trip
+location field for search/coordinates/Maps/Plus Codes, and expose explicit map
+pin confirmation with a return to the originating form. Both canonical and
+legacy planner paths are covered without account migration. Implementation,
+actual verification and release state are tracked in the
+[integrated trip checklist](implementation/my-atlas-integrated-trip-management-2026-11-21.md)
+and [account-state architecture](architecture/my-atlas-account-state.md).
+
 Current trip work: [Integrated trip management, November 21](implementation/my-atlas-integrated-trip-management-2026-11-21.md)
 connects visit reassignment, per-trip public visibility, saved private travel
 searches and Overview journey cards. It preserves independent destinations and

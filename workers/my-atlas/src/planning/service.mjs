@@ -152,11 +152,13 @@ async function projectPlanLocation(
 }
 
 async function snapshotsForPlan(owner, input, placeCatalog, environment) {
-  const start = input.start || Object.freeze({ wishId: input.startWishId })
+  const start =
+    input.start ||
+    (input.startWishId ? Object.freeze({ wishId: input.startWishId }) : null)
   const end = input.end || null
   const uniqueWishIds = [
     ...new Set(
-      [start.wishId, ...input.stopWishIds, end?.wishId].filter(Boolean)
+      [start?.wishId, ...input.stopWishIds, end?.wishId].filter(Boolean)
     ),
   ]
   const result = uniqueWishIds.length
@@ -173,17 +175,13 @@ async function snapshotsForPlan(owner, input, placeCatalog, environment) {
     environment
   )
   const byId = new Map(projectedWishes.map(wish => [wish.wishId, wish]))
-  const needsDirectCatalog = Boolean(start.placeId || end?.placeId)
+  const needsDirectCatalog = Boolean(start?.placeId || end?.placeId)
   const catalog =
     placeCatalog ||
     (needsDirectCatalog ? new WorkerPlaceCatalog(environment) : null)
-  const projectedStart = await projectPlanLocation(
-    start,
-    byId,
-    owner,
-    catalog,
-    environment
-  )
+  const projectedStart = start
+    ? await projectPlanLocation(start, byId, owner, catalog, environment)
+    : null
   const projectedEnd = end
     ? await projectPlanLocation(end, byId, owner, catalog, environment)
     : null
@@ -192,7 +190,7 @@ async function snapshotsForPlan(owner, input, placeCatalog, environment) {
     if (!wish) throw new AccountConflictError("wish_not_found")
     return wish
   })
-  const projected = [projectedStart, ...projectedStops]
+  const projected = [projectedStart, ...projectedStops].filter(Boolean)
   if (projectedEnd) projected.push(projectedEnd)
   let catalogRevision = "custom-only"
   if (projected.some(place => place.placeType !== "custom")) {
@@ -201,7 +199,9 @@ async function snapshotsForPlan(owner, input, placeCatalog, environment) {
     catalogRevision = manifest.catalogRevision
   }
   return Object.freeze({
-    start: planSnapshot(projectedStart, catalogRevision),
+    start: projectedStart
+      ? planSnapshot(projectedStart, catalogRevision)
+      : null,
     stops: Object.freeze(
       projectedStops.map(place => planSnapshot(place, catalogRevision))
     ),
@@ -357,6 +357,7 @@ export async function getMyPlanning({ environment, identity, placeCatalog }) {
     { allowUnavailable: true }
   )
   return Object.freeze({
+    capabilities: Object.freeze({ namedPlanDrafts: true }),
     profile: publicProfile(result.profile),
     wishes: Object.freeze(wishes),
     plans: Object.freeze(result.plans || []),
