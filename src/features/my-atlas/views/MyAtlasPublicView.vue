@@ -2,25 +2,38 @@
   <main class="my-atlas-public" :class="{ 'is-map-only': !overviewExpanded }">
     <MyAtlasMap
       ref="atlasMap"
-      :places="
-        navigatorTrip
-          ? navigatorTrip.stops.map(stop => stop.place)
-          : displayedPlaces
+      :places="displayedPlaces"
+      :selected-place-id="
+        navigatorOpen
+          ? selectedPlace?.placeId || selectedPlaceId
+          : selectedPlaceId
       "
-      :selected-place-id="navigatorLocation?.placeId || selectedPlaceId"
-      :focused-location="navigatorLocation"
-      :navigator-active="Boolean(navigatorTrip)"
-      :planner-active="Boolean(navigatorTrip && navigatorTrip.kind === 'trip')"
-      :planner-route="navigatorTrip?.kind === 'trip' ? navigatorRoute : []"
+      :focused-location="navigatorOpen ? selectedPlace : null"
+      :navigator-active="Boolean(activeMapTrip)"
+      :planner-active="Boolean(selectedPublicTrip)"
+      :planner-route="selectedPublicTrip ? navigatorRoute : []"
       :planner-read-only="true"
-      :show-memories="showMemories"
-      :playback-active="timelinePlaying"
       @select="selectPlace"
-      ><template #navigator
-        ><MyAtlasMapNavigator
+      ><template #navigator>
+        <label v-if="!loading && !error" class="public-map-view-filter">
+          <span>View</span>
+          <select
+            :value="effectiveBrowseMode"
+            @change="setBrowseMode($event.target.value)"
+          >
+            <option value="planned" :disabled="!plannedTrips.length">
+              Planned trips
+            </option>
+            <option value="past" :disabled="!pastTrips.length">
+              Past trips
+            </option>
+            <option value="destinations">Destinations</option>
+          </select>
+        </label>
+        <MyAtlasMapNavigator
           v-if="!loading && !error && navigationTrips.length"
           :trips="navigationTrips"
-          :active-id="navigatorId"
+          :active-id="activeMapTrip?.id || navigatorId"
           :index="navigatorIndex"
           :open="navigatorOpen"
           :collapsed="navigatorCollapsed"
@@ -82,7 +95,7 @@
           <div class="my-atlas-public-intro">
             <p>@{{ atlas.handle }}</p>
             <h1 id="public-atlas-title">{{ atlas.displayName }}</h1>
-            <span>{{ places.length }} {{ placeCountLabel }}</span>
+            <span>{{ places.length }} visited {{ placeCountLabel }}</span>
             <button
               v-if="favoriteImageUrl"
               type="button"
@@ -161,90 +174,103 @@
           </div>
         </div>
 
-        <button
-          type="button"
-          class="my-atlas-public-mobile-controls-toggle"
-          :aria-expanded="String(mobileControlsOpen)"
-          aria-controls="my-atlas-public-map-controls"
-          @click="mobileControlsOpen = !mobileControlsOpen"
+        <section
+          v-if="publicTrips.length"
+          class="public-trip-browser"
+          aria-label="Explore shared trips"
         >
-          <span>Map controls</span>
-          <strong>{{ mobileControlsOpen ? "Hide" : "Show" }}</strong>
-        </button>
-        <div
-          id="my-atlas-public-map-controls"
-          class="my-atlas-public-controls-drawer"
-          :class="{ 'is-open': mobileControlsOpen }"
-        >
-          <div class="my-atlas-public-controls">
-            <label>
-              <span>Show</span>
-              <select v-model="yearFilter" @change="resetTimeline">
-                <option value="all">Every destination</option>
-                <option v-for="year in years" :key="year" :value="String(year)">
-                  {{ year }}
-                </option>
-                <option v-if="stats.undated" value="undated">Date open</option>
-              </select>
-            </label>
+          <div v-if="browsingTrips" class="public-trip-picker">
             <button
+              v-for="trip in visibleTrips"
+              :key="trip.id"
               type="button"
-              :disabled="!years.length"
-              @click="toggleTimeline"
+              :aria-pressed="String(selectedPublicTrip?.id === trip.id)"
+              @click="chooseTrip(trip.id)"
             >
-              {{ timelineButtonLabel }}
-            </button>
-            <button
-              type="button"
-              :disabled="storyExportPending"
-              @click="exportStory"
-            >
-              {{ storyExportPending ? "Creating image" : "Story image" }}
-            </button>
-            <button
-              type="button"
-              :aria-pressed="String(showMemories)"
-              :disabled="!visibleMemoryCount"
-              @click="showMemories = !showMemories"
-            >
-              {{ showMemories ? "Hide memories" : "Show all memories" }}
+              <strong>{{ trip.title }}</strong>
+              <small>
+                {{ trip.lifecycle === "planned" ? "Planned" : "Past" }} ·
+                {{ trip.stops.length }}
+                {{ trip.stops.length === 1 ? "stop" : "stops" }}
+              </small>
+              <span>{{ tripPreview(trip) }}</span>
             </button>
           </div>
-
-          <div v-if="timelineEntry" class="my-atlas-public-timeline">
-            <strong>{{ timelineEntry.place.name }}</strong>
-            <span>
-              {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
-              {{ timelineSequence.length }}
-            </span>
-          </div>
-          <p class="my-atlas-public-route-note">
-            Playback follows visit years. Hops within a year are a visual
-            sequence, not a recorded travel route.
+          <p v-if="browsingTrips && !visibleTrips.length" role="status">
+            No public
+            {{ effectiveBrowseMode === "planned" ? "planned" : "past" }} trips.
           </p>
-          <p
-            v-if="storyExportStatus"
-            class="my-atlas-public-export-status"
-            role="status"
-          >
-            {{ storyExportStatus }}
-          </p>
-        </div>
+        </section>
 
         <div v-if="selectedPlace" class="my-atlas-public-selected">
-          <button type="button" @click="cyclePlace(-1)">Previous</button>
+          <button
+            type="button"
+            :disabled="Boolean(activeMapTrip && navigatorIndex === 0)"
+            @click="cyclePlace(-1)"
+          >
+            Previous
+          </button>
           <div>
+            <small v-if="selectedPublicTrip">
+              {{ selectedPublicTrip.title }} · Stop {{ navigatorIndex + 1 }} of
+              {{ selectedPublicTrip.stops.length }}
+            </small>
             <strong>{{ selectedPlace.name }}</strong>
             <span>{{ placeLabel(selectedPlace) }}</span>
-            <small>{{ formatVisitedDates(selectedPlace) }}</small>
+            <small v-if="!selectedPublicTrip">{{
+              formatVisitedDates(selectedPlace)
+            }}</small>
           </div>
-          <button type="button" @click="cyclePlace(1)">Next</button>
+          <button
+            type="button"
+            :disabled="
+              Boolean(
+                activeMapTrip &&
+                  navigatorIndex >= activeMapTrip.stops.length - 1
+              )
+            "
+            @click="cyclePlace(1)"
+          >
+            Next
+          </button>
           <blockquote v-if="selectedPlace.memory">
             {{ selectedPlace.memory }}
           </blockquote>
         </div>
 
-        <ul class="my-atlas-public-places">
+        <section v-if="selectedPublicTrip" class="public-trip-stops">
+          <header>
+            <h2>{{ selectedPublicTrip.title }}</h2>
+            <MyAtlasInfo label="About this trip's stop order">
+              These stops follow the order shared by the Atlas owner. Map lines
+              connect the places and do not show a recorded travel path.
+              {{
+                selectedPublicTrip.lifecycle === "planned"
+                  ? "This is a planned trip, not a record of places visited."
+                  : "This trip is marked Past."
+              }}
+            </MyAtlasInfo>
+          </header>
+          <ol>
+            <li
+              v-for="(stop, index) in selectedPublicTrip.stops"
+              :key="`${selectedPublicTrip.id}:${index}`"
+            >
+              <button
+                type="button"
+                :aria-current="navigatorIndex === index ? 'step' : null"
+                @click="selectTripStop(index)"
+              >
+                <b aria-hidden="true">{{ index + 1 }}</b>
+                <span>
+                  <strong>{{ stop.place.name }}</strong>
+                  <small>{{ placeLabel(stop.place) }}</small>
+                </span>
+              </button>
+            </li>
+          </ol>
+        </section>
+        <ul v-else-if="!browsingTrips" class="my-atlas-public-places">
           <li v-for="place in displayedPlaces" :key="place.placeId">
             <button type="button" @click="selectPlace(place.placeId)">
               <strong>{{ place.name }}</strong>
@@ -294,24 +320,17 @@
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import MyAtlasMapNavigator from "../components/MyAtlasMapNavigator.vue"
 import MyAtlasMapHelp from "../components/MyAtlasMapHelp.vue"
+import MyAtlasInfo from "../components/MyAtlasInfo.vue"
 import { instagramProfileUrl } from "../../../../shared/my-atlas-instagram.mjs"
 import { fetchPublicAtlas, fetchPublicAtlasImage } from "../api/client.mjs"
-import {
-  atlasTimelineSequence,
-  atlasStats,
-  atlasYears,
-  formatVisitedDates,
-  placesForYear,
-  placesThroughTimelineStep,
-} from "../catalog/atlasInsights.mjs"
+import { atlasStats, formatVisitedDates } from "../catalog/atlasInsights.mjs"
 import { formatPlaceLabel } from "../catalog/search.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
 import placeCatalog from "../data/place-catalog.proof.json"
-import { downloadMyAtlasStory } from "../export/storyExport.mjs"
 
 export default {
   name: "MyAtlasPublicView",
-  components: { MyAtlasMap, MyAtlasMapNavigator, MyAtlasMapHelp },
+  components: { MyAtlasMap, MyAtlasMapNavigator, MyAtlasMapHelp, MyAtlasInfo },
   props: {
     handle: {
       type: String,
@@ -327,20 +346,13 @@ export default {
       navigatorCollapsed: false,
       navigatorId: "",
       navigatorIndex: 0,
+      browseMode: "",
       error: "",
       atlas: null,
       selectedPlaceId: "",
-      timelinePlaying: false,
-      timelineTimer: null,
-      timelineIndex: -1,
-      yearFilter: "all",
-      showMemories: false,
-      mobileControlsOpen: false,
       apiBaseUrl: "",
       favoriteImageUrl: "",
       favoriteImageError: "",
-      storyExportPending: false,
-      storyExportStatus: "",
       previousTitle: "",
       robotsMeta: null,
       previousRobotsContent: null,
@@ -348,19 +360,58 @@ export default {
     }
   },
   computed: {
+    publicTrips() {
+      return this.atlas?.trips || []
+    },
+    pastTrips() {
+      return this.publicTrips.filter(trip => trip.lifecycle === "past")
+    },
+    plannedTrips() {
+      return this.publicTrips.filter(trip => trip.lifecycle === "planned")
+    },
+    effectiveBrowseMode() {
+      return (
+        this.browseMode ||
+        (this.pastTrips.length
+          ? "past"
+          : this.plannedTrips.length
+            ? "planned"
+            : "destinations")
+      )
+    },
+    visibleTrips() {
+      return this.effectiveBrowseMode === "planned"
+        ? this.plannedTrips
+        : this.effectiveBrowseMode === "past"
+          ? this.pastTrips
+          : []
+    },
+    browsingTrips() {
+      return this.effectiveBrowseMode !== "destinations"
+    },
+    selectedPublicTrip() {
+      return this.browsingTrips
+        ? this.visibleTrips.find(trip => trip.id === this.navigatorId) ||
+            this.visibleTrips[0] ||
+            null
+        : null
+    },
+    activeMapTrip() {
+      return this.navigatorTrip || this.selectedPublicTrip
+    },
     navigationTrips() {
       return [
-        ...(this.displayedPlaces.length
+        ...this.publicTrips,
+        ...(this.places.length
           ? [
               {
                 id: "all-destinations",
-                title: "All destinations",
+                title: "Destinations",
                 kind: "atlas",
-                stops: this.displayedPlaces.map(place => ({ place })),
+                stops: this.places.map(place => ({ place })),
               },
             ]
           : []),
-        ...(this.atlas?.trips || []),
       ]
     },
     navigatorTrip() {
@@ -370,10 +421,10 @@ export default {
         : null
     },
     navigatorLocation() {
-      return this.navigatorTrip?.stops[this.navigatorIndex]?.place || null
+      return this.activeMapTrip?.stops[this.navigatorIndex]?.place || null
     },
     navigatorRoute() {
-      return (this.navigatorTrip?.stops || [])
+      return (this.selectedPublicTrip?.stops || [])
         .map((stop, index) => ({
           key: `public:${index}`,
           role: "stop",
@@ -410,17 +461,17 @@ export default {
       return this.places.length === 1 ? "place" : "places"
     },
     displayedPlaces() {
-      return this.timelineIndex >= 0
-        ? placesThroughTimelineStep(this.timelineSequence, this.timelineIndex)
-        : placesForYear(this.places, this.yearFilter)
-    },
-    filterLabel() {
-      if (this.timelineEntry) {
-        return `Timeline through ${this.timelineEntry.place.name}, ${this.timelineEntry.year}`
-      }
-      if (this.yearFilter === "all") return "All destinations"
-      if (this.yearFilter === "undated") return "Destinations with open dates"
-      return `Destinations from ${this.yearFilter}`
+      if (this.browsingTrips && !this.selectedPublicTrip) return []
+      return this.selectedPublicTrip
+        ? [
+            ...new Map(
+              this.selectedPublicTrip.stops.map(stop => [
+                stop.place.placeId,
+                stop.place,
+              ])
+            ).values(),
+          ]
+        : this.places
     },
     selectedPlace() {
       if (this.navigatorLocation) return this.navigatorLocation
@@ -436,41 +487,16 @@ export default {
     visibleStats() {
       return atlasStats(this.displayedPlaces)
     },
-    visibleMemoryCount() {
-      return this.displayedPlaces.filter(place => Boolean(place.memory)).length
-    },
-    years() {
-      return atlasYears(this.places)
-    },
-    timelineSequence() {
-      return atlasTimelineSequence(this.places)
-    },
-    timelineEntry() {
-      return this.timelineSequence[this.timelineIndex] || null
-    },
-    timelineButtonLabel() {
-      if (this.timelinePlaying) return "Pause timeline"
-      if (
-        this.timelineIndex >= 0 &&
-        this.timelineIndex < this.timelineSequence.length - 1
-      ) {
-        return "Resume timeline"
-      }
-      if (
-        this.timelineSequence.length &&
-        this.timelineIndex === this.timelineSequence.length - 1
-      ) {
-        return "Replay timeline"
-      }
-      return "Play timeline"
-    },
   },
   watch: {
     navigationTrips(trips) {
       if (!this.navigatorId) return
       const trip = trips.find(item => item.id === this.navigatorId)
-      if (!trip) this.closeNavigator()
-      else
+      if (!trip) {
+        this.closeNavigator()
+        this.navigatorId = ""
+        this.navigatorIndex = 0
+      } else
         this.navigatorIndex = Math.max(
           0,
           Math.min(this.navigatorIndex, trip.stops.length - 1)
@@ -494,7 +520,6 @@ export default {
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
-    window.clearTimeout(this.timelineTimer)
     if (this.favoriteImageUrl) URL.revokeObjectURL(this.favoriteImageUrl)
     document.title = this.previousTitle
     if (this.createdRobotsMeta) this.robotsMeta?.remove()
@@ -525,29 +550,54 @@ export default {
       this.navigatorCollapsed = false
       if (!this.navigatorTrip)
         this.chooseTrip(this.navigationTrips[0]?.id || "")
+      else if (this.overviewExpanded) this.toggleOverview()
+    },
+    setBrowseMode(mode) {
+      if (!["planned", "past", "destinations"].includes(mode)) return
+      this.browseMode = mode
+      this.navigatorOpen = false
+      this.navigatorIndex = 0
+      this.navigatorId =
+        mode === "destinations"
+          ? "all-destinations"
+          : this.visibleTrips[0]?.id || ""
+      this.selectedPlaceId = ""
     },
     chooseTrip(id) {
-      if (!this.navigationTrips.some(trip => trip.id === id)) return
-      this.pauseTimeline()
+      const trip = this.navigationTrips.find(trip => trip.id === id)
+      if (!trip) return
+      this.browseMode =
+        id === "all-destinations" ? "destinations" : trip.lifecycle
+      this.navigatorOpen = true
       this.navigatorId = id
       this.navigatorIndex = 0
       this.navigatorCollapsed = false
       if (this.overviewExpanded) this.toggleOverview()
     },
     stepTrip(direction) {
-      if (this.navigatorTrip)
+      const trip = this.activeMapTrip
+      if (trip) {
+        this.navigatorId = trip.id
+        this.navigatorOpen = true
         this.navigatorIndex = Math.max(
           0,
-          Math.min(
-            this.navigatorTrip.stops.length - 1,
-            this.navigatorIndex + direction
-          )
+          Math.min(trip.stops.length - 1, this.navigatorIndex + direction)
         )
+      }
     },
     closeNavigator() {
       this.navigatorOpen = false
-      this.navigatorId = ""
-      this.navigatorIndex = 0
+    },
+    selectTripStop(index) {
+      if (!this.selectedPublicTrip?.stops[index]) return
+      this.navigatorId = this.selectedPublicTrip.id
+      this.navigatorIndex = index
+      this.navigatorOpen = true
+      this.navigatorCollapsed = false
+    },
+    tripPreview(trip) {
+      const names = trip.stops.slice(0, 3).map(stop => stop.place.name)
+      return names.join(" → ") + (trip.stops.length > 3 ? " → …" : "")
     },
     async loadAtlas() {
       try {
@@ -588,22 +638,21 @@ export default {
       this.$refs.favoriteImageDialog?.close()
     },
     selectPlace(placeId) {
-      if (this.navigatorTrip) {
-        const index = this.navigatorTrip.stops.findIndex(
+      if (this.activeMapTrip) {
+        if (this.navigatorLocation?.placeId === placeId) return
+        const index = this.activeMapTrip.stops.findIndex(
           stop => stop.place.placeId === placeId
         )
         if (index >= 0) this.navigatorIndex = index
       }
-      if (this.timelinePlaying) this.pauseTimeline()
       this.selectedPlaceId = placeId
     },
     cyclePlace(direction) {
-      if (this.navigatorTrip) {
+      if (this.activeMapTrip) {
         this.stepTrip(direction)
         return
       }
       if (!this.displayedPlaces.length) return
-      if (this.timelinePlaying) this.pauseTimeline()
       const currentIndex = this.displayedPlaces.findIndex(
         place => place.placeId === this.selectedPlaceId
       )
@@ -613,75 +662,6 @@ export default {
         (baseIndex + direction + this.displayedPlaces.length) %
         this.displayedPlaces.length
       this.selectedPlaceId = this.displayedPlaces[nextIndex].placeId
-    },
-    pauseTimeline() {
-      window.clearTimeout(this.timelineTimer)
-      this.timelineTimer = null
-      this.timelinePlaying = false
-    },
-    resetTimeline() {
-      this.pauseTimeline()
-      this.timelineIndex = -1
-    },
-    showTimelineStep(index) {
-      const entry = this.timelineSequence[index]
-      if (!entry) return false
-      this.timelineIndex = index
-      this.selectedPlaceId = entry.place.placeId
-      return true
-    },
-    scheduleTimelineStep() {
-      window.clearTimeout(this.timelineTimer)
-      this.timelineTimer = window.setTimeout(() => {
-        if (!this.timelinePlaying) return
-        const nextIndex = this.timelineIndex + 1
-        if (!this.showTimelineStep(nextIndex)) {
-          this.timelinePlaying = false
-          this.timelineTimer = null
-          return
-        }
-        this.scheduleTimelineStep()
-      }, 4200)
-    },
-    toggleTimeline() {
-      if (this.timelinePlaying) {
-        this.pauseTimeline()
-        return
-      }
-      if (!this.timelineSequence.length) return
-      this.yearFilter = "all"
-      if (
-        this.timelineIndex < 0 ||
-        this.timelineIndex >= this.timelineSequence.length - 1
-      ) {
-        this.showTimelineStep(0)
-      }
-      this.timelinePlaying = true
-      this.scheduleTimelineStep()
-    },
-    async exportStory() {
-      if (this.storyExportPending) return
-      this.storyExportPending = true
-      this.storyExportStatus = "Creating the Story image."
-      try {
-        const favoriteImage = this.$refs.favoriteImagePreview || null
-        if (favoriteImage?.decode) await favoriteImage.decode()
-        const filename = await downloadMyAtlasStory({
-          displayName: this.atlas.displayName,
-          favoriteImage,
-          favoriteImageLocation: this.atlas.favoriteImage?.location || "",
-          filterLabel: this.filterLabel,
-          handle: this.atlas.handle,
-          places: this.displayedPlaces,
-          stats: this.visibleStats,
-        })
-        this.storyExportStatus = `${filename} was downloaded.`
-      } catch {
-        this.storyExportStatus =
-          "The Story image could not be created. Try again."
-      } finally {
-        this.storyExportPending = false
-      }
     },
     formatVisitedDates,
     placeLabel(place) {
@@ -696,6 +676,169 @@ export default {
 </script>
 
 <style scoped>
+.public-map-view-filter {
+  position: absolute;
+  z-index: 7;
+  top: 12px;
+  left: calc(28rem + 2rem);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 180px;
+  min-height: 48px;
+  padding: 0 10px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
+  border-radius: 12px;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-page, #0a1416);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-size: 0.75rem;
+}
+.public-map-view-filter > span {
+  color: var(--color-text-muted, #a8bab4);
+}
+.public-map-view-filter select {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: 6px;
+  color: inherit;
+  background: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.public-map-view-filter select:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: 0;
+}
+.is-map-only .public-map-view-filter {
+  left: 12px;
+}
+@media (max-width: 720px) {
+  .public-map-view-filter {
+    left: 12px;
+    max-width: calc(100% - 100px);
+  }
+}
+.public-trip-browser {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.public-trip-picker button,
+.public-trip-stops button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.35);
+  border-radius: 12px;
+  color: var(--color-text, #edf7f2);
+  background: var(--color-surface-raised, #111f22);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transform: none;
+}
+
+.public-trip-picker {
+  display: grid;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.public-trip-picker button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px 10px;
+  width: 100%;
+  text-align: left;
+}
+.public-trip-picker button > span {
+  grid-column: 1 / -1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.public-trip-picker small,
+.public-trip-picker button > span,
+.public-trip-stops small {
+  color: var(--color-text-muted, #a8bab4);
+  font-size: 0.68rem;
+}
+.public-trip-picker strong,
+.public-trip-stops strong {
+  overflow-wrap: anywhere;
+}
+.public-trip-picker button[aria-pressed="true"],
+.public-trip-stops button[aria-current="step"] {
+  border-color: var(--color-accent, #e6ba68);
+  box-shadow: inset 3px 0 var(--color-accent, #e6ba68);
+}
+.public-trip-stops {
+  margin-bottom: 16px;
+}
+.public-trip-stops > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.public-trip-stops h2 {
+  min-width: 0;
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+.public-trip-stops ol {
+  display: grid;
+  gap: 6px;
+  max-height: 360px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+.public-trip-stops button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+}
+.public-trip-stops button > b {
+  flex: 0 0 26px;
+  color: var(--color-accent-soft, #e6ba68);
+  text-align: center;
+}
+.public-trip-stops button > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.public-trip-picker button:hover,
+.public-trip-stops button:hover {
+  border-color: var(--color-accent, #e6ba68);
+  filter: brightness(1.08);
+  transform: none;
+}
+.public-trip-picker button:active,
+.public-trip-stops button:active {
+  box-shadow: inset 0 0 0 2px var(--color-accent, #e6ba68);
+}
+.public-trip-picker button:focus-visible,
+.public-trip-stops button:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: -3px;
+}
 .my-atlas-public {
   position: relative;
   min-height: 100dvh;
@@ -862,8 +1005,7 @@ export default {
   box-shadow: 0 0 0 3px rgba(230, 186, 104, 0.28);
 }
 
-.my-atlas-public-image-error,
-.my-atlas-public-export-status {
+.my-atlas-public-image-error {
   margin: 0 0 0.8rem;
   color: var(--color-text-muted, #9fb1ab);
   font-size: 0.62rem;
@@ -983,33 +1125,6 @@ export default {
   font-size: 0.48rem;
 }
 
-.my-atlas-public-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.4rem;
-}
-
-.my-atlas-public-controls-drawer {
-  display: grid;
-  gap: 0.55rem;
-  margin-bottom: 0.8rem;
-}
-
-.my-atlas-public-mobile-controls-toggle {
-  display: none;
-}
-
-.my-atlas-public-controls label {
-  display: grid;
-  flex: 1 1 10rem;
-  gap: 0.2rem;
-  color: var(--color-text-muted, #93a69f);
-  font-size: 0.6rem;
-}
-
-.my-atlas-public-controls select,
-.my-atlas-public-controls button,
 .my-atlas-public-selected button {
   padding: 0.5rem 0.6rem;
   border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.38);
@@ -1019,38 +1134,6 @@ export default {
   font: inherit;
   font-size: 0.62rem;
   font-weight: 700;
-}
-
-.my-atlas-public-controls select {
-  display: block;
-}
-
-.my-atlas-public-controls button:disabled {
-  cursor: wait;
-  opacity: 0.56;
-}
-
-.my-atlas-public-timeline {
-  display: grid;
-  gap: 0.08rem;
-  margin: 0 0 0.32rem;
-  color: var(--color-accent-soft, #f0c978);
-}
-
-.my-atlas-public-timeline strong {
-  font-family: "Poppins", system-ui, sans-serif;
-  font-size: 1.05rem;
-}
-
-.my-atlas-public-timeline span,
-.my-atlas-public-route-note {
-  color: var(--color-text-muted, #8fa39c);
-  font-size: 0.6rem;
-}
-
-.my-atlas-public-route-note {
-  margin: 0;
-  line-height: 1.45;
 }
 
 .my-atlas-public-selected {
@@ -1249,55 +1332,6 @@ export default {
     color: var(--color-accent-soft, #d9c58f);
     background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
     white-space: nowrap;
-  }
-
-  .my-atlas-public-mobile-controls-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: 0.8rem;
-    padding: 0.7rem 0.75rem;
-    border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.32);
-    border-radius: 0.75rem;
-    color: var(--color-text, #edf7f2);
-    background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.07);
-    font: inherit;
-    font-size: 0.68rem;
-    font-weight: 700;
-  }
-
-  .my-atlas-public-mobile-controls-toggle strong {
-    color: var(--color-accent-soft, #e6ba68);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.56rem;
-  }
-
-  .my-atlas-public-controls-drawer {
-    display: none;
-  }
-
-  .my-atlas-public-controls-drawer.is-open {
-    display: grid;
-  }
-
-  .my-atlas-public-controls {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .my-atlas-public-controls label {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  .my-atlas-public-controls select {
-    width: 100%;
-  }
-
-  .my-atlas-public-controls button {
-    width: 100%;
   }
 }
 .my-atlas-public.is-map-only {

@@ -1661,6 +1661,48 @@ await assert.rejects(
     2,
     "Repeated public visits must remain distinct"
   )
+  responseBody.atlas.plannedTrips = [
+    {
+      id: "public-planned-trip-1",
+      title: "Future trip",
+      lifecycle: "planned",
+      stops: [
+        {
+          place: {
+            ...responseBody.atlas.places[1],
+            visitedYears: [],
+            visitedDates: [],
+          },
+        },
+      ],
+    },
+  ]
+  const mixed = await fetchPublicAtlas({
+    apiBaseUrl: "https://api.example.com",
+    handle: "justin-travels",
+    fetchImpl: async () => Response.json(responseBody),
+  })
+  assert.deepEqual(
+    mixed.trips.map(trip => trip.lifecycle),
+    ["past", "planned"]
+  )
+  assert.deepEqual(mixed.trips[1].stops[0].place.visitedDates, [])
+  assert.equal(
+    mixed.places.length,
+    atlas.places.length,
+    "planned geography must not inflate visited destinations"
+  )
+  responseBody.atlas.plannedTrips[0].stops[0].place.memory =
+    "A private plan note"
+  await assert.rejects(
+    fetchPublicAtlas({
+      apiBaseUrl: "https://api.example.com",
+      handle: "justin-travels",
+      fetchImpl: async () => Response.json(responseBody),
+    }),
+    { code: "invalid_response" }
+  )
+  delete responseBody.atlas.plannedTrips
   responseBody.atlas.trips[0].stops[0].placeId = "geonames:999999999"
   await assert.rejects(
     fetchPublicAtlas({

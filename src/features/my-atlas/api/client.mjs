@@ -1375,6 +1375,26 @@ export async function fetchPublicAtlas({
                 !body.atlas.places.some(place => place.placeId === stop.placeId)
             )
         ))) ||
+    (body.atlas.plannedTrips !== undefined &&
+      (!Array.isArray(body.atlas.plannedTrips) ||
+        body.atlas.plannedTrips.length > 501 ||
+        body.atlas.plannedTrips.some(
+          trip =>
+            !/^public-planned-trip-[1-9]\d*$/.test(trip?.id || "") ||
+            typeof trip.title !== "string" ||
+            trip.title.length > 80 ||
+            trip.lifecycle !== "planned" ||
+            !Array.isArray(trip.stops) ||
+            !trip.stops.length ||
+            trip.stops.length > 50 ||
+            trip.stops.some(
+              stop =>
+                !isPublicPlace(stop?.place) ||
+                stop.place.memory !== undefined ||
+                (stop.place.visitedDates || []).length ||
+                (stop.place.visitedYears || []).length
+            )
+        ))) ||
     typeof body.catalog?.revision !== "string" ||
     typeof body.catalog?.attribution?.provider !== "string" ||
     typeof body.catalog?.attribution?.license !== "string"
@@ -1393,8 +1413,8 @@ export async function fetchPublicAtlas({
       : {}),
     favoriteImage: normalizedAtlasImage(body.atlas.favoriteImage),
     places: Object.freeze(body.atlas.places.map(normalizedPin)),
-    trips: Object.freeze(
-      (body.atlas.trips || []).map(trip =>
+    trips: Object.freeze([
+      ...(body.atlas.trips || []).map(trip =>
         Object.freeze({
           id: trip.id,
           title: trip.title,
@@ -1412,8 +1432,21 @@ export async function fetchPublicAtlas({
             )
           ),
         })
-      )
-    ),
+      ),
+      ...(body.atlas.plannedTrips || []).map(trip =>
+        Object.freeze({
+          id: trip.id,
+          title: trip.title,
+          lifecycle: "planned",
+          kind: "trip",
+          stops: Object.freeze(
+            trip.stops.map(stop =>
+              Object.freeze({ place: normalizedPin(stop.place) })
+            )
+          ),
+        })
+      ),
+    ]),
     catalog: Object.freeze({ ...body.catalog }),
   })
 }

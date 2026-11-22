@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-19
-updated: 2026-11-21
+updated: 2026-11-22
 related:
   - my-atlas-account-state
   - my-atlas-private-beta-implementation
@@ -278,3 +278,15 @@ and focus evidence is recorded in the trip transition implementation document.
 This deters casual browser saving, not copying loaded image bytes or taking
 screenshots. No R2 access policy, image endpoint, visibility permission or
 account data changes are introduced.
+
+## Owner-only Story exports, November 22, local
+
+The owner requested removal of public visitors' Story download. The public
+profile now omits the export button, method, status state and Story-export
+import. The owner still creates Story images from their own account. Public
+favorite-photo display/full-image viewing and image context-menu/drag
+suppression retain their existing contracts. This supersedes the earlier
+signed-out Story export behavior in this document. Focused view tests verify
+public export is absent and owner export remains available; responsive browser
+evidence is recorded in the integrated trip checklist. The owner authorized
+frontend promotion alongside the public trip views; PR 239 tracks the release.

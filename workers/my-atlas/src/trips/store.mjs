@@ -30,6 +30,37 @@ export const storedTrips = storage =>
     ([, value]) => value
   )
 
+// Keep planned geography separate from the compatibility Visited Atlas.
+export function publicTripGroups(storage) {
+  const trips = [],
+    plannedTrips = []
+  for (const trip of storedTrips(storage)) {
+    if (
+      !trip.sharing?.publicAtlas ||
+      trip.workflow === "archived" ||
+      !trip.stops?.length
+    )
+      continue
+    assertCanonicalTrip(trip)
+    if (trip.lifecycle === "past")
+      trips.push({
+        id: `public-trip-${trips.length + 1}`,
+        title: trip.title,
+        stops: trip.stops.map(stop => ({ placeId: stop.place.placeId })),
+      })
+    else
+      plannedTrips.push({
+        id: `public-planned-trip-${plannedTrips.length + 1}`,
+        title: trip.title,
+        lifecycle: "planned",
+        stops: trip.stops.map(stop => ({
+          place: tripPlaceProjection(stop.place),
+        })),
+      })
+  }
+  return { trips, plannedTrips }
+}
+
 function validCollection(trips, storage, visits = []) {
   assertTripStorageBudget(trips, null, visits)
   if (trips.length > 501) throw Error("trip_limit_reached")
@@ -276,13 +307,14 @@ export function mutateTripStore(
   { source, alarm } = {}
 ) {
   const publicFootprint = () =>
-    JSON.stringify(
-      tripPins(storage, { publicOnly: true }).map(pin => ({
+    JSON.stringify({
+      ...publicTripGroups(storage),
+      pins: tripPins(storage, { publicOnly: true }).map(pin => ({
         place: pin.placeSnapshot,
         dates: pin.visitedDates,
         memory: pin.memory,
-      }))
-    )
+      })),
+    })
   const beforePublic = publicFootprint()
   const receiptKey = `trip-operation:${command.operationDigest}`
   const receipt = storage.kv.get(receiptKey)
