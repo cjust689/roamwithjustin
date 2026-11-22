@@ -589,3 +589,19 @@ at 320 by 568, 390 by 844, 720 by 900 and 568 by 320, with no header, itinerary,
 SDK-control or attribution overlap. Evidence:
 `.state/theme/shared-route-key-browser.json` and screenshots. Focused ESLint
 passed. This bounded CSS fix accompanies the release alignment/handoff PR.
+
+### Explore opener alignment, November 22, local
+
+- [x] Center the closed in-map Explore button's text and arrow explicitly and
+      set a consistent line height. Retain the existing 44 pixel touch target.
+- [x] Chrome passed 24 owner/public, both-theme, 320/390/1440 pixel and
+      open/hidden-menu combinations. The text center stayed within 0.063 pixels
+      of the pill center and the arrow span matched it exactly. Open/close still
+      worked with the same mounted map and no horizontal overflow. Evidence:
+      `.state/theme/pill-alignment-browser.json`, screenshots and
+      `.state/my-atlas/pill-alignment-acceptance.mjs`.
+- [x] Focused ESLint and managed documentation audit passed; the audit retains
+      its existing 12 warnings.
+- [x] Prepare this correction for the owner-authorized develop/main release.
+      Protected branch checks, Pages deployment and post-deployment acceptance
+      are recorded in the release PRs. No Worker or account changes are required.

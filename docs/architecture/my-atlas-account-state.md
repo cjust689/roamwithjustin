@@ -1393,3 +1393,8 @@ for the upper SDK controls and lower menu restore bar. Stop details can scroll
 inside the flex column; Previous/Next sit in a separate fixed-size footer so
 short maps do not hide those actions. This affects presentation only and retains
 the mounted map, ordered trip stops and existing navigation events.
+
+The closed navigator's Explore button explicitly centers its label and arrow
+with `align-items: center` and a unitless line height. This avoids the anonymous
+text flex item aligning above a stretched icon span. Owner and public openers
+share the correction and retain their existing touch size and navigation events.
