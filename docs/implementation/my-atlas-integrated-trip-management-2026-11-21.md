@@ -580,3 +580,12 @@ this handoff into develop before completing the same main promotion.
 No authenticated production account acceptance or real provider short-link
 success is inferred from the public read checks. The final release report
 separates protected-branch promotion, Pages deployment and browser acceptance.
+
+The final pre-promotion pass also found that legacy shared snapshots with explicit
+start/finish endpoints placed their mobile route key under the brand pill. The
+shared view now places that key below the header, and uses just its color labels
+on short mobile viewports to clear the itinerary card. Chrome passed both themes
+at 320 by 568, 390 by 844, 720 by 900 and 568 by 320, with no header, itinerary,
+SDK-control or attribution overlap. Evidence:
+`.state/theme/shared-route-key-browser.json` and screenshots. Focused ESLint
+passed. This bounded CSS fix accompanies the release alignment/handoff PR.
