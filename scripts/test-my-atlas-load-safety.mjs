@@ -160,6 +160,14 @@ let reads = 0,
   deletes = 0
 let overviewResponse = { profile, trips: [], legacyPlans: [] }
 const pin = { pinId: "pin_saved", memory: "Persisted memory" }
+const visibilityCalls = []
+let visibilityProfile = {
+  ...profile,
+  public: false,
+  discoverable: false,
+  revision: 5,
+}
+let rejectDiscovery = false
 const dependencies = {
   formatVisitedDates: () => "",
   formatPlaceTypeLabel: () => "",
@@ -180,6 +188,17 @@ const dependencies = {
   discardLegacyDeletion,
   window: { sessionStorage },
   getMyAtlasApiAccessToken: async () => "fixture",
+  updateMyAtlasDiscovery: async input => {
+    visibilityCalls.push({ kind: "discovery", ...input })
+    if (rejectDiscovery) throw Error("Fixture listing failure")
+    visibilityProfile = {
+      ...visibilityProfile,
+      public: input.public,
+      discoverable: input.discoverable,
+      revision: input.revision + 1,
+    }
+    return { ...visibilityProfile }
+  },
   requestMyAtlasTrips: async () => overviewResponse,
   deleteMyAtlasAccountWithRevisionRecovery: () => {
     deletes++
@@ -459,4 +478,78 @@ assert.equal(
 )
 console.log(
   "Trip navigation preserves repeated visits, stop numbering and saved data."
+)
+
+const visibility = {
+  canUseAtlas: true,
+  accountPending: false,
+  discoveryPending: false,
+  hasPublicAtlasContent: true,
+  apiBaseUrl: "https://fixture.example",
+  accountProfile: { ...visibilityProfile },
+  async withAccountRevisionRetry(token, operation) {
+    assert.equal(token, "fixture")
+    return operation(this.accountProfile.revision)
+  },
+}
+await component.methods.setProfileListing.call(visibility, false)
+assert.equal(
+  visibilityCalls.length,
+  0,
+  "An unchanged private profile needs no write"
+)
+visibility.hasPublicAtlasContent = false
+await component.methods.setProfileListing.call(visibility, true)
+assert.equal(visibilityCalls.length, 0, "Empty profiles cannot be listed")
+visibility.hasPublicAtlasContent = true
+const listing = component.methods.setProfileListing.call(visibility, true)
+assert.equal(visibility.accountPending, true)
+assert.equal(visibility.discoveryPending, true)
+await component.methods.setProfileListing.call(visibility, true)
+await listing
+assert.equal(
+  visibilityCalls.length,
+  1,
+  "Repeated clicks cannot duplicate the request"
+)
+assert.equal(visibilityCalls[0].public, true)
+assert.equal(
+  visibilityCalls[0].discoverable,
+  true,
+  "One request publishes and lists together"
+)
+assert.equal(visibility.accountProfile.public, true)
+assert.equal(visibility.accountProfile.discoverable, true)
+await component.methods.setProfileListing.call(visibility, false)
+assert.equal(visibilityCalls[1].public, false)
+assert.equal(visibilityCalls[1].discoverable, false)
+assert.equal(visibility.accountProfile.public, false)
+assert.equal(visibility.accountProfile.discoverable, false)
+visibilityProfile = { ...visibilityProfile, public: true, discoverable: false }
+visibility.accountProfile = { ...visibilityProfile }
+await component.methods.setProfileListing.call(visibility, false)
+assert.equal(
+  visibility.accountProfile.public,
+  false,
+  "Legacy unlisted profiles can be made private without listing first"
+)
+assert.equal(visibilityCalls.at(-1).discoverable, false)
+rejectDiscovery = true
+await component.methods.setProfileListing.call(visibility, true)
+assert.equal(visibility.accountPending, false)
+assert.equal(visibility.discoveryPending, false)
+assert.equal(visibility.accountProfile.public, false)
+assert.equal(
+  visibility.accountProfile.discoverable,
+  false,
+  "Failed requests preserve both settings"
+)
+assert.ok(visibility.accountError)
+visibility.canUseAtlas = false
+const beforeSignedOut = visibilityCalls.length
+await component.methods.setProfileListing.call(visibility, true)
+await component.methods.setProfileListing.call(visibility, false)
+assert.equal(visibilityCalls.length, beforeSignedOut)
+console.log(
+  "Explore listing changes profile publication atomically with guarded, revisioned requests."
 )

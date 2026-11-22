@@ -234,6 +234,71 @@
                 >
                   Customize My Atlas
                 </button>
+                <section
+                  class="my-atlas-discovery-settings"
+                  aria-labelledby="my-atlas-discovery-title"
+                >
+                  <div class="my-atlas-discovery-heading">
+                    <h3 id="my-atlas-discovery-title">Explore Atlases</h3>
+                    <MyAtlasInfo
+                      label="About listing your profile in Explore Atlases"
+                      >Turn this on to publish your profile and list it for
+                      everyone browsing Explore Atlases. Turn it off to remove
+                      the listing and make your profile private. Your favorite
+                      image appears only if you allow public image use in
+                      Customize My Atlas. Individual trip links can be shared
+                      separately, even while your profile is
+                      private.</MyAtlasInfo
+                    >
+                  </div>
+                  <MyAtlasSwitch
+                    :value="profileListed"
+                    :disabled="
+                      accountPending ||
+                      (!profileListed && !hasPublicAtlasContent)
+                    "
+                    :pending="discoveryPending"
+                    @input="setProfileListing"
+                    >List my profile in Explore Atlases</MyAtlasSwitch
+                  >
+                  <p class="my-atlas-profile-help" role="status">
+                    {{
+                      profileListed
+                        ? "Your profile is public and listed in Explore Atlases."
+                        : accountProfile.public
+                          ? "Your existing profile link is public but not listed. List it in Explore, or make it private below."
+                          : "Your profile is private. Direct trip links can still be shared."
+                    }}
+                  </p>
+                  <button
+                    v-if="accountProfile.public && !accountProfile.discoverable"
+                    type="button"
+                    class="my-atlas-profile-customize"
+                    :disabled="accountPending"
+                    @click="setProfileListing(false)"
+                  >
+                    Make profile private
+                  </button>
+                  <p
+                    v-if="!hasPublicAtlasContent && !profileListed"
+                    class="my-atlas-profile-help"
+                  >
+                    Add a visited destination or include a trip on your profile
+                    before listing it.
+                  </p>
+                  <button
+                    v-if="accountProfile.public"
+                    type="button"
+                    class="my-atlas-profile-customize"
+                    :disabled="accountPending"
+                    @click="copyShareLink"
+                  >
+                    Copy profile link
+                  </button>
+                  <p v-if="accountProfile.public" class="my-atlas-share-link">
+                    <span>Profile link</span><strong>{{ shareUrl }}</strong>
+                  </p>
+                </section>
                 <details class="my-atlas-profile-links">
                   <summary>Profile links</summary>
                   <form @submit.prevent="saveInstagramHandle">
@@ -311,15 +376,10 @@
                   </details>
                 </div>
 
-                <p v-if="accountProfile.public" class="my-atlas-share-link">
-                  <span>Public link</span>
-                  <strong>{{ shareUrl }}</strong>
-                </p>
-
                 <router-link
                   class="my-atlas-explore-link"
                   to="/my-atlas/explore"
-                  >Explore Atlases</router-link
+                  >Explore other Atlases</router-link
                 >
                 <p class="my-atlas-profile-help">
                   Discover other users' publicly shared Atlases.
@@ -902,81 +962,39 @@
             v-show="activeAtlasTab === 'overview'"
             class="my-atlas-tools my-atlas-workflow-section"
           >
-            <button
-              type="button"
-              class="my-atlas-section-toggle"
-              :aria-expanded="String(toolsOpen)"
-              aria-controls="my-atlas-tools-content"
-              @click="openTools"
-            >
-              <span>
-                <strong>Share Your Atlas</strong>
-                <small>
-                  {{
-                    accountProfile.public
-                      ? "Your Atlas has a public link"
-                      : !hasPublicAtlasContent
-                        ? "Add a destination or publish a trip to share"
-                        : "Your Atlas is private"
-                  }}
-                </small>
-              </span>
-              <b>{{ toolsOpen ? "Hide" : "Open" }}</b>
-            </button>
             <div
-              v-if="toolsOpen"
-              id="my-atlas-tools-content"
-              class="my-atlas-section-content my-atlas-tools-content"
+              class="my-atlas-tools-content my-atlas-section-content my-atlas-share-summary"
             >
+              <div class="my-atlas-sharing-heading">
+                <h2>Share Your Atlas</h2>
+                <MyAtlasInfo label="How trip sharing and Explore listing work"
+                  >Share individual Planned or Past trips from their trip cards.
+                  These links work while your profile is private and keep their
+                  saved snapshot. Planned and Past trips appear in separate
+                  views. Profile visibility is controlled by List my profile in
+                  Explore Atlases in Profile settings. Story images use your
+                  visited destinations.</MyAtlasInfo
+                >
+              </div>
               <p>
-                Share visited destinations and trips marked Public Atlas.
-                Planned and Past trips appear in separate views. Create a Story
-                image of your visited destinations, or share an individual trip
-                link.
+                Share a trip from its trip card, or create a Story image of your
+                visited destinations.
               </p>
               <div
-                v-if="!hasPublicAtlasContent"
+                v-if="!pinnedPlaces.length"
                 class="my-atlas-tools-empty"
                 role="status"
               >
-                <strong>Your Atlas is empty</strong>
+                <strong>No visited destinations yet</strong>
                 <p>
-                  {{
-                    atlasImage
-                      ? "Your favorite image is saved. Add at least one visited place or mark a planned trip Public Atlas to share your profile."
-                      : "Add at least one visited place or mark a planned trip Public Atlas to share your profile."
-                  }}
-                  Story exports from this Overview use visited destinations.
-                  Saved places stay private.
+                  Add a visited place to create a Story image. You can still
+                  share Planned and Past trip links.
                 </p>
                 <button type="button" @click="openAtlasPanel('add')">
                   Add a visited place
                 </button>
               </div>
               <div class="my-atlas-tools-actions">
-                <button
-                  type="button"
-                  :disabled="
-                    accountPending ||
-                    (!hasPublicAtlasContent && !accountProfile.public)
-                  "
-                  @click="toggleSharing"
-                >
-                  {{
-                    accountProfile.public
-                      ? "Make Atlas private"
-                      : "Make Atlas public"
-                  }}
-                </button>
-                <button
-                  v-if="accountProfile.public"
-                  type="button"
-                  :disabled="accountPending"
-                  @click="copyShareLink"
-                >
-                  Copy Atlas link
-                </button>
-
                 <button
                   type="button"
                   :disabled="
@@ -1158,34 +1176,6 @@
                   </p>
                 </div>
               </div>
-
-              <h3>Profile presentation</h3>
-              <div class="my-atlas-tools-actions">
-                <button
-                  v-if="accountProfile.public"
-                  type="button"
-                  :disabled="accountPending"
-                  @click="toggleDiscovery"
-                >
-                  {{
-                    accountProfile.discoverable
-                      ? "Remove from Explore Atlases"
-                      : "List in Explore Atlases"
-                  }}
-                </button>
-              </div>
-              <p v-if="accountProfile.public" class="my-atlas-tools-status">
-                {{
-                  accountProfile.discoverable
-                    ? "Your handle and public favorite image can appear in Explore Atlases."
-                    : "Your Atlas stays out of Explore Atlases until you choose to list it."
-                }}
-              </p>
-
-              <p v-if="!accountProfile.public">
-                Make your Atlas public in Share Your Atlas to list it in Explore
-                Atlases.
-              </p>
             </div>
           </section>
         </div>
@@ -1242,6 +1232,7 @@
 
 <script>
 import MyAtlasLocationPicker from "../components/MyAtlasLocationPicker.vue"
+import MyAtlasInfo from "../components/MyAtlasInfo.vue"
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
@@ -1291,7 +1282,6 @@ import {
   updateMyAtlasImageVisibility,
   updateMyAtlasPin,
   updateMyAtlasDiscovery,
-  updateMyAtlasSharing,
   updateMyAtlasInstagram,
 } from "../api/client.mjs"
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
@@ -1322,6 +1312,7 @@ const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasInfo,
     MyAtlasMapNavigator,
     MyAtlasMapHelp,
     MyAtlasSwitch,
@@ -1350,6 +1341,7 @@ export default {
       actionFeedbackSequence: 0,
       instagramDraft: "",
       instagramError: "",
+      discoveryPending: false,
       searchResults: [],
       searchPending: false,
       searchTimer: null,
@@ -1385,7 +1377,6 @@ export default {
       mobileControlsOpen: false,
       addPlaceOpen: false,
       visitedOpen: false,
-      toolsOpen: false,
       customizationOpen: false,
       atlasImage: null,
       atlasImageLocationDraft: "",
@@ -1438,6 +1429,11 @@ export default {
     }
   },
   computed: {
+    profileListed() {
+      return Boolean(
+        this.accountProfile?.public && this.accountProfile?.discoverable
+      )
+    },
     hasPublicAtlasContent() {
       return (
         this.pins.length > 0 ||
@@ -2046,7 +2042,6 @@ export default {
       this.activeAtlasTab = tab
       this.addPlaceOpen = false
       this.visitedOpen = false
-      this.toolsOpen = false
       this.$refs.planner?.closePlanner()
       this.closePinEditor()
       this.cancelCustomPlace()
@@ -2280,7 +2275,6 @@ export default {
       const nextVisited = panel === "visited" && !this.visitedOpen
       this.addPlaceOpen = nextAdd
       this.visitedOpen = panel === "add" ? true : nextVisited
-      this.toolsOpen = false
       if (nextAdd || nextVisited) this.$refs.planner?.closePlanner()
       if (nextAdd) this.$nextTick(() => this.$refs.searchInput?.focus())
     },
@@ -2289,19 +2283,8 @@ export default {
       this.$refs.trips?.close()
       this.addPlaceOpen = false
       this.visitedOpen = false
-      this.toolsOpen = false
       await this.$nextTick()
       await this.$refs.planner?.revealPlanner()
-    },
-    openTools() {
-      this.activeAtlasTab = "overview"
-      const opening = !this.toolsOpen
-      this.toolsOpen = opening
-      if (!opening) return
-      this.toolsStatus = ""
-      this.addPlaceOpen = false
-      this.visitedOpen = false
-      this.$refs.planner?.closePlanner()
     },
     updatePlanningRevision(revision) {
       if (
@@ -2368,7 +2351,6 @@ export default {
       this.selectedPlaceId = ""
       this.addPlaceOpen = false
       this.visitedOpen = false
-      this.toolsOpen = false
       this.toolsStatus = ""
       this.clearAtlasImage()
       this.plannerActive = false
@@ -2398,7 +2380,6 @@ export default {
       if (initializeWorkflow && !this.workflowSectionsInitialized) {
         this.addPlaceOpen = false
         this.visitedOpen = false
-        this.toolsOpen = false
         this.workflowSectionsInitialized = true
       }
       state.pins.forEach(pin => {
@@ -2697,7 +2678,6 @@ export default {
         this.selectedPlaceId = ""
         this.addPlaceOpen = false
         this.visitedOpen = false
-        this.toolsOpen = false
         this.workflowSectionsInitialized = true
         this.announcement =
           "Your private Atlas account was created. Add your first destination."
@@ -2833,7 +2813,6 @@ export default {
       this.activeAtlasTab = "past"
       this.addPlaceOpen = true
       this.visitedOpen = false
-      this.toolsOpen = false
       this.$refs.planner?.closePlanner()
       this.pinEditorPlace = place
       this.pinEditorPin = this.pins.find(pin => pin.placeId === place.placeId)
@@ -3237,34 +3216,6 @@ export default {
     },
     formatVisitedDates,
     placeTypeLabel: formatPlaceTypeLabel,
-    async toggleSharing() {
-      this.accountPending = true
-      this.accountError = ""
-      this.toolsStatus = "Updating your Atlas sharing setting."
-      try {
-        const token = await getMyAtlasApiAccessToken()
-        const publish = !this.accountProfile.public
-        this.accountProfile = await this.withAccountRevisionRetry(
-          token,
-          revision =>
-            updateMyAtlasSharing({
-              apiBaseUrl: this.apiBaseUrl,
-              accessToken: token,
-              public: publish,
-              revision,
-            })
-        )
-        this.announcement = this.accountProfile.public
-          ? "Your Atlas is now available through your share link."
-          : "Your Atlas is private."
-        this.toolsStatus = this.announcement
-      } catch (error) {
-        this.accountError = "Your sharing setting could not be changed."
-        this.toolsStatus = this.accountError
-      } finally {
-        this.accountPending = false
-      }
-    },
     async copyShareLink() {
       try {
         await navigator.clipboard.writeText(this.shareUrl)
@@ -3367,32 +3318,43 @@ export default {
         this.accountPending = false
       }
     },
-    async toggleDiscovery() {
+    async setProfileListing(listed) {
+      if (
+        typeof listed !== "boolean" ||
+        !this.canUseAtlas ||
+        this.accountPending ||
+        (listed && !this.hasPublicAtlasContent) ||
+        (this.accountProfile.public === listed &&
+          this.accountProfile.discoverable === listed)
+      )
+        return
       this.accountPending = true
+      this.discoveryPending = true
       this.accountError = ""
-      this.toolsStatus = "Updating your Atlas discovery setting."
+      this.toolsStatus = "Updating your Explore Atlases listing."
       try {
         const token = await getMyAtlasApiAccessToken()
-        const discoverable = !this.accountProfile.discoverable
         this.accountProfile = await this.withAccountRevisionRetry(
           token,
           revision =>
             updateMyAtlasDiscovery({
               apiBaseUrl: this.apiBaseUrl,
               accessToken: token,
-              discoverable,
+              public: listed,
+              discoverable: listed,
               revision,
             })
         )
-        this.announcement = discoverable
-          ? "Your Atlas can now appear in Explore Atlases."
-          : "Your Atlas was removed from Explore Atlases."
+        this.announcement = listed
+          ? "Your profile is public and listed in Explore Atlases."
+          : "Your profile is private and removed from Explore Atlases. Previously copied trip links still work."
         this.toolsStatus = this.announcement
       } catch {
-        this.accountError = "Your discovery setting could not be changed."
+        this.accountError = "Your Explore Atlases listing could not be changed."
         this.toolsStatus = this.accountError
       } finally {
         this.accountPending = false
+        this.discoveryPending = false
       }
     },
   },
@@ -3987,6 +3949,39 @@ export default {
   color: var(--color-text-muted, #aebdb8);
   font-size: 0.7rem;
   line-height: 1.5;
+}
+.my-atlas-discovery-settings {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.3);
+  border-radius: 10px;
+  min-width: 0;
+}
+.my-atlas-discovery-heading,
+.my-atlas-sharing-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.my-atlas-discovery-heading h3,
+.my-atlas-sharing-heading p {
+  margin: 0;
+}
+.my-atlas-discovery-heading h3 {
+  font-size: 0.8rem;
+}
+.my-atlas-sharing-heading > .atlas-help {
+  align-self: flex-start;
+}
+.my-atlas-share-summary {
+  border-top: 0;
+}
+.my-atlas-share-summary h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.3;
 }
 .my-atlas-profile-settings .my-atlas-explore-link {
   padding: 0;

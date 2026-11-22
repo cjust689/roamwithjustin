@@ -148,9 +148,9 @@ const tutorials = Object.freeze({
     }),
     Object.freeze({
       title: "Share only when it feels ready.",
-      body: "Export a Story image whenever you like. If you want others to explore your Atlas, turn on sharing and copy your personal link.",
+      body: "Share a Planned or Past trip directly with its trip link, even while your profile is private. To share your profile with everyone, turn on List my profile in Explore Atlases in Profile settings.",
       points: Object.freeze([
-        "Sharing can be turned off again",
+        "Turn off Explore listing to make your profile private. Copied trip links keep their saved snapshot",
         "Your quick start guide stays available from the page",
       ]),
       action: "Add your first place",

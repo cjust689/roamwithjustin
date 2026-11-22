@@ -687,11 +687,12 @@ and image visibility choice before reading R2. It never exposes the storage key
 or source digest. The profile hero identifies the image as `Favorite travel
 image` and offers a full image dialog.
 
-Public link sharing and public discovery are separate owner choices. A profile
-starts with both `public` and `discoverable` false. Publishing creates the
-handle link but does not list the profile. The owner must separately choose
-`List in Explore Atlases`, and the Durable Object rejects discovery unless the
-profile is public and has at least one visited place. Unpublishing or removing
+Public profile access and directory discovery remain separate backend fields.
+A profile starts with both `public` and `discoverable` false. The current owner
+UI updates both through one explicit Explore listing choice, while legacy
+public-but-unlisted profiles are preserved until the owner changes them. The
+Durable Object rejects discovery unless the resulting profile is public and
+has publishable geography. Unpublishing or removing
 the final pin atomically clears discovery.
 
 `GET /v1/public/atlases` returns only active profiles that are both public and
@@ -1131,22 +1132,23 @@ until the next frontend promotion; no account API or permission change is added.
 | Location | Functionality |
 | --- | --- |
 | Overview | Travel statistics, journey navigation, Share Your Atlas |
-| Share Your Atlas | Public visibility, copy link, create story image |
-| Profile dropdown | Profile settings, links, data export, account deletion |
-| Customize My Atlas | Favorite travel image, image location, profile presentation |
+| Share Your Atlas | Direct trip-sharing guidance and Story image creation |
+| Profile dropdown | Explore profile visibility, profile link, settings, data export, account deletion |
+| Customize My Atlas | Favorite travel image, image location, public image presentation |
 | Explore Atlases | Discover other users' publicly shared Atlases |
 
-Share Your Atlas remains a collapsible Overview section and omits private
-account-management controls. Its story-image button reuses the existing export
-path. The favorite-image editor and Explore listing preference move into a
-separate Customize My Atlas disclosure on Overview, also reachable from the
-profile dropdown. This separates public profile presentation from Atlas sharing.
+Share Your Atlas is a compact Overview card with trip-sharing guidance and the
+existing Story image export action. The redundant disclosure and separate
+public-profile controls are removed. The favorite-image editor remains in Customize My Atlas on Overview,
+also reachable from the profile dropdown. The November 22 local follow-up moves
+the Explore listing preference into Profile settings, separate from that image
+editor. This is now the single profile visibility control in the current UI.
 Journey controls navigate to the existing Past/Planning tabs without fetching
 or inventing journey records just to populate the summary.
 
 The dropdown opens from the existing profile icon beside the theme selector.
 It includes Instagram links, private JSON data export, the existing guarded
-account deletion flow, public-link display and Explore navigation. Image and
+account deletion flow, public-link display, Explore listing and Explore navigation. Image and
 account deletion retain their existing safeguards. The dropdown closes through
 its Close button, Escape or an outside click; Escape/Close restore trigger focus.
 Its available-height calculation and internal scrolling keep long expanded
@@ -1398,3 +1400,38 @@ The closed navigator's Explore button explicitly centers its label and arrow
 with `align-items: center` and a unitless line height. This avoids the anonymous
 text flex item aligning above a stretched icon span. Owner and public openers
 share the correction and retain their existing touch size and navigation events.
+
+### Sharing and directory visibility, November 22, local
+
+The owner interface separates direct sharing from publishing a discoverable profile:
+
+| Control | Effect |
+| --- | --- |
+| Share trip in Planned or Past | Copies a read-only snapshot URL, independent of profile publication or Explore listing |
+| Profile settings, List my profile in Explore Atlases on | Publishes the profile URL and lists it in the directory together |
+| Profile settings, List my profile in Explore Atlases off | Removes the directory listing and makes the profile URL private together |
+
+The switch lives only in Profile settings. It uses one authenticated, revisioned
+`PATCH /v1/me` with `{public: listed, discoverable: listed}`, so there is no
+intermediate published-only state or partial two-request save. The client helper
+`updateMyAtlasDiscovery` accepts the optional public flag and validates both
+returned flags when it is supplied. Existing discovery-only callers remain
+compatible with the backend's independent fields. Busy, signed-out, unchanged
+and empty-profile publication requests are guarded; failed writes keep the prior
+state. Pending feedback is scoped to this save.
+
+No saved profile changes on loading the new UI. Legacy public-but-unlisted
+profiles retain their existing access and display a notice plus a Make profile
+private action inside the same Explore settings group. They are never
+automatically listed or forced through a listed state to become private.
+Profile link copying/display is inside this group as well. New ordinary profiles
+have one on/off choice, with no separate public-profile action or prerequisite.
+
+Trip publication is labeled Include on my profile, still backed by
+`sharing.publicAtlas`. Its help separates profile inclusion from direct snapshot
+sharing and discovery. Turning off the current Explore switch also makes the
+profile private. Copied trip snapshots retain their original content and are
+not revoked by either profile preference; UI help and the tutorial explain this.
+Favorite-image public use stays a separate explicit permission. The existing API
+already accepts both flags atomically. No Worker, storage schema, directory
+ranking or public projection changes accompany this UI update.
