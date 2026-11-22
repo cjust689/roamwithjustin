@@ -1,6 +1,9 @@
 <template>
   <div class="journey-destinations">
-    <p v-if="reorderable && stops.length > 1" class="journey-reorder-help">
+    <p
+      v-if="reorderable && showReorderHelp && stops.length > 1"
+      class="journey-reorder-help"
+    >
       Drag a handle to change the order, or use its arrow keys. Open a
       destination for more actions.
     </p>
@@ -15,7 +18,7 @@
           v-if="reorderable && stops.length > 1"
           class="journey-drag-handle"
           type="button"
-          :disabled="pending"
+          :disabled="pending || reorderDisabled"
           :aria-label="`Reorder ${stop.place.name}. Use up and down arrow keys.`"
           @pointerdown="startDrag($event, stop.stopId)"
           @keydown.up.prevent="move(index, -1)"
@@ -78,6 +81,8 @@ export default {
     stops: { type: Array, required: true },
     pending: Boolean,
     reorderable: Boolean,
+    reorderDisabled: Boolean,
+    showReorderHelp: { type: Boolean, default: true },
     lifecycle: { type: String, default: "past" },
   },
   emits: ["open", "reorder"],
@@ -85,6 +90,7 @@ export default {
     dragId: "",
     dragOrder: [],
     pointerId: null,
+    scrollFrame: null,
     announcement: "",
     dots: [
       [7, 6],
@@ -112,6 +118,9 @@ export default {
       if (value) this.cancelDrag()
       else this.announcement = ""
     },
+    reorderDisabled(value) {
+      if (value) this.cancelDrag()
+    },
   },
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
@@ -130,7 +139,13 @@ export default {
       return stop.memories.find(item => item.kind === "note")?.text || ""
     },
     startDrag(event, id) {
-      if (this.pending || !this.reorderable || event.button !== 0) return
+      if (
+        this.pending ||
+        this.reorderDisabled ||
+        !this.reorderable ||
+        event.button !== 0
+      )
+        return
       this.dragId = id
       this.pointerId = event.pointerId
       this.dragOrder = this.stops.map(stop => stop.stopId)
@@ -141,14 +156,22 @@ export default {
       document.addEventListener("pointerup", this.finishDrag)
       document.addEventListener("pointercancel", this.cancelDrag)
       window.addEventListener("blur", this.cancelDrag)
+      this._dragScroll = this.$el.closest(".atlas-dialog-body, .my-atlas-panel")
+      this._dragY = event.clientY
+      if (this._dragScroll)
+        this.scrollFrame = window.requestAnimationFrame(this.scrollDuringDrag)
     },
     drag(event) {
       if (!this.dragId || event.pointerId !== this.pointerId) return
+      this._dragY = event.clientY
+      this.previewOrder(event.clientY)
+    },
+    previewOrder(clientY) {
       const rows = [...this.$refs.list.children]
       const others = rows.filter(row => row.dataset.stopId !== this.dragId)
       const before = others.find(
         row =>
-          event.clientY <
+          clientY <
           row.getBoundingClientRect().top +
             row.getBoundingClientRect().height / 2
       )
@@ -159,12 +182,22 @@ export default {
         this.dragId
       )
       this.dragOrder = ids
-      const body = this.$el.closest(".atlas-dialog-body")
-      if (body) {
-        const rect = body.getBoundingClientRect()
-        if (event.clientY < rect.top + 48) body.scrollTop -= 16
-        if (event.clientY > rect.bottom - 48) body.scrollTop += 16
-      }
+    },
+    scrollDuringDrag() {
+      this.scrollFrame = null
+      if (!this.dragId || !this._dragScroll) return
+      const rect = this._dragScroll.getBoundingClientRect()
+      const edge = Math.min(48, rect.height / 4)
+      const delta =
+        this._dragY < rect.top + edge
+          ? -12
+          : this._dragY > rect.bottom - edge
+            ? 12
+            : 0
+      const before = this._dragScroll.scrollTop
+      this._dragScroll.scrollTop += delta
+      if (this._dragScroll.scrollTop !== before) this.previewOrder(this._dragY)
+      this.scrollFrame = window.requestAnimationFrame(this.scrollDuringDrag)
     },
     finishDrag(event) {
       if (!this.dragId || event.pointerId !== this.pointerId) return
@@ -173,6 +206,10 @@ export default {
       this.commitOrder(ids)
     },
     cancelDrag() {
+      if (this.scrollFrame !== null)
+        window.cancelAnimationFrame(this.scrollFrame)
+      this.scrollFrame = null
+      this._dragScroll = null
       document.removeEventListener("pointermove", this.drag)
       document.removeEventListener("pointerup", this.finishDrag)
       document.removeEventListener("pointercancel", this.cancelDrag)
@@ -184,6 +221,7 @@ export default {
     move(index, direction) {
       if (
         this.pending ||
+        this.reorderDisabled ||
         this.dragId ||
         !this.reorderable ||
         index + direction < 0 ||
@@ -200,6 +238,7 @@ export default {
     commitOrder(ids) {
       if (
         this.pending ||
+        this.reorderDisabled ||
         ids.every((id, index) => id === this.stops[index].stopId)
       )
         return
@@ -281,6 +320,7 @@ export default {
   color: var(--color-text-muted, #adbcba);
   font-size: 0.68rem;
   line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 .journey-memory {
   display: -webkit-box;
@@ -307,6 +347,8 @@ export default {
   height: 44px;
   padding: 8px;
   border: 0;
+  border-radius: 8px;
+  background: transparent;
   touch-action: none;
   cursor: grab;
   color: var(--color-text-muted, #adbcba);
