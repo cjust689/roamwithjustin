@@ -831,3 +831,25 @@ visibility setting is preserved rather than restoring the concept's older toggle
       browser acceptance. No Worker deployment or account migration is needed.
 - [ ] Complete genuine owner acceptance of the condensed editor and direct
       destination handles.
+
+### Public header alignment, November 22
+
+- [x] Match the owner overview's RWJ/My Atlas lockup, spacing, 44 pixel control
+      sizes and one-row header in the public profile view.
+- [x] Replace the separate Hide overview row with an accessible chevron beside
+      theme and a compact Explore compass link. Retain existing collapse,
+      map resizing and focus restoration; keep loading/error states usable.
+- [x] Local Chrome passed 16 both-theme, 320/390/568-landscape/1440 pixel cases,
+      with and without a favorite image: 44 pixel header/targets, vertical
+      alignment, contained content, valid Explore link, one collapse control,
+      full-map hide/restore and unchanged map instance. Loading/error states
+      also passed. Evidence: `.state/theme/public-header-browser.json`, captures
+      and `.state/my-atlas/public-header-browser.mjs`. No account writes.
+- [x] `npm run build` passed all script suites and 62 isolated Worker runtime
+      tests with the established parallel-false override, hash
+      `263066857982d9fa`. Evidence: `.state/theme/public-header-build.log`.
+      Focused ESLint, whitespace and managed-doc checks passed with the existing
+      12 unverified-document warnings.
+- [x] Prepare the explicitly requested develop/main release. Release PRs record
+      protected checks, Pages deployment and live browser acceptance. No Worker
+      deployment or account data changes are needed.
