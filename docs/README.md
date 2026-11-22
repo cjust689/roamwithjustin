@@ -200,6 +200,12 @@ actions remain available without a wide toolbar. Local verification passed;
 the integrated-trip checklist and release PRs track protected promotion and
 post-deployment browser acceptance for this follow-up.
 
+Public header alignment: the public Atlas now uses the owner overview's RWJ mark
+and My Atlas lockup, with 44 pixel theme, Explore and collapse controls in one row.
+The separate Hide overview row is removed. The Explore link is a labeled compass
+button; the existing public map, favorite image and collapse/restore behavior
+remain. Verification and release tracking are in the integrated-trip checklist.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;
