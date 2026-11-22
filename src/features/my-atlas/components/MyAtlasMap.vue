@@ -1494,6 +1494,15 @@ export default {
 }
 
 @media (max-width: 720px) {
+  /* Keep provider credits accessible beside zoom controls, away from the menu. */
+  ::v-deep .maplibregl-ctrl-bottom-right {
+    top: 0;
+    bottom: auto;
+    right: 52px;
+  }
+  ::v-deep .maplibregl-ctrl-attrib {
+    max-width: calc(100vw - 80px);
+  }
   ::v-deep .maplibregl-ctrl-bottom-left {
     display: none;
   }

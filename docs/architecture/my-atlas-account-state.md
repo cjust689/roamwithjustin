@@ -223,6 +223,13 @@ and image responses remain no-store. The beta directory still scans bounded
 active registrations for each page; this change adds no background poller or
 new discovery index.
 
+Uploaded favorite photos disable native image context menus and dragging in
+the owner preview, public profile hero/full-image dialog and Explore cards.
+The handlers are attached directly to these four image elements, with no
+sitewide or provider-image interception. This is a casual-saving deterrent,
+not access control; image delivery gates, full-image viewing and explicit
+Atlas Story exports retain their existing contracts.
+
 Owner action feedback is presented by `MyAtlasActionFeedback.vue`, fixed to
 the viewport outside the scrolling owner panel. Planner actions emit
 `action-feedback` events to the owner view. Start/finish, stop order and
@@ -1274,4 +1281,10 @@ presentation IDs instead of canonical trip/stop IDs. Private fields remain
 excluded; clients resolve references against the already-public places and
 reject references outside that set. Repeated references remain distinct stops.
 Older public responses without trip grouping remain supported. Both map views
-use shared touch-specific help. Deployment of this follow-up is outstanding.
+use shared touch-specific help. PRs 235 and 236 released this follow-up;
+Pages run 44962250911 succeeded.
+
+The mobile bottom-menu correction makes owner/public restore controls
+edge-to-edge bottom bars with safe-area padding; the in-map navigator remains
+above them. The SDK's existing attribution control moves to the upper control
+area on mobile and retains its provider links. Desktop placement is unchanged.

@@ -39,9 +39,12 @@
             <img
               v-if="atlas.favoriteImage && !imageErrors[imageVersion(atlas)]"
               :key="imageVersion(atlas)"
+              draggable="false"
               :src="imageUrl(atlas.handle)"
               :alt="`${atlas.displayName}'s favorite travel image`"
               loading="lazy"
+              @contextmenu.prevent
+              @dragstart.prevent
               @error="markImageUnavailable(atlas, $event)"
             />
             <span v-else aria-hidden="true">{{ atlasInitials(atlas) }}</span>

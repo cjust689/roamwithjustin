@@ -978,8 +978,11 @@
                 <img
                   v-if="atlasImageUrl"
                   ref="favoriteImagePreview"
+                  draggable="false"
                   :src="atlasImageUrl"
                   alt="Your favorite travel image"
+                  @contextmenu.prevent
+                  @dragstart.prevent
                 />
                 <span v-else aria-hidden="true">Atlas Story</span>
               </div>
@@ -5093,6 +5096,23 @@ export default {
 .my-atlas-sidebar-hide:focus-visible {
   outline: 2px solid var(--color-focus, #e6ba68);
   outline-offset: 3px;
+}
+@media (max-width: 720px) {
+  .my-atlas-sidebar-open {
+    box-sizing: border-box;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: calc(56px + env(safe-area-inset-bottom));
+    padding: 12px max(16px, env(safe-area-inset-right))
+      calc(12px + env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
 }
 </style>
 <style src="../styles/interactions.css"></style>
