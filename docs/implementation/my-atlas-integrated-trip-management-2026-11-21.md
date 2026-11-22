@@ -311,3 +311,17 @@ authorized by the owner. No account records were changed by deployment checks.
 This visual correction does not resolve the separately reported production
 saved-Atlas load error. That incident remains under investigation; no account
 reset or data deletion is part of this work.
+
+### Mobile menu and profile photo release tracking
+
+The owner authorized develop/main promotion on November 21. Source commit
+`2fc6c2f` includes the mobile menu/attribution correction and profile-photo
+interaction changes. [PR 237](https://github.com/cjust689/roamwithjustin/pull/237)
+tracks develop promotion; its validation and subsequent main promotion provide
+the external release record. Focused ESLint and `npm run docs:audit` passed.
+`npm run build` passed, including 60 isolated Worker runtime tests, using the
+established local parallel-false configuration override. Build output is in
+`.state/theme/mobile-photo-release-build.log`.
+The existing Chrome fixture evidence above covers the layout; profile-photo
+evidence is recorded in the favorite-image implementation checklist. This
+release changes no Viator code or Worker deployment.
