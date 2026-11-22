@@ -12,23 +12,33 @@
       <button type="button" :disabled="pending" @click="$emit('choose-map')">
         Drop a pin
       </button>
-      <button
-        type="button"
-        :disabled="pending"
-        :aria-expanded="String(linkOpen)"
-        @click="linkOpen = !linkOpen"
-      >
-        Paste a map link
-      </button>
     </div>
-    <div v-if="linkOpen" class="location-link">
+    <div class="location-link">
+      <div class="location-heading">
+        <strong>Location</strong
+        ><MyAtlasInfo label="Supported location formats"
+          >Use a Google or Apple Maps link, a Plus Code, or latitude followed by
+          longitude. Decimal degrees and coordinates with N/S/E/W or degrees,
+          minutes and seconds are supported. Short Plus Codes require a nearby
+          reference town or neighborhood. Shorter codes need a closer reference.
+          Short map links contact the provider only when you select Read
+          location. Links with only a place ID may require dropping a pin.
+          Review the decoded location before applying it.</MyAtlasInfo
+        >
+      </div>
       <label
-        >Google or Apple Maps link<input
+        >Map link, Plus Code or coordinates<input
           v-model="link"
-          type="url"
+          type="text"
+          placeholder="e.g. 33.749, -84.38798"
           maxlength="4096"
           autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          :disabled="pending"
           @input="clearCandidate"
+          @paste="pasteLocation"
+          @keydown.enter.prevent="readLink"
       /></label>
       <button
         type="button"
@@ -37,17 +47,56 @@
       >
         {{ resolving ? "Reading location" : "Read location" }}
       </button>
-      <small
-        >Short links contact the map provider only when you select Read
-        location.</small
-      >
       <p v-if="error" role="alert">{{ error }}</p>
       <div v-if="candidate" role="status">
         <strong>{{ candidate.provider }}</strong>
         <p v-if="candidate.label">{{ candidate.label }}</p>
         <p>{{ candidateMessage }}</p>
+        <section
+          v-if="candidate.kind === 'short-plus-code'"
+          class="reference-search"
+        >
+          <label
+            >Nearby town or area<input
+              v-model="referenceQuery"
+              :disabled="pending || resolving"
+              maxlength="160"
+              @input="clearReferences"
+              @keydown.enter.prevent="findReferences"
+          /></label>
+          <button
+            type="button"
+            :disabled="pending || resolving || referenceQuery.trim().length < 2"
+            @click="findReferences"
+          >
+            {{
+              resolving ? "Searching nearby places" : "Find reference location"
+            }}
+          </button>
+          <ul
+            v-if="references.length"
+            aria-label="Choose a nearby reference location"
+            tabindex="0"
+          >
+            <li v-for="place in references" :key="place.placeId">
+              <button
+                type="button"
+                :disabled="pending || resolving"
+                @click="useReference(place)"
+              >
+                <strong>{{ place.name }}</strong
+                ><small>{{
+                  [place.admin1Name, place.countryName]
+                    .filter(Boolean)
+                    .join(", ")
+                }}</small>
+              </button>
+            </li>
+          </ul>
+        </section>
         <p v-if="candidate.coordinates">
-          {{ candidate.coordinates[1] }}, {{ candidate.coordinates[0] }}
+          {{ candidate.coordinates[1].toFixed(6) }},
+          {{ candidate.coordinates[0].toFixed(6) }}
         </p>
         <button
           v-if="candidate.kind === 'explicit-coordinate'"
@@ -55,7 +104,7 @@
           :disabled="pending"
           @click="useCandidate"
         >
-          Use these coordinates
+          Use this location
         </button>
         <button
           v-else-if="candidate.label"
@@ -76,26 +125,9 @@
         autocomplete="off"
         @input="$emit('update:name', $event.target.value)"
     /></label>
-    <div class="location-coordinates">
-      <label
-        >Latitude<input
-          :value="latitude"
-          type="number"
-          min="-85.051129"
-          max="85.051129"
-          step="0.000001"
-          @input="coordinateInput('latitude', $event.target.value)"
-      /></label>
-      <label
-        >Longitude<input
-          :value="longitude"
-          type="number"
-          min="-180"
-          max="180"
-          step="0.000001"
-          @input="coordinateInput('longitude', $event.target.value)"
-      /></label>
-    </div>
+    <p v-if="selectedCoordinates" class="location-position" role="status">
+      Selected position {{ selectedCoordinates }}
+    </p>
     <p class="location-help">
       Review the name and map position before saving. Moving the map does not
       save a place.
@@ -105,10 +137,19 @@
 </template>
 
 <script>
-import { parseMapLinkCandidate } from "../../../../shared/my-atlas-map-links.mjs"
+import {
+  parseLocationInput,
+  parsePlusCode,
+  locationCoordinates,
+} from "../../../../shared/my-atlas-location-input.mjs"
+import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
+import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
+import placeCatalog from "../data/place-catalog.proof.json"
+import MyAtlasInfo from "./MyAtlasInfo.vue"
 
 export default {
   name: "MyAtlasLocationPicker",
+  components: { MyAtlasInfo },
   props: {
     name: { type: String, default: "" },
     latitude: { type: [String, Number], default: "" },
@@ -126,19 +167,37 @@ export default {
     "coordinates-change",
   ],
   data: () => ({
-    linkOpen: false,
     link: "",
+    referenceQuery: "",
+    references: [],
     candidate: null,
     error: "",
     resolving: false,
     requestSequence: 0,
   }),
   computed: {
+    selectedCoordinates() {
+      if (
+        [this.latitude, this.longitude].some(
+          value => String(value).trim() === ""
+        )
+      )
+        return ""
+      const point = locationCoordinates(
+        Number(this.latitude),
+        Number(this.longitude)
+      )
+      return point ? `${point[1].toFixed(6)}, ${point[0].toFixed(6)}` : ""
+    },
     candidateMessage() {
+      if (this.candidate?.code && this.candidate.kind === "explicit-coordinate")
+        return "Plus Code decoded to the center of its area. Review the location before using it."
       return (
         {
           "explicit-coordinate":
             "Coordinates found. Confirm the marker, then adjust it if needed.",
+          "short-plus-code":
+            "Choose a nearby town or neighborhood for this short Plus Code. Shorter codes need a closer reference. Review the decoded location before using it.",
           "view-center":
             "This is the map's view center, not a place pin. Choose the exact location on the map.",
           unknown:
@@ -160,24 +219,99 @@ export default {
     focusName() {
       this.$refs.name?.focus()
     },
-    coordinateInput(field, value) {
-      this.$emit(`update:${field}`, value)
-      this.$emit("coordinates-change")
+    pasteLocation(event) {
+      const text = event.clipboardData?.getData("text/plain")
+      if (!text || this.pending) return
+      event.preventDefault()
+      const input = event.target
+      const start = input.selectionStart ?? input.value.length
+      const end = input.selectionEnd ?? start
+      const normalized = text.replace(/[\r\n\t]+/g, " ")
+      const next =
+        input.value.slice(0, start) + normalized + input.value.slice(end)
+      this.clearCandidate()
+      if (next.length > 4096) {
+        this.error =
+          "This location is too long. Paste only the map link, Plus Code or coordinate pair."
+        return
+      }
+      this.link = next
+      this.$nextTick(() =>
+        input.setSelectionRange(
+          start + normalized.length,
+          start + normalized.length
+        )
+      )
     },
     clearCandidate() {
       this.candidate = null
       this.error = ""
       this.requestSequence++
       this.resolving = false
+      this.references = []
+      this.referenceQuery = ""
+    },
+    clearReferences() {
+      this.references = []
+      this.error = ""
+      this.requestSequence++
+    },
+    async findReferences() {
+      if (
+        this.pending ||
+        this.resolving ||
+        this.referenceQuery.trim().length < 2
+      )
+        return
+      const sequence = ++this.requestSequence
+      this.resolving = true
+      this.error = ""
+      this.references = []
+      try {
+        const results = await searchMyAtlasPlaces({
+          query: this.referenceQuery,
+          catalog: placeCatalog,
+          endpoint: getMyAtlasPlaceSearchEndpoint(
+            process.env,
+            window.location.origin
+          ),
+          limit: 8,
+        })
+        if (sequence !== this.requestSequence) return
+        this.references = results.filter(
+          place =>
+            place.placeType === "city" &&
+            Array.isArray(place.coordinates) &&
+            locationCoordinates(place.coordinates[1], place.coordinates[0])
+        )
+        if (!this.references.length)
+          this.error =
+            "No nearby towns found. Try another name, use the full Plus Code, or drop a pin."
+      } catch {
+        if (sequence === this.requestSequence)
+          this.error =
+            "Nearby search is unavailable. Try again, use the full Plus Code, or drop a pin."
+      } finally {
+        if (sequence === this.requestSequence) this.resolving = false
+      }
+    },
+    useReference(place) {
+      if (this.pending || this.candidate?.kind !== "short-plus-code") return
+      const decoded = parsePlusCode(this.candidate.code, place.coordinates)
+      if (!decoded) return
+      this.candidate = decoded
+      this.references = []
     },
     async readLink() {
+      if (this.pending || this.resolving) return
       const sequence = ++this.requestSequence
       this.error = ""
-      const candidate = parseMapLinkCandidate(this.link)
+      this.references = []
+      const candidate = parseLocationInput(this.link)
       if (candidate.kind === "unsupported") {
         this.candidate = null
         this.error =
-          "Use a Google or Apple Maps location link, or drop a pin instead."
+          "Paste a Google or Apple Maps link, a valid Plus Code, or a latitude, longitude pair. You can also drop a pin."
       } else if (candidate.kind === "short-link") {
         this.candidate = null
         if (!this.resolveLink) {
@@ -187,8 +321,17 @@ export default {
         }
         this.resolving = true
         try {
-          const resolved = await this.resolveLink(this.link)
-          if (sequence === this.requestSequence) this.candidate = resolved
+          const sourceUrl =
+            this.link.match(/https:\/\/[^\s<>]+/)?.[0] || this.link.trim()
+          const resolved = await this.resolveLink(sourceUrl)
+          if (sequence === this.requestSequence) {
+            const code =
+              resolved.kind === "unknown" && parsePlusCode(resolved.label)
+            this.candidate = code
+              ? { ...code, provider: resolved.provider }
+              : resolved
+            this.referenceQuery = this.candidate.referenceQuery || ""
+          }
         } catch {
           if (sequence === this.requestSequence)
             this.error =
@@ -196,7 +339,10 @@ export default {
         } finally {
           if (sequence === this.requestSequence) this.resolving = false
         }
-      } else this.candidate = candidate
+      } else {
+        this.candidate = candidate
+        this.referenceQuery = candidate.referenceQuery || ""
+      }
     },
     useCandidate() {
       const candidate = this.candidate
@@ -220,8 +366,7 @@ export default {
   gap: 12px;
   min-width: 0;
 }
-.location-methods,
-.location-coordinates {
+.location-methods {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -231,9 +376,6 @@ export default {
   gap: 5px;
   min-width: 0;
   font-size: 12px;
-}
-.location-coordinates > label {
-  flex: 1 1 110px;
 }
 .atlas-location-picker input {
   box-sizing: border-box;
@@ -246,6 +388,7 @@ export default {
   border-radius: 8px;
 }
 .atlas-location-picker button {
+  min-height: 44px;
   padding: 9px 11px;
   color: inherit;
   background: transparent;
@@ -267,9 +410,39 @@ export default {
   overflow-wrap: anywhere;
 }
 .location-link p,
-.location-help {
+.location-help,
+.location-position {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
+}
+.location-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.reference-search {
+  display: grid;
+  gap: 8px;
+}
+.reference-search ul {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.reference-search li button {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  width: 100%;
+}
+.location-position {
+  overflow-wrap: anywhere;
+  color: var(--color-accent-soft, #e6ba68);
 }
 </style>

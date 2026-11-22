@@ -7,6 +7,11 @@ import {
 } from "../shared/my-atlas-map-links.mjs"
 import { resolveShortMapLink } from "../workers/my-atlas/src/maps/resolve.mjs"
 import {
+  parseLocationInput,
+  parsePlusCode,
+  locationCoordinates,
+} from "../shared/my-atlas-location-input.mjs"
+import {
   resolveMyAtlasMapLink,
   updateMyAtlasPin,
 } from "../src/features/my-atlas/api/client.mjs"
@@ -34,8 +39,8 @@ const cases = [
   ],
   [
     "https://www.google.com/maps/place/A+view/data=!3d38.123!4d-110.456",
-    "unknown",
-    null,
+    "explicit-coordinate",
+    [-110.456, 38.123],
   ],
   [
     "https://www.google.com/maps/search/?api=1&query=Park&query_place_id=example",
@@ -84,6 +89,12 @@ const cases = [
   ["https://maps.apple.com/place?coordinate=1,181", "invalid-coordinate", null],
   ["https://maps.app.goo.gl/abc", "short-link", null],
   ["https://maps.apple/p/abc", "short-link", null],
+  ["https://goo.gl/maps/abc", "short-link", null],
+  [
+    "https://maps.apple.com/?q=38.123,-110.456",
+    "explicit-coordinate",
+    [-110.456, 38.123],
+  ],
 ]
 for (const [url, kind, coordinates] of cases) {
   const actual = parseMapLinkCandidate(url)
@@ -110,6 +121,124 @@ assert.equal(
 assert.equal(
   parseMapLinkCandidate("https://maps.apple.com/place?name=My%20Place").label,
   "My Place"
+)
+
+for (const value of [
+  "33.749, -84.38798",
+  "(33.749, -84.38798)",
+  "33.749 -84.38798",
+  "33.749; -84.38798",
+  "latitude: 33.749, longitude: -84.38798",
+  "33.749° N, 84.38798° W",
+  "33.749N 84.38798W",
+  "33.749\n-84.38798",
+]) {
+  assert.deepEqual(
+    parseLocationInput(value).coordinates,
+    [-84.38798, 33.749],
+    value
+  )
+}
+const dms = parseLocationInput(`33°44'56.4"N 84°23'16.728"W`)
+assert.ok(Math.abs(dms.coordinates[0] + 84.38798) < 1e-9)
+assert.ok(Math.abs(dms.coordinates[1] - 33.749) < 1e-9)
+for (const value of [
+  "90,1",
+  "1,181",
+  "33°61'0\"N 84°0'0\"W",
+  "33.1°1'0\"N 84°0'0\"W",
+])
+  assert.equal(parseLocationInput(value).kind, "invalid-coordinate", value)
+for (const value of [
+  "33,44,55",
+  "(33,44",
+  "33,44)",
+  "1e2,4",
+  "Latitude 1 longitude 2 extra 3",
+  "<img src=x>",
+  "CXX99999+XX",
+  "33,44".repeat(1000),
+])
+  assert.equal(parseLocationInput(value).kind, "unsupported", value)
+// Centers from Google's published decoding examples, including grid refinement.
+for (const [code, lat, lng] of [
+  ["8FVC9G8F+6W", 47.3655625, 8.5248125],
+  ["7FG49Q00+", 20.375, 2.775],
+  ["7FG49QCJ+2V", 20.3700625, 2.7821875],
+  ["7FG49QCJ+2VX", 20.3701125, 2.782234375],
+  ["4VCPPQGP+Q9", -41.2730625, 174.7859375],
+]) {
+  const point = parseLocationInput(code).coordinates
+  assert.ok(Math.abs(point[1] - lat) < 1e-9, code)
+  assert.ok(Math.abs(point[0] - lng) < 1e-9, code)
+}
+for (const value of ["8F+6W Zurich", "8f+6w Zurich"]) {
+  const shortCode = parseLocationInput(value)
+  assert.equal(shortCode.kind, "short-plus-code")
+  assert.equal(shortCode.referenceQuery, "Zurich")
+  assert.equal(shortCode.coordinates, null)
+  const point = parseLocationInput(value, {
+    reference: [8.537562, 47.373313],
+  }).coordinates
+  assert.ok(Math.abs(point[1] - 47.3655625) < 1e-9)
+  assert.ok(Math.abs(point[0] - 8.5248125) < 1e-9)
+}
+for (const [shortCode, lat, lng] of [
+  ["+2VX", 51.3701125, -1.217765625],
+  ["CJ+2VX", 51.3708675, -1.217765625],
+  ["9QCJ+2VX", 51.3852125, -1.217765625],
+]) {
+  const point = parsePlusCode(shortCode, [lng, lat]).coordinates
+  assert.ok(Math.abs(point[1] - 51.3701125) < 1e-9)
+  assert.ok(Math.abs(point[0] + 1.217765625) < 1e-9)
+}
+for (const value of [
+  "https://plus.codes/8FVC9G8F%2B6W",
+  "https://www.google.com/maps/search/?api=1&query=8FVC9G8F%2B6W",
+  "https://www.google.com/maps/place/8FVC9G8F%2B6W",
+])
+  assert.equal(parseLocationInput(value).kind, "explicit-coordinate", value)
+assert.equal(
+  parseLocationInput("https://plus.codes/8F%2B6W%20Zurich").kind,
+  "short-plus-code"
+)
+assert.equal(
+  parseLocationInput("https://plus.codes.evil.test/8FVC9G8F%2B6W").kind,
+  "unsupported"
+)
+assert.equal(
+  parseLocationInput(
+    "https://maps.google.com/?q=1,2 https://maps.apple.com/?q=3,4"
+  ).kind,
+  "ambiguous"
+)
+assert.deepEqual(
+  parseLocationInput(
+    "Shared place\nhttps://maps.apple.com/place?coordinate=33.749,-84.38798"
+  ).coordinates,
+  [-84.38798, 33.749]
+)
+assert.equal(
+  parseLocationInput(
+    "https://maps.google.com/maps/place/Test/@1,2,12z/data=!3d3!4d4"
+  ).kind,
+  "explicit-coordinate"
+)
+assert.deepEqual(
+  parseLocationInput(
+    "https://maps.google.com/maps/place/Test/@1,2,12z/data=!3d3!4d4"
+  ).coordinates,
+  [4, 3]
+)
+assert.equal(
+  parseLocationInput(
+    "https://maps.google.com/maps/place/Test/data=!3d3!4d4!3d5!4d6"
+  ).kind,
+  "ambiguous"
+)
+assert.equal(
+  parseLocationInput("https://maps.google.com/?q=1,2&query=3,4").kind,
+  "ambiguous"
 )
 
 const short = "https://maps.app.goo.gl/abc"
@@ -237,8 +366,23 @@ const source = compiler
   )
   .script.content.replace(/^import[\s\S]*?from\s+["'][^"']+["']\s*$/gm, "")
   .replace("export default", "return")
-const component = new Function("parseMapLinkCandidate", source)(
-  parseMapLinkCandidate
+const component = new Function(
+  "parseLocationInput",
+  "parsePlusCode",
+  "locationCoordinates",
+  "MyAtlasInfo",
+  "searchMyAtlasPlaces",
+  "getMyAtlasPlaceSearchEndpoint",
+  "placeCatalog",
+  source
+)(
+  parseLocationInput,
+  parsePlusCode,
+  locationCoordinates,
+  {},
+  async () => [],
+  () => "",
+  {}
 )
 const events = []
 const ui = {
@@ -247,9 +391,28 @@ const ui = {
   pending: false,
   resolveLink: null,
   $emit: (...event) => events.push(event),
+  $nextTick: callback => callback(),
 }
 for (const [name, method] of Object.entries(component.methods))
   ui[name] = method.bind(ui)
+let pastePrevented = false
+ui.pasteLocation({
+  clipboardData: { getData: () => "33.749\n-84.38798" },
+  target: {
+    value: "",
+    selectionStart: 0,
+    selectionEnd: 0,
+    setSelectionRange() {},
+  },
+  preventDefault() {
+    pastePrevented = true
+  },
+})
+assert.equal(pastePrevented, true)
+assert.equal(ui.link, "33.749 -84.38798")
+await ui.readLink()
+assert.deepEqual(ui.candidate.coordinates, [-84.38798, 33.749])
+assert.equal(events.length, 0, "Pasting and previewing never writes fields")
 ui.link = final
 await ui.readLink()
 assert.equal(events.length, 0)
@@ -267,6 +430,45 @@ assert.deepEqual(
   [["choose-map"]],
   "Never apply a viewport as a selected place"
 )
+events.length = 0
+ui.link = "8F+6W Zurich"
+await ui.readLink()
+assert.equal(ui.candidate.kind, "short-plus-code")
+assert.equal(ui.referenceQuery, "Zurich")
+ui.useReference({ coordinates: [8.537562, 47.373313] })
+assert.equal(ui.candidate.kind, "explicit-coordinate")
+assert.equal(
+  events.length,
+  0,
+  "Choosing a reference still requires confirmation"
+)
+ui.useCandidate()
+assert.ok(Math.abs(Number(events[0][1]) - 8.5248125) < 1e-9)
+assert.ok(Math.abs(Number(events[1][1]) - 47.3655625) < 1e-9)
+assert.equal(
+  events.some(event => event[0] === "update:name"),
+  false,
+  "A reference town is not the place name"
+)
+events.length = 0
+ui.link = "invalid location"
+await ui.readLink()
+assert.equal(ui.candidate, null)
+assert.equal(
+  events.length,
+  0,
+  "Invalid input preserves the previous coordinate draft"
+)
+ui.resolveLink = async () => ({
+  provider: "Google Maps",
+  kind: "unknown",
+  label: "8F+6W Zurich",
+  coordinates: null,
+})
+ui.link = short
+await ui.readLink()
+assert.equal(ui.candidate.kind, "short-plus-code")
+assert.equal(ui.referenceQuery, "Zurich")
 let complete
 ui.resolveLink = () =>
   new Promise(resolve => {
@@ -284,5 +486,5 @@ assert.equal(
   "An old response must not replace a newer draft"
 )
 console.log(
-  "Map link parsing, confirmation, stale-response, redirect security and timeout checks passed."
+  "Coordinate/DMS and Plus Code decoding, map links, reference confirmation, paste normalization, stale-response and redirect security checks passed."
 )

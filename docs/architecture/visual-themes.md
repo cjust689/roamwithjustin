@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-22
 related:
   - theme-toggle-implementation
   - maptiler-sdk-session-migration
@@ -151,3 +151,15 @@ theme-specific favicon; legacy raster/ICO fallbacks stay amber.
 SVG fidelity, derivative dimensions, ICO entries and recognizable white and
 amber pixels even at the smallest raster sizes. No exploratory AI asset or
 new third-party logo is introduced.
+
+The local November 22 polish gives ThemeSelector's dropdown a short Vue
+opacity/translation transition. Leaving choices become inert until removed;
+keyboard focus returns through the existing close behavior. Reduced-motion
+preferences disable the transition. Theme preference/bootstrap behavior,
+theme-specific brand assets and favicon selection retain their contracts.
+
+The local shared-trip header uses a 32 pixel BrandMark centered in a padded
+44 pixel home link, with additional pill padding. Its theme trigger is also
+44 pixels. This keeps the square mark clear of the pill's rounded ends on
+mobile without cropping or modifying either approved SVG. Theme dropdown
+overflow remains visible and the return-to-Atlas link retains its label.

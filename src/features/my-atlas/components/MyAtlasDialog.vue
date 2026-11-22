@@ -2,14 +2,21 @@
   <dialog
     ref="dialog"
     class="atlas-workspace-dialog"
+    :class="{ 'is-closing': closing }"
+    :inert="closing ? '' : null"
     :aria-labelledby="'atlas-dialog-' + _uid"
     @cancel.prevent="requestClose"
+    @keydown.esc.stop.prevent="requestClose"
     @click="backdrop"
     @keydown="trapFocus"
   >
     <header class="atlas-dialog-header">
       <h2 :id="'atlas-dialog-' + _uid">{{ title }}</h2>
-      <button type="button" :disabled="pending" @click="requestClose">
+      <button
+        type="button"
+        :disabled="pending || closing"
+        @click="requestClose"
+      >
         Close
       </button>
     </header>
@@ -29,6 +36,7 @@ export default {
     statusVisible: Boolean,
   },
   emits: ["close"],
+  data: () => ({ closing: false }),
   mounted() {
     document
       .querySelectorAll(".atlas-help-copy:popover-open")
@@ -37,9 +45,23 @@ export default {
     this.previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
     this.$refs.dialog.showModal()
+    if (
+      !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches &&
+      this.$refs.dialog.animate
+    )
+      this.entryAnimation = this.$refs.dialog.animate(
+        [
+          { opacity: 0, transform: "translateY(12px) scale(0.985)" },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 190, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }
+      )
   },
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.disposed = true
+    this.entryAnimation?.cancel()
+    this.closeAnimation?.cancel()
     this.$refs.dialog.close()
     document.body.style.overflow = this.previousOverflow
     if (this.returnFocus?.isConnected)
@@ -65,8 +87,30 @@ export default {
         first?.focus()
       }
     },
-    requestClose() {
-      if (!this.pending) this.$emit("close")
+    async requestClose() {
+      if (this.pending || this.closing) return
+      const dialog = this.$refs.dialog
+      if (
+        !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches &&
+        dialog.animate
+      ) {
+        const current = window.getComputedStyle(dialog)
+        const frame = { opacity: current.opacity, transform: current.transform }
+        this.entryAnimation?.cancel()
+        this.closing = true
+        this.closeAnimation = dialog.animate(
+          [frame, { opacity: 0, transform: "translateY(8px) scale(0.99)" }],
+          { duration: 140, easing: "ease-in", fill: "forwards" }
+        )
+        await this.closeAnimation.finished.catch(() => {})
+      }
+      if (this.disposed) return
+      if (this.pending) {
+        this.closeAnimation?.cancel()
+        this.closing = false
+        return
+      }
+      this.$emit("close")
     },
     backdrop(event) {
       if (event.target !== this.$refs.dialog) return
@@ -106,6 +150,29 @@ export default {
 .atlas-workspace-dialog::backdrop {
   background: rgba(0, 0, 0, 0.65);
   backdrop-filter: blur(3px);
+  animation: atlas-backdrop-enter 190ms ease both;
+}
+.atlas-workspace-dialog.is-closing::backdrop {
+  animation: atlas-backdrop-leave 140ms ease forwards;
+}
+@keyframes atlas-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes atlas-backdrop-leave {
+  to {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-workspace-dialog::backdrop,
+  .atlas-workspace-dialog.is-closing::backdrop {
+    animation: none;
+  }
 }
 .atlas-dialog-header {
   display: flex;

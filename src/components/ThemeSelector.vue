@@ -30,31 +30,37 @@
         <path d="M12 4a8 8 0 0 1 0 16V4Z" fill="currentColor" />
       </svg>
     </button>
-    <div
-      v-if="open"
-      class="theme-options"
-      role="group"
-      aria-label="Visual theme"
+    <transition
+      name="theme-menu"
+      @before-leave="$event.inert = true"
+      @before-enter="$event.inert = false"
     >
-      <span class="theme-heading">Appearance</span>
-      <button
-        v-for="option in options"
-        :key="option.id"
-        type="button"
-        :aria-pressed="String(theme.current === option.id)"
-        @click="choose(option.id)"
+      <div
+        v-if="open"
+        class="theme-options"
+        role="group"
+        aria-label="Visual theme"
       >
-        <span
-          class="theme-swatch"
-          :class="`theme-swatch-${option.id}`"
-          aria-hidden="true"
-        ></span>
-        <span>{{ option.label }}</span>
-        <span v-if="theme.current === option.id" aria-hidden="true"
-          >&#10003;</span
+        <span class="theme-heading">Appearance</span>
+        <button
+          v-for="option in options"
+          :key="option.id"
+          type="button"
+          :aria-pressed="String(theme.current === option.id)"
+          @click="choose(option.id)"
         >
-      </button>
-    </div>
+          <span
+            class="theme-swatch"
+            :class="`theme-swatch-${option.id}`"
+            aria-hidden="true"
+          ></span>
+          <span>{{ option.label }}</span>
+          <span v-if="theme.current === option.id" aria-hidden="true"
+            >&#10003;</span
+          >
+        </button>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -112,6 +118,27 @@ export default {
 </script>
 
 <style scoped>
+.theme-menu-enter-active,
+.theme-menu-leave-active {
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+  transform-origin: top right;
+}
+.theme-menu-enter,
+.theme-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-5px) scale(0.98);
+}
+.theme-menu-leave-active {
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-menu-enter-active,
+  .theme-menu-leave-active {
+    transition: none;
+  }
+}
 .theme-selector {
   position: relative;
   display: inline-flex;

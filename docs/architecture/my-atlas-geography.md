@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-20
+updated: 2026-11-22
 related:
   - my-atlas-authentication
   - my-atlas-account-state
@@ -21,6 +21,10 @@ code_paths:
   - src/features/my-atlas/catalog/placeTypes.mjs
   - src/features/my-atlas/catalog/customPlace.mjs
   - src/features/my-atlas/catalog/mapMemory.mjs
+  - src/features/my-atlas/catalog/mapMarkers.mjs
+  - shared/my-atlas-location-input.mjs
+  - shared/my-atlas-map-links.mjs
+  - src/features/my-atlas/components/MyAtlasLocationPicker.vue
   - src/features/my-atlas/config/placeSearch.mjs
   - src/features/my-atlas/config/featureFlags.mjs
   - src/features/my-atlas/components/MyAtlasMap.vue
@@ -126,11 +130,16 @@ Journey, Place, Visit, Experience, Moment, media, or editorial state. Its map
 component reuses only the official MapTiler SDK JS session, hybrid style, and
 terrain configuration from the curated Atlas.
 
-The map can project a pin's already authorized favorite memory as plain text.
-Selecting a standalone pin reveals its complete memory in that pin's label.
-An explicit owner or visitor control can reveal shortened memory previews for
-all currently visible standalone pins. Compact low-zoom clusters never include
-memory text, so the overview remains legible.
+The owner map can show already-authorized favorite memories as plain text.
+Show map memories applies to ordinary pins and trip markers. Hide map memories
+hides every map memory label, including the selected pin; a selected place's
+sidebar detail remains available. Public maps do not receive owner-only notes.
+Low-zoom clusters show counts without memory text. Both ordinary and trip pins
+use the primary Atlas's screen-distance clustering thresholds; activating a
+cluster frames its locations with enough close zoom to separate tight groups.
+Repeated stops share one physical marker while retaining route order. Ordinary
+trip pins show dots instead of stop numbers; explicit start/finish markers retain
+their roles and colors. No clustering operation rewrites a trip or route.
 
 The route is absent unless VUE_APP_ENABLE_MY_ATLAS_GEOGRAPHIC_PROOF is exactly
 true. The repository and GitHub Pages workflow do not set that variable, so
@@ -422,6 +431,33 @@ results stay distinct. Only explicit coordinates can fill the draft through a
 confirmation button; camera centers require manual placement. Existing labels
 are preserved. Raw links, provider IDs and inferred business details are not
 saved. The map remains the same SDK instance.
+
+The November 22 local picker replaces separate latitude/longitude controls with
+one text field and a read-only selected-position summary. Its existing split
+coordinate props/events remain the interface to visited, planner, canonical
+trip and custom-pin editors. Parsing and reference selection produce a preview;
+Use this location explicitly applies coordinates and begins map review. Final
+account saving remains a separate owner action.
+
+`shared/my-atlas-location-input.mjs` accepts latitude-first decimal pairs separated
+by commas, whitespace or semicolons, labeled decimal pairs, compass notation,
+and degrees/minutes/seconds with hemispheres. It normalizes pasted line breaks
+and keeps internal arrays longitude-first. Range checks retain the existing
+Mercator latitude limit and reject invalid minutes/seconds, extra values and
+unsupported text. Full Plus Codes and plus.codes URLs decode locally using
+the pinned Apache-2.0 `open-location-code` dependency. Short codes require an
+explicitly chosen nearby city from the existing catalog search, then a second
+confirmation of the decoded area center. No map-center inference or automatic
+first-result geocoding occurs. Shorter codes need closer reference locations;
+the UI explains this and retains full-code/manual alternatives.
+
+Google place URLs may include one explicit `!3d`/`!4d` pair distinct from the
+camera position; conflicting explicit points remain ambiguous. Google query/path
+coordinate and Plus Code URLs, Apple coordinate links, a single URL in sharing
+text and legacy goo.gl/maps short URLs are supported. Multiple URLs, routes,
+unsupported hosts and place-ID-only links never select an arbitrary coordinate.
+Google camera centers and Apple frame centers remain previews requiring manual
+placement. Source strings and reference towns are not added to account records.
 
 `POST /v1/me/map-links/resolve` requires an active authenticated owner and write
 permission, accepts only `{url}`, and uses a dedicated six-per-minute hashed
