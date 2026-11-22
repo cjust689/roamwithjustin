@@ -458,7 +458,7 @@ No Viator code, private account reset or destructive data operation is included.
       Focused ESLint and `npm run docs:audit` passed; the audit retains its
       12 existing unverified-document warnings. Build evidence:
       `.state/theme/my-atlas-map-memory-build.log`.
-- [ ] Promote this frontend-only correction when requested.
+- [x] Include in develop PR 241; protected main promotion is tracked by PR 242.
 
 No account data, API, map provider configuration or public projection is changed.
 The primary Atlas layout algorithm is reused without changing its behavior.
@@ -473,7 +473,7 @@ The primary Atlas layout algorithm is reused without changing its behavior.
       help, navigation or the bottom restore bar. No horizontal overflow occurred.
       Evidence: `.state/theme/route-key-mobile-browser.json` and screenshot.
 - [x] Focused ESLint passed for `MyAtlasMap.vue`.
-- [ ] Promote with the outstanding memory/clustering frontend correction.
+- [x] Include with memory/clustering in develop PR 241 and main promotion PR 242.
 
 This is a mobile CSS correction; route data and desktop placement are unchanged.
 
@@ -505,7 +505,7 @@ This is a mobile CSS correction; route data and desktop placement are unchanged.
       runtime tests. Evidence: `.state/theme/my-atlas-header-motion-build.log`.
 - [x] Managed documentation audit passed for 76 documents, with the existing
       12 unverified-document warnings.
-- [ ] Promote this local follow-up when requested.
+- [x] Include this follow-up in develop PR 241 and main promotion PR 242.
 
 No account mutation, API deployment or map-instance replacement is introduced.
 
@@ -531,7 +531,7 @@ No account mutation, API deployment or map-instance replacement is introduced.
       `d0cae681c127ed7c`. Evidence: `.state/theme/navigator-gestures-build.log`.
 - [x] `npm run docs:audit` passed for 76 managed documents with the existing
       12 unverified-document warnings.
-- [ ] Promote this frontend follow-up when requested.
+- [x] Include this follow-up in develop PR 241 and main promotion PR 242.
 
 No account data, public projection or map provider configuration is changed.
 
@@ -548,7 +548,7 @@ No account data, public projection or map provider configuration is changed.
       `.state/my-atlas/shared-trip-brand-browser.mjs`.
 - [x] Focused ESLint passed for `MyAtlasSharedTripView.vue`; managed
       documentation audit passed with the existing warnings.
-- [ ] Promote this CSS correction with the other local frontend work when requested.
+- [x] Include this correction in develop PR 241 and main promotion PR 242.
 
 Trip data, sharing permissions and the approved SVG assets are unchanged.
 
@@ -566,5 +566,17 @@ The shared map-link parser deployed to the staging-named API used by production
 as Worker `70d750e9-9dbc-4dd1-9a8e-2053d1287480`, before frontend promotion.
 Deploy log: `.state/theme/mobile-location-worker-deploy.log`. No migrations,
 account resets, Viator edits or user-record writes are part of this release.
-Frontend PRs, protected-branch validation, Pages deployment and live read-only
-checks will be recorded after they complete.
+Source commit `e6bc867783dda30ee1d3b470cf62461cf2b6f994` passed GitHub
+validation run 45034855868, then merged through
+[develop PR 241](https://github.com/cjust689/roamwithjustin/pull/241) as
+`5549a98e1f7a18e80a3c81bcaf8da7ee9d786006`. API health and public directory
+reads returned 200 after deployment. The protected
+[main promotion PR 242](https://github.com/cjust689/roamwithjustin/pull/242)
+provides the live merge/check status; the
+[Pages workflow](https://github.com/cjust689/roamwithjustin/actions/workflows/deploy-pages.yml)
+provides deployment status. A follow-up PR carries main-history alignment and
+this handoff into develop before completing the same main promotion.
+
+No authenticated production account acceptance or real provider short-link
+success is inferred from the public read checks. The final release report
+separates protected-branch promotion, Pages deployment and browser acceptance.

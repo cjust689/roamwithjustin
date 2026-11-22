@@ -121,33 +121,36 @@ returned both lifecycles. PRs 239 and 240 released the frontend through develop/
 and owner-only export. See the
 [public grouped browsing checklist](implementation/my-atlas-integrated-trip-management-2026-11-21.md#public-grouped-trip-browsing-local).
 
-Local map correction: Show/Hide map memories now applies to visited and trip
+November 22 map correction: Show/Hide map memories now applies to visited and trip
 pins, including selected markers. Trip pins consolidate using the primary Atlas
 clustering rules, count physical locations and expand on activation. Stop numbers
 are replaced by dots while explicit Start/Finish markers and ordered paths remain.
 Verification is recorded in the active integrated trip checklist.
-The local mobile route key also moves to the upper-left map corner with space
+The mobile route key also moves to the upper-left map corner with space
 reserved for SDK controls and attribution; open/hidden menu layouts were checked.
-The local header follow-up aligns branding, theme, profile and collapse controls
+The header follow-up aligns branding, theme, profile and collapse controls
 in one row. The collapsed bar retains the themed RWJ mark and My Atlas label.
 Menus, sidebar changes and native dialogs use short transitions with reduced-
 motion support; focus, pending-save guards and unsaved drafts were checked.
-The local mobile navigator now contains its own gesture-help icon instead of
+The mobile navigator now contains its own gesture-help icon instead of
 overlapping the floating Map gestures control. Its height follows the available
 map area, with Previous/Next kept outside the scrolling stop details, for owner
 and public views.
-The local location picker now uses one field for coordinate pairs, compass/DMS
+The location picker now uses one field for coordinate pairs, compass/DMS
 coordinates, Google/Apple links and Plus Codes. Separate latitude/longitude
 inputs are removed. Short Plus Codes require a chosen nearby reference before
 confirmation. See the [location implementation record](implementation/my-atlas-location-experience-commerce.md#unified-location-input-november-22-local).
-The local shared-trip header also insets the RWJ mark inside its rounded pill,
+The shared-trip header also insets the RWJ mark inside its rounded pill,
 with aligned 44 pixel brand/theme controls and verified mobile spacing.
 
-November 22 promotion: the owner authorized develop/main release of this local
+November 22 promotion: the owner authorized develop/main release of this
 map, navigation, motion, location-input and shared-branding batch. The compatible
 map-link parser is deployed as Worker `70d750e9-9dbc-4dd1-9a8e-2053d1287480`.
-Frontend promotion and final live verification are tracked in the integrated
-trip implementation handoff.
+Source commit `e6bc867` passed GitHub validation run 45034855868 and merged
+through [develop PR 241](https://github.com/cjust689/roamwithjustin/pull/241).
+[Main promotion PR 242](https://github.com/cjust689/roamwithjustin/pull/242)
+tracks protected-branch release status; the integrated trip implementation
+handoff links the checks and Pages workflow.
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
