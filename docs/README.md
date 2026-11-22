@@ -175,6 +175,23 @@ recovery, drafts, pending-save guards and Customize navigation.
 The owner authorized develop/main promotion; its release PRs record protected
 checks, Pages deployment and post-deployment browser acceptance.
 
+Local journey-summary follow-up: Planned and Past journeys now lead with known
+dates, compact numbered destinations, memory previews and a View journey on map
+action. Read-only lifecycle and visibility badges replace summary switches.
+Destination recaps and tabbed journey management keep editing controls out of the
+default summary, with pointer/keyboard reordering, explicit permanent-removal
+confirmation and a separate read-only sharing dialog. The expanded mockup pass
+adds separate trip list/detail views, an Overview destination detail view,
+compact journey cards and two sharing cards with owner-only Story preview.
+Mobile signed-in menus fill the viewport and retain the full-map collapse action.
+An additive Worker change supports named empty drafts and private planning notes;
+capability checks preserve compatibility with older servers. Public projections
+remain unchanged. The owner authorized develop/main promotion. Compatible Worker
+`b84e61df-6755-4cbd-aed2-f4d1d794ffa4` is deployed, with seven remote health,
+authentication and CORS checks passing without account writes. The active
+integrated-trip checklist records verification; protected checks, Pages deployment
+and live frontend acceptance are recorded in the release PRs.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;

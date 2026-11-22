@@ -33,6 +33,9 @@ code_paths:
   - src/features/my-atlas/components/MyAtlasVisitManager.vue
   - src/features/my-atlas/components/MyAtlasJourneyCards.vue
   - src/features/my-atlas/components/MyAtlasTrips.vue
+  - src/features/my-atlas/components/MyAtlasTripDestinations.vue
+  - src/features/my-atlas/components/MyAtlasPinEditor.vue
+  - src/features/my-atlas/export/storyExport.mjs
   - src/features/my-atlas/views/MyAtlasGeographicProof.vue
   - src/features/my-atlas/planning/journeyCards.mjs
   - src/features/my-atlas/planning/tripClient.mjs
@@ -69,7 +72,8 @@ destination still does not create a trip. PRs 228 and 229 released the integrate
 feature, with branch alignment in PR 230. Pages run 44912326394 succeeded for
 main commit `7ee5c30fe6a457bebade61d13d8f4403d0ed66bb`; live owner, Explore and
 unavailable-Atlas routes and shipped feature markers passed browser checks.
-The compact workspace follow-up below remains local. Real owner acceptance
+The compact workspace follow-up shipped through PRs 231 and 232. New local
+follow-ups are tracked in the dated sections below. Real owner acceptance
 remains separate work. The additive
 API is deployed to staging as `71692099-3991-455a-b9e9-a8a794433a38`, which is the
 configured API used by localhost. No user data was migrated or written during
@@ -676,3 +680,111 @@ passed. This bounded CSS fix accompanies the release alignment/handoff PR.
 - [x] Prepare the owner-authorized develop/main release. Protected checks,
       Pages deployment and post-deployment browser acceptance are recorded in
       the release PRs. No API or Worker deployment is required.
+
+### Journey-first summary, November 22, local
+
+- [x] Lead Planned and Past journeys with title, known dates, destination count,
+      read-only lifecycle and effective visibility badges. Preserve the theme,
+      title pencil and independent destination model.
+- [x] Replace per-row editing controls with compact numbered destination rows,
+      existing memory excerpts, region/country and experience counts. Open a
+      destination on its Recap tab before showing editing fields.
+- [x] Put explicit lifecycle movement and the profile inclusion switch in Edit
+      journey Settings. Put transfer, grouping, reordering and travel tools in
+      the existing single dialog, retaining tabs and guarded writes.
+- [x] Rename Move visits to Manage destinations. Provide Order, Move between
+      journeys and Add existing tabs, using existing revisioned APIs. Resolve
+      raw standalone pin names through owner catalog places, and preserve the
+      existing visibility boundary for assigning those pins.
+- [x] Add management-only pointer drag handles, keyboard arrow reordering and
+      explicit earlier/later destination actions. Preserve stop IDs, acknowledge
+      server state and revert cancelled previews. Keep the long list scrollable.
+- [x] Confirm permanent stop removal in the same dialog. Offer transfer or
+      ungrouping separately so preserving a visit is distinct from deleting it.
+- [x] Make View journey on map open the existing selected-trip navigator with
+      the sidebar hidden. Separate Share journey into a read-only explanation
+      and Copy action with status inside the dialog. Preserve snapshot privacy.
+- [x] Script regression checks cover recap defaults, known-date precision,
+      settings and lifecycle tabs, pin-name resolution, invalid/duplicate reorder
+      IDs, cancellation, pointer/keyboard payloads, pending guards and explicit
+      removal. Command: `node scripts/test-my-atlas-trip-workspace.mjs`.
+- [x] Local Chrome passed 16 combinations of both themes, Planned/Past,
+      320 by 568, 390 by 844, 568 by 320 and 1440 by 900: compact summary,
+      effective visibility, a native viewport-bounded single dialog, Recap
+      before fields, sharing explanation and acknowledged visibility writes.
+      Extra checks passed real mouse and touch dragging, cancelled touch
+      gestures, keyboard reorder, long-list
+      scrolling, retained failed drafts, pinned Copy feedback, private snapshot
+      exclusion and reuse of the same map with the correct trip navigator.
+      Evidence: `.state/theme/journey-overview-browser.json`, local captures and
+      `.state/my-atlas/journey-overview-browser.mjs`. No real account writes.
+- [x] `npm run build` passed all script suites and 61 isolated Worker runtime
+      tests with the established local parallel-false override, hash
+      `de09597ae71ed2af`. Evidence: `.state/theme/journey-overview-build.log`.
+- [x] Focused ESLint and `git diff --check` passed. `npm run docs:audit` passed
+      for 76 managed documents with the 12 existing unverified-document warnings.
+- [ ] Complete genuine owner acceptance. The owner subsequently authorized
+      promotion with the expanded mockup flow below; no data migration is needed.
+
+### Overview and planning mockup implementation, November 22, local
+
+Owner references are the November 22 pasted feedback and `codex-context/download.png`,
+plus the attached Planning/New trip/stop-notes concept. The pictures guide
+hierarchy and navigation; their sample journeys, dates, statistics and illustrative
+maps are not added as user data or public content. The existing unified Profile
+visibility setting is preserved rather than restoring the concept's older toggle.
+
+- [x] Place owner navigation before contextual Overview/Planning/Past headings.
+      Distinguish trip lists from a selected journey, with Back navigation,
+      prominent New trip and compact destination/management controls.
+- [x] Build the Overview home from travel statistics, map actions, a compact
+      selected-destination card and journey summaries. Destination View opens
+      known memory/dates and actual related journeys; standalone editing uses
+      the existing pin editor inside one native dialog.
+- [x] Make expanded signed-in mobile menus fill and scroll within the viewport.
+      Hide covered mobile gesture help; preserve full-map collapse/restore and
+      reuse the existing SDK instance and navigator.
+- [x] Separate Interactive Atlas and Travel story image cards. Preserve Profile's
+      single publication/listing control and direct-trip snapshot boundaries.
+      Add owner-only PNG preview and Save without changing visibility.
+- [x] New trip takes status from the tab and accepts a name without a stop on
+      capable servers. Add optional collection capability flags, create empty
+      private drafts and save them when their first destination is added.
+- [x] Save private, multiline planning notes through the existing revisioned stop
+      PATCH, separate from memories and experiences. Preserve notes across
+      lifecycle changes; reject invalid, overlong, stale and cross-owner writes.
+      Keep old-server UI clear and preserve drafts when saving is unavailable.
+- [x] Isolated Worker tests passed all 62 tests, including named draft creation,
+      exact replay, first-stop workflow, note normalization/limits, private export,
+      snapshot exclusion, lifecycle preservation and cross-owner denial.
+      Evidence: `.state/theme/journey-flow-runtime.log`.
+- [x] Local Chrome passed 8 both-theme Overview flow cases at 320 by 568,
+      390 by 844, 568 by 320 and 1440 by 900, with list/detail navigation,
+      standalone editor pending guards, planned-note-only payloads, empty-draft
+      readiness, old-server guards, same-map selection, two sharing cards and
+      actual PNG preview. Failed planning notes remained in the dialog.
+      Evidence: `.state/theme/overview-flow-browser.json` and captures.
+- [x] The 16-case journey browser suite also passed recap/settings/sharing,
+      pointer/touch/keyboard reordering, touch cancellation, long lists, failed
+      drafts and private share exclusion. Evidence:
+      `.state/theme/journey-flow-browser.json`. No real account writes.
+- [x] Final `npm run build` passed all script suites and 62 isolated Worker
+      runtime tests, using the established local parallel-false override. Hash
+      `ea761d6934b85394`; evidence: `.state/theme/journey-flow-build.log`.
+- [x] `npm run my-atlas:worker:check:staging` passed as a dry run; no Worker was
+      deployed. Evidence: `.state/theme/journey-flow-worker-check.log`.
+- [x] Focused ESLint and `git diff --check` passed. Retire the obsolete test for
+      the former selected-place inline memory button; browser acceptance now
+      covers the recap/editor flow. `npm run docs:audit` passed with the existing
+      12 unverified-document warnings.
+- [x] Chrome delayed PNG generation while opening Profile and retained that
+      editor with exactly one modal. No nested Story-preview dialog appeared.
+- [x] Owner authorized develop/main promotion. Deploy compatible Worker
+      `b84e61df-6755-4cbd-aed2-f4d1d794ffa4`; seven remote health/auth/CORS checks
+      passed without account writes. Evidence:
+      `.state/theme/journey-flow-worker-deploy.log` and
+      `.state/theme/journey-flow-api-live.json`.
+- [x] Prepare protected-PR promotion and post-deployment UI acceptance. Release
+      PRs record actual commits, check runs, Pages deployment and live evidence.
+- [ ] Complete genuine owner acceptance. No account-store switch or data
+      migration was performed; no real account was changed during verification.

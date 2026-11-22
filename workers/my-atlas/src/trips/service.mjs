@@ -53,6 +53,22 @@ const text = (value, max, required = false) => {
     bad()
   return normalized
 }
+const planningNote = value => {
+  if (typeof value !== "string") bad()
+  const normalized = value.normalize("NFC").replace(/\r\n?/g, "\n").trim()
+  if (
+    normalized.length > 2000 ||
+    /[<>\p{Cf}\uD800-\uDFFF]/u.test(normalized) ||
+    Array.from(normalized).some(character => {
+      const code = character.codePointAt(0)
+      return (
+        (code < 32 && ![9, 10].includes(code)) || (code >= 127 && code <= 159)
+      )
+    })
+  )
+    bad()
+  return normalized
+}
 const ids = (value, pattern) => {
   if (
     !Array.isArray(value) ||
@@ -130,6 +146,7 @@ export async function tripRequest({
       writesEnabled: environment.MY_ATLAS_TRIP_WRITES_ENABLED === "true",
       trips: state.trips,
       destinations: state.destinations,
+      capabilities: { emptyTripDrafts: true, planningNotes: true },
       ungroupedVisits: state.ungroupedVisits,
       legacyPlans: state.legacyPlans,
       rollbackAvailable: state.rollbackAvailable,
@@ -373,7 +390,6 @@ export async function tripRequest({
     if (
       !["planned", "past"].includes(input.lifecycle) ||
       !Array.isArray(input.stops) ||
-      input.stops.length < 1 ||
       input.stops.length > 50
     )
       bad()
@@ -387,7 +403,7 @@ export async function tripRequest({
         title: text(input.title, 80, true),
         description: text(input.description, 500),
         lifecycle: input.lifecycle,
-        workflow: "saved",
+        workflow: stops.length ? "saved" : "draft",
         stops,
         memories: [],
         logistics: { flights: [], rentals: [] },
@@ -455,6 +471,7 @@ export async function tripRequest({
       action = action === "visit-edit" ? "visit-edit" : "stop-edit"
       input = object(body, [
         "memory",
+        "planNote",
         "experienceChange",
         "plannedDates",
         "actualDates",
@@ -462,6 +479,8 @@ export async function tripRequest({
       if (!Object.keys(input).length) bad()
       const patch = {}
       if (input.memory !== undefined) patch.memory = text(input.memory, 500)
+      if (input.planNote !== undefined)
+        patch.planNote = planningNote(input.planNote)
       if (input.experienceChange !== undefined) {
         patch.experienceChange = normalizeExperienceChange(
           input.experienceChange

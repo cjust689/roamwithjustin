@@ -45,6 +45,7 @@ code_paths:
   - workers/my-atlas/src/index.mjs
   - src/features/my-atlas/api/client.mjs
   - src/features/my-atlas/components/MyAtlasPlanner.vue
+  - src/features/my-atlas/components/MyAtlasTripDestinations.vue
   - src/features/my-atlas/components/MyAtlasActionFeedback.vue
   - src/features/my-atlas/components/MyAtlasRegistrationForm.vue
   - src/features/my-atlas/planning/handoffs.mjs
@@ -1242,8 +1243,10 @@ This frontend follow-up is local and does not alter persistence or public data.
 
 The refined summary uses the trip and destination names, with pen icons, as
 editor triggers. A selected single trip does not need a duplicate picker.
-Public Atlas and Traveled are revisioned switches that retain server state
-until acknowledged. Deletion confirmation replaces the title editor's content
+Profile inclusion remains a revisioned switch in the journey editor's Settings
+tab. Lifecycle uses an explicit Move to Planned or Mark as Traveled action in
+that tab; the summary shows read-only status and visibility badges. These actions
+retain server state until acknowledged. Deletion confirmation replaces the title editor's content
 inside the same dialog. Shared hover rules are explicitly overridden in the
 trip workspace to prevent movement and brightness effects on its controls.
 Switches also exclude generic press transforms; their pending spinner overlays
@@ -1458,3 +1461,102 @@ focusing the existing Overview disclosure. Info help uses a popover within the
 single dialog; no nested modal is introduced. The map and account revision are
 unchanged by opening/closing. Profile publication and account API contracts are
 not changed by this presentation correction.
+
+### Journey summary and destination recap, November 22, local
+
+`MyAtlasTrips.vue` presents a journey before its management controls: editable
+title, destination count, known dates from `journeyCardDate`, lifecycle and
+effective-profile-visibility badges, optional existing overview, compact ordered
+destinations and a map action. Dates are never inferred from creation timestamps.
+`MyAtlasTripDestinations.vue` shows region/country, an existing note excerpt and
+experience counts when available. It does not invent cover media or events.
+
+Opening a destination starts on a read-only Recap tab. Memory, Dates,
+Experiences and Actions remain tabs of the same native dialog. Actions contains
+accessible earlier/later movement and permanent removal; removal replaces the
+dialog content with an explicit confirmation. Moving or ungrouping preserves the
+visit and uses the existing transfer API. No nested dialog is opened.
+
+Edit journey has Details and Settings tabs. Lifecycle is an explicit action;
+profile inclusion remains an acknowledged revisioned switch. Manage destinations
+has Order, Move between journeys and, for Past journeys, Add existing tabs.
+Standalone legacy pins resolve names from owner `pinnedPlaces` and retain their
+original pin references. Their existing visibility-matching rule still applies.
+Independent canonical visits use the existing transfer path. Neither destination
+addition nor this presentation change creates a journey implicitly.
+
+Management-only drag handles support pointer gestures and arrow keys. Drag order
+is a local preview until release, then emits the existing full stop-ID reorder
+payload. Repeated place visits remain distinct by stop ID. Cancellation, pending
+writes and failed requests do not mutate prop-owned order. Pointer listeners are
+removed on cancellation, release and destruction. Touch panning is disabled only
+on the handle; the dialog body remains scrollable. Explicit earlier/later buttons
+provide an alternative to dragging or arrow keys.
+
+Share journey opens a separate read-only explanation and Copy action with pinned
+confirmation. It retains the existing allowlisted snapshot, excludes private
+memories/experiences/logistics, works independently of profile publication and
+explains that previously copied snapshots do not change or revoke themselves.
+View journey on map selects that canonical journey in the existing owner map
+navigator and hides the sidebar without creating another map or changing data.
+The initial summary was a frontend-only change. The expanded mockup pass below
+also adds a compatible API extension. Both remain local.
+
+### Overview and planning mockup flow, November 22, local
+
+The owner tabs precede a context-specific heading. Overview contains three travel
+statistics, an action card for the existing map, a compact selected destination,
+journey summaries and sharing/customization cards. Opening a selected destination
+replaces the Overview body with its known location, memory, visit dates and
+related canonical journeys. It never guesses a trip relationship from proximity
+or dates. Standalone memory/date editing reuses `MyAtlasPinEditor.vue` in the
+shared native dialog. Grouped geography opens occurrence-aware journey tools
+instead of writing to a merged compatibility pin. Custom-pin location editing
+remains in its existing workflow, outside that memory/date dialog.
+
+On mobile, a signed-in expanded menu fills the viewport and scrolls internally.
+Its collapse action and map buttons reveal the same mounted SDK map and existing
+trip/stop navigator. The signed-out map layout is unchanged. Map-help controls
+are hidden while covered by the full menu. No extra map instance or illustrative
+map asset is introduced.
+
+Planning and Past have distinct list and selected-journey views, with a Back
+action. New trip takes its lifecycle from the current tab and requires a name;
+the first stop is optional when the server advertises support. Management and
+sharing stay in the existing native dialog. Overview journey cards open these
+views and do not duplicate editing or sharing controls.
+
+`GET /v1/me/trips` adds optional `capabilities.emptyTripDrafts` and
+`capabilities.planningNotes` booleans. Older responses omit them and remain valid.
+The UI treats absent/nonboolean capabilities as false: saving an empty trip
+requires a first destination on such servers, and planning-note saving is
+disabled with an explanation. Normal local startup continues using its configured
+API and does not replace, clear or switch the account store.
+
+The collection POST accepts zero stops, storing an explicitly named private
+`workflow: draft` trip. Adding its first stop changes the workflow to `saved`.
+Neither changes the independent-destination model. Empty trips have no map route
+or share snapshot and remain excluded from public trip projections.
+
+Stop PATCH also accepts `planNote`, stored separately from `memories`. It accepts
+up to 2,000 UTF-16 units of normalized plain text, preserves line breaks and
+rejects markup, invisible formatting, invalid surrogates and control characters.
+Planned stops open on Notes; Past stops open on Recap. Notes survive lifecycle
+changes, remain in private exports and are excluded from public/share projections.
+Existing authorization, revision, idempotency and storage limits remain in force.
+
+Share Your Atlas distinguishes an Interactive Atlas card from a Travel story
+image card. Profile publication/Explore listing still has one control in Profile
+settings. Story Preview and save builds an owner-only PNG Blob, shows it in one
+dialog, then offers Save. Closing, destruction, logout and account deletion revoke
+the preview URL. A completed preview checks owner identity before presentation.
+If another dialog opened during PNG generation, its form is retained and the
+new Blob is revoked instead of opening a second modal.
+It neither uploads an image nor changes visibility, and public visitors retain
+no Story download action. Compatible Worker
+`b84e61df-6755-4cbd-aed2-f4d1d794ffa4` is deployed. Health returned 200;
+unauthenticated trip reads, creates and note writes returned 401; allowed PATCH
+preflights returned 204; a foreign origin returned 403. Authenticated new behavior
+is covered by isolated Worker tests, not real-account mutation acceptance.
+The owner authorized frontend promotion through develop/main; release PRs record
+protected checks, Pages deployment and live synthetic UI acceptance.

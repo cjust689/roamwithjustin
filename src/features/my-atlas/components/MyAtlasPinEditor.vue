@@ -1,6 +1,10 @@
 <template>
-  <section class="pin-editor" aria-labelledby="pin-editor-title">
-    <div class="pin-editor-heading">
+  <section
+    class="pin-editor"
+    :aria-labelledby="embedded ? undefined : 'pin-editor-title'"
+    :aria-label="embedded ? 'Edit visit to ' + place.name : undefined"
+  >
+    <div v-if="!embedded" class="pin-editor-heading">
       <div>
         <p>{{ editorLabel }}</p>
         <h2 id="pin-editor-title">{{ place.name }}</h2>
@@ -80,7 +84,9 @@
     </label>
 
     <details
-      v-if="pin && place.placeType === 'custom' && !memoryOnly"
+      v-if="
+        pin && place.placeType === 'custom' && !memoryOnly && allowLocationEdit
+      "
       @toggle="toggleLocationEditor"
     >
       <summary>Edit this custom location</summary>
@@ -152,6 +158,8 @@ export default {
   name: "MyAtlasPinEditor",
   components: { MyAtlasExperiences, MyAtlasLocationPicker },
   props: {
+    embedded: Boolean,
+    allowLocationEdit: { type: Boolean, default: true },
     experiencePending: Boolean,
     resolveLink: { type: Function, default: null },
     experienceError: { type: String, default: "" },

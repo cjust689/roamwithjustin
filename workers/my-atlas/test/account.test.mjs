@@ -1265,6 +1265,100 @@ describe("private owner profile and pin services", () => {
       )
     ).toEqual(["account-deleted"])
   })
+  it("saves named empty drafts and private planning notes without converting ideas into memories", async () => {
+    await upgradeTrips()
+    const listed = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(listed.capabilities).toEqual({
+      emptyTripDrafts: true,
+      planningNotes: true,
+    })
+    const key = tripKey(),
+      revision = listed.profile.revision
+    const body = { title: "A future idea", lifecycle: "planned", stops: [] }
+    const created = await tripCall("/v1/me/trips", body, { key, revision })
+    expect(created.trip.workflow).toBe("draft")
+    expect(created.trip.stops).toEqual([])
+    expect(created.trip.sharing.publicAtlas).toBe(false)
+    const replay = await tripCall("/v1/me/trips", body, { key, revision })
+    expect(replay.trip.tripId).toBe(created.trip.tripId)
+    expect(replay.idempotent).toBe(true)
+    await expect(
+      tripCall("/v1/me/trips", { ...body, title: " " })
+    ).rejects.toThrow()
+    const path = `/v1/me/trips/${created.trip.tripId}`
+    const added = await tripCall(`${path}/stops`, {
+      customPlace: { name: "A first place", coordinates: [1, 2] },
+    })
+    expect(added.trip.workflow).toBe("saved")
+    const stop = added.trip.stops[0],
+      stopPath = `${path}/stops/${stop.stopId}`
+    const notes = "Maybe visit the coast.\nFind somewhere to stay."
+    const saved = await tripCall(
+      stopPath,
+      { planNote: notes },
+      { method: "PATCH" }
+    )
+    expect(saved.trip.stops[0].planNote).toBe(notes)
+    expect(saved.trip.stops[0].memories).toEqual([])
+    expect(saved.trip.stops[0].experiences).toEqual([])
+    await expect(
+      tripCall(
+        stopPath,
+        { planNote: "Stale" },
+        { method: "PATCH", revision: added.profile.revision }
+      )
+    ).rejects.toMatchObject({ code: "revision_conflict", status: 412 })
+    await expect(
+      tripCall(stopPath, { planNote: "<b>bad</b>" }, { method: "PATCH" })
+    ).rejects.toThrow()
+    await expect(
+      tripCall(stopPath, { planNote: "x".repeat(2001) }, { method: "PATCH" })
+    ).rejects.toThrow()
+    const past = await tripCall(
+      `${path}/lifecycle`,
+      { lifecycle: "past" },
+      { method: "PATCH" }
+    )
+    expect(past.trip.stops[0].planNote).toBe(notes)
+    expect(past.trip.stops[0].memories).toEqual([])
+    expect(
+      JSON.stringify(decodeSharedTrip(encodeSharedTrip(past.trip)))
+    ).not.toContain("Maybe visit")
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(
+      exported.trips.find(trip => trip.tripId === created.trip.tripId).stops[0]
+        .planNote
+    ).toBe(notes)
+    await registerSecondOwner()
+    await upgradeTrips({ identity: SECOND_IDENTITY })
+    const other = await tripCall("/v1/me/trips", undefined, {
+      identity: SECOND_IDENTITY,
+      method: "GET",
+    })
+    expect(other.trips).toEqual([])
+    await expect(
+      tripCall(
+        stopPath,
+        { planNote: "Other owner" },
+        { identity: SECOND_IDENTITY, method: "PATCH" }
+      )
+    ).rejects.toMatchObject({ code: "trip_not_found" })
+    const longer = await tripCall(
+      stopPath,
+      { planNote: "x".repeat(2000) },
+      { method: "PATCH" }
+    )
+    expect(longer.trip.stops[0].planNote).toHaveLength(2000)
+    const blanked = await tripCall(
+      stopPath,
+      { planNote: "" },
+      { method: "PATCH" }
+    )
+    expect(blanked.trip.stops[0].planNote).toBe("")
+  })
   it("edits stop order and dates with revision guards and explicit content deletion", async () => {
     await upgradeTrips()
     const created = await tripCall("/v1/me/trips", {
