@@ -268,12 +268,54 @@ describe("public Atlas projection", () => {
       "recent-owner",
       "older-owner",
     ])
+    const unlisted = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { discoverable: false },
+        expectedRevision: 4,
+        idempotencyKey: "14141414-1414-4414-8414-141414141414",
+      },
+      now: NOW,
+    })
+    expect(unlisted.profile).toMatchObject({
+      public: true,
+      discoverable: false,
+    })
+    expect(
+      (
+        await getPublicAtlasDirectory({
+          environment: environment(),
+          input: { limit: 12, cursor: null },
+          now: NOW,
+        })
+      ).atlases
+    ).toEqual([])
+    expect(
+      (
+        await getPublicAtlas({
+          environment: environment(),
+          handle: "public-owner",
+          placeCatalog,
+        })
+      ).atlas.handle
+    ).toBe("public-owner")
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { discoverable: true },
+        expectedRevision: 5,
+        idempotencyKey: "15151515-1515-4515-8515-151515151515",
+      },
+      now: NOW,
+    })
     const unpublished = await updateMyProfile({
       environment: environment(),
       identity: IDENTITY,
       input: {
         patch: { public: false },
-        expectedRevision: 4,
+        expectedRevision: 6,
         idempotencyKey: "13131313-1313-4313-8313-131313131314",
       },
       now: NOW,
@@ -288,6 +330,61 @@ describe("public Atlas projection", () => {
         })
       ).atlases
     ).toEqual([])
+    const listedTogether = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true, discoverable: true },
+        expectedRevision: 7,
+        idempotencyKey: "16161616-1616-4616-8616-161616161616",
+      },
+      now: NOW,
+    })
+    expect(listedTogether.profile).toMatchObject({
+      public: true,
+      discoverable: true,
+      revision: 8,
+    })
+    expect(
+      (
+        await getPublicAtlasDirectory({
+          environment: environment(),
+          input: { limit: 12, cursor: null },
+          now: NOW,
+        })
+      ).atlases
+    ).toHaveLength(1)
+    const privateTogether = await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: false, discoverable: false },
+        expectedRevision: 8,
+        idempotencyKey: "17171717-1717-4717-8717-171717171717",
+      },
+      now: NOW,
+    })
+    expect(privateTogether.profile).toMatchObject({
+      public: false,
+      discoverable: false,
+      revision: 9,
+    })
+    expect(
+      (
+        await getPublicAtlasDirectory({
+          environment: environment(),
+          input: { limit: 12, cursor: null },
+          now: NOW,
+        })
+      ).atlases
+    ).toEqual([])
+    await expect(
+      getPublicAtlas({
+        environment: environment(),
+        handle: "public-owner",
+        placeCatalog,
+      })
+    ).rejects.toBeInstanceOf(PublicAtlasNotFoundError)
   })
 
   it("is private by default and exposes only the safe published projection", async () => {

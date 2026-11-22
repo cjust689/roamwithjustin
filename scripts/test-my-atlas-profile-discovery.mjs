@@ -6,7 +6,10 @@ import {
   instagramProfileUrl,
 } from "../shared/my-atlas-instagram.mjs"
 import { normalizeProfilePatch } from "../workers/my-atlas/src/account/contracts.mjs"
-import { updateMyAtlasInstagram } from "../src/features/my-atlas/api/client.mjs"
+import {
+  updateMyAtlasInstagram,
+  updateMyAtlasDiscovery,
+} from "../src/features/my-atlas/api/client.mjs"
 import {
   directoryImageVersion,
   mergeDirectoryCards,
@@ -60,6 +63,60 @@ assert.throws(() =>
   normalizeProfilePatch({ instagramHandle: "javascript:alert(1)" }, headers)
 )
 let requests = 0
+for (const listed of [true, false]) {
+  let calls = 0
+  const result = await updateMyAtlasDiscovery({
+    apiBaseUrl: "https://api.example",
+    accessToken: "fixture",
+    public: listed,
+    discoverable: listed,
+    revision: 7,
+    fetchImpl: async (_url, options) => {
+      calls++
+      assert.deepEqual(JSON.parse(options.body), {
+        public: listed,
+        discoverable: listed,
+      })
+      assert.equal(options.headers.get("If-Match"), '"rev-7"')
+      assert.ok(options.headers.get("Idempotency-Key"))
+      return Response.json(
+        {
+          profile: {
+            handle: "atlas-owner",
+            public: listed,
+            discoverable: listed,
+          },
+        },
+        { headers: { ETag: '"rev-8"' } }
+      )
+    },
+  })
+  assert.equal(
+    calls,
+    1,
+    "Profile and directory visibility use one atomic request"
+  )
+  assert.equal(result.public, listed)
+  assert.equal(result.discoverable, listed)
+  assert.equal(result.revision, 8)
+}
+await assert.rejects(
+  updateMyAtlasDiscovery({
+    apiBaseUrl: "https://api.example",
+    accessToken: "fixture",
+    public: true,
+    discoverable: true,
+    revision: 7,
+    fetchImpl: async () =>
+      Response.json(
+        {
+          profile: { handle: "atlas-owner", public: false, discoverable: true },
+        },
+        { headers: { ETag: '"rev-8"' } }
+      ),
+  }),
+  error => error.code === "invalid_response"
+)
 const profile = await updateMyAtlasInstagram({
   apiBaseUrl: "https://api.example",
   accessToken: "fixture",

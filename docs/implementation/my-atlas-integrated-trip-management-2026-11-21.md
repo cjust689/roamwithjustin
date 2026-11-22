@@ -605,3 +605,45 @@ passed. This bounded CSS fix accompanies the release alignment/handoff PR.
 - [x] Prepare this correction for the owner-authorized develop/main release.
       Protected branch checks, Pages deployment and post-deployment acceptance
       are recorded in the release PRs. No Worker or account changes are required.
+
+### Unified profile visibility in Explore, November 22, local
+
+- [x] Use List my profile in Explore Atlases in Profile settings as the single
+      ordinary profile visibility control. Remove the separate publication
+      button and profile-link controls from Overview.
+- [x] Save `{public: listed, discoverable: listed}` in one authenticated,
+      revisioned PATCH. On publishes/lists; off makes private/removes the listing.
+      The client validates both returned flags. Retain the existing backend
+      contract and discovery-only caller compatibility.
+- [x] Preserve direct Planned/Past snapshot links and the independent per-trip
+      Include on my profile preference. Keep image public-use permission separate.
+- [x] Do not migrate or advertise existing unlisted profiles on load. Give those
+      records an explicit private action inside Explore settings, without first
+      listing them. Keep profile-link copying/display in the same settings group.
+- [x] Block empty-profile publication, signed-out, duplicate, pending and
+      unchanged requests. A failed save preserves both prior visibility flags.
+- [x] Make Overview sharing a compact Story-export card with direct-trip guidance,
+      instead of a disclosure containing only the remaining export action.
+- [x] Update the tutorial and info text for the single control and independently
+      shared trip snapshots. Copied trip links are not revoked by profile privacy.
+- [x] Owner-method and client tests passed combined payloads, one-request saves,
+      both-flag response validation, legacy unlisted privacy, failures and guards.
+- [x] Chrome passed 18 private/unlisted/listed, both-theme, 320/390/1440 pixel
+      combinations: one visibility control in Profile, no publication control or
+      disclosure in Overview, correct on/off states, explicit legacy privacy,
+      pending feedback, usable Story export and no horizontal overflow. Empty
+      private profiles cannot be listed. Browser writes were synthetic; no real
+      account was changed. Evidence: `.state/theme/unified-profile-visibility-browser.json`,
+      captures and `.state/my-atlas/unified-profile-visibility-browser.mjs`.
+- [x] The 61 isolated Worker runtime tests passed, including combined on/off
+      updates with one revision each, actual directory inclusion/removal and
+      profile URL access/rejection, plus legacy independent-field compatibility.
+      Evidence: `.state/theme/unified-profile-visibility-runtime.log`.
+- [x] Final `npm run build` passed, including all script suites and 61 isolated
+      Worker runtime tests, with hash `b27db817aacd4c5e` and the established local
+      parallel-false override. Evidence: `.state/theme/unified-profile-visibility-build.log`.
+- [x] Focused ESLint, whitespace validation and managed documentation audit
+      passed. The audit retains its 12 existing unverified-document warnings.
+- [x] Prepare the owner-authorized develop/main release. Protected checks,
+      Pages deployment and post-deployment browser acceptance are recorded in
+      its release PRs. No Worker deployment or data migration is required.
