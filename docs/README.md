@@ -168,6 +168,13 @@ The owner authorized develop/main promotion. The integrated trip implementation
 record tracks verification, and the release PRs record protected checks,
 deployment and post-deployment browser acceptance.
 
+Profile-surface follow-up: Profile settings now uses the shared native
+modal with an opaque panel, dimmed/blurred backdrop, trapped focus and internal
+scrolling. This separates it from sidebar/map controls while retaining account
+recovery, drafts, pending-save guards and Customize navigation.
+The owner authorized develop/main promotion; its release PRs record protected
+checks, Pages deployment and post-deployment browser acceptance.
+
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).
 The owner-approved amber and orange SVG marks now follow the selected theme;

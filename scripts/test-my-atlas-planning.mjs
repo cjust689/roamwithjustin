@@ -255,10 +255,6 @@ assert.match(
 )
 assert.match(
   ownerView,
-  /\.my-atlas-account\.is-menu \{[\s\S]*position: absolute;[\s\S]*right: 1\.25rem;[\s\S]*width: min\(22rem, calc\(100% - 2\.5rem\)\);/
-)
-assert.match(
-  ownerView,
   /\.my-atlas-account-card strong,[\s\S]*\.my-atlas-account-card small \{[\s\S]*line-height: 1\.2;/
 )
 assert.match(

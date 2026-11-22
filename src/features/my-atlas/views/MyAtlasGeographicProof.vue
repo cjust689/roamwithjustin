@@ -110,6 +110,7 @@
               type="button"
               class="my-atlas-profile-trigger"
               :aria-expanded="String(accountMenuOpen)"
+              aria-haspopup="dialog"
               aria-controls="my-atlas-account-menu"
               aria-label="Open My Atlas profile menu"
               @click="toggleProfileMenu"
@@ -153,254 +154,256 @@
             </button>
           </div>
         </header>
-        <transition
-          name="atlas-menu"
-          @before-leave="$event.inert = true"
-          @before-enter="$event.inert = false"
+        <nav
+          v-if="
+            !accountMenuOpen &&
+            (auth.loading || !auth.configured || auth.error || accountError)
+          "
+          id="my-atlas-account-status"
+          ref="authSection"
+          class="my-atlas-account"
+          aria-label="My Atlas account"
+          tabindex="-1"
         >
-          <nav
-            v-if="
-              accountMenuOpen ||
-              auth.loading ||
-              !auth.configured ||
-              auth.error ||
-              accountError
-            "
-            id="my-atlas-account-menu"
-            ref="authSection"
-            class="my-atlas-account"
-            :class="{ 'is-menu': accountMenuOpen }"
-            :style="
-              accountMenuOpen && profileMenuMaxHeight
-                ? { maxHeight: profileMenuMaxHeight + 'px' }
-                : null
-            "
-            aria-label="My Atlas account"
-            tabindex="-1"
-            @keydown.esc.stop="closeProfileMenu"
+          <span v-if="auth.loading" class="my-atlas-account-status">
+            Checking your session
+          </span>
+          <span v-else-if="!auth.configured" class="my-atlas-account-status">
+            Authentication is not configured for this build.
+          </span>
+          <button
+            v-else-if="!auth.authenticated"
+            type="button"
+            class="my-atlas-sign-in"
+            @click="signIn"
           >
-            <span v-if="auth.loading" class="my-atlas-account-status">
-              Checking your session
-            </span>
-            <span v-else-if="!auth.configured" class="my-atlas-account-status">
-              Authentication is not configured for this build.
+            Sign in with Google
+          </button>
+          <template v-else>
+            <div class="my-atlas-account-card">
+              <span>
+                <strong>{{ authDisplayName }}</strong>
+                <small v-if="accountProfile"
+                  >@{{ accountProfile.handle }}</small
+                >
+                <small v-else>Finish account setup</small>
+              </span>
+              <button
+                v-if="accountLoadFailed"
+                class="my-atlas-account-retry"
+                type="button"
+                :disabled="accountPending"
+                @click="loadAccount"
+              >
+                {{ accountPending ? "Loading Atlas" : "Retry saved Atlas" }}
+              </button>
+              <button class="my-atlas-sign-out" type="button" @click="signOut">
+                Sign out
+              </button>
+            </div>
+          </template>
+          <p v-if="auth.error" class="my-atlas-auth-error" role="alert">
+            {{ auth.error }}
+          </p>
+          <p v-if="accountError" class="my-atlas-auth-error" role="alert">
+            {{ accountError }}
+          </p>
+        </nav>
+        <MyAtlasDialog
+          v-if="accountMenuOpen"
+          id="my-atlas-account-menu"
+          ref="profileDialog"
+          class="my-atlas-profile-dialog"
+          :title="accountProfile ? 'Profile settings' : 'Your account'"
+          :pending="accountPending || atlasImagePending"
+          :status-visible="Boolean(accountError || auth.error || toolsStatus)"
+          @close="closeProfileMenu"
+        >
+          <template #status>
+            <p
+              v-if="accountError || auth.error"
+              class="my-atlas-auth-error"
+              role="alert"
+            >
+              {{ accountError || auth.error }}
+            </p>
+            <p v-else class="my-atlas-tools-status" role="status">
+              {{ toolsStatus }}
+            </p>
+          </template>
+          <div class="my-atlas-account-card">
+            <span>
+              <strong>{{ authDisplayName }}</strong>
+              <small v-if="accountProfile">@{{ accountProfile.handle }}</small>
+              <small v-else>Finish account setup</small>
             </span>
             <button
-              v-else-if="!auth.authenticated"
+              v-if="accountLoadFailed"
+              class="my-atlas-account-retry"
               type="button"
-              class="my-atlas-sign-in"
-              @click="signIn"
+              :disabled="accountPending"
+              @click="loadAccount"
             >
-              Sign in with Google
+              {{ accountPending ? "Loading Atlas" : "Retry saved Atlas" }}
             </button>
-            <template v-else>
-              <div class="my-atlas-account-card">
-                <span>
-                  <strong>{{ authDisplayName }}</strong>
-                  <small v-if="accountProfile"
-                    >@{{ accountProfile.handle }}</small
-                  >
-                  <small v-else>Finish account setup</small>
-                </span>
-                <button
-                  v-if="accountLoadFailed"
-                  class="my-atlas-account-retry"
-                  type="button"
-                  :disabled="accountPending"
-                  @click="loadAccount"
+            <button class="my-atlas-sign-out" type="button" @click="signOut">
+              Sign out
+            </button>
+          </div>
+          <div v-if="accountProfile" class="my-atlas-profile-settings">
+            <button
+              type="button"
+              class="my-atlas-profile-customize"
+              @click="openCustomization"
+            >
+              Customize My Atlas
+            </button>
+            <section
+              class="my-atlas-discovery-settings"
+              aria-labelledby="my-atlas-discovery-title"
+            >
+              <div class="my-atlas-discovery-heading">
+                <h3 id="my-atlas-discovery-title">Explore Atlases</h3>
+                <MyAtlasInfo
+                  label="About listing your profile in Explore Atlases"
+                  >Turn this on to publish your profile and list it for everyone
+                  browsing Explore Atlases. Turn it off to remove the listing
+                  and make your profile private. Your favorite image appears
+                  only if you allow public image use in Customize My Atlas.
+                  Individual trip links can be shared separately, even while
+                  your profile is private.</MyAtlasInfo
                 >
-                  {{ accountPending ? "Loading Atlas" : "Retry saved Atlas" }}
-                </button>
-                <button
-                  class="my-atlas-sign-out"
-                  type="button"
-                  @click="signOut"
-                >
-                  Sign out
-                </button>
               </div>
-              <div
-                v-if="accountProfile && accountMenuOpen"
-                class="my-atlas-profile-settings"
+              <MyAtlasSwitch
+                :value="profileListed"
+                :disabled="
+                  accountPending || (!profileListed && !hasPublicAtlasContent)
+                "
+                :pending="discoveryPending"
+                @input="setProfileListing"
+                >List my profile in Explore Atlases</MyAtlasSwitch
               >
-                <div class="my-atlas-profile-menu-heading">
-                  <h2>Profile settings</h2>
-                  <button type="button" @click="closeProfileMenu">Close</button>
-                </div>
+              <p class="my-atlas-profile-help" role="status">
+                {{
+                  profileListed
+                    ? "Your profile is public and listed in Explore Atlases."
+                    : accountProfile.public
+                      ? "Your existing profile link is public but not listed. List it in Explore, or make it private below."
+                      : "Your profile is private. Direct trip links can still be shared."
+                }}
+              </p>
+              <button
+                v-if="accountProfile.public && !accountProfile.discoverable"
+                type="button"
+                class="my-atlas-profile-customize"
+                :disabled="accountPending"
+                @click="setProfileListing(false)"
+              >
+                Make profile private
+              </button>
+              <p
+                v-if="!hasPublicAtlasContent && !profileListed"
+                class="my-atlas-profile-help"
+              >
+                Add a visited destination or include a trip on your profile
+                before listing it.
+              </p>
+              <button
+                v-if="accountProfile.public"
+                type="button"
+                class="my-atlas-profile-customize"
+                :disabled="accountPending"
+                @click="copyShareLink"
+              >
+                Copy profile link
+              </button>
+              <p v-if="accountProfile.public" class="my-atlas-share-link">
+                <span>Profile link</span><strong>{{ shareUrl }}</strong>
+              </p>
+            </section>
+            <details class="my-atlas-profile-links">
+              <summary>Profile links</summary>
+              <form @submit.prevent="saveInstagramHandle">
+                <label for="my-atlas-instagram">Instagram handle</label>
+                <input
+                  id="my-atlas-instagram"
+                  v-model="instagramDraft"
+                  type="text"
+                  maxlength="31"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  :spellcheck="false"
+                  :disabled="accountPending"
+                  aria-describedby="my-atlas-instagram-help"
+                  placeholder="@yourhandle"
+                />
+                <p id="my-atlas-instagram-help">
+                  Optional. Visible to other visitors when your Atlas is public.
+                  Enter a handle, not a URL. Leave blank and save to remove it.
+                </p>
+                <a
+                  v-if="savedInstagramUrl"
+                  :href="savedInstagramUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  referrerpolicy="no-referrer"
+                  >Visit @{{ accountProfile.instagramHandle }} on Instagram</a
+                >
+                <button type="submit" :disabled="accountPending">
+                  {{ accountPending ? "Saving" : "Save Instagram link" }}
+                </button>
+                <p v-if="instagramError" role="alert">
+                  {{ instagramError }}
+                </p>
+              </form>
+            </details>
+            <div class="my-atlas-account-data-actions">
+              <button
+                type="button"
+                :disabled="accountPending"
+                @click="exportAccountData"
+              >
+                Export account data
+              </button>
+              <details class="my-atlas-delete-account">
+                <summary>Delete My Atlas account</summary>
+                <p>
+                  Permanently remove your visited places, memories, private
+                  saved places, trips, favorite travel image, handle, and My
+                  Atlas account. Your Google account is kept. This cannot be
+                  undone.
+                </p>
+                <label>
+                  <span>Type DELETE MY ATLAS to confirm</span>
+                  <input
+                    v-model="deleteConfirmation"
+                    autocomplete="off"
+                    type="text"
+                    :disabled="accountPending"
+                  />
+                </label>
                 <button
                   type="button"
-                  class="my-atlas-profile-customize"
-                  @click="openCustomization"
+                  :disabled="
+                    accountPending ||
+                    atlasImagePending ||
+                    deleteConfirmation !== 'DELETE MY ATLAS'
+                  "
+                  @click="deleteAccount"
                 >
-                  Customize My Atlas
+                  Permanently delete account
                 </button>
-                <section
-                  class="my-atlas-discovery-settings"
-                  aria-labelledby="my-atlas-discovery-title"
-                >
-                  <div class="my-atlas-discovery-heading">
-                    <h3 id="my-atlas-discovery-title">Explore Atlases</h3>
-                    <MyAtlasInfo
-                      label="About listing your profile in Explore Atlases"
-                      >Turn this on to publish your profile and list it for
-                      everyone browsing Explore Atlases. Turn it off to remove
-                      the listing and make your profile private. Your favorite
-                      image appears only if you allow public image use in
-                      Customize My Atlas. Individual trip links can be shared
-                      separately, even while your profile is
-                      private.</MyAtlasInfo
-                    >
-                  </div>
-                  <MyAtlasSwitch
-                    :value="profileListed"
-                    :disabled="
-                      accountPending ||
-                      (!profileListed && !hasPublicAtlasContent)
-                    "
-                    :pending="discoveryPending"
-                    @input="setProfileListing"
-                    >List my profile in Explore Atlases</MyAtlasSwitch
-                  >
-                  <p class="my-atlas-profile-help" role="status">
-                    {{
-                      profileListed
-                        ? "Your profile is public and listed in Explore Atlases."
-                        : accountProfile.public
-                          ? "Your existing profile link is public but not listed. List it in Explore, or make it private below."
-                          : "Your profile is private. Direct trip links can still be shared."
-                    }}
-                  </p>
-                  <button
-                    v-if="accountProfile.public && !accountProfile.discoverable"
-                    type="button"
-                    class="my-atlas-profile-customize"
-                    :disabled="accountPending"
-                    @click="setProfileListing(false)"
-                  >
-                    Make profile private
-                  </button>
-                  <p
-                    v-if="!hasPublicAtlasContent && !profileListed"
-                    class="my-atlas-profile-help"
-                  >
-                    Add a visited destination or include a trip on your profile
-                    before listing it.
-                  </p>
-                  <button
-                    v-if="accountProfile.public"
-                    type="button"
-                    class="my-atlas-profile-customize"
-                    :disabled="accountPending"
-                    @click="copyShareLink"
-                  >
-                    Copy profile link
-                  </button>
-                  <p v-if="accountProfile.public" class="my-atlas-share-link">
-                    <span>Profile link</span><strong>{{ shareUrl }}</strong>
-                  </p>
-                </section>
-                <details class="my-atlas-profile-links">
-                  <summary>Profile links</summary>
-                  <form @submit.prevent="saveInstagramHandle">
-                    <label for="my-atlas-instagram">Instagram handle</label>
-                    <input
-                      id="my-atlas-instagram"
-                      v-model="instagramDraft"
-                      type="text"
-                      maxlength="31"
-                      autocomplete="off"
-                      autocapitalize="off"
-                      :spellcheck="false"
-                      :disabled="accountPending"
-                      aria-describedby="my-atlas-instagram-help"
-                      placeholder="@yourhandle"
-                    />
-                    <p id="my-atlas-instagram-help">
-                      Optional. Visible to other visitors when your Atlas is
-                      public. Enter a handle, not a URL. Leave blank and save to
-                      remove it.
-                    </p>
-                    <a
-                      v-if="savedInstagramUrl"
-                      :href="savedInstagramUrl"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      referrerpolicy="no-referrer"
-                      >Visit @{{ accountProfile.instagramHandle }} on
-                      Instagram</a
-                    >
-                    <button type="submit" :disabled="accountPending">
-                      {{ accountPending ? "Saving" : "Save Instagram link" }}
-                    </button>
-                    <p v-if="instagramError" role="alert">
-                      {{ instagramError }}
-                    </p>
-                  </form>
-                </details>
-                <div class="my-atlas-account-data-actions">
-                  <button
-                    type="button"
-                    :disabled="accountPending"
-                    @click="exportAccountData"
-                  >
-                    Export account data
-                  </button>
-                  <details class="my-atlas-delete-account">
-                    <summary>Delete My Atlas account</summary>
-                    <p>
-                      Permanently remove your visited places, memories, private
-                      saved places, trips, favorite travel image, handle, and My
-                      Atlas account. Your Google account is kept. This cannot be
-                      undone.
-                    </p>
-                    <label>
-                      <span>Type DELETE MY ATLAS to confirm</span>
-                      <input
-                        v-model="deleteConfirmation"
-                        autocomplete="off"
-                        type="text"
-                        :disabled="accountPending"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      :disabled="
-                        accountPending ||
-                        atlasImagePending ||
-                        deleteConfirmation !== 'DELETE MY ATLAS'
-                      "
-                      @click="deleteAccount"
-                    >
-                      Permanently delete account
-                    </button>
-                  </details>
-                </div>
+              </details>
+            </div>
 
-                <router-link
-                  class="my-atlas-explore-link"
-                  to="/my-atlas/explore"
-                  >Explore other Atlases</router-link
-                >
-                <p class="my-atlas-profile-help">
-                  Discover other users' publicly shared Atlases.
-                </p>
-                <p
-                  v-if="toolsStatus"
-                  class="my-atlas-tools-status"
-                  role="status"
-                >
-                  {{ toolsStatus }}
-                </p>
-              </div>
-            </template>
-            <p v-if="auth.error" class="my-atlas-auth-error" role="alert">
-              {{ auth.error }}
+            <router-link class="my-atlas-explore-link" to="/my-atlas/explore"
+              >Explore other Atlases</router-link
+            >
+            <p class="my-atlas-profile-help">
+              Discover other users' publicly shared Atlases.
             </p>
-            <p v-if="accountError" class="my-atlas-auth-error" role="alert">
-              {{ accountError }}
-            </p>
-          </nav>
-        </transition>
+          </div>
+        </MyAtlasDialog>
 
         <div class="my-atlas-intro">
           <h1 id="my-atlas-title">Mark the places that shaped your travels.</h1>
@@ -1233,6 +1236,7 @@
 <script>
 import MyAtlasLocationPicker from "../components/MyAtlasLocationPicker.vue"
 import MyAtlasInfo from "../components/MyAtlasInfo.vue"
+import MyAtlasDialog from "../components/MyAtlasDialog.vue"
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
@@ -1312,6 +1316,7 @@ const ACCOUNT_TUTORIAL_STORAGE_PREFIX = "rwj:my-atlas:account-tutorial:v1:"
 export default {
   name: "MyAtlasGeographicProof",
   components: {
+    MyAtlasDialog,
     MyAtlasInfo,
     MyAtlasMapNavigator,
     MyAtlasMapHelp,
@@ -1425,7 +1430,6 @@ export default {
       tripPlacement: { active: false, coordinates: null },
       plannerRoute: [],
       accountMenuOpen: false,
-      profileMenuMaxHeight: null,
     }
   },
   computed: {
@@ -1761,7 +1765,6 @@ export default {
   },
   mounted() {
     window.addEventListener("keydown", this.handleKeyboardNavigation)
-    document.addEventListener("click", this.handleProfileOutsideClick)
   },
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
@@ -1769,7 +1772,6 @@ export default {
     window.clearTimeout(this.searchTimer)
     window.clearTimeout(this.timelineTimer)
     window.removeEventListener("keydown", this.handleKeyboardNavigation)
-    document.removeEventListener("click", this.handleProfileOutsideClick)
     if (this.searchAbortController) this.searchAbortController.abort()
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
@@ -1932,40 +1934,16 @@ export default {
     toggleProfileMenu() {
       if (this.accountMenuOpen) this.closeProfileMenu()
       else {
+        this.toolsStatus = ""
         this.accountMenuOpen = true
-        this.$nextTick(() => {
-          const menu = this.$refs.authSection
-          if (!menu) return
-          if (
-            menu.getBoundingClientRect().top < 12 ||
-            window.innerHeight - menu.getBoundingClientRect().top < 240
-          )
-            this.$refs.profileTrigger?.scrollIntoView({
-              block: "start",
-              behavior: "instant",
-            })
-          this.profileMenuMaxHeight = Math.max(
-            100,
-            window.innerHeight - menu.getBoundingClientRect().top - 12
-          )
-          menu.focus({ preventScroll: true })
-        })
       }
     },
     closeProfileMenu() {
+      if (this.accountPending || this.atlasImagePending) return
       this.accountMenuOpen = false
       this.$nextTick(() =>
         this.$refs.profileTrigger?.focus({ preventScroll: true })
       )
-    },
-    handleProfileOutsideClick(event) {
-      if (
-        !this.accountMenuOpen ||
-        this.$refs.authSection?.contains(event.target) ||
-        this.$refs.profileTrigger?.contains(event.target)
-      )
-        return
-      this.accountMenuOpen = false
     },
     async openCustomization() {
       this.accountMenuOpen = false
@@ -3903,36 +3881,22 @@ export default {
   line-height: 1.2;
 }
 
-.my-atlas-account.is-menu {
-  position: absolute;
-  top: 4.25rem;
-  right: 1.25rem;
-  z-index: 8;
-  width: min(22rem, calc(100% - 2.5rem));
-  margin: 0;
-  max-height: calc(100dvh - 6rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
 .my-atlas-profile-settings {
   display: grid;
   gap: 0.75rem;
   min-width: 0;
   padding: 0.75rem 0.2rem 0.2rem;
 }
-.my-atlas-profile-menu-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+.my-atlas-profile-dialog.atlas-workspace-dialog {
+  width: min(480px, calc(100vw - 24px));
+  background: var(--color-surface, #112124);
 }
-.my-atlas-profile-menu-heading h2 {
+.my-atlas-profile-dialog ::v-deep .atlas-dialog-status p {
   margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.3;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
-.my-atlas-profile-menu-heading button,
+
 .my-atlas-profile-customize {
   border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.4);
   border-radius: 0.6rem;
@@ -5119,13 +5083,6 @@ export default {
 
   .my-atlas-favorite-image-preview {
     width: min(11rem, 100%);
-  }
-
-  .my-atlas-account.is-menu {
-    justify-items: stretch;
-    min-height: 0;
-    width: calc(100% - 2.5rem);
-    margin: 0;
   }
 
   .my-atlas-sign-in,

@@ -181,6 +181,7 @@ const dependencies = {
   MyAtlasJourneyCards: {},
   MyAtlasSwitch: {},
   MyAtlasInfo: {},
+  MyAtlasDialog: {},
   MyAtlasMapNavigator: {},
   MyAtlasMapHelp: {},
   MyAtlasRegistrationForm: {},

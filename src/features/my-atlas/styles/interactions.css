@@ -1,8 +1,6 @@
 /* Shared owner controls, including child editors. Keep map controls untouched. */
 .my-atlas-proof .atlas-sidebar-enter-active,
 .my-atlas-proof .atlas-sidebar-leave-active,
-.my-atlas-proof .atlas-menu-enter-active,
-.my-atlas-proof .atlas-menu-leave-active,
 .my-atlas-proof .atlas-restore-enter-active,
 .my-atlas-proof .atlas-restore-leave-active {
   transition:
@@ -16,13 +14,7 @@
   opacity: 0;
   transform: translateY(14px);
 }
-.my-atlas-proof .atlas-menu-enter,
-.my-atlas-proof .atlas-menu-leave-to {
-  opacity: 0;
-  transform: translateY(-6px) scale(0.99);
-}
 .my-atlas-proof .atlas-sidebar-leave-active,
-.my-atlas-proof .atlas-menu-leave-active,
 .my-atlas-proof .atlas-restore-leave-active {
   pointer-events: none;
 }
@@ -165,8 +157,6 @@
 @media (prefers-reduced-motion: reduce) {
   .my-atlas-proof .atlas-sidebar-enter-active,
   .my-atlas-proof .atlas-sidebar-leave-active,
-  .my-atlas-proof .atlas-menu-enter-active,
-  .my-atlas-proof .atlas-menu-leave-active,
   .my-atlas-proof .atlas-restore-enter-active,
   .my-atlas-proof .atlas-restore-leave-active {
     transition: none;
