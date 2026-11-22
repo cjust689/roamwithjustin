@@ -6,7 +6,16 @@
     aria-label="Your trips"
     :aria-busy="String(pending)"
   >
-    <header class="trip-workspace-heading">
+    <button
+      v-if="selected"
+      type="button"
+      class="trip-back"
+      :disabled="pending"
+      @click="showCollection"
+    >
+      ‹ {{ scope === "planned" ? "Planning" : "Past trips" }}
+    </button>
+    <header v-else class="trip-workspace-heading">
       <h2>
         {{
           scope === "planned"
@@ -16,18 +25,16 @@
               : "Your trips"
         }}
       </h2>
-      <div class="trip-heading-actions">
-        <button
-          v-if="loaded && upgraded"
-          type="button"
-          :disabled="busy"
-          @click="startNew"
-        >
-          Add trip
-        </button>
-        <button type="button" :disabled="pending" @click="close">Close</button>
-      </div>
     </header>
+    <button
+      v-if="loaded && upgraded && !selected"
+      class="trip-new-primary"
+      type="button"
+      :disabled="busy"
+      @click="startNew"
+    >
+      + New trip
+    </button>
     <p v-if="error && !workspace" role="alert">{{ error }}</p>
     <button
       v-if="!loaded || refreshNeeded"
@@ -55,8 +62,10 @@
     <template v-if="loaded && upgraded">
       <div
         v-if="
-          scope === 'all' ||
-          (scope !== 'planned' && (ungroupedVisits.length || count('past') > 1))
+          !selected &&
+          (scope === 'all' ||
+            (scope !== 'planned' &&
+              (ungroupedVisits.length || count('past') > 1)))
         "
         class="trip-controls"
       >
@@ -84,26 +93,48 @@
           Combine trips
         </button>
       </div>
-      <p v-if="!filteredTrips.length">
+      <p v-if="!selected && !filteredTrips.length">
         No {{ scope === "planned" ? "planned" : "past" }} trips yet.
       </p>
-      <ul v-if="filteredTrips.length > 1 || !selected" class="trip-list">
+      <ul v-if="!selected" class="trip-list">
         <li v-for="trip in filteredTrips" :key="trip.tripId">
           <button
             type="button"
             :aria-pressed="String(selectedId === trip.tripId)"
             @click="select(trip)"
           >
-            <strong>{{ trip.title }}</strong
-            ><small
-              >{{ trip.lifecycle === "past" ? "Past" : "Planned" }} ·
-              {{ trip.stops.length }}
-              {{ trip.stops.length === 1 ? "stop" : "stops" }}</small
+            <span class="trip-status-badge">{{
+              trip.lifecycle === "past" ? "Past journey" : "Planned"
+            }}</span>
+            <strong>{{ trip.title }}</strong>
+            <small
+              >{{
+                trip.stops
+                  .slice(0, 3)
+                  .map(stop => stop.place.name)
+                  .join(" → ")
+              }}<span v-if="trip.stops.length"> · </span
+              >{{ trip.stops.length }}
+              {{
+                trip.stops.length === 1 ? "destination" : "destinations"
+              }}</small
             >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m9 5 7 7-7 7" />
+            </svg>
           </button>
         </li>
       </ul>
+      <aside v-if="!selected && scope === 'planned'" class="trip-guidance">
+        <strong>No itinerary needed to get started.</strong>
+        <p>Add dates, stops and travel tools as you go.</p>
+      </aside>
       <article v-if="selected" class="trip-form trip-summary">
+        <p class="trip-journey-label">
+          {{
+            selected.lifecycle === "past" ? "Past journey" : "Planned journey"
+          }}
+        </p>
         <h3>
           <button
             class="trip-editable-title"
@@ -118,135 +149,98 @@
             </svg>
           </button>
         </h3>
+        <p class="trip-journey-meta">
+          {{ selected.stops.length }}
+          {{ selected.stops.length === 1 ? "destination" : "destinations"
+          }}<span> · {{ selectedDate || "Dates not set" }}</span>
+        </p>
+        <div
+          class="trip-journey-badges"
+          aria-label="Journey status and visibility"
+        >
+          <span
+            class="trip-status-badge"
+            :class="{ 'is-past': selected.lifecycle === 'past' }"
+            >{{ selected.lifecycle === "past" ? "Traveled" : "Planned" }}</span
+          >
+          <button
+            type="button"
+            class="trip-visibility-badge"
+            @click="
+              openWorkspace('metadata')
+              workspaceTab = 'settings'
+            "
+          >
+            {{
+              selected.sharing.publicAtlas
+                ? profilePublic
+                  ? "Visible on profile"
+                  : "Profile hidden"
+                : "Private"
+            }}
+          </button>
+          <MyAtlasInfo label="About journey visibility"
+            >{{
+              selected.sharing.publicAtlas
+                ? profilePublic
+                  ? "This journey appears on your shared profile."
+                  : "This journey is included on your profile, but your profile is currently private."
+                : "This journey is not included on your profile."
+            }}
+            Change visibility in Edit journey. Direct read only links are shared
+            separately.</MyAtlasInfo
+          >
+        </div>
+        <p v-if="selected.description" class="trip-journey-description">
+          {{ selected.description }}
+        </p>
         <p v-if="!selected.stops.length">
           This trip has no visits. Its saved details are kept.
         </p>
-        <div class="trip-setting">
-          <MyAtlasSwitch
-            :value="selected.sharing.publicAtlas"
-            :disabled="busy"
-            :pending="pendingAction === 'sharing'"
-            @input="mutate('sharing', { publicAtlas: $event }, selected.tripId)"
-            >Include on my profile</MyAtlasSwitch
-          >
-          <MyAtlasInfo label="About including trips on your profile"
-            >Include this trip's name, Planned or Past status, and destinations
-            when your profile is shared in Explore Atlases. Private notes,
-            experiences, flights and rentals stay private. Direct read only trip
-            links are shared separately and work while your profile is
-            private.</MyAtlasInfo
-          >
-        </div>
-        <div class="trip-action-row">
-          <MyAtlasSwitch
-            :value="selected.lifecycle === 'past'"
-            :disabled="busy"
-            :pending="pendingAction === 'lifecycle'"
-            @input="
-              mutate(
-                'lifecycle',
-                {
-                  lifecycle: $event ? 'past' : 'planned',
-                },
-                selected.tripId
-              )
-            "
-            >Traveled</MyAtlasSwitch
-          >
-          <MyAtlasInfo label="About trip status"
-            >{{
-              selected.lifecycle === "past" ? "Past trip." : "Planned trip."
-            }}
-            Memories are preserved when you change its status.</MyAtlasInfo
-          >
-        </div>
-        <div class="trip-controls trip-primary-actions">
-          <button
-            v-if="selected.stops.length"
-            type="button"
-            :disabled="busy"
-            @click="openWorkspace('visits')"
-          >
-            Move visits
-          </button>
-          <button
-            type="button"
-            :disabled="busy"
-            @click="openWorkspace('travel')"
-          >
-            Travel tools
-          </button>
-        </div>
-        <div class="trip-action-row">
-          <button
-            type="button"
-            :disabled="!selected.stops.length"
-            @click="shareTrip"
-          >
-            Share trip
-          </button>
-          <MyAtlasInfo label="About shared trip links"
-            >Shared links include this trip's name, status and ordered
-            destinations. Private memories, experiences and logistics stay
-            private. These links work while your profile is private and do not
-            list your profile in Explore Atlases. Previously copied links keep
-            their saved trip snapshot.</MyAtlasInfo
-          >
-        </div>
         <div class="trip-itinerary-heading">
           <h4>Destinations</h4>
           <button type="button" :disabled="busy" @click="openWorkspace('add')">
             Add stop
           </button>
         </div>
-        <ol class="trip-stops">
-          <li v-for="(stop, index) in selected.stops" :key="stop.stopId">
-            <button
-              class="trip-editable-stop"
-              type="button"
-              :disabled="busy"
-              :aria-label="`Edit visit to ${stop.place.name}`"
-              @click="editStop(stop)"
-            >
-              <strong>{{ stop.place.name }}</strong
-              ><svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m15 5 4 4M4 20l4-1L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
-              </svg>
-            </button>
-            <small v-if="stop.visitedDates.length">{{
-              stop.visitedDates
-                .map(date =>
-                  date.month ? `${date.month}/${date.year}` : String(date.year)
-                )
-                .join(", ")
-            }}</small>
-            <div v-if="selected.stops.length > 1" class="trip-controls">
-              <button
-                type="button"
-                :disabled="busy || index === 0"
-                :aria-label="`Move ${stop.place.name} earlier`"
-                @click="moveStop(index, -1)"
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                :disabled="busy || index === selected.stops.length - 1"
-                :aria-label="`Move ${stop.place.name} later`"
-                @click="moveStop(index, 1)"
-              >
-                ↓
-              </button>
-              <button
-                type="button"
-                :disabled="busy || selected.stops.length === 1"
-                @click="removeStop(stop)"
-              >
-                Remove stop
-              </button>
-            </div>
-          </li>
-        </ol>
+        <MyAtlasTripDestinations
+          :stops="selected.stops"
+          :lifecycle="selected.lifecycle"
+          @open="editStop"
+        />
+        <button
+          class="trip-view-map"
+          type="button"
+          :disabled="!selected.stops.length"
+          @click="$emit('view-on-map', selected.tripId)"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zM9 3v16M15 5v16" />
+          </svg>
+          View journey on map
+        </button>
+        <button
+          class="trip-travel-action"
+          type="button"
+          :disabled="busy || !selected.stops.length"
+          @click="openWorkspace('travel')"
+        >
+          Travel tools
+        </button>
+        <button
+          class="trip-manage-action"
+          type="button"
+          :disabled="busy"
+          @click="openWorkspace('metadata')"
+        >
+          Manage journey <span>Rename · Destinations · Status · Sharing</span>
+        </button>
+        <aside v-if="selected.lifecycle === 'planned'" class="trip-guidance">
+          <strong>Keep planning simple.</strong>
+          <p>
+            Add a destination without setting a home address or return journey.
+          </p>
+        </aside>
       </article>
       <button
         v-if="rollbackAvailable"
@@ -433,13 +427,37 @@
           v-show="workspaceTab === 'details'"
           class="trip-form"
         >
-          <label>Trip name<input v-model="draftTitle" maxlength="80" /></label>
+          <p>Give it a name. The rest can come later.</p>
           <label
-            >Trip status<select v-model="draftLifecycle">
-              <option value="planned">Planned</option>
-              <option value="past">Past</option>
-            </select></label
-          >
+            >Trip name<input
+              v-model="draftTitle"
+              maxlength="80"
+              placeholder="e.g. Costa Rica Adventure"
+          /></label>
+          <div class="trip-create-status">
+            <span>Status</span
+            ><strong class="trip-status-badge">{{
+              draftLifecycle === "past" ? "Past" : "Planned"
+            }}</strong
+            ><small
+              >Created from
+              {{ draftLifecycle === "past" ? "Past" : "Planning" }}. Change
+              status later.</small
+            >
+          </div>
+          <div class="trip-create-destination">
+            <strong>First destination</strong>
+            <p>
+              {{
+                capabilities.emptyTripDrafts
+                  ? "Optional. You can add stops later."
+                  : "Add a first destination to create this trip."
+              }}
+            </p>
+            <button type="button" @click="workspaceTab = 'destinations'">
+              + Add destination
+            </button>
+          </div>
           <ol>
             <li v-for="(stop, index) in draftStops" :key="index">
               {{ stop.name }}
@@ -450,7 +468,7 @@
           </ol>
           <button
             type="button"
-            :disabled="busy || !draftTitle.trim() || !draftStops.length"
+            :disabled="!canCreateTrip"
             :aria-busy="String(pendingAction === 'create')"
             @click="
               mutate('create', {
@@ -460,7 +478,7 @@
               })
             "
           >
-            Save trip
+            Create trip
           </button>
         </div>
         <div
@@ -614,7 +632,11 @@
           </section>
         </div>
 
-        <section v-if="workspace === 'metadata' && selected" class="trip-form">
+        <section
+          v-if="workspace === 'metadata' && selected"
+          v-show="workspaceTab === 'details'"
+          class="trip-form"
+        >
           <label>Trip name<input v-model="titleDraft" maxlength="80" /></label>
           <label
             >Overview<textarea v-model="descriptionDraft" maxlength="500" />
@@ -633,6 +655,82 @@
           >
             Save trip details
           </button>
+          <div class="trip-controls">
+            <button
+              type="button"
+              :disabled="busy"
+              @click="openWorkspace('visits')"
+            >
+              Manage destinations
+            </button>
+            <button
+              type="button"
+              :disabled="busy"
+              @click="openWorkspace('travel')"
+            >
+              Travel tools
+            </button>
+            <button
+              type="button"
+              :disabled="!selected.stops.length"
+              @click="openWorkspace('share')"
+            >
+              Share journey
+            </button>
+          </div>
+        </section>
+        <section
+          v-if="workspace === 'metadata' && selected"
+          v-show="workspaceTab === 'settings'"
+          class="trip-form"
+        >
+          <div class="trip-setting">
+            <strong>{{
+              selected.lifecycle === "past" ? "Past journey" : "Planned journey"
+            }}</strong>
+            <MyAtlasInfo label="About trip status"
+              >Moving this journey changes which tab it appears in. All
+              destinations, memories and experiences stay attached.</MyAtlasInfo
+            >
+          </div>
+          <button
+            type="button"
+            :disabled="busy"
+            :aria-busy="String(pendingAction === 'lifecycle')"
+            @click="
+              mutate(
+                'lifecycle',
+                {
+                  lifecycle: selected.lifecycle === 'past' ? 'planned' : 'past',
+                },
+                selected.tripId
+              )
+            "
+          >
+            {{
+              selected.lifecycle === "past"
+                ? "Move to Planned"
+                : "Mark as Traveled"
+            }}
+          </button>
+          <div class="trip-setting">
+            <MyAtlasSwitch
+              :value="selected.sharing.publicAtlas"
+              :disabled="busy"
+              :pending="pendingAction === 'sharing'"
+              @input="
+                mutate('sharing', { publicAtlas: $event }, selected.tripId)
+              "
+              >Include on my profile</MyAtlasSwitch
+            >
+            <MyAtlasInfo label="About including trips on your profile"
+              >Include this journey's name, status and destinations when your
+              profile is listed in Explore Atlases. Your profile must also be
+              listed for others to see it. Private notes, experiences, flights
+              and rentals stay private. Direct trip links work
+              separately.</MyAtlasInfo
+            >
+          </div>
           <button
             class="trip-danger-link"
             type="button"
@@ -641,6 +739,24 @@
           >
             Delete trip
           </button>
+        </section>
+        <section v-if="workspace === 'share' && selected" class="trip-form">
+          <h3>{{ selected.title }}</h3>
+          <p>
+            Anyone with this read only link can see the journey's name, status
+            and ordered destinations. It works while your profile is private.
+          </p>
+          <p>
+            Memories, experiences and travel details stay private. This does not
+            list your profile in Explore Atlases.
+          </p>
+          <button type="button" @click="shareTrip">
+            Copy read only journey link
+          </button>
+          <MyAtlasInfo label="About saved journey links"
+            >The link contains a snapshot. Future edits and visibility changes
+            do not change or revoke links you have already shared.</MyAtlasInfo
+          >
         </section>
         <section v-if="workspace === 'delete' && selected" class="trip-form">
           <p>
@@ -670,10 +786,35 @@
             </button>
           </div>
         </section>
+        <section
+          v-if="workspace === 'visits' && selected"
+          v-show="workspaceTab === 'order'"
+          class="trip-form"
+        >
+          <div class="trip-itinerary-heading">
+            <h3>Destinations</h3>
+            <button
+              type="button"
+              :disabled="busy"
+              @click="openWorkspace('add')"
+            >
+              Add stop
+            </button>
+          </div>
+          <MyAtlasTripDestinations
+            :stops="selected.stops"
+            :lifecycle="selected.lifecycle"
+            :pending="busy"
+            reorderable
+            @open="openStopActions"
+            @reorder="reorderStops"
+          />
+        </section>
         <MyAtlasVisitManager
           v-if="
             (workspace === 'visits' && selected) || workspace === 'ungrouped'
           "
+          v-show="workspace !== 'visits' || workspaceTab === 'move'"
           :key="workspace === 'visits' ? selected.tripId : 'ungrouped'"
           :source-trip="workspace === 'visits' ? selected : null"
           :visits="ungroupedVisits"
@@ -685,6 +826,62 @@
             mutate('editVisit', $event.patch, undefined, $event.stopId)
           "
         />
+        <section
+          v-if="
+            workspace === 'visits' && selected && selected.lifecycle === 'past'
+          "
+          v-show="workspaceTab === 'existing'"
+          class="trip-form"
+        >
+          <h3>Add existing destinations</h3>
+          <MyAtlasVisitManager
+            v-if="ungroupedVisits.length"
+            :key="'existing-' + selected.tripId"
+            :visits="ungroupedVisits"
+            :trips="[selected]"
+            :initial-target-id="selected.tripId"
+            :pending="busy"
+            :saved-sequence="savedSequence"
+            @transfer="mutate('transfer', $event)"
+            @edit-visit="
+              mutate('editVisit', $event.patch, undefined, $event.stopId)
+            "
+          />
+          <template v-if="destinations.length">
+            <p v-if="!canAddExistingDestinations">
+              Your standalone destinations follow your Atlas visibility. Match
+              this journey's profile inclusion in Settings before adding them.
+            </p>
+            <template v-else>
+              <MyAtlasSwitch
+                v-for="place in existingDestinations"
+                :key="place.pinId"
+                :value="existingPinIds.includes(place.pinId)"
+                :disabled="busy || !place.name"
+                @input="toggleExistingDestination(place.pinId, $event)"
+                >{{
+                  place.name || "Location details unavailable"
+                }}</MyAtlasSwitch
+              >
+              <button
+                type="button"
+                :disabled="busy || !existingPinIds.length"
+                @click="
+                  mutate('groupDestinations', {
+                    pinIds: existingPinIds,
+                    tripId: selected.tripId,
+                  })
+                "
+              >
+                Add selected destinations
+              </button>
+            </template>
+          </template>
+          <p v-if="!ungroupedVisits.length && !destinations.length">
+            All your visited destinations are already grouped. Use the Move
+            between journeys tab in another journey to bring them here.
+          </p>
+        </section>
         <section v-if="workspace === 'combine'" class="trip-form">
           <p>Choose trips in the order you want their visits combined.</p>
           <MyAtlasSwitch
@@ -710,6 +907,89 @@
           </button>
         </section>
         <section v-if="workspace === 'visit' && editingStop" class="trip-form">
+          <div v-show="workspaceTab === 'planning'" class="trip-form">
+            <p>A stop in {{ selected.title }}</p>
+            <label
+              >Planning notes<textarea
+                v-model="planNoteDraft"
+                maxlength="2000"
+                rows="5"
+                placeholder="Things to see, places to stay, reminders…"
+                :disabled="busy || !capabilities.planningNotes"
+              />
+            </label>
+            <p v-if="!capabilities.planningNotes">
+              Planning-note saving is not available yet. Your existing trip is
+              unchanged.
+            </p>
+            <button
+              type="button"
+              class="trip-new-primary"
+              :disabled="busy || !capabilities.planningNotes"
+              :aria-busy="String(pendingAction === 'editStop')"
+              @click="
+                mutate(
+                  'editStop',
+                  { planNote: planNoteDraft },
+                  selected.tripId,
+                  editingStop.stopId
+                )
+              "
+            >
+              Save planning notes
+            </button>
+            <aside class="trip-guidance">
+              <strong>After the trip</strong>
+              <p>
+                Record favorite memories and what you did in Memory and
+                Experiences. Keep those separate from ideas.
+              </p>
+            </aside>
+          </div>
+          <div
+            v-show="workspaceTab === 'overview'"
+            class="trip-form trip-visit-recap"
+          >
+            <p v-if="stopLocation(editingStop)">
+              {{ stopLocation(editingStop) }}
+            </p>
+            <p v-if="stopDate(editingStop)">{{ stopDate(editingStop) }}</p>
+            <blockquote v-if="savedStopMemory">
+              {{ savedStopMemory }}
+            </blockquote>
+            <p v-else>No memory recorded yet.</p>
+            <template v-if="editingStop.planNote"
+              ><h3>Planning notes</h3>
+              <p class="trip-saved-plan-note">
+                {{ editingStop.planNote }}
+              </p></template
+            >
+            <template v-if="editingStop.experiences.length"
+              ><h3>Experiences</h3>
+              <ul>
+                <li v-for="entry in editingStop.experiences" :key="entry.id">
+                  <strong>{{ entry.title }}</strong
+                  ><span v-if="entry.operatorName">
+                    · {{ entry.operatorName }}</span
+                  ><a
+                    v-if="entry.operatorWebsite"
+                    :href="entry.operatorWebsite"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    referrerpolicy="no-referrer"
+                    >Visit operator</a
+                  >
+                </li>
+              </ul></template
+            >
+            <button
+              type="button"
+              :disabled="busy"
+              @click="workspaceTab = 'memory'"
+            >
+              {{ savedStopMemory ? "Edit memory" : "Add memory" }}
+            </button>
+          </div>
           <div v-show="workspaceTab === 'memory'" class="trip-form">
             <label
               >Favorite memory<textarea v-model="memoryDraft" maxlength="500" />
@@ -736,7 +1016,7 @@
             /></label>
           </div>
           <button
-            v-show="workspaceTab !== 'experiences'"
+            v-show="['memory', 'dates'].includes(workspaceTab)"
             type="button"
             :disabled="busy"
             :aria-busy="String(pendingAction === 'editStop')"
@@ -775,6 +1055,71 @@
               )
             "
           />
+          <div v-show="workspaceTab === 'actions'" class="trip-form">
+            <h3>{{ editingStop.place.name }}</h3>
+            <div class="trip-controls">
+              <button
+                type="button"
+                :disabled="busy || editingStopIndex === 0"
+                @click="moveStop(editingStopIndex, -1)"
+              >
+                Move earlier
+              </button>
+              <button
+                type="button"
+                :disabled="
+                  busy || editingStopIndex === selected.stops.length - 1
+                "
+                @click="moveStop(editingStopIndex, 1)"
+              >
+                Move later
+              </button>
+            </div>
+            <button
+              type="button"
+              :disabled="busy"
+              @click="
+                openWorkspace('visits')
+                workspaceTab = 'move'
+              "
+            >
+              {{
+                selected.lifecycle === "past"
+                  ? "Move to another journey or ungroup"
+                  : "Move to another planned journey"
+              }}
+            </button>
+            <button
+              class="trip-danger-link"
+              type="button"
+              :disabled="busy || selected.stops.length === 1"
+              @click="confirmRemoveStop"
+            >
+              Remove destination permanently
+            </button>
+          </div>
+        </section>
+        <section v-if="workspace === 'remove' && editingStop" class="trip-form">
+          <p>
+            Remove {{ editingStop.place.name }} and its saved memories and
+            experiences? This cannot be undone. To keep the visit, move it to
+            another journey or ungroup it instead.
+          </p>
+          <div class="trip-controls">
+            <button
+              type="button"
+              :disabled="busy"
+              @click="openStopActions(editingStop)"
+            >
+              Keep destination</button
+            ><button
+              type="button"
+              :disabled="busy"
+              @click="removeStop(editingStop)"
+            >
+              Remove permanently
+            </button>
+          </div>
         </section>
         <section v-if="workspace === 'travel'" class="trip-form">
           <p>Private travel details.</p>
@@ -835,6 +1180,8 @@ import { formatPlaceTypeLabel } from "../catalog/placeTypes.mjs"
 import MyAtlasLocationPicker from "./MyAtlasLocationPicker.vue"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
 import MyAtlasVisitManager from "./MyAtlasVisitManager.vue"
+import MyAtlasTripDestinations from "./MyAtlasTripDestinations.vue"
+import { journeyCardDate } from "../planning/journeyCards.mjs"
 import {
   normalizeTripTravelDraft,
   savedTripTravelDraft,
@@ -866,12 +1213,14 @@ export default {
     MyAtlasLocationPicker,
     MyAtlasTravelSearch,
     MyAtlasVisitManager,
+    MyAtlasTripDestinations,
   },
   props: {
     apiBaseUrl: { type: String, required: true },
     revision: { type: Number, required: true },
     resolveLink: { type: Function, default: null },
     profilePublic: { type: Boolean, default: false },
+    knownPlaces: { type: Array, default: () => [] },
     scope: { type: String, default: "all" },
   },
   emits: [
@@ -881,6 +1230,8 @@ export default {
     "location-placement-change",
     "open-change",
     "collection-change",
+    "view-on-map",
+    "detail-change",
   ],
   data: () => ({
     open: false,
@@ -896,6 +1247,7 @@ export default {
     trips: [],
     upgraded: false,
     writesEnabled: false,
+    capabilities: { emptyTripDrafts: false, planningNotes: false },
     rollbackAvailable: false,
     preview: null,
     confirmation: "",
@@ -915,9 +1267,11 @@ export default {
     destinations: [],
     ungroupedVisits: [],
     publicAtlasDraft: false,
+    existingPinIds: [],
     destinationGroupResolved: false,
     editingStopId: "",
     memoryDraft: "",
+    planNoteDraft: "",
     titleDraft: "",
     descriptionDraft: "",
     travelTool: "",
@@ -949,6 +1303,43 @@ export default {
     placementActive: false,
   }),
   computed: {
+    canCreateTrip() {
+      return (
+        !this.busy &&
+        Boolean(this.draftTitle.trim()) &&
+        (this.capabilities.emptyTripDrafts || this.draftStops.length > 0)
+      )
+    },
+    selectedDate() {
+      return this.selected
+        ? journeyCardDate({ trip: this.selected, legacy: false })
+        : ""
+    },
+    savedStopMemory() {
+      return (
+        this.editingStop?.memories.find(memory => memory.kind === "note")
+          ?.text || ""
+      )
+    },
+    editingStopIndex() {
+      return (
+        this.selected?.stops.findIndex(
+          stop => stop.stopId === this.editingStopId
+        ) ?? -1
+      )
+    },
+    canAddExistingDestinations() {
+      return this.selected?.sharing.publicAtlas === this.profilePublic
+    },
+    existingDestinations() {
+      const places = new Map(
+        (this.knownPlaces || []).map(place => [place.placeId, place])
+      )
+      return this.destinations.map(pin => ({
+        ...places.get(pin.placeId),
+        ...pin,
+      }))
+    },
     searchResults() {
       return [
         ...new Map(this.results.map(place => [place.placeId, place])).values(),
@@ -964,11 +1355,13 @@ export default {
       return this.workspace === "visit"
         ? this.editingStop?.place.name || "Visit details"
         : {
-            create: "Add trip",
+            create: "New trip",
             add: "Add a stop",
-            metadata: "Trip details",
+            metadata: "Edit journey",
             delete: "Delete trip?",
-            visits: "Move or ungroup visits",
+            remove: "Remove destination?",
+            share: "Share journey",
+            visits: "Manage destinations",
             ungrouped: "Ungrouped visits",
             travel: "Travel tools",
             combine: "Combine trips",
@@ -977,6 +1370,19 @@ export default {
           }[this.workspace] || "Trip details"
     },
     dialogTabs() {
+      if (this.workspace === "metadata")
+        return [
+          { key: "details", label: "Details" },
+          { key: "settings", label: "Settings" },
+        ]
+      if (this.workspace === "visits")
+        return [
+          { key: "order", label: "Order" },
+          { key: "move", label: "Move between journeys" },
+          ...(this.selected?.lifecycle === "past"
+            ? [{ key: "existing", label: "Add existing" }]
+            : []),
+        ]
       if (this.workspace === "create")
         return [
           {
@@ -989,9 +1395,14 @@ export default {
         ]
       if (this.workspace === "visit")
         return [
+          ...(this.selected?.lifecycle === "past"
+            ? [{ key: "overview", label: "Recap" }]
+            : []),
+          { key: "planning", label: "Notes" },
           { key: "memory", label: "Memory" },
           { key: "dates", label: "Dates" },
           { key: "experiences", label: "Experiences" },
+          { key: "actions", label: "Actions" },
         ]
       if (this.workspace === "travel")
         return [
@@ -1081,6 +1492,9 @@ export default {
     },
   },
   watch: {
+    selectedId(value) {
+      this.$emit("detail-change", Boolean(value))
+    },
     scope: {
       immediate: true,
       handler(value) {
@@ -1104,6 +1518,12 @@ export default {
     this.stopPlacement()
   },
   methods: {
+    readCapabilities(state) {
+      this.capabilities = {
+        emptyTripDrafts: state.capabilities?.emptyTripDrafts === true,
+        planningNotes: state.capabilities?.planningNotes === true,
+      }
+    },
     selectSearchResult(place) {
       if (this.busy || (this.creating && this.draftStops.length >= 50)) return
       this.destinationEntryMode = "search"
@@ -1157,8 +1577,16 @@ export default {
       this.workspaceStatus = ""
       this.workspace = value
       this.workspaceTab =
-        { create: "details", visit: "memory", travel: "flights" }[value] || ""
+        {
+          create: "details",
+          metadata: "details",
+          visits: "order",
+          visit: "overview",
+          travel: "flights",
+        }[value] || ""
       if (value === "add") this.adding = true
+      if (value === "visit" && this.selected?.lifecycle === "planned")
+        this.workspaceTab = "planning"
     },
     closeWorkspace() {
       if (this.pending) return
@@ -1267,6 +1695,17 @@ export default {
       this.$emit("open-change", true)
       if (!this.loaded) await this.load()
     },
+    showCollection() {
+      if (this.pending) return
+      this.closeWorkspace()
+      this.selectedId = ""
+      this.$emit("route-change", { active: false, route: [] })
+      this.$nextTick(() =>
+        this.$el
+          .querySelector(".trip-new-primary")
+          ?.focus({ preventScroll: true })
+      )
+    },
     close() {
       this.closeWorkspace()
       this.open = false
@@ -1292,6 +1731,7 @@ export default {
         this.trips = state.trips
         this.upgraded = state.upgraded
         this.writesEnabled = state.writesEnabled === true
+        this.readCapabilities(state)
         this.rollbackAvailable = state.rollbackAvailable
         this.currentRevision = state.profile.revision
         this.loaded = true
@@ -1344,6 +1784,7 @@ export default {
         this.publicAtlasDraft = trip.sharing.publicAtlas
         this.descriptionDraft = trip.description
         this.travelTool = ""
+        this.existingPinIds = []
       }
       if (
         this.editingStopId &&
@@ -1407,6 +1848,8 @@ export default {
             "combine",
             "addStop",
             "delete",
+            "removeStop",
+            "lifecycle",
           ].includes(action)
         )
           this.workspace = ""
@@ -1431,6 +1874,7 @@ export default {
         this.upgraded = result.upgraded
         if (action === "logistics") this.$delete(this.travelDrafts, tripId)
         if (action === "groupDestinations") {
+          this.existingPinIds = []
           this.groupDestinations = []
           this.groupTitle = ""
           this.groupTargetId = ""
@@ -1458,6 +1902,7 @@ export default {
           this.rollbackAvailable = state.rollbackAvailable
           this.currentRevision = state.profile.revision
           this.writesEnabled = state.writesEnabled === true
+          this.readCapabilities(state)
           this.$emit("collection-change", state)
           if (action === "upgrade") this.applyDestinationGroup()
           if (["combine", "groupDestinations"].includes(action)) {
@@ -1506,12 +1951,53 @@ export default {
       this.editingStopId = stop.stopId
       this.memoryDraft =
         stop.memories.find(memory => memory.kind === "note")?.text || ""
+      this.planNoteDraft = stop.planNote || ""
       this.dates = {
         plannedArrival: stop.plannedDates.arrival || "",
         plannedDeparture: stop.plannedDates.departure || "",
         actualArrival: stop.actualDates.arrival || "",
         actualDeparture: stop.actualDates.departure || "",
       }
+    },
+    stopLocation(stop) {
+      return [
+        ...new Set(
+          [stop.place.admin1Name, stop.place.countryName].filter(Boolean)
+        ),
+      ].join(", ")
+    },
+    stopDate(stop) {
+      return journeyCardDate({
+        trip: { ...this.selected, stops: [stop] },
+        legacy: false,
+      })
+    },
+    openStopActions(stop) {
+      this.editStop(stop)
+      this.workspaceTab = "actions"
+    },
+    toggleExistingDestination(id, value) {
+      this.existingPinIds = value
+        ? [...new Set([...this.existingPinIds, id])]
+        : this.existingPinIds.filter(item => item !== id)
+    },
+    reorderStops(stopIds) {
+      if (
+        !this.selected ||
+        this.busy ||
+        stopIds.length !== this.selected.stops.length ||
+        new Set(stopIds).size !== stopIds.length ||
+        stopIds.some(
+          id => !this.selected.stops.some(stop => stop.stopId === id)
+        )
+      )
+        return
+      return this.mutate("reorder", { stopIds }, this.selected.tripId)
+    },
+    confirmRemoveStop() {
+      if (this.busy || !this.editingStop || this.selected.stops.length < 2)
+        return
+      this.openWorkspace("remove")
     },
     openTrip(id) {
       const trip = this.trips.find(item => item.tripId === id)
@@ -1565,26 +2051,35 @@ export default {
       }
     },
     moveStop(index, direction) {
+      if (
+        !this.selected ||
+        index < 0 ||
+        index >= this.selected.stops.length ||
+        ![-1, 1].includes(direction) ||
+        index + direction < 0 ||
+        index + direction >= this.selected.stops.length
+      )
+        return
       const stopIds = this.selected.stops.map(stop => stop.stopId)
       ;[stopIds[index], stopIds[index + direction]] = [
         stopIds[index + direction],
         stopIds[index],
       ]
-      this.mutate("reorder", { stopIds }, this.selected.tripId)
+      return this.reorderStops(stopIds)
     },
     removeStop(stop) {
+      if (
+        !this.selected ||
+        this.workspace !== "remove" ||
+        this.editingStopId !== stop.stopId ||
+        this.selected.stops.length < 2
+      )
+        return
       const content =
         stop.memories.length ||
         stop.experiences.length ||
         stop.visitedDates.length ||
         stop.planNote
-      if (
-        content &&
-        !window.confirm(
-          `Remove ${stop.place.name} and its saved memories and experiences?`
-        )
-      )
-        return
       this.mutate(
         "removeStop",
         { discardContent: Boolean(content) },
@@ -1809,8 +2304,7 @@ export default {
   justify-content: flex-start;
   column-gap: 12px;
 }
-.atlas-trips .trip-editable-title,
-.atlas-trips .trip-editable-stop {
+.atlas-trips .trip-editable-title {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -1828,8 +2322,7 @@ export default {
   overflow-wrap: anywhere;
   min-width: 0;
 }
-.trip-editable-title svg,
-.trip-editable-stop svg {
+.trip-editable-title svg {
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
@@ -1839,8 +2332,7 @@ export default {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.atlas-trips .trip-editable-title:hover,
-.atlas-trips .trip-editable-stop:hover {
+.atlas-trips .trip-editable-title:hover {
   color: var(--color-accent-soft, #e6ba68);
   background: transparent;
   text-decoration: underline;
@@ -1861,18 +2353,10 @@ export default {
   border: 0;
   color: var(--color-error, #eeafa7);
 }
-.trip-action-row > .atlas-switch {
-  flex: 1;
-}
-.atlas-trips .trip-stops {
-  margin: 0;
-  gap: 10px;
-}
 .atlas-trips .trip-workspace-heading h2 {
   font-size: 1.05rem;
 }
-.trip-setting,
-.trip-action-row {
+.trip-setting {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1881,19 +2365,102 @@ export default {
 .trip-setting > .atlas-switch {
   flex: 1;
 }
-.trip-action-row > button:first-child {
-  flex: 1;
-}
-.trip-primary-actions > button {
-  flex: 1 1 auto;
-}
 .trip-summary {
   padding-top: 12px;
   gap: 8px;
   border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
 }
-.trip-delete {
-  justify-self: start;
+.atlas-trips .trip-summary {
+  padding: 14px;
+  gap: 10px;
+}
+.atlas-trips .trip-journey-label {
+  color: var(--color-accent-soft, #e6ba68);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.atlas-trips .trip-summary h3 {
+  font-size: 1.3rem;
+  line-height: 1.3;
+}
+.atlas-trips .trip-journey-meta {
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.75rem;
+}
+.trip-journey-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.trip-status-badge,
+.trip-visibility-badge {
+  padding: 4px 9px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
+}
+.trip-status-badge.is-past {
+  color: var(--color-success, #89c8ae);
+  background: rgba(37, 132, 92, 0.14);
+}
+.trip-journey-description {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.trip-summary .trip-itinerary-heading {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
+}
+.trip-summary .trip-itinerary-heading h4 {
+  font-size: 0.9rem;
+}
+.atlas-trips .trip-view-map {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  border-color: var(--color-accent, #e6ba68);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.trip-view-map svg {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linejoin: round;
+}
+.trip-summary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.atlas-trips .trip-summary-actions button {
+  min-height: 44px;
+  border-color: transparent;
+  color: var(--color-text, #f3f1e9);
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.06);
+}
+.trip-visit-recap blockquote {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 2px solid var(--color-accent, #e6ba68);
+  font-size: 0.86rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.trip-visit-recap a {
+  display: block;
+  color: var(--color-accent-soft, #e6ba68);
 }
 .trip-dialog-tabs {
   display: flex;
@@ -1904,11 +2471,13 @@ export default {
   line-height: normal;
   background: transparent;
   box-shadow: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   border-bottom: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
 }
 .trip-dialog-tabs > button {
   flex: 1;
-  min-width: 0;
+  min-width: max-content;
   min-height: 44px;
   line-height: normal;
   padding: 8px 4px;
@@ -2004,14 +2573,6 @@ export default {
 .trip-list [aria-pressed="true"] {
   background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.1);
 }
-.trip-stops {
-  display: grid;
-  gap: 16px;
-  padding-left: 22px;
-}
-.trip-stops > li > small {
-  margin-left: 0.5em;
-}
 .trip-form {
   padding: 12px;
   border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.18);
@@ -2032,5 +2593,127 @@ export default {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.atlas-trips {
+  padding: 0;
+  border: 0;
+  margin: 18px 0;
+  gap: 16px;
+}
+.atlas-trips .trip-summary {
+  padding: 0;
+  border: 0;
+  gap: 14px;
+}
+.atlas-trips .trip-new-primary {
+  color: var(--color-on-accent, #112124);
+  background: var(--color-accent, #e6ba68);
+  border-color: var(--color-accent, #e6ba68);
+  min-height: 48px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.atlas-trips .trip-new-primary:not(:disabled):hover {
+  background: var(--color-accent-soft, #efc777);
+}
+.atlas-trips .trip-back {
+  justify-self: start;
+  border: 0;
+  padding: 8px 0;
+  font-size: 0.8rem;
+}
+.trip-list li > button {
+  position: relative;
+  padding: 18px;
+  min-height: 112px;
+  border-color: var(--color-control-border, #324959);
+  background: var(--color-surface-raised, #152629);
+  border-radius: 14px;
+  gap: 10px;
+}
+.trip-list strong {
+  padding-right: 22px;
+  font-size: 1.08rem;
+}
+.trip-list .trip-status-badge {
+  justify-self: start;
+}
+.trip-list small {
+  padding-right: 22px;
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.73rem;
+}
+.trip-list svg {
+  position: absolute;
+  right: 14px;
+  top: calc(50% - 10px);
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.trip-guidance {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-surface-raised, #152629);
+  font-size: 0.8rem;
+}
+.trip-guidance p {
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.atlas-trips .trip-visibility-badge {
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 0;
+  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.08);
+  font-size: 0.68rem;
+}
+.atlas-trips .trip-travel-action {
+  min-height: 48px;
+  background: var(--color-surface-raised, #152629);
+  border-color: var(--color-control-border, #324959);
+  font-size: 0.86rem;
+}
+.atlas-trips .trip-manage-action {
+  display: grid;
+  gap: 7px;
+  justify-items: start;
+  padding: 14px 0;
+  border: 0;
+  font-size: 0.85rem;
+}
+.trip-manage-action span {
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.72rem;
+  text-align: left;
+}
+.trip-create-status,
+.trip-create-destination {
+  display: grid;
+  gap: 10px;
+  padding: 12px 0;
+}
+.trip-create-status > strong {
+  justify-self: start;
+}
+.trip-create-status > span,
+.trip-create-destination > strong {
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.78rem;
+}
+.trip-create-status small {
+  color: var(--color-text-muted, #adbcba);
+}
+.trip-create-destination {
+  border-top: 1px solid var(--color-control-border, #324959);
+}
+.trip-saved-plan-note {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 </style>

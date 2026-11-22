@@ -290,3 +290,26 @@ signed-out Story export behavior in this document. Focused view tests verify
 public export is absent and owner export remains available; responsive browser
 evidence is recorded in the integrated trip checklist. The owner authorized
 frontend promotion alongside the public trip views; PR 239 tracks the release.
+
+## Owner Story preview, November 22, local
+
+- [x] Split PNG generation into `createMyAtlasStoryPreview` and the retained
+      direct-download helper. Reuse the existing favorite image, location, map
+      projection and Story design.
+- [x] Overview separates Interactive Atlas from Travel story image. Preview and
+      save opens an owner-only native dialog with the generated PNG and Save link.
+      Saving a Story does not change profile publication or Explore visibility.
+- [x] Revoke the Blob URL on close, destruction, logout and account deletion.
+      Reject preview completion after owner identity changes. No public export
+      action, R2 upload or new image permission is introduced.
+- [x] If another editor opens while the PNG is generating, retain its form and
+      revoke the unused preview rather than nesting dialogs. Chrome exercised
+      the delayed PNG/Profile race and observed exactly one native dialog.
+- [x] Local Chrome generated, decoded and displayed the actual PNG at 390 by 844
+      with one modal, a contained preview and a PNG download link, while the
+      synthetic profile stayed private at revision 20. No real account writes.
+      Evidence: `.state/theme/overview-flow-browser.json` and
+      `.state/theme/story-preview-390.png`.
+- [x] Prepare the owner-authorized release with the Overview mockup flow. Release
+      PRs record protected checks, deployment and live synthetic acceptance.
+- [ ] Complete genuine owner acceptance.

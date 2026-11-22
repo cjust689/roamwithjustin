@@ -1,7 +1,7 @@
 <template>
   <main
     class="my-atlas-proof"
-    :class="{ 'is-map-only': !sidebarExpanded }"
+    :class="{ 'is-map-only': !sidebarExpanded, 'has-account': canUseAtlas }"
     @keydown.esc="cancelLocationPlacement"
   >
     <MyAtlasActionFeedback
@@ -405,39 +405,6 @@
           </div>
         </MyAtlasDialog>
 
-        <div class="my-atlas-intro">
-          <h1 id="my-atlas-title">Mark the places that shaped your travels.</h1>
-          <p class="my-atlas-intro-copy">
-            Search countries, cities, national parks, and iconic spots, then
-            place them on your map.
-            <template v-if="accountProfile">
-              Your changes are saved to your private beta account.
-            </template>
-            <template v-else>
-              Sign in to build your Atlas and save your travels.
-            </template>
-          </p>
-          <div v-if="canUseAtlas" class="my-atlas-intro-actions">
-            <button type="button" @click="openTutorial('account')">
-              Quick start guide
-            </button>
-            <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
-              Explore Atlases
-            </router-link>
-          </div>
-          <div
-            v-else-if="!auth.loading && !auth.authenticated"
-            class="my-atlas-intro-actions"
-          >
-            <button type="button" :disabled="!auth.configured" @click="signIn">
-              Sign in with Google
-            </button>
-            <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
-              Explore Atlases
-            </router-link>
-          </div>
-        </div>
-
         <nav
           v-if="canUseAtlas"
           class="my-atlas-tabs"
@@ -460,6 +427,60 @@
           </button>
         </nav>
         <div
+          v-show="!canUseAtlas || (!tripDetailOpen && !overviewPlaceOpen)"
+          class="my-atlas-intro"
+          :class="{ 'is-signed-in': canUseAtlas }"
+        >
+          <h1 id="my-atlas-title">
+            {{
+              !canUseAtlas
+                ? "Mark the places that shaped your travels."
+                : activeAtlasTab === "planning"
+                  ? "Your next journeys"
+                  : activeAtlasTab === "past"
+                    ? "Your past adventures"
+                    : "Your travel story"
+            }}
+          </h1>
+          <p class="my-atlas-intro-copy">
+            <template v-if="canUseAtlas">{{
+              activeAtlasTab === "planning"
+                ? "Start with a place. Build the plan as you go."
+                : activeAtlasTab === "past"
+                  ? "Revisit your journeys and the places that shaped them."
+                  : "Explore where you have been and what comes next."
+            }}</template>
+            <template v-else
+              >Search countries, cities, national parks, and iconic spots, then
+              place them on your map. Sign in to build your Atlas and save your
+              travels.</template
+            >
+          </p>
+          <div
+            v-if="canUseAtlas && activeAtlasTab === 'overview'"
+            class="my-atlas-intro-actions"
+          >
+            <button type="button" @click="openTutorial('account')">
+              Quick start guide
+            </button>
+            <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
+              Explore Atlases
+            </router-link>
+          </div>
+          <div
+            v-else-if="!auth.loading && !auth.authenticated"
+            class="my-atlas-intro-actions"
+          >
+            <button type="button" :disabled="!auth.configured" @click="signIn">
+              Sign in with Google
+            </button>
+            <router-link class="my-atlas-explore-link" to="/my-atlas/explore">
+              Explore Atlases
+            </router-link>
+          </div>
+        </div>
+
+        <div
           id="my-atlas-tab-panel"
           :role="canUseAtlas ? 'tabpanel' : undefined"
           :aria-labelledby="
@@ -468,7 +489,7 @@
         >
           <section
             v-if="canUseAtlas"
-            v-show="activeAtlasTab === 'overview'"
+            v-show="activeAtlasTab === 'overview' && !overviewPlaceOpen"
             class="my-atlas-overview"
           >
             <div class="my-atlas-stats" aria-label="Atlas statistics">
@@ -484,135 +505,121 @@
                 <strong>{{ visibleStats.continents }}</strong>
                 <span>Continents</span>
               </div>
-              <div>
-                <strong>{{
-                  visibleStats.spots || visibleStats.capitals
-                }}</strong>
-                <span>{{ visibleStats.spots ? "Spots" : "Capitals" }}</span>
-              </div>
             </div>
 
-            <button
-              type="button"
-              class="my-atlas-mobile-controls-toggle"
-              :aria-expanded="String(mobileControlsOpen)"
-              aria-controls="my-atlas-map-controls"
-              @click="mobileControlsOpen = !mobileControlsOpen"
-            >
-              <span>Map controls</span>
-              <strong>{{ mobileControlsOpen ? "Hide" : "Show" }}</strong>
-            </button>
-            <div
-              id="my-atlas-map-controls"
-              class="my-atlas-controls-drawer"
-              :class="{ 'is-open': mobileControlsOpen }"
-            >
-              <div class="my-atlas-view-controls">
-                <label>
-                  <span>Show</span>
-                  <select v-model="yearFilter" @change="resetTimeline">
-                    <option value="all">Every destination</option>
-                    <option
-                      v-for="year in years"
-                      :key="year"
-                      :value="String(year)"
-                    >
-                      {{ year }}
-                    </option>
-                    <option v-if="atlasStats.undated" value="undated">
-                      Date open
-                    </option>
-                  </select>
-                </label>
+            <section class="my-atlas-map-card">
+              <div class="my-atlas-map-card-heading">
+                <h2>Your map</h2>
                 <button
                   type="button"
-                  :disabled="!years.length"
-                  @click="toggleTimeline"
+                  class="my-atlas-mobile-controls-toggle"
+                  :aria-expanded="String(mobileControlsOpen)"
+                  aria-controls="my-atlas-map-controls"
+                  @click="mobileControlsOpen = !mobileControlsOpen"
                 >
-                  {{ timelineButtonLabel }}
-                </button>
-                <button
-                  type="button"
-                  @click="showConnections = !showConnections"
-                >
-                  {{ showConnections ? "Hide paths" : "Show paths" }}
-                </button>
-                <button
-                  type="button"
-                  :aria-pressed="String(showMemories)"
-                  :disabled="!visibleMemoryCount"
-                  @click="showMemories = !showMemories"
-                >
-                  {{ showMemories ? "Hide map memories" : "Show map memories" }}
+                  <span>Map controls</span>
+                  <strong>{{ mobileControlsOpen ? "Hide" : "Show" }}</strong>
                 </button>
               </div>
-              <p v-if="timelineEntry" class="my-atlas-timeline-year">
-                <strong>{{ timelineEntry.place.name }}</strong>
-                <span>
-                  {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
-                  {{ timelineSequence.length }}
-                </span>
-              </p>
-              <p class="my-atlas-connections-note">
-                Playback follows visit years. Hops within a year are a visual
-                sequence, not a recorded travel route.
-              </p>
-            </div>
+              <div
+                id="my-atlas-map-controls"
+                class="my-atlas-controls-drawer"
+                :class="{ 'is-open': mobileControlsOpen }"
+              >
+                <div class="my-atlas-view-controls">
+                  <label>
+                    <span>Show</span>
+                    <select v-model="yearFilter" @change="resetTimeline">
+                      <option value="all">Every destination</option>
+                      <option
+                        v-for="year in years"
+                        :key="year"
+                        :value="String(year)"
+                      >
+                        {{ year }}
+                      </option>
+                      <option v-if="atlasStats.undated" value="undated">
+                        Date open
+                      </option>
+                    </select>
+                  </label>
+                  <button
+                    type="button"
+                    :disabled="!years.length"
+                    @click="toggleTimeline"
+                  >
+                    {{ timelineButtonLabel }}
+                  </button>
+                  <button
+                    type="button"
+                    @click="showConnections = !showConnections"
+                  >
+                    {{ showConnections ? "Hide paths" : "Show paths" }}
+                  </button>
+                  <button
+                    type="button"
+                    :aria-pressed="String(showMemories)"
+                    :disabled="!visibleMemoryCount"
+                    @click="showMemories = !showMemories"
+                  >
+                    {{
+                      showMemories ? "Hide map memories" : "Show map memories"
+                    }}
+                  </button>
+                </div>
+                <p v-if="timelineEntry" class="my-atlas-timeline-year">
+                  <strong>{{ timelineEntry.place.name }}</strong>
+                  <span>
+                    {{ timelineEntry.year }} · {{ timelineIndex + 1 }} of
+                    {{ timelineSequence.length }}
+                  </span>
+                </p>
+                <p class="my-atlas-connections-note">
+                  Playback follows visit years. Hops within a year are a visual
+                  sequence, not a recorded travel route.
+                </p>
+              </div>
 
-            <div v-if="selectedPlace" class="my-atlas-selected">
-              <button
-                type="button"
-                aria-label="Previous destination"
-                @click="cyclePin(-1)"
-              >
-                Previous
-              </button>
-              <div>
-                <strong>{{ selectedPlace.name }}</strong>
-                <span>{{ placeLabel(selectedPlace) }}</span>
-                <small>{{ formatVisitedDates(selectedPlace) }}</small>
+              <div class="my-atlas-map-card-actions">
+                <button type="button" @click="viewAllDestinationsOnMap">
+                  View your map</button
+                ><button type="button" @click="openAtlasPanel('add')">
+                  + Add visited place
+                </button>
               </div>
-              <button
-                type="button"
-                aria-label="Next destination"
-                @click="cyclePin(1)"
-              >
-                Next
-              </button>
-              <blockquote v-if="selectedPlace.memory">
-                {{ selectedPlace.memory }}
-              </blockquote>
-              <p v-else class="my-atlas-selected-memory-empty">
-                No favorite memory added yet.
-              </p>
-              <button
-                v-if="accountProfile"
-                type="button"
-                class="my-atlas-selected-memory-action"
-                :disabled="accountPending"
-                @click="
-                  organizedTrips && !selectedPlace.ungrouped
-                    ? openTripWorkspace()
-                    : openExistingPin(selectedPlace, { memoryOnly: true })
-                "
-              >
+            </section>
+            <section v-if="selectedPlace" class="my-atlas-selected-card">
+              <div class="my-atlas-selected-card-heading">
+                <strong>Selected destination</strong
+                ><span
+                  >{{
+                    displayedPlaces.findIndex(
+                      place => place.placeId === selectedPlace.placeId
+                    ) + 1
+                  }}
+                  of {{ displayedPlaces.length }}</span
+                >
+              </div>
+              <h2>{{ selectedPlace.name }}</h2>
+              <p>
+                {{ placeLabel(selectedPlace) }} ·
                 {{
-                  organizedTrips && !selectedPlace.ungrouped
-                    ? (selectedPlace.ungroupedVisitIds || []).length
-                      ? "View visits"
-                      : "View trips"
-                    : selectedPlace.memory
-                      ? "Edit memory"
-                      : "Add memory"
+                  selectedPlace.visitedDates?.length
+                    ? formatVisitedDates(selectedPlace)
+                    : "Visit date not added"
                 }}
+              </p>
+              <p v-if="selectedPlace.memory" class="my-atlas-selected-excerpt">
+                {{ selectedPlace.memory }}
+              </p>
+              <button
+                type="button"
+                class="my-atlas-selected-view"
+                @click="overviewPlaceOpen = true"
+              >
+                View destination ›
               </button>
-            </div>
-
-            <div class="my-atlas-overview-actions">
-              <button type="button" @click="openAtlasPanel('add')">
-                Add visited destination
-              </button>
-            </div>
+            </section>
             <MyAtlasJourneyCards
               :trips="overviewTrips"
               :legacy-plans="overviewLegacyPlans"
@@ -622,10 +629,136 @@
               @share="shareJourney"
               @refresh="loadJourneyOverview()"
               @past="selectAtlasTab('past')"
-              @plan="selectAtlasTab('planning')"
+              @plan="openTripWorkspace(true, 'planning')"
             />
           </section>
 
+          <section
+            v-if="canUseAtlas && selectedPlace && overviewPlaceOpen"
+            v-show="activeAtlasTab === 'overview'"
+            class="my-atlas-place-detail"
+          >
+            <button
+              type="button"
+              class="my-atlas-back-link"
+              @click="overviewPlaceOpen = false"
+            >
+              ‹ Back to Overview
+            </button>
+            <h1>{{ selectedPlace.name }}</h1>
+            <p>{{ placeLabel(selectedPlace) }}</p>
+            <span class="my-atlas-place-badge">Visited place</span>
+            <section class="my-atlas-place-card">
+              <h2>Location on your map</h2>
+              <button type="button" @click="viewSelectedPlaceOnMap">
+                View {{ selectedPlace.name }} on map
+              </button>
+            </section>
+            <section class="my-atlas-place-card">
+              <h2>Your memory</h2>
+              <blockquote v-if="selectedPlace.memory">
+                {{ selectedPlace.memory }}
+              </blockquote>
+              <p v-else>No memory recorded yet.</p>
+              <p>
+                {{
+                  selectedPlace.visitedDates?.length
+                    ? formatVisitedDates(selectedPlace)
+                    : "Visit date not added"
+                }}
+              </p>
+              <div
+                v-if="selectedPlace.ungrouped !== false"
+                class="my-atlas-place-actions"
+              >
+                <button
+                  type="button"
+                  :disabled="accountPending"
+                  @click="openOverviewEditor(true)"
+                >
+                  {{
+                    selectedPlace.memory ? "Edit memory" : "Add memory"
+                  }}</button
+                ><button
+                  type="button"
+                  :disabled="accountPending"
+                  @click="openOverviewEditor(false)"
+                >
+                  Edit visit dates
+                </button>
+              </div>
+              <button v-else type="button" @click="openTripWorkspace()">
+                View journey visits
+              </button>
+            </section>
+            <section class="my-atlas-place-card">
+              <h2>Related journeys</h2>
+              <button
+                v-for="trip in selectedPlaceJourneys"
+                :key="trip.tripId"
+                type="button"
+                @click="openJourney({ trip, legacy: false })"
+              >
+                {{ trip.title }} ·
+                {{ trip.lifecycle === "past" ? "Past trip" : "Planned" }}
+              </button>
+              <p v-if="!selectedPlaceJourneys.length">
+                This destination is not part of a journey yet.
+              </p>
+            </section>
+            <div class="my-atlas-place-actions">
+              <button type="button" @click="cyclePin(-1)">
+                Previous destination</button
+              ><button type="button" @click="cyclePin(1)">
+                Next destination
+              </button>
+            </div>
+          </section>
+          <MyAtlasDialog
+            v-if="overviewEditing && pinEditorPlace"
+            :title="pinEditorPlace.name"
+            :pending="accountPending || experiencePending"
+            :status-visible="Boolean(pinEditorError || experienceError)"
+            @close="closePinEditor"
+            ><template #status
+              ><p role="alert">
+                {{ pinEditorError || experienceError }}
+              </p></template
+            >
+            <MyAtlasPinEditor
+              ref="pinEditor"
+              :key="pinEditorKey"
+              :place="pinEditorPlace"
+              :place-label="placeLabel(pinEditorPlace)"
+              :pin="pinEditorPin"
+              :memory-only="pinEditorMemoryOnly"
+              :pending="accountPending"
+              :error="pinEditorError"
+              :experience-pending="experiencePending"
+              :experience-error="experienceError"
+              :experience-saved-sequence="experienceSavedSequence"
+              embedded
+              :allow-location-edit="false"
+              @experience-change="saveVisitExperience"
+              @cancel="closePinEditor"
+              @save="savePinDetails"
+            />
+          </MyAtlasDialog>
+          <MyAtlasDialog
+            v-if="canUseAtlas && storyPreview"
+            title="Your travel story image"
+            @close="closeStoryPreview"
+            ><div class="my-atlas-story-preview">
+              <img
+                :src="storyPreview.url"
+                alt="Preview of your Atlas Story image"
+              />
+              <p>Saving this image does not change your profile visibility.</p>
+              <a :href="storyPreview.url" :download="storyPreview.filename"
+                >Save story image</a
+              >
+            </div></MyAtlasDialog
+          >
           <MyAtlasRegistrationForm
             v-if="auth.authenticated && accountMissing"
             ref="registration"
@@ -731,7 +864,7 @@
               </section>
 
               <MyAtlasPinEditor
-                v-if="pinEditorPlace"
+                v-if="pinEditorPlace && !overviewEditing"
                 ref="pinEditor"
                 :key="pinEditorKey"
                 :place="pinEditorPlace"
@@ -935,6 +1068,7 @@
             ref="trips"
             :scope="activeAtlasTab === 'planning' ? 'planned' : 'past'"
             :profile-public="accountProfile.public"
+            :known-places="pinnedPlaces"
             :api-base-url="apiBaseUrl"
             :revision="accountProfile.revision"
             :resolve-link="resolveMapLink"
@@ -943,6 +1077,8 @@
             @open-change="tripWorkspaceOpen = $event"
             @action-feedback="showActionFeedback"
             @route-change="tripView = $event"
+            @detail-change="tripDetailOpen = $event"
+            @view-on-map="viewJourneyOnMap"
             @location-placement-change="handleTripPlacement"
           />
           <MyAtlasPlanner
@@ -962,7 +1098,7 @@
 
           <section
             v-if="canUseAtlas"
-            v-show="activeAtlasTab === 'overview'"
+            v-show="activeAtlasTab === 'overview' && !overviewPlaceOpen"
             class="my-atlas-tools my-atlas-workflow-section"
           >
             <div
@@ -971,7 +1107,7 @@
               <div class="my-atlas-sharing-heading">
                 <h2>Share Your Atlas</h2>
                 <MyAtlasInfo label="How trip sharing and Explore listing work"
-                  >Share individual Planned or Past trips from their trip cards.
+                  >Open a journey and choose Share journey in Manage journey.
                   These links work while your profile is private and keep their
                   saved snapshot. Planned and Past trips appear in separate
                   views. Profile visibility is controlled by List my profile in
@@ -979,42 +1115,72 @@
                   visited destinations.</MyAtlasInfo
                 >
               </div>
-              <p>
-                Share a trip from its trip card, or create a Story image of your
-                visited destinations.
-              </p>
-              <div
-                v-if="!pinnedPlaces.length"
-                class="my-atlas-tools-empty"
-                role="status"
-              >
-                <strong>No visited destinations yet</strong>
+              <p>Two ways to share your travels.</p>
+              <article class="my-atlas-sharing-card">
+                <h3>Interactive Atlas</h3>
                 <p>
-                  Add a visited place to create a Story image. You can still
-                  share Planned and Past trip links.
+                  Share the destinations and journeys included on your profile.
                 </p>
-                <button type="button" @click="openAtlasPanel('add')">
-                  Add a visited place
-                </button>
-              </div>
-              <div class="my-atlas-tools-actions">
-                <button
-                  type="button"
-                  :disabled="
-                    !pinnedPlaces.length ||
-                    atlasImagePending ||
-                    storyExportPending
-                  "
-                  :aria-busy="String(storyExportPending)"
-                  @click="exportStory"
+                <span class="my-atlas-place-badge">{{
+                  accountProfile.public ? "Public profile" : "Private profile"
+                }}</span>
+                <p v-if="accountProfile.public" class="my-atlas-share-link">
+                  {{ shareUrl }}
+                </p>
+                <div class="my-atlas-place-actions">
+                  <button
+                    v-if="accountProfile.public"
+                    type="button"
+                    @click="copyShareLink"
+                  >
+                    Copy profile link</button
+                  ><button type="button" @click="toggleProfileMenu">
+                    Profile settings
+                  </button>
+                </div>
+                <p>
+                  Explore listing is controlled in Profile. Direct trip links
+                  can be shared separately, even while your profile is private.
+                </p>
+              </article>
+              <article class="my-atlas-sharing-card">
+                <h3>Travel story image</h3>
+                <p>Create a shareable graphic of your visited destinations.</p>
+                <span class="my-atlas-place-badge">Works while private</span>
+                <div
+                  v-if="!pinnedPlaces.length"
+                  class="my-atlas-tools-empty"
+                  role="status"
                 >
-                  {{
-                    storyExportPending
-                      ? "Creating Story image"
-                      : "Create story image"
-                  }}
-                </button>
-              </div>
+                  <strong>No visited destinations yet</strong>
+                  <p>
+                    Add a visited place to create a Story image. You can still
+                    share Planned and Past trip links.
+                  </p>
+                  <button type="button" @click="openAtlasPanel('add')">
+                    Add a visited place
+                  </button>
+                </div>
+                <div class="my-atlas-tools-actions">
+                  <button
+                    type="button"
+                    :disabled="
+                      !pinnedPlaces.length ||
+                      atlasImagePending ||
+                      storyExportPending
+                    "
+                    :aria-busy="String(storyExportPending)"
+                    @click="exportStory({ preview: true })"
+                  >
+                    {{
+                      storyExportPending
+                        ? "Creating Story image"
+                        : "Preview and save"
+                    }}
+                  </button>
+                </div>
+                <p>Visibility is not changed by saving an image.</p>
+              </article>
               <p
                 v-if="toolsStatus && !accountMenuOpen"
                 class="my-atlas-tools-status"
@@ -1026,7 +1192,7 @@
           </section>
           <section
             v-if="canUseAtlas"
-            v-show="activeAtlasTab === 'overview'"
+            v-show="activeAtlasTab === 'overview' && !overviewPlaceOpen"
             ref="customization"
             class="my-atlas-customization my-atlas-workflow-section"
           >
@@ -1229,7 +1395,9 @@
         >
       </button>
     </transition>
-    <MyAtlasMapHelp :hide-on-mobile="mapNavigatorOpen" />
+    <MyAtlasMapHelp
+      :hide-on-mobile="mapNavigatorOpen || (canUseAtlas && sidebarExpanded)"
+    />
   </main>
 </template>
 
@@ -1291,7 +1459,10 @@ import {
 import { getMyAtlasApiBaseUrl } from "../config/api.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
 import { getMyAtlasTurnstileSiteKey } from "../config/turnstile.mjs"
-import { downloadMyAtlasStory } from "../export/storyExport.mjs"
+import {
+  downloadMyAtlasStory,
+  createMyAtlasStoryPreview,
+} from "../export/storyExport.mjs"
 import {
   getMyAtlasApiAccessToken,
   initializeMyAtlasAuth,
@@ -1361,6 +1532,10 @@ export default {
       loadedPlaces: {},
       pins: [],
       selectedPlaceId: "",
+      overviewPlaceOpen: false,
+      overviewEditing: false,
+      tripDetailOpen: false,
+      storyPreview: null,
       pinEditorPlace: null,
       pinEditorPin: null,
       pinEditorMemoryOnly: false,
@@ -1433,6 +1608,15 @@ export default {
     }
   },
   computed: {
+    selectedPlaceJourneys() {
+      return this.overviewTrips.filter(
+        trip =>
+          trip.workflow !== "archived" &&
+          trip.stops.some(
+            stop => stop.place.placeId === this.selectedPlace?.placeId
+          )
+      )
+    },
     profileListed() {
       return Boolean(
         this.accountProfile?.public && this.accountProfile?.discoverable
@@ -1746,6 +1930,10 @@ export default {
     },
     "auth.authenticated"(authenticated) {
       if (!authenticated) {
+        this.closeStoryPreview()
+        this.overviewPlaceOpen = false
+        this.overviewEditing = false
+        this.tripDetailOpen = false
         this.closeMapNavigator()
         this.actionFeedback = null
         this.overviewTrips = []
@@ -1769,6 +1957,7 @@ export default {
   // This project uses Vue 2; its lint preset also checks the Vue 3 lifecycle.
   // eslint-disable-next-line vue/no-deprecated-destroyed-lifecycle
   beforeDestroy() {
+    this.closeStoryPreview()
     window.clearTimeout(this.searchTimer)
     window.clearTimeout(this.timelineTimer)
     window.removeEventListener("keydown", this.handleKeyboardNavigation)
@@ -1776,6 +1965,47 @@ export default {
     if (this.atlasImageUrl) URL.revokeObjectURL(this.atlasImageUrl)
   },
   methods: {
+    viewAllDestinationsOnMap() {
+      if (!this.canUseAtlas) return
+      if (this.displayedPlaces.length) {
+        this.mapNavigatorOpen = true
+        this.chooseMapTrip("all-destinations")
+      } else if (this.sidebarExpanded) this.toggleSidebar()
+    },
+    viewSelectedPlaceOnMap() {
+      if (!this.selectedPlace) return
+      const index = this.displayedPlaces.findIndex(
+        place => place.placeId === this.selectedPlace.placeId
+      )
+      this.viewAllDestinationsOnMap()
+      this.mapNavigatorStopIndex = Math.max(0, index)
+      this.selectedPlaceId = this.mapNavigatorLocation?.placeId || ""
+    },
+    openOverviewEditor(memoryOnly) {
+      if (
+        !this.canUseAtlas ||
+        !this.selectedPlace ||
+        this.accountPending ||
+        this.selectedPlace.ungrouped === false
+      )
+        return
+      this.pinEditorPlace = this.selectedPlace
+      this.pinEditorPin = this.pins.find(
+        pin => pin.placeId === this.selectedPlace.placeId
+      )
+      this.pinEditorMemoryOnly = memoryOnly
+      this.pinEditorError = ""
+      this.overviewEditing = true
+    },
+    viewJourneyOnMap(id) {
+      if (
+        !this.canUseAtlas ||
+        !this.mapNavigationTrips.some(trip => trip.id === id)
+      )
+        return
+      this.mapNavigatorOpen = true
+      this.chooseMapTrip(id)
+    },
     openMapNavigator() {
       this.mapNavigatorOpen = true
       this.mapNavigatorCollapsed = false
@@ -1960,6 +2190,9 @@ export default {
     },
     async selectAtlasTab(tab) {
       if (!this.atlasTabs.some(item => item.id === tab)) return
+      if (this.accountPending || this.$refs.trips?.pending) return
+      this.overviewPlaceOpen = false
+      this.$refs.trips?.showCollection()
       this.activeAtlasTab = tab
       this.cancelLocationPlacement()
       if (this.timelinePlaying && tab !== "overview") this.pauseTimeline()
@@ -2324,6 +2557,10 @@ export default {
       this.deleteConfirmation = ""
       this.accountMenuOpen = false
       this.accountProfile = null
+      this.closeStoryPreview()
+      this.overviewPlaceOpen = false
+      this.overviewEditing = false
+      this.tripDetailOpen = false
       this.accountMissing = true
       this.pins = []
       this.selectedPlaceId = ""
@@ -2686,6 +2923,7 @@ export default {
       return label.replace(place.name + ", ", "")
     },
     closePinEditor() {
+      this.overviewEditing = false
       this.locationAttempt = null
       this.editPlacement = { active: false, coordinates: null }
       this.experienceAttempt = null
@@ -3155,7 +3393,8 @@ export default {
       this.timelinePlaying = true
       this.scheduleTimelineStep()
     },
-    async exportStory() {
+    async exportStory({ preview = false } = {}) {
+      if (!this.canUseAtlas) return
       if (this.storyExportPending) return
       if (!this.pinnedPlaces.length) {
         this.toolsStatus =
@@ -3163,6 +3402,7 @@ export default {
         return
       }
       this.storyExportPending = true
+      const owner = this.accountProfile.userId
       this.toolsStatus = "Creating your Story image."
       try {
         if (this.atlasImage && !this.atlasImageUrl) {
@@ -3173,7 +3413,7 @@ export default {
         await this.$nextTick()
         const favoriteImage = this.$refs.favoriteImagePreview || null
         if (favoriteImage?.decode) await favoriteImage.decode()
-        const filename = await downloadMyAtlasStory({
+        const options = {
           displayName: this.accountProfile?.displayName || this.authDisplayName,
           favoriteImage,
           favoriteImageLocation: this.atlasImage?.location || "",
@@ -3181,8 +3421,27 @@ export default {
           handle: this.accountProfile?.handle || "",
           places: this.displayedPlaces,
           stats: this.visibleStats,
-        })
-        this.toolsStatus = `${filename} was downloaded.`
+        }
+        if (preview) {
+          this.closeStoryPreview()
+          const result = await createMyAtlasStoryPreview(options)
+          if (!this.canUseAtlas || this.accountProfile?.userId !== owner) {
+            URL.revokeObjectURL(result.url)
+            return
+          }
+          if (document.querySelector("dialog:modal")) {
+            URL.revokeObjectURL(result.url)
+            this.toolsStatus =
+              "Close the open dialog, then preview your Story image."
+            return
+          }
+          this.storyPreview = result
+          this.toolsStatus =
+            "Your Story image is ready to preview. Your profile visibility is unchanged."
+        } else {
+          const filename = await downloadMyAtlasStory(options)
+          this.toolsStatus = `${filename} was downloaded.`
+        }
         this.announcement = this.toolsStatus
       } catch {
         this.atlasImageError =
@@ -3191,6 +3450,10 @@ export default {
       } finally {
         this.storyExportPending = false
       }
+    },
+    closeStoryPreview() {
+      if (this.storyPreview?.url) URL.revokeObjectURL(this.storyPreview.url)
+      this.storyPreview = null
     },
     formatVisitedDates,
     placeTypeLabel: formatPlaceTypeLabel,
@@ -5209,6 +5472,224 @@ export default {
     border-left: 0;
     border-right: 0;
     border-bottom: 0;
+  }
+}
+.my-atlas-tabs {
+  order: -25;
+}
+.my-atlas-intro.is-signed-in h1 {
+  max-width: none;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  line-height: 1.2;
+}
+.my-atlas-intro.is-signed-in .my-atlas-intro-copy {
+  font-size: 0.82rem;
+}
+.my-atlas-overview {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  gap: 18px;
+}
+.my-atlas-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.my-atlas-stats > div {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--color-control-border, #324959);
+  background: var(--color-surface-raised, #152629);
+}
+.my-atlas-stats strong {
+  font-size: 1.6rem;
+}
+.my-atlas-stats span {
+  font-size: 0.56rem;
+}
+.my-atlas-map-card,
+.my-atlas-selected-card,
+.my-atlas-place-card,
+.my-atlas-sharing-card {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--color-control-border, #324959);
+  border-radius: 14px;
+  background: var(--color-surface-raised, #152629);
+}
+.my-atlas-map-card-heading,
+.my-atlas-selected-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.my-atlas-map-card h2,
+.my-atlas-selected-card h2,
+.my-atlas-place-card h2,
+.my-atlas-sharing-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+.my-atlas-selected-card p,
+.my-atlas-place-card p,
+.my-atlas-sharing-card p {
+  margin: 0;
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.76rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.my-atlas-selected-card-heading {
+  color: var(--color-accent-soft, #e6ba68);
+  font-size: 0.7rem;
+}
+.my-atlas-selected-card-heading span {
+  color: var(--color-text-muted, #adbcba);
+  white-space: nowrap;
+}
+.my-atlas-selected-excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.my-atlas-map-card-heading .my-atlas-mobile-controls-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  padding: 8px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--color-accent-soft, #e6ba68);
+  background: transparent;
+  font: inherit;
+  font-size: 0.65rem;
+  cursor: pointer;
+}
+.my-atlas-map-card .my-atlas-controls-drawer {
+  display: none;
+}
+.my-atlas-map-card .my-atlas-controls-drawer.is-open {
+  display: grid;
+}
+.my-atlas-map-card-actions,
+.my-atlas-place-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.my-atlas-map-card-actions > button,
+.my-atlas-place-actions > button {
+  flex: 1 1 120px;
+}
+.my-atlas-map-card button:not(.my-atlas-mobile-controls-toggle),
+.my-atlas-selected-view,
+.my-atlas-place-detail button,
+.my-atlas-sharing-card button,
+.my-atlas-story-preview a {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-control-border, #324959);
+  border-radius: 9px;
+  color: var(--color-accent-soft, #e6ba68);
+  background: transparent;
+  font: inherit;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+.my-atlas-map-card-actions button:last-child,
+.my-atlas-sharing-card .my-atlas-tools-actions button {
+  color: var(--color-on-accent, #0b1d23);
+  background: var(--color-accent, #e6ba68);
+  border-color: var(--color-accent, #e6ba68);
+  font-weight: 600;
+}
+.my-atlas-place-detail {
+  display: grid;
+  gap: 18px;
+  margin: 18px 0;
+}
+.my-atlas-place-detail > h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.my-atlas-place-detail > p {
+  margin: 0;
+  color: var(--color-text-muted, #adbcba);
+  font-size: 0.8rem;
+}
+.my-atlas-place-detail .my-atlas-back-link {
+  justify-self: start;
+  padding: 8px 0;
+  border: 0;
+}
+.my-atlas-place-badge {
+  justify-self: start;
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  color: var(--color-accent-soft, #e6ba68);
+  background: rgba(var(--color-accent-rgb, 230, 186, 104), 0.1);
+  font-size: 0.7rem;
+}
+.my-atlas-place-card blockquote {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+.my-atlas-sharing-card + .my-atlas-sharing-card {
+  margin-top: 12px;
+}
+.my-atlas-story-preview {
+  display: grid;
+  gap: 14px;
+}
+.my-atlas-story-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 62dvh;
+  margin: auto;
+  object-fit: contain;
+}
+.my-atlas-story-preview p {
+  font-size: 0.78rem;
+}
+.my-atlas-story-preview a {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
+@media (max-width: 720px) {
+  .my-atlas-proof.has-account:not(.is-map-only) {
+    display: block;
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+  .my-atlas-proof.has-account > .my-atlas-map-shell {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  .my-atlas-proof.has-account .my-atlas-panel {
+    max-height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    overflow-y: auto;
   }
 }
 </style>

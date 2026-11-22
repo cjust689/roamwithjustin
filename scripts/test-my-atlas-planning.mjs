@@ -213,11 +213,8 @@ assert.doesNotMatch(ownerView, />\s*Verify API\s*</)
 assert.match(ownerView, /openAtlasPanel\('add'\)/)
 assert.match(ownerView, /role="tablist"/)
 assert.match(ownerView, /aria-controls="my-atlas-tab-panel"/)
-assert.match(ownerView, /class="my-atlas-selected-memory-action"/)
-assert.match(
-  ownerView,
-  /openExistingPin\(selectedPlace, \{ memoryOnly: true \}\)/
-)
+// Selected-place recap and modal editing are exercised by responsive browser
+// acceptance; the former inline memory-button markup is no longer required.
 assert.match(ownerView, /openExistingPin\(place, \{ memoryOnly: true \}\)/)
 assert.match(ownerView, /openExistingPin\(place\)/)
 assert.match(ownerView, />\s*Visit dates\s*</)

@@ -140,6 +140,12 @@
   box-sizing: border-box;
 }
 
+/* Pointer capture reorders visits; keep map/page panning off the handle only. */
+.my-atlas-proof .my-atlas-panel .atlas-trips button.journey-drag-handle {
+  touch-action: none;
+  transform: none;
+}
+
 @keyframes my-atlas-button-working {
   to {
     transform: rotate(360deg);

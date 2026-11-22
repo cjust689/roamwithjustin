@@ -233,6 +233,8 @@ const dependencies = {
   MyAtlasSwitch: {},
   MyAtlasTravelSearch: {},
   MyAtlasVisitManager: {},
+  MyAtlasTripDestinations: {},
+  journeyCardDate,
   normalizeTripTravelDraft,
   savedTripTravelDraft,
   emptyTravelSearchDraft,
@@ -620,4 +622,212 @@ assert.equal(
 )
 console.log(
   "Search identity deduplication, place context, draft counts, modal-only feedback and destination limits passed."
+)
+
+// The default journey is a recap. Management still uses the existing guarded
+// actions, and drag previews never change persisted or prop-owned stop order.
+ui.trips = [structuredClone(trip)]
+ui.selectedId = trip.tripId
+ui.refreshNeeded = false
+ui.writesEnabled = true
+ui.pending = false
+ui.scope = "past"
+ui.filter = "past"
+ui.profilePublic = false
+assert.equal(ui.selectedDate, "")
+ui.selected.stops[0].visitedDates = [{ year: 2026 }]
+assert.equal(ui.selectedDate, "2026")
+ui.editingStopId = ""
+ui.editStop(ui.selected.stops[0])
+assert.equal(ui.workspaceTab, "overview")
+assert.equal(ui.savedStopMemory, "Private memory 1")
+assert.deepEqual(
+  ui.dialogTabs.map(tab => tab.key),
+  ["overview", "planning", "memory", "dates", "experiences", "actions"]
+)
+ui.openStopActions(ui.selected.stops[1])
+assert.equal(ui.editingStopId, trip.stops[1].stopId)
+assert.equal(ui.workspaceTab, "actions")
+ui.openWorkspace("metadata")
+assert.equal(ui.workspaceTab, "details")
+assert.equal(ui.dialogTabs[1].key, "settings")
+ui.openWorkspace("visits")
+assert.deepEqual(
+  ui.dialogTabs.map(tab => tab.key),
+  ["order", "move", "existing"]
+)
+ui.selected.lifecycle = "planned"
+assert.deepEqual(
+  ui.dialogTabs.map(tab => tab.key),
+  ["order", "move"]
+)
+ui.selected.lifecycle = "past"
+ui.openWorkspace("share")
+assert.equal(ui.dialogTitle, "Share journey")
+assert.equal(ui.canAddExistingDestinations, true)
+ui.profilePublic = true
+assert.equal(ui.canAddExistingDestinations, false)
+ui.startNew()
+ui.draftTitle = "Just an idea"
+assert.equal(
+  ui.canCreateTrip,
+  false,
+  "Older servers require a first destination"
+)
+ui.capabilities = { emptyTripDrafts: true, planningNotes: true }
+assert.equal(
+  ui.canCreateTrip,
+  true,
+  "Capable servers accept a named empty draft"
+)
+ui.draftTitle = "  "
+assert.equal(ui.canCreateTrip, false)
+ui.selectedId = trip.tripId
+ui.selected.lifecycle = "planned"
+ui.editingStopId = ""
+ui.editStop(ui.selected.stops[0])
+assert.equal(ui.workspaceTab, "planning")
+assert.equal(ui.planNoteDraft, ui.editingStop.planNote)
+ui.planNoteDraft = "Keep this idea separate"
+ui.memoryDraft = "A different memory"
+ui.workspaceTab = "dates"
+ui.workspaceTab = "planning"
+assert.equal(ui.planNoteDraft, "Keep this idea separate")
+assert.equal(ui.memoryDraft, "A different memory")
+ui.selected.lifecycle = "past"
+ui.destinations = [{ pinId: "pin_" + "a".repeat(24), placeId: place.placeId }]
+ui.knownPlaces = [place]
+assert.equal(
+  ui.existingDestinations[0].name,
+  "London",
+  "Standalone pins use resolved place names without changing the pin reference"
+)
+assert.equal(ui.existingDestinations[0].pinId, ui.destinations[0].pinId)
+const originalMutate = ui.mutate
+const managementWrites = []
+ui.mutate = (...args) => managementWrites.push(args)
+ui.reorderStops([trip.stops[0].stopId, trip.stops[0].stopId])
+ui.reorderStops(["another-owner-stop", trip.stops[0].stopId])
+ui.moveStop(0, -1)
+ui.moveStop(1, 1)
+assert.equal(managementWrites.length, 0)
+const reversedIds = ui.selected.stops.map(item => item.stopId).reverse()
+ui.reorderStops(reversedIds)
+assert.deepEqual(managementWrites.pop(), [
+  "reorder",
+  { stopIds: reversedIds },
+  trip.tripId,
+])
+ui.openStopActions(ui.selected.stops[0])
+ui.removeStop(ui.editingStop)
+assert.equal(
+  managementWrites.length,
+  0,
+  "Permanent removal requires its own in-dialog confirmation"
+)
+ui.confirmRemoveStop()
+assert.equal(ui.workspace, "remove")
+ui.removeStop(ui.editingStop)
+assert.equal(managementWrites.pop()[0], "removeStop")
+ui.pending = true
+ui.openWorkspace("metadata")
+assert.equal(ui.workspace, "remove", "Pending writes cannot switch editors")
+ui.pending = false
+ui.mutate = originalMutate
+
+const destinationFile = compiler.parseComponent(
+  await fs.readFile(
+    "src/features/my-atlas/components/MyAtlasTripDestinations.vue",
+    "utf8"
+  )
+)
+assert.deepEqual(compiler.compile(destinationFile.template.content).errors, [])
+const gestureListeners = { addEventListener() {}, removeEventListener() {} }
+const destinationComponent = new Function(
+  "document",
+  "window",
+  destinationFile.script.content.replace("export default", "return")
+)(gestureListeners, gestureListeners)
+const destinationEvents = []
+const list = {
+  ...destinationComponent.data(),
+  stops: structuredClone(trip.stops),
+  pending: false,
+  reorderable: true,
+  $emit: (...args) => destinationEvents.push(args),
+}
+for (const [name, method] of Object.entries(destinationComponent.methods))
+  list[name] = method.bind(list)
+Object.defineProperty(list, "orderedStops", {
+  get: () => destinationComponent.computed.orderedStops.call(list),
+})
+list.$refs = {
+  list: {
+    children: list.stops.map((item, index) => ({
+      dataset: { stopId: item.stopId },
+      getBoundingClientRect: () => ({ top: index * 80, height: 80 }),
+    })),
+  },
+}
+list.$el = { closest: () => null }
+const originalIds = list.stops.map(item => item.stopId)
+let capturedPointer
+const pointer = {
+  button: 0,
+  pointerId: 1,
+  currentTarget: {
+    setPointerCapture: id => {
+      capturedPointer = id
+    },
+  },
+}
+list.startDrag(pointer, originalIds[0])
+assert.equal(capturedPointer, 1)
+list.drag({ pointerId: 1, clientY: 180 })
+assert.deepEqual(
+  list.orderedStops.map(item => item.stopId),
+  [...originalIds].reverse()
+)
+assert.deepEqual(
+  list.stops.map(item => item.stopId),
+  originalIds
+)
+assert.equal(
+  destinationEvents.length,
+  0,
+  "Dragging only previews until release"
+)
+list.cancelDrag()
+assert.deepEqual(
+  list.orderedStops.map(item => item.stopId),
+  originalIds
+)
+list.startDrag(pointer, originalIds[0])
+list.drag({ pointerId: 1, clientY: 180 })
+list.finishDrag({ pointerId: 7 })
+assert.equal(
+  destinationEvents.length,
+  0,
+  "Other pointers cannot commit an order"
+)
+list.finishDrag({ pointerId: 1 })
+assert.deepEqual(destinationEvents.pop(), [
+  "reorder",
+  [...originalIds].reverse(),
+])
+list.move(0, -1)
+list.move(1, 1)
+assert.equal(destinationEvents.length, 0)
+list.move(0, 1)
+assert.deepEqual(destinationEvents.pop(), [
+  "reorder",
+  [...originalIds].reverse(),
+])
+list.pending = true
+list.move(0, 1)
+list.startDrag(pointer, originalIds[0])
+assert.equal(list.dragId, "")
+assert.equal(destinationEvents.length, 0)
+console.log(
+  "Journey recap, explicit management, single-dialog removal, and occurrence-safe pointer/keyboard reordering checks passed."
 )
