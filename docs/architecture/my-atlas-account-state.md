@@ -1323,9 +1323,10 @@ owner view retains its export path. Aggregate place dates are not presented
 as dates of individual occurrences.
 Owner visibility help, Share Your Atlas readiness and privacy copy explain
 both lifecycles. The configured privacy version advances to
-`my-atlas-privacy-2026-11-21-public-trips` on the next Worker deployment. This
-local follow-up requires the compatible Worker projection before frontend
-promotion. No production account was changed during implementation checks.
+`my-atlas-privacy-2026-11-21-public-trips` in deployed Worker version
+`abf6fa12-b4ca-4239-8cfb-a860fbdaf41a`. Frontend rollout is tracked in PR 239.
+Live health/directory/profile reads passed, including a profile with both trip
+lifecycles. No production account was changed by verification.
 
 The November 22 simplification moves Planned/Past/Destinations selection into
 one labeled View select inside the existing map shell. Empty lifecycle options

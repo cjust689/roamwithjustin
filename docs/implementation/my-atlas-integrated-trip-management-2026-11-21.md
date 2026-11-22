@@ -374,12 +374,17 @@ its repeated-stop navigation and independent destination compatibility.
       `.state/theme/public-view-states-build.log`,
       `.state/theme/public-view-states-runtime.log`, and
       `.state/theme/public-view-states-worker-check.log`.
-- [ ] Deploy the additive Worker API, then promote the frontend when requested.
+- [x] Deploy the additive Worker as `abf6fa12-b4ca-4239-8cfb-a860fbdaf41a`.
+      Live health, directory and public-profile reads returned HTTP 200. The
+      checked profile included one Past and one Planned trip; the production
+      response passed the new client normalizer. Evidence:
+      `.state/theme/public-trip-release-api.json`.
+- [x] Receive owner authorization for frontend promotion on November 22;
+      [PR 239](https://github.com/cjust689/roamwithjustin/pull/239) tracks develop.
 
-No real account mutation, API switch, migration or production deployment was
-performed by these checks. The configured localhost app still reads the existing
-staging API; new planned publication is covered by isolated runtime/browser
-fixtures until that Worker is promoted.
+No real account mutation, API switch or migration was performed by these
+checks. The configured localhost app still reads the same staging-named API,
+now serving the deployed additive public-trip projection.
 
 ### Public map controls and owner-only Story export, November 22, local
 
@@ -402,8 +407,19 @@ fixtures until that Worker is promoted.
       suites and 61 isolated Worker runtime tests. Focused ESLint and the final
       managed documentation audit passed with the existing 12 warnings. Build
       evidence: `.state/theme/public-map-filters-build.log`.
-- [ ] Promote this local follow-up with the pending public-trip API/frontend work.
+- [x] Include this follow-up in the owner-authorized public-trip release,
+      tracked by PR 239. Production verification is recorded in its release
+      handoff after protected-branch checks and Pages deployment.
 
 The owner-only account data export remains authenticated. This change removes
 the public app's Story generation/download path; it does not change photo
 visibility, private R2 delivery, trip permissions or account data.
+
+### Public trip release tracking, November 22
+
+Source commit `b18d79d` contains the public lifecycle projection, on-map View
+selector, private-field boundaries and owner-only Story export. The compatible
+Worker is deployed before frontend promotion. PR 239 records validation and
+develop promotion; subsequent main/Pages promotion is tracked in the release
+handoff. The build and browser evidence above describes the final source.
+No Viator code, private account reset or destructive data operation is included.

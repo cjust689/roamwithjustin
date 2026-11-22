@@ -288,5 +288,5 @@ favorite-photo display/full-image viewing and image context-menu/drag
 suppression retain their existing contracts. This supersedes the earlier
 signed-out Story export behavior in this document. Focused view tests verify
 public export is absent and owner export remains available; responsive browser
-evidence is recorded in the integrated trip checklist. Deployment is pending
-alongside the public trip view-state work.
+evidence is recorded in the integrated trip checklist. The owner authorized
+frontend promotion alongside the public trip views; PR 239 tracks the release.

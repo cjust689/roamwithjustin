@@ -108,13 +108,16 @@ Explore cards. Other site and Viator images retain their browser behavior.
 records verification and limitations. The owner authorized develop/main promotion
 on November 21; release tracking is recorded in the implementation checklist.
 
-Local public Atlas view states: a single on-map View selector chooses Planned,
+Public Atlas view states: a single on-map View selector chooses Planned,
 Past or Destinations with matching cards and pins. Public Story downloading
-is removed; owners retain their Story export. Explicitly published planned trips are projected separately
+is removed; owners retain their Story export. Explicitly published planned
+trips are projected separately
 from visited geography, preserving the existing public response for older
 clients. Planned-only profiles can be published without creating a visited
-place. Private trip content remains excluded. API and frontend changes are
-local and require promotion; see the
+place. Private trip content remains excluded. Worker
+`abf6fa12-b4ca-4239-8cfb-a860fbdaf41a` is deployed; live public-profile reads
+returned both lifecycles. Frontend rollout is tracked in
+[PR 239](https://github.com/cjust689/roamwithjustin/pull/239); see the
 [public grouped browsing checklist](implementation/my-atlas-integrated-trip-management-2026-11-21.md#public-grouped-trip-browsing-local).
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
