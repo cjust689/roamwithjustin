@@ -41,9 +41,12 @@
           through your public profile link. Your favorite travel image becomes
           visible with its location label only when you also allow public
           profile use. You can keep the image private, make the Atlas private,
-          or remove the image at any time. Wishlist entries, future trip plans,
-          private notes, desired years, and plan retention details are never
-          included in that public profile.
+          or remove the image at any time. A trip marked Public Atlas shares its
+          name, Planned or Past status, and ordered destinations while your
+          profile is public. Planned stops are shown separately from visited
+          destinations. Wishlist entries, unpublished trips, private notes,
+          experiences, flight and rental details, desired years, and retention
+          details are excluded from the public profile.
         </p>
         <p>
           If you add an Instagram handle, the handle and its Instagram link

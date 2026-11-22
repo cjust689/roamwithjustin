@@ -350,7 +350,7 @@ describe("private owner profile and pin services", () => {
       )
     ).rejects.toMatchObject({ code: "trip_writes_disabled" })
   })
-  it("publishes only ordered geography for explicitly public Past trips", async () => {
+  it("publishes separate ordered geography for public Past and Planned trips", async () => {
     await upgradeTrips()
     const visible = await tripCall("/v1/me/trips", {
       title: "Public journey",
@@ -373,8 +373,16 @@ describe("private owner profile and pin services", () => {
     })
     const planned = await tripCall("/v1/me/trips", {
       title: "Future journey",
+      description: "Private planned overview",
       lifecycle: "planned",
       stops: [{ customPlace: { name: "Future place", coordinates: [5, 6] } }],
+    })
+    const privatePlan = await tripCall("/v1/me/trips", {
+      title: "Private future journey",
+      lifecycle: "planned",
+      stops: [
+        { customPlace: { name: "Private future place", coordinates: [7, 8] } },
+      ],
     })
     for (const trip of [visible.trip, planned.trip])
       await tripCall(
@@ -415,12 +423,34 @@ describe("private owner profile and pin services", () => {
         })),
       },
     ])
+    expect(result.atlas.plannedTrips).toEqual([
+      {
+        id: "public-planned-trip-1",
+        title: "Future journey",
+        lifecycle: "planned",
+        stops: [
+          {
+            place: {
+              ...planned.trip.stops[0].place,
+              visitedDates: [],
+              visitedYears: [],
+            },
+          },
+        ],
+      },
+    ])
+    expect(
+      result.atlas.places.some(place => place.name === "Future place")
+    ).toBe(false)
     for (const secret of [
       "Private overview",
       "Private memory",
       "Private journey",
-      "Future journey",
-      "Future place",
+      "Private planned overview",
+      "Private future journey",
+      "Private future place",
+      privatePlan.trip.tripId,
+      planned.trip.tripId,
       visible.trip.tripId,
       hidden.trip.tripId,
       visible.trip.stops[0].stopId,
@@ -428,6 +458,103 @@ describe("private owner profile and pin services", () => {
       "experiences",
     ])
       expect(JSON.stringify(result)).not.toContain(secret)
+  })
+  it("shares a planned-only profile without marking planned stops visited and honors visibility/lifecycle changes", async () => {
+    await upgradeTrips()
+    const plan = await tripCall("/v1/me/trips", {
+      title: "Public planned route",
+      lifecycle: "planned",
+      stops: [
+        { customPlace: { name: "Planned only stop", coordinates: [5, 6] } },
+      ],
+    })
+    const user = env.MY_ATLAS_USERS.getByName(USER_ID)
+    const path = `/v1/me/trips/${plan.trip.tripId}`
+    await tripCall(
+      path + "/sharing",
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    const profile = (
+      await getMyProfile({ environment: environment(), identity: IDENTITY })
+    ).profile
+    expect(profile.pinCount).toBe(0)
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true, discoverable: true },
+        expectedRevision: profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    const publicState = () =>
+      getPublicAtlas({
+        environment: environment(),
+        handle: "account-owner",
+        placeCatalog: {
+          manifest: async () => ({
+            catalogRevision: "fixture",
+            attribution: { provider: "GeoNames", license: "CC BY 4.0" },
+          }),
+        },
+      })
+    let result = await publicState()
+    expect(result.atlas.places).toEqual([])
+    expect(result.atlas.trips).toEqual([])
+    expect(result.atlas.plannedTrips).toHaveLength(1)
+    expect((await user.getPublicAtlasDiscovery()).profile.pinCount).toBe(1)
+    expect(
+      (await getMyProfile({ environment: environment(), identity: IDENTITY }))
+        .profile.pinCount
+    ).toBe(0)
+    const later = "2026-11-16T18:00:00.000Z"
+    await tripCall(
+      path,
+      { title: "Updated public plan" },
+      { method: "PATCH", now: later }
+    )
+    expect((await user.getPublicAtlasDiscovery()).profile.updatedAt).toBe(later)
+    await tripCall(
+      path + "/lifecycle",
+      { lifecycle: "past" },
+      { method: "PATCH" }
+    )
+    result = await publicState()
+    expect(result.atlas.places).toHaveLength(1)
+    expect(result.atlas.trips[0].title).toBe("Updated public plan")
+    expect(result.atlas.plannedTrips).toEqual([])
+    await tripCall(
+      path + "/lifecycle",
+      { lifecycle: "planned" },
+      { method: "PATCH" }
+    )
+    result = await publicState()
+    expect(result.atlas.places).toEqual([])
+    expect(result.atlas.trips).toEqual([])
+    expect(result.atlas.plannedTrips).toHaveLength(1)
+    await tripCall(
+      path + "/sharing",
+      { publicAtlas: false },
+      { method: "PATCH" }
+    )
+    expect((await user.getPublicAtlas()).ok).toBe(false)
+    expect((await user.getPublicAtlasDiscovery()).ok).toBe(false)
+    await tripCall(
+      path + "/sharing",
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    await runInDurableObject(user, (_instance, state) => {
+      const stored = state.storage.kv.get(`trip:${plan.trip.tripId}`)
+      state.storage.kv.put(`trip:${plan.trip.tripId}`, {
+        ...stored,
+        workflow: "archived",
+      })
+    })
+    expect((await user.getPublicAtlas()).ok).toBe(false)
+    expect((await user.getPublicAtlasDiscovery()).ok).toBe(false)
   })
   it("moves complete visits between trips and Ungrouped without deleting memories or empty-trip data", async () => {
     await upgradeTrips()

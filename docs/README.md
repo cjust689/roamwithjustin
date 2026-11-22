@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-21
+updated: 2026-11-22
 related:
   - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-location-experience-commerce
@@ -107,6 +107,18 @@ Explore cards. Other site and Viator images retain their browser behavior.
 [Favorite travel image implementation](implementation/my-atlas-favorite-travel-image.md#profile-photo-interactions-november-21)
 records verification and limitations. The owner authorized develop/main promotion
 on November 21; release tracking is recorded in the implementation checklist.
+
+Public Atlas view states: a single on-map View selector chooses Planned,
+Past or Destinations with matching cards and pins. Public Story downloading
+is removed; owners retain their Story export. Explicitly published planned
+trips are projected separately
+from visited geography, preserving the existing public response for older
+clients. Planned-only profiles can be published without creating a visited
+place. Private trip content remains excluded. Worker
+`abf6fa12-b4ca-4239-8cfb-a860fbdaf41a` is deployed; live public-profile reads
+returned both lifecycles. Frontend rollout is tracked in
+[PR 239](https://github.com/cjust689/roamwithjustin/pull/239); see the
+[public grouped browsing checklist](implementation/my-atlas-integrated-trip-management-2026-11-21.md#public-grouped-trip-browsing-local).
 
 Site appearance: [Classic and Explorer architecture](architecture/visual-themes.md)
 and [theme implementation and verification](implementation/theme-toggle.md).

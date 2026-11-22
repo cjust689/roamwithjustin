@@ -343,6 +343,7 @@ describe("public Atlas projection", () => {
         displayName: "Public Owner",
         favoriteImage: null,
         trips: [],
+        plannedTrips: [],
         places: [
           {
             placeId: "geonames:3621138",

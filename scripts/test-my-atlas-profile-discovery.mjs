@@ -12,6 +12,14 @@ import {
   mergeDirectoryCards,
   readDirectoryWindow,
 } from "../src/features/my-atlas/discovery/directory.mjs"
+import {
+  atlasTimelineSequence,
+  atlasStats,
+  atlasYears,
+  formatVisitedDates,
+  placesForYear,
+  placesThroughTimelineStep,
+} from "../src/features/my-atlas/catalog/atlasInsights.mjs"
 
 assert.equal(normalizeInstagramHandle(" @My.Travel_1 "), "my.travel_1")
 assert.equal(normalizeInstagramHandle(" "), "")
@@ -235,6 +243,212 @@ await assert.rejects(
     readDirectoryWindow(async () => ({ atlases: [], nextCursor: "loop" }), 24),
   /Repeated/
 )
+
+// Exercise grouped public browsing through the real component state, including
+// repeated stops and switching back to independent destinations.
+const publicSource = compiler
+  .parseComponent(
+    await fs.readFile(
+      new URL(
+        "../src/features/my-atlas/views/MyAtlasPublicView.vue",
+        import.meta.url
+      ),
+      "utf8"
+    )
+  )
+  .script.content.replace(/^import[\s\S]*?from\s+["'][^"']+["']\s*$/gm, "")
+  .replace("export default", "return")
+const publicDependencies = {
+  MyAtlasMap: {},
+  MyAtlasMapNavigator: {},
+  MyAtlasMapHelp: {},
+  MyAtlasInfo: {},
+  formatVisitedDates,
+  atlasTimelineSequence,
+  atlasStats,
+  atlasYears,
+  placesForYear,
+  placesThroughTimelineStep,
+  instagramProfileUrl,
+  placeCatalog: { records: [] },
+  window: { clearTimeout() {} },
+}
+const publicComponent = new Function(
+  ...Object.keys(publicDependencies),
+  publicSource
+)(...Object.values(publicDependencies))
+const publicView = publicComponent.data()
+for (const [key, method] of Object.entries(publicComponent.methods))
+  publicView[key] = method.bind(publicView)
+for (const [key, computed] of Object.entries(publicComponent.computed))
+  Object.defineProperty(publicView, key, {
+    get: () => computed.call(publicView),
+  })
+publicView.toggleOverview = () => {
+  publicView.overviewExpanded = !publicView.overviewExpanded
+}
+const publicPlaces = ["a", "b", "independent"].map((name, index) => ({
+  placeId: `custom:${name}`,
+  name,
+  coordinates: [index, 10],
+  visitedDates: [{ year: 2025 }],
+  visitedYears: [2025],
+}))
+const sharedTrips = [
+  {
+    id: "public-trip-1",
+    title: "A return trip",
+    kind: "trip",
+    lifecycle: "past",
+    stops: [publicPlaces[0], publicPlaces[1], publicPlaces[0]].map(place => ({
+      place,
+    })),
+  },
+  {
+    id: "public-trip-2",
+    title: "A single stop",
+    kind: "trip",
+    lifecycle: "past",
+    stops: [{ place: publicPlaces[1] }],
+  },
+  {
+    id: "public-planned-trip-1",
+    title: "A planned journey",
+    kind: "trip",
+    lifecycle: "planned",
+    stops: [
+      {
+        place: {
+          placeId: "planned-only",
+          name: "Future stop",
+          coordinates: [20, 20],
+          visitedDates: [],
+          visitedYears: [],
+        },
+      },
+    ],
+  },
+]
+publicView.atlas = { places: publicPlaces, trips: sharedTrips }
+const unchangedPublicAtlas = JSON.stringify(publicView.atlas)
+assert.equal(publicView.browsingTrips, true)
+assert.equal(publicView.effectiveBrowseMode, "past")
+assert.equal(publicView.selectedPublicTrip.id, "public-trip-1")
+assert.deepEqual(
+  publicView.displayedPlaces.map(place => place.name),
+  ["a", "b"]
+)
+assert.deepEqual(
+  publicView.navigatorRoute.map(node => node.location.name),
+  ["a", "b", "a"]
+)
+assert.equal(
+  publicView.visibleStats.places,
+  2,
+  "repeat stops do not inflate unique place statistics"
+)
+publicView.selectTripStop(2)
+assert.equal(publicView.navigatorIndex, 2)
+assert.equal(publicView.navigatorLocation.name, "a")
+publicView.selectPlace(publicPlaces[0].placeId)
+assert.equal(
+  publicView.navigatorIndex,
+  2,
+  "clicking the current repeat must preserve its occurrence"
+)
+publicView.stepTrip(1)
+assert.equal(publicView.navigatorIndex, 2)
+publicView.closeNavigator()
+assert.equal(publicView.selectedPublicTrip.id, "public-trip-1")
+assert.equal(
+  publicView.navigatorIndex,
+  2,
+  "closing map controls preserves the selected trip and stop"
+)
+publicView.openNavigator()
+assert.equal(publicView.overviewExpanded, false)
+assert.equal(publicView.navigatorIndex, 2)
+publicView.chooseTrip("public-trip-2")
+assert.equal(publicView.selectedPlace.name, "b")
+assert.equal(publicView.navigatorIndex, 0)
+publicView.stepTrip(-1)
+assert.equal(publicView.navigatorIndex, 0)
+publicView.setBrowseMode("destinations")
+assert.equal(publicView.selectedPublicTrip, null)
+assert.equal(
+  publicView.displayedPlaces.length,
+  3,
+  "independent places remain available"
+)
+publicView.openNavigator()
+assert.equal(publicView.navigatorTrip.kind, "atlas")
+assert.equal(publicView.navigatorTrip.stops.length, 3)
+publicView.setBrowseMode("planned")
+assert.equal(publicView.visibleTrips.length, 1)
+assert.equal(publicView.selectedPublicTrip.lifecycle, "planned")
+assert.deepEqual(
+  publicView.displayedPlaces.map(place => place.name),
+  ["Future stop"]
+)
+assert.equal(
+  publicView.stats.places,
+  3,
+  "planned stops do not count as visited destinations"
+)
+assert.equal(
+  publicComponent.methods.exportStory,
+  undefined,
+  "public profiles cannot create another owner's Story download"
+)
+assert.equal(
+  typeof ownerComponent.methods.exportStory,
+  "function",
+  "owners retain Story export"
+)
+publicView.setBrowseMode("destinations")
+assert.ok(
+  publicView.displayedPlaces.every(place => place.name !== "Future stop")
+)
+publicView.chooseTrip("public-trip-1")
+assert.equal(publicView.browsingTrips, true)
+assert.equal(publicView.selectedPublicTrip.lifecycle, "past")
+assert.equal(
+  JSON.stringify(publicView.atlas),
+  unchangedPublicAtlas,
+  "public browsing never edits trip data"
+)
+publicView.atlas = { places: publicPlaces }
+publicView.browseMode = ""
+publicComponent.watch.navigationTrips.call(
+  publicView,
+  publicView.navigationTrips
+)
+assert.equal(
+  publicView.browsingTrips,
+  false,
+  "older responses without trips keep destination browsing"
+)
+assert.equal(publicView.displayedPlaces.length, 3)
+assert.equal(publicView.navigatorIndex, 0)
+publicView.atlas = { places: [], trips: [sharedTrips[2]] }
+assert.equal(
+  publicView.effectiveBrowseMode,
+  "planned",
+  "planned-only profiles default to their public plans"
+)
+publicView.setBrowseMode("past")
+assert.equal(publicView.selectedPublicTrip, null)
+assert.deepEqual(
+  publicView.displayedPlaces,
+  [],
+  "an empty Past view cannot show planned pins"
+)
+publicView.setBrowseMode("destinations")
+assert.deepEqual(
+  publicView.displayedPlaces,
+  [],
+  "a planned-only profile has no visited destinations"
+)
 console.log(
-  "Instagram normalization, safe links, revisioned client writes and directory refresh reconciliation tests passed."
+  "Instagram links, revisioned writes, directory refresh and grouped public trip browsing tests passed."
 )
