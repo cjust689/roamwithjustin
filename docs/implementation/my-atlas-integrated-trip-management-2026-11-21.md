@@ -13,6 +13,13 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/components/ThemeSelector.vue
+  - src/features/my-atlas/styles/interactions.css
+  - src/features/my-atlas/components/MyAtlasMap.vue
+  - src/features/my-atlas/catalog/mapMemory.mjs
+  - src/features/my-atlas/catalog/mapMarkers.mjs
+  - scripts/test-my-atlas-place-catalog.mjs
+  - scripts/test-my-atlas-load-safety.mjs
   - src/features/my-atlas/components/MyAtlasMapHelp.vue
   - src/features/my-atlas/views/MyAtlasPublicView.vue
   - src/features/my-atlas/api/client.mjs
@@ -423,3 +430,162 @@ Worker is deployed before frontend promotion. PR 239 records validation and
 develop promotion; subsequent main/Pages promotion is tracked in the release
 handoff. The build and browser evidence above describes the final source.
 No Viator code, private account reset or destructive data operation is included.
+
+### Map memories, clustering and order labels, November 22, local
+
+- [x] Make Hide map memories hide all map memory labels, including the selected
+      pin, and apply Show map memories to both overview and trip markers.
+- [x] Project owner-only stop notes into navigator/workspace map locations and
+      base toggle readiness on the actual map scope. Keep public/share data unchanged.
+- [x] Cluster trip markers as well as ordinary pins with the primary Atlas's zoom
+      threshold and responsive distance radii. Preserve the selected point and
+      consolidate repeated route occurrences at one physical marker.
+- [x] Let cluster activation zoom close enough to separate tight groups. Keep
+      route coordinates, occurrence keys, ordering and connection segments intact.
+- [x] Replace numbered trip pins with dots; retain explicit Start/Finish roles,
+      return styling, accessible marker selection and navigator progress. Hide
+      the order legend for trips without explicit endpoints.
+- [x] Pure/state tests cover selected-memory hiding, owner-only note projection,
+      route clustering, physical counts, repeat identity, unchanged source data,
+      signed-out map privacy and actual planner/trip map scope.
+- [x] Chrome checks passed at 320, 390 and 1440 pixels with real toggle buttons,
+      ordinary and trip memories, the correct return-occurrence note, zoomed-out
+      clustering, cluster expansion, no numeric stop labels, unchanged route keys
+      and SDK instance, endpoint/return styling and no horizontal overflow.
+      Evidence: `.state/theme/my-atlas-map-memory-browser.json` and screenshots.
+- [x] Final `npm run build` passed, including all script suites and 61 isolated
+      Worker runtime tests, with the established parallel-false local override.
+      Focused ESLint and `npm run docs:audit` passed; the audit retains its
+      12 existing unverified-document warnings. Build evidence:
+      `.state/theme/my-atlas-map-memory-build.log`.
+- [x] Include in develop PR 241; protected main promotion is tracked by PR 242.
+
+No account data, API, map provider configuration or public projection is changed.
+The primary Atlas layout algorithm is reused without changing its behavior.
+
+### Mobile route key placement, November 22, local
+
+- [x] Move the endpoint route key to the upper-left corner at mobile widths,
+      reserve horizontal space for SDK controls/attribution and retain its labels.
+- [x] Chrome geometry checks passed in both themes at 320 by 568, 390 by 844
+      and 720 by 900 pixels, with the menu open and hidden. The key remained
+      inside the map and had no overlap with zoom controls, attribution, gesture
+      help, navigation or the bottom restore bar. No horizontal overflow occurred.
+      Evidence: `.state/theme/route-key-mobile-browser.json` and screenshot.
+- [x] Focused ESLint passed for `MyAtlasMap.vue`.
+- [x] Include with memory/clustering in develop PR 241 and main promotion PR 242.
+
+This is a mobile CSS correction; route data and desktop placement are unchanged.
+
+### Header, collapsed branding and motion, November 22, local
+
+- [x] Remove the separate Hide menu row and align the brand, theme selector,
+      profile/sign-in and collapse control in a single 44 pixel header row.
+- [x] Reuse the themed BrandMark and My Atlas label in the full-width mobile
+      restore bar. Keep home navigation and existing account controls accessible.
+- [x] Add short sidebar/profile/theme/disclosure transitions. Preserve mounted
+      content and the map, retain leaving geometry and recover from rapid toggles.
+- [x] Animate native modal opening/closing with focus trapping/restoration,
+      background scroll locking, pending-save guards and retained parent drafts.
+      Keep closing content inert and handle Escape before its native default.
+- [x] Respect reduced-motion preferences for CSS and native dialog animations.
+- [x] Browser checks passed both themes at 320, 390, 720 and 1440 pixels, signed
+      in and out: one-row alignment, equal action heights, correct expanded/
+      collapsed SVGs, full-width mobile restore bars, unchanged map instance,
+      restored focus and no horizontal overflow. Profile/theme motion and rapid
+      reversals passed. Evidence: `.state/theme/my-atlas-header-motion-browser.json`
+      and `.state/theme/my-atlas-header-rapid-toggle.json`.
+- [x] Native dialog checks passed at 320, 390 and 1440 pixels with motion enabled
+      and reduced: one modal, focus containment, Escape blocked while pending,
+      inert animated dismissal, opener focus/body overflow restoration, retained
+      unsaved text and unchanged fixture records. Evidence:
+      `.state/theme/my-atlas-dialog-motion-browser.json`.
+- [x] `npm run theme:test`, focused ESLint and production build passed. Build
+      hash `a0a5de7692c9a95e` includes all script suites and 61 isolated Worker
+      runtime tests. Evidence: `.state/theme/my-atlas-header-motion-build.log`.
+- [x] Managed documentation audit passed for 76 documents, with the existing
+      12 unverified-document warnings.
+- [x] Include this follow-up in develop PR 241 and main promotion PR 242.
+
+No account mutation, API deployment or map-instance replacement is introduced.
+
+### Mobile navigator and gesture-help collision, November 22, local
+
+- [x] Put gesture help in the mobile navigator header and hide the separate
+      floating control while the navigator is open or collapsed. Restore it
+      when navigation closes, for owner and public Atlases.
+- [x] Bound navigator height to the available map area, reserving space for
+      upper controls and the bottom restore bar. Keep Previous/Next outside
+      the scrolling stop details.
+- [x] Chrome passed 64 mobile combinations across both themes, owner/public
+      views, open/hidden sidebars and expanded/collapsed navigators at 320 by
+      568, 390 by 844, 720 by 900 and 568 by 320 pixels. No navigator overlap
+      with zoom, attribution, View filtering or restore controls occurred.
+      Help popovers fit the viewport, touch guidance remained available, and
+      Previous/Next changed the active stop without replacing the map.
+      Sixteen desktop smoke combinations also retained separate gesture help.
+      Evidence: `.state/theme/navigator-gestures-browser.json` and screenshots;
+      browser harness: `.state/my-atlas/navigator-gestures-browser.mjs`.
+- [x] Focused ESLint and `npm run build` passed, using the established local
+      parallel-false override, including 61 Worker runtime tests. Build hash:
+      `d0cae681c127ed7c`. Evidence: `.state/theme/navigator-gestures-build.log`.
+- [x] `npm run docs:audit` passed for 76 managed documents with the existing
+      12 unverified-document warnings.
+- [x] Include this follow-up in develop PR 241 and main promotion PR 242.
+
+No account data, public projection or map provider configuration is changed.
+
+### Shared-trip brand containment, November 22, local
+
+- [x] Inset the shared-trip header's logo within a padded 44 pixel home link,
+      retain the full 32 pixel themed mark and align its theme control. Add pill
+      padding so the artwork clears the rounded edge without clipping dropdowns.
+- [x] Chrome passed both themes at 320, 390, 720 and 1440 pixels: loaded full
+      logos, contained image bounds, 44 pixel links, reachable theme choices,
+      viewport-contained dropdowns and no horizontal overflow. The 390 pixel
+      before/after captures were visually inspected. Evidence:
+      `.state/theme/shared-trip-brand-browser.json`, captures and
+      `.state/my-atlas/shared-trip-brand-browser.mjs`.
+- [x] Focused ESLint passed for `MyAtlasSharedTripView.vue`; managed
+      documentation audit passed with the existing warnings.
+- [x] Include this correction in develop PR 241 and main promotion PR 242.
+
+Trip data, sharing permissions and the approved SVG assets are unchanged.
+
+### Map, location and mobile polish release, November 22
+
+The owner authorized develop/main promotion of all outstanding map memories,
+clustering, route-key placement, header/menu/dialog motion, mobile gesture-help,
+unified location entry and shared-trip brand containment changes. The final
+local `npm run build` passed with hash `c1f47ce8e2141cbf`, all script suites and
+61 isolated Worker runtime tests. Focused lint passed across modified Vue/MJS
+files. Evidence: `.state/theme/mobile-location-release-build.log` and the
+browser reports linked above.
+
+The shared map-link parser deployed to the staging-named API used by production
+as Worker `70d750e9-9dbc-4dd1-9a8e-2053d1287480`, before frontend promotion.
+Deploy log: `.state/theme/mobile-location-worker-deploy.log`. No migrations,
+account resets, Viator edits or user-record writes are part of this release.
+Source commit `e6bc867783dda30ee1d3b470cf62461cf2b6f994` passed GitHub
+validation run 45034855868, then merged through
+[develop PR 241](https://github.com/cjust689/roamwithjustin/pull/241) as
+`5549a98e1f7a18e80a3c81bcaf8da7ee9d786006`. API health and public directory
+reads returned 200 after deployment. The protected
+[main promotion PR 242](https://github.com/cjust689/roamwithjustin/pull/242)
+provides the live merge/check status; the
+[Pages workflow](https://github.com/cjust689/roamwithjustin/actions/workflows/deploy-pages.yml)
+provides deployment status. A follow-up PR carries main-history alignment and
+this handoff into develop before completing the same main promotion.
+
+No authenticated production account acceptance or real provider short-link
+success is inferred from the public read checks. The final release report
+separates protected-branch promotion, Pages deployment and browser acceptance.
+
+The final pre-promotion pass also found that legacy shared snapshots with explicit
+start/finish endpoints placed their mobile route key under the brand pill. The
+shared view now places that key below the header, and uses just its color labels
+on short mobile viewports to clear the itinerary card. Chrome passed both themes
+at 320 by 568, 390 by 844, 720 by 900 and 568 by 320, with no header, itinerary,
+SDK-control or attribution overlap. Evidence:
+`.state/theme/shared-route-key-browser.json` and screenshots. Focused ESLint
+passed. This bounded CSS fix accompanies the release alignment/handoff PR.

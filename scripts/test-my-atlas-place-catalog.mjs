@@ -38,7 +38,11 @@ import {
   isNormalizedMyAtlasMemory,
   normalizeMyAtlasMemory,
 } from "../src/features/my-atlas/catalog/memory.mjs"
-import { shouldShowMyAtlasMapMemory } from "../src/features/my-atlas/catalog/mapMemory.mjs"
+import {
+  shouldShowMyAtlasMapMemory,
+  myAtlasStopMapPlace,
+} from "../src/features/my-atlas/catalog/mapMemory.mjs"
+import { groupMyAtlasRouteMarkers } from "../src/features/my-atlas/catalog/mapMarkers.mjs"
 import {
   MY_ATLAS_CUSTOM_PLACE_MAX_CHARACTERS,
   isNormalizedMyAtlasCustomPlace,
@@ -99,7 +103,74 @@ assert.equal(
   shouldShowMyAtlasMapMemory(memoryPlace, {
     selectedPlaceId: "geonames:3621138",
   }),
-  true
+  false,
+  "Selecting a place must not override Hide map memories"
+)
+const stopMemory = {
+  place: { placeId: "test", coordinates: [1, 2] },
+  visitedDates: [{ year: 2025 }],
+  planNote: "Not a favorite memory",
+  memories: [
+    { kind: "photo", text: "Not a note" },
+    { kind: "note", text: "Owner memory" },
+  ],
+}
+const unchangedStop = JSON.stringify(stopMemory)
+assert.equal(myAtlasStopMapPlace(stopMemory).memory, "Owner memory")
+assert.equal(myAtlasStopMapPlace({ ...stopMemory, memories: [] }).memory, "")
+assert.equal(JSON.stringify(stopMemory), unchangedStop)
+
+const clusteredRoute = [0, 0.001, 0.002, 2, 0].map((longitude, index) => ({
+  key: `stop:${index}`,
+  label: String(index + 1),
+  role: "stop",
+  location: {
+    placeId: `place:${longitude}`,
+    name: `Place ${longitude}`,
+    coordinates: [longitude, 1],
+  },
+}))
+const unchangedRoute = JSON.stringify(clusteredRoute)
+const clusterOptions = {
+  zoom: 10,
+  project: coordinates => ({ x: coordinates[0] * 1000, y: 0 }),
+}
+const lowGroups = groupMyAtlasRouteMarkers(clusteredRoute, clusterOptions)
+assert.equal(
+  lowGroups.length,
+  2,
+  "trip stops cluster at the primary Atlas's overview zooms"
+)
+assert.equal(
+  lowGroups[0].nodes.length,
+  3,
+  "clusters count physical locations, not repeated stops"
+)
+const selectedGroups = groupMyAtlasRouteMarkers(clusteredRoute, {
+  ...clusterOptions,
+  selectedPlaceId: "place:0.001",
+})
+assert.equal(selectedGroups.filter(group => group.isCluster).length, 1)
+assert.ok(
+  selectedGroups.some(
+    group => !group.isCluster && group.nodes[0].coordinates[0] === 0.001
+  )
+)
+const highGroups = groupMyAtlasRouteMarkers(clusteredRoute, {
+  ...clusterOptions,
+  zoom: 13,
+})
+assert.equal(highGroups.length, 4)
+assert.ok(highGroups.every(group => !group.isCluster))
+assert.equal(
+  highGroups[0].nodes[0].nodes.length,
+  2,
+  "return occurrences retain their identity at one physical pin"
+)
+assert.equal(
+  JSON.stringify(clusteredRoute),
+  unchangedRoute,
+  "clustering cannot reorder or rewrite the route"
 )
 assert.equal(shouldShowMyAtlasMapMemory(memoryPlace, { showAll: true }), true)
 assert.equal(
@@ -354,9 +425,8 @@ assert.equal(
   (await fixtureWorkerCatalog.resolve("geonames:3621138")).name,
   "Uvita"
 )
-const resolvedYellowstone = await fixtureWorkerCatalog.resolve(
-  "geonames:5843642"
-)
+const resolvedYellowstone =
+  await fixtureWorkerCatalog.resolve("geonames:5843642")
 assert.equal(resolvedYellowstone.placeType, "spot")
 assert.equal(resolvedYellowstone.spotKind, "National park")
 assert.equal(await fixtureWorkerCatalog.resolve("geonames:999999999"), null)
@@ -630,7 +700,10 @@ assert.equal(
   searchPlaceCatalog(proofCatalog, "Banff National Park")[0].countryCode,
   "CA"
 )
-assert.equal(searchPlaceCatalog(proofCatalog, "Cabo Pulmo")[0].countryCode, "MX")
+assert.equal(
+  searchPlaceCatalog(proofCatalog, "Cabo Pulmo")[0].countryCode,
+  "MX"
+)
 const nextSource = path.join(tempRoot, "next")
 fs.cpSync(fixture, nextSource, { recursive: true })
 const cityFile = path.join(nextSource, "cities500.txt")

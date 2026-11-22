@@ -179,7 +179,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.35rem 0.65rem 0.35rem 0.35rem;
+  padding: 6px 10px;
   border: 1px solid rgba(var(--color-accent-rgb, 230, 186, 104), 0.34);
   border-radius: 999px;
   color: var(--color-accent-soft, #e6ba68);
@@ -191,13 +191,27 @@ export default {
   font-weight: 800;
 }
 
-.shared-trip-page > header a {
+.shared-trip-page > header > a {
   display: grid;
-  width: 2.35rem;
-  height: 2.35rem;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 50%;
   place-items: center;
   letter-spacing: 0;
   text-decoration: none;
+}
+
+.shared-trip-page > header > a > .brand-mark {
+  width: 32px;
+  height: 32px;
+}
+
+.shared-trip-page > header ::v-deep .theme-trigger {
+  width: 44px;
+  min-height: 44px;
 }
 
 .shared-trip-card {
@@ -403,6 +417,10 @@ export default {
 }
 
 @media (max-width: 720px) {
+  .shared-trip-map ::v-deep .my-atlas-planner-map-status {
+    top: calc(0.65rem + 70px);
+  }
+
   .shared-trip-page > header {
     top: 0.65rem;
     left: 0.65rem;
@@ -434,6 +452,22 @@ export default {
     width: auto;
     max-height: none;
     transform: translateY(-50%);
+  }
+}
+
+@media (max-width: 720px) and (max-height: 500px) {
+  .shared-trip-map ::v-deep .my-atlas-planner-map-status > strong,
+  .shared-trip-map
+    ::v-deep
+    .my-atlas-planner-map-status
+    > span:not(.my-atlas-planner-map-key) {
+    display: none;
+  }
+
+  .shared-trip-map ::v-deep .my-atlas-planner-map-key {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 }
 

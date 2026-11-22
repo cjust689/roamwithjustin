@@ -471,8 +471,8 @@
               >Click a search result to add it directly to your trip draft and
               fill the preview below. You do not need to complete the manual
               fields. Manual entry is an alternative for places you cannot find;
-              fill its name and coordinates, then choose Add custom
-              stop.</MyAtlasInfo
+              enter a name and paste a map link, Plus Code or coordinate pair,
+              then choose Add custom stop.</MyAtlasInfo
             >
           </div>
           <div v-show="destinationEntryMode === 'search'" class="trip-form">
@@ -557,27 +557,10 @@
               >Place name<input :value="selectedSearchPlace.name" readonly
             /></label>
             <small>{{ resultLocation(selectedSearchPlace) }}</small>
-            <div class="trip-date-fields">
-              <label
-                >Latitude<input
-                  :value="
-                    selectedSearchPlace.coordinates
-                      ? selectedSearchPlace.coordinates[1]
-                      : ''
-                  "
-                  readonly
-                  placeholder="Not provided" /></label
-              ><label
-                >Longitude<input
-                  :value="
-                    selectedSearchPlace.coordinates
-                      ? selectedSearchPlace.coordinates[0]
-                      : ''
-                  "
-                  readonly
-                  placeholder="Not provided"
-              /></label>
-            </div>
+            <small v-if="selectedSearchPlace.coordinates"
+              >{{ selectedSearchPlace.coordinates[1].toFixed(6) }},
+              {{ selectedSearchPlace.coordinates[0].toFixed(6) }}</small
+            >
           </section>
           <button
             type="button"
@@ -865,6 +848,7 @@ import {
   normalizeMyAtlasCustomCoordinates,
 } from "../catalog/customPlace.mjs"
 import { buildCanonicalTripMapRoute } from "../../../../shared/my-atlas-trips.mjs"
+import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
 import { searchMyAtlasPlaces } from "../catalog/placeSearchClient.mjs"
 import { getMyAtlasPlaceSearchEndpoint } from "../config/placeSearch.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
@@ -1368,7 +1352,10 @@ export default {
       this.stopPlacement()
       this.$emit("route-change", {
         active: true,
-        route: buildCanonicalTripMapRoute(trip),
+        route: buildCanonicalTripMapRoute(trip).map((node, index) => ({
+          ...node,
+          location: myAtlasStopMapPlace(trip.stops[index]),
+        })),
         lifecycle: trip.lifecycle,
       })
     },

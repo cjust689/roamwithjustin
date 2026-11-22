@@ -1,4 +1,46 @@
 /* Shared owner controls, including child editors. Keep map controls untouched. */
+.my-atlas-proof .atlas-sidebar-enter-active,
+.my-atlas-proof .atlas-sidebar-leave-active,
+.my-atlas-proof .atlas-menu-enter-active,
+.my-atlas-proof .atlas-menu-leave-active,
+.my-atlas-proof .atlas-restore-enter-active,
+.my-atlas-proof .atlas-restore-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.my-atlas-proof .atlas-sidebar-enter,
+.my-atlas-proof .atlas-sidebar-leave-to,
+.my-atlas-proof .atlas-restore-enter,
+.my-atlas-proof .atlas-restore-leave-to {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.my-atlas-proof .atlas-menu-enter,
+.my-atlas-proof .atlas-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.99);
+}
+.my-atlas-proof .atlas-sidebar-leave-active,
+.my-atlas-proof .atlas-menu-leave-active,
+.my-atlas-proof .atlas-restore-leave-active {
+  pointer-events: none;
+}
+.my-atlas-proof .my-atlas-section-content,
+.my-atlas-proof details[open] > :not(summary) {
+  animation: atlas-section-enter 160ms ease;
+}
+@keyframes atlas-section-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .my-atlas-proof .my-atlas-panel :is(button, summary, a.my-atlas-explore-link),
 .my-atlas-proof .my-atlas-action-feedback button {
   touch-action: manipulation;
@@ -121,6 +163,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .my-atlas-proof .atlas-sidebar-enter-active,
+  .my-atlas-proof .atlas-sidebar-leave-active,
+  .my-atlas-proof .atlas-menu-enter-active,
+  .my-atlas-proof .atlas-menu-leave-active,
+  .my-atlas-proof .atlas-restore-enter-active,
+  .my-atlas-proof .atlas-restore-leave-active {
+    transition: none;
+    transform: none;
+  }
+  .my-atlas-proof .my-atlas-section-content,
+  .my-atlas-proof details[open] > :not(summary) {
+    animation: none;
+  }
   .my-atlas-proof .my-atlas-panel :is(button, summary, a.my-atlas-explore-link),
   .my-atlas-proof .my-atlas-action-feedback button {
     transition: none;

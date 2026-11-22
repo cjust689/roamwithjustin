@@ -312,7 +312,7 @@
       <strong>@{{ atlas.handle }}</strong
       ><span>Show overview ↑</span>
     </button>
-    <MyAtlasMapHelp />
+    <MyAtlasMapHelp :hide-on-mobile="navigatorOpen" />
   </main>
 </template>
 

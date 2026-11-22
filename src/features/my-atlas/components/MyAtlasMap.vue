@@ -18,7 +18,7 @@
       </span>
     </div>
     <div
-      v-if="ready && plannerActive && !navigatorActive"
+      v-if="ready && plannerActive && !navigatorActive && plannerHasEndpoints"
       class="my-atlas-planner-map-status"
     >
       <strong>{{ plannerStatusTitle }}</strong>
@@ -59,7 +59,13 @@ import {
   mapTilerMapOptions,
   mapTilerSdk,
 } from "../../atlas/config/mapConfig"
-import { buildAtlasMarkerGroups } from "../../atlas/config/markerLayout.mjs"
+import {
+  buildAtlasMarkerGroups,
+  atlasMarkerClusterMaxZoom as CLUSTER_MAX_ZOOM,
+  atlasMarkerClusterRadius as CLUSTER_RADIUS,
+  atlasMarkerCompactClusterRadius as COMPACT_CLUSTER_RADIUS,
+  atlasPinFocusMinZoom,
+} from "../../atlas/config/markerLayout.mjs"
 import {
   atlasYears,
   curvedConnectionCoordinates,
@@ -68,12 +74,10 @@ import {
   visitedDatesForPlace,
 } from "../catalog/atlasInsights.mjs"
 import { shouldShowMyAtlasMapMemory } from "../catalog/mapMemory.mjs"
+import { groupMyAtlasRouteMarkers } from "../catalog/mapMarkers.mjs"
 import { buildPlannerMapSegments } from "../planning/mapProjection.mjs"
 
 const CONNECTION_SOURCE = "my-atlas-connections"
-const CLUSTER_MAX_ZOOM = 7.75
-const CLUSTER_RADIUS = 96
-const COMPACT_CLUSTER_RADIUS = 76
 const YEAR_COLORS = Object.freeze([
   "#f2c76e",
   "#58d1c9",
@@ -684,40 +688,43 @@ export default {
       })
     },
     renderPlannerMarkers() {
-      const groups = new Map()
-      this.plannerRoute.forEach(node => {
-        const key = node.location.coordinates.join(",")
-        const group = groups.get(key) || {
-          coordinates: node.location.coordinates,
-          nodes: [],
-        }
-        group.nodes.push(node)
-        groups.set(key, group)
+      const groups = groupMyAtlasRouteMarkers(this.plannerRoute, {
+        zoom: this.map.getZoom(),
+        project: coordinates => this.map.project(coordinates),
+        selectedPlaceId: this.selectedPlaceId,
+        selectedCoordinates: this.focusedLocation?.coordinates,
+        compact: window.innerWidth <= 720,
       })
-      groups.forEach(group => this.addPlannerMarker(group))
+      groups.forEach(group => {
+        if (group.isCluster) this.addClusterMarker(group)
+        else this.addPlannerMarker(group.nodes[0])
+      })
     },
     addPlannerMarker(group) {
-      const element = document.createElement("div")
+      const element = document.createElement("button")
+      element.type = "button"
       const marker = document.createElement("span")
       const markerText = document.createElement("strong")
       const label = document.createElement("span")
       const name = document.createElement("strong")
       const role = document.createElement("small")
-      const roles = group.nodes.map(node => {
-        if (node.role === "start") return "Start"
-        if (node.role === "finish") {
-          return this.plannerReturnsToStart ? "Return" : "Finish"
-        }
-        return `Stop ${node.label}`
-      })
+      const roles = [
+        ...new Set(
+          group.nodes
+            .map(node => {
+              if (node.role === "start") return "Start"
+              if (node.role === "finish") {
+                return this.plannerReturnsToStart ? "Return" : "Finish"
+              }
+              return ""
+            })
+            .filter(Boolean)
+        ),
+      ]
       const names = [...new Set(group.nodes.map(node => node.location.name))]
 
       element.className = "my-atlas-plan-pin"
-      element.setAttribute("role", "img")
-      element.setAttribute(
-        "aria-label",
-        `${roles.join(" and ")}: ${names.join(", ")}`
-      )
+      element.setAttribute("aria-label", [...roles, ...names].join(", "))
       if (group.nodes.some(node => node.role === "start")) {
         element.classList.add("has-start")
       }
@@ -726,13 +733,53 @@ export default {
       }
 
       marker.className = "my-atlas-plan-pin-shape"
-      markerText.textContent = group.nodes.map(node => node.label).join("/")
+      markerText.textContent = group.nodes.some(node => node.role === "start")
+        ? group.nodes.some(node => node.role === "finish")
+          ? "S/F"
+          : "S"
+        : group.nodes.some(node => node.role === "finish")
+          ? "F"
+          : "•"
       marker.appendChild(markerText)
       label.className = "my-atlas-plan-pin-label"
       name.textContent = names.join(" / ")
       role.textContent = roles.join(" · ")
-      label.append(name, role)
+      label.append(name)
+      if (roles.length) label.append(role)
+      const selected =
+        this.selectedPlaceId &&
+        group.nodes.some(node => node.location.placeId === this.selectedPlaceId)
+      if (selected) element.classList.add("is-selected")
+      const focused =
+        this.focusedLocation?.coordinates?.join(",") ===
+        group.coordinates.join(",")
+          ? this.focusedLocation
+          : null
+      const memoryPlace =
+        focused ||
+        group.nodes.map(node => node.location).find(place => place.memory) ||
+        this.places.find(place =>
+          group.nodes.some(node => node.location.placeId === place.placeId)
+        )
+      if (
+        shouldShowMyAtlasMapMemory(memoryPlace, { showAll: this.showMemories })
+      ) {
+        element.classList.add("has-memory")
+        const memory = document.createElement("span")
+        memory.className = "my-atlas-pin-memory"
+        memory.textContent = memoryPlace.memory
+        label.append(memory)
+        element.setAttribute(
+          "aria-label",
+          `${element.getAttribute("aria-label")}. Favorite memory: ${memoryPlace.memory}`
+        )
+      }
       element.append(marker, label)
+      element.addEventListener("click", () => {
+        const location = focused || group.nodes[0].location
+        if (location.placeId) this.$emit("select", location.placeId)
+        else this.focusLocation(location)
+      })
       this.addMarker(element, group.coordinates)
     },
     addPlaceMarker(place) {
@@ -741,7 +788,6 @@ export default {
       element.className = "my-atlas-pin"
       const selected = place.placeId === this.selectedPlaceId
       const memoryVisible = shouldShowMyAtlasMapMemory(place, {
-        selectedPlaceId: this.selectedPlaceId,
         showAll: this.showMemories,
       })
       if (selected) {
@@ -838,7 +884,7 @@ export default {
       ).matches
       this.map.fitBounds(bounds, {
         padding: window.innerWidth <= 720 ? 72 : 110,
-        maxZoom: CLUSTER_MAX_ZOOM + 0.75,
+        maxZoom: atlasPinFocusMinZoom,
         duration: reducedMotion ? 0 : 800,
         pitch: 18,
         bearing: 0,
@@ -1362,7 +1408,8 @@ export default {
   white-space: normal;
 }
 
-::v-deep .my-atlas-pin.has-memory:not(.is-selected) .my-atlas-pin-memory {
+::v-deep .my-atlas-pin.has-memory:not(.is-selected) .my-atlas-pin-memory,
+::v-deep .my-atlas-plan-pin.has-memory:not(.is-selected) .my-atlas-pin-memory {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -1391,7 +1438,20 @@ export default {
   height: 3rem;
   overflow: visible;
   color: var(--color-accent-contrast, #102023);
-  pointer-events: none;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+::v-deep .my-atlas-plan-pin.has-memory .my-atlas-plan-pin-label {
+  width: min(16rem, calc(100vw - 2rem));
+  min-width: 0;
+}
+
+::v-deep .my-atlas-plan-pin:focus-visible {
+  outline: 2px solid var(--color-focus, #e6ba68);
+  outline-offset: 4px;
 }
 
 ::v-deep .my-atlas-plan-pin-shape {
@@ -1514,9 +1574,11 @@ export default {
   }
 
   .my-atlas-planner-map-status {
-    top: 0.65rem;
-    right: 0.65rem;
-    max-width: calc(100% - 1.3rem);
+    box-sizing: border-box;
+    top: 12px;
+    left: 12px;
+    right: auto;
+    max-width: calc(100% - 104px);
   }
 
   ::v-deep .my-atlas-pin-label {

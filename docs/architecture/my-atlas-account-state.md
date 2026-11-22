@@ -786,14 +786,14 @@ visual treatment over the current pins and do not claim route history. They use
 a dark underlay, soft gold glow, and high-opacity three-pixel dashed line so the
 connections remain legible over satellite imagery.
 
-When a standalone pin has a favorite memory, selecting it reveals the complete
-memory inside that pin's map label. A `Show all memories` control in both owner
-and public views exposes shortened previews for every visible standalone pin
-with a memory, and changes to `Hide memories` while active. The control is
-disabled when the filtered view contains no memories. It starts off on every
-page load, remains inside the existing collapsed phone controls, and does not
-expand memory text inside low-zoom cluster markers. Memory content is assigned
-as DOM text rather than HTML.
+The owner Show map memories control explicitly reveals favorite-note labels on
+standalone and trip pins; Hide map memories suppresses all map memory labels,
+including the selected destination. Sidebar memory detail is independent.
+The toggle starts off and is disabled when the actual map scope has no memories.
+Owner-only stop notes are projected locally into map locations for the navigator
+and canonical trip workspace. They never enter public trip or share projections.
+Memory content is assigned as DOM text rather than HTML; clusters stay compact
+and never show memory text.
 
 The owner editor intentionally asks only for optional visit years. Users may
 record multiple years for repeat visits or leave a destination undated. The API
@@ -1335,3 +1335,61 @@ controls and remains available with the overview hidden. The sidebar retains
 profile information, trip cards and ordered stops. Public year playback and
 its extra sidebar control drawer are removed; no alternate year filter silently
 hides pins. Switching View still resets the selected stop and scopes the map.
+
+### Memory labels, clustering and trip pin simplification, November 22, local
+
+My Atlas reuses the primary Atlas cluster maximum zoom and desktop/mobile
+screen-distance radii. `catalog/mapMarkers.mjs` first groups route occurrences
+at the same physical coordinates, then applies that shared clustering model.
+The selected location remains precise. Activating clusters frames the locations
+with the primary Atlas close-focus zoom as its cap. Route data, occurrence keys
+and connection order are unchanged by grouping or zooming.
+
+Trip markers render plain dots rather than stop numbers. Explicit start/finish
+roles and their colors remain; the map order legend is omitted for trips without
+those endpoints. The separate navigator retains its stop progress and Next/
+Previous controls. Owner map inputs are scoped by `mapVisiblePlaces`, so memory
+readiness follows the map rather than an unrelated visited list. Stop memory
+projection stays in owner code paths; no API or visibility permission changes.
+
+The mobile endpoint route key anchors 12 pixels from the map's upper-left
+corner, with border-box sizing and a width cap reserving 92 pixels on the right
+for SDK controls/attribution. It clears gesture help and the lower navigation
+controls with the owner menu either open or hidden. Desktop styling is unchanged.
+
+### Header branding and menu motion, November 22, local
+
+The owner header places the themed BrandMark/My Atlas lockup beside one aligned
+44 pixel action row for appearance, profile/sign-in and the collapse chevron.
+The collapse action no longer reserves a separate row above the header. The
+bottom restore bar reuses BrandMark and the same My Atlas lockup.
+
+Sidebar transitions preserve the mounted DOM and map instance. Before leaving,
+the panel's viewport bounds are captured and held while it fades/slides out;
+temporary positioning is cleared after completion or cancellation. Leaving
+panels/menus are inert, and focus moves between the header and restore control.
+Rapid reversals retain normal layout and focus. Profile and theme dropdowns
+fade/slide, and expanding owner disclosures use brief content reveals.
+
+MyAtlasDialog animates the native modal after showModal and delays requested
+closure until its short exit completes. The dialog stays modal/inert while
+closing, retains focus trapping/body scroll locking, cancels animations on
+external destruction and restores opener focus. Escape is handled before its
+native default so pending saves cannot dismiss the modal. Draft ownership and
+mutation timing remain with the parent. Reduced-motion preferences disable
+these transitions and dialog animations.
+
+### Mobile navigator and gesture help, November 22, local
+
+`MyAtlasMapNavigator.vue` embeds `MyAtlasMapHelp.vue` as a compact 44 pixel
+info control in its mobile header. Owner and public views hide the separate
+floating gesture control while their navigator is open, including its collapsed
+state. Changing that visibility dismisses any existing floating help popover;
+closing the navigator restores the floating control. Desktop help remains
+separate.
+
+The mobile navigator caps its height against its map container, reserving space
+for the upper SDK controls and lower menu restore bar. Stop details can scroll
+inside the flex column; Previous/Next sit in a separate fixed-size footer so
+short maps do not hide those actions. This affects presentation only and retains
+the mounted map, ordered trip stops and existing navigation events.
