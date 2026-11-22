@@ -35,6 +35,11 @@ export function mapLinkUrl(value) {
       /^\/p\/[A-Za-z0-9_-]{1,200}\/?$/.test(url.pathname)
     )
       return url
+    if (
+      url.hostname === "goo.gl" &&
+      /^\/maps\/[A-Za-z0-9_-]{1,200}\/?$/.test(url.pathname)
+    )
+      return url
     if (!FULL_HOSTS.has(url.hostname)) return null
     if (
       ["google.com", "www.google.com"].includes(url.hostname) &&
@@ -48,7 +53,11 @@ export function mapLinkUrl(value) {
 }
 
 export function isShortMapLink(url) {
-  return url?.hostname === "maps.app.goo.gl" || url?.hostname === "maps.apple"
+  return (
+    url?.hostname === "maps.app.goo.gl" ||
+    url?.hostname === "maps.apple" ||
+    url?.hostname === "goo.gl"
+  )
 }
 
 function coordinates(value) {
@@ -101,7 +110,7 @@ export function parseMapLinkCandidate(value) {
     point = place
       ? params.get("coordinate")
       : legacy && params.has("q")
-        ? params.get("ll")
+        ? params.get("ll") || params.get("q")
         : null
     center = params.get("center") || (legacy ? params.get("ll") : null)
   } else {
@@ -116,6 +125,37 @@ export function parseMapLinkCandidate(value) {
     const query = params.get("query") || params.get("q")
     result.label = label(query || pathName)
     point = query
+    // A shared place URL may carry the actual pin after a separate camera
+    // position. Read only complete location pairs; multiple distinct pins
+    // are ambiguous and must not silently select the first result.
+    let decodedPath
+    try {
+      decodedPath = decodeURIComponent(url.pathname)
+    } catch {
+      decodedPath = url.pathname
+    }
+    const embedded = [
+      ...decodedPath.matchAll(
+        new RegExp(`!3d(${NUMBER})!4d(${NUMBER})(?=!|/|$)`, "g")
+      ),
+    ].map(match => `${match[1]},${match[2]}`)
+    const pathPoint = decodedPath.match(
+      /\/(?:place|search)\/([^/]+)(?:\/|$)/
+    )?.[1]
+    const points = [
+      params.get("q"),
+      params.get("query"),
+      pathPoint,
+      ...embedded,
+    ].filter(value => value && PAIR.test(value))
+    if (points.length) {
+      const parsed = points.map(coordinates)
+      if (parsed.some(value => !value))
+        return { ...result, kind: "invalid-coordinate" }
+      if (new Set(parsed.map(value => value.join(","))).size > 1)
+        return { ...result, kind: "ambiguous" }
+      point = points[0]
+    }
     center =
       params.get("center") ||
       params.get("ll") ||

@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-20
-updated: 2026-11-20
+updated: 2026-11-22
 related:
   - my-atlas-geography
   - my-atlas-account-state
@@ -21,6 +21,7 @@ code_paths:
   - scripts/lib/curated-experiences.mjs
   - scripts/test-editorial-experience-intake.mjs
   - shared/my-atlas-map-links.mjs
+  - shared/my-atlas-location-input.mjs
   - src/features/my-atlas/components/MyAtlasLocationPicker.vue
   - workers/my-atlas/src/maps/resolve.mjs
   - scripts/test-my-atlas-map-links.mjs
@@ -64,6 +65,9 @@ evidence. The foundation slice is deployed; the follow-up picker slice is local 
 approved banners and private affiliate restrictions are preserved.
 
 ## Phase 0 findings
+
+This section records the initial audit. Later implementation and verification
+sections describe the current behavior, including the unified input below.
 
 **Locations.** `MyAtlasGeographicProof.vue` already supports named custom visited
 pins, prefills the typed search, and sends a custom draft through the shared
@@ -334,3 +338,57 @@ read-only snapshots. See [Trip centric transition](my-atlas-trip-centric-transit
 for runtime/browser evidence and remaining activation, logistics and public
 publication work. Editorial operator intake remains the separate ingestion
 workflow above; private trip recaps do not publish operator records.
+
+## Unified location input, November 22, local
+
+- [x] Replace the shared picker's separate latitude/longitude fields with one
+      always-visible location field, a format-help icon, preview confirmation
+      and a read-only selected-position summary. Keep the existing coordinate
+      events for visited, planner, canonical trip and custom-pin editors.
+- [x] Parse latitude-first decimal pairs, whitespace/semicolon pairs, labeled
+      coordinates, N/S/E/W notation and degrees/minutes/seconds. Normalize pasted
+      line breaks, validate ranges and reject malformed or extra values.
+- [x] Decode full Plus Codes and plus.codes URLs locally with pinned
+      `open-location-code@1.0.3`. For short codes, require selection of a nearby
+      reference city from the existing catalog and explicit coordinate confirmation.
+      Explain reference proximity and show the decoded area center.
+- [x] Expand Google place/query/path parsing, including a single complete
+      `!3d`/`!4d` pin pair. Preserve camera-center distinctions and reject
+      conflicting pins, route endpoints and multiple URLs. Support Apple Maps
+      coordinate links, sharing text with one URL and legacy goo.gl/maps links.
+- [x] Preserve the existing name and coordinate draft when input is invalid or
+      a short link cannot resolve. Do not persist source text or reference cities.
+      Replace the trip search preview's coordinate inputs with one text summary.
+- [x] `node scripts/test-my-atlas-map-links.mjs` passed coordinate/DMS parsing,
+      published Google Plus Code decode/recovery examples, short-code reference
+      confirmation, multi-line paste normalization, invalid inputs, distinct
+      place/camera positions, stale responses and redirect security checks.
+- [x] Chrome passed at 320, 390 and 1440 pixels in both themes: one location
+      field plus name, Google/Apple/Plus Code previews, actual read-only Zurich
+      catalog lookup, chosen short-code reference, no premature coordinate update,
+      exact application, preserved name, resumed editor, one added draft stop,
+      unchanged map/revision and no horizontal overflow. No account was written.
+      Evidence: `.state/theme/location-input-browser.json`, captures and
+      `.state/my-atlas/location-input-browser.mjs`.
+- [x] Existing custom-pin Chrome checks passed at the same widths, preserving
+      name, memory, exact selected coordinates, camera-center boundaries and
+      map instance. Evidence: `.state/theme/map-picker-browser-qa.json`.
+- [x] Final `npm run build` passed with all script suites and 61 Worker runtime
+      tests, hash `266b381ccb741aca`, using the established local parallel-false
+      override. Focused ESLint and `npm run my-atlas:worker:check:staging` passed.
+      `npm run docs:audit` passed for 76 managed documents with the existing 12
+      warnings. Evidence: `.state/theme/location-input-build.log` and
+      `.state/theme/location-input-worker-dryrun.log`.
+- [ ] Promote the frontend and compatible shared-parser Worker change when requested.
+
+External limitation: live Google/Apple short-link redirects remain unverified.
+The configured staging API, also used by production, now runs the compatible
+parser as Worker `70d750e9-9dbc-4dd1-9a8e-2053d1287480` following the owner's
+November 22 release authorization. Frontend promotion is tracked in the
+integrated trip release handoff. Direct full
+URLs, coordinates and Plus Codes parse locally. Links carrying only a provider
+place ID need manual pin placement; no paid geocoder or HTML scraping was added.
+
+Implementation references: [Google Maps URLs](https://developers.google.com/maps/documentation/urls/get-started),
+[Apple unified Maps URLs](https://developer.apple.com/documentation/mapkit/unified-map-urls),
+and [Google Open Location Code](https://github.com/google/open-location-code).

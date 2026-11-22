@@ -14,6 +14,7 @@ import {
   buildSharedTripUrl,
 } from "../src/features/my-atlas/planning/sharedTrip.mjs"
 import { buildCanonicalTripMapRoute } from "../shared/my-atlas-trips.mjs"
+import { myAtlasStopMapPlace } from "../src/features/my-atlas/catalog/mapMemory.mjs"
 import {
   normalizeMyAtlasCustomPlace,
   normalizeMyAtlasCustomCoordinates,
@@ -257,6 +258,7 @@ const dependencies = {
   normalizeMyAtlasCustomPlace,
   normalizeMyAtlasCustomCoordinates,
   buildCanonicalTripMapRoute,
+  myAtlasStopMapPlace,
   searchMyAtlasPlaces: async input => {
     assert.equal(typeof input, "object")
     return [place]

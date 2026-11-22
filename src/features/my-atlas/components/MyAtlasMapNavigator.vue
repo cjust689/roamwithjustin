@@ -32,7 +32,7 @@
               }}
             </option>
           </select></label
-        ><button
+        ><MyAtlasMapHelp inline class="navigator-gesture-help" /><button
           type="button"
           :aria-expanded="String(!collapsed)"
           :aria-label="
@@ -72,30 +72,32 @@
                 : "Coordinates are unavailable for this destination."
             }}
           </p>
-          <div class="navigator-actions">
-            <button
-              type="button"
-              :disabled="index === 0"
-              @click="$emit('step', -1)"
-            >
-              ← Previous</button
-            ><button
-              type="button"
-              :disabled="index >= active.stops.length - 1"
-              @click="$emit('step', 1)"
-            >
-              Next stop →
-            </button>
-          </div>
         </template>
         <p v-else>Choose a trip to explore its destinations on the map.</p>
+      </div>
+      <div v-if="!collapsed && stop" class="navigator-actions">
+        <button
+          type="button"
+          :disabled="index === 0"
+          @click="$emit('step', -1)"
+        >
+          ← Previous</button
+        ><button
+          type="button"
+          :disabled="index >= active.stops.length - 1"
+          @click="$emit('step', 1)"
+        >
+          Next stop →
+        </button>
       </div>
     </template>
   </section>
 </template>
 <script>
+import MyAtlasMapHelp from "./MyAtlasMapHelp.vue"
 export default {
   name: "MyAtlasMapNavigator",
+  components: { MyAtlasMapHelp },
   props: {
     openLabel: { type: String, default: "Explore my trips" },
     trips: { type: Array, default: () => [] },
@@ -130,16 +132,30 @@ export default {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   font: inherit;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+.my-atlas-map-navigator .navigator-gesture-help {
+  display: none;
 }
 .my-atlas-map-navigator.is-menu-hidden {
   bottom: 88px;
 }
 @media (max-width: 720px) {
+  .my-atlas-map-navigator {
+    max-height: calc(100% - 140px);
+  }
+  .my-atlas-map-navigator .navigator-gesture-help {
+    display: inline-flex;
+  }
   .my-atlas-map-navigator.is-menu-hidden {
     bottom: calc(72px + env(safe-area-inset-bottom));
+    max-height: calc(100% - 184px - env(safe-area-inset-bottom));
   }
 }
 header {
+  flex: 0 0 auto;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -196,7 +212,9 @@ select:focus-visible {
 .navigator-content {
   display: grid;
   gap: 8px;
-  padding: 8px 14px 14px;
+  padding: 4px 14px;
+  flex: 1 1 auto;
+  min-height: 0;
   max-height: min(40dvh, 300px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -230,6 +248,8 @@ progress {
   display: flex;
   justify-content: space-between;
   gap: 8px;
+  padding: 4px 14px 14px;
+  flex: 0 0 auto;
 }
 .navigator-actions button:last-child {
   color: var(--color-accent-contrast, #102023);

@@ -1,7 +1,10 @@
 <template>
-  <div class="atlas-map-help">
-    <span>Map gestures</span
-    ><MyAtlasInfo label="How to navigate the My Atlas map"
+  <div
+    class="atlas-map-help"
+    :class="{ 'is-inline': inline, 'is-hidden-on-mobile': hideOnMobile }"
+  >
+    <span class="map-gesture-label">Map gestures</span
+    ><MyAtlasInfo ref="help" label="How to navigate the My Atlas map"
       ><span class="touch-help"
         >Use two fingers to move the map. To zoom in, place two fingers close
         together and spread them apart. To zoom out, pinch them together. Tap a
@@ -17,7 +20,16 @@
 </template>
 <script>
 import MyAtlasInfo from "./MyAtlasInfo.vue"
-export default { name: "MyAtlasMapHelp", components: { MyAtlasInfo } }
+export default {
+  name: "MyAtlasMapHelp",
+  components: { MyAtlasInfo },
+  props: { inline: Boolean, hideOnMobile: Boolean },
+  watch: {
+    hideOnMobile() {
+      this.$refs.help?.dismiss()
+    },
+  },
+}
 </script>
 <style scoped>
 .atlas-map-help {
@@ -37,6 +49,26 @@ export default { name: "MyAtlasMapHelp", components: { MyAtlasInfo } }
 }
 .touch-help {
   display: none;
+}
+.atlas-map-help.is-inline {
+  position: static;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.is-inline .map-gesture-label {
+  display: none;
+}
+.is-inline ::v-deep .atlas-help-button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.2);
+}
+@media (max-width: 720px) {
+  .atlas-map-help.is-hidden-on-mobile {
+    display: none;
+  }
 }
 @media (pointer: coarse), (max-width: 720px) {
   .touch-help {

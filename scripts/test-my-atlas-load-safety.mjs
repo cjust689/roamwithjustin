@@ -11,6 +11,7 @@ import {
   LEGACY_DELETION_STORAGE_KEY,
 } from "../src/features/my-atlas/auth/accountDeletion.mjs"
 import { deleteMyAtlasAccountWithRevisionRecovery } from "../src/features/my-atlas/api/client.mjs"
+import { myAtlasStopMapPlace } from "../src/features/my-atlas/catalog/mapMemory.mjs"
 const require = createRequire(import.meta.url)
 const {
   myAtlasLocalRuntime,
@@ -164,6 +165,7 @@ const dependencies = {
   formatPlaceTypeLabel: () => "",
   MyAtlasActionFeedback: {},
   MyAtlasMap: {},
+  myAtlasStopMapPlace,
   MyAtlasLocationPicker: {},
   MyAtlasPinEditor: {},
   MyAtlasPlanner: {},
@@ -398,6 +400,37 @@ for (const name of [
 ])
   navigation[name] = component.methods[name].bind(navigation)
 const tripSnapshot = JSON.stringify(navigation.overviewTrips)
+const mapContext = {
+  canUseAtlas: false,
+  mapNavigatorTrip: { stops: [{ place: { placeId: "trip-stop" } }] },
+}
+assert.deepEqual(
+  component.computed.mapVisiblePlaces.call(mapContext),
+  [],
+  "signed-out maps cannot expose owner trip places"
+)
+mapContext.canUseAtlas = true
+assert.equal(
+  component.computed.mapVisiblePlaces.call(mapContext)[0].placeId,
+  "trip-stop"
+)
+mapContext.mapNavigatorTrip = null
+mapContext.tripMapActive = true
+mapContext.tripView = {
+  route: [{ location: { placeId: "occurrence", memory: "Occurrence memory" } }],
+}
+assert.equal(
+  component.computed.mapVisiblePlaces.call(mapContext)[0].memory,
+  "Occurrence memory"
+)
+mapContext.tripMapActive = false
+mapContext.plannerMapActive = true
+mapContext.plannerRoute = [{ location: { placeId: "planned-only" } }]
+assert.deepEqual(
+  component.computed.mapVisiblePlaces.call(mapContext),
+  [{ placeId: "planned-only" }],
+  "planner scope does not include visited pins"
+)
 navigation.openMapNavigator()
 assert.equal(navigation.mapNavigatorTripId, "trip-one")
 assert.equal(navigation.sidebarExpanded, false)
