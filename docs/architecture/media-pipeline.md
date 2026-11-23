@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-19
+updated: 2026-11-23
 related:
   - content-model
   - journey-media-ingestion
@@ -26,6 +26,7 @@ code_paths:
   - scripts/upload-media.js
   - scripts/publish-gear-image.mjs
   - scripts/editorial-publish.mjs
+  - scripts/lib/editorial-process.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
   - scripts/lib/editorial-github-publisher.mjs
@@ -51,6 +52,18 @@ verification:
 ---
 
 # Media pipeline
+
+Windows editorial validation and worktree builds invoke npm through the current
+Node executable and the installed `npm-cli.js`, with literal argv and no shell.
+The same runner is used for local publication, explicit Place registration and
+protected worktree publication; POSIX hosts use `npm`. An npm build-launch
+failure preserves verified private packages/receipts and rolls back the local
+generated pair before GitHub promotion. The active
+[editorial checklist](../implementation/editorial-sheet-publishing.md) records
+the subprocess repair and receipt-backed retry evidence.
+Command capture preserves leading Git status columns for strict generated-file
+scope checks. Publication branches are allocated after validation, so early
+build or scope failures do not reserve their retry names.
 
 ## Current paths
 
