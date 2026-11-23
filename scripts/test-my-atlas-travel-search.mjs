@@ -5,6 +5,12 @@ import {
   reviewRentalSearch,
   TRAVEL_SEARCH_PROVIDERS,
 } from "../src/features/my-atlas/planning/travelSearch.mjs"
+import { normalizedFlightAirportCode } from "../src/features/my-atlas/planning/handoffs.mjs"
+import {
+  tripTravelContext,
+  seedTravelDates,
+  tripTravelFingerprint,
+} from "../src/features/my-atlas/planning/tripTravelContext.mjs"
 
 const draft = emptyTravelSearchDraft()
 assert.equal(draft.flights.outboundFrom, "")
@@ -24,14 +30,48 @@ const roundtrip = new URL(reviewed.links[0].url)
 assert.equal(roundtrip.origin, "https://www.expedia.com")
 assert.equal(
   roundtrip.pathname,
-  "/go/flight/search/roundtrip/2027-04-05/2027-04-20"
+  "/go/flight/search/Roundtrip/2027-04-05/2027-04-20"
 )
 assert.deepEqual(
   [...roundtrip.searchParams.keys()].sort(),
-  ["FromAirport", "NumAdult", "ToAirport", "load"].sort()
+  [
+    "FromAirport",
+    "NumAdult",
+    "ToAirport",
+    "TripType",
+    "FromDate",
+    "ToDate",
+    "load",
+  ].sort()
 )
 assert.equal(roundtrip.searchParams.get("FromAirport"), "ATL")
 assert.equal(roundtrip.searchParams.get("ToAirport"), "MAD")
+assert.equal(roundtrip.searchParams.get("TripType"), "RoundTrip")
+assert.equal(roundtrip.searchParams.get("FromDate"), "2027-04-05")
+assert.equal(roundtrip.searchParams.get("ToDate"), "2027-04-20")
+assert.equal(normalizedFlightAirportCode("atl"), "ATL")
+assert.equal(normalizedFlightAirportCode("Atlanta (ATL)"), "ATL")
+assert.equal(normalizedFlightAirportCode("ATL - Hartsfield Jackson"), "ATL")
+assert.equal(normalizedFlightAirportCode("Atlanta"), "")
+assert.equal(normalizedFlightAirportCode("(ATL) or (SJO)"), "")
+const labeled = reviewFlightSearch({
+  ...flight,
+  outboundFrom: "Atlanta (atl)",
+  outboundTo: "mad",
+  confirmed: true,
+})
+assert.equal(
+  new URL(labeled.links[0].url).searchParams.get("FromAirport"),
+  "ATL"
+)
+assert.equal(new URL(labeled.links[0].url).searchParams.get("ToAirport"), "MAD")
+assert.ok(
+  reviewFlightSearch({
+    ...flight,
+    outboundFrom: "Atlanta",
+    confirmed: true,
+  }).readiness.some(message => /City names/.test(message))
+)
 const openJaw = reviewFlightSearch({
   ...flight,
   searchType: "open-jaw",
@@ -148,4 +188,75 @@ assert.throws(
   /Choose pickup/
 )
 assert.equal(draft.rental.pickup, "")
+const trip = {
+  stops: [
+    {
+      stopId: "one",
+      place: { placeId: "one", name: "Uvita" },
+      plannedDates: { arrival: "2027-04-06", departure: "2027-04-10" },
+    },
+    {
+      stopId: "two",
+      place: { placeId: "two", name: "La Fortuna" },
+      plannedDates: { arrival: "2027-04-11", departure: "2027-04-18" },
+    },
+  ],
+  routeEndpoints: {
+    start: {
+      place: { name: "Atlanta" },
+      plannedDates: { arrival: null, departure: "2027-04-05" },
+    },
+    finish: {
+      place: { name: "Atlanta" },
+      plannedDates: { arrival: "2027-04-20", departure: null },
+    },
+  },
+}
+const context = tripTravelContext(trip)
+const partialDateCopy = seedTravelDates(
+  { ...draft, flights: { ...flight } },
+  { departDate: "2027-04-04", returnDate: "" },
+  { replace: true }
+)
+assert.equal(partialDateCopy.flights.departDate, "2027-04-04")
+assert.equal(
+  partialDateCopy.flights.returnDate,
+  "2027-04-20",
+  "An unavailable planned date must not clear a chosen flight date"
+)
+assert.equal(context.departDate, "2027-04-05")
+assert.equal(context.returnDate, "2027-04-20")
+const seeded = seedTravelDates(draft, context)
+assert.equal(seeded.flights.departDate, context.departDate)
+assert.equal(seeded.flights.returnDate, context.returnDate)
+assert.equal(
+  seeded.flights.outboundFrom,
+  "",
+  "A city endpoint must not silently select an airport"
+)
+assert.equal(seeded.flights.outboundTo, "")
+assert.equal(
+  draft.flights.departDate,
+  "",
+  "Seeding does not mutate a saved source draft"
+)
+assert.equal(
+  seedTravelDates(
+    { ...draft, flights: { ...flight, departDate: "2027-04-04" } },
+    context
+  ).flights.departDate,
+  "2027-04-04",
+  "Keep explicitly chosen flight dates"
+)
+assert.equal(
+  seedTravelDates(draft, { departDate: "2027-04-20", returnDate: "2027-04-01" })
+    .flights.departDate,
+  ""
+)
+assert.equal(tripTravelContext({ stops: trip.stops }).departDate, "2027-04-06")
+assert.equal(tripTravelContext({ stops: trip.stops }).returnDate, "2027-04-18")
+assert.notEqual(
+  tripTravelFingerprint(trip),
+  tripTravelFingerprint({ ...trip, routeEndpoints: undefined })
+)
 console.log("My Atlas flight and rental search tests passed.")

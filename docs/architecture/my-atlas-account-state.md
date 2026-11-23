@@ -1617,3 +1617,59 @@ remote health, unauthenticated-access and CORS checks passed without account
 writes. Isolated runtime tests cover authenticated persistence and reload.
 The authorized frontend promotion and post-deployment synthetic browser checks
 are recorded in [release PR 256](https://github.com/cjust689/roamwithjustin/pull/256).
+
+### Destination dates and optional travel endpoints, November 22
+
+Planned destination editors open on Planning with optional arrival and
+departure fields alongside notes. One explicit save PATCHes `plannedDates`
+and, when supported, `planNote`; it does not rewrite memories or actual dates.
+Destination rows show the saved date range or Add planned dates. The existing
+Dates section retains the fuller planned/actual editor. Planning dates remain
+per location; no separate overall-trip date record was introduced.
+
+Canonical trips may carry optional private `routeEndpoints`, advertised by
+`GET /v1/me/trips` as `capabilities.routeEndpoints`. Its `start` and `finish`
+values are independently nullable, otherwise `{ place, plannedDates }`.
+`plannedDates` uses nullable arrival/departure calendar dates. Trip PATCH
+accepts this field alongside title/description; each input `place` uses the
+existing catalog-ID/custom-place selection contract and is resolved by the
+Worker before storing an immutable snapshot. Shared validation rejects invalid
+calendar dates, reversed local ranges and a finish before the start. The field
+is optional for existing schema-version-1 trips and needs no migration.
+
+Endpoints do not create stops, visits, pins, memories or statistics. Owners can
+set, replace, date and clear them in the single Start and finish dialog. Its
+location picker uses the existing full-map review/return flow. Owner maps and
+directions include S/F endpoints while stop identities/order remain intact.
+Public Atlas projections and read-only snapshot links continue to omit private
+endpoints; private account exports retain them. Existing revision, idempotency,
+retention and account deletion paths remain in force. Combining trips with
+nonempty private endpoints requires review, as it does for flight/rental details;
+secondary endpoint records are never discarded by combining destination lists.
+
+Flight tools display endpoint/destination names as context without guessing
+airports. Blank flight dates are seeded from endpoint dates, falling back to
+the first/last destination's planned dates; explicit flight dates survive.
+Use planned location dates is the explicit replacement action. A fingerprint
+including stop order, planned dates and endpoints invalidates an earlier review
+when context changes. `tripTravelContext.mjs` owns these derivations.
+
+`normalizedFlightAirportCode` accepts a bare case-insensitive three-letter
+code or an unambiguous labeled code, such as Atlanta (ATL). City-only text is
+not sent as `FromAirport`/`ToAirport`. The central Expedia builder sends
+normalized airports, `TripType`, ISO `FromDate`/`ToDate`, one adult and the dated
+one-way/Roundtrip path. Round-trip and separate open-jaw legs use the same
+builder; a reviewed code/date pair is required for a prepared search. These are
+search intentions, not airport validation, availability or reservations.
+
+The handoff follows the official
+[Expedia flight deeplink specification](https://developers.expediagroup.com/white-label-template/traffic-growth/deeplinking/flight-deeplinks).
+Automated provider requests returned HTTP 429, so the destination site's actual
+field prefill remains externally unverified. No booking or provider account
+action was attempted.
+
+Compatible endpoint storage is deployed as Worker
+`6d5edfb6-818c-4711-9eeb-72c2542a4a64`; ten health/authentication/CORS checks
+passed without account writes. The active implementation checklist records
+runtime/browser evidence. Authorized frontend promotion and live acceptance
+are tracked in its release PRs; actual Expedia page prefill remains distinct.

@@ -1,6 +1,7 @@
 const GOOGLE_MAPS_DIRECTIONS_URL = "https://www.google.com/maps/dir/"
 const GOOGLE_MAPS_SEARCH_URL = "https://www.google.com/maps/search/"
-const EXPEDIA_FLIGHT_SEARCH_URL = "https://www.expedia.com/go/flight/search/oneway/"
+const EXPEDIA_FLIGHT_SEARCH_URL =
+  "https://www.expedia.com/go/flight/search/oneway/"
 const MAX_MAPS_URL_LENGTH = 2048
 const MAX_MAPS_WAYPOINTS_PER_LEG = 3
 export const MAX_PLAN_DESTINATIONS = 50
@@ -24,15 +25,25 @@ export class MyAtlasHandoffError extends Error {
   }
 }
 
+export function normalizedFlightAirportCode(value) {
+  const text = String(value || "").trim()
+  if (/^[a-z]{3}$/i.test(text)) return text.toUpperCase()
+  const labeled = [...text.matchAll(/\(([a-z]{3})\)/gi)]
+  if (labeled.length === 1) return labeled[0][1].toUpperCase()
+  const prefix = text.match(/^([a-z]{3})\s*[-\u2013]\s+.+$/i)
+  return prefix ? prefix[1].toUpperCase() : ""
+}
+
 export function buildExpediaFlightSearchUrl({
   origin,
   destination,
   departureDate,
+  returnDate = "",
 }) {
-  const from = String(origin || "").trim()
-  const to = String(destination || "").trim()
+  const from = normalizedFlightAirportCode(origin)
+  const to = normalizedFlightAirportCode(destination)
   const date = String(departureDate || "").trim()
-  if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     throw new MyAtlasHandoffError(
       "Choose a departure date before opening the flight search.",
       "flight_date_required"
@@ -48,10 +59,34 @@ export function buildExpediaFlightSearchUrl({
       "invalid_flight_date"
     )
   }
-  const url = new URL(`${EXPEDIA_FLIGHT_SEARCH_URL}${date}/${date}`)
+  if (!from || !to || from === to)
+    throw new MyAtlasHandoffError(
+      "Enter distinct three letter departure and arrival airport codes, such as ATL and MAD.",
+      "flight_gateway_required"
+    )
+  if (
+    returnDate &&
+    (!/^\d{4}-\d{2}-\d{2}$/.test(returnDate) ||
+      !Number.isFinite(Date.parse(returnDate + "T00:00:00Z")) ||
+      new Date(returnDate + "T00:00:00Z").toISOString().slice(0, 10) !==
+        returnDate ||
+      returnDate < date)
+  )
+    throw new MyAtlasHandoffError(
+      "The return date must follow the departure date.",
+      "invalid_flight_date"
+    )
+  const url = new URL(
+    returnDate
+      ? `https://www.expedia.com/go/flight/search/Roundtrip/${date}/${returnDate}`
+      : `${EXPEDIA_FLIGHT_SEARCH_URL}${date}/${date}`
+  )
   url.searchParams.set("load", "1")
+  url.searchParams.set("TripType", returnDate ? "RoundTrip" : "OneWay")
   url.searchParams.set("FromAirport", from)
   url.searchParams.set("ToAirport", to)
+  url.searchParams.set("FromDate", date)
+  url.searchParams.set("ToDate", returnDate || date)
   url.searchParams.set("NumAdult", "1")
   return url.toString()
 }

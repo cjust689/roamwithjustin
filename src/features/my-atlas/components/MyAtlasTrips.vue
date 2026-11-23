@@ -197,6 +197,20 @@
         <p v-if="!selected.stops.length">
           This trip has no visits. Its saved details are kept.
         </p>
+        <button
+          class="trip-route-settings"
+          type="button"
+          :disabled="busy"
+          @click="openWorkspace('endpoints')"
+        >
+          <strong>Start and finish <small>Optional</small></strong>
+          <span
+            >Start
+            {{ selected.routeEndpoints?.start?.place.name || "not set" }} ·
+            Finish
+            {{ selected.routeEndpoints?.finish?.place.name || "not set" }}</span
+          >
+        </button>
         <div class="trip-itinerary-heading">
           <div class="trip-itinerary-title">
             <h4>Destinations</h4>
@@ -234,7 +248,7 @@
         <button
           class="trip-travel-action"
           type="button"
-          :disabled="busy || !selected.stops.length"
+          :disabled="busy"
           @click="openWorkspace('travel')"
         >
           Travel tools
@@ -509,6 +523,93 @@
           />
         </section>
 
+        <section v-if="workspace === 'endpoints' && selected" class="trip-form">
+          <p>
+            Optional travel locations. They stay private and do not add
+            destinations or visits. Dates belong to each location.
+          </p>
+          <p v-if="!capabilities.routeEndpoints" role="status">
+            Route settings are unavailable on this server. Refresh trips to
+            check again.
+          </p>
+          <label
+            >Location to edit<select
+              v-model="endpointRole"
+              :disabled="busy"
+              @change="resetEndpointPicker"
+            >
+              <option value="start">Start</option>
+              <option value="finish">Finish</option>
+            </select></label
+          >
+          <div v-if="endpointDraft[endpointRole]" class="trip-form">
+            <strong>{{ endpointDraft[endpointRole].place.name }}</strong>
+            <div class="trip-date-fields">
+              <label
+                >Planned arrival (optional)<input
+                  v-model="endpointDraft[endpointRole].plannedDates.arrival"
+                  type="date"
+                  :disabled="busy"
+                  :max="
+                    endpointDraft[endpointRole].plannedDates.departure ||
+                    undefined
+                  "
+              /></label>
+              <label
+                >Planned departure (optional)<input
+                  v-model="endpointDraft[endpointRole].plannedDates.departure"
+                  type="date"
+                  :disabled="busy"
+                  :min="
+                    endpointDraft[endpointRole].plannedDates.arrival ||
+                    undefined
+                  "
+              /></label>
+            </div>
+            <div class="trip-controls">
+              <button
+                type="button"
+                :disabled="busy"
+                @click="endpointPickerOpen = !endpointPickerOpen"
+              >
+                Change location</button
+              ><button type="button" :disabled="busy" @click="clearEndpoint">
+                Clear {{ endpointRole }}
+              </button>
+            </div>
+          </div>
+          <MyAtlasDestinationPicker
+            v-if="!endpointDraft[endpointRole] || endpointPickerOpen"
+            v-model="destinationDraft"
+            :pending="busy || !capabilities.routeEndpoints"
+            :resolve-link="resolveLink"
+            :action-label="
+              endpointRole === 'start' ? 'Use as start' : 'Use as finish'
+            "
+            @review="beginPlacement"
+            @choose="chooseEndpoint"
+          />
+          <button
+            v-if="
+              endpointRole === 'finish' &&
+              endpointDraft.start &&
+              !endpointDraft.finish
+            "
+            type="button"
+            :disabled="busy"
+            @click="finishAtStart"
+          >
+            Finish at the start location
+          </button>
+          <button
+            type="button"
+            :disabled="busy || !capabilities.routeEndpoints"
+            @click="saveEndpoints"
+          >
+            Save start and finish
+          </button>
+        </section>
+
         <section
           v-if="workspace === 'metadata' && selected"
           v-show="workspaceTab === 'details'"
@@ -765,9 +866,17 @@
             v-for="trip in trips.filter(item => item.lifecycle === 'past')"
             :key="trip.tripId"
             :value="combineIds.includes(trip.tripId)"
-            :disabled="busy"
+            :disabled="
+              busy ||
+              Boolean(trip.routeEndpoints?.start || trip.routeEndpoints?.finish)
+            "
             @input="toggleCombinedTrip(trip.tripId, $event)"
-            >{{ trip.title }}</MyAtlasSwitch
+            >{{ trip.title
+            }}{{
+              trip.routeEndpoints?.start || trip.routeEndpoints?.finish
+                ? " (review start and finish before combining)"
+                : ""
+            }}</MyAtlasSwitch
           >
           <label
             >Combined trip name<input v-model="combineTitle" maxlength="80"
@@ -795,6 +904,24 @@
           </p>
           <div v-show="workspaceTab === 'planning'" class="trip-form">
             <p>A stop in {{ selected.title }}</p>
+            <div class="trip-date-fields">
+              <label
+                >Planned arrival (optional)<input
+                  v-model="dates.plannedArrival"
+                  type="date"
+                  :disabled="busy"
+                  :max="dates.plannedDeparture || undefined"
+                  @input="workspaceStatus = ''"
+              /></label>
+              <label
+                >Planned departure (optional)<input
+                  v-model="dates.plannedDeparture"
+                  type="date"
+                  :disabled="busy"
+                  :min="dates.plannedArrival || undefined"
+                  @input="workspaceStatus = ''"
+              /></label>
+            </div>
             <label
               >Planning notes<textarea
                 v-model="planNoteDraft"
@@ -805,24 +932,17 @@
               />
             </label>
             <p v-if="!capabilities.planningNotes">
-              Planning-note saving is not available yet. Your existing trip is
-              unchanged.
+              Notes are unavailable on this server. You can still save planned
+              dates.
             </p>
             <button
               type="button"
               class="trip-new-primary"
-              :disabled="busy || !capabilities.planningNotes"
+              :disabled="busy"
               :aria-busy="String(pendingAction === 'editStop')"
-              @click="
-                mutate(
-                  'editStop',
-                  { planNote: planNoteDraft },
-                  selected.tripId,
-                  editingStop.stopId
-                )
-              "
+              @click="saveStopPlanning"
             >
-              Save planning notes
+              Save planning details
             </button>
           </div>
           <div v-show="workspaceTab === 'memory'" class="trip-form">
@@ -968,6 +1088,7 @@
             v-model="selectedTravelDraft"
             :tool="workspaceTab === 'rental' ? 'rental' : 'flights'"
             :context-changed="travelContextChanged"
+            :trip-context="flightContext"
             :persistable="true"
             :dirty="travelDetailsDirty"
           />
@@ -1028,13 +1149,21 @@ import {
 } from "../../../../shared/my-atlas-trip-logistics.mjs"
 import { emptyTravelSearchDraft } from "../planning/travelSearch.mjs"
 import {
+  tripTravelContext,
+  seedTravelDates,
+  tripTravelFingerprint,
+} from "../planning/tripTravelContext.mjs"
+import {
   buildGoogleMapsRouteHandoffs,
   buildAiPlanningPrompt,
 } from "../planning/handoffs.mjs"
 import { getMyAtlasApiAccessToken } from "../auth/auth0"
 import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
 import { normalizeMyAtlasCustomCoordinates } from "../catalog/customPlace.mjs"
-import { buildCanonicalTripMapRoute } from "../../../../shared/my-atlas-trips.mjs"
+import {
+  buildCanonicalTripMapRoute,
+  validTripCalendarDate,
+} from "../../../../shared/my-atlas-trips.mjs"
 import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
 import { buildSharedTripUrl } from "../planning/sharedTrip.mjs"
 
@@ -1082,7 +1211,11 @@ export default {
     trips: [],
     upgraded: false,
     writesEnabled: false,
-    capabilities: { emptyTripDrafts: false, planningNotes: false },
+    capabilities: {
+      emptyTripDrafts: false,
+      planningNotes: false,
+      routeEndpoints: false,
+    },
     rollbackAvailable: false,
     preview: null,
     confirmation: "",
@@ -1094,6 +1227,9 @@ export default {
     draftTitle: "",
     draftLifecycle: "planned",
     destinationDraft: emptyDestinationDraft(),
+    endpointDraft: { start: null, finish: null },
+    endpointRole: "start",
+    endpointPickerOpen: false,
     combineIds: [],
     combineTitle: "",
     groupDestinations: [],
@@ -1130,7 +1266,7 @@ export default {
     visitSections() {
       return [
         { key: "memory", label: "Memory" },
-        { key: "planning", label: "Planning notes" },
+        { key: "planning", label: "Planning" },
         { key: "dates", label: "Dates" },
         { key: "experiences", label: "Experiences" },
         { key: "actions", label: "More actions" },
@@ -1180,6 +1316,7 @@ export default {
             create: "New trip",
             add: "Add a stop",
             metadata: "Edit journey",
+            endpoints: "Start and finish (optional)",
             delete: "Delete trip?",
             remove: "Remove destination?",
             share: "Share journey",
@@ -1209,7 +1346,8 @@ export default {
         return [
           { key: "flights", label: "Flights" },
           { key: "rental", label: "Rental cars" },
-          ...(this.selected?.stops.length > 1
+          ...(this.selected &&
+          buildCanonicalTripMapRoute(this.selected).length > 1
             ? [{ key: "directions", label: "Directions" }]
             : []),
         ]
@@ -1240,6 +1378,9 @@ export default {
         (this.upgraded || (this.preview?.ready && this.retentionAcknowledged))
       )
     },
+    flightContext() {
+      return tripTravelContext(this.selected)
+    },
     selectedTravelDraft: {
       get() {
         return (
@@ -1253,7 +1394,7 @@ export default {
         this.$set(
           this.travelContexts,
           this.selectedId,
-          this.selected.stops.map(stop => stop.stopId).join(",")
+          tripTravelFingerprint(this.selected)
         )
       },
     },
@@ -1268,7 +1409,7 @@ export default {
       return Boolean(
         this.travelContexts[this.selectedId] &&
           this.travelContexts[this.selectedId] !==
-            this.selected?.stops.map(stop => stop.stopId).join(",")
+            tripTravelFingerprint(this.selected)
       )
     },
     selected() {
@@ -1329,6 +1470,7 @@ export default {
       this.capabilities = {
         emptyTripDrafts: state.capabilities?.emptyTripDrafts === true,
         planningNotes: state.capabilities?.planningNotes === true,
+        routeEndpoints: state.capabilities?.routeEndpoints === true,
       }
     },
     openWorkspace(value) {
@@ -1343,6 +1485,28 @@ export default {
           visit: "memory",
           travel: "flights",
         }[value] || ""
+      if (value === "endpoints") {
+        this.endpointDraft = JSON.parse(
+          JSON.stringify(
+            this.selected.routeEndpoints || { start: null, finish: null }
+          )
+        )
+        this.endpointRole = "start"
+        this.resetEndpointPicker()
+      }
+      if (value === "travel" && this.selected) {
+        const draft = seedTravelDates(
+          this.selectedTravelDraft,
+          this.flightContext
+        )
+        this.$set(this.travelDrafts, this.selectedId, draft)
+        if (!this.travelContexts[this.selectedId])
+          this.$set(
+            this.travelContexts,
+            this.selectedId,
+            tripTravelFingerprint(this.selected)
+          )
+      }
       if (value === "add") {
         this.adding = true
         this.destinationDraft = emptyDestinationDraft()
@@ -1568,9 +1732,14 @@ export default {
       this.stopPlacement()
       this.$emit("route-change", {
         active: true,
-        route: buildCanonicalTripMapRoute(trip).map((node, index) => ({
+        route: buildCanonicalTripMapRoute(trip).map(node => ({
           ...node,
-          location: myAtlasStopMapPlace(trip.stops[index]),
+          location:
+            node.role === "stop"
+              ? myAtlasStopMapPlace(
+                  trip.stops.find(stop => stop.stopId === node.key)
+                )
+              : node.location,
         })),
         lifecycle: trip.lifecycle,
       })
@@ -1717,6 +1886,121 @@ export default {
         this.pendingAction = ""
       }
     },
+    saveStopPlanning() {
+      // Save planned dates and notes without rewriting recorded memories.
+      const dates = {
+        arrival: this.dates.plannedArrival || null,
+        departure: this.dates.plannedDeparture || null,
+      }
+      if (
+        !validTripCalendarDate(dates.arrival) ||
+        !validTripCalendarDate(dates.departure) ||
+        (dates.arrival && dates.departure && dates.arrival > dates.departure)
+      ) {
+        this.workspaceStatus =
+          "Choose a departure on or after the arrival date."
+        return
+      }
+      return this.mutate(
+        "editStop",
+        {
+          plannedDates: dates,
+          ...(this.capabilities.planningNotes
+            ? { planNote: this.planNoteDraft }
+            : {}),
+        },
+        this.selected.tripId,
+        this.editingStop.stopId
+      )
+    },
+    resetEndpointPicker() {
+      this.workspaceStatus = ""
+      this.destinationDraft = emptyDestinationDraft()
+      this.endpointPickerOpen = false
+    },
+    chooseEndpoint(value) {
+      if (this.busy || !this.capabilities.routeEndpoints) return
+      const place = value.place || {
+        ...value.selection.customPlace,
+        placeType: "custom",
+      }
+      const dates = this.endpointDraft[this.endpointRole]?.plannedDates || {
+        arrival: null,
+        departure: null,
+      }
+      this.$set(this.endpointDraft, this.endpointRole, {
+        place: JSON.parse(JSON.stringify(place)),
+        plannedDates: { ...dates },
+      })
+      this.resetEndpointPicker()
+      this.workspaceStatus = `${place.name} selected as ${this.endpointRole}. Save start and finish to keep it.`
+    },
+    clearEndpoint() {
+      if (this.busy) return
+      this.$set(this.endpointDraft, this.endpointRole, null)
+      this.resetEndpointPicker()
+    },
+    finishAtStart() {
+      if (this.busy || !this.endpointDraft.start) return
+      this.endpointDraft.finish = {
+        place: JSON.parse(JSON.stringify(this.endpointDraft.start.place)),
+        plannedDates: { arrival: null, departure: null },
+      }
+      this.resetEndpointPicker()
+    },
+    saveEndpoints() {
+      if (this.busy || !this.capabilities.routeEndpoints) return
+      const endpoints = {}
+      for (const role of ["start", "finish"]) {
+        const endpoint = this.endpointDraft[role]
+        if (!endpoint) {
+          endpoints[role] = null
+          continue
+        }
+        const { arrival, departure } = endpoint.plannedDates
+        if (
+          !validTripCalendarDate(arrival || null) ||
+          !validTripCalendarDate(departure || null) ||
+          (arrival && departure && arrival > departure)
+        ) {
+          this.workspaceStatus =
+            "Choose a departure on or after arrival for each location."
+          return
+        }
+        const place = endpoint.place
+        endpoints[role] = {
+          place:
+            place.placeType === "custom"
+              ? {
+                  customPlace: {
+                    name: place.name,
+                    coordinates: [...place.coordinates],
+                  },
+                }
+              : { placeId: place.placeId },
+          plannedDates: {
+            arrival: arrival || null,
+            departure: departure || null,
+          },
+        }
+      }
+      const start =
+        endpoints.start?.plannedDates.departure ||
+        endpoints.start?.plannedDates.arrival
+      const finish =
+        endpoints.finish?.plannedDates.arrival ||
+        endpoints.finish?.plannedDates.departure
+      if (start && finish && finish < start) {
+        this.workspaceStatus =
+          "The finish date must be on or after the start date."
+        return
+      }
+      return this.mutate(
+        "metadata",
+        { routeEndpoints: endpoints },
+        this.selected.tripId
+      )
+    },
     editStop(stop) {
       this.openWorkspace("visit")
       if (this.editingStopId === stop.stopId) return
@@ -1740,7 +2024,7 @@ export default {
     },
     stopDate(stop) {
       return journeyCardDate({
-        trip: { ...this.selected, stops: [stop] },
+        trip: { ...this.selected, routeEndpoints: undefined, stops: [stop] },
         legacy: false,
       })
     },
@@ -1790,9 +2074,15 @@ export default {
       }
     },
     toolPlan() {
+      const nodes = buildCanonicalTripMapRoute(this.selected)
+      if (!nodes.length)
+        throw Error("Choose a destination, start or finish first.")
       return {
-        start: this.selected.stops[0].place,
-        stops: this.selected.stops.slice(1).map(stop => stop.place),
+        start: nodes[0].location,
+        stops:
+          nodes.length > 1
+            ? nodes.slice(1).map(node => node.location)
+            : [nodes[0].location],
         endMode: "last-stop",
         end: null,
       }
@@ -1802,9 +2092,9 @@ export default {
         this.directions = buildGoogleMapsRouteHandoffs(this.toolPlan(), {
           defaultMode: this.directionsMode,
           confirmedCoordinatePlaceIds: this.routeReviewed
-            ? this.selected.stops
-                .filter(stop => stop.place.placeType === "custom")
-                .map(stop => stop.place.placeId)
+            ? buildCanonicalTripMapRoute(this.selected)
+                .filter(node => node.location.placeType === "custom")
+                .map(node => node.location.placeId)
             : [],
         }).actions
         this.error = ""
@@ -1916,6 +2206,24 @@ export default {
 </script>
 
 <style scoped>
+.trip-route-settings {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+}
+.trip-route-settings strong {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.trip-route-settings small,
+.trip-route-settings > span {
+  font-size: 0.7rem;
+  color: var(--color-text-muted, #adbcba);
+}
+
 .atlas-trips,
 .trip-form {
   display: grid;
@@ -2393,7 +2701,7 @@ export default {
   resize: vertical;
 }
 @media (max-width: 480px) {
-  .trip-visit-dialog .trip-date-fields {
+  .trip-date-fields {
     grid-template-columns: minmax(0, 1fr);
   }
 }

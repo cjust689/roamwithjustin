@@ -48,6 +48,9 @@
           <span class="journey-stop-copy">
             <strong>{{ stop.place.name }}</strong>
             <small v-if="context(stop)">{{ context(stop) }}</small>
+            <small v-if="lifecycle === 'planned'">{{
+              plannedDateLabel(stop) || "Add planned dates"
+            }}</small>
             <span v-if="memory(stop)" class="journey-memory">{{
               memory(stop)
             }}</span>
@@ -127,6 +130,16 @@ export default {
     this.cancelDrag()
   },
   methods: {
+    plannedDateLabel(stop) {
+      // A date hint makes the default planning editor discoverable from the list.
+      return [
+        ...new Set(
+          [stop.plannedDates?.arrival, stop.plannedDates?.departure].filter(
+            Boolean
+          )
+        ),
+      ].join(" to ")
+    },
     context(stop) {
       return [
         ...new Set(

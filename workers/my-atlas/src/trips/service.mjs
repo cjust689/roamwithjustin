@@ -18,6 +18,7 @@ import { previewTripUpgrade } from "./preview.mjs"
 import { normalizeExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
 import { normalizeTripTravelDraft } from "../../../../shared/my-atlas-trip-logistics.mjs"
 import {
+  normalizeTripRouteEndpoints,
   validTripCalendarDate,
   TRIP_RETENTION_POLICY,
 } from "../../../../shared/my-atlas-trips.mjs"
@@ -146,7 +147,11 @@ export async function tripRequest({
       writesEnabled: environment.MY_ATLAS_TRIP_WRITES_ENABLED === "true",
       trips: state.trips,
       destinations: state.destinations,
-      capabilities: { emptyTripDrafts: true, planningNotes: true },
+      capabilities: {
+        emptyTripDrafts: true,
+        planningNotes: true,
+        routeEndpoints: true,
+      },
       ungroupedVisits: state.ungroupedVisits,
       legacyPlans: state.legacyPlans,
       rollbackAvailable: state.rollbackAvailable,
@@ -422,11 +427,34 @@ export async function tripRequest({
       value = { tripId: route.tripId }
     } else {
       action = "metadata"
-      input = object(body, ["title", "description"])
+      input = object(body, ["title", "description", "routeEndpoints"])
       if (!Object.keys(input).length) bad()
+      let endpoints
+      if (input.routeEndpoints !== undefined) {
+        const raw = object(input.routeEndpoints, ["start", "finish"])
+        endpoints = {}
+        for (const role of ["start", "finish"]) {
+          if (raw[role] === null) {
+            endpoints[role] = null
+            continue
+          }
+          const endpoint = object(raw[role], ["place", "plannedDates"])
+          object(endpoint.plannedDates, ["arrival", "departure"])
+          endpoints[role] = {
+            place: await place(endpoint.place),
+            plannedDates: endpoint.plannedDates,
+          }
+        }
+        try {
+          endpoints = normalizeTripRouteEndpoints(endpoints)
+        } catch {
+          bad()
+        }
+      }
       value = {
         tripId: route.tripId,
         patch: {
+          ...(endpoints === undefined ? {} : { routeEndpoints: endpoints }),
           ...(input.title === undefined
             ? {}
             : { title: text(input.title, 80, true) }),

@@ -1397,6 +1397,7 @@ import MyAtlasDialog from "../components/MyAtlasDialog.vue"
 import MyAtlasMap from "../components/MyAtlasMap.vue"
 import { myAtlasStopMapPlace } from "../catalog/mapMemory.mjs"
 import MyAtlasPinEditor from "../components/MyAtlasPinEditor.vue"
+import { buildCanonicalTripMapRoute } from "../../../../shared/my-atlas-trips.mjs"
 import MyAtlasPlanner from "../components/MyAtlasPlanner.vue"
 import MyAtlasJourneyCards from "../components/MyAtlasJourneyCards.vue"
 import { requestMyAtlasTrips } from "../planning/tripClient.mjs"
@@ -1632,6 +1633,9 @@ export default {
           title: trip.title,
           lifecycle: trip.lifecycle,
           kind: "trip",
+          route: trip.routeEndpoints
+            ? buildCanonicalTripMapRoute(trip)
+            : undefined,
           stops: trip.stops.map(stop => ({
             ...stop,
             place: myAtlasStopMapPlace(stop),
@@ -1683,6 +1687,8 @@ export default {
       )
     },
     mapNavigatorRoute() {
+      // Only owner route records carry the optional private travel endpoints.
+      if (this.mapNavigatorTrip?.route) return this.mapNavigatorTrip.route
       return (this.mapNavigatorTrip?.stops || [])
         .map((stop, index) => ({
           key: stop.stopId || `map:${index}`,
