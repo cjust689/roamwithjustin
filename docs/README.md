@@ -68,6 +68,14 @@ verification:
 
 # Roam With Justin documentation
 
+Planning follow-up: destination arrival/departure dates are visible in the
+default Planning editor and save with notes. Canonical trips also support
+optional private start/finish locations, each with its own dates. Flight tools
+use those dates as suggestions, retain chosen airports and send normalized
+airport codes in Expedia's documented handoff format. Verification, provider
+limitations and release status are recorded in the
+[active integrated trip checklist](implementation/my-atlas-integrated-trip-management-2026-11-21.md).
+
 Current follow-up: save a trip name before destination entry, use one trip
 location field for search/coordinates/Maps/Plus Codes, and expose explicit map
 pin confirmation with a return to the originating form. Both canonical and

@@ -28,6 +28,39 @@
           transfer.</MyAtlasInfo
         >
       </div>
+      <div
+        v-if="
+          tripContext.start ||
+          tripContext.finish ||
+          tripContext.firstDestination
+        "
+        class="travel-route-context"
+      >
+        <strong>Your planned locations</strong>
+        <span v-if="tripContext.start">Start: {{ tripContext.start }}</span>
+        <span v-if="tripContext.firstDestination"
+          >First destination: {{ tripContext.firstDestination }}</span
+        >
+        <span
+          v-if="
+            tripContext.lastDestination &&
+            tripContext.lastDestination !== tripContext.firstDestination
+          "
+          >Last destination: {{ tripContext.lastDestination }}</span
+        >
+        <span v-if="tripContext.finish">Finish: {{ tripContext.finish }}</span>
+        <small
+          >Choose your actual airports below. A city or trail location does not
+          choose an airport.</small
+        >
+      </div>
+      <button
+        v-if="tripContext.departDate || tripContext.returnDate"
+        type="button"
+        @click="usePlannedDates"
+      >
+        Use planned location dates
+      </button>
       <label>
         <span>Flight search type</span>
         <select v-model="draft.flights.searchType" @change="clearReview">
@@ -42,36 +75,48 @@
       <template v-if="draft.flights.searchType !== 'individual-legs'">
         <div class="travel-fields">
           <label
-            ><span>Flying from</span
+            ><span>Departure airport code</span
             ><input
               v-model="draft.flights.outboundFrom"
+              autocapitalize="characters"
+              autocomplete="off"
               maxlength="160"
-              placeholder="Atlanta or ATL"
+              placeholder="e.g. ATL"
+              @blur="normalizeAirport('outboundFrom')"
               @input="clearReview"
           /></label>
           <label
-            ><span>Flying to</span
+            ><span>Arrival airport code</span
             ><input
               v-model="draft.flights.outboundTo"
+              autocapitalize="characters"
+              autocomplete="off"
               maxlength="160"
-              placeholder="Madrid or MAD"
+              placeholder="e.g. SJO"
+              @blur="normalizeAirport('outboundTo')"
               @input="clearReview"
           /></label>
           <template v-if="draft.flights.searchType === 'open-jaw'">
             <label
-              ><span>Flying back from</span
+              ><span>Return departure airport code</span
               ><input
                 v-model="draft.flights.returnFrom"
+                autocapitalize="characters"
+                autocomplete="off"
                 maxlength="160"
-                placeholder="Malaga or AGP"
+                placeholder="e.g. SJO"
+                @blur="normalizeAirport('returnFrom')"
                 @input="clearReview"
             /></label>
             <label
-              ><span>Flying back to</span
+              ><span>Return arrival airport code</span
               ><input
                 v-model="draft.flights.returnTo"
+                autocapitalize="characters"
+                autocomplete="off"
                 maxlength="160"
-                placeholder="Atlanta or ATL"
+                placeholder="e.g. ATL"
+                @blur="normalizeAirport('returnTo')"
                 @input="clearReview"
             /></label>
           </template>
@@ -98,6 +143,11 @@
         </button>
         <div v-if="flightReview" class="travel-preview">
           <pre>{{ flightReview.details }}</pre>
+          <ul v-if="flightReview.readiness?.length" role="status">
+            <li v-for="message in flightReview.readiness" :key="message">
+              {{ message }}
+            </li>
+          </ul>
           <div v-if="flightReview.conflicts.length">
             <p role="status">
               An explicit return Fly leg differs from this round trip intention.
@@ -281,6 +331,8 @@
 <script>
 import MyAtlasSwitch from "./MyAtlasSwitch.vue"
 import MyAtlasInfo from "./MyAtlasInfo.vue"
+import { normalizedFlightAirportCode } from "../planning/handoffs.mjs"
+import { seedTravelDates } from "../planning/tripTravelContext.mjs"
 import {
   emptyTravelSearchDraft,
   reviewFlightSearch,
@@ -298,6 +350,7 @@ export default {
     contextChanged: { type: Boolean, default: false },
     persistable: { type: Boolean, default: false },
     dirty: { type: Boolean, default: true },
+    tripContext: { type: Object, default: () => ({}) },
   },
   emits: ["input"],
   data() {
@@ -311,6 +364,17 @@ export default {
     }
   },
   watch: {
+    value: {
+      deep: true,
+      handler(value) {
+        if (JSON.stringify(value) !== JSON.stringify(this.draft)) {
+          this.draft = JSON.parse(
+            JSON.stringify(value || emptyTravelSearchDraft())
+          )
+          this.clearReview()
+        }
+      },
+    },
     draft: {
       deep: true,
       handler(value) {
@@ -323,11 +387,16 @@ export default {
         this.clearReview()
       },
     },
-    contextChanged() {
-      this.draft.flights.confirmed = false
-      this.draft.flights.conflictChoice = ""
-      this.draft.rental.confirmed = false
-      this.clearReview()
+    contextChanged: {
+      // Changed trip context requires a fresh airport review, never new guesses.
+      immediate: true,
+      handler(changed) {
+        if (!changed) return
+        this.draft.flights.confirmed = false
+        this.draft.flights.conflictChoice = ""
+        this.draft.rental.confirmed = false
+        this.clearReview()
+      },
     },
     tool() {
       this.error = ""
@@ -335,12 +404,29 @@ export default {
     },
   },
   methods: {
+    normalizeAirport(field) {
+      const code = normalizedFlightAirportCode(this.draft.flights[field])
+      if (code && code !== this.draft.flights[field]) {
+        this.draft.flights[field] = code
+        this.draft.flights.confirmed = false
+        this.clearReview()
+      }
+    },
+    usePlannedDates() {
+      this.draft = seedTravelDates(this.draft, this.tripContext, {
+        replace: true,
+      })
+      this.clearReview()
+      this.notice =
+        "Planned dates copied. Review your flight dates and airports before searching."
+    },
+
     useLeg(pair) {
       this.draft.flights = {
         ...this.draft.flights,
         searchType: "one-way",
-        outboundFrom: pair.from.location.name,
-        outboundTo: pair.to.location.name,
+        outboundFrom: normalizedFlightAirportCode(pair.from.location.name),
+        outboundTo: normalizedFlightAirportCode(pair.to.location.name),
         departDate: "",
         confirmed: false,
         conflictChoice: "",
@@ -391,6 +477,15 @@ export default {
 </script>
 
 <style scoped>
+.travel-route-context {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--color-control-border, #71848d);
+  border-radius: 10px;
+  font-size: 0.75rem;
+}
+
 .travel-heading {
   display: flex;
   align-items: center;

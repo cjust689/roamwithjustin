@@ -94,6 +94,48 @@ function validDates(dates) {
     (!dates.arrival || !dates.departure || dates.arrival <= dates.departure)
   )
 }
+
+// Optional private travel endpoints do not create visits or change stop IDs.
+export function normalizeTripRouteEndpoints(
+  value = { start: null, finish: null }
+) {
+  if (
+    !plain(value) ||
+    Object.keys(value).some(key => !["start", "finish"].includes(key))
+  )
+    fail("invalid_route_endpoints")
+  const result = {}
+  for (const role of ["start", "finish"]) {
+    const endpoint = value[role]
+    if (endpoint === null) {
+      result[role] = null
+      continue
+    }
+    if (
+      !plain(endpoint) ||
+      Object.keys(endpoint).some(
+        key => !["place", "plannedDates"].includes(key)
+      ) ||
+      !validTripPlace(endpoint.place) ||
+      !validDates(endpoint.plannedDates)
+    )
+      fail("invalid_route_endpoints")
+    result[role] = {
+      place: tripPlaceProjection(endpoint.place),
+      plannedDates: {
+        arrival: endpoint.plannedDates.arrival,
+        departure: endpoint.plannedDates.departure,
+      },
+    }
+  }
+  const departure =
+    result.start?.plannedDates.departure || result.start?.plannedDates.arrival
+  const arrival =
+    result.finish?.plannedDates.arrival || result.finish?.plannedDates.departure
+  if (departure && arrival && departure > arrival)
+    fail("invalid_route_endpoints")
+  return result
+}
 function validLegacyDates(dates) {
   return (
     Array.isArray(dates) &&
@@ -184,6 +226,8 @@ export function assertCanonicalTrip(trip) {
     typeof trip.sharing.publicAtlas !== "boolean"
   )
     fail("invalid_trip_details")
+  if (trip.routeEndpoints !== undefined)
+    normalizeTripRouteEndpoints(trip.routeEndpoints)
   return trip
 }
 
@@ -248,10 +292,25 @@ export function removeEmptyTripStop(trip, stopId, options) {
 
 export function buildCanonicalTripMapRoute(trip) {
   assertCanonicalTrip(trip)
-  return trip.stops.map((stop, index) => ({
+  const route = trip.stops.map((stop, index) => ({
     key: stop.stopId,
     role: "stop",
     label: String(index + 1),
     location: { ...stop.place, coordinates: [...stop.place.coordinates] },
   }))
+  if (trip.routeEndpoints?.start)
+    route.unshift({
+      key: "trip-start",
+      role: "start",
+      label: "S",
+      location: tripPlaceProjection(trip.routeEndpoints.start.place),
+    })
+  if (trip.routeEndpoints?.finish)
+    route.push({
+      key: "trip-finish",
+      role: "finish",
+      label: "F",
+      location: tripPlaceProjection(trip.routeEndpoints.finish.place),
+    })
+  return route
 }

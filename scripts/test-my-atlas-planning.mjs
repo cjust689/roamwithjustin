@@ -449,8 +449,8 @@ assert.match(
 
 const flightUrl = new URL(
   buildExpediaFlightSearchUrl({
-    origin: "Atlanta, Georgia, United States",
-    destination: "Moab, Utah, United States",
+    origin: "Atlanta (atl)",
+    destination: "MAD",
     departureDate: "2027-04-18",
   })
 )
@@ -458,13 +458,18 @@ assert.equal(
   flightUrl.pathname,
   "/go/flight/search/oneway/2027-04-18/2027-04-18"
 )
-assert.equal(
-  flightUrl.searchParams.get("FromAirport"),
-  "Atlanta, Georgia, United States"
-)
-assert.equal(
-  flightUrl.searchParams.get("ToAirport"),
-  "Moab, Utah, United States"
+assert.equal(flightUrl.searchParams.get("FromAirport"), "ATL")
+assert.equal(flightUrl.searchParams.get("ToAirport"), "MAD")
+assert.equal(flightUrl.searchParams.get("TripType"), "OneWay")
+assert.equal(flightUrl.searchParams.get("FromDate"), "2027-04-18")
+assert.throws(
+  () =>
+    buildExpediaFlightSearchUrl({
+      origin: "Atlanta",
+      destination: "Moab",
+      departureDate: "2027-04-18",
+    }),
+  error => error.code === "flight_gateway_required"
 )
 assert.throws(
   () =>

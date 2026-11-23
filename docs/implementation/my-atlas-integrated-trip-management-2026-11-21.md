@@ -13,6 +13,11 @@ related:
 supersedes: []
 superseded_by: []
 code_paths:
+  - src/features/my-atlas/planning/tripTravelContext.mjs
+  - src/features/my-atlas/planning/travelSearch.mjs
+  - src/features/my-atlas/planning/handoffs.mjs
+  - src/features/my-atlas/components/MyAtlasTravelSearch.vue
+  - scripts/test-my-atlas-travel-search.mjs
   - src/features/my-atlas/components/MyAtlasDestinationPicker.vue
   - src/features/my-atlas/catalog/destinationDraft.mjs
   - scripts/test-my-atlas-destination-entry.mjs
@@ -914,3 +919,58 @@ visibility setting is preserved rather than restoring the concept's older toggle
       UI acceptance, distinguishing those from real-owner acceptance below.
 - [ ] Genuine owner acceptance with a real saved trip remains separate from
       synthetic browser and isolated-backend verification.
+
+### Per-destination planning dates, optional endpoints and flight handoff
+
+- [x] Put arrival/departure fields directly in the default destination Planning
+      view. Save dates and notes together without touching actual dates or
+      memories; show date hints in destination rows and clear corrected
+      validation guidance.
+- [x] Add optional private start/finish locations, each with arrival/departure
+      dates, in one dialog using the shared location picker and map review.
+      Persist via capability-gated trip metadata, validate snapshots/date order,
+      retain old trips, and support clearing both endpoints. Do not create
+      extra visits or add an overall-trip date requirement.
+- [x] Include endpoints in owner map routes/directions and planning date
+      summaries while keeping destination navigation/order and share/public
+      privacy boundaries. Private exports retain endpoint details.
+- [x] Seed blank flight dates from planned locations and retain chosen flight
+      values. Show place context separately from explicit airport-code fields.
+      Normalize lowercase/labeled codes and centralize documented Expedia
+      one-way, round-trip and open-jaw handoffs with explicit trip type/dates.
+      Require fresh confirmation when itinerary context changes.
+- [x] Focused scripts passed joint date/note saves, date validation, endpoint
+      payloads, stable visits, private snapshot exclusion, airport normalization,
+      explicit provider parameters and preservation of chosen flight dates.
+      The account Worker runtime suite passed 29 tests, including endpoint
+      persistence/reload, idempotent replay, invalid dates, private public
+      projections, exports, clearing and preservation during Combine review. Evidence:
+      `.state/my-atlas/endpoint-runtime.log`.
+- [x] Local Chrome passed eight both-theme cases at 320, 390, 568 landscape and
+      1440 pixels: two date fields in the default Planning view; joint saves;
+      dated optional endpoints; no extra destinations or nested dialogs;
+      flight context/date seeding; ATL/SJO parameters; retained chosen dates;
+      failed-save draft retention; endpoint clearing and unchanged map instance.
+      Endpoint coordinate review also passed both Yes/No return paths while
+      preserving the chosen endpoint role, draft name and map instance.
+      No real account writes. Evidence: `.state/theme/planning-dates-browser.json`,
+      captures and `.state/my-atlas/planning-dates-browser.mjs`.
+- [x] Final `npm run build` passed all script suites and 64 isolated Worker
+      runtime tests, hash `7613ef9e3425b6ec`, with the established local
+      parallel-false override and existing bundle-size warnings. Focused ESLint
+      and whitespace checks passed. Evidence: `.state/theme/planning-dates-build.log`.
+      Managed-doc audit passed with 76 documents and 12 existing warnings;
+      compatible Worker dry run passed in
+      `.state/theme/planning-dates-worker-dryrun.log`.
+- [x] Deploy compatible Worker `6d5edfb6-818c-4711-9eeb-72c2542a4a64`.
+      Ten remote health/authentication/CORS checks passed without account writes.
+      Evidence: `.state/theme/planning-dates-worker-deploy.log` and
+      `.state/my-atlas/planning-dates-worker-deployed.json`.
+- [x] Prepare the owner's authorized develop/main release. The release PRs
+      record protected checks, Pages deployment and live synthetic acceptance,
+      separately from genuine owner/provider acceptance below.
+- [ ] Genuine owner acceptance of dates and endpoint flow, plus actual Expedia
+      field prefill. Automated Expedia checks returned HTTP 429. Parameter
+      verification follows the official
+      [flight deeplink documentation](https://developers.expediagroup.com/white-label-template/traffic-growth/deeplinking/flight-deeplinks);
+      no provider booking or account action was taken.

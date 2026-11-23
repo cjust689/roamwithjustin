@@ -617,7 +617,7 @@ export function mutateTripStore(
       } else if (command.action === "metadata") {
         if (
           Object.keys(value.patch).some(
-            field => !["title", "description"].includes(field)
+            field => !["title", "description", "routeEndpoints"].includes(field)
           )
         )
           return fail("invalid_trip_patch")
@@ -690,7 +690,9 @@ export function mutateTripStore(
               trip.workflow !== "saved" ||
               trip.sharing.publicAtlas !== selected[0].sharing.publicAtlas ||
               trip.logistics.flights.length ||
-              trip.logistics.rentals.length
+              trip.logistics.rentals.length ||
+              trip.routeEndpoints?.start ||
+              trip.routeEndpoints?.finish
           )
         )
           return fail("combine_needs_review")

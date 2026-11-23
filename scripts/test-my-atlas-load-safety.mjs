@@ -1,3 +1,4 @@
+import { buildCanonicalTripMapRoute } from "../shared/my-atlas-trips.mjs"
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import os from "node:os"
@@ -169,6 +170,7 @@ let visibilityProfile = {
 }
 let rejectDiscovery = false
 const dependencies = {
+  buildCanonicalTripMapRoute,
   formatVisitedDates: () => "",
   formatPlaceTypeLabel: () => "",
   MyAtlasActionFeedback: {},
