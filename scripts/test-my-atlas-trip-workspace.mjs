@@ -1,3 +1,9 @@
+import {
+  tripTravelContext,
+  seedTravelDates,
+  tripTravelFingerprint,
+} from "../src/features/my-atlas/planning/tripTravelContext.mjs"
+import { validTripCalendarDate } from "../shared/my-atlas-trips.mjs"
 import { emptyDestinationDraft } from "../src/features/my-atlas/catalog/destinationDraft.mjs"
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
@@ -228,6 +234,10 @@ let calls = [],
   failure = "unavailable",
   readFailure = false
 const dependencies = {
+  tripTravelContext,
+  seedTravelDates,
+  tripTravelFingerprint,
+  validTripCalendarDate,
   formatPlaceTypeLabel,
   MyAtlasDialog: {},
   MyAtlasInfo: {},
@@ -843,4 +853,94 @@ assert.equal(
 )
 console.log(
   "Name-first persistence, failed-create retention and explicit pin-review return tests passed."
+)
+
+ui.trips = [{ ...structuredClone(trip), lifecycle: "planned" }]
+ui.selectedId = trip.tripId
+ui.pending = false
+ui.refreshNeeded = false
+ui.capabilities = {
+  emptyTripDrafts: true,
+  planningNotes: true,
+  routeEndpoints: true,
+}
+const plannedWrites = []
+ui.$set = (target, key, value) => (target[key] = value)
+ui.mutate = (...args) => plannedWrites.push(args)
+ui.editingStopId = ""
+ui.editStop(ui.selected.stops[0])
+ui.dates.plannedArrival = "2027-04-06"
+ui.dates.plannedDeparture = "2027-04-18"
+ui.planNoteDraft = "A hike idea"
+ui.saveStopPlanning()
+assert.deepEqual(plannedWrites.pop(), [
+  "editStop",
+  {
+    plannedDates: { arrival: "2027-04-06", departure: "2027-04-18" },
+    planNote: "A hike idea",
+  },
+  trip.tripId,
+  trip.stops[0].stopId,
+])
+ui.dates.plannedDeparture = "2027-04-01"
+ui.saveStopPlanning()
+assert.equal(plannedWrites.length, 0)
+assert.match(ui.workspaceStatus, /departure on or after/)
+ui.openWorkspace("endpoints")
+ui.chooseEndpoint({
+  selection: {
+    customPlace: { name: "Private departure", coordinates: [1, 2] },
+  },
+})
+ui.endpointDraft.start.plannedDates.departure = "2027-04-05"
+ui.endpointRole = "finish"
+ui.finishAtStart()
+assert.equal(
+  ui.endpointDraft.finish.plannedDates.arrival,
+  null,
+  "Return dates must not be copied from departure dates"
+)
+ui.endpointDraft.finish.plannedDates.arrival = "2027-04-20"
+ui.saveEndpoints()
+const endpointWrite = plannedWrites.pop()
+assert.equal(endpointWrite[0], "metadata")
+assert.equal(
+  endpointWrite[1].routeEndpoints.start.place.customPlace.name,
+  "Private departure"
+)
+assert.equal(
+  endpointWrite[1].routeEndpoints.finish.plannedDates.arrival,
+  "2027-04-20"
+)
+assert.equal(
+  ui.selected.stops.length,
+  trip.stops.length,
+  "Endpoint drafting never creates destinations"
+)
+const startPlace = { ...place, name: "Private departure" }
+ui.selected.routeEndpoints = {
+  start: {
+    place: startPlace,
+    plannedDates: { arrival: null, departure: "2027-04-05" },
+  },
+  finish: {
+    place: startPlace,
+    plannedDates: { arrival: "2027-04-20", departure: null },
+  },
+}
+const routeWithEndpoints = buildCanonicalTripMapRoute(ui.selected)
+assert.deepEqual(
+  routeWithEndpoints.map(node => node.role),
+  ["start", "stop", "stop", "finish"]
+)
+assert.equal(routeWithEndpoints[1].key, trip.stops[0].stopId)
+assert.equal(
+  JSON.stringify(decodeSharedTrip(encodeSharedTrip(ui.selected))).includes(
+    "Private departure"
+  ),
+  false
+)
+assert.equal(ui.selectedDate, "2027-04-05 to 2027-04-20")
+console.log(
+  "Visible destination date saves, optional endpoint drafts, date order, stable visit identities and shared-link privacy passed."
 )

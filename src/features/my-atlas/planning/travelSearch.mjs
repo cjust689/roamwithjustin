@@ -1,6 +1,7 @@
 import {
   buildExpediaFlightSearchUrl,
   MyAtlasHandoffError,
+  normalizedFlightAirportCode,
 } from "./handoffs.mjs"
 
 export const TRAVEL_SEARCH_PROVIDERS = Object.freeze({
@@ -92,8 +93,10 @@ export function reviewFlightSearch(flight, explicitFlyPairs = []) {
       details: "Use the individually selected Fly legs below.",
     }
   }
-  const from = text(flight.outboundFrom, "Departure gateway")
-  const to = text(flight.outboundTo, "Arrival gateway")
+  const fromText = text(flight.outboundFrom, "Departure gateway")
+  const toText = text(flight.outboundTo, "Arrival gateway")
+  const from = normalizedFlightAirportCode(fromText) || fromText
+  const to = normalizedFlightAirportCode(toText) || toText
   if (!from || !to || from.toLowerCase() === to.toLowerCase()) {
     throw new MyAtlasHandoffError(
       "Choose distinct departure and arrival gateways.",
@@ -108,11 +111,15 @@ export function reviewFlightSearch(flight, explicitFlyPairs = []) {
     const returnFrom =
       flight.searchType === "round-trip"
         ? to
-        : text(flight.returnFrom, "Return departure gateway")
+        : normalizedFlightAirportCode(
+            text(flight.returnFrom, "Return departure gateway")
+          ) || flight.returnFrom.trim()
     const returnTo =
       flight.searchType === "round-trip"
         ? from
-        : text(flight.returnTo, "Return arrival gateway")
+        : normalizedFlightAirportCode(
+            text(flight.returnTo, "Return arrival gateway")
+          ) || flight.returnTo.trim()
     if (
       !returnFrom ||
       !returnTo ||
@@ -160,14 +167,15 @@ export function reviewFlightSearch(flight, explicitFlyPairs = []) {
     )
   ) {
     if (flight.searchType === "round-trip") {
-      const url = new URL(
-        `https://www.expedia.com/go/flight/search/roundtrip/${departDate}/${returnDate}`
-      )
-      url.searchParams.set("load", "1")
-      url.searchParams.set("FromAirport", from)
-      url.searchParams.set("ToAirport", to)
-      url.searchParams.set("NumAdult", "1")
-      links.push({ label: "Search round trip on Expedia", url: url.toString() })
+      links.push({
+        label: "Search round trip on Expedia",
+        url: buildExpediaFlightSearchUrl({
+          origin: from,
+          destination: to,
+          departureDate: departDate,
+          returnDate,
+        }),
+      })
     } else {
       legs.forEach((leg, index) =>
         links.push({
@@ -182,6 +190,21 @@ export function reviewFlightSearch(flight, explicitFlyPairs = []) {
   }
   return {
     searchType: flight.searchType,
+    readiness: [
+      ...(!legs.every(
+        leg => codes.test(leg.origin) && codes.test(leg.destination)
+      )
+        ? [
+            "Enter three letter airport codes, such as ATL or SJO. City names do not select an airport.",
+          ]
+        : []),
+      ...(!legs.every(leg => leg.departureDate)
+        ? ["Choose the flight dates to prepare a dated Expedia search."]
+        : []),
+      ...(flight.confirmed !== true
+        ? ["Confirm the airports before opening a prepared search."]
+        : []),
+    ],
     legs,
     links,
     conflicts,

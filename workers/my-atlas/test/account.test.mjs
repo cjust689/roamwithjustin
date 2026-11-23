@@ -213,6 +213,159 @@ describe("private owner profile and pin services", () => {
       options
     )
   }
+  it("keeps optional dated endpoints private and separate from destination visits", async () => {
+    await upgradeTrips()
+    const created = await tripCall("/v1/me/trips", {
+      title: "Optional travel",
+      lifecycle: "planned",
+      stops: [
+        { customPlace: { name: "Visible destination", coordinates: [3, 4] } },
+      ],
+    })
+    const path = `/v1/me/trips/${created.trip.tripId}`
+    const routeEndpoints = {
+      start: {
+        place: {
+          customPlace: {
+            name: "Private departure location",
+            coordinates: [1, 2],
+          },
+        },
+        plannedDates: { arrival: null, departure: "2027-04-05" },
+      },
+      finish: {
+        place: {
+          customPlace: { name: "Private return location", coordinates: [5, 6] },
+        },
+        plannedDates: { arrival: "2027-04-20", departure: null },
+      },
+    }
+    const revision = created.profile.revision,
+      key = tripKey()
+    const saved = await tripCall(
+      path,
+      { routeEndpoints },
+      { method: "PATCH", revision, key }
+    )
+    expect(saved.trip.stops).toEqual(created.trip.stops)
+    expect(saved.profile.pinCount).toBe(0)
+    expect(saved.trip.routeEndpoints.start.place.name).toBe(
+      "Private departure location"
+    )
+    expect(saved.trip.routeEndpoints.start.plannedDates.departure).toBe(
+      "2027-04-05"
+    )
+    expect(
+      (
+        await tripCall(
+          path,
+          { routeEndpoints },
+          { method: "PATCH", revision, key }
+        )
+      ).idempotent
+    ).toBe(true)
+    const reloaded = await tripCall("/v1/me/trips", undefined, {
+      method: "GET",
+    })
+    expect(reloaded.capabilities.routeEndpoints).toBe(true)
+    expect(reloaded.trips[0].routeEndpoints).toEqual(saved.trip.routeEndpoints)
+    for (const dates of [
+      { arrival: "2027-02-30", departure: null },
+      { arrival: "2027-04-20", departure: "2027-04-05" },
+      { arrival: null, departure: null, note: "extra" },
+    ])
+      await expect(
+        tripCall(
+          path,
+          {
+            routeEndpoints: {
+              ...routeEndpoints,
+              start: { ...routeEndpoints.start, plannedDates: dates },
+            },
+          },
+          { method: "PATCH" }
+        )
+      ).rejects.toThrow()
+    await expect(
+      tripCall(
+        path,
+        {
+          routeEndpoints: {
+            ...routeEndpoints,
+            finish: {
+              ...routeEndpoints.finish,
+              plannedDates: { arrival: "2027-04-01", departure: null },
+            },
+          },
+        },
+        { method: "PATCH" }
+      )
+    ).rejects.toThrow()
+    const dated = await tripCall(
+      `${path}/stops/${created.trip.stops[0].stopId}`,
+      {
+        planNote: "Plan remains private",
+        plannedDates: { arrival: "2027-04-06", departure: "2027-04-18" },
+      },
+      { method: "PATCH" }
+    )
+    expect(dated.trip.routeEndpoints).toEqual(saved.trip.routeEndpoints)
+    const published = await tripCall(
+      `${path}/sharing`,
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: published.profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    const publicState =
+      await env.MY_ATLAS_USERS.getByName(USER_ID).getPublicAtlas()
+    expect(JSON.stringify(publicState)).not.toContain(
+      "Private departure location"
+    )
+    expect(JSON.stringify(publicState)).not.toContain("Private return location")
+    expect(JSON.stringify(publicState)).not.toContain("routeEndpoints")
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.trips[0].routeEndpoints).toEqual(saved.trip.routeEndpoints)
+    await tripCall(
+      `${path}/lifecycle`,
+      { lifecycle: "past" },
+      { method: "PATCH" }
+    )
+    const other = await tripCall("/v1/me/trips", {
+      title: "Another past journey",
+      lifecycle: "past",
+      stops: [{ customPlace: { name: "Other visit", coordinates: [7, 8] } }],
+    })
+    await tripCall(
+      `/v1/me/trips/${other.trip.tripId}/sharing`,
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    await expect(
+      tripCall("/v1/me/trips/combine", {
+        tripIds: [created.trip.tripId, other.trip.tripId],
+        title: "Combined",
+      })
+    ).rejects.toMatchObject({ code: "combine_needs_review" })
+    const cleared = await tripCall(
+      path,
+      { routeEndpoints: { start: null, finish: null } },
+      { method: "PATCH" }
+    )
+    expect(cleared.trip.routeEndpoints).toEqual({ start: null, finish: null })
+    expect(cleared.trip.stops[0].planNote).toBe("Plan remains private")
+  })
   it("keeps destinations independent until explicitly grouped, including one-stop trips and repeated visits", async () => {
     const addDestination = async (name, coordinates, memory = "") => {
       const profile = (
@@ -1271,6 +1424,7 @@ describe("private owner profile and pin services", () => {
     expect(listed.capabilities).toEqual({
       emptyTripDrafts: true,
       planningNotes: true,
+      routeEndpoints: true,
     })
     const key = tripKey(),
       revision = listed.profile.revision
