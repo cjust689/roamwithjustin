@@ -37,6 +37,8 @@ verification:
     - local Chrome verified both themes at 320, 390 and 1440 pixels with one scrollable dialog and zero horizontal overflow
     - browser fixture verified map-review draft return plus add/edit/remove while preserving five destinations
     - .state/my-atlas/lodging-browser-results.json
+    - staging Worker 3151c546-c995-4ebc-b857-61876be0f687 deployed on 2026-11-23
+    - remote health, three unauthenticated stay routes, collection authentication and allowed/foreign-origin CORS checks passed
 ---
 
 # Private trip lodging
@@ -114,13 +116,24 @@ reset or written during tests.
 - [x] Revision/idempotency, account isolation, export/deletion and public exclusion tests.
 - [x] Five destinations with one, three or five stays without changing stops.
 - [x] Complete mobile/desktop rendered acceptance evidence.
-- [ ] Deploy the additive Worker and release the frontend when authorized.
+- [x] Deploy the additive Worker and prepare authorized protected frontend promotion.
 - [ ] Complete signed-in owner acceptance after release.
 
 Browser acceptance used synthetic in-memory trips and blocked real owner API
 requests. Screenshots are under `.state/my-atlas/lodging-{theme}-{width}.png`.
 The retained preview server runs at `http://localhost:8081/my-atlas` because
-8080 was already occupied. Its configured remote API has not been updated with
-lodging routes, so real-account lodging controls remain capability-gated until
-Worker deployment. The isolated browser fixture is evidence of UI behavior,
-not a claim that staging or production already supports lodging.
+8080 was already occupied. The isolated browser fixture is evidence of UI
+behavior, not signed-in remote owner acceptance.
+
+## November 23 release evidence
+
+The owner authorized release. Worker version
+`3151c546-c995-4ebc-b857-61876be0f687` is deployed to the existing staging API,
+which the production site's `MY_ATLAS_API_URL` repository variable also selects.
+Remote checks passed health 200, owner collection and all three lodging writes
+401 without authentication, site-origin preflight 204 and foreign-origin
+preflight 403. No account was created, modified, migrated or reset by these checks.
+
+Protected frontend promotion starts in [pull request 260](https://github.com/cjust689/roamwithjustin/pull/260).
+Its release description records the final develop/main merge and Pages evidence
+after completion. Signed-in owner acceptance remains a separate unchecked item.

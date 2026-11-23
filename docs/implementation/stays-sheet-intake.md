@@ -185,11 +185,16 @@ receipt. No background polling is enabled by a Sheet flag.
 - [x] Add generated-path protected publication and guarded readback plumbing.
 - [x] Verify real workbook reads without importing or inventing a stay.
 - [ ] Complete a real owner-supplied stay's preview/apply acceptance.
-- [ ] Release feature code, then verify its first real protected deployment and Published readback.
+- [x] Prepare feature code for authorized protected release through pull request 260.
+- [ ] Verify the first real stay's protected deployment and Published readback.
 
 The generated shard is intentionally empty. No real lodging has been imported
 or deployed during implementation. Source and publisher tests do not substitute
 for the final real-content external-service acceptance.
+
+The owner authorized code release on November 23. Final develop/main and Pages
+release evidence is recorded in [pull request 260](https://github.com/cjust689/roamwithjustin/pull/260).
+Releasing the importer does not import or publish a stay row.
 
 ## Live workbook evidence
 

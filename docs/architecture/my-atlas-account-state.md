@@ -196,7 +196,7 @@ removed with their trip/account. They do not add pins, map route points,
 destination counts, shared-link content or public profile fields. Main Atlas
 editorial Stays ingestion uses a different generated content authority and
 never reads owner trip storage. The [active lodging checklist](../implementation/my-atlas-lodging-implementation.md)
-records verification and the still-unreleased API/UI boundary.
+records verification, release evidence and remaining signed-in owner acceptance.
 
 ## Optional Instagram profile link
 
