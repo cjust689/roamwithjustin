@@ -32,6 +32,8 @@ code_paths:
   - scripts/editorial-github-publish.mjs
   - scripts/lib/editorial-baseline.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-public-copy.mjs
+  - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-github.mjs
   - scripts/lib/editorial-github-publisher.mjs
   - scripts/lib/editorial-github-rules.mjs
@@ -43,6 +45,7 @@ code_paths:
   - scripts/lib/editorial-place-registration.mjs
   - scripts/test-editorial-google.mjs
   - scripts/test-editorial-place-registration.mjs
+  - scripts/test-editorial-story-generator.mjs
   - src/content/experiences/index.mjs
   - src/content/editorial/generated/records.json
   - src/content/geography/index.mjs
@@ -122,6 +125,39 @@ single-command real publication remains unverified; the implementation remains
 partial.
 
 ## One-command workflow
+
+### Story generation restoration and branch audit
+
+On 2026-11-23 a refreshed remote-branch and GitHub PR audit found no open PRs.
+`feature-editorial-atlas-story` was the only remote feature branch with
+non-equivalent commits absent from develop. Its story generator, commit
+`38a6d5d`, was never integrated into the current publisher. This explains why
+Preview on develop prepared media without generating `Atlas Story`.
+
+The restoration carries only that generator integration onto current develop.
+It retains the newer Windows process runner, Git status parser, guarded
+publication recovery and lodging features. The old branch's generated Media
+and editorial record changes are excluded, preserving current public records.
+Other retained branch names are not evidence of missing features; their
+commits are merged or patch-equivalent to develop. The generated Pages branch
+has separate history and was excluded from the source-feature comparison.
+
+Use the existing row arguments with `npm.cmd run editorial:publish -- --preview`.
+For an Experience row, this requires `OPENAI_API_KEY` in the terminal environment
+and writes a fresh draft to `Atlas Story`. Review that cell, set Atlas Mode to
+Publish and run the same command with `--apply` instead of `--preview`.
+Every Preview overwrites prior Story edits. Apply never generates copy or
+falls back to private Notes. A blank Experience remains media-only and now
+prints an explicit explanation that no story will be generated.
+
+- [x] Restore Preview model call and guarded single-cell Sheet writeback.
+- [x] Keep Notes private and require Story for Experience publication.
+- [x] Preserve current publisher fixes, lodging and generated records.
+- [x] Run editorial regression tests with mocked model and Google responses.
+- [ ] Verify a live model request and Sheet draft writeback after restoration.
+
+The tests spend no credits and make no external model calls. Provider billing,
+model access and a live regenerated draft remain externally unverified.
 
 ### Windows build launch and retry
 
@@ -226,10 +262,12 @@ scope:
 --drive-scope readonly --allow-restricted-drive-scope --reauthorize
 ```
 
-The OAuth client and refresh token must remain outside the repository. R2 apply
-also requires `MEDIA_UPLOAD_WORKER_URL` and `MEDIA_UPLOAD_TOKEN` in the process
-environment. GitHub authentication comes from an existing Git Credential
-Manager login or a supported token environment variable.
+The OAuth client and refresh token must remain outside the repository. Preview
+story generation requires `OPENAI_API_KEY`; `EDITORIAL_STORY_MODEL` may
+override the default `gpt-6-astra`. R2 apply also requires
+`MEDIA_UPLOAD_WORKER_URL` and `MEDIA_UPLOAD_TOKEN` in the process environment.
+GitHub authentication comes from an existing Git Credential Manager login or
+a supported token environment variable.
 
 ## Sheet routing fields
 
@@ -256,6 +294,13 @@ existing label or `New: <title>` can be entered. The protected `Atlas
 Reference` tab is for review only. `editorial:catalog -- --apply` rebuilds it
 on demand, and every apply-mode publication refreshes it before selection and
 again after successful generated content changes.
+
+`Atlas Notes` is private firsthand evidence. `Atlas Story` is reviewed public
+copy. For a row with an Experience, every Preview command regenerates and
+overwrites `Atlas Story`, including any manual edits to the prior draft. Review
+or edit the new Story in Sheets, then change the row to Publish. Publish never
+regenerates it and ingests the exact current cell. Rows with a blank Experience
+remain media-only, do not call the model, and leave `Atlas Story` untouched.
 
 ## Explicit Place and Visit registration
 
@@ -294,27 +339,36 @@ or changes `Atlas Mode`; the creator chooses Preview or Publish afterward.
 
 ## Preview behavior
 
-Preview performs only local and Google read operations:
+Preview performs local work plus one narrowly guarded Google Sheet write:
 
 1. Resolve the designated Sheet gid and one stable Post ID.
 2. Require `Publish To = Atlas` or `Both`, a canonical Journey, and a Drive
    folder. Blank `Atlas Place` means Journey scope. A chosen Atlas Place must
    resolve to a real Visit in that Journey.
-3. Inventory the folder and combine the Sheet source hash with the immutable
-   Drive metadata fingerprint.
-4. Download every direct JPEG, PNG, and MP4 into a private hash-addressed
+3. Inventory the folder. If `Atlas Experience` is present, send `Atlas Notes`,
+   the complete storytelling framework, the relevant Journey section from
+   owner travel context, canonical target labels, and image/video counts to
+   the OpenAI Responses API. Media bytes and filenames are not sent.
+4. Validate the structured draft for length, public punctuation rules, and
+   workflow language. Re-read the stable Post ID, reject any concurrent source
+   change, overwrite only `Atlas Story`, and verify its exact readback.
+5. Combine the refreshed Sheet source hash with the immutable Drive metadata
+   fingerprint.
+6. Download every direct JPEG, PNG, and MP4 into a private hash-addressed
    snapshot below `.state/editorial/runs/`.
-5. Reuse `media:prepare` to build separate deterministic image and video
+7. Reuse `media:prepare` to build separate deterministic image and video
    packages. The linked Drive folder may freely mix all three supported file
    formats; this partition is internal and requires no folder management by
    the owner.
-6. Run mandatory receipt-free `media:ingest --dry-run` validation.
-7. Plan the combined generated Media, Experience, Moment, and placement diff.
-8. Write a private `publication-plan.json` and stop.
+8. Run mandatory receipt-free `media:ingest --dry-run` validation.
+9. Plan the combined generated Media, Experience, Moment, and placement diff.
+10. Write a private `publication-plan.json` and stop.
 
 Preview does not upload to R2, mutate generated application records, create a
 Git branch, call GitHub, deploy Pages, or write publication status to Sheets.
-No fake upload receipt is accepted.
+Its only remote mutation is the exact `Atlas Story` cell. The API request uses
+structured output, disables response storage, has a bounded timeout, and never
+logs the API key. No fake upload receipt is accepted.
 
 ## Apply behavior
 
@@ -327,8 +381,8 @@ It then:
 1. uploads each prepared package through the existing R2 Worker and records a
    checksum receipt;
 2. applies the existing Media ingestor for each real receipt;
-3. compiles one stable Moment per Post and optionally resolves or creates an
-   Experience;
+3. requires the reviewed `Atlas Story`, compiles one stable Moment per Post,
+   and optionally resolves or creates an Experience, without calling a model;
 4. updates only the generated Media and editorial JSON shards, with rollback
    on validation failure;
 5. runs the production build;
@@ -370,9 +424,10 @@ not an inferred ordering key.
   invent an Experience.
 
 The same Post ID revises its own Moment idempotently. A second Post assigned to
-the same Experience appends a second Moment. Public title and notes validation
-rejects dash punctuation and does not invent missing copy. Media placements
-can now reference a validated Experience in the same Journey.
+the same Experience appends a second Moment. `Atlas Notes` never enters the
+generated record. Public title and `Atlas Story` validation rejects dash
+punctuation and workflow labels and does not invent missing copy. Media
+placements can now reference a validated Experience in the same Journey.
 
 ## Live baseline already verified
 
@@ -451,9 +506,8 @@ Implemented and test-covered:
 
 Still owner-controlled or externally unverified:
 
-- first real Drive download through the chosen OAuth scope
-- production R2 Worker endpoint and token availability in this environment
-- first row-backed end-to-end post publication and Sheet Published readback
+- first uninterrupted row-backed publication without manual metadata recovery
+- live model generation and Story writeback after restoration
 - first live row-backed `New Place` registration and generated Atlas pin; the
   command and its Sheet request surface are implemented and verified, but no
   new Place record has been applied yet
@@ -476,7 +530,9 @@ Still owner-controlled or externally unverified:
 - [x] Implement isolated per-post branches and staged merge-commit promotion.
 - [x] Implement workflow, Pages, rendered content, Catalog, and Sheet checks.
 - [x] Implement an explicit `New Place` and Visit registration command.
-- [ ] Run the first owner-selected Preview row against a real Drive folder.
-- [ ] Run the first owner-approved Publish row through R2 and production.
+- [x] Run the first owner-selected Preview row against a real Drive folder.
+- [x] Publish the owner-approved Bajos del Toro row through R2 and production,
+      with guarded Sheet metadata recovery documented above.
+- [ ] Complete an uninterrupted publication without manual recovery.
 - [ ] Prove the two-Post, one-Experience regression with real content.
 - [ ] Consider an opt-in local watcher only after field publication is stable.

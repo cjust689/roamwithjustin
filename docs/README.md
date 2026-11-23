@@ -70,6 +70,12 @@ verification:
 
 # Roam With Justin documentation
 
+The reviewed story generator from commit `38a6d5d` is reconciled with the
+current publisher. For Experience rows, Preview generates `Atlas Story` from
+private `Atlas Notes` and writes the guarded draft back to Sheets. Apply
+publishes the reviewed Story without calling the model. Each Preview replaces
+the prior draft. See the [editorial workflow](implementation/editorial-sheet-publishing.md#story-generation-restoration-and-branch-audit).
+
 Editorial Windows subprocess repair: npm build commands now use Node and the
 installed npm CLI instead of executing a `.cmd` shim directly. Existing Bajos
 del Toro image/video packages and receipts passed nonpublishing verification.
@@ -577,9 +583,10 @@ structure only; it cannot prove application behavior.
   choices. Experience and
   Moment compilation is test-verified. Guarded GitHub promotion, Actions,
   Pages, rendered production output, and merge-only protected-branch rules are
-  live verified. Real Drive-folder access, R2 credentials, the first deployed
-  row and Sheet write-back, the first explicit generated Place registration,
-  and any optional Utah 2026 Salt Lake City Airport transit Visit remain
-  externally unverified.
+  live verified. Bajos del Toro media and editorial records are deployed, and
+  final Sheet metadata was recovered and verified. Uninterrupted publication,
+  a live Story generation after restoration, the first explicit generated
+  Place registration, and any optional Utah 2026 Salt Lake City Airport transit
+  Visit remain externally unverified.
 
 **Last repository documentation audit:** 2026-11-20.

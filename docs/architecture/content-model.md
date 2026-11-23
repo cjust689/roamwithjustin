@@ -71,6 +71,8 @@ code_paths:
   - scripts/editorial-register-place.mjs
   - scripts/lib/editorial-place-registration.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-public-copy.mjs
+  - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-google-publication.mjs
   - scripts/lib/editorial-publication-plan.mjs
   - scripts/test-editorial-google.mjs
@@ -80,6 +82,7 @@ code_paths:
   - scripts/test-editorial-place-suggestions.mjs
   - scripts/test-editorial-place-decisions.mjs
   - scripts/test-editorial-place-registration.mjs
+  - scripts/test-editorial-story-generator.mjs
 verification:
   state: verified
   evidence:
@@ -269,6 +272,15 @@ order and their own Media set. `Travel Date / Range` is shown as supplied
 evidence but does not silently reorder Moments or manufacture exact dates.
 Draft Experiences, Moments, and placements are excluded from public selectors.
 
+Sheet-authored Moment copy has two deliberately separate fields. `Atlas Notes`
+is private source evidence and is never projected as public prose. `Atlas
+Story` is the reviewed public draft. Preview regenerates it from the private
+notes, the complete storytelling framework, the relevant owner travel-context
+section, canonical Journey and Place identity, and media counts only. Publish
+does not call a model. It requires and ingests the current `Atlas Story` when
+the row names an Experience. A blank Experience remains a media-only Journey
+or Visit contribution and creates neither a Story nor a Moment.
+
 An internally incomplete Journey may be media free. Story list/detail
 components render a quiet decorative surface and the available date, place,
 and story copy. Internal publication state, verification state, media counts,
@@ -377,12 +389,15 @@ at Journey scope rather than inventing a Visit.
 Blank `Atlas Place` clears Place and Visit targeting for Journey scope. A
 selected Atlas Place must resolve to an existing canonical Place and a matching
 Visit in that Journey. Guarded write-back persists the resolved hidden IDs.
-Preview plans generated Media and editorial records without remote writes.
-Apply uses verified R2 receipts, creates or reuses an Experience, upserts one
-stable Moment for the Post, validates the generated pair, and then hands only
-those machine-owned shards to the isolated Git publisher. A blank Experience
-leaves the media at Journey or Visit scope rather than inventing one. The
-publisher does not infer missing geography.
+Preview calls the OpenAI Responses API only for rows with an Experience,
+validates the structured result, rechecks the unchanged stable row, and
+overwrites only `Atlas Story`. It then plans generated Media and editorial
+records without R2, GitHub, tracked-content, deployment, or publication-status
+writes. Apply uses the reviewed Sheet story and verified R2 receipts, creates
+or reuses an Experience, upserts one stable Moment for the Post, validates the
+generated pair, and then hands only those machine-owned shards to the isolated
+Git publisher. A blank Experience leaves the media at Journey or Visit scope
+rather than inventing one. The publisher does not infer missing geography.
 
 `editorial:register:place` is the separate explicit geography boundary. The
 selected row must contain `Atlas Place = New Place`, put the requested name in

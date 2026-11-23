@@ -18,10 +18,7 @@ const emptyEditorial = {
 }
 const emptyMedia = {
   schemaVersion: 1,
-  assets: [
-    { id: "image-1" },
-    { id: "image-2" },
-  ],
+  assets: [{ id: "image-1" }, { id: "image-2" }],
   placements: [
     { id: "placement-1", assetId: "image-1", experienceId: null },
     { id: "placement-2", assetId: "image-2", experienceId: null },
@@ -42,7 +39,8 @@ const row = {
   "Series/Post": "Boat day",
   "Atlas Experience": "New: Boat day",
   "Moment / Angle": "The vessel",
-  "Atlas Notes": "We board in the morning and watch the coastline change.",
+  "Atlas Notes": "Private evidence can keep a morning - afternoon shorthand.",
+  "Atlas Story": "We board in the morning and watch the coastline change.",
   "Travel Date / Range": "July 2026",
 }
 const first = planEditorialCompilation({
@@ -57,8 +55,37 @@ assert.equal(first.changed, true)
 assert.equal(first.editorial.experiences.length, 1)
 assert.equal(first.editorial.moments.length, 1)
 assert.equal(first.editorial.moments[0].sortOrder, 0)
+assert.equal(
+  first.editorial.moments[0].notes,
+  "We board in the morning and watch the coastline change."
+)
+assert.doesNotMatch(first.editorial.moments[0].notes, /Private evidence/)
+assert.throws(
+  () =>
+    planEditorialCompilation({
+      currentEditorial: emptyEditorial,
+      currentMedia: emptyMedia,
+      row: { ...row, "Atlas Story": "" },
+      processedHash: "a".repeat(64),
+      mediaBatchIds: ["media-batch-1"],
+      journeys,
+    }),
+  /Atlas Story is required/
+)
 assert.equal(first.media.placements[0].experienceId, first.experienceId)
 assert.deepEqual(validateEditorialRecords(first.editorial, { journeys }), [])
+
+const mediaOnly = planEditorialCompilation({
+  currentEditorial: emptyEditorial,
+  currentMedia: emptyMedia,
+  row: { ...row, "Atlas Experience": "", "Atlas Story": "" },
+  processedHash: "a".repeat(64),
+  mediaBatchIds: ["media-batch-1"],
+  journeys,
+})
+assert.equal(mediaOnly.experienceId, null)
+assert.equal(mediaOnly.momentId, null)
+assert.deepEqual(mediaOnly.editorial, emptyEditorial)
 
 const repeated = planEditorialCompilation({
   currentEditorial: first.editorial,
@@ -73,7 +100,10 @@ assert.equal(repeated.changed, false)
 const revised = planEditorialCompilation({
   currentEditorial: first.editorial,
   currentMedia: first.media,
-  row: { ...row, "Atlas Notes": "The coastline becomes the part I keep watching." },
+  row: {
+    ...row,
+    "Atlas Story": "The coastline becomes the part I keep watching.",
+  },
   processedHash: "b".repeat(64),
   mediaBatchIds: ["media-batch-1"],
   journeys,
@@ -116,7 +146,7 @@ assert.throws(
     planEditorialCompilation({
       currentEditorial: emptyEditorial,
       currentMedia: emptyMedia,
-      row: { ...row, "Atlas Notes": "Morning - then the water." },
+      row: { ...row, "Atlas Story": "Morning - then the water." },
       processedHash: "d".repeat(64),
       mediaBatchIds: ["media-batch-1"],
       journeys,

@@ -12,6 +12,7 @@ import { placeRecords } from "../src/content/places/index.mjs"
 import {
   buildCanonicalCatalog,
   postSourceHash,
+  storySourceHash,
 } from "./lib/editorial-baseline.mjs"
 import {
   planEditorialCompilation,
@@ -41,6 +42,7 @@ import {
 } from "./lib/editorial-google-catalog.mjs"
 import {
   applyPublicationWriteback,
+  buildAtlasStoryWriteback,
   buildPublicationWriteback,
 } from "./lib/editorial-google-publication.mjs"
 import {
@@ -55,6 +57,10 @@ import {
   readSheetStructure,
   readSpreadsheetSheets,
 } from "./lib/editorial-google-sheets.mjs"
+import {
+  generateAtlasStory,
+  loadStoryReferences,
+} from "./lib/editorial-story-generator.mjs"
 
 const require = createRequire(import.meta.url)
 const {
@@ -80,9 +86,11 @@ function usage() {
   npm run editorial:publish -- --preview --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--post-id <id>]
   npm run editorial:publish -- --apply --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--post-id <id>]
 
-Preview downloads the selected row's approved Drive folder into private state,
-prepares deterministic packages, and validates the combined Media, Experience,
-and Moment plan. It makes no R2, GitHub, app-content, or Sheet writes.
+Preview regenerates Atlas Story from Atlas Notes when the row names an
+Experience, writes only that reviewed-copy cell to the same stable Sheet row,
+downloads the approved Drive folder into private state, prepares deterministic
+packages, and validates the combined Media, Experience, and Moment plan. It
+makes no R2, GitHub, app-content, or publication-status writes.
 
 Apply requires Atlas Mode Publish. It rechecks the Sheet and Drive, uploads with
 real receipts, updates only generated content, validates and builds, promotes a
@@ -466,7 +474,7 @@ async function main() {
   const configuration = resolveGoogleConfiguration({
     options: {
       ...options,
-      sheetsAccess: options.apply ? "write" : "readonly",
+      sheetsAccess: "write",
     },
     projectRoot,
   })
@@ -497,7 +505,7 @@ async function main() {
       postsRange: postsStructure.title,
     })
   }
-  const selectedSource = selectPublicationRow({
+  let selectedSource = selectPublicationRow({
     rows: postsSheet.rows,
     account: options.account,
     postId: options.postId,
@@ -509,16 +517,92 @@ async function main() {
     atlasNodes: atlasPresentation,
     experiences: experienceRecords,
   })
-  const target = resolvePublicationTarget({
+  let target = resolvePublicationTarget({
     row: selectedSource.row,
     catalog: authoringCatalog,
   })
-  const selected = { ...selectedSource, row: target.row, target }
-  const sheetSourceHash = postSourceHash(selected.row)
+  let selected = { ...selectedSource, row: target.row, target }
   const inventory = await inventoryDriveFolder({
     auth,
     folderUrl: selected.row["Drive Folder"],
   })
+  let storyGeneration = null
+  if (
+    options.preview &&
+    String(selected.row["Atlas Experience"] || "").trim()
+  ) {
+    const expectedStorySourceHash = storySourceHash(selected.row)
+    const references = loadStoryReferences({
+      projectRoot,
+      journeyId: selected.row.journey_id,
+    })
+    const journey = journeyRecords.find(
+      item => item.id === selected.row.journey_id
+    )
+    console.log("Generating Atlas Story from Atlas Notes for the selected Post.")
+    const generated = await generateAtlasStory({
+      row: selected.row,
+      journey,
+      place: target.place,
+      visit: target.visit,
+      mediaSummary: inventory.summary,
+      ...references,
+    })
+    const guardedSheet = await readPostsSheet({
+      auth,
+      spreadsheetId: configuration.spreadsheetId,
+      postsRange: postsStructure.title,
+    })
+    const storyWriteback = buildAtlasStoryWriteback({
+      sheetId: postsStructure.sheetId,
+      headers: guardedSheet.headers,
+      rows: guardedSheet.rows,
+      postId: selected.row.post_id,
+      expectedStorySourceHash,
+      story: generated.story,
+    })
+    await applyPublicationWriteback({
+      auth,
+      spreadsheetId: configuration.spreadsheetId,
+      requests: storyWriteback.requests,
+    })
+    const storyReadback = await readPostsSheet({
+      auth,
+      spreadsheetId: configuration.spreadsheetId,
+      postsRange: postsStructure.title,
+    })
+    const actual = storyReadback.rows.find(
+      row => String(row.post_id || "").trim() === selected.row.post_id
+    )
+    if (String(actual?.["Atlas Story"] || "") !== generated.story) {
+      throw new Error("Atlas Story Sheet write-back verification failed")
+    }
+    console.log(
+      "Atlas Story saved to the Sheet. Review or edit it before Publish. Running Preview again replaces this draft."
+    )
+    selectedSource = selectPublicationRow({
+      rows: storyReadback.rows,
+      account: options.account,
+      postId: selected.row.post_id,
+      apply: false,
+    })
+    target = resolvePublicationTarget({
+      row: selectedSource.row,
+      catalog: authoringCatalog,
+    })
+    selected = { ...selectedSource, row: target.row, target }
+    storyGeneration = {
+      model: generated.model,
+      characters: generated.story.length,
+      rowNumber: storyWriteback.rowNumber,
+      regenerated: true,
+    }
+  } else if (options.preview) {
+    console.log(
+      "Media-only preview. Set Atlas Experience and Atlas Notes to generate an Atlas Story."
+    )
+  }
+  const sheetSourceHash = postSourceHash(selected.row)
   const fingerprint = driveInventoryFingerprint(inventory)
   const processedHash = publicationSourceHash({
     sheetSourceHash,
@@ -587,7 +671,12 @@ async function main() {
     momentId: previewPlan.momentId,
     mediaAssetIds: previewPlan.mediaAssetIds,
     message: previewPlan.message,
-    remoteChanges: options.apply ? "pending approval checks" : "none",
+    storyGeneration,
+    remoteChanges: options.apply
+      ? "pending approval checks"
+      : storyGeneration
+        ? "Atlas Story written to Sheet"
+        : "none",
   }
   writePrivateJson(path.join(runDirectory, "publication-plan.json"), preview)
   if (options.preview) {

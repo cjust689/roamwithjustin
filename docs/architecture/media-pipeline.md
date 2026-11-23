@@ -29,6 +29,7 @@ code_paths:
   - scripts/lib/editorial-process.mjs
   - scripts/lib/editorial-google-drive.mjs
   - scripts/lib/editorial-content-compiler.mjs
+  - scripts/lib/editorial-story-generator.mjs
   - scripts/lib/editorial-github-publisher.mjs
   - scripts/test-editorial-google.mjs
   - workers/media-upload/src/index.mjs
@@ -49,6 +50,7 @@ verification:
     - npm run media:worker:check
     - npm run content:validate
     - npm run build
+    - owner-authenticated Drive video snapshot and Worker R2 integrity receipt on 2026-11-17
 ---
 
 # Media pipeline
@@ -203,10 +205,12 @@ unverified.
 
 ## Sheet and Git publication orchestration
 
-`editorial:publish -- --preview` downloads a hash-addressed private Drive
-snapshot, partitions images and MP4s, invokes `media:prepare`, runs mandatory
-receipt-free ingestion planning, and composes the proposed Experience and
-Moment diff. It never uploads or changes tracked content.
+`editorial:publish -- --preview` inventories the Drive folder and, when the row
+names an Experience, regenerates the reviewed `Atlas Story` before downloading
+a hash-addressed private snapshot. It then partitions images and MP4s, invokes
+`media:prepare`, runs mandatory receipt-free ingestion planning, and composes
+the proposed Experience and Moment diff. Preview writes only the guarded Story
+cell. It never uploads, changes tracked content, calls GitHub, or deploys.
 
 One editorial Drive folder may contain any mixture of direct JPEG, PNG, and
 MP4 files. The publisher preserves that single-folder authoring workflow and
@@ -223,11 +227,13 @@ must succeed before the Sheet receives Published metadata. R2 objects are
 immutable and are not deleted as rollback for a later Git, Pages, or Sheet
 failure.
 
-The Git portion is externally proven: the integration itself passed the
-`develop` and `main` validation jobs, deployed through Pages run 43800514937,
-and produced the expected rendered Journey page. Both target branches now
-require the strict `validate` context and merge commits. The remaining live
-proof is a row-backed Drive download and R2 upload, not the Git or Pages path.
+The Git portion is externally proven. Both target branches require the strict
+`validate` context and merge commits. The Bajos del Toro publication completed
+Drive/R2 ingestion and deployed through PR 267 and Pages run 45277672821.
+Its Sheet metadata required guarded recovery after the original production PR
+closed unmerged. A fully uninterrupted publication and a live model-generated
+Story after restoration remain unverified. Restoration keeps those existing
+public records and both current publisher fixes intact.
 
 ## Not implemented
 
@@ -237,4 +243,4 @@ proof is a row-backed Drive download and R2 upload, not the Git or Pages path.
 - Automatic video transcoding, codec inspection, posters, or adaptive bitrate
 - Direct Experience-scoped manifest preparation; the compiler currently adds
   the Experience association after Journey or Place/Visit ingestion
-- First live end-to-end Sheet, Drive, R2, GitHub, Pages, and write-back proof
+- First uninterrupted Sheet, Drive, R2, GitHub, Pages, and write-back proof

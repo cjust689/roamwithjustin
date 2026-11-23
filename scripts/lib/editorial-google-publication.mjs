@@ -1,7 +1,9 @@
 import {
   AUTOMATION_POST_HEADERS,
   postSourceHash,
+  storySourceHash,
 } from "./editorial-baseline.mjs"
+import { requirePublicCopy } from "./editorial-public-copy.mjs"
 
 function cellValue(value) {
   return { userEnteredValue: { stringValue: String(value) } }
@@ -123,6 +125,58 @@ export function buildPublicationWriteback({
     currentSourceHash,
     values,
     alreadyApplied,
+  }
+}
+
+export function buildAtlasStoryWriteback({
+  sheetId,
+  headers,
+  rows,
+  postId,
+  expectedStorySourceHash,
+  story,
+}) {
+  if (!headers.includes("Atlas Story")) {
+    throw new Error("Posts Sheet is missing Atlas Story")
+  }
+  const matches = rows
+    .map((row, index) => ({ row, rowIndex: index + 1, rowNumber: index + 2 }))
+    .filter(entry => String(entry.row.post_id || "").trim() === postId)
+  if (matches.length !== 1) {
+    throw new Error(
+      matches.length
+        ? `Duplicate post_id ${postId} blocks Atlas Story write-back`
+        : `Post ID ${postId} no longer exists in the Sheet`
+    )
+  }
+  const target = matches[0]
+  if (
+    !["Preview", "Publish"].includes(
+      String(target.row["Atlas Mode"] || "").trim()
+    )
+  ) {
+    throw new Error(`Post ID ${postId} is no longer approved for Atlas preview`)
+  }
+  const currentSourceHash = storySourceHash(target.row)
+  if (currentSourceHash !== expectedStorySourceHash) {
+    throw new Error(`Post ID ${postId} changed during Atlas Story generation`)
+  }
+  const value = requirePublicCopy(story, "Generated Atlas Story", {
+    maxLength: 2400,
+  })
+  return {
+    requests: [
+      updateCellRequest({
+        sheetId,
+        rowIndex: target.rowIndex,
+        columnIndex: headers.indexOf("Atlas Story"),
+        value,
+      }),
+    ],
+    postId,
+    rowNumber: target.rowNumber,
+    currentSourceHash,
+    values: { "Atlas Story": value },
   }
 }
 
