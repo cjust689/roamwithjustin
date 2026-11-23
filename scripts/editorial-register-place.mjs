@@ -1,6 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
-import { spawnSync } from "node:child_process"
+import { spawnEditorialCommand } from "./lib/editorial-process.mjs"
 import { fileURLToPath } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
 import { generatedGeography } from "../src/content/geography/index.mjs"
@@ -149,7 +149,7 @@ function parseArgs(args) {
 }
 
 function run(command, args, { capture = false } = {}) {
-  const result = spawnSync(command, args, {
+  const result = spawnEditorialCommand(command, args, {
     cwd: projectRoot,
     encoding: "utf8",
     windowsHide: true,
