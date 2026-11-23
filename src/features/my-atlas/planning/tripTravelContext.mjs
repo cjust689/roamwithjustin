@@ -29,10 +29,12 @@ export function tripTravelContext(trip) {
 export function seedTravelDates(value, context, { replace = false } = {}) {
   const draft = JSON.parse(JSON.stringify(value || emptyTravelSearchDraft()))
   const flights = draft.flights
-  const departure =
-    (replace ? "" : flights.departDate) || context.departDate || ""
-  const returning =
-    (replace ? "" : flights.returnDate) || context.returnDate || ""
+  const departure = replace
+    ? context.departDate || flights.departDate || ""
+    : flights.departDate || context.departDate || ""
+  const returning = replace
+    ? context.returnDate || flights.returnDate || ""
+    : flights.returnDate || context.returnDate || ""
   if (departure && returning && returning < departure) return draft
   if (
     departure !== flights.departDate ||

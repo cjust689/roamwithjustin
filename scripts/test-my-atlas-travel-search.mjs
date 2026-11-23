@@ -213,6 +213,17 @@ const trip = {
   },
 }
 const context = tripTravelContext(trip)
+const partialDateCopy = seedTravelDates(
+  { ...draft, flights: { ...flight } },
+  { departDate: "2027-04-04", returnDate: "" },
+  { replace: true }
+)
+assert.equal(partialDateCopy.flights.departDate, "2027-04-04")
+assert.equal(
+  partialDateCopy.flights.returnDate,
+  "2027-04-20",
+  "An unavailable planned date must not clear a chosen flight date"
+)
 assert.equal(context.departDate, "2027-04-05")
 assert.equal(context.returnDate, "2027-04-20")
 const seeded = seedTravelDates(draft, context)

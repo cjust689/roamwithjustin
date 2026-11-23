@@ -962,6 +962,10 @@ visibility setting is preserved rather than restoring the concept's older toggle
       Managed-doc audit passed with 76 documents and 12 existing warnings;
       compatible Worker dry run passed in
       `.state/theme/planning-dates-worker-dryrun.log`.
+      A final partial-date-copy guard retains an already chosen return date
+      when only a planned departure is available. Focused travel-search tests
+      passed, followed by `vue-cli-service build`, hash `c3570514cf352cd8`.
+      Evidence: `.state/theme/planning-dates-final-frontend.log`.
 - [x] Deploy compatible Worker `6d5edfb6-818c-4711-9eeb-72c2542a4a64`.
       Ten remote health/authentication/CORS checks passed without account writes.
       Evidence: `.state/theme/planning-dates-worker-deploy.log` and
