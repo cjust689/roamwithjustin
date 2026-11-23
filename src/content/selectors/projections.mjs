@@ -82,12 +82,14 @@ function journeyLodgingView(stay) {
 
   return {
     ...stay,
-    id: partner?.id || stay.partnerId || "",
+    id: stay.id || partner?.id || stay.partnerId || "",
     name: partner?.name || stay.name,
     image: resolveLodgingImage(stay.image),
     link: externalLink.href,
-    linkType: analyticsPartnerLinkType(externalLink),
-    disclosure: partner?.disclosure || "",
+    linkType: ["Affiliate", "Mixed"].includes(stay.relationship)
+      ? "affiliate"
+      : analyticsPartnerLinkType(externalLink),
+    disclosure: stay.disclosure || partner?.disclosure || "",
   }
 }
 

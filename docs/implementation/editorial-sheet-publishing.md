@@ -5,12 +5,13 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-15
-updated: 2026-11-16
+updated: 2026-11-23
 related:
   - editorial-single-row-atlas-publishing
   - content-model
   - media-pipeline
   - journey-media-ingestion
+  - stays-sheet-intake
 supersedes: []
 superseded_by: []
 code_paths:
@@ -85,6 +86,13 @@ verification:
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
+
+Separate accommodation intake is tracked in the
+[Stays sheet checklist](stays-sheet-intake.md). The setup command adds new
+tabs without changing Posts. The separate `editorial:stays` command now provides
+matching-preview local compilation and optional protected publication for
+approved stay rows. It does not access private My Atlas trip lodging. This
+document's publisher continues to read Posts only.
 
 The repository now contains the bounded one-row publication path described by
 the [accepted proposal](../proposals/single-row-sheets-drive-atlas-publishing.md).

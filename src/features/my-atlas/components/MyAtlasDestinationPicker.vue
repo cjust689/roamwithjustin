@@ -150,6 +150,7 @@ export default {
     value: { type: Object, required: true },
     pending: Boolean,
     actionLabel: { type: String, default: "Add destination" },
+    contextLabel: { type: String, default: "destination" },
     resolveLink: { type: Function, default: null },
   },
   emits: ["input", "review", "choose"],
@@ -175,13 +176,18 @@ export default {
       if (this.value.place)
         return {
           title: "Place selected",
-          copy: "Review the place below, then add it to your trip.",
+          copy:
+            this.contextLabel === "lodging"
+              ? "Review the place below, then select Use this location for your stay."
+              : "Review the place below, then add it to your trip.",
         }
       if (this.value.reviewed)
         return {
           title: "Map position confirmed",
           copy: this.selection
-            ? "Ready to add. This destination is not saved until you add it."
+            ? this.contextLabel === "lodging"
+              ? "Ready to use. Select Use this location, then save your lodging."
+              : "Ready to add. This destination is not saved until you add it."
             : "Enter a place name of up to 80 characters, without markup, then add it to your trip.",
         }
       const kind = this.value.candidate?.kind

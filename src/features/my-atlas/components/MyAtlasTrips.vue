@@ -234,6 +234,13 @@
           @open="editStop"
           @reorder="reorderStops"
         />
+        <MyAtlasTripLodging
+          :trip="selected"
+          :pending="busy"
+          :enabled="capabilities.stays"
+          @add="editStay()"
+          @edit="editStay"
+        />
         <button
           class="trip-view-map"
           type="button"
@@ -523,6 +530,38 @@
           />
         </section>
 
+        <MyAtlasStayEditor
+          v-if="workspace === 'stay' && selected"
+          v-model="stayDraft"
+          :location-draft="destinationDraft"
+          :picker-open="stayPickerOpen"
+          :editing="Boolean(editingStayId)"
+          :pending="pending"
+          :resolve-link="resolveLink"
+          @location-input="destinationDraft = $event"
+          @change-location="stayPickerOpen = !stayPickerOpen"
+          @choose="chooseStayLocation"
+          @review="beginPlacement"
+          @save="saveStay"
+          @remove="workspace = 'stay-remove'"
+        />
+        <section v-if="workspace === 'stay-remove'" class="trip-form">
+          <p>
+            Remove {{ stayDraft.name }} from this trip? Your destinations and
+            other stays are kept.
+          </p>
+          <div class="trip-controls">
+            <button type="button" :disabled="busy" @click="removeStay">
+              Remove lodging</button
+            ><button
+              type="button"
+              :disabled="pending"
+              @click="workspace = 'stay'"
+            >
+              Keep lodging
+            </button>
+          </div>
+        </section>
         <section v-if="workspace === 'endpoints' && selected" class="trip-form">
           <p>
             Optional travel locations. They stay private and do not add
@@ -1138,7 +1177,13 @@ import MyAtlasInfo from "./MyAtlasInfo.vue"
 import MyAtlasSwitch from "./MyAtlasSwitch.vue"
 import MyAtlasExperiences from "./MyAtlasExperiences.vue"
 import MyAtlasDestinationPicker from "./MyAtlasDestinationPicker.vue"
-import { emptyDestinationDraft } from "../catalog/destinationDraft.mjs"
+import MyAtlasTripLodging from "./MyAtlasTripLodging.vue"
+import MyAtlasStayEditor from "./MyAtlasStayEditor.vue"
+import { seedTripStayDates } from "../planning/stays.mjs"
+import {
+  emptyDestinationDraft,
+  destinationPlaceSelection,
+} from "../catalog/destinationDraft.mjs"
 import MyAtlasTravelSearch from "./MyAtlasTravelSearch.vue"
 import MyAtlasVisitManager from "./MyAtlasVisitManager.vue"
 import MyAtlasTripDestinations from "./MyAtlasTripDestinations.vue"
@@ -1175,6 +1220,8 @@ export default {
     MyAtlasSwitch,
     MyAtlasExperiences,
     MyAtlasDestinationPicker,
+    MyAtlasTripLodging,
+    MyAtlasStayEditor,
     MyAtlasTravelSearch,
     MyAtlasVisitManager,
     MyAtlasTripDestinations,
@@ -1215,6 +1262,7 @@ export default {
       emptyTripDrafts: false,
       planningNotes: false,
       routeEndpoints: false,
+      stays: false,
     },
     rollbackAvailable: false,
     preview: null,
@@ -1230,6 +1278,9 @@ export default {
     endpointDraft: { start: null, finish: null },
     endpointRole: "start",
     endpointPickerOpen: false,
+    editingStayId: "",
+    stayDraft: { name: "", url: "", checkIn: "", checkOut: "", place: null },
+    stayPickerOpen: true,
     combineIds: [],
     combineTitle: "",
     groupDestinations: [],
@@ -1317,6 +1368,8 @@ export default {
             add: "Add a stop",
             metadata: "Edit journey",
             endpoints: "Start and finish (optional)",
+            stay: this.editingStayId ? "Edit lodging" : "Add lodging",
+            "stay-remove": "Remove lodging?",
             delete: "Delete trip?",
             remove: "Remove destination?",
             share: "Share journey",
@@ -1471,6 +1524,7 @@ export default {
         emptyTripDrafts: state.capabilities?.emptyTripDrafts === true,
         planningNotes: state.capabilities?.planningNotes === true,
         routeEndpoints: state.capabilities?.routeEndpoints === true,
+        stays: state.capabilities?.stays === true,
       }
     },
     openWorkspace(value) {
@@ -1753,9 +1807,15 @@ export default {
       this.draftLifecycle = this.scope === "past" ? "past" : "planned"
       this.$emit("route-change", { active: false, route: [] })
     },
-    async mutate(action, body, tripId, stopId) {
+    async mutate(action, body, tripId, stopId, stayId) {
       if (this.pending || this.refreshNeeded || !this.writesEnabled) return
-      const fingerprint = JSON.stringify({ action, body, tripId, stopId })
+      const fingerprint = JSON.stringify({
+        action,
+        body,
+        tripId,
+        stopId,
+        stayId,
+      })
       if (this.attempt?.fingerprint !== fingerprint)
         this.attempt = {
           fingerprint,
@@ -1772,6 +1832,7 @@ export default {
           body,
           tripId,
           stopId,
+          stayId,
           revision: this.attempt.revision,
           idempotencyKey: this.attempt.key,
         })
@@ -1790,6 +1851,9 @@ export default {
             "delete",
             "removeStop",
             "lifecycle",
+            "addStay",
+            "editStay",
+            "removeStay",
           ].includes(action)
         )
           this.workspace = ""
@@ -1918,6 +1982,62 @@ export default {
       this.destinationDraft = emptyDestinationDraft()
       this.endpointPickerOpen = false
     },
+    editStay(stay) {
+      if (this.busy || !this.selected || !this.capabilities.stays) return
+      this.openWorkspace("stay")
+      this.editingStayId = stay?.id || ""
+      this.stayDraft = stay
+        ? JSON.parse(JSON.stringify(stay))
+        : {
+            name: "",
+            url: "",
+            ...seedTripStayDates(this.selected),
+            place: null,
+          }
+      this.destinationDraft = emptyDestinationDraft()
+      this.stayPickerOpen = !stay
+    },
+    chooseStayLocation(value) {
+      if (this.busy) return
+      const place = value.place || {
+        ...value.selection.customPlace,
+        placeType: "custom",
+      }
+      this.$set(this.stayDraft, "place", JSON.parse(JSON.stringify(place)))
+      this.stayPickerOpen = false
+      this.destinationDraft = emptyDestinationDraft()
+      this.workspaceStatus = `${place.name} selected. Save lodging to keep this stay.`
+    },
+    saveStay() {
+      if (this.busy || this.stayPickerOpen) return
+      const { name, url, checkIn, checkOut, place } = this.stayDraft
+      const selection = destinationPlaceSelection(place)
+      if (!selection) return
+      return this.mutate(
+        this.editingStayId ? "editStay" : "addStay",
+        {
+          name,
+          url,
+          checkIn,
+          checkOut,
+          place: selection,
+        },
+        this.selected.tripId,
+        undefined,
+        this.editingStayId || undefined
+      )
+    },
+    removeStay() {
+      if (this.busy || this.workspace !== "stay-remove" || !this.editingStayId)
+        return
+      return this.mutate(
+        "removeStay",
+        {},
+        this.selected.tripId,
+        undefined,
+        this.editingStayId
+      )
+    },
     chooseEndpoint(value) {
       if (this.busy || !this.capabilities.routeEndpoints) return
       const place = value.place || {
@@ -1969,15 +2089,7 @@ export default {
         }
         const place = endpoint.place
         endpoints[role] = {
-          place:
-            place.placeType === "custom"
-              ? {
-                  customPlace: {
-                    name: place.name,
-                    coordinates: [...place.coordinates],
-                  },
-                }
-              : { placeId: place.placeId },
+          place: destinationPlaceSelection(place),
           plannedDates: {
             arrival: arrival || null,
             departure: departure || null,

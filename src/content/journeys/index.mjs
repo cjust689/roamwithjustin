@@ -1,5 +1,6 @@
 import { createIdRegistry } from "../contracts.mjs"
 import { generatedVisitRecords } from "../geography/index.mjs"
+import { composeJourneyLodging } from "../lodging/index.mjs"
 import { costaRica2025Journey } from "./costa-rica-2025.mjs"
 import { miamiJourney } from "./miami.mjs"
 import { nextDestinationJourneys } from "./next-destinations.mjs"
@@ -67,7 +68,9 @@ const registry = createIdRegistry(
     ...nextDestinationJourneys,
     costaRica2025Journey,
     utah2026Journey,
-  ].map(composeGeneratedVisits),
+  ]
+    .map(composeGeneratedVisits)
+    .map(composeJourneyLodging),
   "Journey registry"
 )
 
