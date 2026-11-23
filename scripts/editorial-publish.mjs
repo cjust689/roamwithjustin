@@ -2,7 +2,7 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { createRequire } from "node:module"
-import { spawnSync } from "node:child_process"
+import { spawnEditorialCommand } from "./lib/editorial-process.mjs"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
 import { experienceRecords } from "../src/content/experiences/index.mjs"
@@ -160,7 +160,7 @@ function parseArgs(args) {
 }
 
 function run(command, args, { capture = false } = {}) {
-  const result = spawnSync(command, args, {
+  const result = spawnEditorialCommand(command, args, {
     cwd: projectRoot,
     encoding: "utf8",
     windowsHide: true,

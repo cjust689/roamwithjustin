@@ -4,18 +4,29 @@ import os from "node:os"
 import path from "node:path"
 import {
   assertScopedChanges,
+  createCommandRunner,
   publicationFingerprint,
   publishGeneratedPost,
   verifyPublicPublication,
 } from "./lib/editorial-github-publisher.mjs"
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), "editorial-github-publisher-"))
+const root = fs.mkdtempSync(
+  path.join(os.tmpdir(), "editorial-github-publisher-")
+)
 try {
   const generatedPath = "src/content/media/generated/records.json"
-  fs.mkdirSync(path.join(root, path.dirname(generatedPath)), { recursive: true })
+  fs.mkdirSync(path.join(root, path.dirname(generatedPath)), {
+    recursive: true,
+  })
   fs.writeFileSync(path.join(root, generatedPath), '{"schemaVersion":1}\n')
-  const firstHash = publicationFingerprint({ sourceRoot: root, paths: [generatedPath] })
-  const secondHash = publicationFingerprint({ sourceRoot: root, paths: [generatedPath] })
+  const firstHash = publicationFingerprint({
+    sourceRoot: root,
+    paths: [generatedPath],
+  })
+  const secondHash = publicationFingerprint({
+    sourceRoot: root,
+    paths: [generatedPath],
+  })
   assert.equal(firstHash, secondHash)
   assert.deepEqual(
     assertScopedChanges(` M ${generatedPath}\n`, [generatedPath]),
@@ -24,6 +35,60 @@ try {
   assert.throws(
     () => assertScopedChanges(" M docs/README.md\n", [generatedPath]),
     /unexpected paths/
+  )
+  // Exercise the actual runner and Git output together. Mocked status strings
+  // do not catch a runner stripping the leading unstaged-status column.
+  const run = createCommandRunner()
+  const editorialPath = "src/content/editorial/generated/records.json"
+  fs.mkdirSync(path.join(root, path.dirname(editorialPath)), {
+    recursive: true,
+  })
+  fs.writeFileSync(path.join(root, editorialPath), '{"schemaVersion":1}\n')
+  run("git", ["init", "--quiet"], { cwd: root })
+  run("git", ["add", "--", generatedPath, editorialPath], { cwd: root })
+  run(
+    "git",
+    [
+      "-c",
+      "user.name=Editorial fixture",
+      "-c",
+      "user.email=editorial-fixture@example.invalid",
+      "-c",
+      `core.hooksPath=${path.join(root, "no-hooks")}`,
+      "commit",
+      "--quiet",
+      "--no-gpg-sign",
+      "-m",
+      "Fixture baseline",
+    ],
+    { cwd: root }
+  )
+  fs.appendFileSync(path.join(root, generatedPath), "\n")
+  fs.appendFileSync(path.join(root, editorialPath), "\n")
+  const status = run("git", ["status", "--short", "--untracked-files=all"], {
+    cwd: root,
+  })
+  assert.ok(
+    status.startsWith(` M ${editorialPath}`),
+    "The first Git status column must survive command capture"
+  )
+  assert.deepEqual(
+    assertScopedChanges(status, [generatedPath, editorialPath]),
+    [editorialPath, generatedPath]
+  )
+  fs.writeFileSync(
+    path.join(root, "unexpected.txt"),
+    "Unexpected source change"
+  )
+  assert.throws(
+    () =>
+      assertScopedChanges(
+        run("git", ["status", "--short", "--untracked-files=all"], {
+          cwd: root,
+        }),
+        [generatedPath, editorialPath]
+      ),
+    /unexpected paths: unexpected.txt/
   )
   assert.equal(
     (
@@ -113,10 +178,17 @@ try {
   assert.equal(result.developMergeSha, "develop-merge")
   assert.equal(result.mainMergeSha, "main-merge")
   assert.equal(result.publicVerification.state, "succeeded")
+  assert.ok(
+    commands.findIndex(
+      entry => entry.program === "git" && entry.args[0] === "switch"
+    ) >
+      commands.findIndex(
+        entry => entry.program === "npm" && entry.args[1] === "build"
+      ),
+    "Reserve the retry branch only after the build and scope checks pass"
+  )
   assert.equal(
-    commands.some(
-      entry => entry.program === "git" && entry.args[0] === "push"
-    ),
+    commands.some(entry => entry.program === "git" && entry.args[0] === "push"),
     true
   )
   const pushesBeforeRetry = commands.filter(

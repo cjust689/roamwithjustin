@@ -70,6 +70,15 @@ verification:
 
 # Roam With Justin documentation
 
+Editorial Windows subprocess repair: npm build commands now use Node and the
+installed npm CLI instead of executing a `.cmd` shim directly. Existing Bajos
+del Toro image/video packages and receipts passed nonpublishing verification.
+Implementation and recovery details are in the
+[editorial checklist](implementation/editorial-sheet-publishing.md#windows-build-launch-and-retry).
+Git status capture also preserves its leading status columns, preventing the
+first generated file's `src/` path from being misread as `rc/`. Real Git and
+pending-publication scope regressions pass with the original allowlist intact.
+
 Two separate lodging features are implemented. Main Atlas
 `editorial:stays` previews approved sheet rows, compiles canonical lodging and
 optionally uses protected publication with verified writeback. Rough public

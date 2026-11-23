@@ -12,6 +12,18 @@
       "sortOrder": 0,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-jurassic-canyon",
+      "slug": "jurassic-canyon",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "title": "Jurassic Canyon",
+      "summary": "",
+      "sortOrder": 1,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -31,6 +43,29 @@
         "video-costa-rica-2025-5776c9df76c8-001"
       ],
       "sourceHash": "6174ae6d271f5e37b1f82f7dc74e721e7101fc38f24366079613eb5d08800191"
+    },
+    {
+      "id": "moment-7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "postId": "7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7",
+      "title": "Bajos Del Toro Remainder",
+      "notes": "The highlight of the trip and this was sort of a last minute consideration sobao's Del Toro which is an area not far from La Fortuna has one of the largest density of waterfalls many of them are privately owned on private land quick little hikes but one of them stood out to us Jurassic Canyon it's exactly what it sounds like it's incredible words will not explain especially considering how you have to get there it requires a private guide you park on a Winding Road trust just a random stranger through a power plant and a hole in the fence down a Canyon Ridge down to a riverbed fjording ice cold Rivers the same color as Arctic ice\n\nJumping gaps between slippery rocks throwing your gear hopefully you don't miss the catch\n\nPassing plants with leaves the side three times your wingspan.\n\nIconic views and truly real life Cinema the way the Falls reveal themselves to you as you've been trekking. Nothing really would have prepared us for how amazing the experience is going to be.\n\nThe majority of the journey isn't bad it's primarily a hike down the first 20 minutes can be a little treacherous especially in when it's wet slippery holding a cable or Vines I would advise you to be mostly capable capable but nothing overly dangerous the Trek back can be a bit physically challenging hiking up the hill but again nothing nothing treacherous and well worth all the effort I plan for at least 6 hours to at least enjoy The full experience and highly highly recommend getting a guide there are no Mark Trails we could easily get lost and being aware of the weather conditions is a must I'll let the videos and photos speak for themselves but truly an amazing experience but this is just one trail of many in the region I'd say skip La Fortuna and spend as much time as you can in Baja del Toro",
+      "travelDate": "05/30/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-b7bfacee36be-001",
+        "image-costa-rica-2025-19b31d0c91c6-002",
+        "image-costa-rica-2025-494d989dec0a-003",
+        "image-costa-rica-2025-8e48e9369852-004",
+        "image-costa-rica-2025-70c7252d5974-005",
+        "image-costa-rica-2025-319d1891aea6-006",
+        "video-costa-rica-2025-59dd980b85a7-001",
+        "video-costa-rica-2025-804219ab410e-002",
+        "video-costa-rica-2025-cbea3a047663-003",
+        "video-costa-rica-2025-b6e6eebcecd4-004"
+      ],
+      "sourceHash": "82cfc2630af4b273999241853737bbcc772fcfc1e2bef2afb2301473898660e9"
     }
   ],
   "batches": [
@@ -66,6 +101,29 @@
         "image-costa-rica-2025-bee01e5253e5-002",
         "image-costa-rica-2025-59bbab123454-003",
         "video-costa-rica-2025-5776c9df76c8-001"
+      ]
+    },
+    {
+      "id": "editorial-7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7-82cfc2630af4b273",
+      "postId": "7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7",
+      "sourceHash": "82cfc2630af4b273999241853737bbcc772fcfc1e2bef2afb2301473898660e9",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "momentId": "moment-7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028",
+        "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-b7bfacee36be-001",
+        "image-costa-rica-2025-19b31d0c91c6-002",
+        "image-costa-rica-2025-494d989dec0a-003",
+        "image-costa-rica-2025-8e48e9369852-004",
+        "image-costa-rica-2025-70c7252d5974-005",
+        "image-costa-rica-2025-319d1891aea6-006",
+        "video-costa-rica-2025-59dd980b85a7-001",
+        "video-costa-rica-2025-804219ab410e-002",
+        "video-costa-rica-2025-cbea3a047663-003",
+        "video-costa-rica-2025-b6e6eebcecd4-004"
       ]
     }
   ]

@@ -16,6 +16,8 @@ supersedes: []
 superseded_by: []
 code_paths:
   - scripts/editorial-publish.mjs
+  - scripts/lib/editorial-process.mjs
+  - scripts/test-editorial-process.mjs
   - scripts/editorial-register-place.mjs
   - scripts/editorial-baseline.mjs
   - scripts/editorial-migrate-sheet.mjs
@@ -56,6 +58,10 @@ verification:
     - npm run content:validate
     - npm run docs:audit
     - npm run build
+    - real Windows npm invocation and literal-argument subprocess regression checks on 2026-11-23
+    - dry-run receipt verification for six Bajos del Toro images and four videos on 2026-11-23
+    - fixed shared Windows runner completed editorial tests and production build b923635c5ef71849 with 66 Worker runtime tests on 2026-11-23
+    - real Git status regression and live pending generated-file scope checks passed on 2026-11-23
     - authenticated read-only Sheet baseline on 2026-11-15
     - creator-authorized live Sheet migration on 2026-11-15
     - verified live Atlas Catalog and 106 Journey and Place bindings on 2026-11-16
@@ -109,6 +115,49 @@ live verified. A real post has not yet supplied the combination of
 end-to-end R2 publication, so the implementation remains partial.
 
 ## One-command workflow
+
+### Windows build launch and retry
+
+`scripts/lib/editorial-process.mjs` resolves Windows npm calls to
+`process.execPath` plus the installed `npm-cli.js`. It preserves argument arrays
+and runs without a shell. It uses `EDITORIAL_NPM_CLI_PATH`, a valid inherited
+`npm_execpath`, or npm beside the current Node installation. POSIX hosts use
+`npm`. The local publisher, explicit Place-registration build and shared GitHub
+worktree commands all use this boundary. This fixes `spawnSync npm.cmd EINVAL`
+after successful media ingestion and avoids the same failure later in the
+isolated publication worktree.
+
+The reported Bajos del Toro attempt retained its private snapshot, six-image
+and four-video packages and both upload receipts. Its failure handler restored
+the generated Media/Editorial pair before GitHub promotion. Both packages
+passed receipt-backed ingestion dry runs after the fix; no bytes were uploaded
+and no records were changed by those checks. Retry the original approved
+`editorial:publish` command with the same source row and private run state.
+The existing source-freshness, immutable object, receipt and publication guards
+remain in force. Real publication success is separate from this local repair.
+
+### Git status scope verification and retry branches
+
+The shared command runner preserves leading stdout whitespace. Git short
+status uses the first two columns for index/worktree state, so trimming the
+output's beginning turned the first ` M src/...` entry into `M src/...` and
+made the fixed-column parser report `rc/...`. Only trailing output whitespace
+is trimmed now; the generated-file allowlist remains unchanged. A real temporary
+Git repository regression covers two modified generated files and still rejects
+an unexpected source file.
+
+Publication branch creation occurs after validation and both scope checks, so
+an early build/scope failure does not reserve the deterministic retry branch.
+Existing failed-attempt branches must be checked for unique commits before
+cleanup. No existing branch with publication commits is discarded automatically.
+
+The Bajos del Toro failed-attempt branch pointed at `7124d9c`, already the
+current develop commit, with no unique commits. It was removed using guarded
+non-forced local branch deletion. The pending generated Media/Editorial files
+then passed the real command-runner scope check. No content or remote branch
+was removed, and publication was not rerun during these checks.
+
+### Commands
 
 Preview one selected row:
 

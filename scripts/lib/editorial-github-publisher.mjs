@@ -2,6 +2,7 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { spawnSync } from "node:child_process"
+import { spawnEditorialCommand } from "./editorial-process.mjs"
 import {
   DEFAULT_DEVELOP_BRANCH,
   DEFAULT_MAIN_BRANCH,
@@ -23,14 +24,21 @@ function commandError(command, args, result) {
 
 export function createCommandRunner(execute = spawnSync) {
   return (command, args, options = {}) => {
-    const result = execute(command, args, {
-      encoding: "utf8",
-      windowsHide: true,
-      ...options,
-    })
+    const result = spawnEditorialCommand(
+      command,
+      args,
+      {
+        encoding: "utf8",
+        windowsHide: true,
+        ...options,
+      },
+      { execute }
+    )
     if (result.error) throw result.error
     if (result.status !== 0) throw commandError(command, args, result)
-    return String(result.stdout || "").trim()
+    // Porcelain Git status uses leading spaces as meaningful status columns.
+    // Preserve them so the scope guard never cuts into the first file path.
+    return String(result.stdout || "").trimEnd()
   }
 }
 
@@ -118,9 +126,13 @@ export async function verifyPublicPublication({
   timeoutMs = 10 * 60 * 1000,
   pollMs = 15 * 1000,
 }) {
-  const markers = [...new Set((expectedMarkers || []).map(String).filter(Boolean))]
+  const markers = [
+    ...new Set((expectedMarkers || []).map(String).filter(Boolean)),
+  ]
   if (!markers.length) {
-    throw new Error("Public verification requires at least one exact content marker")
+    throw new Error(
+      "Public verification requires at least one exact content marker"
+    )
   }
   return waitForGate({
     timeoutMs,
@@ -209,8 +221,7 @@ async function waitForWorkflow({
   return waitForGate({
     timeoutMs,
     pollMs,
-    read: () =>
-      client.listWorkflowRuns({ workflow, branch, headSha, event }),
+    read: () => client.listWorkflowRuns({ workflow, branch, headSha, event }),
     evaluate: payload => evaluateWorkflowRuns(payload, { headSha }),
   })
 }
@@ -250,7 +261,9 @@ function readCheckpoint(checkpointPath) {
   if (!fs.existsSync(checkpointPath)) return null
   const value = JSON.parse(fs.readFileSync(checkpointPath, "utf8"))
   if (!value || value.schemaVersion !== 1) {
-    throw new Error(`Unsupported GitHub publication checkpoint: ${checkpointPath}`)
+    throw new Error(
+      `Unsupported GitHub publication checkpoint: ${checkpointPath}`
+    )
   }
   return value
 }
@@ -289,7 +302,6 @@ function prepareAndPushPublication({
       { cwd: sourceRoot }
     )
     registeredWorktree = true
-    command("git", ["switch", "-c", branch], { cwd: worktree })
     copyPublicationPaths({ sourceRoot, worktree, paths: scopedPaths })
     const changed = assertScopedChanges(
       command("git", ["status", "--short", "--untracked-files=all"], {
@@ -300,13 +312,13 @@ function prepareAndPushPublication({
     if (!changed.length) return null
 
     if (install) {
-      command("npm.cmd", ["ci"], { cwd: worktree, stdio: "inherit" })
+      command("npm", ["ci"], { cwd: worktree, stdio: "inherit" })
     }
-    command("npm.cmd", ["run", "editorial:test"], {
+    command("npm", ["run", "editorial:test"], {
       cwd: worktree,
       stdio: "inherit",
     })
-    command("npm.cmd", ["run", "build"], {
+    command("npm", ["run", "build"], {
       cwd: worktree,
       stdio: "inherit",
     })
@@ -316,6 +328,8 @@ function prepareAndPushPublication({
       }),
       scopedPaths
     )
+    // Validation failures should not reserve the deterministic retry branch.
+    command("git", ["switch", "-c", branch], { cwd: worktree })
     command("git", ["add", "--", ...scopedPaths], { cwd: worktree })
     command(
       "git",
@@ -331,11 +345,10 @@ function prepareAndPushPublication({
     const publicationCommit = command("git", ["rev-parse", "HEAD"], {
       cwd: worktree,
     })
-    command(
-      "git",
-      ["push", "--set-upstream", remote, `${branch}:${branch}`],
-      { cwd: worktree, stdio: "inherit" }
-    )
+    command("git", ["push", "--set-upstream", remote, `${branch}:${branch}`], {
+      cwd: worktree,
+      stdio: "inherit",
+    })
     return publicationCommit
   } finally {
     if (registeredWorktree) {
@@ -408,7 +421,9 @@ export async function publishGeneratedPost({
     checkpoint.branch !== branch ||
     JSON.stringify(checkpoint.paths) !== JSON.stringify(scopedPaths)
   ) {
-    throw new Error(`GitHub publication checkpoint does not match current input: ${checkpointPath}`)
+    throw new Error(
+      `GitHub publication checkpoint does not match current input: ${checkpointPath}`
+    )
   }
 
   command("git", ["fetch", "--prune", remote, develop, main], {
@@ -530,7 +545,10 @@ export async function publishGeneratedPost({
     })
   }
   if (!checkpoint.publicVerification) {
-    if (!publicVerification?.url || !publicVerification?.expectedMarkers?.length) {
+    if (
+      !publicVerification?.url ||
+      !publicVerification?.expectedMarkers?.length
+    ) {
       throw new Error(
         "Deployment completed, but exact public URL verification input is missing"
       )
