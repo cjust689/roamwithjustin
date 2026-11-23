@@ -5,6 +5,9 @@ import {
   removeEmptyTripStop,
   TRIP_RETENTION_POLICY,
   tripPlaceProjection,
+  normalizeTripStay,
+  STAY_ID_PATTERN,
+  MAX_TRIP_STAYS,
 } from "../../../../shared/my-atlas-trips.mjs"
 import { storedVisits, visitKey, visitPin } from "./visits.mjs"
 import { applyExperienceChange } from "../../../../shared/my-atlas-experiences.mjs"
@@ -547,6 +550,32 @@ export function mutateTripStore(
               }
             : item
         )
+      } else if (
+        ["stay-add", "stay-edit", "stay-remove"].includes(command.action)
+      ) {
+        const stays = copy(current.stays || [])
+        const stay =
+          command.action === "stay-remove"
+            ? null
+            : normalizeTripStay(value.stay)
+        const id = stay?.id || value.stayId
+        if (!STAY_ID_PATTERN.test(id || "")) return fail("invalid_stay")
+        const index = stays.findIndex(item => item.id === id)
+        if (command.action === "stay-add") {
+          if (index >= 0) return fail("duplicate_stay")
+          if (stays.length >= MAX_TRIP_STAYS) return fail("stay_limit_reached")
+          stays.push(stay)
+        } else {
+          if (index < 0) return fail("stay_not_found")
+          if (stay) stays.splice(index, 1, stay)
+          else stays.splice(index, 1)
+        }
+        updated = {
+          ...current,
+          stays,
+          version: current.version + 1,
+          updatedAt: command.now,
+        }
       } else if (command.action === "sharing") {
         updated = {
           ...current,
@@ -691,6 +720,7 @@ export function mutateTripStore(
               trip.sharing.publicAtlas !== selected[0].sharing.publicAtlas ||
               trip.logistics.flights.length ||
               trip.logistics.rentals.length ||
+              trip.stays?.length ||
               trip.routeEndpoints?.start ||
               trip.routeEndpoints?.finish
           )

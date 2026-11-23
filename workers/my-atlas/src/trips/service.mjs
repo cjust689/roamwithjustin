@@ -19,6 +19,7 @@ import { normalizeExperienceChange } from "../../../../shared/my-atlas-experienc
 import { normalizeTripTravelDraft } from "../../../../shared/my-atlas-trip-logistics.mjs"
 import {
   normalizeTripRouteEndpoints,
+  normalizeTripStay,
   validTripCalendarDate,
   TRIP_RETENTION_POLICY,
 } from "../../../../shared/my-atlas-trips.mjs"
@@ -93,6 +94,16 @@ const checked = result => {
 
 export function matchTripRoute(path) {
   const base = "/v1/me/trips"
+  const stay = path.match(
+    /^\/v1\/me\/trips\/((?:trip|plan)_[a-f0-9]{24})\/stays(?:\/(stay_[a-f0-9]{32}))?$/
+  )
+  if (stay)
+    return {
+      action: stay[2] ? "stay" : "stay-add",
+      tripId: stay[1],
+      stayId: stay[2],
+      methods: stay[2] ? ["PATCH", "DELETE"] : ["POST"],
+    }
   if (path === `${base}/visits/transfer`)
     return { action: "transfer", methods: ["POST"] }
   const standalone = path.match(
@@ -151,6 +162,7 @@ export async function tripRequest({
         emptyTripDrafts: true,
         planningNotes: true,
         routeEndpoints: true,
+        stays: true,
       },
       ungroupedVisits: state.ungroupedVisits,
       legacyPlans: state.legacyPlans,
@@ -359,6 +371,30 @@ export async function tripRequest({
         statusChangedAt: null,
       }
     }
+  } else if (action === "stay-add" || action === "stay") {
+    if (method === "DELETE") {
+      input = object(body, [])
+      action = "stay-remove"
+      value = { tripId: route.tripId, stayId: route.stayId }
+    } else {
+      input = object(body, ["name", "url", "checkIn", "checkOut", "place"])
+      const resolvedPlace = await place(input.place)
+      let stay
+      try {
+        stay = normalizeTripStay({
+          id: route.stayId || (await stable("stay", "added-stay")),
+          name: input.name,
+          url: input.url,
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          place: resolvedPlace,
+        })
+      } catch {
+        bad()
+      }
+      action = route.stayId ? "stay-edit" : "stay-add"
+      value = { tripId: route.tripId, stay }
+    }
   } else if (action === "sharing") {
     input = object(body, ["publicAtlas"])
     if (typeof input.publicAtlas !== "boolean") bad()
@@ -552,7 +588,7 @@ export async function tripRequest({
   const metadata = await mutationMetadata(
     owner,
     { expectedRevision, idempotencyKey },
-    `trip:${action}:${route.tripId || ""}:${route.stopId || ""}`,
+    `trip:${action}:${route.tripId || ""}:${route.stopId || route.stayId || ""}`,
     input
   )
   const result = checked(

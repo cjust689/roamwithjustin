@@ -195,6 +195,7 @@ describe("private owner profile and pin services", () => {
         "Idempotency-Key": options.key || tripKey(),
       }),
       now: options.now || NOW,
+      placeCatalog: options.placeCatalog,
     })
   }
   async function upgradeTrips(options = {}) {
@@ -213,6 +214,164 @@ describe("private owner profile and pin services", () => {
       options
     )
   }
+  it("keeps independent private lodging through CRUD, retries, lifecycle, export and deletion", async () => {
+    await upgradeTrips()
+    const created = await tripCall("/v1/me/trips", {
+      title: "Lodging trip",
+      lifecycle: "planned",
+      stops: Array.from({ length: 5 }, (_, index) => ({
+        customPlace: { name: `Stop ${index}`, coordinates: [index, 2] },
+      })),
+    })
+    const path = `/v1/me/trips/${created.trip.tripId}`
+    const body = {
+      name: "Private base",
+      url: "https://example.com/base",
+      checkIn: "2026-06-10",
+      checkOut: "2026-06-13",
+      place: {
+        customPlace: {
+          name: "Town near base",
+          coordinates: [-83.1234567, 9.2345678],
+        },
+      },
+    }
+    const revision = created.profile.revision,
+      key = tripKey()
+    let result = await tripCall(path + "/stays", body, { revision, key })
+    const first = result.trip.stays[0]
+    expect(first.place.coordinates).toEqual([-83.123457, 9.234568])
+    expect(first).not.toHaveProperty("nights")
+    expect(result.trip.stops).toEqual(created.trip.stops)
+    expect(result.profile.pinCount).toBe(created.profile.pinCount)
+    expect(
+      (await tripCall(path + "/stays", body, { revision, key })).idempotent
+    ).toBe(true)
+    await expect(
+      tripCall(path + "/stays", body, { revision })
+    ).rejects.toMatchObject({ code: "revision_conflict" })
+    for (let index = 1; index < 5; index++)
+      result = await tripCall(path + "/stays", {
+        ...body,
+        name: `Private base ${index}`,
+      })
+    expect(result.trip.stays).toHaveLength(5)
+    for (const stay of result.trip.stays.slice(3))
+      result = await tripCall(
+        path + "/stays/" + stay.id,
+        {},
+        { method: "DELETE" }
+      )
+    expect(result.trip.stays).toHaveLength(3)
+    result = await tripCall(
+      path + "/stays/" + first.id,
+      { ...body, name: "Edited private base" },
+      { method: "PATCH" }
+    )
+    expect(result.trip.stays[0].id).toBe(first.id)
+    expect(result.trip.stops).toEqual(created.trip.stops)
+    for (const patch of [
+      { checkOut: body.checkIn },
+      { url: "javascript:alert(1)" },
+      { stopIds: [] },
+      { nights: 3 },
+    ])
+      await expect(
+        tripCall(path + "/stays", { ...body, ...patch })
+      ).rejects.toThrow()
+    await expect(
+      tripCall(path + "/stays/stay_" + "f".repeat(32), body, {
+        method: "PATCH",
+      })
+    ).rejects.toMatchObject({ code: "stay_not_found" })
+    const list = await tripCall("/v1/me/trips", undefined, { method: "GET" })
+    expect(list.trips[0].stays).toEqual(result.trip.stays)
+    const past = await tripCall(
+      path + "/lifecycle",
+      { lifecycle: "past" },
+      { method: "PATCH" }
+    )
+    expect(past.trip.stays).toEqual(result.trip.stays)
+    expect(
+      JSON.stringify(decodeSharedTrip(encodeSharedTrip(past.trip)))
+    ).not.toContain("Private base")
+    await tripCall(
+      path + "/sharing",
+      { publicAtlas: true },
+      { method: "PATCH" }
+    )
+    const profile = (
+      await getMyProfile({ environment: environment(), identity: IDENTITY })
+    ).profile
+    await updateMyProfile({
+      environment: environment(),
+      identity: IDENTITY,
+      input: {
+        patch: { public: true },
+        expectedRevision: profile.revision,
+        idempotencyKey: tripKey(),
+      },
+      now: NOW,
+    })
+    const publicResult =
+      await env.MY_ATLAS_USERS.getByName(USER_ID).getPublicAtlas()
+    expect(JSON.stringify(publicResult)).not.toContain("Edited private base")
+    expect(JSON.stringify(publicResult)).not.toContain("Town near base")
+    const exported = await exportMyAtlas({
+      environment: environment(),
+      identity: IDENTITY,
+    })
+    expect(exported.trips[0].stays).toHaveLength(3)
+    await registerSecondOwner()
+    await upgradeTrips({ identity: SECOND_IDENTITY })
+    await expect(
+      tripCall(path + "/stays", body, { identity: SECOND_IDENTITY })
+    ).rejects.toMatchObject({ code: "trip_not_found" })
+    await tripCall(path, { confirmation: "DELETE TRIP" }, { method: "DELETE" })
+    expect(
+      (await exportMyAtlas({ environment: environment(), identity: IDENTITY }))
+        .trips
+    ).toEqual([])
+  })
+  it("resolves lodging through the destination catalog and supports an empty draft", async () => {
+    await upgradeTrips()
+    const created = await tripCall("/v1/me/trips", {
+      title: "Draft with a stay",
+      lifecycle: "planned",
+      stops: [],
+    })
+    const place = {
+      placeId: "geonames:2643743",
+      placeType: "city",
+      name: "London",
+      countryCode: "GB",
+      countryName: "United Kingdom",
+      admin1Name: "England",
+      continent: "EU",
+      featureCode: "PPLC",
+      coordinates: [-0.1257, 51.5085],
+      deprecated: false,
+    }
+    const path = `/v1/me/trips/${created.trip.tripId}/stays`
+    const saved = await tripCall(
+      path,
+      {
+        name: "London stay",
+        checkIn: "2026-06-10",
+        checkOut: "2026-06-13",
+        place: { placeId: place.placeId },
+      },
+      { placeCatalog: { resolve: async () => place } }
+    )
+    expect(saved.trip.stops).toEqual([])
+    expect(saved.trip.workflow).toBe("draft")
+    expect(saved.trip.stays[0].place).toMatchObject({
+      placeId: place.placeId,
+      countryCode: "GB",
+      admin1Name: "England",
+      coordinates: place.coordinates,
+    })
+  })
   it("keeps optional dated endpoints private and separate from destination visits", async () => {
     await upgradeTrips()
     const created = await tripCall("/v1/me/trips", {
@@ -1425,6 +1584,7 @@ describe("private owner profile and pin services", () => {
       emptyTripDrafts: true,
       planningNotes: true,
       routeEndpoints: true,
+      stays: true,
     })
     const key = tripKey(),
       revision = listed.profile.revision

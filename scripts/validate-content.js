@@ -363,6 +363,10 @@ async function main() {
   ])
 
   const controlledKeys = new Map()
+  const lodgingModule = await importContent("src/content/lodging/index.mjs")
+  try {
+    lodgingModule.validateLodgingReferences({ journeys: journeyModule.journeyRecords, partners: partnerModule.partnerRecords, media: mediaModule.mediaRecords, places: placeModule.placeRecords })
+  } catch (error) { report(error.message) }
   const localSources = new Map()
   const localImageChecks = []
 
@@ -629,7 +633,7 @@ async function main() {
     const externalLinks = Object.values(partner.externalLinks || {}).filter(
       Boolean
     )
-    if (!externalLinks.length) {
+    if (!externalLinks.length && !(partner.kind === "lodging" && partner.linkPolicy === "omitted-for-privacy")) {
       report(owner + " is missing an external link")
     }
     externalLinks.forEach(link => {
@@ -777,7 +781,7 @@ async function main() {
           partner.externalLinks?.official ||
           partner.externalLinks?.directory ||
           partner.externalLinks?.platform
-        if (!/^https:\/\//i.test(website || "")) {
+        if (!/^https:\/\//i.test(website || "") && partner.linkPolicy !== "omitted-for-privacy") {
           report(lodgingOwner + " is missing a property website or directory URL")
         }
       }

@@ -7,6 +7,8 @@ export const TRIP_ID_PATTERN = /^(?:trip|plan)_[a-f0-9]{24}$/
 export const STOP_ID_PATTERN = /^stop_[a-f0-9]{32}$/
 export const MEMORY_ID_PATTERN = /^memory_[a-f0-9]{32}$/
 export const MAX_TRIP_STOPS = 50
+export const MAX_TRIP_STAYS = 50
+export const STAY_ID_PATTERN = /^stay_[a-f0-9]{32}$/
 
 export class TripContractError extends Error {
   constructor(code) {
@@ -84,6 +86,85 @@ export function tripPlaceProjection(place) {
         field === "coordinates" ? [...place.coordinates] : place[field],
       ])
   )
+}
+
+export function tripStayNights(checkIn, checkOut) {
+  if (
+    !checkIn ||
+    !checkOut ||
+    !validTripCalendarDate(checkIn) ||
+    !validTripCalendarDate(checkOut) ||
+    checkOut <= checkIn
+  )
+    return null
+  return (
+    (Date.parse(checkOut + "T00:00:00.000Z") -
+      Date.parse(checkIn + "T00:00:00.000Z")) /
+    86400000
+  )
+}
+
+export function normalizeTripStayUrl(value = "") {
+  if (typeof value !== "string") fail("invalid_stay_url")
+  const raw = value.trim()
+  if (!raw) return ""
+  if (raw.length > 2048 || /[\s\\<>\p{C}]/u.test(raw)) fail("invalid_stay_url")
+  try {
+    const url = new URL(raw)
+    if (
+      !["http:", "https:"].includes(url.protocol) ||
+      !url.hostname ||
+      url.username ||
+      url.password
+    )
+      fail("invalid_stay_url")
+  } catch {
+    fail("invalid_stay_url")
+  }
+  return raw
+}
+
+// Uses the exact same place snapshot as a destination; stays never create stops.
+export function normalizeTripStay(value) {
+  if (
+    !plain(value) ||
+    Object.keys(value).some(
+      key =>
+        !["id", "name", "url", "checkIn", "checkOut", "place"].includes(key)
+    ) ||
+    !STAY_ID_PATTERN.test(value.id || "") ||
+    !text(value.name, 160)
+  )
+    fail("invalid_stay")
+  const name = value.name.normalize("NFC").replace(/\s+/gu, " ").trim()
+  if (!name) fail("invalid_stay")
+  if (tripStayNights(value.checkIn, value.checkOut) === null)
+    fail("invalid_stay_dates")
+  return {
+    id: value.id,
+    name,
+    url: normalizeTripStayUrl(value.url),
+    checkIn: value.checkIn,
+    checkOut: value.checkOut,
+    place: tripPlaceProjection(value.place),
+  }
+}
+
+export function assertTripStays(stays = []) {
+  if (!Array.isArray(stays) || stays.length > MAX_TRIP_STAYS)
+    fail("invalid_stays")
+  const ids = new Set()
+  for (const stay of stays) {
+    const normalized = normalizeTripStay(stay)
+    if (
+      ids.has(stay.id) ||
+      normalized.name !== stay.name ||
+      normalized.url !== (stay.url ?? "")
+    )
+      fail("invalid_stays")
+    ids.add(stay.id)
+  }
+  return stays
 }
 
 function validDates(dates) {
@@ -228,6 +309,7 @@ export function assertCanonicalTrip(trip) {
     fail("invalid_trip_details")
   if (trip.routeEndpoints !== undefined)
     normalizeTripRouteEndpoints(trip.routeEndpoints)
+  assertTripStays(trip.stays)
   return trip
 }
 

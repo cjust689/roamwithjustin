@@ -5,9 +5,10 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-16
-updated: 2026-11-22
+updated: 2026-11-23
 related:
   - my-atlas-integrated-trip-management-2026-11-21
+  - my-atlas-trip-lodging
   - my-atlas-registration
   - my-atlas-api-authentication
   - my-atlas-geography
@@ -178,6 +179,24 @@ verification:
 ---
 
 # My Atlas local profile, pin, and sharing state
+
+## Private trip lodging
+
+Canonical owner trips optionally store independent `stays` with stable IDs,
+name, safe optional web URL, required date-only check-in/check-out and the same
+`place` snapshot used by destination visits. Missing stays means empty without
+migration. The existing authenticated, revisioned and idempotent trip boundary
+adds POST `/v1/me/trips/{tripId}/stays` and PATCH/DELETE
+`/v1/me/trips/{tripId}/stays/{stayId}`. Catalog/custom resolution and coordinate
+precision reuse destination logic. Nights are computed, never stored.
+
+Stay mutations preserve stops, memories, logistics and sharing. Stays remain
+private across lifecycle changes, are included in owner JSON exports and are
+removed with their trip/account. They do not add pins, map route points,
+destination counts, shared-link content or public profile fields. Main Atlas
+editorial Stays ingestion uses a different generated content authority and
+never reads owner trip storage. The [active lodging checklist](../implementation/my-atlas-lodging-implementation.md)
+records verification and the still-unreleased API/UI boundary.
 
 ## Optional Instagram profile link
 
@@ -1130,13 +1149,13 @@ Anonymous route/CORS checks pass; genuine-owner save acceptance is not claimed.
 The owner UI now uses these responsibilities. This follow-up remains local
 until the next frontend promotion; no account API or permission change is added.
 
-| Location | Functionality |
-| --- | --- |
-| Overview | Travel statistics, journey navigation, Share Your Atlas |
-| Share Your Atlas | Direct trip-sharing guidance and Story image creation |
-| Profile dialog | Explore profile visibility, profile link, settings, data export, account deletion |
-| Customize My Atlas | Favorite travel image, image location, public image presentation |
-| Explore Atlases | Discover other users' publicly shared Atlases |
+| Location           | Functionality                                                                     |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Overview           | Travel statistics, journey navigation, Share Your Atlas                           |
+| Share Your Atlas   | Direct trip-sharing guidance and Story image creation                             |
+| Profile dialog     | Explore profile visibility, profile link, settings, data export, account deletion |
+| Customize My Atlas | Favorite travel image, image location, public image presentation                  |
+| Explore Atlases    | Discover other users' publicly shared Atlases                                     |
 
 Share Your Atlas is a compact Overview card with trip-sharing guidance and the
 existing Story image export action. The redundant disclosure and separate
@@ -1408,11 +1427,11 @@ share the correction and retain their existing touch size and navigation events.
 
 The owner interface separates direct sharing from publishing a discoverable profile:
 
-| Control | Effect |
-| --- | --- |
-| Share trip in Planned or Past | Copies a read-only snapshot URL, independent of profile publication or Explore listing |
-| Profile settings, List my profile in Explore Atlases on | Publishes the profile URL and lists it in the directory together |
-| Profile settings, List my profile in Explore Atlases off | Removes the directory listing and makes the profile URL private together |
+| Control                                                  | Effect                                                                                 |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Share trip in Planned or Past                            | Copies a read-only snapshot URL, independent of profile publication or Explore listing |
+| Profile settings, List my profile in Explore Atlases on  | Publishes the profile URL and lists it in the directory together                       |
+| Profile settings, List my profile in Explore Atlases off | Removes the directory listing and makes the profile URL private together               |
 
 The switch lives only in Profile settings. It uses one authenticated, revisioned
 `PATCH /v1/me` with `{public: listed, discoverable: listed}`, so there is no

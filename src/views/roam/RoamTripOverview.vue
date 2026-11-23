@@ -97,6 +97,7 @@
           <article
             v-for="stay in trip.lodging"
             :key="stay.id"
+            :data-stay-id="stay.id"
             class="lodging-card"
           >
             <img
@@ -114,11 +115,24 @@
               <span>{{ stay.location }}</span>
               <h3>{{ stay.name }}</h3>
               <p>{{ stay.blurb }}</p>
+              <p
+                v-if="
+                  stay.relationship &&
+                  stay.relationship !== 'Independent' &&
+                  stay.disclosure
+                "
+              >
+                {{ stay.disclosure }}
+              </p>
               <a
                 v-if="stay.link"
                 :href="stay.link"
                 target="_blank"
-                rel="noopener noreferrer"
+                :rel="
+                  stay.relationship && stay.relationship !== 'Independent'
+                    ? 'sponsored noopener noreferrer'
+                    : 'noopener noreferrer'
+                "
                 :title="stay.disclosure || null"
                 @click="trackLodgingClick(stay)"
               >
@@ -319,7 +333,7 @@ export default {
     trackLodgingClick(stay) {
       const parameters = commercialLinks.buildPartnerClickParameters({
         linkType: stay.linkType,
-        partnerId: stay.id,
+        partnerId: stay.partnerId || stay.id,
         placement: "trip_lodging",
         publicJourneyId: this.trip.journeyId,
       })
