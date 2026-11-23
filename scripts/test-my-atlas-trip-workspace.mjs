@@ -4,7 +4,11 @@ import {
   tripTravelFingerprint,
 } from "../src/features/my-atlas/planning/tripTravelContext.mjs"
 import { validTripCalendarDate } from "../shared/my-atlas-trips.mjs"
-import { emptyDestinationDraft } from "../src/features/my-atlas/catalog/destinationDraft.mjs"
+import {
+  emptyDestinationDraft,
+  destinationPlaceSelection,
+} from "../src/features/my-atlas/catalog/destinationDraft.mjs"
+import { seedTripStayDates } from "../src/features/my-atlas/planning/stays.mjs"
 import assert from "node:assert/strict"
 import fs from "node:fs/promises"
 import compiler from "vue-template-compiler"
@@ -253,6 +257,10 @@ const dependencies = {
   buildAiPlanningPrompt,
   MyAtlasExperiences: {},
   MyAtlasDestinationPicker: {},
+  MyAtlasTripLodging: {},
+  MyAtlasStayEditor: {},
+  seedTripStayDates,
+  destinationPlaceSelection,
   emptyDestinationDraft,
   getMyAtlasApiAccessToken: async () => "fixture",
   requestMyAtlasTrips: async input => {
@@ -943,4 +951,38 @@ assert.equal(
 assert.equal(ui.selectedDate, "2027-04-05 to 2027-04-20")
 console.log(
   "Visible destination date saves, optional endpoint drafts, date order, stable visit identities and shared-link privacy passed."
+)
+
+ui.capabilities.stays = true
+ui.editStay()
+ui.stayDraft.name = "Private base camp"
+ui.stayDraft.url = "https://example.com/stay"
+ui.stayDraft.checkIn = "2026-06-10"
+ui.stayDraft.checkOut = "2026-06-13"
+ui.destinationDraft.name = "Nearby town"
+ui.beginPlacement({
+  kind: "explicit-coordinate",
+  coordinates: [1, 2],
+  name: "Nearby town",
+})
+assert.equal(ui.workspace, "")
+assert.equal(ui.stayDraft.name, "Private base camp")
+ui.setCoordinates([1.1234567, 2.1234567])
+assert.equal(ui.workspace, "stay")
+assert.equal(ui.stayDraft.checkIn, "2026-06-10")
+ui.chooseStayLocation({
+  selection: {
+    customPlace: { name: "Nearby town", coordinates: [1.123457, 2.123457] },
+  },
+})
+await ui.saveStay()
+const stayWrite = plannedWrites.pop()
+assert.equal(stayWrite[0], "addStay")
+assert.deepEqual(stayWrite[1].place, {
+  customPlace: { name: "Nearby town", coordinates: [1.123457, 2.123457] },
+})
+assert.equal(stayWrite[1].name, "Private base camp")
+assert.equal(ui.selected.stops.length, trip.stops.length)
+console.log(
+  "Private lodging form reuses map confirmation, retains stay drafts and creates no destination stops"
 )

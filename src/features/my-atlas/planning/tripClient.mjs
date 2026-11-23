@@ -3,12 +3,14 @@ import {
   assertCanonicalTrip,
   TRIP_ID_PATTERN,
   STOP_ID_PATTERN,
+  STAY_ID_PATTERN,
 } from "../../../../shared/my-atlas-trips.mjs"
 
 export async function requestMyAtlasTrips({
   action = "list",
   tripId,
   stopId,
+  stayId,
   body,
   revision,
   idempotencyKey,
@@ -25,16 +27,21 @@ export async function requestMyAtlasTrips({
       "reorder",
       "editStop",
       "removeStop",
+      "addStay",
+      "editStay",
+      "removeStay",
     ].includes(action) &&
       !tripId) ||
-    (["editStop", "removeStop", "editVisit"].includes(action) && !stopId)
+    (["editStop", "removeStop", "editVisit"].includes(action) && !stopId) ||
+    (["editStay", "removeStay"].includes(action) && !stayId)
   )
     throw new MyAtlasApiError("Trip selection is invalid.", {
       code: "invalid_trip",
     })
   if (
     (tripId && !TRIP_ID_PATTERN.test(tripId)) ||
-    (stopId && !STOP_ID_PATTERN.test(stopId))
+    (stopId && !STOP_ID_PATTERN.test(stopId)) ||
+    (stayId && !STAY_ID_PATTERN.test(stayId))
   )
     throw new MyAtlasApiError("Trip selection is invalid.", {
       code: "invalid_trip",
@@ -60,6 +67,9 @@ export async function requestMyAtlasTrips({
     reorder: [`${trip}/stops/order`, "PATCH"],
     editStop: [`${trip}/stops/${stopId}`, "PATCH"],
     removeStop: [`${trip}/stops/${stopId}`, "DELETE"],
+    addStay: [`${trip}/stays`, "POST"],
+    editStay: [`${trip}/stays/${stayId}`, "PATCH"],
+    removeStay: [`${trip}/stays/${stayId}`, "DELETE"],
   }
   const route = Object.prototype.hasOwnProperty.call(routes, action)
     ? routes[action]

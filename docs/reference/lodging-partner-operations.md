@@ -5,11 +5,12 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-17
-updated: 2026-11-17
+updated: 2026-11-23
 related:
   - content-model
   - monetization-analytics
   - affiliate-activation-public-editorial-first-slice
+  - stays-sheet-intake
 supersedes: []
 superseded_by: []
 code_paths:
@@ -58,6 +59,19 @@ owner review item because its exact identity and URL cannot be inferred from a
 story title.
 
 ## Add or update a stay
+
+For spreadsheet intake, use the `Stays` and `Stays Instructions` tabs prepared
+by `npm run editorial:stays:setup`. Their schema and remaining importer work
+are tracked in the [active Stays checklist](../implementation/stays-sheet-intake.md).
+Use `editorial:stays --preview` to review one Ready for preview row. After
+approval, change Atlas Mode to Publish and use `--apply` to compile locally.
+Optional `--deploy` uses the protected publication workflow after feature
+release. Only rendered verification writes Published. The Posts publisher
+continues to ignore Stays. Public coordinates may intentionally identify a
+nearby town or rough area; supplying them does not register a pin. A private
+property can omit its link through the generated privacy omission policy.
+Source notes and Drive folders stay out of public records. The manual canonical
+workflow below remains available for curated records.
 
 1. Add or update one lodging Partner in `src/content/partners/index.mjs`.
    Keep its ID stable once published. Prefer the property's official website.

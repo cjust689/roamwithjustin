@@ -20,3 +20,15 @@ export function destinationSelection(draft) {
   })
   return customPlace ? { customPlace } : null
 }
+
+// Shared by private trip endpoints and stays after the destination picker.
+export function destinationPlaceSelection(place) {
+  if (place?.placeType === "custom") {
+    const customPlace = normalizeMyAtlasCustomPlace({
+      name: place.name,
+      coordinates: place.coordinates,
+    })
+    return customPlace ? { customPlace } : null
+  }
+  return place?.placeId ? { placeId: place.placeId } : null
+}

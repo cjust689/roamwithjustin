@@ -1,4 +1,5 @@
 import { createIdRegistry } from "../contracts.mjs"
+import { generatedLodgingPartners } from "../lodging/index.mjs"
 
 // Operators and commercial providers are separate from Places and Media.
 // A record here identifies a real trip relationship without implying that
@@ -167,6 +168,7 @@ const registry = createIdRegistry(
       commercialHosts: ["amazon.com", "amzn.to", "a.co"],
       disclosure: "As an Amazon Associate I earn from qualifying purchases.",
     },
+    ...generatedLodgingPartners,
   ],
   "Partner registry"
 )

@@ -5,11 +5,12 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-20
+updated: 2026-11-23
 related:
   - media-pipeline
   - gear-system
   - lodging-partner-operations
+  - stays-sheet-intake
 supersedes:
   - atlas-asset-architecture-brief
 superseded_by: []
@@ -123,6 +124,19 @@ design and migration narrative is preserved in the
   Partner, Journey, or private planning models.
 - **Atlas presentation** owns map-only grouping, camera, root, and relationship
   choices. It does not replace Place or Journey identity.
+
+The separate [Stays sheet intake](../implementation/stays-sheet-intake.md)
+captures reviewed main Atlas property/stay data, including intentionally rough
+public display coordinates. `editorial:stays` previews and compiles approved
+rows into `src/content/lodging/generated/records.json`. This generated shard
+composes lodging Partners and Journey stays through their existing registries.
+It preserves curated records and accepts only registered, rights-reviewed Media.
+Private source notes are excluded. Blank property links require an explicit
+privacy omission policy. Public map bindings must already resolve to reviewed
+Places/Visits with matching public coordinates; ingestion does not create pins.
+Sheet flags select intent for the explicit command, without background polling.
+Compiled content is distinguished from verified publication. Private My Atlas
+trip stays belong to the owner account model and never feed this pipeline.
 
 **Experiences** own a reusable outing or story within one Journey and may bind
 to one Place and Visit. **Moments** are additive Post-authored perspectives

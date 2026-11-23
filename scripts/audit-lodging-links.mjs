@@ -41,8 +41,13 @@ export function auditLodgingRecords({
       if (!/^[a-z0-9][a-z0-9-]{2,99}$/.test(stay.partnerId || "")) {
         issues.push(`${owner}: invalid tracking slug`)
       }
-      if (!["official", "directory", "platform"].includes(link.kind)) {
-        issues.push(`${owner}: property website or reviewed directory is missing`)
+      if (
+        !["official", "directory", "platform"].includes(link.kind) &&
+        partner?.linkPolicy !== "omitted-for-privacy"
+      ) {
+        issues.push(
+          `${owner}: property website or reviewed directory is missing`
+        )
       }
       if (link.url && !/^https:\/\//i.test(link.url)) {
         issues.push(`${owner}: link must use https`)
@@ -57,9 +62,11 @@ export function auditLodgingRecords({
         trackingSlug: stay.partnerId || "",
         linkType: link.kind,
         url: link.url,
-        status: ["official", "directory", "platform"].includes(link.kind)
-          ? "ready"
-          : "review",
+        status:
+          ["official", "directory", "platform"].includes(link.kind) ||
+          partner?.linkPolicy === "omitted-for-privacy"
+            ? "ready"
+            : "review",
       }
     })
   )
@@ -121,6 +128,9 @@ function run() {
   if (issues.length) process.exitCode = 1
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (
+  process.argv[1] &&
+  pathToFileURL(process.argv[1]).href === import.meta.url
+) {
   run()
 }

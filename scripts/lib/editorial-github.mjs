@@ -10,6 +10,7 @@ export const PUBLICATION_PATH_ALLOWLIST = Object.freeze([
   "src/content/media/generated/records.json",
   "src/content/editorial/generated/records.json",
   "src/content/geography/generated/records.json",
+  "src/content/lodging/generated/records.json",
 ])
 
 export function parseGitHubRemote(remoteUrl) {

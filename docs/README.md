@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-22
+updated: 2026-11-23
 related:
   - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-location-experience-commerce
@@ -37,6 +37,8 @@ related:
   - my-atlas-travel-booking-affiliate-partnerships
   - affiliate-activation-public-editorial-first-slice
   - lodging-partner-operations
+  - stays-sheet-intake
+  - my-atlas-trip-lodging
   - gear-affiliate-readiness-2026-11-17
   - editorial-voice
   - sitewide-copy-audit-2026-11-17
@@ -67,6 +69,20 @@ verification:
 ---
 
 # Roam With Justin documentation
+
+Two separate lodging features are implemented. Main Atlas
+`editorial:stays` previews approved sheet rows, compiles canonical lodging and
+optionally uses protected publication with verified writeback. Rough public
+location fields remain separate from explicit geography registration. Its
+[Stays checklist](implementation/stays-sheet-intake.md) records source and
+external-service acceptance. Private trip-owned stays use the existing My Atlas
+destination picker and owner storage, with no publication into the main Atlas.
+Their [implementation checklist](implementation/my-atlas-lodging-implementation.md)
+tracks API/UI verification and release status.
+The owner authorized release on November 23. The API is deployed as Worker
+`3151c546-c995-4ebc-b857-61876be0f687`, with successful remote health,
+authentication and CORS checks. Protected frontend promotion and final Pages
+evidence are tracked in [pull request 260](https://github.com/cjust689/roamwithjustin/pull/260).
 
 Planning follow-up: destination arrival/departure dates are visible in the
 default Planning editor and save with notes. Canonical trips also support
