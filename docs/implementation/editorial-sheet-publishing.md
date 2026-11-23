@@ -89,6 +89,10 @@ verification:
     - Pages workflow run 43868555523 succeeded on 2026-11-16
     - live Catalog refresh verified 223 canonical references, 71 Visit choices, 106 exact bindings, and no Posts ID writes on 2026-11-16
     - live Posts table metadata readback verified the New Place dropdown choice on 2026-11-16
+    - Bajos del Toro publication PRs 264 and 267 and successful Pages run 45277672821 verified on 2026-11-23
+    - exact production generated records, unchanged Drive inventory and rendered media marker verified before Sheet recovery
+    - Sheet row 22 readback verified 14 publication metadata fields including Experience/Moment IDs while retaining social Status Posted
+    - node scripts/test-editorial-publication-writeback.mjs
 ---
 
 # Single-row Sheets and Drive Atlas publishing implementation
@@ -110,9 +114,12 @@ The code path is implemented and locally tested. The historical Sheet
 migration, 106 Journey and Place bindings, 82 Visit relations, the visible
 protected Atlas Reference, GitHub pull-request promotion, Actions build,
 Pages deployment, rendered-page verification, and hardened branch rules are
-live verified. A real post has not yet supplied the combination of
-`Atlas Mode`, Drive media, and credentials needed to prove the first
-end-to-end R2 publication, so the implementation remains partial.
+live verified. A real Bajos del Toro post has now completed Drive/R2 ingestion,
+production content deployment and verified Sheet write-back. Its original
+production PR closed without merging and was replaced by a separate merge,
+so final write-back required guarded recovery. A completely uninterrupted
+single-command real publication remains unverified; the implementation remains
+partial.
 
 ## One-command workflow
 
@@ -157,7 +164,43 @@ non-forced local branch deletion. The pending generated Media/Editorial files
 then passed the real command-runner scope check. No content or remote branch
 was removed, and publication was not rerun during these checks.
 
-### Commands
+### Replaced promotion PR and social-status recovery
+
+Post `7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7` produced Experience
+`experience-costa-rica-2025-jurassic-canyon` and Moment
+`moment-7c744fc5-b9d4-4c1e-8e6a-4f7adfd8b2e7`. The automatic checkpoint
+tracked main PR 266, which closed unmerged. PR 267 instead deployed its exact
+generated records as `93898f8e5a64bd0146da05c96e7707e7ad027ed5`, with successful
+Pages run 45277672821. As write-back follows deployment verification, the
+interrupted automatic run never reached its Sheet update.
+
+The row's social `Status` also changed from Ready to Posted. That field is part
+of the existing full source hash, so ordinary stale-source protection correctly
+blocked a blind write-back. Recovery proved that substituting the original
+Ready value recreated the original complete source hash, that all public
+authoring fields and the Drive fingerprint were unchanged, and that the exact
+planned Moment/media existed in both main and the rendered public page.
+
+`buildPublicationWriteback` now accepts an optional `publishedSheetSourceHash`
+for this explicit verified-recovery case. `expectedSheetSourceHash` still
+guards the actual current row; the stored `source_hash` and processed hash
+retain the source that was truly deployed. Default behavior is unchanged and
+does not silently ignore social edits. This is not permission to mark changed
+public content as published.
+
+Guarded recovery refreshed the canonical reference, wrote and read back all
+14 metadata cells in row 22, kept social Status Posted, and recorded the actual
+replacement PR/deployment in the private checkpoint and publication result.
+No media upload, content change, GitHub push or new production deployment was
+performed during recovery. Evidence is in the existing private run directory
+under `publication-result.json` and `sheet-writeback-recovery-before.json`.
+The repaired metadata helper and regression remain local until a code release.
+
+The batch Chrome DOM-dump command timed out during recovery. An isolated CDP
+browser rendered the exact live media marker successfully. Batch-renderer
+reliability remains follow-up work; no weaker HTTP-only success was substituted.
+
+### Publication commands
 
 Preview one selected row:
 

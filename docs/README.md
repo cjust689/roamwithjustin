@@ -78,6 +78,11 @@ Implementation and recovery details are in the
 Git status capture also preserves its leading status columns, preventing the
 first generated file's `src/` path from being misread as `rc/`. Real Git and
 pending-publication scope regressions pass with the original allowlist intact.
+The Bajos del Toro post is deployed through PR 267 and Pages run 45277672821.
+Guarded recovery restored its missing Sheet publication metadata after the
+original promotion PR closed, preserving the social Posted status. Recovery
+evidence and the remaining uninterrupted-publication acceptance are in the
+[editorial checklist](implementation/editorial-sheet-publishing.md#replaced-promotion-pr-and-social-status-recovery).
 
 Two separate lodging features are implemented. Main Atlas
 `editorial:stays` previews approved sheet rows, compiles canonical lodging and
