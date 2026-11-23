@@ -29,6 +29,7 @@ export function buildPublicationWriteback({
   rows,
   postId,
   expectedSheetSourceHash,
+  publishedSheetSourceHash = expectedSheetSourceHash,
   processedHash,
   deploymentSha,
   atlasUrl,
@@ -69,6 +70,9 @@ export function buildPublicationWriteback({
   if (currentSourceHash !== expectedSheetSourceHash) {
     throw new Error(`Post ID ${postId} changed after publication planning`)
   }
+  if (!/^[a-f0-9]{64}$/.test(String(publishedSheetSourceHash || ""))) {
+    throw new Error("publishedSheetSourceHash must be a 64 character SHA-256")
+  }
   for (const [label, value] of Object.entries({
     processedHash,
     deploymentSha,
@@ -88,7 +92,9 @@ export function buildPublicationWriteback({
     atlas_status: "Published",
     atlas_url: atlasUrl,
     atlas_url_level: atlasUrlLevel,
-    source_hash: expectedSheetSourceHash,
+    // Recovery may verify an unchanged published payload while a social-only
+    // field has since changed. Guard the current row, retain the deployed hash.
+    source_hash: publishedSheetSourceHash,
     last_processed_hash: processedHash,
     last_deployment: deploymentSha,
     last_verified_at: verifiedAt,

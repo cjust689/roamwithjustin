@@ -53,6 +53,32 @@ assert.equal(plan.values.atlas_status, "Published")
 assert.equal(plan.values.last_deployment, "main-merge-sha")
 assert.equal(plan.values.place_id, "cruz-bay")
 
+const postedRow = { ...row, Status: "Posted" }
+const recovered = buildPublicationWriteback({
+  ...input,
+  rows: [postedRow],
+  expectedSheetSourceHash: postSourceHash(postedRow),
+  publishedSheetSourceHash: expectedSheetSourceHash,
+})
+assert.equal(recovered.currentSourceHash, postSourceHash(postedRow))
+assert.equal(recovered.values.source_hash, expectedSheetSourceHash)
+assert.equal(recovered.values.last_processed_hash, input.processedHash)
+assert.throws(
+  () => buildPublicationWriteback({ ...input, publishedSheetSourceHash: "" }),
+  /publishedSheetSourceHash/
+)
+assert.equal(
+  recovered.requests.some(
+    request =>
+      request.updateCells.range.startColumnIndex === headers.indexOf("Status")
+  ),
+  false
+)
+assert.throws(
+  () => buildPublicationWriteback({ ...input, rows: [postedRow] }),
+  /changed after publication planning/
+)
+
 const appliedRow = { ...row, ...plan.values }
 assert.equal(
   buildPublicationWriteback({ ...input, rows: [appliedRow] }).alreadyApplied,
