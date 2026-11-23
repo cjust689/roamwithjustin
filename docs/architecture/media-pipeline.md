@@ -65,6 +65,13 @@ Command capture preserves leading Git status columns for strict generated-file
 scope checks. Publication branches are allocated after validation, so early
 build or scope failures do not reserve their retry names.
 
+Final Sheet IDs/status are written only after verified deployment. Explicit
+recovery can guard the current Sheet hash separately from the published source
+hash, preserving a proven social-only Ready-to-Posted change without claiming
+that different public content was deployed. The full default freshness guard
+remains unchanged. The Bajos del Toro handoff and verified metadata recovery
+are recorded in the active editorial checklist.
+
 ## Current paths
 
 The repository supports four local preparation modes and one shared upload
