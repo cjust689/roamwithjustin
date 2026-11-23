@@ -5105,6 +5105,310 @@
         "byteSize": 83499849,
         "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-b7bfacee36be-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "b7bfacee36bee30869d4c01e00b3ac50e7516a849a62d0e9faa73882cf07e12d",
+        "byteSize": 601926,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-19b31d0c91c6-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "19b31d0c91c64793dcf462ce62db0bc3bf475b66f7d9535eb697d75ef1cea1ec",
+        "byteSize": 664864,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-494d989dec0a-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "494d989dec0af4b7dc83a892e1047b9e7dc9618ef134301b35eb898eefe6ad99",
+        "byteSize": 759033,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-8e48e9369852-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "8e48e93698520fa15ca049369c245cdf611970444fc753ff82516c94fee7f97a",
+        "byteSize": 1077536,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-70c7252d5974-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "70c7252d5974432d1d90c18f61bb542058e9cd055e758fd71021e35d3005f7ca",
+        "byteSize": 950031,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-319d1891aea6-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028/bajos-del-toro-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "319d1891aea64a49b1404e09bab75a062b4fd6c57fba00e871f9c898b219a010",
+        "byteSize": 864372,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-59dd980b85a7-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284/bajos-del-toro-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "59dd980b85a7bec280e9a1d4d90270bc3d58b19c4891787c33a3707008201154",
+        "byteSize": 33071264,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-804219ab410e-002",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284/bajos-del-toro-002.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "804219ab410edecfdf92b09475adbc6322633d57251b51b476598174ef75f8cd",
+        "byteSize": 15619712,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-cbea3a047663-003",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284/bajos-del-toro-003.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "cbea3a047663158bc8f2f27b3b809cb4c101f303ee8856db313e6656edc2bafc",
+        "byteSize": 22624222,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-b6e6eebcecd4-004",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/bajos-del-toro/media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284/bajos-del-toro-004.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "b6e6eebcecd481d21e43e0891c5b5b0db10c6c07eaacfa676f663d26da558506",
+        "byteSize": 131898367,
+        "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+      }
     }
   ],
   "placements": [
@@ -7317,6 +7621,136 @@
       "sortOrder": 1,
       "publicationSequence": 19,
       "batchId": "media-costa-rica-2025-la-fortuna-costa-rica-17dc65b670f6eb31"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-b7bfacee36be-001",
+      "assetId": "image-costa-rica-2025-b7bfacee36be-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-19b31d0c91c6-002",
+      "assetId": "image-costa-rica-2025-19b31d0c91c6-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-494d989dec0a-003",
+      "assetId": "image-costa-rica-2025-494d989dec0a-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-8e48e9369852-004",
+      "assetId": "image-costa-rica-2025-8e48e9369852-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-70c7252d5974-005",
+      "assetId": "image-costa-rica-2025-70c7252d5974-005",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-image-costa-rica-2025-319d1891aea6-006",
+      "assetId": "image-costa-rica-2025-319d1891aea6-006",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 20,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-video-costa-rica-2025-59dd980b85a7-001",
+      "assetId": "video-costa-rica-2025-59dd980b85a7-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 21,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-video-costa-rica-2025-804219ab410e-002",
+      "assetId": "video-costa-rica-2025-804219ab410e-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 21,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-video-costa-rica-2025-cbea3a047663-003",
+      "assetId": "video-costa-rica-2025-cbea3a047663-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 21,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-bajos-del-toro-video-costa-rica-2025-b6e6eebcecd4-004",
+      "assetId": "video-costa-rica-2025-b6e6eebcecd4-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-bajos-del-toro",
+      "placeId": "bajos-del-toro",
+      "experienceId": "experience-costa-rica-2025-jurassic-canyon",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 21,
+      "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
     }
   ],
   "batches": [
@@ -7723,6 +8157,40 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "805fdb777ba0c1ad5788225528b06a4dba467e6240134d257b4ead5c6780166f"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-bajos-del-toro-4f83f28ec718f028",
+      "sequence": 20,
+      "manifestSha256": "2a7227bd60604d856547db9a593a8b8d7470e83bd84ab579db11ebe99c473e64",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-b7bfacee36be-001",
+        "image-costa-rica-2025-19b31d0c91c6-002",
+        "image-costa-rica-2025-494d989dec0a-003",
+        "image-costa-rica-2025-8e48e9369852-004",
+        "image-costa-rica-2025-70c7252d5974-005",
+        "image-costa-rica-2025-319d1891aea6-006"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "5ebb0f813ecde19262b1e9b9c7cc37b4c325f9d22391a683b0822dcf59e8340a"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284",
+      "sequence": 21,
+      "manifestSha256": "e4a305c5bfc330578cdf668768953898ae28090dee44d3c11d5c6fd6a862c090",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-59dd980b85a7-001",
+        "video-costa-rica-2025-804219ab410e-002",
+        "video-costa-rica-2025-cbea3a047663-003",
+        "video-costa-rica-2025-b6e6eebcecd4-004"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "712118414939f8a51bd299d9a4861cc754602383993e14b4a461da8052e00b00"
       }
     }
   ]
