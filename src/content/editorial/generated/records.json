@@ -24,6 +24,18 @@
       "sortOrder": 1,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-drake-bay",
+      "slug": "drake-bay",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "title": "Drake Bay",
+      "summary": "",
+      "sortOrder": 2,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -66,6 +78,33 @@
         "video-costa-rica-2025-b6e6eebcecd4-004"
       ],
       "sourceHash": "a0f8e3a49d85e4fd11fcf2d6959b3b7b7b6faea3e0bb8a7722e786ccba37605c"
+    },
+    {
+      "id": "moment-8c98fa71-8379-4b48-a314-39185b4085a1",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "postId": "8c98fa71-8379-4b48-a314-39185b4085a1",
+      "title": "Drake Secret Beach",
+      "notes": "Drake Bay is one of the parts of Costa Rica I’ve been most excited to reach. But the weather cancels both of our planned boat excursions, one out to an island for snorkeling, the other closer to shore with a beach lunch. That’s the downside of traveling in shoulder season. We make the best of a gap in the weather and head out on a beach hike instead.\n\nWe spot monkeys and macaws along the way. The beach is roughly two or three miles from Drake Bay, and we spend some of the morning there alone. It isn’t the outing we planned, but we have a stretch of this coastline to ourselves.",
+      "travelDate": "06/01/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-d2100d5758e4-001",
+        "image-costa-rica-2025-3fb47025c11c-002",
+        "image-costa-rica-2025-e9ba6577f601-003",
+        "image-costa-rica-2025-953cde1e37e1-004",
+        "image-costa-rica-2025-8088691de116-005",
+        "image-costa-rica-2025-41dcc3bfc62f-006",
+        "image-costa-rica-2025-7ea0bbeaf828-007",
+        "image-costa-rica-2025-33d3723e8eb7-008",
+        "image-costa-rica-2025-fcd02e40b909-009",
+        "image-costa-rica-2025-160e5c081550-010",
+        "image-costa-rica-2025-38c5e8aba7c1-011",
+        "image-costa-rica-2025-94f644d2fbcc-012",
+        "video-costa-rica-2025-6e88e064df34-001",
+        "video-costa-rica-2025-f26bb57daab1-002"
+      ],
+      "sourceHash": "ac05b29fcea8515c3a55f632537d44c7b8a658ef34bae21530add02c1f4780bd"
     }
   ],
   "batches": [
@@ -147,6 +186,60 @@
         "video-costa-rica-2025-804219ab410e-002",
         "video-costa-rica-2025-cbea3a047663-003",
         "video-costa-rica-2025-b6e6eebcecd4-004"
+      ]
+    },
+    {
+      "id": "editorial-8c98fa71-8379-4b48-a314-39185b4085a1-b4c00b005234be1f",
+      "postId": "8c98fa71-8379-4b48-a314-39185b4085a1",
+      "sourceHash": "b4c00b005234be1f23f0282a3839605be5425192b0ba008c58f303f3f5701ed9",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "momentId": "moment-8c98fa71-8379-4b48-a314-39185b4085a1",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516",
+        "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-d2100d5758e4-001",
+        "image-costa-rica-2025-3fb47025c11c-002",
+        "image-costa-rica-2025-e9ba6577f601-003",
+        "image-costa-rica-2025-953cde1e37e1-004",
+        "image-costa-rica-2025-8088691de116-005",
+        "image-costa-rica-2025-41dcc3bfc62f-006",
+        "image-costa-rica-2025-7ea0bbeaf828-007",
+        "image-costa-rica-2025-33d3723e8eb7-008",
+        "image-costa-rica-2025-fcd02e40b909-009",
+        "image-costa-rica-2025-160e5c081550-010",
+        "image-costa-rica-2025-38c5e8aba7c1-011",
+        "image-costa-rica-2025-94f644d2fbcc-012",
+        "video-costa-rica-2025-6e88e064df34-001",
+        "video-costa-rica-2025-f26bb57daab1-002"
+      ]
+    },
+    {
+      "id": "editorial-8c98fa71-8379-4b48-a314-39185b4085a1-ac05b29fcea8515c",
+      "postId": "8c98fa71-8379-4b48-a314-39185b4085a1",
+      "sourceHash": "ac05b29fcea8515c3a55f632537d44c7b8a658ef34bae21530add02c1f4780bd",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "momentId": "moment-8c98fa71-8379-4b48-a314-39185b4085a1",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516",
+        "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-d2100d5758e4-001",
+        "image-costa-rica-2025-3fb47025c11c-002",
+        "image-costa-rica-2025-e9ba6577f601-003",
+        "image-costa-rica-2025-953cde1e37e1-004",
+        "image-costa-rica-2025-8088691de116-005",
+        "image-costa-rica-2025-41dcc3bfc62f-006",
+        "image-costa-rica-2025-7ea0bbeaf828-007",
+        "image-costa-rica-2025-33d3723e8eb7-008",
+        "image-costa-rica-2025-fcd02e40b909-009",
+        "image-costa-rica-2025-160e5c081550-010",
+        "image-costa-rica-2025-38c5e8aba7c1-011",
+        "image-costa-rica-2025-94f644d2fbcc-012",
+        "video-costa-rica-2025-6e88e064df34-001",
+        "video-costa-rica-2025-f26bb57daab1-002"
       ]
     }
   ]
