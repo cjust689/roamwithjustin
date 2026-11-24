@@ -5409,6 +5409,428 @@
         "byteSize": 131898367,
         "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-d2100d5758e4-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "d2100d5758e47430c0fda8d41ebb9ca46cdf1faa85a46f8e1dd8965c3ba70f8f",
+        "byteSize": 478114,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-3fb47025c11c-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1705,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "3fb47025c11c4f021e00e1427ee4bad4d830df5eac7f9f6161c3c586137ef293",
+        "byteSize": 143089,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-e9ba6577f601-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "e9ba6577f6013e8eef740001c98450fdef5b51f3ddc03a4b9499631edc1a5f13",
+        "byteSize": 367661,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-953cde1e37e1-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "953cde1e37e1e4dd0cc5ea4f3a924cde45dc7425ae7d7386af37de03dc1b60e2",
+        "byteSize": 224016,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-8088691de116-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "8088691de116d0a6a0670a67c5ee311d12fad2dd88cc2e807250bb967d10f3ca",
+        "byteSize": 690937,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-41dcc3bfc62f-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "41dcc3bfc62fcd2d03cfaae2dcb49431e2856681bd7773963e2e07bd5de7040d",
+        "byteSize": 711039,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-7ea0bbeaf828-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "7ea0bbeaf8282d9e71a613743e62056bb3ddae2cc4ac186c1c2de788b25abb0e",
+        "byteSize": 398367,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-33d3723e8eb7-008",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-008.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 8",
+      "publication": {
+        "revision": 1,
+        "sha256": "33d3723e8eb71f847bdcb33b3e6eaa00e3acd37fc1f140bf4edb24dae8231e94",
+        "byteSize": 165379,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-fcd02e40b909-009",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-009.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 9",
+      "publication": {
+        "revision": 1,
+        "sha256": "fcd02e40b9099d137bc1c8577e3992dd27f865be1b6f262a828ce1a2e5274758",
+        "byteSize": 516758,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-160e5c081550-010",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-010.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 10",
+      "publication": {
+        "revision": 1,
+        "sha256": "160e5c081550c55fef3d4cb69a2cdde98b1b432d36cd387a1498b2b6c2b65312",
+        "byteSize": 387090,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-38c5e8aba7c1-011",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-011.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 11",
+      "publication": {
+        "revision": 1,
+        "sha256": "38c5e8aba7c1f8d56e7a33b2eb6a0f27a0625e79ce84c0207a7ee4f9205f5a5b",
+        "byteSize": 487143,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-94f644d2fbcc-012",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-edab0b2d8e8c0516/drake-bay-012.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 12",
+      "publication": {
+        "revision": 1,
+        "sha256": "94f644d2fbccc4f0592085e2518478254ccb6c3272731ec95e4b8ba7cea8f984",
+        "byteSize": 555784,
+        "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-6e88e064df34-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-f54f337d9643fb76/drake-bay-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "6e88e064df346826cb80963db8e53e65c069253076e821274d364b930c3e067e",
+        "byteSize": 117349950,
+        "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-f26bb57daab1-002",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/drake-bay/media-costa-rica-2025-drake-bay-f54f337d9643fb76/drake-bay-002.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "f26bb57daab17f98dcddb475f55d9dd4b7f418165efc7025cf616aef023dfca3",
+        "byteSize": 92219193,
+        "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+      }
     }
   ],
   "placements": [
@@ -7751,6 +8173,188 @@
       "sortOrder": 4,
       "publicationSequence": 21,
       "batchId": "media-costa-rica-2025-bajos-del-toro-6dfd2282014a9284"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-d2100d5758e4-001",
+      "assetId": "image-costa-rica-2025-d2100d5758e4-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-3fb47025c11c-002",
+      "assetId": "image-costa-rica-2025-3fb47025c11c-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-e9ba6577f601-003",
+      "assetId": "image-costa-rica-2025-e9ba6577f601-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-953cde1e37e1-004",
+      "assetId": "image-costa-rica-2025-953cde1e37e1-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-8088691de116-005",
+      "assetId": "image-costa-rica-2025-8088691de116-005",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-41dcc3bfc62f-006",
+      "assetId": "image-costa-rica-2025-41dcc3bfc62f-006",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-7ea0bbeaf828-007",
+      "assetId": "image-costa-rica-2025-7ea0bbeaf828-007",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-33d3723e8eb7-008",
+      "assetId": "image-costa-rica-2025-33d3723e8eb7-008",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 8,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-fcd02e40b909-009",
+      "assetId": "image-costa-rica-2025-fcd02e40b909-009",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 9,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-160e5c081550-010",
+      "assetId": "image-costa-rica-2025-160e5c081550-010",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 10,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-38c5e8aba7c1-011",
+      "assetId": "image-costa-rica-2025-38c5e8aba7c1-011",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 11,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-image-costa-rica-2025-94f644d2fbcc-012",
+      "assetId": "image-costa-rica-2025-94f644d2fbcc-012",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 12,
+      "publicationSequence": 22,
+      "batchId": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-video-costa-rica-2025-6e88e064df34-001",
+      "assetId": "video-costa-rica-2025-6e88e064df34-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 23,
+      "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-drake-bay-video-costa-rica-2025-f26bb57daab1-002",
+      "assetId": "video-costa-rica-2025-f26bb57daab1-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-drake-bay",
+      "placeId": "drake-bay",
+      "experienceId": "experience-costa-rica-2025-drake-bay",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 23,
+      "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
     }
   ],
   "batches": [
@@ -8191,6 +8795,44 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "712118414939f8a51bd299d9a4861cc754602383993e14b4a461da8052e00b00"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-drake-bay-edab0b2d8e8c0516",
+      "sequence": 22,
+      "manifestSha256": "9024984159a035ce844716d1834b17ee922a2293738d0396a1adb9eafbb6fc60",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-d2100d5758e4-001",
+        "image-costa-rica-2025-3fb47025c11c-002",
+        "image-costa-rica-2025-e9ba6577f601-003",
+        "image-costa-rica-2025-953cde1e37e1-004",
+        "image-costa-rica-2025-8088691de116-005",
+        "image-costa-rica-2025-41dcc3bfc62f-006",
+        "image-costa-rica-2025-7ea0bbeaf828-007",
+        "image-costa-rica-2025-33d3723e8eb7-008",
+        "image-costa-rica-2025-fcd02e40b909-009",
+        "image-costa-rica-2025-160e5c081550-010",
+        "image-costa-rica-2025-38c5e8aba7c1-011",
+        "image-costa-rica-2025-94f644d2fbcc-012"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "b2968073c58bde782158fc56a539a95115c23bc5811acfc8ea950002e77bb0f1"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-drake-bay-f54f337d9643fb76",
+      "sequence": 23,
+      "manifestSha256": "ad2ca90f5fa58431bd7aed6cf9a5f5ced31749ad2858b84869977ff1b67e5354",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-6e88e064df34-001",
+        "video-costa-rica-2025-f26bb57daab1-002"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "2b349b2a0705fe188091cd9b8d68edcbca50cc9fd165595283d97f3ff43805d4"
       }
     }
   ]
