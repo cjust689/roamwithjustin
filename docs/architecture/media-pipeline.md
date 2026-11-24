@@ -236,13 +236,21 @@ must succeed before the Sheet receives Published metadata. R2 objects are
 immutable and are not deleted as rollback for a later Git, Pages, or Sheet
 failure.
 
+Pull-request validation is read from the exact PR head commit. GitHub also
+reports a synthetic `merge_commit_sha` while a PR is open, but the required
+`validate` check is attached to the submitted head SHA. The publisher therefore
+uses `pull.head.sha` for the validation gate, then supplies that same head SHA
+as the optimistic merge guard. It continues to record the actual merge commit
+returned by GitHub for the subsequent `develop` and `main` push workflows.
+
 The Git portion is externally proven. Both target branches require the strict
 `validate` context and merge commits. The Bajos del Toro publication completed
 Drive/R2 ingestion and deployed through PR 267 and Pages run 45277672821.
 Its Sheet metadata required guarded recovery after the original production PR
-closed unmerged. A fully uninterrupted publication and a live model-generated
-Story after restoration remain unverified. Restoration keeps those existing
-public records and both current publisher fixes intact.
+closed unmerged. The later Drake Bay publication completed an uninterrupted
+resumable apply through PRs 277 and 278, Pages run 45321807276, exact rendered
+media verification, Catalog refresh and guarded Sheet row 20 readback. Its
+earlier Preview also verified live model generation and Story writeback.
 
 ## Not implemented
 

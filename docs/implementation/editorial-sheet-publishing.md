@@ -95,6 +95,8 @@ verification:
     - Bajos del Toro publication PRs 264 and 267 and successful Pages run 45277672821 verified on 2026-11-23
     - exact production generated records, unchanged Drive inventory and rendered media marker verified before Sheet recovery
     - Sheet row 22 readback verified 14 publication metadata fields including Experience/Moment IDs while retaining social Status Posted
+    - Drake Bay publication PRs 277 and 278 and successful Pages run 45321807276 verified on 2026-11-23
+    - Drake Bay exact rendered media, Catalog refresh, and guarded Sheet row 20 writeback verified in one resumed apply command
     - node scripts/test-editorial-publication-writeback.mjs
 ---
 
@@ -120,9 +122,11 @@ Pages deployment, rendered-page verification, and hardened branch rules are
 live verified. A real Bajos del Toro post has now completed Drive/R2 ingestion,
 production content deployment and verified Sheet write-back. Its original
 production PR closed without merging and was replaced by a separate merge,
-so final write-back required guarded recovery. A completely uninterrupted
-single-command real publication remains unverified; the implementation remains
-partial.
+so final write-back required guarded recovery. Drake Bay subsequently completed
+the resumable one-command path through both protected merges, Pages, rendered
+media verification, Catalog refresh and guarded Sheet write-back. The broader
+implementation remains partial because live Place registration, Journey
+creation and optional polling are still open.
 
 ## One-command workflow
 
@@ -154,10 +158,10 @@ prints an explicit explanation that no story will be generated.
 - [x] Keep Notes private and require Story for Experience publication.
 - [x] Preserve current publisher fixes, lodging and generated records.
 - [x] Run editorial regression tests with mocked model and Google responses.
-- [ ] Verify a live model request and Sheet draft writeback after restoration.
+- [x] Verify a live model request and Sheet draft writeback after restoration.
 
-The tests spend no credits and make no external model calls. Provider billing,
-model access and a live regenerated draft remain externally unverified.
+The tests spend no credits and make no external model calls. The separate live
+Drake Bay Preview completed the provider request and exact Sheet draft readback.
 
 ### Windows build launch and retry
 
@@ -193,6 +197,17 @@ Publication branch creation occurs after validation and both scope checks, so
 an early build/scope failure does not reserve the deterministic retry branch.
 Existing failed-attempt branches must be checked for unique commits before
 cleanup. No existing branch with publication commits is discarded automatically.
+
+PR validation must follow the submitted head commit, not GitHub's temporary
+merge ref. Drake Bay PR 277 had a successful `validate` check on head
+`4e0f485df105c46aa4ab94a9c85878c47547c9d5`, while the open PR reported the
+different synthetic merge SHA
+`06e4c45dd873d37c505eb48933ecbdd52090c075`. Polling that synthetic SHA left
+the clean PR open even though its required check had passed. The waiter now
+uses `pull.head.sha`; its regression gives each mock PR distinct head and merge
+identities and requires both validation reads to use the two head identities.
+The merge call retains its existing head-SHA guard, and later workflow waits
+still use the real merge commits returned by GitHub.
 
 The Bajos del Toro failed-attempt branch pointed at `7124d9c`, already the
 current develop commit, with no unique commits. It was removed using guarded
@@ -264,6 +279,17 @@ rejected that 2,651.6 MiB source against the configured 190 MiB per-video
 delivery policy. The second 92,219,193 byte MP4 is within policy. Re-exporting
 or deliberately replacing the oversized source is owner action; neither the
 streaming repair nor multipart transport silently weakens the delivery limit.
+
+After the oversized source was replaced with a 117,349,950 byte derivative,
+the apply run verified both immutable R2 receipts and resumed from PR 277. The
+head-SHA waiter merged that PR into `develop` as
+`fa518ca086e4d786a568dd9dba8031b500055b79`, validated the push, created and
+merged PR 278 into `main` as
+`a4d63e5e984843d1c2da8f7d07189bbae599bd63`, and observed successful Pages run
+45321807276. Exact media appeared at the Drake Bay Experience URL. The same
+command refreshed 226 Catalog and 84 Atlas Reference records, then wrote and
+read back deployment metadata on Sheet row 20. No manual metadata recovery was
+required.
 
 ### Publication commands
 
@@ -554,8 +580,6 @@ Implemented and test-covered:
 
 Still owner-controlled or externally unverified:
 
-- first uninterrupted row-backed publication without manual metadata recovery
-- live model generation and Story writeback after restoration
 - first live row-backed `New Place` registration and generated Atlas pin; the
   command and its Sheet request surface are implemented and verified, but no
   new Place record has been applied yet
@@ -583,6 +607,7 @@ Still owner-controlled or externally unverified:
 - [x] Run the first owner-selected Preview row against a real Drive folder.
 - [x] Publish the owner-approved Bajos del Toro row through R2 and production,
       with guarded Sheet metadata recovery documented above.
-- [ ] Complete an uninterrupted publication without manual recovery.
+- [x] Complete an uninterrupted resumable Drake Bay publication without manual
+      metadata recovery.
 - [ ] Prove the two-Post, one-Experience regression with real content.
 - [ ] Consider an opt-in local watcher only after field publication is stable.

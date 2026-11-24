@@ -195,15 +195,15 @@ async function waitForPullRequestValidation({
   timeoutMs,
   pollMs,
 }) {
-  let lastMergeSha = null
+  let lastHeadSha = null
   return waitForGate({
     timeoutMs,
     pollMs,
     read: async () => {
       const pull = await client.getPullRequest(pullNumber)
-      lastMergeSha = pull.merge_commit_sha || lastMergeSha
-      if (!lastMergeSha) return { check_runs: [] }
-      return client.listCheckRunsForRef(lastMergeSha)
+      lastHeadSha = pull.head?.sha || lastHeadSha
+      if (!lastHeadSha) return { check_runs: [] }
+      return client.listCheckRunsForRef(lastHeadSha)
     },
     evaluate: evaluateValidationChecks,
   })
