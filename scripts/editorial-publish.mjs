@@ -1,4 +1,3 @@
-import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import { createRequire } from "node:module"
@@ -33,6 +32,7 @@ import {
 } from "./lib/editorial-google-auth.mjs"
 import {
   driveInventoryFingerprint,
+  hashDriveSnapshotFile,
   inventoryDriveFolder,
   snapshotDriveFolder,
 } from "./lib/editorial-google-drive.mjs"
@@ -83,7 +83,7 @@ const editorialRecordsPath = path.join(
 
 function usage() {
   return `Usage:
-  npm run editorial:publish -- --preview --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--post-id <id>]
+  npm run editorial:publish -- --preview --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--post-id <id>] [--reuse-story]
   npm run editorial:publish -- --apply --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> [--post-id <id>]
 
 Preview regenerates Atlas Story from Atlas Notes when the row names an
@@ -91,6 +91,8 @@ Experience, writes only that reviewed-copy cell to the same stable Sheet row,
 downloads the approved Drive folder into private state, prepares deterministic
 packages, and validates the combined Media, Experience, and Moment plan. It
 makes no R2, GitHub, app-content, or publication-status writes.
+Use --reuse-story to resume Preview after a technical failure without calling
+the model or replacing the existing Atlas Story draft.
 
 Apply requires Atlas Mode Publish. It rechecks the Sheet and Drive, uploads with
 real receipts, updates only generated content, validates and builds, promotes a
@@ -120,6 +122,7 @@ function parseArgs(args) {
     driveScope: "selected",
     allowRestrictedDriveScope: false,
     reauthorize: false,
+    reuseStory: false,
     remote: "origin",
     develop: "develop",
     main: "main",
@@ -161,6 +164,7 @@ function parseArgs(args) {
     else if (argument === "--allow-restricted-drive-scope") {
       options.allowRestrictedDriveScope = true
     } else if (argument === "--reauthorize") options.reauthorize = true
+    else if (argument === "--reuse-story") options.reuseStory = true
     else if (["--help", "-h"].includes(argument)) options.help = true
     else throw new Error(`Unknown option: ${argument}`)
   }
@@ -205,7 +209,7 @@ function writePrivateJson(target, value) {
   fs.renameSync(temporary, target)
 }
 
-function verifyExistingSnapshot(snapshotDirectory, fingerprint) {
+async function verifyExistingSnapshot(snapshotDirectory, fingerprint) {
   const manifestPath = path.join(snapshotDirectory, "drive-snapshot.json")
   if (!fs.existsSync(manifestPath)) return null
   const snapshot = readJson(manifestPath)
@@ -220,9 +224,11 @@ function verifyExistingSnapshot(snapshotDirectory, fingerprint) {
     if (relative.startsWith("..") || path.isAbsolute(relative)) {
       throw new Error(`Unsafe Drive snapshot path: ${file.relativePath}`)
     }
-    const bytes = fs.readFileSync(target)
-    const checksum = crypto.createHash("sha256").update(bytes).digest("hex")
-    if (bytes.length !== file.byteSize || checksum !== file.sha256) {
+    const verified = await hashDriveSnapshotFile(target)
+    if (
+      verified.byteSize !== file.byteSize ||
+      verified.sha256 !== file.sha256
+    ) {
       throw new Error(`Private Drive snapshot changed: ${file.relativePath}`)
     }
   }
@@ -467,6 +473,9 @@ async function main() {
   if (options.preview === options.apply) {
     throw new Error("Choose exactly one of --preview or --apply")
   }
+  if (options.reuseStory && !options.preview) {
+    throw new Error("--reuse-story is available only with --preview")
+  }
   if (options.postsSheetId === null) throw new Error("--posts-gid is required")
   if (!Number.isFinite(options.timeoutMinutes) || options.timeoutMinutes <= 0) {
     throw new Error("--timeout-minutes must be positive")
@@ -529,7 +538,8 @@ async function main() {
   let storyGeneration = null
   if (
     options.preview &&
-    String(selected.row["Atlas Experience"] || "").trim()
+    String(selected.row["Atlas Experience"] || "").trim() &&
+    !options.reuseStory
   ) {
     const expectedStorySourceHash = storySourceHash(selected.row)
     const references = loadStoryReferences({
@@ -597,6 +607,23 @@ async function main() {
       rowNumber: storyWriteback.rowNumber,
       regenerated: true,
     }
+  } else if (
+    options.preview &&
+    String(selected.row["Atlas Experience"] || "").trim()
+  ) {
+    const existingStory = String(selected.row["Atlas Story"] || "").trim()
+    if (!existingStory) {
+      throw new Error("--reuse-story requires an existing Atlas Story draft")
+    }
+    console.log(
+      "Reusing the existing Atlas Story draft; the model and Sheet write are skipped."
+    )
+    storyGeneration = {
+      model: null,
+      characters: existingStory.length,
+      rowNumber: selected.rowNumber,
+      regenerated: false,
+    }
   } else if (options.preview) {
     console.log(
       "Media-only preview. Set Atlas Experience and Atlas Notes to generate an Atlas Story."
@@ -629,7 +656,7 @@ async function main() {
   )
   const snapshotDirectory = path.join(runDirectory, "drive")
   const snapshot =
-    verifyExistingSnapshot(snapshotDirectory, fingerprint) ||
+    (await verifyExistingSnapshot(snapshotDirectory, fingerprint)) ||
     (await snapshotDriveFolder({
       auth,
       inventory,
@@ -674,7 +701,7 @@ async function main() {
     storyGeneration,
     remoteChanges: options.apply
       ? "pending approval checks"
-      : storyGeneration
+      : storyGeneration?.regenerated
         ? "Atlas Story written to Sheet"
         : "none",
   }

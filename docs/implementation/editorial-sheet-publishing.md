@@ -236,6 +236,35 @@ The batch Chrome DOM-dump command timed out during recovery. An isolated CDP
 browser rendered the exact live media marker successfully. Batch-renderer
 reliability remains follow-up work; no weaker HTTP-only success was substituted.
 
+### Streamed Drive intake and Story-safe Preview retry
+
+On November 23, Preview for Post
+`8c98fa71-8379-4b48-a314-39185b4085a1` completed model generation, wrote and
+verified `Atlas Story`, then failed during the private Drive snapshot with
+`data is too long`. Run `6926acaa9fbb` remained empty after staging cleanup,
+which places the failure before package preparation and before any R2 upload.
+The Drive client still requested each source file as one array buffer and then
+created another whole-file Buffer for hashing. The separate R2 uploader's
+existing MP4 multipart behavior was still present.
+
+Drive intake now requests a stream, writes chunks directly to the private
+staging file, and accumulates byte size and SHA-256 in the same pass. Existing
+snapshot verification also hashes incrementally. Download failures identify
+the source filename and remove the incomplete staging tree. Preview now accepts
+the explicit `--reuse-story` recovery option so the already saved draft can
+continue through local planning without another model call or Sheet write.
+
+Local verification passed with `node scripts/test-editorial-google.mjs`, the
+complete `npm.cmd run editorial:test` suite, and `git diff --check`. The live
+`--reuse-story` retry then downloaded all 14 Drive files, including the
+2,780,414,173 byte `Drake_Hike.mp4`, into a verified private snapshot without
+repeating the model call or Sheet write. The 12-image package and ingestion dry
+run passed. Preview remains incomplete because video preparation correctly
+rejected that 2,651.6 MiB source against the configured 190 MiB per-video
+delivery policy. The second 92,219,193 byte MP4 is within policy. Re-exporting
+or deliberately replacing the oversized source is owner action; neither the
+streaming repair nor multipart transport silently weakens the delivery limit.
+
 ### Publication commands
 
 Preview one selected row:
@@ -243,6 +272,16 @@ Preview one selected row:
 ```bash
 npm run editorial:publish -- --preview --oauth-client "C:\private\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID" --post-id "POST_ID"
 ```
+
+Resume local Preview work after the Story was saved but a later technical step
+failed:
+
+```bash
+npm run editorial:publish -- --preview --reuse-story --oauth-client "C:\private\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID" --post-id "POST_ID"
+```
+
+`--reuse-story` requires a nonblank existing `Atlas Story`. It does not call
+the model and does not write to the Sheet. It is rejected in Apply mode.
 
 Publish one approved row:
 
@@ -296,11 +335,13 @@ on demand, and every apply-mode publication refreshes it before selection and
 again after successful generated content changes.
 
 `Atlas Notes` is private firsthand evidence. `Atlas Story` is reviewed public
-copy. For a row with an Experience, every Preview command regenerates and
-overwrites `Atlas Story`, including any manual edits to the prior draft. Review
-or edit the new Story in Sheets, then change the row to Publish. Publish never
-regenerates it and ingests the exact current cell. Rows with a blank Experience
-remain media-only, do not call the model, and leave `Atlas Story` untouched.
+copy. For a row with an Experience, an ordinary Preview command regenerates and
+overwrites `Atlas Story`, including any manual edits to the prior draft. The
+explicit `--reuse-story` recovery preserves and validates the existing draft
+while resuming downstream local work. Review or edit the Story in Sheets, then
+change the row to Publish. Publish never regenerates it and ingests the exact
+current cell. Rows with a blank Experience remain media-only, do not call the
+model, and leave `Atlas Story` untouched.
 
 ## Explicit Place and Visit registration
 
@@ -348,14 +389,16 @@ Preview performs local work plus one narrowly guarded Google Sheet write:
 3. Inventory the folder. If `Atlas Experience` is present, send `Atlas Notes`,
    the complete storytelling framework, the relevant Journey section from
    owner travel context, canonical target labels, and image/video counts to
-   the OpenAI Responses API. Media bytes and filenames are not sent.
+   the OpenAI Responses API. Media bytes and filenames are not sent. Explicit
+   `--reuse-story` recovery skips this request and uses the existing draft.
 4. Validate the structured draft for length, public punctuation rules, and
    workflow language. Re-read the stable Post ID, reject any concurrent source
    change, overwrite only `Atlas Story`, and verify its exact readback.
 5. Combine the refreshed Sheet source hash with the immutable Drive metadata
    fingerprint.
-6. Download every direct JPEG, PNG, and MP4 into a private hash-addressed
-   snapshot below `.state/editorial/runs/`.
+6. Stream every direct JPEG, PNG, and MP4 into a private hash-addressed
+   snapshot below `.state/editorial/runs/`, computing byte size and SHA-256
+   incrementally without buffering a complete source file.
 7. Reuse `media:prepare` to build separate deterministic image and video
    packages. The linked Drive folder may freely mix all three supported file
    formats; this partition is internal and requires no folder management by
@@ -366,9 +409,10 @@ Preview performs local work plus one narrowly guarded Google Sheet write:
 
 Preview does not upload to R2, mutate generated application records, create a
 Git branch, call GitHub, deploy Pages, or write publication status to Sheets.
-Its only remote mutation is the exact `Atlas Story` cell. The API request uses
-structured output, disables response storage, has a bounded timeout, and never
-logs the API key. No fake upload receipt is accepted.
+An ordinary Experience Preview mutates only the exact `Atlas Story` cell;
+`--reuse-story` makes no remote mutation. The API request uses structured
+output, disables response storage, has a bounded timeout, and never logs the
+API key. No fake upload receipt is accepted.
 
 ## Apply behavior
 
@@ -482,10 +526,14 @@ configuration command semantically verifies those rules after applying them.
 
 Implemented and test-covered:
 
-- Google OAuth, Sheet reads and guarded writes, Drive inventory and download
+- Google OAuth, Sheet reads and guarded writes, Drive inventory and streamed
+  download with incremental snapshot hashing
 - table-aware `Publish To`, Journey, Place, and Mode choices plus a visible
   protected canonical reference
-- deterministic private snapshots and image/video packages
+- deterministic private snapshots, streamed retry verification, and
+  image/video packages
+- explicit Preview recovery that reuses a saved Story without a model call or
+  Sheet write
 - receipt-free preview planning and real-receipt apply plumbing
 - generated Experience and Moment records, selectors, validation, and Journey
   presentation
@@ -525,6 +573,8 @@ Still owner-controlled or externally unverified:
 - [x] Add friendly publication routing and an automatically refreshed Atlas
       Reference without creator-managed relational tabs.
 - [x] Implement private Drive snapshots and mandatory local media planning.
+- [x] Stream Drive intake and snapshot verification, and support Story-safe
+      Preview recovery after a downstream technical failure.
 - [x] Implement Experience and Moment generated records and public projection.
 - [x] Implement real-receipt R2 apply and atomic generated-record compilation.
 - [x] Implement isolated per-post branches and staged merge-commit promotion.
