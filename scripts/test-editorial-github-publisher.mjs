@@ -118,6 +118,7 @@ try {
 
   let pullNumber = 0
   let mergeNumber = 0
+  const checkedRefs = []
   const client = {
     listPullRequests: async () => [],
     createPullRequest: async body => ({
@@ -132,11 +133,14 @@ try {
       merge_commit_sha: `test-merge-${number}`,
       head: { sha: `head-${number}` },
     }),
-    listCheckRunsForRef: async () => ({
-      check_runs: [
-        { name: "validate", status: "completed", conclusion: "success" },
-      ],
-    }),
+    listCheckRunsForRef: async ref => {
+      checkedRefs.push(ref)
+      return {
+        check_runs: [
+          { name: "validate", status: "completed", conclusion: "success" },
+        ],
+      }
+    },
     mergePullRequest: async () => ({
       merged: true,
       sha: mergeNumber++ === 0 ? "develop-merge" : "main-merge",
@@ -178,6 +182,7 @@ try {
   assert.equal(result.developMergeSha, "develop-merge")
   assert.equal(result.mainMergeSha, "main-merge")
   assert.equal(result.publicVerification.state, "succeeded")
+  assert.deepEqual(checkedRefs, ["head-1", "head-2"])
   assert.ok(
     commands.findIndex(
       entry => entry.program === "git" && entry.args[0] === "switch"
