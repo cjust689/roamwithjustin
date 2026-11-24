@@ -73,8 +73,15 @@ verification:
 The reviewed story generator from commit `38a6d5d` is reconciled with the
 current publisher. For Experience rows, Preview generates `Atlas Story` from
 private `Atlas Notes` and writes the guarded draft back to Sheets. Apply
-publishes the reviewed Story without calling the model. Each Preview replaces
-the prior draft. See the [editorial workflow](implementation/editorial-sheet-publishing.md#story-generation-restoration-and-branch-audit).
+publishes the reviewed Story without calling the model. An ordinary Preview
+replaces the prior draft. The explicit `--reuse-story` recovery mode keeps the
+current draft and resumes local planning without another model call or Sheet
+write. See the [editorial workflow](implementation/editorial-sheet-publishing.md#story-generation-restoration-and-branch-audit).
+
+Editorial Drive intake now streams each source file to private state while
+incrementally computing its size and SHA-256. Existing snapshot verification
+also hashes through a stream. This removes the former whole-file array-buffer
+boundary for large source videos while preserving immutable snapshot checks.
 
 Editorial Windows subprocess repair: npm build commands now use Node and the
 installed npm CLI instead of executing a `.cmd` shim directly. Existing Bajos
