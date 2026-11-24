@@ -194,6 +194,17 @@ an early build/scope failure does not reserve the deterministic retry branch.
 Existing failed-attempt branches must be checked for unique commits before
 cleanup. No existing branch with publication commits is discarded automatically.
 
+PR validation must follow the submitted head commit, not GitHub's temporary
+merge ref. Drake Bay PR 277 had a successful `validate` check on head
+`4e0f485df105c46aa4ab94a9c85878c47547c9d5`, while the open PR reported the
+different synthetic merge SHA
+`06e4c45dd873d37c505eb48933ecbdd52090c075`. Polling that synthetic SHA left
+the clean PR open even though its required check had passed. The waiter now
+uses `pull.head.sha`; its regression gives each mock PR distinct head and merge
+identities and requires both validation reads to use the two head identities.
+The merge call retains its existing head-SHA guard, and later workflow waits
+still use the real merge commits returned by GitHub.
+
 The Bajos del Toro failed-attempt branch pointed at `7124d9c`, already the
 current develop commit, with no unique commits. It was removed using guarded
 non-forced local branch deletion. The pending generated Media/Editorial files

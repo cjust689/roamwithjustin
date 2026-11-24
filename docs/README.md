@@ -82,6 +82,9 @@ Editorial Drive intake now streams each source file to private state while
 incrementally computing its size and SHA-256. Existing snapshot verification
 also hashes through a stream. This removes the former whole-file array-buffer
 boundary for large source videos while preserving immutable snapshot checks.
+Automated publication also follows required PR checks on the submitted head
+commit rather than GitHub's temporary merge ref, so a successful validation can
+advance through the guarded `develop` and `main` merges.
 
 Editorial Windows subprocess repair: npm build commands now use Node and the
 installed npm CLI instead of executing a `.cmd` shim directly. Existing Bajos
