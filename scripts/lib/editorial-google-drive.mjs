@@ -1,6 +1,8 @@
 import crypto from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
+import { Readable, Transform } from "node:stream"
+import { pipeline } from "node:stream/promises"
 
 const folderMimeType = "application/vnd.google-apps.folder"
 const supportedMimeTypes = new Set(["image/jpeg", "image/png", "video/mp4"])
@@ -32,7 +34,7 @@ function createDriveApi(auth) {
         return auth.request({
           method: "GET",
           url: url.toString(),
-          responseType: "arraybuffer",
+          responseType: "stream",
         })
       },
       list: request => {
@@ -79,13 +81,49 @@ function extensionFor(file) {
   throw new Error(`Unsupported Drive media type: ${file.mimeType}`)
 }
 
-function bufferFromResponse(data) {
-  if (Buffer.isBuffer(data)) return data
-  if (data instanceof ArrayBuffer) return Buffer.from(data)
+function readableFromResponse(data) {
+  if (Buffer.isBuffer(data)) return Readable.from([data])
+  if (data instanceof ArrayBuffer) return Readable.from([Buffer.from(data)])
   if (ArrayBuffer.isView(data)) {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength)
+    return Readable.from([
+      Buffer.from(data.buffer, data.byteOffset, data.byteLength),
+    ])
+  }
+  if (data && typeof data.pipe === "function") return data
+  if (data && typeof data.getReader === "function") return Readable.fromWeb(data)
+  if (data && typeof data[Symbol.asyncIterator] === "function") {
+    return Readable.from(data)
   }
   throw new Error("Google Drive download returned an unsupported response body")
+}
+
+async function writeResponseToFile(data, target) {
+  const digest = crypto.createHash("sha256")
+  let byteSize = 0
+  const hashAndCount = new Transform({
+    transform(chunk, encoding, callback) {
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding)
+      digest.update(bytes)
+      byteSize += bytes.length
+      callback(null, bytes)
+    },
+  })
+  await pipeline(
+    readableFromResponse(data),
+    hashAndCount,
+    fs.createWriteStream(target, { flags: "wx" })
+  )
+  return { byteSize, sha256: digest.digest("hex") }
+}
+
+export async function hashDriveSnapshotFile(target) {
+  const digest = crypto.createHash("sha256")
+  let byteSize = 0
+  for await (const chunk of fs.createReadStream(target)) {
+    digest.update(chunk)
+    byteSize += chunk.length
+  }
+  return { byteSize, sha256: digest.digest("hex") }
 }
 
 export async function snapshotDriveFolder({
@@ -130,26 +168,39 @@ export async function snapshotDriveFolder({
       counters[kind] += 1
       const localFilename = `${String(counters[kind]).padStart(3, "0")}${extensionFor(file)}`
       const relativePath = `${kind === "image" ? "images" : "videos"}/${localFilename}`
-      const response = await api.files.getMedia({ fileId: file.id })
-      const bytes = bufferFromResponse(response.data)
-      const sha256 = crypto.createHash("sha256").update(bytes).digest("hex")
-      if (file.byteSize !== null && Number(file.byteSize) !== bytes.length) {
-        throw new Error(`Drive file size changed during download: ${file.name}`)
+      let downloaded
+      try {
+        const response = await api.files.getMedia({ fileId: file.id })
+        downloaded = await writeResponseToFile(
+          response.data,
+          path.join(staging, relativePath)
+        )
+        if (
+          file.byteSize !== null &&
+          Number(file.byteSize) !== downloaded.byteSize
+        ) {
+          throw new Error(`size changed during download`)
+        }
+        if (
+          file.sha256Checksum &&
+          file.sha256Checksum !== downloaded.sha256
+        ) {
+          throw new Error(`checksum changed during download`)
+        }
+      } catch (error) {
+        throw new Error(
+          `Drive download failed for ${file.name}: ${error.message}`,
+          { cause: error }
+        )
       }
-      if (file.sha256Checksum && file.sha256Checksum !== sha256) {
-        throw new Error(`Drive file checksum changed during download: ${file.name}`)
-      }
-      await fs.promises.writeFile(path.join(staging, relativePath), bytes, {
-        flag: "wx",
-      })
       records.push({
         id: file.id,
         sourceName: file.name,
         mimeType: file.mimeType,
-        byteSize: bytes.length,
+        byteSize: downloaded.byteSize,
         version: file.version,
         modifiedTime: file.modifiedTime,
-        sha256,
+        sha256: downloaded.sha256,
         relativePath,
       })
     }

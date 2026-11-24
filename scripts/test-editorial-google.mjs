@@ -3,6 +3,7 @@ import crypto from "node:crypto"
 import fs from "node:fs"
 import os from "node:os"
 import path from "node:path"
+import { Readable } from "node:stream"
 import {
   DRIVE_FILE_SCOPE,
   DRIVE_READONLY_SCOPE,
@@ -427,7 +428,10 @@ try {
           const bytesById = {
             "image-1": imageBytes,
             "png-1": pngBytes,
-            "video-1": videoBytes,
+            "video-1": Readable.from([
+              videoBytes.subarray(0, 5),
+              videoBytes.subarray(5),
+            ]),
           }
           return { data: bytesById[fileId] }
         },

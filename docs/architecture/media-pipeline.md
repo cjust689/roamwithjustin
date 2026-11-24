@@ -210,7 +210,16 @@ names an Experience, regenerates the reviewed `Atlas Story` before downloading
 a hash-addressed private snapshot. It then partitions images and MP4s, invokes
 `media:prepare`, runs mandatory receipt-free ingestion planning, and composes
 the proposed Experience and Moment diff. Preview writes only the guarded Story
-cell. It never uploads, changes tracked content, calls GitHub, or deploys.
+cell. It never uploads, changes tracked content, calls GitHub, or deploys. An
+explicit `--reuse-story` preview recovery skips the model and Sheet write, then
+continues from the existing reviewed draft.
+
+Drive media responses are streamed into the private snapshot. SHA-256 and byte
+counts are accumulated per chunk before the temporary snapshot is renamed into
+place. Retry verification also streams each existing snapshot file instead of
+loading whole images or videos into memory. A failed download removes its
+staging tree and names the source file in the error; it cannot leave a partial
+snapshot eligible for reuse.
 
 One editorial Drive folder may contain any mixture of direct JPEG, PNG, and
 MP4 files. The publisher preserves that single-folder authoring workflow and
