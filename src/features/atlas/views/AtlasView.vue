@@ -280,7 +280,7 @@ const MY_ATLAS_INVITE_STORAGE_KEY = "rwj:atlas:my-atlas-invite:v1"
 
 const worldCamera = {
   // Offset the world view west so both American and European roots remain
-  // visible beside the open journey navigator instead of beneath it.
+  // visible beside the journey explorer launcher instead of beneath it.
   center: [-65, 29],
   zoom: 1.3,
   pitch: 10,
@@ -317,9 +317,9 @@ export default {
       previousTitle: "",
       previousSurpriseNodeId: "",
       stateLoaded: false,
-      // The root Atlas always introduces its journey navigator in the open
-      // state. Visitors can collapse it without losing the quick-nav trigger.
-      welcomeExpanded: true,
+      // Keep the root Atlas map ready for immediate interaction. The compact
+      // journey explorer launcher remains available for deliberate browsing.
+      welcomeExpanded: false,
       mapPinExpandRequest: 0,
       pendingMapPinNodeId: null,
       detailCollapseRequest: 0,
@@ -474,9 +474,9 @@ export default {
   },
   watch: {
     nodeId(nodeId) {
-      // Returning to the canonical /atlas root restores the open landing
-      // navigator, including browser back and the World breadcrumb.
-      if (!nodeId) this.welcomeExpanded = true
+      // Returning to the root restores the map-first landing state, including
+      // browser back and the World breadcrumb.
+      if (!nodeId) this.welcomeExpanded = false
       if (this.atlasAdNodeId && nodeId !== this.atlasAdNodeId) {
         this.atlasAdNodeId = ""
       }
