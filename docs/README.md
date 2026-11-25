@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-23
+updated: 2026-11-25
 related:
   - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-location-experience-commerce
@@ -69,6 +69,12 @@ verification:
 ---
 
 # Roam With Justin documentation
+
+Homepage map feedback now makes the root Atlas map immediately usable: the
+Journey explorer card starts collapsed and returns to that compact state when
+visitors navigate back to World. Its existing Open control still provides the
+story list on demand. The behavior and automated coverage are recorded in the
+[integrated story reader checklist](implementation/atlas-integrated-story-reader.md#phase-6-atlas-first-entry-shell).
 
 The reviewed story generator from commit `38a6d5d` is reconciled with the
 current publisher. For Experience rows, Preview generates `Atlas Story` from

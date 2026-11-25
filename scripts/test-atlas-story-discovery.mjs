@@ -90,6 +90,16 @@ assert.match(atlasView, /class="atlas-my-atlas-toast"/)
 assert.match(atlasView, />\s*Make your own Atlas\.\s*</)
 assert.match(atlasView, /MY_ATLAS_INVITE_STORAGE_KEY/)
 assert.match(atlasView, /dismissMyAtlasInvite/)
+assert.match(
+  atlasView,
+  /welcomeExpanded:\s*false/,
+  "The homepage journey explorer should start collapsed so the map is immediately interactive"
+)
+assert.match(
+  atlasView,
+  /if \(!nodeId\) this\.welcomeExpanded = false/,
+  "Returning to the Atlas root should restore the map-first collapsed state"
+)
 assert.match(atlasRoutes, /path: "\/",\s*name: "Home"/)
 assert.match(atlasRoutes, /component: atlasView/)
 assert.doesNotMatch(appRouter, /views\/roam\/Home\.vue/)
