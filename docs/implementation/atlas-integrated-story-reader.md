@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-20
+updated: 2026-11-25
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -56,6 +56,7 @@ verification:
     - Local Chrome mobile detail hierarchy checks at 320 and 390 CSS pixels
     - Local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels
     - Local Chrome Atlas invitation checks at 390 and 1280 CSS pixels
+    - npm run atlas:test verifies that the root Journey explorer starts collapsed and returns to the collapsed state at World
 ---
 
 # Atlas integrated story reader
@@ -131,6 +132,12 @@ desktop inspector and mobile detail dock. Sparse Journey cards and panels no
 longer expose internal editorial workflow labels. They present only established
 places and content. The welcome rail omits them until the canonical Journey
 owns a substantive published story.
+
+The root Journey explorer now starts collapsed so the homepage opens with the
+map available for immediate interaction. Returning through browser history or
+the World breadcrumb restores the same map-first state. The compact explorer
+launcher remains visible and keeps the existing story navigation available on
+demand.
 
 The public `/trips/:id` URL remains available and retains its commercial and
 advertising modules. The embedded Atlas reader deliberately excludes ads,
@@ -219,6 +226,8 @@ remains the indexable representation.
   detail panels.
 - [x] Restrict the welcome rail Explore action to Journey roots with a derived
       canonical story lead while retaining incomplete Journey map pins.
+- [x] Start the homepage Journey explorer collapsed and restore that map-first
+      state whenever navigation returns to World.
 
 ## Verified flow after Phase 3
 
