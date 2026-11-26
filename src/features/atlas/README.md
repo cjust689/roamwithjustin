@@ -4,7 +4,7 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-19
+updated: 2026-11-26
 related:
   - content-model
   - atlas-integrated-story-reader
@@ -83,8 +83,8 @@ would remove the Atlas UI but must not delete `src/content/` records.
   destination roots.
 - `/atlas/moab`, `/atlas/old-san-juan`, and other IDs registered in
   `src/content/atlas/presentation.mjs` are shareable deep links.
-- `?story=1` opens a published Journey's secondary in-Atlas reader state on
-  the same selected-node route. Invalid or unavailable story state is removed.
+- `?story=1` opens a Journey's secondary in-Atlas reader state on the same
+  selected-node route. Invalid or unavailable story state is removed.
 
 The Atlas view remains a lazy route component, but the root application now
 selects it immediately so visitors enter the map experience without a separate
@@ -188,14 +188,14 @@ video from appearing to be duplicate items. An explicitly registered video
 poster is reserved for the opened video player; a missing poster remains empty.
 
 Confirmed but incomplete Journeys are registered through
-`src/content/atlas/preview-presentation.mjs`. Their real coordinates and public
-Place summaries remain visible. Their map pins can still open that established
-geography, but the root welcome rail omits its `Explore` action until the
-canonical Journey owns a substantive published story. Missing material stays
-absent instead of rendering empty sections or editorial workflow language in
-cards or panels. Planned-only stops are excluded. The validator requires every internally
-incomplete Journey Visit to resolve to an Atlas node so later media ingestion
-enriches stable IDs instead of creating a parallel map record.
+`src/content/atlas/preview-presentation.mjs`. Their real coordinates, public
+Place summaries, root Journey entries, and available story content remain
+visible. A natural update note explains that more places, stories, photographs,
+and films will be added. Missing material stays absent instead of rendering
+empty sections or editorial workflow language in cards or panels. Planned-only
+stops are excluded. The validator requires every internally incomplete Journey
+Visit to resolve to an Atlas node so later media ingestion enriches stable IDs
+instead of creating a parallel map record.
 
 Every Atlas root uses the canonical Journey title and date label, including
 its year, because the same Place can host multiple trips. Child nodes use their
@@ -203,23 +203,23 @@ canonical Place names and local labels without repeating the Journey year.
 
 ## Story discovery
 
-Published Journey roots derive a story lead from the same canonical Journey
-used by `/trips/:id`. The lead reuses its real title, overview, hero, public
-story ID, and route, and appears before the ordered stop list. `View N stops`
-scrolls the existing detail container to those stops. External map and official
-Place actions appear after editorial media under `Useful links`.
+Every Journey root derives a story lead from the same canonical Journey used
+by `/trips/:id`. The lead reuses its real title, overview, hero, public story
+ID, and route, and appears before the ordered stop list. `View N stops` scrolls
+the existing detail container to those stops. External map and official Place
+actions appear after editorial media under `Useful links`.
 
-Story availability is stricter than the presence of a Journey slug. The
-Journey must be published and own substantive chapters or a published
-Experience. Incomplete Journey previews therefore expose no story lead and no
-toolbar Story action.
+Incomplete Journeys expose the same story route and toolbar action as completed
+Journeys. Their root detail and shared story body include an update note that
+sets an honest expectation without showing internal workflow language.
 
-Published child stops derive specific story relationships from canonical
-Visit edges. Journey chapter matches come from
+Child stops derive specific story relationships from canonical Visit edges.
+Journey chapter matches come from
 `days[].visits[].visitId`, so one Visit can appear in several chapters and two
 Visits at one Place stay distinct. Published Experiences join only when their
-`visitId` and `placeId` both match. Structural hubs and Journey-only chapters
-with no Visit references do not receive a preview.
+`visitId` and `placeId` both match, regardless of the containing Journey's
+publication state. Structural hubs and Journey-only chapters with no Visit
+references do not receive a preview.
 
 `Explore the story` now adds `?story=1` to the selected Atlas route and mounts
 `AtlasStoryReader.vue` without replacing `AtlasView.vue` or `AtlasMap.vue`.

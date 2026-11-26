@@ -32,7 +32,7 @@ const appRouter = fs.readFileSync(
 
 const nodes = atlasPresentation.map(buildAtlasNodeView).filter(Boolean)
 const roots = nodes.filter(node => !node.parentId)
-const publishedStoryJourneys = new Set([
+const completedStoryJourneys = new Set([
   "utah-winter-2025",
   "puerto-rico-2024",
   "usvi-st-john-2025",
@@ -43,29 +43,23 @@ for (const root of roots) {
     action => action.analyticsType === "story"
   )
 
-  if (publishedStoryJourneys.has(root.journeyId)) {
-    assert.ok(root.storyLead, `${root.journeyId} should expose a story lead`)
-    assert.equal(root.storyLead.title, root.title)
+  assert.ok(root.storyLead, `${root.journeyId} should expose a story lead`)
+  assert.equal(root.storyLead.title, root.title)
+  assert.equal(root.storyLead.href, storyAction?.href)
+  assert.equal(storyAction?.label, "Explore the story")
+
+  if (completedStoryJourneys.has(root.journeyId)) {
     assert.ok(root.storyLead.image)
     assert.ok(root.storyLead.excerpt)
-    assert.equal(root.storyLead.href, storyAction?.href)
-    assert.equal(storyAction?.label, "Explore the story")
+    assert.equal(root.storyLead.progressNote, "")
   } else {
-    assert.equal(
-      root.storyLead,
-      null,
-      `${root.journeyId} should not imply a published story`
-    )
-    assert.equal(
-      storyAction,
-      undefined,
-      `${root.journeyId} should not expose a story action`
-    )
+    assert.match(root.storyLead.progressNote, /Check back for updates\./)
   }
 }
 
 assert.match(detailPanel, /class="atlas-story-lead"/)
 assert.match(detailPanel, />\s*Explore the story\s*</)
+assert.match(detailPanel, /class="atlas-story-progress-note"/)
 assert.match(detailPanel, />Journey stops</)
 assert.match(detailPanel, />Useful links</)
 assert.match(detailPanel, /usefulActions\.length/)

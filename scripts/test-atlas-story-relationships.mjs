@@ -43,6 +43,15 @@ assert.deepEqual(
   "A Visit reused by two Journey days should keep both relationships"
 )
 
+const laFortuna = nodeById.get("la-fortuna-costa-rica")
+assert.ok(
+  laFortuna.storyExperiences.some(
+    experience =>
+      experience.id === "experience-la-fortuna-airbnb" && experience.card
+  ),
+  "A published Experience should appear at its exact stop before the full Journey is complete"
+)
+
 for (const id of ["utah", "moab", "europe"]) {
   assert.deepEqual(
     nodeById.get(id).storyChapters,
