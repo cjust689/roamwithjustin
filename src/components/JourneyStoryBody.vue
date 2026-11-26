@@ -3,6 +3,14 @@
 <template>
   <div class="journey-story-body" :class="{ 'is-embedded': embedded }">
     <section
+      v-if="trip.storyProgressNote"
+      class="journey-story-section journey-progress-note"
+      aria-label="Journey updates"
+    >
+      <p>{{ trip.storyProgressNote }}</p>
+    </section>
+
+    <section
       v-if="trip.hasItinerary"
       id="itinerary"
       class="journey-story-section itinerary-section"
@@ -377,6 +385,25 @@ export default {
 
 .journey-story-section + .journey-story-section {
   padding-top: clamp(4rem, 8vw, 7rem);
+}
+
+.journey-progress-note {
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.3);
+  border-radius: 18px;
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.07);
+}
+
+.journey-progress-note p {
+  max-width: 760px;
+  margin: 0;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
+  font-size: max(1rem, 16px);
+  line-height: 1.7;
+}
+
+.journey-progress-note + .journey-story-section {
+  padding-top: clamp(3rem, 6vw, 5rem);
 }
 
 .journey-section-intro {

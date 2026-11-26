@@ -189,6 +189,7 @@
           <section
             v-if="node.storyLead"
             class="atlas-story-lead"
+            :class="{ 'has-media': node.storyLead.image }"
             :aria-labelledby="`atlas-story-title-${node.id}`"
           >
             <button
@@ -210,6 +211,12 @@
               </h2>
               <p v-if="node.storyLead.excerpt">
                 {{ node.storyLead.excerpt }}
+              </p>
+              <p
+                v-if="node.storyLead.progressNote"
+                class="atlas-story-progress-note"
+              >
+                {{ node.storyLead.progressNote }}
               </p>
               <div class="atlas-story-lead-actions">
                 <button
@@ -1186,7 +1193,7 @@ export default {
 
 .atlas-story-lead {
   display: grid;
-  grid-template-columns: minmax(118px, 0.8fr) minmax(0, 1.2fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   overflow: hidden;
   margin-top: 1.8rem;
@@ -1194,6 +1201,10 @@ export default {
   border-radius: 18px;
   padding: 0.85rem;
   background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.065);
+}
+
+.atlas-story-lead.has-media {
+  grid-template-columns: minmax(118px, 0.8fr) minmax(0, 1.2fr);
 }
 
 .atlas-story-lead-media {
@@ -1242,6 +1253,17 @@ export default {
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
+}
+
+.atlas-story-lead .atlas-story-progress-note {
+  display: block;
+  overflow: visible;
+  border-left: 2px solid var(--color-accent, #f6bd60);
+  padding-left: 0.75rem;
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
+  font-size: 0.86rem;
+  line-height: 1.55;
+  -webkit-line-clamp: unset;
 }
 
 .atlas-story-lead-actions {

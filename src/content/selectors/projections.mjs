@@ -114,16 +114,14 @@ function journeyPreviewCopy(journey) {
   return journey.description || ""
 }
 
-function hasPublishedJourneyStory(journey) {
-  if (!journey?.slug || journey.publicationStatus !== "published") return false
+function hasJourneyStory(journey) {
+  return Boolean(journey?.slug)
+}
 
-  const hasJourneyChapters = (journey.days || []).some(
-    day => day?.summary || day?.visits?.length
-  )
-  const hasPublishedExperience =
-    getJourneyExperienceViews(journey.id).length > 0
-
-  return hasJourneyChapters || hasPublishedExperience
+function journeyProgressNote(journey) {
+  return journey?.publicationStatus === "published"
+    ? ""
+    : "I’m adding more places, stories, photographs, and films from this trip over time. Check back for updates."
 }
 
 function journeyChapterViews(journey) {
@@ -137,7 +135,7 @@ function journeyChapterViews(journey) {
 }
 
 function atlasStoryRelationships(journey, visit) {
-  if (!visit || !hasPublishedJourneyStory(journey)) {
+  if (!visit || !hasJourneyStory(journey)) {
     return { storyChapters: [], storyExperiences: [] }
   }
 
@@ -169,7 +167,7 @@ function atlasStoryRelationships(journey, visit) {
 }
 
 function atlasStoryLead(journey) {
-  if (!hasPublishedJourneyStory(journey)) return null
+  if (!hasJourneyStory(journey)) return null
 
   const hero = resolveMediaReference(journey.hero)
 
@@ -180,6 +178,7 @@ function atlasStoryLead(journey) {
     imageAlt: hero?.alt || `${journey.title} story photograph`,
     href: `/trips/${journey.slug}`,
     publicStoryId: journey.id,
+    progressNote: journeyProgressNote(journey),
   }
 }
 
@@ -333,6 +332,7 @@ export function buildTripViewModel(journey) {
     allMedia,
     allPhotography: allMedia.filter(media => media.kind === "image"),
     description: journeyPreviewCopy(journey),
+    storyProgressNote: journeyProgressNote(journey),
     dates: journey.dateRange?.label || String(journey.year),
     duration: journey.duration,
     who: journey.audience,
@@ -454,7 +454,7 @@ function atlasActions(place, journey) {
       type: "external",
     })
   }
-  if (hasPublishedJourneyStory(journey)) {
+  if (hasJourneyStory(journey)) {
     actions.push({
       analyticsType: "story",
       label: "Explore the story",
@@ -526,7 +526,7 @@ export function buildAtlasNodeView(presentation) {
     image: hero?.src || "",
     media,
     storyLead: isJourneyRoot ? atlasStoryLead(journey) : null,
-    storyTitle: hasPublishedJourneyStory(journey) ? journey.title : "",
+    storyTitle: hasJourneyStory(journey) ? journey.title : "",
     ...storyRelationships,
     childIds: [],
     relatedIds: [...(presentation.relatedIds || [])],

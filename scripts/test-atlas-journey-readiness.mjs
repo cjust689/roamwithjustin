@@ -23,18 +23,25 @@ const storyRootIds = getAtlasNodes(atlasRootIds)
   .filter(node => Boolean(node.storyLead))
   .map(node => node.id)
 
-assert.deepEqual(storyRootIds, ["utah", "puerto-rico", "st-john"])
+assert.deepEqual(storyRootIds, [...atlasRootIds])
 assert.match(atlasView, /v-for="node in storyRootNodes"/)
 assert.match(atlasView, /storyRootNodes\(\)[\s\S]*node\.storyLead/)
 assert.doesNotMatch(atlasView, /v-for="node in rootNodes"/)
 assert.match(atlasView, />\s*Explore\s*</)
-assert.doesNotMatch(atlasView, /First look|still taking shape|will be added/)
 assert.doesNotMatch(atlasView, />Journey preview</)
 
-assert.doesNotMatch(
-  detailPanel,
-  /First look|still taking shape|will be added over time/
+const incompleteRoots = getAtlasNodes(atlasRootIds).filter(
+  node => node.comingSoon
 )
+assert.ok(incompleteRoots.length > 0)
+assert.ok(incompleteRoots.every(node => node.storyLead?.progressNote))
+assert.ok(
+  getAtlasNodes(atlasRootIds)
+    .filter(node => !node.comingSoon)
+    .every(node => !node.storyLead?.progressNote)
+)
+assert.match(detailPanel, /node\.storyLead\.progressNote/)
+assert.match(detailPanel, /class="atlas-story-progress-note"/)
 assert.doesNotMatch(detailPanel, /displayEyebrow/)
 assert.doesNotMatch(detailPanel, /child\.eyebrow/)
 

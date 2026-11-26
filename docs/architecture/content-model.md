@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-23
+updated: 2026-11-26
 related:
   - media-pipeline
   - gear-system
@@ -96,7 +96,7 @@ verification:
     - live Atlas Place dropdown verified with the New Place request choice on 2026-11-16
     - live Catalog refresh verified 223 references, 71 Visit choices, and 106 exact bindings with no Posts ID writes on 2026-11-16
     - Atlas Journey First look presentation verified in production on 2026-11-16
-    - npm run atlas:test verified published story leads and incomplete Journey suppression
+    - npm run atlas:test verified all ten Journey story leads, incomplete Journey update notes, and exact Experience stop projection
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
     - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
     - Local Chrome verified the revised mobile detail hierarchy at 320 and 390 CSS pixels on 2026-11-18
@@ -197,10 +197,10 @@ its internal `coming-soon` status while South Pointe and Shark Valley media,
 captions, editorial roles, and final curation are incomplete.
 
 These previews may omit media, venues, external links, itinerary days, and
-unsupported details. Their Atlas chooser cards use the visitor-facing `First
-look` cue, and every incomplete Journey panel explains that the Journey is
-still taking shape and will gain more places, stories, photographs, and films
-over time. This sets an honest completeness expectation without exposing
+unsupported details. Their Atlas Journey entries and story routes remain
+available, and every incomplete Journey explains that more places, stories,
+photographs, and films will be added over time. This sets an honest
+completeness expectation without exposing
 internal status labels such as "coming soon," "confirmed," "unconfirmed,"
 "verified," or "unverified." Missing links stay absent instead of being
 replaced with guessed tourism or map URLs.
@@ -219,21 +219,21 @@ selector for compatibility.
 and guided-journey shapes. Feature components consume those projections rather
 than maintaining another content database.
 
-An Atlas root receives a story lead only when its canonical Journey is
-published and owns substantive Journey chapters or a published Experience.
-The lead reuses the canonical Journey title, description, hero, public story
-ID, and standalone route. A slug alone is not story availability. Incomplete
-Journey previews and overview-only records therefore do not expose an Atlas
-story action.
+Every Atlas root with a canonical Journey slug receives a story lead. The lead
+reuses the canonical Journey title, description, hero, public story ID, and
+standalone route. Incomplete Journeys carry a visitor-facing update note while
+published Journeys omit it. This keeps every registered trip discoverable
+without presenting internal publication state as public copy.
 
 Stop-to-story relationships reuse canonical IDs already present in the content
 model. `Journey.days[].visits[].visitId` creates a chapter edge to that Visit,
 including many-to-many cases where one Visit appears in several chapters.
-Published Experiences create a stop edge only when both their `visitId` and
-`placeId` match. Atlas presentation selects the intended Visit when more than
-one Visit shares a Place, so it can retain one deliberate pin without merging
-the underlying story relationships. Structural hubs and chapters without a
-Visit reference have no stop-specific relationship.
+Published Experiences create a stop edge as soon as both their `visitId` and
+`placeId` match, even while the containing Journey remains incomplete. Atlas
+presentation selects the intended Visit when more than one Visit shares a
+Place, so it can retain one deliberate pin without merging the underlying
+story relationships. Structural hubs and chapters without a Visit reference
+have no stop-specific relationship.
 
 `src/components/JourneyStoryBody.vue` renders the canonical Journey chapters,
 locations, published Experiences and Moments, and media for both
