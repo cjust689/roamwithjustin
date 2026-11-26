@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-25
+updated: 2026-11-26
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -39,7 +39,7 @@ verification:
   evidence:
     - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
     - Pages run 44737312245 deployed the production merge; the live Atlas rail rendered exactly three Explore actions for Utah 2025, Puerto Rico 2024, and St. John 2025, and chunk 852.ccfda71b.js contained the stories-to-explore marker
-    - npm run atlas:test verifies that only Utah 2025, Puerto Rico 2024, and St. John 2025 own root story leads and that the welcome rail iterates those story-backed roots
+    - npm run atlas:test verifies that all ten registered Journey roots own story leads, incomplete Journeys carry the update note, and published Experiences project to exact stops before Journey completion
     - npm run atlas:test
     - npm run lint
     - npm run content:validate
@@ -68,19 +68,19 @@ and published Experiences that explicitly reference their Visits.
 
 ## Current implementation
 
-Phase 1 derives a `storyLead` only for Journey roots whose canonical Journey is
-published and has substantive Journey chapters or a published Experience. The
+Every Journey root now derives a `storyLead` from its canonical Journey. The
 lead reuses the canonical Journey title, description, hero, public story ID,
-and existing `/trips/:id` route. It is not a second content store.
+and existing `/trips/:id` route. It is not a second content store. Incomplete
+Journeys include a natural update note in both the root detail and shared story
+body, while completed Journeys omit it.
 
 The detail panel now presents the real story lead and `Explore the story`
 action before Journey stops. `View N stops` scrolls the existing panel to the
 ordered stop list. Google Maps and official Place destinations remain external
 actions under a compact `Useful links` section after editorial media. Incomplete
-Journey roots expose neither the story lead nor the toolbar Story action.
-The root welcome rail now uses that same selector and offers `Explore` only for
-Utah 2025, Puerto Rico 2024, and St. John 2025. Other confirmed map roots remain
-selectable on the map without being presented as finished stories.
+Journey roots expose the same story lead and toolbar Story action as completed
+Journeys. The root welcome rail uses that same selector, so all ten registered
+trips remain available while their established content grows.
 
 Phase 2 extracts `JourneyStoryBody.vue` as the shared canonical presentation
 used by the public Journey page and `AtlasStoryReader.vue`. Atlas reader state
@@ -130,8 +130,8 @@ appears once per browser tab when the same feature flag is enabled. It links
 directly to `/my-atlas`, stays out of story-reader state, and moves clear of the
 desktop inspector and mobile detail dock. Sparse Journey cards and panels no
 longer expose internal editorial workflow labels. They present only established
-places and content. The welcome rail omits them until the canonical Journey
-owns a substantive published story.
+places and content. The welcome rail now includes every registered Journey,
+with an update note inside incomplete Journey details and stories.
 
 The root Journey explorer now starts collapsed so the homepage opens with the
 map available for immediate interaction. Returning through browser history or
@@ -162,7 +162,7 @@ remains the indexable representation.
 - [x] Present the lead before ordered Journey stops.
 - [x] Keep story and stop actions visible as peers.
 - [x] Demote external utilities into `Useful links`.
-- [x] Hide story UI for incomplete Journey previews.
+- [x] Present incomplete Journey story UI with an honest update note.
 - [x] Add bottom scroll clearance and allow mobile dock titles to wrap.
 - [x] Verify the full panel at 320, 375, 390, 768, 1024, and 1440 CSS pixels.
 - [x] Preserve standalone story routing, Atlas selection, and browser history.
@@ -225,9 +225,18 @@ remains the indexable representation.
 - [x] Remove visitor-facing sparse-content workflow labels from Atlas cards and
   detail panels.
 - [x] Restrict the welcome rail Explore action to Journey roots with a derived
-      canonical story lead while retaining incomplete Journey map pins.
+      canonical story lead.
 - [x] Start the homepage Journey explorer collapsed and restore that map-first
       state whenever navigation returns to World.
+
+### Phase 7, progressive Journey discovery
+
+- [x] Expose every registered Journey through the Atlas explorer and reader.
+- [x] Add a natural update note to incomplete Journey details and stories.
+- [x] Project published Experiences to exact stops before full Journey
+      completion.
+- [x] Verify all ten Journey roots and the incomplete Journey stop relationship
+      with `npm run atlas:test`.
 
 ## Verified flow after Phase 3
 
