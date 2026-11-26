@@ -36,6 +36,18 @@
       "sortOrder": 2,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-rancho-la-merced",
+      "slug": "rancho-la-merced",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "title": "Rancho La Merced",
+      "summary": "",
+      "sortOrder": 3,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -105,6 +117,20 @@
         "video-costa-rica-2025-f26bb57daab1-002"
       ],
       "sourceHash": "ac05b29fcea8515c3a55f632537d44c7b8a658ef34bae21530add02c1f4780bd"
+    },
+    {
+      "id": "moment-ffce77d3-1fb1-4f90-8d57-6da5c47b1beb",
+      "experienceId": "experience-costa-rica-2025-rancho-la-merced",
+      "postId": "ffce77d3-1fb1-4f90-8d57-6da5c47b1beb",
+      "title": "Uvita Horses",
+      "notes": "I’m riding through the forest at Rancho La Merced in Uvita, with monkeys overhead and a small group of fellow riders around me. There are maybe ten of us, visiting during shoulder season. I often look for animal experiences when I travel, and horses tend to be part of that. This ride takes us through the ranch, across a few rivers and down to the beach, roughly three hours from saddle up to saddle down.\n\nOn the beach, our guide lets those of us comfortable in the saddle pick up the pace. Those horses can move. There’s the sound of the ocean, the galloping in the sand and the horses’ grunts. Seeing monkeys from horseback is already something, but this stretch of the ride is hard to beat.",
+      "travelDate": "06/02/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "video-costa-rica-2025-2568e61dfd18-001"
+      ],
+      "sourceHash": "3f884f845a9081a8ff558268214e47931f703a1be2eaf99f52f7b7d88ea638de"
     }
   ],
   "batches": [
@@ -240,6 +266,19 @@
         "image-costa-rica-2025-94f644d2fbcc-012",
         "video-costa-rica-2025-6e88e064df34-001",
         "video-costa-rica-2025-f26bb57daab1-002"
+      ]
+    },
+    {
+      "id": "editorial-ffce77d3-1fb1-4f90-8d57-6da5c47b1beb-3f884f845a9081a8",
+      "postId": "ffce77d3-1fb1-4f90-8d57-6da5c47b1beb",
+      "sourceHash": "3f884f845a9081a8ff558268214e47931f703a1be2eaf99f52f7b7d88ea638de",
+      "experienceId": "experience-costa-rica-2025-rancho-la-merced",
+      "momentId": "moment-ffce77d3-1fb1-4f90-8d57-6da5c47b1beb",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-uvita-costa-rica-1b7ae0f8ba1bede9"
+      ],
+      "mediaAssetIds": [
+        "video-costa-rica-2025-2568e61dfd18-001"
       ]
     }
   ]

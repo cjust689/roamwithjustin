@@ -5831,6 +5831,37 @@
         "byteSize": 92219193,
         "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
       }
+    },
+    {
+      "id": "video-costa-rica-2025-2568e61dfd18-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/uvita-costa-rica/media-costa-rica-2025-uvita-costa-rica-1b7ae0f8ba1bede9/uvita-costa-rica-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "2568e61dfd184face4700cf6c9baf2a18fbc75025d8ef3d959432b3773a986a5",
+        "byteSize": 116653770,
+        "batchId": "media-costa-rica-2025-uvita-costa-rica-1b7ae0f8ba1bede9"
+      }
     }
   ],
   "placements": [
@@ -8355,6 +8386,19 @@
       "sortOrder": 2,
       "publicationSequence": 23,
       "batchId": "media-costa-rica-2025-drake-bay-f54f337d9643fb76"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-costa-rica-video-costa-rica-2025-2568e61dfd18-001",
+      "assetId": "video-costa-rica-2025-2568e61dfd18-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "experienceId": "experience-costa-rica-2025-rancho-la-merced",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 24,
+      "batchId": "media-costa-rica-2025-uvita-costa-rica-1b7ae0f8ba1bede9"
     }
   ],
   "batches": [
@@ -8833,6 +8877,19 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "2b349b2a0705fe188091cd9b8d68edcbca50cc9fd165595283d97f3ff43805d4"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-uvita-costa-rica-1b7ae0f8ba1bede9",
+      "sequence": 24,
+      "manifestSha256": "130c007ba929b30a7243fb5ca44bc4a0ddca66dbd234102ddaa18b30537c8a31",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-2568e61dfd18-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "41f4fb14ba4e25f1786c0cb43cd17625863bb4e8a3d6a31ddab8caf4605f6577"
       }
     }
   ]
