@@ -48,6 +48,18 @@
       "sortOrder": 3,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-uvita-the-lost-lemon",
+      "slug": "uvita-the-lost-lemon",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "title": "Uvita The Lost Lemon",
+      "summary": "",
+      "sortOrder": 4,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -131,6 +143,20 @@
         "video-costa-rica-2025-2568e61dfd18-001"
       ],
       "sourceHash": "3f884f845a9081a8ff558268214e47931f703a1be2eaf99f52f7b7d88ea638de"
+    },
+    {
+      "id": "moment-fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2",
+      "experienceId": "experience-costa-rica-2025-uvita-the-lost-lemon",
+      "postId": "fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2",
+      "title": "Uvita House",
+      "notes": "Our Airbnb in Uvita feels secluded without putting us far from everything. The shoulder season brings a mix of good weather and rain, and I’m glad we have a private pool for time in the water. I also appreciate something less glamorous, laundry on the property. Between hikes and traveling, we haven’t had much time to catch up on it.\n\nA covered, raised, open air yoga studio sits just a few steps from the back door. We opt for a massage session organized by our host, and it’s well worth it. The pool is a great part of staying here, but the practical comforts count too.",
+      "travelDate": "06/02/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "video-costa-rica-2025-881770ae4854-001"
+      ],
+      "sourceHash": "2bb0c27170452d327817feb9d2be35301e1d63530c30737906984402af3d943b"
     }
   ],
   "batches": [
@@ -279,6 +305,19 @@
       ],
       "mediaAssetIds": [
         "video-costa-rica-2025-2568e61dfd18-001"
+      ]
+    },
+    {
+      "id": "editorial-fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2-2bb0c27170452d32",
+      "postId": "fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2",
+      "sourceHash": "2bb0c27170452d327817feb9d2be35301e1d63530c30737906984402af3d943b",
+      "experienceId": "experience-costa-rica-2025-uvita-the-lost-lemon",
+      "momentId": "moment-fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-uvita-costa-rica-1a5b43685ad17d7f"
+      ],
+      "mediaAssetIds": [
+        "video-costa-rica-2025-881770ae4854-001"
       ]
     }
   ]
