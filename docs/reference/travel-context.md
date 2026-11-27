@@ -465,7 +465,7 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 **Suggested ID:** `costa-rica-2025`  
 **Status:** `CONFIRMED` trip, route, and several specific on-site experiences.  
-**Broad route:** **La Fortuna / Bajos del Toro** → **Drake Bay / Osa Peninsula** → **Uvita / southern Pacific coast** → **San José area**. Dates and some order details need trip-journal confirmation.
+**Broad route:** **La Fortuna** → **Bajos del Toro** → **San José area** → **Uvita / southern Pacific coast** → **Drake Bay / Osa Peninsula and later Pacific stops** → **San José return**. The owner confirmed that the arrival drive went directly to La Fortuna, the next day continued through Bajos del Toro to a San José Airbnb, and the following day continued to Uvita. Exact dates and some later order details still need trip-journal confirmation.
 
 ### 7.1 La Fortuna / Bajos del Toro
 
@@ -518,7 +518,8 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ### 7.7 Other Costa Rica material
 
-- **San José end of trip:** Ending near/overlooking San José was included in a retrospective trip route.
+- **San José route role:** The San José Airbnb is the third distinct stop, after Bajos del Toro and before Uvita. The trip later returned to San José, and the owner has a small final set of photographs from that return. The public Atlas uses one broad city pin ordered by the first stay instead of overlapping city pins. Preserve a separate return Visit only if those final photographs are published as their own story.
+- **Arrival gateway:** The published La Fortuna story confirms arrival processing at SJO before the direct drive to La Fortuna. The airport is connective context rather than a separate Atlas stop unless the owner later wants an airport-specific chapter.
 - **Unverified/planned only:** Monteverde, Nosara, Golfito Bay, particular rafting/canyoning operators, and specific villas/restaurants floated in itineraries. Do not mark visited without confirming.
 - **Commercial possibilities:** Lodging, boat operators, rainforest guides, waterfall access operators, and tours only when actual experience + official contact info can be established.
 

@@ -78,6 +78,16 @@ validation cover the precedence locally; this correction is not yet deployed.
 The owner also removed Playa San Josecito from the public Costa Rica 2025
 Journey. Its standalone Place and source history remain registered, but it is
 no longer a Journey Visit, Atlas stop, related route edge, or guided stop.
+The owner then corrected the opening chronology to La Fortuna, Bajos del Toro,
+the San José Airbnb, and Uvita. San José now orders as the third distinct stop.
+The later return to the same city remains route context rather than a duplicate
+map pin, preserving the existing Casa Jungla story and every media reference.
+The Costa Rica root also keeps that same canonical Journey hero on its
+`Explore the story` card at mobile widths instead of hiding the card image.
+Visitor-facing Journey titles no longer repeat their year in parentheses.
+Canonical titles retain the year for editorial automation and identity, while
+trip pages, Atlas cards, map pills, and story leads render the date as a styled
+secondary label.
 
 Local Atlas marker follow-up: tightly colliding World-level Journey roots now
 remain individually selectable instead of collapsing into one marker. Their

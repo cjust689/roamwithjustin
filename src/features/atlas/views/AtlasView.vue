@@ -163,6 +163,7 @@
           >
             <span>Explore</span>
             <strong>{{ node.title }}</strong>
+            <small v-if="node.dateLabel">{{ node.dateLabel }}</small>
           </button>
         </div>
 

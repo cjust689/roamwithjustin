@@ -176,9 +176,17 @@ Zion, and Park City geography. Planned-only Hanksville is not registered as a
 visited Place. Playa San Josecito remains a canonical Place with retained
 source context, but the owner removed it from the Costa Rica 2025 Journey, so
 it has no Visit, Atlas stop, related route edge, or guided stop in that Journey.
+Costa Rica orders San José by its first distinct stay, after Bajos del Toro and
+before Uvita. The later return uses the same broad city geography and closes
+the related route from Manuel Antonio without creating an overlapping map pin.
+The existing Casa Jungla Experience, Moment, and media remain attached to the
+unchanged San José Visit identity.
 
-Every top-level Atlas entry projects its year-specific Journey title and date
-label. This keeps repeat visits to the same geography visibly separate. Child
+Every top-level Atlas entry derives a clean public display title from its
+canonical Journey title and projects the Journey date as a separate secondary
+label. Canonical titles retain their year for editorial automation and unique
+operator-facing choices. This keeps repeat visits to the same geography visibly
+separate without putting parenthesized dates inside public headings. Child
 Atlas entries continue to project canonical Place names and their own
 place-level labels, so the Journey year is not repeated at every stop.
 
@@ -238,6 +246,9 @@ nodes do not inherit the Journey hero. They continue to use an explicit Atlas
 or Visit hero and then the first verified image published to that Visit. This
 lets one reviewed Journey cover populate its trip surface and default root map
 pill without implying that the same photograph belongs to every destination.
+The root `storyLead` projection resolves the same canonical Journey hero. Its
+mobile Atlas card retains that photograph in a bounded single-column layout,
+so the trip header, root inspector, and story entry remain visually consistent.
 
 Stop-to-story relationships reuse canonical IDs already present in the content
 model. `Journey.days[].visits[].visitId` creates a chapter edge to that Visit,

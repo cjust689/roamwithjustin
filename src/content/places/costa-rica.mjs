@@ -156,7 +156,7 @@ export const costaRicaPlaces = Object.freeze([
     evidenceStatus: "confirmed",
     coordinatePrecision: "metropolitan-area",
     description:
-      "The broad San José area closes the route after the Pacific coast and brings the journey back toward the city.",
+      "The broad San José area marks an overnight transition after Bajos del Toro and the final return after the Pacific coast.",
     externalLinks: {},
     verificationNotes:
       "The metropolitan coordinate comes from Costa Rican/UN geographic sources and does not expose lodging.",

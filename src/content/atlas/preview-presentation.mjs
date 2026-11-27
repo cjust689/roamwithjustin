@@ -180,7 +180,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Rainforest and waterfalls",
     camera: { center: [-84.2996454, 10.2134461], zoom: 11.2, pitch: 56, bearing: -16 },
-    relatedIds: ["la-fortuna-costa-rica", "drake-bay"],
+    relatedIds: ["la-fortuna-costa-rica", "san-jose-costa-rica"],
   },
   {
     id: "drake-bay",
@@ -190,7 +190,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Osa Peninsula coast",
     camera: { center: [-83.6550131, 8.7046659], zoom: 11.2, pitch: 58, bearing: 16 },
-    relatedIds: ["bajos-del-toro", "uvita-costa-rica"],
+    relatedIds: ["uvita-costa-rica"],
   },
   {
     id: "uvita-costa-rica",
@@ -200,7 +200,12 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Southern Pacific base",
     camera: { center: [-83.7363979, 9.1730967], zoom: 11.4, pitch: 54, bearing: 12 },
-    relatedIds: ["drake-bay", "uvita-whale-tail", "nauyaca-waterfalls"],
+    relatedIds: [
+      "san-jose-costa-rica",
+      "drake-bay",
+      "uvita-whale-tail",
+      "nauyaca-waterfalls",
+    ],
   },
   {
     id: "uvita-whale-tail",
@@ -238,9 +243,9 @@ export const previewAtlasPresentation = Object.freeze([
     journeyId: "costa-rica-2025",
     parentId: "costa-rica",
     eyebrow: "Coming soon",
-    category: "Journey endpoint",
+    category: "Overnight stop and return",
     camera: { center: [-84.0796683, 9.9327373], zoom: 10.8, pitch: 48, bearing: 8 },
-    relatedIds: ["manuel-antonio-area"],
+    relatedIds: ["bajos-del-toro", "uvita-costa-rica", "manuel-antonio-area"],
   },
   {
     id: "utah-2026",
