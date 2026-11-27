@@ -60,6 +60,18 @@
       "sortOrder": 4,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-uvita",
+      "slug": "uvita",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "title": "Uvita",
+      "summary": "",
+      "sortOrder": 5,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -157,6 +169,26 @@
         "video-costa-rica-2025-881770ae4854-001"
       ],
       "sourceHash": "2bb0c27170452d327817feb9d2be35301e1d63530c30737906984402af3d943b"
+    },
+    {
+      "id": "moment-73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "postId": "73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "title": "High Tide Whale Tail",
+      "notes": "The water reaches almost to the tree line at Uvita’s Whale Tail. We arrive at high tide, with barely any beach left and the park nearly empty. After the past couple of days driving and trekking, I’m ready for an easier day. We’ve packed snacks, water and swim gear, but there isn’t much room to settle in.\n\nInstead, we wander the narrow stretch of coast and make a local friend. A dog hangs out with us for a good hour as we explore what the tide has left exposed. I keep noticing how little land remains between the water and the trees.\n\nWe leave with a plan to return at low tide, when we can walk out to the Whale Tail. For now, it’s a coastal wander with a dog for company.",
+      "travelDate": "06/02/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-91ed3b1314f3-001",
+        "image-costa-rica-2025-380e422160f5-002",
+        "image-costa-rica-2025-442d7e82af9b-003",
+        "image-costa-rica-2025-f08aeebca256-004",
+        "image-costa-rica-2025-0dca522c9862-005",
+        "image-costa-rica-2025-42e112fd9686-006",
+        "video-costa-rica-2025-63563c1541ed-001"
+      ],
+      "sourceHash": "28d9914ef08bfb609dae5942c68bd67f81cdfa9b2ddeca34cc9bd3941546844f"
     }
   ],
   "batches": [
@@ -318,6 +350,46 @@
       ],
       "mediaAssetIds": [
         "video-costa-rica-2025-881770ae4854-001"
+      ]
+    },
+    {
+      "id": "editorial-73b2e53d-cb2f-4b81-8137-0f02b6f51e20-e3f65a07d54bbd44",
+      "postId": "73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "sourceHash": "e3f65a07d54bbd4423c49b967dca682572c996ebd67a879a1643a67b1d2c7fdb",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "momentId": "moment-73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5",
+        "media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-91ed3b1314f3-001",
+        "image-costa-rica-2025-380e422160f5-002",
+        "image-costa-rica-2025-442d7e82af9b-003",
+        "image-costa-rica-2025-f08aeebca256-004",
+        "image-costa-rica-2025-0dca522c9862-005",
+        "image-costa-rica-2025-42e112fd9686-006",
+        "video-costa-rica-2025-63563c1541ed-001"
+      ]
+    },
+    {
+      "id": "editorial-73b2e53d-cb2f-4b81-8137-0f02b6f51e20-28d9914ef08bfb60",
+      "postId": "73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "sourceHash": "28d9914ef08bfb609dae5942c68bd67f81cdfa9b2ddeca34cc9bd3941546844f",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "momentId": "moment-73b2e53d-cb2f-4b81-8137-0f02b6f51e20",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5",
+        "media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-91ed3b1314f3-001",
+        "image-costa-rica-2025-380e422160f5-002",
+        "image-costa-rica-2025-442d7e82af9b-003",
+        "image-costa-rica-2025-f08aeebca256-004",
+        "image-costa-rica-2025-0dca522c9862-005",
+        "image-costa-rica-2025-42e112fd9686-006",
+        "video-costa-rica-2025-63563c1541ed-001"
       ]
     }
   ]
