@@ -190,17 +190,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Osa Peninsula coast",
     camera: { center: [-83.6550131, 8.7046659], zoom: 11.2, pitch: 58, bearing: 16 },
-    relatedIds: ["bajos-del-toro", "playa-san-josecito"],
-  },
-  {
-    id: "playa-san-josecito",
-    placeId: "playa-san-josecito",
-    journeyId: "costa-rica-2025",
-    parentId: "costa-rica",
-    eyebrow: "Coming soon",
-    category: "Jungle beach",
-    camera: { center: [-83.7112504, 8.6550443], zoom: 12.2, pitch: 56, bearing: -14 },
-    relatedIds: ["drake-bay", "uvita-costa-rica"],
+    relatedIds: ["bajos-del-toro", "uvita-costa-rica"],
   },
   {
     id: "uvita-costa-rica",
@@ -210,7 +200,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Southern Pacific base",
     camera: { center: [-83.7363979, 9.1730967], zoom: 11.4, pitch: 54, bearing: 12 },
-    relatedIds: ["playa-san-josecito", "uvita-whale-tail", "nauyaca-waterfalls"],
+    relatedIds: ["drake-bay", "uvita-whale-tail", "nauyaca-waterfalls"],
   },
   {
     id: "uvita-whale-tail",

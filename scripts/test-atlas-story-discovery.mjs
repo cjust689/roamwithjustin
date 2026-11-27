@@ -3,6 +3,8 @@ import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
+import { getJourney } from "../src/content/journeys/index.mjs"
+import { resolveMediaReference } from "../src/content/selectors/media.mjs"
 import { buildAtlasNodeView } from "../src/content/selectors/projections.mjs"
 
 const projectRoot = path.resolve(
@@ -39,6 +41,8 @@ const completedStoryJourneys = new Set([
 ])
 
 for (const root of roots) {
+  const presentation = atlasPresentation.find(item => item.id === root.id)
+  const journey = getJourney(root.journeyId)
   const storyAction = root.actions.find(
     action => action.analyticsType === "story"
   )
@@ -46,6 +50,10 @@ for (const root of roots) {
   assert.ok(root.storyLead, `${root.journeyId} should expose a story lead`)
   assert.equal(root.storyLead.title, root.title)
   assert.equal(root.storyLead.href, storyAction?.href)
+
+  if (journey?.hero && !presentation?.hero) {
+    assert.equal(root.image, resolveMediaReference(journey.hero)?.src)
+  }
   assert.equal(storyAction?.label, "Explore the story")
 
   if (completedStoryJourneys.has(root.journeyId)) {
@@ -56,6 +64,18 @@ for (const root of roots) {
     assert.match(root.storyLead.progressNote, /Check back for updates\./)
   }
 }
+
+const costaRicaPresentation = atlasPresentation.find(
+  item => item.id === "costa-rica"
+)
+const explicitRootOverride = "/test/atlas-root-override.jpg"
+assert.equal(
+  buildAtlasNodeView({
+    ...costaRicaPresentation,
+    hero: { src: explicitRootOverride, kind: "image" },
+  }).image,
+  explicitRootOverride
+)
 
 assert.match(detailPanel, /class="atlas-story-lead"/)
 assert.match(detailPanel, />\s*Explore the story\s*</)
