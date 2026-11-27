@@ -117,6 +117,9 @@
             {{ isFavorite ? "Saved" : "Save" }}
           </button>
           <div class="atlas-detail-title">
+            <span v-if="node.dateLabel" class="atlas-detail-date">
+              {{ node.dateLabel }}
+            </span>
             <h1>{{ node.title }}</h1>
           </div>
         </div>
@@ -279,6 +282,9 @@
               />
             </button>
             <div class="atlas-story-lead-copy">
+              <span v-if="node.dateLabel" class="atlas-story-lead-date">
+                {{ node.dateLabel }}
+              </span>
               <h2 :id="`atlas-story-title-${node.id}`">
                 {{ node.storyLead.title }}
               </h2>
@@ -1179,6 +1185,20 @@ export default {
   left: 1.25rem;
 }
 
+.atlas-detail-date {
+  display: inline-flex;
+  width: fit-content;
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.72);
+  border-radius: 999px;
+  padding: 0.32rem 0.56rem;
+  background: rgba(var(--color-page-rgb, 8, 12, 15), 0.66);
+  color: var(--color-accent-soft, #f6bd60);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
 .atlas-section-heading span {
   color: var(--color-accent-soft, #f6bd60);
   font-size: 0.66rem;
@@ -1380,6 +1400,15 @@ export default {
   display: flex;
   min-width: 0;
   flex-direction: column;
+}
+
+.atlas-story-lead-date {
+  margin-bottom: 0.42rem;
+  color: var(--color-accent-soft, #f6bd60);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .atlas-story-lead h2,
@@ -2057,7 +2086,8 @@ export default {
   }
 
   .atlas-story-lead-media {
-    display: none;
+    min-height: 150px;
+    max-height: 210px;
   }
 
   .atlas-story-lead h2 {

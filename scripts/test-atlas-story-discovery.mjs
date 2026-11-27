@@ -5,7 +5,10 @@ import { fileURLToPath } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
 import { getJourney } from "../src/content/journeys/index.mjs"
 import { resolveMediaReference } from "../src/content/selectors/media.mjs"
-import { buildAtlasNodeView } from "../src/content/selectors/projections.mjs"
+import {
+  buildAtlasNodeView,
+  journeyDisplayTitle,
+} from "../src/content/selectors/projections.mjs"
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -21,6 +24,10 @@ const journeyPlayer = fs.readFileSync(
 )
 const atlasView = fs.readFileSync(
   path.join(projectRoot, "src/features/atlas/views/AtlasView.vue"),
+  "utf8"
+)
+const atlasMap = fs.readFileSync(
+  path.join(projectRoot, "src/features/atlas/components/AtlasMap.vue"),
   "utf8"
 )
 const atlasRoutes = fs.readFileSync(
@@ -48,8 +55,11 @@ for (const root of roots) {
   )
 
   assert.ok(root.storyLead, `${root.journeyId} should expose a story lead`)
+  assert.equal(root.title, journeyDisplayTitle(journey))
   assert.equal(root.storyLead.title, root.title)
   assert.equal(root.storyLead.href, storyAction?.href)
+  assert.equal(root.eyebrow, journey.dateRange?.label)
+  assert.equal(root.dateLabel, journey.dateRange?.label)
 
   if (journey?.hero && !presentation?.hero) {
     assert.equal(root.image, resolveMediaReference(journey.hero)?.src)
@@ -68,6 +78,12 @@ for (const root of roots) {
 const costaRicaPresentation = atlasPresentation.find(
   item => item.id === "costa-rica"
 )
+const costaRicaNode = nodes.find(item => item.id === "costa-rica")
+const costaRicaJourney = getJourney("costa-rica-2025")
+const costaRicaHero = resolveMediaReference(costaRicaJourney.hero)?.src
+assert.ok(costaRicaHero)
+assert.equal(costaRicaNode.image, costaRicaHero)
+assert.equal(costaRicaNode.storyLead.image, costaRicaHero)
 const explicitRootOverride = "/test/atlas-root-override.jpg"
 assert.equal(
   buildAtlasNodeView({
@@ -79,7 +95,18 @@ assert.equal(
 
 assert.match(detailPanel, /class="atlas-story-lead"/)
 assert.match(detailPanel, />\s*Explore the story\s*</)
+assert.match(detailPanel, /class="atlas-detail-date"/)
+assert.match(detailPanel, /class="atlas-story-lead-date"/)
+assert.doesNotMatch(
+  detailPanel,
+  /\.atlas-story-lead-media\s*\{\s*display:\s*none;/
+)
 assert.match(detailPanel, /class="atlas-story-progress-note"/)
+assert.match(
+  atlasView,
+  /<small v-if="node\.dateLabel">\{\{ node\.dateLabel \}\}<\/small>/
+)
+assert.match(atlasMap, /labelMeta\.className = "atlas-marker-meta"/)
 assert.match(detailPanel, />Journey stops</)
 assert.match(detailPanel, />Useful links</)
 assert.match(detailPanel, /usefulActions\.length/)

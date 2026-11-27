@@ -252,6 +252,13 @@ copy of the story.
 renders the same canonical chapters, locations, Experiences, Moments, and
 media. The Atlas variant omits ads and commercial modules. Temporary
 `noindex,follow` metadata leaves the standalone page as the indexable story.
+The root story card uses the same canonical Journey hero as the Journey header
+and root Atlas inspector. Mobile keeps that card image visible in a bounded
+single-column layout.
+Root Journey headings derive a public title without the canonical trailing
+year. The Journey date renders separately in the inspector hero, story card,
+World explorer, and root map pill, while canonical titles remain unchanged for
+editorial automation.
 
 The desktop reader occupies a bounded pane beside the retained map. Mobile
 uses a full-width focused sheet with a deliberate map peek toggle. Reader and
