@@ -134,6 +134,25 @@ function journeyChapterViews(journey) {
   }))
 }
 
+function atlasExperienceCardView(experience) {
+  const card = experienceCardView(experience)
+  const [moment] = experience.moments || []
+
+  if (
+    experience.moments?.length !== 1 ||
+    !moment?.title ||
+    moment.title === experience.title
+  ) {
+    return card
+  }
+
+  return {
+    ...card,
+    title: moment.title,
+    contextLabel: experience.title,
+  }
+}
+
 function atlasStoryRelationships(journey, visit) {
   if (!visit || !hasJourneyStory(journey)) {
     return { storyChapters: [], storyExperiences: [] }
@@ -161,7 +180,11 @@ function atlasStoryRelationships(journey, visit) {
         id: `experience-${experience.slug}`,
         title: experience.title,
         summary: experience.summary,
-        card: experienceCardView(experience),
+        card: atlasExperienceCardView(experience),
+        // Keep the full canonical Moment projection beside the compact card.
+        // The primary Atlas can show it directly at the selected stop while
+        // the existing Journey reader remains available as a deeper path.
+        moments: experience.moments,
       })),
   }
 }
