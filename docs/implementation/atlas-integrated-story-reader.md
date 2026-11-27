@@ -66,6 +66,8 @@ verification:
     - npm run atlas:test verifies that the root Journey explorer starts collapsed and returns to the collapsed state at World
     - npm run atlas:test verifies that colliding World-level Journey roots remain individual while child stops retain ordinary clustering
     - Local headless Chrome at 390 CSS pixels measured Utah 2025 at pixels 4 through 68 and Utah 2026 at 76 through 140, fully inside the viewport with an 8 pixel gap
+    - npm run atlas:test verifies that a root without an Atlas-specific hero inherits its Journey hero, an explicit Atlas hero still overrides it, and child Places remain isolated
+    - npm run content:validate verifies that the Costa Rica Journey and guided route omit Playa San Josecito while its standalone Place remains registered
 ---
 
 # Atlas integrated story reader
@@ -93,6 +95,17 @@ lead reuses the canonical Journey title, description, hero, public story ID,
 and existing `/trips/:id` route. It is not a second content store. Incomplete
 Journeys include a natural update note in both the root detail and shared story
 body, while completed Journeys omit it.
+
+The same canonical Journey hero now supplies the root Atlas display image when
+the presentation does not declare a map-specific override. Explicit Atlas
+heroes remain first in precedence. The fallback applies only to top-level
+Journey roots, so destination pins still require their own Atlas hero, Visit
+hero, or verified Visit image.
+
+The owner-corrected Costa Rica route omits Playa San Josecito. Drake Bay now
+relates directly to Uvita in the Atlas presentation. The standalone Playa San
+Josecito Place and its source context remain available without projecting a
+Visit, Atlas stop, related route edge, or guided stop into this Journey.
 
 The detail panel now presents the real story lead and `Explore the story`
 action before Journey stops. `View N stops` scrolls the existing panel to the

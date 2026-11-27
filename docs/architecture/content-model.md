@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-26
+updated: 2026-11-27
 related:
   - media-pipeline
   - gear-system
@@ -100,6 +100,7 @@ verification:
     - Pull requests 287 and 288 plus Pages run 45898969341 deployed progressive Journey discovery; live Uvita rendered both exact Experience relationships
     - npm run atlas:test verified Uvita Horses and Uvita House as single-Moment Atlas card titles with their parent Experience context
     - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
+    - npm run atlas:test verified Journey-hero fallback for Atlas roots, explicit Atlas override precedence, and child Place isolation
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
     - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
     - Local Chrome verified the revised mobile detail hierarchy at 320 and 390 CSS pixels on 2026-11-18
@@ -172,7 +173,9 @@ preview have canonical Journey/Place identity and public Atlas presentation.
 Europe remains one Journey with geographic stops beneath its Europe root;
 Utah 2026 remains separate from Utah winter 2025 and reuses the shared Utah,
 Zion, and Park City geography. Planned-only Hanksville is not registered as a
-visited Place.
+visited Place. Playa San Josecito remains a canonical Place with retained
+source context, but the owner removed it from the Costa Rica 2025 Journey, so
+it has no Visit, Atlas stop, related route edge, or guided stop in that Journey.
 
 Every top-level Atlas entry projects its year-specific Journey title and date
 label. This keeps repeat visits to the same geography visibly separate. Child
@@ -227,6 +230,14 @@ reuses the canonical Journey title, description, hero, public story ID, and
 standalone route. Incomplete Journeys carry a visitor-facing update note while
 published Journeys omit it. This keeps every registered trip discoverable
 without presenting internal publication state as public copy.
+
+Root display media follows one bounded precedence: an explicit Atlas
+presentation hero wins, otherwise the root inherits the canonical Journey
+hero, otherwise it may use the first verified root-scoped image. Child Place
+nodes do not inherit the Journey hero. They continue to use an explicit Atlas
+or Visit hero and then the first verified image published to that Visit. This
+lets one reviewed Journey cover populate its trip surface and default root map
+pill without implying that the same photograph belongs to every destination.
 
 Stop-to-story relationships reuse canonical IDs already present in the content
 model. `Journey.days[].visits[].visitId` creates a chapter edge to that Visit,

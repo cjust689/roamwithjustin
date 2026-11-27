@@ -499,6 +499,7 @@ export function buildAtlasNodeView(presentation) {
 
   if (!place || !journey) return null
 
+  const isJourneyRoot = !presentation.parentId
   const publishedMedia = visit
     ? getVisitPublishedMedia(journey.id, visit.id)
     : []
@@ -508,16 +509,18 @@ export function buildAtlasNodeView(presentation) {
     ),
     ...publishedMedia,
   ])
-  // Curated presentation/Visit heroes are protected. Otherwise, prefer the
-  // first verified image placed on this Visit and leave image empty when the
-  // Place has none instead of repeating a Journey-level cover across pins.
+  // Explicit Atlas presentation heroes remain the strongest override. A root
+  // without one shares its canonical Journey cover, while child Places never
+  // borrow that broad image. Children still prefer their curated Visit hero,
+  // then the first verified image placed on that Visit.
   const hero =
-    resolveMediaReference(presentation.hero || visit?.hero) ||
+    resolveMediaReference(
+      presentation.hero || (isJourneyRoot ? journey.hero : null) || visit?.hero
+    ) ||
     media.find(item => item.kind === "image") ||
     null
   const personalNote =
     visit?.summary || visit?.description || journey.atlasNotes?.[place.id] || ""
-  const isJourneyRoot = !presentation.parentId
   const useJourneyIdentity =
     isJourneyRoot || Boolean(presentation.useJourneyIdentity)
   const isInternalPreviewLabel = presentation.eyebrow === "Coming soon"

@@ -31,12 +31,12 @@ export const costaRica2025Journey = Object.freeze({
   hero: {
     assetId: "image-costa-rica-2025-19b31d0c91c6-002",
     role: "hero",
-    altText: "Waterfall Bajos del Toro",
+    alt: "Waterfall at Bajos del Toro",
   },
   fullImage: {
     assetId: "image-costa-rica-2025-19b31d0c91c6-002",
-    role: "hero",
-    altText: "Waterfall Bajos del Toro",
+    role: "full",
+    alt: "Waterfall at Bajos del Toro",
   },
   gallery: [],
   description:
@@ -53,7 +53,6 @@ export const costaRica2025Journey = Object.freeze({
     destinationVisit("la-fortuna-costa-rica"),
     destinationVisit("bajos-del-toro"),
     destinationVisit("drake-bay"),
-    destinationVisit("playa-san-josecito"),
     destinationVisit("uvita-costa-rica"),
     destinationVisit("uvita-whale-tail"),
     destinationVisit("nauyaca-waterfalls"),
@@ -69,7 +68,6 @@ export const costaRica2025Journey = Object.freeze({
     "la-fortuna-costa-rica",
     "bajos-del-toro",
     "drake-bay",
-    "playa-san-josecito",
     "uvita-costa-rica",
     "uvita-whale-tail",
     "nauyaca-waterfalls",

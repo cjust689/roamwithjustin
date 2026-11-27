@@ -70,6 +70,15 @@ verification:
 
 # Roam With Justin documentation
 
+Costa Rica now uses its reviewed generated waterfall asset as the canonical
+Journey hero and full image. Atlas roots without a separate map-specific hero
+inherit that Journey hero, while explicit Atlas overrides retain priority and
+child Places never borrow the broad Journey cover. Selector and content
+validation cover the precedence locally; this correction is not yet deployed.
+The owner also removed Playa San Josecito from the public Costa Rica 2025
+Journey. Its standalone Place and source history remain registered, but it is
+no longer a Journey Visit, Atlas stop, related route edge, or guided stop.
+
 Local Atlas marker follow-up: tightly colliding World-level Journey roots now
 remain individually selectable instead of collapsing into one marker. Their
 cards receive stable responsive spacing while their coordinate dots remain at

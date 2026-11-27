@@ -1175,7 +1175,6 @@ async function main() {
     "la-fortuna-costa-rica",
     "bajos-del-toro",
     "drake-bay",
-    "playa-san-josecito",
     "uvita-costa-rica",
     "uvita-whale-tail",
     "nauyaca-waterfalls",
