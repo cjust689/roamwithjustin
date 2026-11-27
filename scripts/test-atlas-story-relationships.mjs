@@ -52,10 +52,13 @@ assert.ok(
   "A published Experience should appear at its exact stop before the full Journey is complete"
 )
 
-const uvitaCards = new Map(
+const uvitaRelationships = new Map(
   nodeById
     .get("uvita-costa-rica")
-    .storyExperiences.map(experience => [experience.id, experience.card])
+    .storyExperiences.map(experience => [experience.id, experience])
+)
+const uvitaCards = new Map(
+  Array.from(uvitaRelationships, ([id, experience]) => [id, experience.card])
 )
 assert.deepEqual(
   {
@@ -71,6 +74,26 @@ assert.deepEqual(
       ?.contextLabel,
   },
   { title: "Uvita House", contextLabel: "Uvita The Lost Lemon" }
+)
+assert.deepEqual(
+  uvitaRelationships
+    .get("experience-rancho-la-merced")
+    ?.moments.map(moment => moment.title),
+  ["Uvita Horses"],
+  "The selected Atlas stop should receive the full canonical Moment projection"
+)
+assert.deepEqual(
+  uvitaRelationships
+    .get("experience-uvita-the-lost-lemon")
+    ?.moments.map(moment => moment.title),
+  ["Uvita House"],
+  "Every exact Experience relationship should remain available inline"
+)
+assert.ok(
+  uvitaRelationships
+    .get("experience-rancho-la-merced")
+    ?.moments[0]?.media.some(media => media.kind === "video"),
+  "Inline Atlas Experience data should retain its registered media"
 )
 
 for (const id of ["utah", "moab", "europe"]) {
@@ -118,6 +141,9 @@ const storyBody = read("src/components/JourneyStoryBody.vue")
 const projections = read("src/content/selectors/projections.mjs")
 
 assert.match(detailPanel, /class="atlas-stop-story"/)
+assert.match(detailPanel, /class="atlas-experience-stories"/)
+assert.match(detailPanel, /v-for="moment in experience\.moments"/)
+assert.match(detailPanel, />Continue in the full journey</)
 assert.match(detailPanel, /actionLabel: "Read this chapter"/)
 assert.match(detailPanel, /open-story-section/)
 assert.match(detailPanel, />Journey sequence</)

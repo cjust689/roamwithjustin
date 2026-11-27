@@ -181,6 +181,10 @@ function atlasStoryRelationships(journey, visit) {
         title: experience.title,
         summary: experience.summary,
         card: atlasExperienceCardView(experience),
+        // Keep the full canonical Moment projection beside the compact card.
+        // The primary Atlas can show it directly at the selected stop while
+        // the existing Journey reader remains available as a deeper path.
+        moments: experience.moments,
       })),
   }
 }

@@ -99,6 +99,7 @@ verification:
     - npm run atlas:test verified all ten Journey story leads, incomplete Journey update notes, and exact Experience stop projection
     - Pull requests 287 and 288 plus Pages run 45898969341 deployed progressive Journey discovery; live Uvita rendered both exact Experience relationships
     - npm run atlas:test verified Uvita Horses and Uvita House as single-Moment Atlas card titles with their parent Experience context
+    - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
     - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
     - Local Chrome verified the revised mobile detail hierarchy at 320 and 390 CSS pixels on 2026-11-18
@@ -240,7 +241,10 @@ have no stop-specific relationship.
 When a stop Experience contains exactly one published Moment with a distinct
 title, its Atlas card leads with that Moment title and retains the Experience
 title as context. Multi-Moment Experiences keep their Experience title. The
-shared Journey story still renders the canonical Experience and all Moments.
+stop relationship also carries the canonical Moment projection, including its
+registered media, so the primary Atlas inspector can render that content
+inline without creating another record or copying prose. The compact card and
+the shared Journey story remain available as the nested comparison path.
 
 `src/components/JourneyStoryBody.vue` renders the canonical Journey chapters,
 locations, published Experiences and Moments, and media for both

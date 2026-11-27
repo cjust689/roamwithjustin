@@ -41,6 +41,7 @@ verification:
     - pull requests 287 and 288 plus Pages run 45898969341 deployed all ten Journey story leads and exact incomplete-Journey Experience projection on 2026-11-26
     - live Chrome rendered both Uvita Experience cards after the progressive Journey deployment on 2026-11-26
     - npm run atlas:test verified Uvita Horses and Uvita House as the single-Moment card titles while retaining parent Experience context
+    - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
     - local Chrome MapTiler SDK layout check on 2026-11-19 retained both map canvases, terrain controls, Journey markers, and zero horizontal overflow at desktop and 390 by 844 mobile widths
     - Pull requests 188 and 189 passed validation runs 44628906987 and 44629509687, merged through develop and main, and Pages run 44629848589 deployed the official SDK runtime
@@ -229,6 +230,14 @@ Moment title and shows the parent Experience title as context. This keeps Sheet
 entry names recognizable at the stop without flattening the canonical
 Experience and Moment relationship. Multi-Moment cards retain the Experience
 title.
+
+The primary stop inspector also renders every matched Moment's text and
+registered media inline. Visitors selecting a location can therefore read and
+play its available Experiences in the same scrolling panel without another
+reader action. The compact Experience cards and exact in-Journey reader links
+remain below that inline presentation as a comparison path. Both presentations
+consume the same selector projection, so this hoisting does not create a second
+copy of the story.
 
 `Explore the story` now adds `?story=1` to the selected Atlas route and mounts
 `AtlasStoryReader.vue` without replacing `AtlasView.vue` or `AtlasMap.vue`.
