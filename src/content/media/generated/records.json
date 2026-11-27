@@ -5893,6 +5893,217 @@
         "byteSize": 115461250,
         "batchId": "media-costa-rica-2025-uvita-costa-rica-1a5b43685ad17d7f"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-91ed3b1314f3-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "91ed3b1314f36cf913f6c6423e7c79dfeb255b9925ae57289cba285650b164ea",
+        "byteSize": 546418,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-380e422160f5-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "380e422160f5ab323ebb0bf01bd0fc511fd3ae4adaed972a037b1e69011e5be0",
+        "byteSize": 557689,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-442d7e82af9b-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "442d7e82af9b2548d548d57dfeac72fcb7148b74ed2c26f9c45e35b754bb751f",
+        "byteSize": 807030,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-f08aeebca256-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "f08aeebca256960ead38196b9198a17f1bdb41c9f12683d4cbd9d472e145aa4a",
+        "byteSize": 210716,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-0dca522c9862-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "0dca522c986225ad91e5ad04f4e908984088a48c18f9a6620cbf9e53514e0f09",
+        "byteSize": 433557,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-42e112fd9686-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5/uvita-whale-tail-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1071
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "42e112fd96865089be3f1f1759b42897c7f5c35e3b4b3000c358c2693ede2369",
+        "byteSize": 348262,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-63563c1541ed-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/uvita-whale-tail/media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f/uvita-whale-tail-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "63563c1541ed87ba3d628f21d1dd5b14e0104c109f22d9b312ceb9337dbc9488",
+        "byteSize": 85830579,
+        "batchId": "media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f"
+      }
     }
   ],
   "placements": [
@@ -8443,6 +8654,97 @@
       "sortOrder": 1,
       "publicationSequence": 25,
       "batchId": "media-costa-rica-2025-uvita-costa-rica-1a5b43685ad17d7f"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-91ed3b1314f3-001",
+      "assetId": "image-costa-rica-2025-91ed3b1314f3-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-380e422160f5-002",
+      "assetId": "image-costa-rica-2025-380e422160f5-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-442d7e82af9b-003",
+      "assetId": "image-costa-rica-2025-442d7e82af9b-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-f08aeebca256-004",
+      "assetId": "image-costa-rica-2025-f08aeebca256-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-0dca522c9862-005",
+      "assetId": "image-costa-rica-2025-0dca522c9862-005",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-image-costa-rica-2025-42e112fd9686-006",
+      "assetId": "image-costa-rica-2025-42e112fd9686-006",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 26,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-whale-tail-video-costa-rica-2025-63563c1541ed-001",
+      "assetId": "video-costa-rica-2025-63563c1541ed-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-whale-tail",
+      "placeId": "uvita-whale-tail",
+      "experienceId": "experience-costa-rica-2025-uvita",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 27,
+      "batchId": "media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f"
     }
   ],
   "batches": [
@@ -8947,6 +9249,37 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "9b7f3f83729da595ea996348a1c2da1710daa33a00781ca198e2b14d0f5ddbe9"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-uvita-whale-tail-81adfe2df0574cf5",
+      "sequence": 26,
+      "manifestSha256": "cb76b33d65b3408e65954e4fde1655ba6b94dc8abf57908fa9063a67cb47ef4b",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-91ed3b1314f3-001",
+        "image-costa-rica-2025-380e422160f5-002",
+        "image-costa-rica-2025-442d7e82af9b-003",
+        "image-costa-rica-2025-f08aeebca256-004",
+        "image-costa-rica-2025-0dca522c9862-005",
+        "image-costa-rica-2025-42e112fd9686-006"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "e4dad2e3c0fb57324ad27715bb671e26e591f343b9163d2ca383f84648be55ab"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-uvita-whale-tail-993c7ab0440ec23f",
+      "sequence": 27,
+      "manifestSha256": "0e879fa40f9d732b9d8ad13760c8236c86c11abd3f7c92809e53e6edb92f6488",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-63563c1541ed-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "d99395bf0917cdd370ff0ab70de81ec38d696f9a49b96009dd075639246f4ea6"
       }
     }
   ]
