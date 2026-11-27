@@ -72,6 +72,18 @@
       "sortOrder": 5,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-casa-jungla",
+      "slug": "casa-jungla",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "title": "Casa Jungla",
+      "summary": "",
+      "sortOrder": 6,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -189,6 +201,25 @@
         "video-costa-rica-2025-63563c1541ed-001"
       ],
       "sourceHash": "28d9914ef08bfb609dae5942c68bd67f81cdfa9b2ddeca34cc9bd3941546844f"
+    },
+    {
+      "id": "moment-bf80f592-678d-47e2-a9b9-a59fd3dac26b",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "postId": "bf80f592-678d-47e2-a9b9-a59fd3dac26b",
+      "title": "San Jose AirBnb",
+      "notes": "My wife loves plants, and this stay on the outskirts of San José is a surprise for her. I came across this Airbnb and thought it would be the perfect place for us to spend an evening. It’s one of the most unusual homes I’ve seen, a home that feels genuinely alive.\n\nWhat stands out to me is how personal it feels. I don’t think of it as just a rental. It’s someone’s home, with their heart and soul put into something the two of us get to share for a little while.",
+      "travelDate": "05/30/20205",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-6a791471d568-001",
+        "image-costa-rica-2025-3c69a44c74d4-002",
+        "image-costa-rica-2025-d511924fec48-003",
+        "image-costa-rica-2025-7e0b349cb945-004",
+        "image-costa-rica-2025-9d15bb80725b-005",
+        "video-costa-rica-2025-e5e209ecd161-001"
+      ],
+      "sourceHash": "b4c69448395c9bc296a070c50ab35a8788f045308aac244c914f59e2c3984cf9"
     }
   ],
   "batches": [
@@ -390,6 +421,25 @@
         "image-costa-rica-2025-0dca522c9862-005",
         "image-costa-rica-2025-42e112fd9686-006",
         "video-costa-rica-2025-63563c1541ed-001"
+      ]
+    },
+    {
+      "id": "editorial-bf80f592-678d-47e2-a9b9-a59fd3dac26b-b4c69448395c9bc2",
+      "postId": "bf80f592-678d-47e2-a9b9-a59fd3dac26b",
+      "sourceHash": "b4c69448395c9bc296a070c50ab35a8788f045308aac244c914f59e2c3984cf9",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "momentId": "moment-bf80f592-678d-47e2-a9b9-a59fd3dac26b",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e",
+        "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-6a791471d568-001",
+        "image-costa-rica-2025-3c69a44c74d4-002",
+        "image-costa-rica-2025-d511924fec48-003",
+        "image-costa-rica-2025-7e0b349cb945-004",
+        "image-costa-rica-2025-9d15bb80725b-005",
+        "video-costa-rica-2025-e5e209ecd161-001"
       ]
     }
   ]
