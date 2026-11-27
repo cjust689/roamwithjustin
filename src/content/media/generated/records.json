@@ -6134,6 +6134,187 @@
         "byteSize": 1070507,
         "batchId": "media-costa-rica-2025-uvita-costa-rica-d3b06525180311f2"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-6a791471d568-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e/san-jose-costa-rica-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "6a791471d5689f8bad77392f7adce7972e6e58b6b7d41d5d6968862cef70dd44",
+        "byteSize": 482356,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-3c69a44c74d4-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e/san-jose-costa-rica-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "3c69a44c74d4900713a3a3024bf9a0b8808bab2834ceab2c42e3f0d706a514e7",
+        "byteSize": 525042,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-d511924fec48-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e/san-jose-costa-rica-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "d511924fec485931218da09ec6a5d53756311f4465c07b6a908419ec933a8627",
+        "byteSize": 371099,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-7e0b349cb945-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e/san-jose-costa-rica-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "7e0b349cb9450c9717dfe4e6e0ae006a2555f91b5c910c61c30843fa0e2aee99",
+        "byteSize": 510179,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-9d15bb80725b-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e/san-jose-costa-rica-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "9d15bb80725b71054a44fe4ffac6530bf9512fa589034d49d6f3f4eec7d50a8f",
+        "byteSize": 613981,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-e5e209ecd161-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/san-jose-costa-rica/media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6/san-jose-costa-rica-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "e5e209ecd16103c62022508fab8cf448c9c81165c09ed2947de991a1269690f6",
+        "byteSize": 132182897,
+        "batchId": "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6"
+      }
     }
   ],
   "placements": [
@@ -8788,6 +8969,84 @@
       "sortOrder": 1,
       "publicationSequence": 28,
       "batchId": "media-costa-rica-2025-uvita-costa-rica-d3b06525180311f2"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-image-costa-rica-2025-6a791471d568-001",
+      "assetId": "image-costa-rica-2025-6a791471d568-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 29,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-image-costa-rica-2025-3c69a44c74d4-002",
+      "assetId": "image-costa-rica-2025-3c69a44c74d4-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 29,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-image-costa-rica-2025-d511924fec48-003",
+      "assetId": "image-costa-rica-2025-d511924fec48-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 29,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-image-costa-rica-2025-7e0b349cb945-004",
+      "assetId": "image-costa-rica-2025-7e0b349cb945-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 29,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-image-costa-rica-2025-9d15bb80725b-005",
+      "assetId": "image-costa-rica-2025-9d15bb80725b-005",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 29,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-san-jose-costa-rica-video-costa-rica-2025-e5e209ecd161-001",
+      "assetId": "video-costa-rica-2025-e5e209ecd161-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-san-jose-costa-rica",
+      "placeId": "san-jose-costa-rica",
+      "experienceId": "experience-costa-rica-2025-casa-jungla",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 30,
+      "batchId": "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6"
     }
   ],
   "batches": [
@@ -9336,6 +9595,36 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "c09da8cabc70a61d74765c74f6815d1ceab33fb98764f9096326f449d2a693c9"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-san-jose-costa-rica-7be41b17618a143e",
+      "sequence": 29,
+      "manifestSha256": "2f29eb756bdfec657ef2ae34c59a5d4b1bf6487f629f7c59d9982b80b159e2a7",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-6a791471d568-001",
+        "image-costa-rica-2025-3c69a44c74d4-002",
+        "image-costa-rica-2025-d511924fec48-003",
+        "image-costa-rica-2025-7e0b349cb945-004",
+        "image-costa-rica-2025-9d15bb80725b-005"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "3d77adeeafb843f22518ce7a81c3b14b264c8ef72a4d8f533371b08de62d6a55"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6",
+      "sequence": 30,
+      "manifestSha256": "d8654da01085fb0aa853328457b94bc47348acb47c613281ddd8c3a35df16447",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-e5e209ecd161-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "06e44e6d899ed1f4a8a4620fe05bccc78c7aece65016c850aca6ff90e6d7158c"
       }
     }
   ]
