@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-26
+updated: 2026-11-27
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -23,13 +23,16 @@ code_paths:
   - src/components/JourneyStoryBody.vue
   - src/content/selectors/projections.mjs
   - src/features/atlas/components/AtlasDetailPanel.vue
+  - src/features/atlas/components/AtlasMap.vue
   - src/features/atlas/components/AtlasStoryReader.vue
+  - src/features/atlas/config/markerLayout.mjs
   - src/features/atlas/routes.js
   - src/features/atlas/views/AtlasView.vue
   - src/views/roam/RoamTripOverview.vue
   - src/router/index.js
   - scripts/test-atlas-story-discovery.mjs
   - scripts/test-atlas-journey-readiness.mjs
+  - scripts/test-atlas-marker-layout.mjs
   - scripts/test-atlas-story-reader.mjs
   - scripts/test-atlas-story-relationships.mjs
   - package.json
@@ -61,6 +64,8 @@ verification:
     - Local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels
     - Local Chrome Atlas invitation checks at 390 and 1280 CSS pixels
     - npm run atlas:test verifies that the root Journey explorer starts collapsed and returns to the collapsed state at World
+    - npm run atlas:test verifies that colliding World-level Journey roots remain individual while child stops retain ordinary clustering
+    - Local headless Chrome at 390 CSS pixels measured Utah 2025 at pixels 4 through 68 and Utah 2026 at 76 through 140, fully inside the viewport with an 8 pixel gap
 ---
 
 # Atlas integrated story reader
@@ -69,6 +74,17 @@ The accepted target is a story-first Journey experience that reads the
 substantive editorial body inside the mounted Atlas. Phase 2 provides that
 reader. Phase 3 now connects mapped stops to the canonical Journey chapters
 and published Experiences that explicitly reference their Visits.
+
+## World-level Journey marker collisions
+
+The World map keeps tightly colliding top-level Journey roots as separate
+interactive markers. A pure projected-screen layout rule detects root
+coordinates within 14 CSS pixels, excludes those roots from ordinary clustering
+and applies stable horizontal card spacing. Compact markers use 72 pixels and
+larger markers use 154 pixels. Near the viewport edge, the complete collision
+group shifts inward without changing its internal spacing. Coordinate dots stay
+at the canonical Place coordinates, and child stop markers continue using the
+existing cluster rules.
 
 ## Current implementation
 

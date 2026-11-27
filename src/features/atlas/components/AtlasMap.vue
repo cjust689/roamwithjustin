@@ -45,7 +45,10 @@ import {
 import {
   atlasMarkerClusterRadius,
   atlasMarkerCompactClusterRadius,
+  atlasRootMarkerCompactSpacing,
+  atlasRootMarkerSpacing,
   buildAtlasMarkerGroups,
+  buildAtlasRootMarkerOffsets,
 } from "../config/markerLayout.mjs"
 
 const journeySourceId = "atlas-journey-route"
@@ -488,19 +491,33 @@ export default {
       const clusterRadius = this.compactMarkerMedia?.matches
         ? atlasMarkerCompactClusterRadius
         : atlasMarkerClusterRadius
+      // World-level Journeys can intentionally share one broad geographic
+      // anchor, such as repeat Utah trips. Keep their coordinate dots exact,
+      // but spread the cards enough to make every Journey independently usable.
+      const rootMarkerOffsets = buildAtlasRootMarkerOffsets(markerNodes, {
+        project: coordinates => this.map.project(coordinates),
+        spacing: this.compactMarkerMedia?.matches
+          ? atlasRootMarkerCompactSpacing
+          : atlasRootMarkerSpacing,
+        viewportWidth: this.map.getContainer().clientWidth,
+      })
       const groups = buildAtlasMarkerGroups(markerNodes, {
         zoom: this.map.getZoom(),
         project: coordinates => this.map.project(coordinates),
         selectedId: this.selectedNode?.id || "",
+        unclusteredIds: Object.keys(rootMarkerOffsets),
         clusterRadius,
       })
 
       groups.forEach(group => {
         if (group.isCluster) this.addClusterMarker(group)
-        else this.addPlaceMarker(group.nodes[0])
+        else {
+          const node = group.nodes[0]
+          this.addPlaceMarker(node, rootMarkerOffsets[node.id])
+        }
       })
     },
-    addPlaceMarker(node) {
+    addPlaceMarker(node, cardOffset = null) {
       const element = document.createElement("button")
       const card = document.createElement("span")
       const avatar = document.createElement(node.image ? "img" : "span")
@@ -548,7 +565,7 @@ export default {
         selected,
       })
       element.dataset.nodeId = node.id
-      this.addCardMarker(element, node.coordinates)
+      this.addCardMarker(element, node.coordinates, cardOffset)
     },
     addClusterMarker(group) {
       const element = document.createElement("button")
@@ -621,11 +638,15 @@ export default {
 
       this.markers.push(marker)
     },
-    addCardMarker(element, coordinates) {
+    addCardMarker(element, coordinates, cardOffset = null) {
+      const offset = cardOffset || { x: 0, y: 0 }
       const marker = new mapTilerSdk.Marker({
         element,
         anchor: "bottom",
-        offset: [0, this.compactMarkerMedia?.matches ? -21 : -14],
+        offset: [
+          offset.x,
+          offset.y + (this.compactMarkerMedia?.matches ? -21 : -14),
+        ],
         rotationAlignment: "viewport",
         pitchAlignment: "viewport",
         subpixelPositioning: true,
