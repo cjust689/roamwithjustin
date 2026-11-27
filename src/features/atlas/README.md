@@ -4,7 +4,7 @@ title: Travel Atlas Feature
 kind: architecture
 status: implemented
 implementation_state: complete
-updated: 2026-11-26
+updated: 2026-11-27
 related:
   - content-model
   - atlas-integrated-story-reader
@@ -43,6 +43,8 @@ verification:
     - npm run atlas:test verified Uvita Horses and Uvita House as the single-Moment card titles while retaining parent Experience context
     - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
+    - npm run atlas:test verified separate collision layout for World-level Journey roots while preserving child clustering on 2026-11-27
+    - local headless Chrome at 390 CSS pixels kept Utah 2025 and Utah 2026 fully inside the viewport with an 8 pixel gap on 2026-11-27
     - local Chrome MapTiler SDK layout check on 2026-11-19 retained both map canvases, terrain controls, Journey markers, and zero horizontal overflow at desktop and 390 by 844 mobile widths
     - Pull requests 188 and 189 passed validation runs 44628906987 and 44629509687, merged through develop and main, and Pages run 44629848589 deployed the official SDK runtime
     - Live Chrome on 2026-11-19 observed 75 chargeable tile requests across Atlas, a Journey, and My Atlas with zero missing mtsid values and one shared session identifier
@@ -115,9 +117,14 @@ them back into document flow causes each card to inherit cumulative vertical
 drift from the markers before it.
 
 Below zoom `12.25`, nearby unselected stops are grouped by projected screen
-distance so fixed-size labels do not stack over one another. A cluster is a
-display-only map affordance: it does not create or alter a Place. Selecting a
-cluster fits its member coordinates and expands back to individual markers.
+distance so fixed-size labels do not stack over one another. Tightly colliding
+World-level Journey roots are the deliberate exception: roots within 14 CSS
+pixels remain individual, their cards spread horizontally by 72 compact pixels
+or 154 larger-layout pixels, and the group shifts inward at viewport edges.
+Their coordinate dots remain exact. Child stops retain ordinary clustering. A
+cluster is a display-only map affordance: it does not create or alter a Place.
+Selecting a cluster fits its member coordinates and expands back to individual
+markers.
 Selecting an individual leaf pin centers its canonical coordinate at a minimum
 zoom of `15.5`; destination/root selections retain their broader configured
 camera. The pure clustering and focus-camera rules live in

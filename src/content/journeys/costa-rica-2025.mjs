@@ -28,8 +28,16 @@ export const costaRica2025Journey = Object.freeze({
     end: null,
     label: "2025",
   },
-  hero: null,
-  fullImage: null,
+  hero: {
+    assetId: "image-costa-rica-2025-19b31d0c91c6-002",
+    role: "hero",
+    altText: "Waterfall Bajos del Toro",
+  },
+  fullImage: {
+    assetId: "image-costa-rica-2025-19b31d0c91c6-002",
+    role: "hero",
+    altText: "Waterfall Bajos del Toro",
+  },
   gallery: [],
   description:
     "A journey from the rainforests around La Fortuna and Bajos del Toro to the Osa Peninsula, Uvita, and the San José area.",

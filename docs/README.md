@@ -5,7 +5,7 @@ kind: reference
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-25
+updated: 2026-11-27
 related:
   - my-atlas-integrated-trip-management-2026-11-21
   - my-atlas-location-experience-commerce
@@ -69,6 +69,14 @@ verification:
 ---
 
 # Roam With Justin documentation
+
+Local Atlas marker follow-up: tightly colliding World-level Journey roots now
+remain individually selectable instead of collapsing into one marker. Their
+cards receive stable responsive spacing while their coordinate dots remain at
+the canonical location. Viewport-edge correction keeps repeat Journeys such as
+Utah 2025 and Utah 2026 fully visible on a 390 pixel map. Verification and the
+implemented boundary are recorded in the
+[integrated story reader checklist](implementation/atlas-integrated-story-reader.md#world-level-journey-marker-collisions).
 
 Atlas Journey discovery now exposes all ten registered trips. Incomplete
 Journeys carry a visitor-facing note that more places, stories, photographs,
