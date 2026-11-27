@@ -173,11 +173,84 @@
             </div>
           </section>
           <section
+            v-if="experienceStories.length"
+            class="atlas-experience-stories"
+            :aria-labelledby="`atlas-experience-stories-title-${node.id}`"
+          >
+            <header class="atlas-experience-stories-heading">
+              <span>At this place</span>
+              <h2 :id="`atlas-experience-stories-title-${node.id}`">
+                Stories from {{ node.title }}
+              </h2>
+            </header>
+            <article
+              v-for="experience in experienceStories"
+              :key="`inline-${experience.id}`"
+              class="atlas-experience-story"
+            >
+              <EditorialExperienceCard
+                :experience="experience.card"
+                :show-image="!experience.moments.length"
+              />
+              <article
+                v-for="moment in experience.moments"
+                :key="moment.id"
+                class="atlas-experience-moment"
+              >
+                <div class="atlas-experience-moment-copy">
+                  <span v-if="moment.travelDate">{{ moment.travelDate }}</span>
+                  <h3
+                    v-if="
+                      moment.title && moment.title !== experience.card.title
+                    "
+                  >
+                    {{ moment.title }}
+                  </h3>
+                  <p v-if="moment.notes">{{ moment.notes }}</p>
+                </div>
+                <div
+                  v-if="moment.media.length"
+                  class="atlas-experience-moment-media"
+                >
+                  <template v-for="media in moment.media">
+                    <video
+                      v-if="media.kind === 'video'"
+                      :key="media.id"
+                      controls
+                      playsinline
+                      preload="none"
+                      :poster="media.poster || null"
+                      :aria-label="media.alt"
+                      @loadedmetadata="updateScrollCue"
+                    >
+                      <source
+                        :src="media.src"
+                        :type="media.mimeType || 'video/mp4'"
+                      />
+                      Your browser does not support HTML video.
+                    </video>
+                    <img
+                      v-else
+                      :key="media.id"
+                      :src="media.src"
+                      :alt="media.alt"
+                      :width="media.width || null"
+                      :height="media.height || null"
+                      loading="lazy"
+                      decoding="async"
+                      @load="updateScrollCue"
+                    />
+                  </template>
+                </div>
+              </article>
+            </article>
+          </section>
+          <section
             v-if="experienceCards.length"
             class="atlas-experience-cards"
-            aria-label="Experiences from my travels"
+            aria-label="Continue in the full journey"
           >
-            <h2>Experiences from my travels</h2>
+            <h2>Continue in the full journey</h2>
             <EditorialExperienceCard
               v-for="experience in experienceCards"
               :key="experience.id"
@@ -560,6 +633,11 @@ export default {
         experience => experience.card
       )
     },
+    experienceStories() {
+      return (this.node.storyExperiences || []).filter(
+        experience => experience.card
+      )
+    },
     storySections() {
       return [
         ...(this.node.storyChapters || []).map(chapter => ({
@@ -843,6 +921,78 @@ export default {
 </script>
 
 <style scoped>
+.atlas-experience-stories {
+  display: grid;
+  gap: 24px;
+  margin: 24px 0;
+}
+.atlas-experience-stories-heading {
+  display: grid;
+  gap: 5px;
+}
+.atlas-experience-stories-heading > span,
+.atlas-experience-moment-copy > span {
+  color: var(--color-accent-soft, #e6ba68);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.atlas-experience-stories-heading > h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.08;
+}
+.atlas-experience-story {
+  display: grid;
+  gap: 18px;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(var(--color-surface-rgb, 17, 25, 29), 0.72);
+}
+.atlas-experience-story + .atlas-experience-story {
+  margin-top: 2px;
+}
+.atlas-experience-moment {
+  display: grid;
+  gap: 16px;
+}
+.atlas-experience-moment-copy {
+  display: grid;
+  gap: 9px;
+}
+.atlas-experience-moment-copy h3,
+.atlas-experience-moment-copy p {
+  margin: 0;
+}
+.atlas-experience-moment-copy h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+.atlas-experience-moment-copy p {
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.72));
+  font-size: max(1rem, 16px);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+.atlas-experience-moment-media {
+  display: grid;
+  gap: 10px;
+}
+.atlas-experience-moment-media > img,
+.atlas-experience-moment-media > video {
+  display: block;
+  width: 100%;
+  max-height: 420px;
+  border-radius: 14px;
+  background: var(--color-surface, #111b20);
+  object-fit: cover;
+}
 .atlas-experience-cards {
   display: grid;
   gap: 18px;
