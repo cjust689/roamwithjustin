@@ -875,6 +875,7 @@ async function main() {
   )
   tripViews.forEach(trip => {
     const owner = 'Trip view "' + trip.id + '"'
+    const journey = journeyModule.getJourney(trip.journeyId)
     validateTripPublicCopy(trip)
     if (!trip.cover && !trip.comingSoon) {
       report(owner + " has no resolved cover")
@@ -883,6 +884,12 @@ async function main() {
       report(owner + " has no public description")
     }
     if (!trip.id || !trip.name) report(owner + " has no public route identity")
+    if (journey && trip.name !== projections.journeyDisplayTitle(journey)) {
+      report(owner + " does not use its public Journey display title")
+    }
+    if (journey && trip.dates !== journey.dateRange?.label) {
+      report(owner + " does not project its separate Journey date label")
+    }
     if (!Array.isArray(trip.allPhotography)) {
       report(owner + " has no All Photography projection")
     }
@@ -1029,15 +1036,23 @@ async function main() {
     }
 
     const journey = journeyModule.getJourney(rootNode.journeyId)
-    if (journey && rootNode.title !== journey.title) {
+    if (
+      journey &&
+      rootNode.title !== projections.journeyDisplayTitle(journey)
+    ) {
       report(
         'Atlas root "' +
           rootId +
-          '" does not use its year-specific Journey title'
+          '" does not use its public Journey display title'
       )
     }
     if (journey && rootNode.eyebrow !== journey.dateRange?.label) {
       report('Atlas root "' + rootId + '" does not use its Journey date label')
+    }
+    if (journey && rootNode.dateLabel !== journey.dateRange?.label) {
+      report(
+        'Atlas root "' + rootId + '" does not expose its public date subheading'
+      )
     }
   })
 
@@ -1174,12 +1189,12 @@ async function main() {
   const expectedCostaRicaGuidedOrder = [
     "la-fortuna-costa-rica",
     "bajos-del-toro",
-    "drake-bay",
+    "san-jose-costa-rica",
     "uvita-costa-rica",
+    "drake-bay",
     "uvita-whale-tail",
     "nauyaca-waterfalls",
     "manuel-antonio-area",
-    "san-jose-costa-rica",
   ]
 
   const expectedUtah2026GuidedOrder = ["utah-2026-zion", "utah-2026-park-city"]

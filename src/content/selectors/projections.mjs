@@ -118,6 +118,14 @@ function hasJourneyStory(journey) {
   return Boolean(journey?.slug)
 }
 
+export function journeyDisplayTitle(journey) {
+  const title = String(journey?.title || "").trim()
+  const year = String(journey?.year || "").trim()
+  if (!title || !year) return title
+
+  return title.replace(new RegExp(`\\s*\\(${year}\\)\\s*$`), "").trim() || title
+}
+
 function journeyProgressNote(journey) {
   return journey?.publicationStatus === "published"
     ? ""
@@ -195,7 +203,7 @@ function atlasStoryLead(journey) {
   const hero = resolveMediaReference(journey.hero)
 
   return {
-    title: journey.title,
+    title: journeyDisplayTitle(journey),
     excerpt: journey.description || "",
     image: hero?.src || "",
     imageAlt: hero?.alt || `${journey.title} story photograph`,
@@ -340,7 +348,7 @@ export function buildTripViewModel(journey) {
   return {
     id: journey.slug,
     journeyId: journey.id,
-    name: journey.title,
+    name: journeyDisplayTitle(journey),
     comingSoon,
     publicationStatus: journey.publicationStatus,
     evidenceStatus: journey.evidenceStatus,
@@ -535,15 +543,18 @@ export function buildAtlasNodeView(presentation) {
     // anchor lets their route position come from the first real stop they group.
     journeyOrderPlaceId: presentation.journeyOrderPlaceId || null,
     // Top-level Atlas entries represent a particular Journey, not only the
-    // reusable geography beneath it. Journey titles and dates carry the year
-    // so repeat visits to the same Place remain visibly distinct. Child nodes
-    // keep Place identity and never inherit a Journey year as their label.
-    title: useJourneyIdentity ? journey.title : place.name,
+    // reusable geography beneath it. Their public title stays clean while the
+    // adjacent Journey date label distinguishes repeat visits to one Place.
+    // Child nodes keep Place identity and never inherit a Journey date label.
+    title: useJourneyIdentity ? journeyDisplayTitle(journey) : place.name,
     eyebrow: isJourneyRoot
       ? journey.dateRange?.label || String(journey.year)
       : isInternalPreviewLabel
         ? publicTaxonomyLabel(place.category || visit?.type) || "Journey place"
         : presentation.eyebrow,
+    dateLabel: isJourneyRoot
+      ? journey.dateRange?.label || String(journey.year)
+      : "",
     category: presentation.category,
     coordinates: place.coordinates ? [...place.coordinates] : null,
     camera: presentation.camera,
@@ -552,7 +563,7 @@ export function buildAtlasNodeView(presentation) {
     image: hero?.src || "",
     media,
     storyLead: isJourneyRoot ? atlasStoryLead(journey) : null,
-    storyTitle: hasJourneyStory(journey) ? journey.title : "",
+    storyTitle: hasJourneyStory(journey) ? journeyDisplayTitle(journey) : "",
     ...storyRelationships,
     childIds: [],
     relatedIds: [...(presentation.relatedIds || [])],

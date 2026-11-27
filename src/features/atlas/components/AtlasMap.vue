@@ -522,6 +522,7 @@ export default {
       const card = document.createElement("span")
       const avatar = document.createElement(node.image ? "img" : "span")
       const label = document.createElement("span")
+      const labelTitle = document.createElement("strong")
       const selected = this.selectedNode?.id === node.id
       const journeyIndex = this.journeyNodes.findIndex(
         journeyNode => journeyNode.id === node.id
@@ -537,7 +538,15 @@ export default {
       )
       card.className = "atlas-marker-card"
       label.className = "atlas-marker-label"
-      label.textContent = node.title
+      labelTitle.textContent = node.title
+      label.append(labelTitle)
+
+      if (node.dateLabel) {
+        const labelMeta = document.createElement("small")
+        labelMeta.className = "atlas-marker-meta"
+        labelMeta.textContent = node.dateLabel
+        label.append(labelMeta)
+      }
 
       if (node.image) {
         avatar.src = node.image
@@ -978,6 +987,20 @@ export default {
   font-size: 0.75rem;
   font-weight: 700;
   text-overflow: ellipsis;
+}
+
+.atlas-marker-label > strong,
+.atlas-marker-meta {
+  display: block;
+}
+
+.atlas-marker-meta {
+  margin-top: 0.1rem;
+  color: var(--color-accent-soft, #f6bd60);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 .atlas-marker-cluster .atlas-marker-card {
