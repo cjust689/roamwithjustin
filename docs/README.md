@@ -74,8 +74,12 @@ Atlas Journey discovery now exposes all ten registered trips. Incomplete
 Journeys carry a visitor-facing note that more places, stories, photographs,
 and films will be added, while published Experiences appear at their exact
 stops as soon as their Visit and Place IDs match. Local selector and copy
-coverage passes through `npm run atlas:test`; production deployment remains
-unverified.
+coverage passes through `npm run atlas:test`. Pull requests 287 and 288 plus
+Pages run 45898969341 deployed the all-Journey discovery change, and live Uvita
+verification found both exact Experience relationships. The follow-up
+single-Moment card presentation now leads with the recognizable Moment title
+while retaining the parent Experience title as context; that label refinement
+remains locally verified and not yet deployed.
 
 Homepage map feedback now makes the root Atlas map immediately usable: the
 Journey explorer card starts collapsed and returns to that compact state when

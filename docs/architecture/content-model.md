@@ -97,6 +97,8 @@ verification:
     - live Catalog refresh verified 223 references, 71 Visit choices, and 106 exact bindings with no Posts ID writes on 2026-11-16
     - Atlas Journey First look presentation verified in production on 2026-11-16
     - npm run atlas:test verified all ten Journey story leads, incomplete Journey update notes, and exact Experience stop projection
+    - Pull requests 287 and 288 plus Pages run 45898969341 deployed progressive Journey discovery; live Uvita rendered both exact Experience relationships
+    - npm run atlas:test verified Uvita Horses and Uvita House as single-Moment Atlas card titles with their parent Experience context
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
     - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
     - Local Chrome verified the revised mobile detail hierarchy at 320 and 390 CSS pixels on 2026-11-18
@@ -234,6 +236,11 @@ presentation selects the intended Visit when more than one Visit shares a
 Place, so it can retain one deliberate pin without merging the underlying
 story relationships. Structural hubs and chapters without a Visit reference
 have no stop-specific relationship.
+
+When a stop Experience contains exactly one published Moment with a distinct
+title, its Atlas card leads with that Moment title and retains the Experience
+title as context. Multi-Moment Experiences keep their Experience title. The
+shared Journey story still renders the canonical Experience and all Moments.
 
 `src/components/JourneyStoryBody.vue` renders the canonical Journey chapters,
 locations, published Experiences and Moments, and media for both

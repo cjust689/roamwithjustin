@@ -38,6 +38,9 @@ verification:
     - local Chrome accessibility tree checks for mobile modal, map peek region, and desktop region semantics on 2026-11-18
     - local Chrome mobile detail checks at 320 and 390 CSS pixels on 2026-11-18
     - local Chrome direct root Atlas and feature-gated My Atlas handoff checks at 320, 390, and 1280 CSS pixels on 2026-11-18
+    - pull requests 287 and 288 plus Pages run 45898969341 deployed all ten Journey story leads and exact incomplete-Journey Experience projection on 2026-11-26
+    - live Chrome rendered both Uvita Experience cards after the progressive Journey deployment on 2026-11-26
+    - npm run atlas:test verified Uvita Horses and Uvita House as the single-Moment card titles while retaining parent Experience context
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
     - local Chrome MapTiler SDK layout check on 2026-11-19 retained both map canvases, terrain controls, Journey markers, and zero horizontal overflow at desktop and 390 by 844 mobile widths
     - Pull requests 188 and 189 passed validation runs 44628906987 and 44629509687, merged through develop and main, and Pages run 44629848589 deployed the official SDK runtime
@@ -220,6 +223,12 @@ Visits at one Place stay distinct. Published Experiences join only when their
 `visitId` and `placeId` both match, regardless of the containing Journey's
 publication state. Structural hubs and Journey-only chapters with no Visit
 references do not receive a preview.
+
+A stop card for an Experience with one distinctly titled Moment leads with the
+Moment title and shows the parent Experience title as context. This keeps Sheet
+entry names recognizable at the stop without flattening the canonical
+Experience and Moment relationship. Multi-Moment cards retain the Experience
+title.
 
 `Explore the story` now adds `?story=1` to the selected Atlas route and mounts
 `AtlasStoryReader.vue` without replacing `AtlasView.vue` or `AtlasMap.vue`.

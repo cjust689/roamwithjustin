@@ -40,6 +40,8 @@ verification:
     - Pull requests 208 and 209 passed validation runs 44736412417 and 44737017269, merged through protected develop and main as 05eb2a0d8bf42b428f297dded08e61cbf9f11ffa and afd771c5e63d53a24f1a2e234c7ed111f9dbf67c, and develop validation run 44736727554 succeeded
     - Pages run 44737312245 deployed the production merge; the live Atlas rail rendered exactly three Explore actions for Utah 2025, Puerto Rico 2024, and St. John 2025, and chunk 852.ccfda71b.js contained the stories-to-explore marker
     - npm run atlas:test verifies that all ten registered Journey roots own story leads, incomplete Journeys carry the update note, and published Experiences project to exact stops before Journey completion
+    - Pull requests 287 and 288 merged the progressive Journey discovery through develop and main; Pages run 45898969341 succeeded and live Uvita rendered both exact Experience cards
+    - npm run atlas:test verifies that single-Moment stop cards lead with Uvita Horses and Uvita House while retaining their parent Experience labels
     - npm run atlas:test
     - npm run lint
     - npm run content:validate
@@ -105,6 +107,8 @@ through the `section` query value. Browser Back restores the stop and focus.
 Canonical previous and next stop actions use the already derived guided
 Journey order rather than a new sequence. Reader `Show on map` also handles
 the current stop without replacing the map or losing the saved reader offset.
+Single-Moment Experience cards lead with the recognizable Moment title and
+retain the Experience title as context.
 
 The bounded Phase 4 refinement leaves more desktop map visible, moves focus to
 an explicitly requested chapter heading, stops the short restoration window
@@ -235,6 +239,8 @@ remains the indexable representation.
 - [x] Add a natural update note to incomplete Journey details and stories.
 - [x] Project published Experiences to exact stops before full Journey
       completion.
+- [x] Lead single-Moment stop cards with the Moment title while preserving the
+      parent Experience label.
 - [x] Verify all ten Journey roots and the incomplete Journey stop relationship
       with `npm run atlas:test`.
 

@@ -13,6 +13,9 @@
       <span v-if="experience.category" class="experience-category">{{
         experience.category
       }}</span>
+      <span v-if="experience.contextLabel" class="experience-context">{{
+        experience.contextLabel
+      }}</span>
       <h3 tabindex="-1">{{ experience.title }}</h3>
       <p v-if="experience.summary">{{ experience.summary }}</p>
       <button v-if="readable" type="button" @click="$emit('read')">
@@ -85,9 +88,13 @@ export default {
   white-space: pre-line;
 }
 .editorial-experience-card small,
-.experience-category {
+.experience-category,
+.experience-context {
   font-size: 0.72rem;
   line-height: 1.5;
+}
+.experience-context {
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
 }
 .editorial-experience-card a {
   color: var(--color-accent-soft, #e6ba68);

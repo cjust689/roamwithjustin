@@ -52,6 +52,27 @@ assert.ok(
   "A published Experience should appear at its exact stop before the full Journey is complete"
 )
 
+const uvitaCards = new Map(
+  nodeById
+    .get("uvita-costa-rica")
+    .storyExperiences.map(experience => [experience.id, experience.card])
+)
+assert.deepEqual(
+  {
+    title: uvitaCards.get("experience-rancho-la-merced")?.title,
+    contextLabel: uvitaCards.get("experience-rancho-la-merced")?.contextLabel,
+  },
+  { title: "Uvita Horses", contextLabel: "Rancho La Merced" }
+)
+assert.deepEqual(
+  {
+    title: uvitaCards.get("experience-uvita-the-lost-lemon")?.title,
+    contextLabel: uvitaCards.get("experience-uvita-the-lost-lemon")
+      ?.contextLabel,
+  },
+  { title: "Uvita House", contextLabel: "Uvita The Lost Lemon" }
+)
+
 for (const id of ["utah", "moab", "europe"]) {
   assert.deepEqual(
     nodeById.get(id).storyChapters,
