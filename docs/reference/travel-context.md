@@ -4,7 +4,7 @@ title: Travel History and Content Context
 kind: reference
 status: approved
 implementation_state: unknown
-updated: 2026-11-19
+updated: 2026-11-27
 related:
   - content-model
   - storytelling-framework
@@ -477,8 +477,11 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ### 7.2 Drake Bay / Osa Peninsula
 
-- **IDs:** `drake-bay`, `playa-san-josecito`.
-- **Status:** `CONFIRMED` route and **Playa San Josecito** firsthand photography/context.
+- **Journey ID:** `drake-bay`.
+- **Status:** `CONFIRMED` route. Playa San Josecito firsthand photography and
+  context remain part of the source history, but the owner removed that Place
+  from the public Costa Rica 2025 Journey on November 27, 2026. Do not project
+  it as a Journey Visit or Atlas stop without a later owner reassignment.
 - **Scenes:** Jungle meeting the ocean; beach with lush tree line and dramatic tropical setting; snorkeling/calmer-water context.
 - **Story:** The feeling of reaching a more remote Pacific coastline; beach approached by boat or hiking was discussed as visitor context, but verify which method Justin personally used.
 - **Nearby Caño Island:** Discussed as a potential snorkeling/diving opportunity; **not confirmed visited** in the available data.
