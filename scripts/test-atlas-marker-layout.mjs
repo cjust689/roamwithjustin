@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import {
   buildAtlasMarkerGroups,
+  buildAtlasRootMarkerOffsets,
   getAtlasPinFocusCamera,
 } from "../src/features/atlas/config/markerLayout.mjs"
 
@@ -62,6 +63,65 @@ assert.equal(
     .isCluster,
   false
 )
+
+const repeatedJourneyRoots = [
+  { id: "utah-2025", parentId: null, coordinates: [-111.0937, 39.321] },
+  { id: "utah-2026", parentId: null, coordinates: [-111.0937, 39.321] },
+  { id: "puerto-rico", parentId: null, coordinates: [-66.5901, 18.2208] },
+]
+const rootProject = ([longitude, latitude]) => ({
+  x: longitude * 4,
+  y: latitude * 4,
+})
+const rootOffsets = buildAtlasRootMarkerOffsets(repeatedJourneyRoots, {
+  project: rootProject,
+  spacing: 160,
+})
+assert.deepEqual(rootOffsets, {
+  "utah-2025": { x: -80, y: 0 },
+  "utah-2026": { x: 80, y: 0 },
+})
+
+const edgeSafeRootOffsets = buildAtlasRootMarkerOffsets(
+  repeatedJourneyRoots.slice(0, 2),
+  {
+    project: () => ({ x: 20, y: 120 }),
+    spacing: 72,
+    viewportWidth: 390,
+  }
+)
+assert.deepEqual(edgeSafeRootOffsets, {
+  "utah-2025": { x: 16, y: 0 },
+  "utah-2026": { x: 88, y: 0 },
+})
+
+const separatedJourneyRoots = buildAtlasMarkerGroups(repeatedJourneyRoots, {
+  zoom: 1.3,
+  project: rootProject,
+  clusterRadius: 112,
+  unclusteredIds: Object.keys(rootOffsets),
+})
+assert.equal(
+  separatedJourneyRoots.filter(group =>
+    group.nodes.some(node => node.id.startsWith("utah-"))
+  ).length,
+  2
+)
+assert.equal(
+  separatedJourneyRoots
+    .filter(group => group.nodes.some(node => node.id.startsWith("utah-")))
+    .every(group => !group.isCluster),
+  true
+)
+
+const childOffsets = buildAtlasRootMarkerOffsets(
+  [
+    { id: "zion-1", parentId: "utah", coordinates: [-113, 37.3] },
+    { id: "zion-2", parentId: "utah", coordinates: [-113, 37.3] },
+  ],
+  { project: rootProject }
+)
+assert.deepEqual(childOffsets, {})
 
 assert.deepEqual(getAtlasPinFocusCamera(nodes[0]), {
   center: [0, 0],
