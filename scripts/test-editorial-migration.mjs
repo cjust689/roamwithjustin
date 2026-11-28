@@ -56,7 +56,7 @@ const plan = buildPostsMigration({
 assert.deepEqual(plan.summary, {
   eligibleRows: 2,
   ignoredRows: 1,
-  visibleHeadersAdded: 9,
+  visibleHeadersAdded: 11,
   automationHeadersAdded: 16,
   postIdsAssigned: 2,
   atlasModesDefaultedOff: 2,
@@ -64,7 +64,7 @@ assert.deepEqual(plan.summary, {
   atlasPlacesBackfilled: 0,
   requestCount: plan.requests.length,
 })
-assert.equal(plan.finalHeaders.length, 33)
+assert.equal(plan.finalHeaders.length, 35)
 assert.deepEqual(plan.finalHeaders, [
   ...EXISTING_POST_HEADERS,
   ...ATLAS_POST_HEADERS,
@@ -72,7 +72,7 @@ assert.deepEqual(plan.finalHeaders, [
 ])
 assert.deepEqual(
   plan.requests.find(request => request.appendDimension)?.appendDimension,
-  { sheetId: 87724606, dimension: "COLUMNS", length: 7 }
+  { sheetId: 87724606, dimension: "COLUMNS", length: 9 }
 )
 assert.equal(
   plan.requests.filter(request => request.addProtectedRange).length,
@@ -84,7 +84,7 @@ assert.equal(
 )
 assert.equal(
   plan.requests.filter(request => request.setDataValidation).length,
-  2
+  3
 )
 assert.deepEqual(originalFieldSnapshot(rows)[0], rows[0])
 
@@ -118,13 +118,35 @@ const migratedRows = rows.map((row, index) => ({
 }))
 const noOp = buildPostsMigration({
   sheetId: 87724606,
-  gridColumnCount: 33,
+  gridColumnCount: 35,
   gridRowCount: 1000,
   headers: migratedHeaders,
   rows: migratedRows,
 })
 assert.equal(noOp.requests.length, 0)
 assert.equal(noOp.summary.postIdsAssigned, 0)
+
+const preCoordinateHeaders = [
+  ...EXISTING_POST_HEADERS,
+  ...ATLAS_POST_HEADERS.filter(header => header !== "Atlas Coordinates"),
+  ...AUTOMATION_POST_HEADERS,
+]
+const coordinateUpgrade = buildPostsMigration({
+  sheetId: 87724606,
+  gridColumnCount: 33,
+  gridRowCount: 1000,
+  headers: preCoordinateHeaders,
+  rows: migratedRows,
+})
+assert.deepEqual(coordinateUpgrade.finalHeaders, [
+  ...EXISTING_POST_HEADERS,
+  ...ATLAS_POST_HEADERS.filter(header => header !== "Atlas Coordinates"),
+  "Atlas Coordinates",
+  ...AUTOMATION_POST_HEADERS,
+])
+assert.equal(coordinateUpgrade.summary.visibleHeadersAdded, 1)
+assert.equal(coordinateUpgrade.summary.automationHeadersAdded, 0)
+assert.equal(coordinateUpgrade.summary.postIdsAssigned, 0)
 
 assert.throws(
   () =>
@@ -142,7 +164,13 @@ assert.throws(
 )
 
 const previousAtlasHeaders = ATLAS_POST_HEADERS.filter(
-  header => !["Publish To", "Atlas Place"].includes(header)
+  header =>
+    ![
+      "Publish To",
+      "Atlas Place",
+      "Atlas Coordinates",
+      "Atlas Stop",
+    ].includes(header)
 )
 const upgradedHeaders = [
   ...EXISTING_POST_HEADERS,
@@ -170,6 +198,8 @@ assert.deepEqual(upgraded.finalHeaders, [
   ...previousAtlasHeaders,
   "Publish To",
   "Atlas Place",
+  "Atlas Coordinates",
+  "Atlas Stop",
   ...AUTOMATION_POST_HEADERS,
 ])
 assert.equal(
@@ -224,9 +254,11 @@ assert.deepEqual(liveUpgrade.finalHeaders, [
   "Publish To",
   ...previousAtlasHeaders,
   "Atlas Place",
+  "Atlas Coordinates",
+  "Atlas Stop",
   ...AUTOMATION_POST_HEADERS,
 ])
-assert.equal(liveUpgrade.summary.visibleHeadersAdded, 1)
+assert.equal(liveUpgrade.summary.visibleHeadersAdded, 3)
 assert.equal(
   liveUpgrade.requests.filter(request => request.insertDimension).length,
   1
@@ -236,7 +268,7 @@ assert.equal(
   0
 )
 const tableUpdate = liveUpgrade.requests.find(request => request.updateTable)
-assert.equal(tableUpdate.updateTable.table.range.endColumnIndex, 33)
+assert.equal(tableUpdate.updateTable.table.range.endColumnIndex, 35)
 assert.deepEqual(
   tableUpdate.updateTable.table.columnProperties
     .find(property => property.columnName === "Publish To")

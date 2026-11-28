@@ -8,7 +8,7 @@ import { journeyRecords } from "../src/content/journeys/index.mjs"
 import { placeRecords } from "../src/content/places/index.mjs"
 import {
   buildCanonicalCatalog,
-  postSourceHash,
+  placeRegistrationSourceHash,
 } from "./lib/editorial-baseline.mjs"
 import {
   createGitHubClient,
@@ -54,15 +54,16 @@ function usage() {
   npm run editorial:register:place -- --apply --oauth-client <path> --spreadsheet-id <id> --posts-gid <gid> --post-id <id> [Place options]
 
 The selected row must use the Atlas Place choice "New Place", put the requested
-name in Location, use Publish To Atlas or Both, and keep Atlas Mode Off. Preview
-is read-only. Apply explicitly registers the
+name in Location, set Atlas Stop to Yes, use Publish To Atlas or Both, and keep
+Atlas Mode Off. Preview is read-only. Apply explicitly registers the
 Place when needed, adds its Visit and Atlas pin, promotes the generated shard
 through protected GitHub branches, refreshes the Sheet catalog, and replaces
 the request with the registered Atlas Place.
 
 New Place options:
   --parent-place <Place ID or label | none>  Required for a new Place
-  --longitude <number> --latitude <number>  Required Atlas coordinates
+  Atlas Coordinates Sheet cell               latitude, longitude
+  --longitude <number> --latitude <number>  Optional Sheet coordinate override
   --summary <public Place summary>           Required public copy
   --place-id <id>                            Optional stable ID override
   --category <value>                         Defaults to destination
@@ -287,7 +288,7 @@ async function main() {
     account: options.account,
     postId: options.postId,
   })
-  if (postSourceHash(confirmation.row) !== plan.sourceHash) {
+  if (placeRegistrationSourceHash(confirmation.row) !== plan.sourceHash) {
     throw new Error("The Sheet row changed after Place registration planning")
   }
 
@@ -362,6 +363,7 @@ async function main() {
     journeyId: plan.registration.journeyId,
     placeId: plan.registration.placeId,
     visitId: plan.registration.visitId,
+    coordinates: plan.place.coordinates,
   })
   await applyPublicationWriteback({
     auth,

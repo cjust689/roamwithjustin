@@ -99,9 +99,10 @@ verification:
     - npm run atlas:test verified all ten Journey story leads, incomplete Journey update notes, and exact Experience stop projection
     - Pull requests 287 and 288 plus Pages run 45898969341 deployed progressive Journey discovery; live Uvita rendered both exact Experience relationships
     - npm run atlas:test verified Uvita Horses and Uvita House as single-Moment Atlas card titles with their parent Experience context
-    - npm run atlas:test verified the corrected Costa Rica top-level order and the Uvita Whale Tail child relationship while retaining the existing seven-media Moment
-    - npm run content:validate verified San José third, Drake Bay fourth, Uvita fifth, and matching Place and Atlas parentage for Uvita Whale Tail
-    - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
+    - npm run atlas:test verified the corrected Costa Rica top-level order, all three Uvita child Place pins, the direct unpinned house Experience, and retained horse and Whale Tail media
+    - npm run content:validate verified San José third, Drake Bay fourth, Uvita fifth, and matching Place and Atlas parentage for the Uvita child Places
+    - live guarded Sheet migrations added Atlas Coordinates and Atlas Stop as two independent visible headers while preserving all creator fields and 108 eligible Post IDs and bindings on 2026-11-27
+    - local Chrome at 1440 by 1200 CSS pixels rendered three child Place entries plus the direct house Experience inside Uvita, then rendered Uvita Horses and its existing video inside Rancho La Merced
     - npm run atlas:test verified Journey-hero fallback for Atlas roots, explicit Atlas override precedence, and child Place isolation
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
     - Local Chrome accessibility tree verified conditional mobile dialog and nonmodal region semantics on 2026-11-18
@@ -169,6 +170,15 @@ use `Journey.slug`, while `legacySlugs` keep older unyeared links resolvable.
 Internal relationships use canonical IDs. A Place may appear in more than one
 Journey through distinct Visits.
 
+Place and Experience answer different questions. A Place is a physical
+destination and can be nested under another Place to any depth. A Journey
+Visit records that the Place was visited. An Experience is a story owned by a
+Journey and, when geographically specific, by one Place and Visit at any depth.
+Only a Place with an Atlas presentation becomes a map pin. A destination
+inspector can list both child Place pins and direct Experiences, but it does
+not turn an Experience into synthetic geography. This supports country, city,
+district, venue, and attraction nesting without imposing a fixed stop depth.
+
 Incomplete but confirmed trips use bounded internal publication scaffolds. Europe,
 Costa Rica, Utah 2026, Miami, North Georgia, Peoria, and the retained Hungary
 preview have canonical Journey/Place identity and public Atlas presentation.
@@ -179,10 +189,13 @@ visited Place. Playa San Josecito remains a canonical Place with retained
 source context, but the owner removed it from the Costa Rica 2025 Journey, so
 it has no Visit, Atlas stop, related route edge, or guided stop in that Journey.
 Costa Rica orders San José by its first distinct stay, after Bajos del Toro.
-Drake Bay is the fourth top-level stop and Uvita is the fifth. Uvita Whale Tail
-keeps its independent Visit and exact Experience binding but uses Uvita as its
-Place and Atlas presentation parent. This makes Uvita a nested exploration hub
-without rewriting the Whale Tail Moment or any of its seven media references.
+Drake Bay is the fourth top-level stop and Uvita is the fifth. Uvita Whale
+Tail, Rancho La Merced, and Nauyaca Waterfalls have independent Visits and use
+Uvita as their Place and Atlas presentation parent. The horse Experience and
+its existing video are associated with Rancho La Merced. The house Experience
+remains directly associated with Uvita and therefore has no separate pin. This
+makes Uvita a nested exploration hub without changing existing Moment IDs,
+media asset IDs, or R2 object keys.
 The later return uses the same broad San José geography and closes the related
 route from Manuel Antonio without creating an overlapping map pin. The Casa
 Jungla Experience, Moment, and media remain attached to the unchanged San José
@@ -395,6 +408,28 @@ Catalog sync refreshes the hidden and visible projections plus those table
 choices. Apply-mode publication performs that refresh before selecting a row
 and again after a successful content change.
 
+`Atlas Place` selects the physical destination that owns a row. `Atlas
+Experience` selects or creates the story within that destination. A selected
+Place may be a Journey root or a descendant at any depth. A new physical pin
+must first be registered with its intended parent Place. A row that should not
+expose a precise pin stays bound to the appropriate broader Place. Changing a
+row's Place does not silently move an existing Experience or its media. That
+reassociation is an explicit reviewed migration, after which later rows must
+select the Experience's new Place.
+
+`Atlas Coordinates` is the explicit new-Place pin input. It uses `latitude,
+longitude`, the order shown by Google Maps. Place registration converts that
+cell to the canonical `[longitude, latitude]` storage contract and writes a
+normalized value back to the row. Existing Places ignore row coordinates and
+retain their canonical position, preventing one post from moving a shared pin.
+
+`Atlas Stop` explicitly classifies whether a row represents a physical Place
+that should become a map pin. `Yes` is required for explicit Place
+registration. `No` means the row remains an Experience or Moment inside its
+selected Place and does not create geography. This classification does not
+move an existing Place or hide its shared pin. Parent Place identity determines
+nesting, and canonical coordinates determine marker position.
+
 After creator review, a separate guarded writer applied 33 exact `place_id`
 bindings for Amsterdam, Costa Rica, and Utah. It keys by stable Post ID and
 reviewed source hash rather than row position. The remaining broad or aliased
@@ -440,16 +475,18 @@ rather than inventing one. The publisher does not infer missing geography.
 
 `editorial:register:place` is the separate explicit geography boundary. The
 selected row must contain `Atlas Place = New Place`, put the requested name in
-`Location`, and keep `Atlas Mode = Off`. Preview resolves the Journey and produces the proposed canonical IDs,
-order, coordinates, public summary, Visit, and Atlas pin without writes. Apply
+`Location`, set `Atlas Stop = Yes`, and keep `Atlas Mode = Off`. Preview
+resolves the Journey and produces the proposed canonical IDs, order,
+coordinates, public summary, Visit, and Atlas pin without writes. Apply
 updates only `src/content/geography/generated/records.json`, validates and
 builds it, promotes it through the protected develop and main branches,
 verifies the rendered Atlas URL, refreshes both Sheet lookup tabs, and replaces
 the request with the registered Place plus hidden Journey, Place, and Visit
 IDs. A matching existing Place is reused when only its Visit is missing. A new
-Place requires explicit parent, longitude, latitude, and public summary. Visit
-order is explicit through `--after-place` or defaults to the Journey end; a
-display date never silently determines route order.
+Place requires an explicit parent, verified `Atlas Coordinates`, and public
+summary. The command line longitude and latitude pair is an explicit recovery
+override. Visit order is explicit through `--after-place` or defaults to the
+Journey end; a display date never silently determines route order.
 
 ## Current limitations
 

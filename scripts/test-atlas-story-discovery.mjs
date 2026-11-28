@@ -95,9 +95,34 @@ assert.deepEqual(
     "san-jose-costa-rica",
     "drake-bay",
     "uvita-costa-rica",
-    "nauyaca-waterfalls",
     "manuel-antonio-area",
   ]
+)
+const uvitaNode = nodes.find(node => node.id === "uvita-costa-rica")
+assert.deepEqual(
+  orderAtlasNodesByJourney(
+    nodes.filter(node => node.parentId === "uvita-costa-rica")
+  ).map(node => node.id),
+  ["uvita-whale-tail", "rancho-la-merced", "nauyaca-waterfalls"]
+)
+assert.deepEqual(
+  uvitaNode.storyExperiences.map(experience => experience.card.title),
+  ["Uvita House"]
+)
+const ranchoNode = nodes.find(node => node.id === "rancho-la-merced")
+assert.equal(ranchoNode.parentId, "uvita-costa-rica")
+assert.deepEqual(
+  ranchoNode.storyExperiences.map(experience => experience.card.title),
+  ["Uvita Horses"]
+)
+assert.equal(ranchoNode.storyExperiences[0]?.moments[0]?.media.length, 1)
+assert.equal(
+  ranchoNode.storyExperiences[0]?.moments[0]?.media[0]?.id,
+  "video-costa-rica-2025-2568e61dfd18-001"
+)
+assert.equal(
+  ranchoNode.storyExperiences[0]?.moments[0]?.media[0]?.kind,
+  "video"
 )
 const whaleTailNode = nodes.find(node => node.id === "uvita-whale-tail")
 assert.equal(whaleTailNode.parentId, "uvita-costa-rica")
@@ -121,6 +146,10 @@ assert.doesNotMatch(
   /\.atlas-story-lead-media\s*\{\s*display:\s*none;/
 )
 assert.match(detailPanel, /class="atlas-story-progress-note"/)
+assert.match(detailPanel, /Inside \{\{ node\.title \}\}/)
+assert.match(detailPanel, /destinationIndexItems/)
+assert.match(detailPanel, /openDestinationItem\(item\)/)
+assert.match(detailPanel, /item\.kindLabel/)
 assert.match(
   atlasView,
   /<small v-if="node\.dateLabel">\{\{ node\.dateLabel \}\}<\/small>/

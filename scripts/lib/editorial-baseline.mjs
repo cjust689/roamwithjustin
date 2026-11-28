@@ -21,7 +21,15 @@ export const ATLAS_POST_HEADERS = Object.freeze([
   "Atlas Mode",
   "Publish To",
   "Atlas Place",
+  "Atlas Coordinates",
+  "Atlas Stop",
 ])
+
+const PUBLICATION_ATLAS_POST_HEADERS = Object.freeze(
+  ATLAS_POST_HEADERS.filter(
+    header => !["Atlas Coordinates", "Atlas Stop"].includes(header)
+  )
+)
 
 export const NEW_PLACE_REQUEST_LABEL = "New Place"
 
@@ -63,7 +71,7 @@ function stableHash(value) {
 
 export function postSourceHash(row) {
   const sourceFields = Object.fromEntries(
-    [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
+    [...EXISTING_POST_HEADERS, ...PUBLICATION_ATLAS_POST_HEADERS]
       .sort()
       .map(header => [header, row?.[header] || ""])
   )
@@ -72,8 +80,17 @@ export function postSourceHash(row) {
 
 export function storySourceHash(row) {
   const sourceFields = Object.fromEntries(
-    [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
+    [...EXISTING_POST_HEADERS, ...PUBLICATION_ATLAS_POST_HEADERS]
       .filter(header => header !== "Atlas Story")
+      .sort()
+      .map(header => [header, row?.[header] || ""])
+  )
+  return stableHash(sourceFields)
+}
+
+export function placeRegistrationSourceHash(row) {
+  const sourceFields = Object.fromEntries(
+    [...EXISTING_POST_HEADERS, ...ATLAS_POST_HEADERS]
       .sort()
       .map(header => [header, row?.[header] || ""])
   )

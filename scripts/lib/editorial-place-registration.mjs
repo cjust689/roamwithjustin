@@ -2,7 +2,7 @@ import crypto from "node:crypto"
 import { isCoordinatePair } from "../../src/content/contracts.mjs"
 import {
   NEW_PLACE_REQUEST_LABEL,
-  postSourceHash,
+  placeRegistrationSourceHash,
   resolveCatalogValue,
 } from "./editorial-baseline.mjs"
 
@@ -53,6 +53,34 @@ function finiteNumber(value, label, fallback = null) {
   const result = Number(value)
   if (!Number.isFinite(result)) throw new Error(`${label} must be a number`)
   return result
+}
+
+function requestedCoordinates(row, options) {
+  const longitudeInput = String(options.longitude ?? "").trim()
+  const latitudeInput = String(options.latitude ?? "").trim()
+  if (longitudeInput || latitudeInput) {
+    if (!longitudeInput || !latitudeInput) {
+      throw new Error("--longitude and --latitude must be provided together")
+    }
+    return [
+      finiteNumber(longitudeInput, "--longitude"),
+      finiteNumber(latitudeInput, "--latitude"),
+    ]
+  }
+
+  const input = String(row["Atlas Coordinates"] || "").trim()
+  const match = input.match(
+    /^([+-]?(?:\d+(?:\.\d+)?|\.\d+))\s*,\s*([+-]?(?:\d+(?:\.\d+)?|\.\d+))$/
+  )
+  if (!match) {
+    throw new Error(
+      'Atlas Coordinates must use "latitude, longitude" for a new Place'
+    )
+  }
+  return [
+    finiteNumber(match[2], "Atlas Coordinates longitude"),
+    finiteNumber(match[1], "Atlas Coordinates latitude"),
+  ]
 }
 
 function cloneRecords(records) {
@@ -231,6 +259,9 @@ export function selectPlaceRegistrationRow({ rows, account = "Roam", postId }) {
   if (String(selected.row["Atlas Mode"] || "").trim() !== "Off") {
     throw new Error("Atlas Mode must remain Off while registering a Place")
   }
+  if (normalize(selected.row["Atlas Stop"]) !== "yes") {
+    throw new Error("Place registration requires Atlas Stop Yes")
+  }
   return selected
 }
 
@@ -262,7 +293,7 @@ export function planPlaceRegistration({
     const atlasNode = atlasNodes.find(
       item => item.id === existingRegistration.atlasNodeId
     )
-    const sourceHash = postSourceHash(row)
+    const sourceHash = placeRegistrationSourceHash(row)
     if (
       !place ||
       !visit ||
@@ -313,10 +344,7 @@ export function planPlaceRegistration({
 
   if (!place) {
     const parentPlace = resolveParentPlace(options.parentPlace, catalog, places)
-    const coordinates = [
-      finiteNumber(options.longitude, "--longitude"),
-      finiteNumber(options.latitude, "--latitude"),
-    ]
+    const coordinates = requestedCoordinates(row, options)
     if (!isCoordinatePair(coordinates)) {
       throw new Error(
         "Requested Place coordinates are outside valid longitude or latitude bounds"
@@ -372,6 +400,17 @@ export function planPlaceRegistration({
       `${journey.title} must have exactly one Atlas root before registering a Place`
     )
   }
+  const atlasParentNode = place.parentPlaceId
+    ? atlasNodes.find(
+        node =>
+          node.journeyId === journey.id && node.placeId === place.parentPlaceId
+      )
+    : rootNodes[0]
+  if (!atlasParentNode) {
+    throw new Error(
+      `Parent Place ${place.parentPlaceId} must have an Atlas node in ${journey.title}`
+    )
+  }
   const visitId = `${journey.id}-${place.id}`
   if (
     journey.visits.some(visit => visit.id === visitId) ||
@@ -416,7 +455,7 @@ export function planPlaceRegistration({
     placeId: place.id,
     journeyId: journey.id,
     visitId,
-    parentId: rootNodes[0].id,
+    parentId: atlasParentNode.id,
     eyebrow: "Journey place",
     category: categoryLabel(category),
     camera: {
@@ -427,7 +466,7 @@ export function planPlaceRegistration({
     },
     relatedIds: [],
   }
-  const sourceHash = postSourceHash(row)
+  const sourceHash = placeRegistrationSourceHash(row)
   const registrationId = `geography-${slugify(postId)}-${crypto
     .createHash("sha256")
     .update(`${sourceHash}\n${journey.id}\n${place.id}`)

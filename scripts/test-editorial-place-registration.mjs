@@ -85,8 +85,16 @@ const rootNode = {
   camera: { center: [-80, 20], zoom: 6, pitch: 40, bearing: 0 },
   relatedIds: [],
 }
+const firstNode = {
+  id: firstPlace.id,
+  placeId: firstPlace.id,
+  journeyId: journey.id,
+  parentId: rootNode.id,
+  camera: { center: firstPlace.coordinates, zoom: 10, pitch: 45, bearing: 0 },
+  relatedIds: [],
+}
 const places = [rootPlace, firstPlace, existingPlace]
-const atlasNodes = [rootNode]
+const atlasNodes = [rootNode, firstNode]
 const catalog = buildCanonicalCatalog({
   journeys: [journey],
   places,
@@ -101,6 +109,8 @@ const row = {
   "Publish To": "Both",
   "Atlas Journey": journey.title,
   "Atlas Place": "New Place",
+  "Atlas Coordinates": "20.2, -80.2",
+  "Atlas Stop": "Yes",
   "Atlas Experience": "",
   "Atlas Mode": "Off",
   "Atlas Notes": "",
@@ -119,6 +129,14 @@ assert.throws(
     }),
   /must remain Off/
 )
+assert.throws(
+  () =>
+    selectPlaceRegistrationRow({
+      rows: [{ ...row, "Atlas Stop": "No" }],
+      postId: row.post_id,
+    }),
+  /Atlas Stop Yes/
+)
 
 const plan = planPlaceRegistration({
   current: empty,
@@ -128,9 +146,7 @@ const plan = planPlaceRegistration({
   places,
   atlasNodes,
   options: {
-    parentPlace: rootPlace.id,
-    longitude: "-80.2",
-    latitude: "20.2",
+    parentPlace: firstPlace.id,
     summary: "A small coastal stop on the Test Country journey.",
     category: "coastal place",
     coordinatePrecision: "village",
@@ -141,9 +157,11 @@ assert.equal(plan.createdPlace, true)
 assert.equal(plan.createdAtlasNode, true)
 assert.equal(plan.resumed, false)
 assert.equal(plan.place.id, "test-cove")
+assert.deepEqual(plan.place.coordinates, [-80.2, 20.2])
 assert.equal(plan.visit.insertAfterPlaceId, firstPlace.id)
 assert.equal(plan.visit.id, "test-country-2026-test-cove")
-assert.equal(plan.atlasNode.parentId, rootNode.id)
+assert.equal(plan.place.parentPlaceId, firstPlace.id)
+assert.equal(plan.atlasNode.parentId, firstNode.id)
 assert.equal(plan.records.places.length, 1)
 assert.equal(plan.records.visits.length, 1)
 assert.equal(plan.records.atlasNodes.length, 1)
@@ -242,6 +260,22 @@ assert.throws(
       },
     }),
   /dash punctuation/
+)
+assert.throws(
+  () =>
+    planPlaceRegistration({
+      current: empty,
+      row: { ...row, "Atlas Coordinates": "not a coordinate" },
+      catalog,
+      journeys: [journey],
+      places,
+      atlasNodes,
+      options: {
+        parentPlace: firstPlace.id,
+        summary: "A valid public summary.",
+      },
+    }),
+  /latitude, longitude/
 )
 
 console.log("Editorial Place registration tests passed.")

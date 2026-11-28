@@ -79,14 +79,28 @@ behavior through `develop` and `main`.
 The owner also removed Playa San Josecito from the public Costa Rica 2025
 Journey. Its standalone Place and source history remain registered, but it is
 no longer a Journey Visit, Atlas stop, related route edge, or guided stop.
-The owner has now corrected the top-level chronology to La Fortuna, Bajos del
-Toro, the San José Airbnb, Drake Bay, and Uvita. San José is the third stop,
-Drake Bay is fourth, and Uvita is fifth. Uvita Whale Tail is nested beneath
-Uvita in both Place and Atlas presentation hierarchy, following the same hub
-pattern used by Moab. Its existing Visit, Experience, Moment, and seven media
-references remain unchanged. The later return to San José remains route
-context rather than a duplicate map pin. This latest hierarchy correction is
-locally verified and not yet deployed.
+The owner corrected the top-level chronology to La Fortuna, Bajos del Toro,
+the San José Airbnb, Drake Bay, and Uvita. San José is the third stop, Drake
+Bay is fourth, and Uvita is fifth. Pull requests 301 and 302 deployed that
+chronology and the first Uvita child relationship. The current local follow-up
+makes Uvita a reusable destination hub with three child Place pins: Uvita
+Whale Tail, Rancho La Merced, and Nauyaca Waterfalls. The existing horse
+Experience and video now belong to the Rancho La Merced Visit. The private
+house story remains a direct Uvita Experience without a dedicated pin. The
+Uvita detail index combines those child Places with direct Experiences while
+preserving the distinction between a physical pin and a story. Existing media
+asset IDs, Moment IDs, and R2 object keys remain unchanged. The later return
+to San José remains route context rather than a duplicate map pin. This
+recursive destination follow-up is locally verified and not yet deployed.
+The live Posts Sheet now includes visible `Atlas Coordinates` and `Atlas Stop`
+fields. `Atlas Stop` is a `Yes` or `No` classification. `Yes` is required when
+a row explicitly registers a Place pin. `No` keeps the row as story content
+inside its selected Place without creating another pin. New Place registration
+reads `latitude, longitude` from `Atlas Coordinates`, stores the canonical
+Place coordinate, and writes the normalized value back after the guarded
+registration. The two verified schema migrations each added one header,
+changed no existing creator fields, and retained all 108 eligible Post IDs and
+bindings.
 The Costa Rica root also keeps that same canonical Journey hero on its
 `Explore the story` card at mobile widths instead of hiding the card image.
 Visitor-facing Journey titles no longer repeat their year in parentheses.

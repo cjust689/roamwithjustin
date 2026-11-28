@@ -8,7 +8,9 @@ import {
   EXISTING_POST_HEADERS,
   buildCanonicalCatalog,
   parseCsvRecords,
+  placeRegistrationSourceHash,
   planBaseline,
+  postSourceHash,
   validatePostsHeaders,
 } from "./lib/editorial-baseline.mjs"
 
@@ -68,6 +70,8 @@ const parsed = parseCsvRecords(
       "Preview",
       "Both",
       "",
+      "",
+      "",
       "post-opaque-a1",
     ].join(","),
     [
@@ -88,6 +92,8 @@ const parsed = parseCsvRecords(
       "Off",
       "Social",
       "",
+      "",
+      "",
       "post-opaque-b2",
     ].join(","),
   ].join("\r\n")
@@ -103,6 +109,16 @@ assert.deepEqual(validatePostsHeaders(parsed.headers), {
 assert.equal(parsed.rows.length, 2)
 assert.equal(parsed.rows[0].Caption, "A caption, with punctuation")
 assert.equal(parsed.rows[0]["Atlas Notes"], "First line\nSecond line")
+const coordinateHashRow = {
+  ...parsed.rows[0],
+  "Atlas Coordinates": "9.182, -83.763",
+  "Atlas Stop": "Yes",
+}
+assert.equal(postSourceHash(parsed.rows[0]), postSourceHash(coordinateHashRow))
+assert.notEqual(
+  placeRegistrationSourceHash(parsed.rows[0]),
+  placeRegistrationSourceHash(coordinateHashRow)
+)
 assert.throws(
   () => parseCsvRecords("Location,Location\nOne,Two"),
   /duplicate header/

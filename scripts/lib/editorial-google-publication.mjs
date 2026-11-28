@@ -1,5 +1,6 @@
 import {
   AUTOMATION_POST_HEADERS,
+  placeRegistrationSourceHash,
   postSourceHash,
   storySourceHash,
 } from "./editorial-baseline.mjs"
@@ -191,9 +192,11 @@ export function buildPlaceRegistrationWriteback({
   journeyId,
   placeId,
   visitId,
+  coordinates,
 }) {
   const requiredHeaders = [
     "Atlas Place",
+    "Atlas Coordinates",
     "post_id",
     "journey_id",
     "place_id",
@@ -219,6 +222,7 @@ export function buildPlaceRegistrationWriteback({
   const target = matches[0]
   const values = {
     "Atlas Place": placeLabel,
+    "Atlas Coordinates": `${coordinates[1]}, ${coordinates[0]}`,
     journey_id: journeyId,
     place_id: placeId,
     visit_id: visitId,
@@ -244,7 +248,7 @@ export function buildPlaceRegistrationWriteback({
   if (String(target.row["Atlas Place"] || "").trim() !== requestedPlace) {
     throw new Error(`Post ID ${postId} changed its requested Atlas Place`)
   }
-  const currentSourceHash = postSourceHash(target.row)
+  const currentSourceHash = placeRegistrationSourceHash(target.row)
   if (currentSourceHash !== expectedSheetSourceHash) {
     throw new Error(
       `Post ID ${postId} changed after Place registration planning`
