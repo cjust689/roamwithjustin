@@ -190,7 +190,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Osa Peninsula coast",
     camera: { center: [-83.6550131, 8.7046659], zoom: 11.2, pitch: 58, bearing: 16 },
-    relatedIds: ["uvita-costa-rica"],
+    relatedIds: ["san-jose-costa-rica", "uvita-costa-rica"],
   },
   {
     id: "uvita-costa-rica",
@@ -201,7 +201,6 @@ export const previewAtlasPresentation = Object.freeze([
     category: "Southern Pacific base",
     camera: { center: [-83.7363979, 9.1730967], zoom: 11.4, pitch: 54, bearing: 12 },
     relatedIds: [
-      "san-jose-costa-rica",
       "drake-bay",
       "uvita-whale-tail",
       "nauyaca-waterfalls",
@@ -211,7 +210,7 @@ export const previewAtlasPresentation = Object.freeze([
     id: "uvita-whale-tail",
     placeId: "uvita-whale-tail",
     journeyId: "costa-rica-2025",
-    parentId: "costa-rica",
+    parentId: "uvita-costa-rica",
     eyebrow: "Coming soon",
     category: "Coastal walk at low tide",
     camera: { center: [-83.7484997, 9.1304772], zoom: 12.6, pitch: 58, bearing: -16 },
@@ -245,7 +244,7 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Overnight stop and return",
     camera: { center: [-84.0796683, 9.9327373], zoom: 10.8, pitch: 48, bearing: 8 },
-    relatedIds: ["bajos-del-toro", "uvita-costa-rica", "manuel-antonio-area"],
+    relatedIds: ["bajos-del-toro", "drake-bay", "manuel-antonio-area"],
   },
   {
     id: "utah-2026",

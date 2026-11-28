@@ -41,6 +41,8 @@ verification:
     - pull requests 287 and 288 plus Pages run 45898969341 deployed all ten Journey story leads and exact incomplete-Journey Experience projection on 2026-11-26
     - live Chrome rendered both Uvita Experience cards after the progressive Journey deployment on 2026-11-26
     - npm run atlas:test verified Uvita Horses and Uvita House as the single-Moment card titles while retaining parent Experience context
+    - npm run atlas:test verified San José, Drake Bay, and Uvita as Costa Rica stops three through five and retained all seven Whale Tail Moment media items after nesting that stop beneath Uvita
+    - npm run content:validate verified matching Uvita Whale Tail parentage in canonical Place and Atlas presentation records
     - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
     - npm run atlas:test verified separate collision layout for World-level Journey roots while preserving child clustering on 2026-11-27
@@ -188,6 +190,11 @@ hand-maintained `childIds` array. Generated Visits use the explicit
 `--after-place` registration option or append to the Journey; dates do not
 silently determine order.
 
+Costa Rica follows this boundary with Uvita as its fifth top-level stop and
+Uvita Whale Tail as a child stop. The child keeps its independent Visit and
+published Experience association, so nesting changes discovery hierarchy
+without moving its story or media to another record.
+
 Do not add unverified business information. Only include website, directions,
 phone, or booking actions when the source has been confirmed. External actions
 are derived from canonical Place/Journey links and remain separate from map
@@ -208,9 +215,9 @@ stops are excluded. The validator requires every internally incomplete Journey
 Visit to resolve to an Atlas node so later media ingestion enriches stable IDs
 instead of creating a parallel map record.
 
-Every Atlas root uses the canonical Journey title and date label, including
-its year, because the same Place can host multiple trips. Child nodes use their
-canonical Place names and local labels without repeating the Journey year.
+Every Atlas root uses a clean public Journey title and a separate date label,
+because the same Place can host multiple trips. Child nodes use their canonical
+Place names and local labels without repeating the Journey year.
 
 ## Story discovery
 

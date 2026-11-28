@@ -40,7 +40,7 @@ export const costaRica2025Journey = Object.freeze({
   },
   gallery: [],
   description:
-    "A route from La Fortuna and Bajos del Toro through an overnight stay near San José, then south to Uvita and Drake Bay before returning to San José.",
+    "A route from La Fortuna and Bajos del Toro through an overnight stay near San José, then south to Drake Bay and Uvita before returning to San José.",
   duration: "",
   audience: "",
   costLevel: "",
@@ -53,8 +53,8 @@ export const costaRica2025Journey = Object.freeze({
     destinationVisit("la-fortuna-costa-rica"),
     destinationVisit("bajos-del-toro"),
     destinationVisit("san-jose-costa-rica"),
-    destinationVisit("uvita-costa-rica"),
     destinationVisit("drake-bay"),
+    destinationVisit("uvita-costa-rica"),
     destinationVisit("uvita-whale-tail"),
     destinationVisit("nauyaca-waterfalls"),
     destinationVisit("manuel-antonio-area"),
@@ -68,12 +68,12 @@ export const costaRica2025Journey = Object.freeze({
     "la-fortuna-costa-rica",
     "bajos-del-toro",
     "san-jose-costa-rica",
-    "uvita-costa-rica",
     "drake-bay",
+    "uvita-costa-rica",
     "uvita-whale-tail",
     "nauyaca-waterfalls",
     "manuel-antonio-area",
   ],
   verificationNotes:
-    "The owner confirmed the opening route as La Fortuna, Bajos del Toro, a San José Airbnb, then Uvita, with a final return to San José. Exact dates, several later stop transitions, operators, and remaining media associations still require source verification.",
+    "The owner confirmed the route as La Fortuna, Bajos del Toro, a San José Airbnb, Drake Bay, then Uvita, with a final return to San José. Uvita groups the Whale Tail as a child stop. Exact dates, later Pacific transitions, operators, and remaining media associations still require source verification.",
 })

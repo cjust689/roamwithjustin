@@ -74,14 +74,19 @@ Costa Rica now uses its reviewed generated waterfall asset as the canonical
 Journey hero and full image. Atlas roots without a separate map-specific hero
 inherit that Journey hero, while explicit Atlas overrides retain priority and
 child Places never borrow the broad Journey cover. Selector and content
-validation cover the precedence locally; this correction is not yet deployed.
+validation cover the precedence. Pull requests 299 and 300 deployed that
+behavior through `develop` and `main`.
 The owner also removed Playa San Josecito from the public Costa Rica 2025
 Journey. Its standalone Place and source history remain registered, but it is
 no longer a Journey Visit, Atlas stop, related route edge, or guided stop.
-The owner then corrected the opening chronology to La Fortuna, Bajos del Toro,
-the San José Airbnb, and Uvita. San José now orders as the third distinct stop.
-The later return to the same city remains route context rather than a duplicate
-map pin, preserving the existing Casa Jungla story and every media reference.
+The owner has now corrected the top-level chronology to La Fortuna, Bajos del
+Toro, the San José Airbnb, Drake Bay, and Uvita. San José is the third stop,
+Drake Bay is fourth, and Uvita is fifth. Uvita Whale Tail is nested beneath
+Uvita in both Place and Atlas presentation hierarchy, following the same hub
+pattern used by Moab. Its existing Visit, Experience, Moment, and seven media
+references remain unchanged. The later return to San José remains route
+context rather than a duplicate map pin. This latest hierarchy correction is
+locally verified and not yet deployed.
 The Costa Rica root also keeps that same canonical Journey hero on its
 `Explore the story` card at mobile widths instead of hiding the card image.
 Visitor-facing Journey titles no longer repeat their year in parentheses.
