@@ -8,6 +8,7 @@ import { resolveMediaReference } from "../src/content/selectors/media.mjs"
 import {
   buildAtlasNodeView,
   journeyDisplayTitle,
+  orderAtlasNodesByJourney,
 } from "../src/content/selectors/projections.mjs"
 
 const projectRoot = path.resolve(
@@ -84,6 +85,24 @@ const costaRicaHero = resolveMediaReference(costaRicaJourney.hero)?.src
 assert.ok(costaRicaHero)
 assert.equal(costaRicaNode.image, costaRicaHero)
 assert.equal(costaRicaNode.storyLead.image, costaRicaHero)
+assert.deepEqual(
+  orderAtlasNodesByJourney(
+    nodes.filter(node => node.parentId === "costa-rica")
+  ).map(node => node.id),
+  [
+    "la-fortuna-costa-rica",
+    "bajos-del-toro",
+    "san-jose-costa-rica",
+    "drake-bay",
+    "uvita-costa-rica",
+    "nauyaca-waterfalls",
+    "manuel-antonio-area",
+  ]
+)
+const whaleTailNode = nodes.find(node => node.id === "uvita-whale-tail")
+assert.equal(whaleTailNode.parentId, "uvita-costa-rica")
+assert.equal(whaleTailNode.storyExperiences[0]?.moments[0]?.title, "High Tide Whale Tail")
+assert.equal(whaleTailNode.storyExperiences[0]?.moments[0]?.media.length, 7)
 const explicitRootOverride = "/test/atlas-root-override.jpg"
 assert.equal(
   buildAtlasNodeView({

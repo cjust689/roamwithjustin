@@ -99,6 +99,8 @@ verification:
     - npm run atlas:test verified all ten Journey story leads, incomplete Journey update notes, and exact Experience stop projection
     - Pull requests 287 and 288 plus Pages run 45898969341 deployed progressive Journey discovery; live Uvita rendered both exact Experience relationships
     - npm run atlas:test verified Uvita Horses and Uvita House as single-Moment Atlas card titles with their parent Experience context
+    - npm run atlas:test verified the corrected Costa Rica top-level order and the Uvita Whale Tail child relationship while retaining the existing seven-media Moment
+    - npm run content:validate verified San José third, Drake Bay fourth, Uvita fifth, and matching Place and Atlas parentage for Uvita Whale Tail
     - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
     - npm run atlas:test verified Journey-hero fallback for Atlas roots, explicit Atlas override precedence, and child Place isolation
     - Local Chrome verified one retained MapLibre canvas, shared body rendering, and inspector and reader scroll restoration on 2026-11-18
@@ -176,11 +178,15 @@ Zion, and Park City geography. Planned-only Hanksville is not registered as a
 visited Place. Playa San Josecito remains a canonical Place with retained
 source context, but the owner removed it from the Costa Rica 2025 Journey, so
 it has no Visit, Atlas stop, related route edge, or guided stop in that Journey.
-Costa Rica orders San José by its first distinct stay, after Bajos del Toro and
-before Uvita. The later return uses the same broad city geography and closes
-the related route from Manuel Antonio without creating an overlapping map pin.
-The existing Casa Jungla Experience, Moment, and media remain attached to the
-unchanged San José Visit identity.
+Costa Rica orders San José by its first distinct stay, after Bajos del Toro.
+Drake Bay is the fourth top-level stop and Uvita is the fifth. Uvita Whale Tail
+keeps its independent Visit and exact Experience binding but uses Uvita as its
+Place and Atlas presentation parent. This makes Uvita a nested exploration hub
+without rewriting the Whale Tail Moment or any of its seven media references.
+The later return uses the same broad San José geography and closes the related
+route from Manuel Antonio without creating an overlapping map pin. The Casa
+Jungla Experience, Moment, and media remain attached to the unchanged San José
+Visit identity.
 
 Every top-level Atlas entry derives a clean public display title from its
 canonical Journey title and projects the Journey date as a separate secondary

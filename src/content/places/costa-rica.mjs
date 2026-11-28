@@ -101,7 +101,7 @@ export const costaRicaPlaces = Object.freeze([
     id: "uvita-whale-tail",
     name: "Uvita Whale Tail",
     coordinates: [-83.7484997, 9.1304772],
-    parentPlaceId: "costa-rica",
+    parentPlaceId: "uvita-costa-rica",
     countryCode: "CR",
     regionCode: "CR-P",
     category: "coastal-landform",
