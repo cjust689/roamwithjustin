@@ -111,6 +111,16 @@ function stableId(prefix, value) {
   return `${prefix}-${crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 16)}`
 }
 
+function requireMatchingExperienceScope(experience, row) {
+  const visitId = String(row.visit_id || "").trim() || null
+  const placeId = visitId ? String(row.place_id || "").trim() || null : null
+  if (experience.visitId !== visitId || experience.placeId !== placeId) {
+    throw new Error(
+      `Experience "${experience.title}" is bound to a different Atlas Place; reparent it explicitly before publishing this row`
+    )
+  }
+}
+
 function resolveExperience({ row, current, journeyId, visibility }) {
   const input = String(row["Atlas Experience"] || "").trim()
   if (!input) return { experience: null, created: false }
@@ -122,6 +132,7 @@ function resolveExperience({ row, current, journeyId, visibility }) {
         `Bound experience_id "${currentId}" is invalid for this Journey`
       )
     }
+    requireMatchingExperienceScope(match, row)
     return { experience: match, created: false }
   }
   const newMatch = input.match(/^new:\s*(.+)$/i)
@@ -136,7 +147,10 @@ function resolveExperience({ row, current, journeyId, visibility }) {
   )
   if (matches.length > 1)
     throw new Error(`Atlas Experience "${requestedTitle}" is ambiguous`)
-  if (matches.length === 1) return { experience: matches[0], created: false }
+  if (matches.length === 1) {
+    requireMatchingExperienceScope(matches[0], row)
+    return { experience: matches[0], created: false }
+  }
   if (!newMatch) {
     throw new Error(
       `Atlas Experience "${requestedTitle}" does not exist; prefix a new title with "New:"`

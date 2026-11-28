@@ -490,9 +490,12 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 - **IDs:** `uvita-costa-rica`, `uvita-whale-tail`, `marino-ballena`.
 - **Status:** `CONFIRMED` specific walk and media.
-- **Hierarchy:** Uvita is the fifth top-level Journey stop. The Whale Tail is
-  a child Place and Atlas stop beneath Uvita, while its existing Visit and
-  published Experience retain their stable IDs and media references.
+- **Hierarchy:** Uvita is the fifth top-level Journey stop. The Whale Tail,
+  Rancho La Merced, and Nauyaca Waterfalls are child Places and Atlas pins
+  beneath Uvita. The horse Experience belongs to Rancho La Merced. The Lost
+  Lemon house story remains attached to broad Uvita and must not expose a
+  precise public pin. Existing Moment IDs, media asset IDs, and R2 object keys
+  remain stable when these associations change.
 - **Actual experience:** Walked out across the **Whale Tail** formation at **low tide**; wife photographed against/near a palm tree; aerial imagery reveals the distinctive shape.
 - **Story:** The dramatic geographic reveal that only makes sense once you understand the tide—ground-level exploration followed by a high-angle view. Excellent progressive map/card story.
 - **Practical take-away:** Tide timing matters to the visit. Don't publish specific safe tide windows, restricted airspace advice, or detailed access conditions without an up-to-date source.
@@ -503,6 +506,17 @@ The above is the best recovered sequence, but do not assign exact dates to every
 - **ID:** `nauyaca-waterfalls`
 - **Status:** `CONFIRMED` actual trip visit/photography as stated in a retrospective route account.
 - **To verify:** Which waterfall/entry route, how accessed, duration, logistics, and exact photo files.
+
+### 7.4a Rancho La Merced
+
+- **ID:** `rancho-la-merced`
+- **Status:** `CONFIRMED` owner horseback experience and registered video.
+- **Hierarchy:** Physical child Place beneath Uvita with its own Visit and
+  Atlas pin. The `Uvita Horses` Moment belongs to this Place.
+- **Location evidence:** The Costa Rica Tourism Board identifies Rancho La
+  Merced National Wildlife Refuge near Punta Uvita and Marino Ballena. The
+  Atlas coordinate represents the refuge, not an inferred point along the
+  riding route.
 
 ### 7.5 Uvita rainforest / howler monkeys
 

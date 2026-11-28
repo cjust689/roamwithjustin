@@ -129,6 +129,19 @@ assert.equal(second.editorial.experiences.length, 1)
 assert.equal(second.editorial.moments.length, 2)
 assert.equal(second.editorial.moments[1].sortOrder, 1)
 
+assert.throws(
+  () =>
+    planEditorialCompilation({
+      currentEditorial: first.editorial,
+      currentMedia: first.media,
+      row: { ...secondRow, place_id: "other-place", visit_id: "" },
+      processedHash: "c".repeat(64),
+      mediaBatchIds: ["media-batch-1"],
+      journeys,
+    }),
+  /reparent it explicitly/
+)
+
 const journeyScoped = planEditorialCompilation({
   currentEditorial: emptyEditorial,
   currentMedia: emptyMedia,

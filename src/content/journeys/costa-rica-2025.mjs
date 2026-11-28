@@ -56,6 +56,7 @@ export const costaRica2025Journey = Object.freeze({
     destinationVisit("drake-bay"),
     destinationVisit("uvita-costa-rica"),
     destinationVisit("uvita-whale-tail"),
+    destinationVisit("rancho-la-merced"),
     destinationVisit("nauyaca-waterfalls"),
     destinationVisit("manuel-antonio-area"),
   ],
@@ -71,9 +72,10 @@ export const costaRica2025Journey = Object.freeze({
     "drake-bay",
     "uvita-costa-rica",
     "uvita-whale-tail",
+    "rancho-la-merced",
     "nauyaca-waterfalls",
     "manuel-antonio-area",
   ],
   verificationNotes:
-    "The owner confirmed the route as La Fortuna, Bajos del Toro, a San José Airbnb, Drake Bay, then Uvita, with a final return to San José. Uvita groups the Whale Tail as a child stop. Exact dates, later Pacific transitions, operators, and remaining media associations still require source verification.",
+    "The owner confirmed the route as La Fortuna, Bajos del Toro, a San José Airbnb, Drake Bay, then Uvita, with a final return to San José. Uvita groups the Whale Tail, Rancho La Merced, and Nauyaca Waterfalls as child Places. Exact dates, later Pacific transitions, operators, and remaining media associations still require source verification.",
 })

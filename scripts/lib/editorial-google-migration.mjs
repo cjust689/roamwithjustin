@@ -149,6 +149,7 @@ export function buildPostsMigration({
   const atlasModeIndex = finalHeaders.indexOf("Atlas Mode")
   const publishToIndex = finalHeaders.indexOf("Publish To")
   const atlasPlaceIndex = finalHeaders.indexOf("Atlas Place")
+  const atlasStopIndex = finalHeaders.indexOf("Atlas Stop")
   const postIdIndex = finalHeaders.indexOf("post_id")
   const automationIndices = AUTOMATION_POST_HEADERS.map(header =>
     finalHeaders.indexOf(header)
@@ -167,6 +168,7 @@ export function buildPostsMigration({
     atlasModeIndex < 0 ||
     publishToIndex < 0 ||
     atlasPlaceIndex < 0 ||
+    atlasStopIndex < 0 ||
     postIdIndex < 0 ||
     automationIndices.includes(-1)
   ) {
@@ -388,6 +390,7 @@ export function buildPostsMigration({
             overrides: new Map([
               ["Publish To", dropdown(["Social", "Atlas", "Both"])],
               ["Atlas Mode", dropdown(["Off", "Preview", "Publish"])],
+              ["Atlas Stop", dropdown(["No", "Yes"])],
             ]),
           }),
         },
@@ -429,6 +432,27 @@ export function buildPostsMigration({
           condition: {
             type: "ONE_OF_LIST",
             values: ["Social", "Atlas", "Both"].map(userEnteredValue => ({
+              userEnteredValue,
+            })),
+          },
+          strict: true,
+          showCustomUi: true,
+        },
+      },
+    })
+    requests.push({
+      setDataValidation: {
+        range: {
+          sheetId,
+          startRowIndex: 1,
+          endRowIndex: Math.max(gridRowCount, rows.length + 1),
+          startColumnIndex: atlasStopIndex,
+          endColumnIndex: atlasStopIndex + 1,
+        },
+        rule: {
+          condition: {
+            type: "ONE_OF_LIST",
+            values: ["No", "Yes"].map(userEnteredValue => ({
               userEnteredValue,
             })),
           },

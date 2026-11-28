@@ -129,6 +129,42 @@
             {{ node.summary }}
           </p>
           <section
+            v-if="hasDestinationIndex"
+            id="atlas-destination-index"
+            ref="journeyStops"
+            class="atlas-discoveries atlas-destination-index"
+            :aria-labelledby="`atlas-destination-index-title-${node.id}`"
+          >
+            <div class="atlas-section-heading">
+              <h2 :id="`atlas-destination-index-title-${node.id}`">
+                Inside {{ node.title }}
+              </h2>
+              <strong>{{ destinationIndexItems.length }} entries</strong>
+            </div>
+            <button
+              v-for="item in destinationIndexItems"
+              :key="`${item.kind}-${item.id}`"
+              type="button"
+              @click="openDestinationItem(item)"
+            >
+              <img v-if="item.image" :src="item.image" alt="" loading="lazy" />
+              <span
+                v-else
+                class="atlas-discovery-placeholder"
+                :class="{ 'is-video': item.hasVideo }"
+                aria-hidden="true"
+              >
+                <b v-if="item.hasVideo">&#9654;</b>
+              </span>
+              <span>
+                <small>{{ item.kindLabel }}</small>
+                {{ item.title }}
+                <em v-if="item.contextLabel">{{ item.contextLabel }}</em>
+              </span>
+              <span aria-hidden="true">&rarr;</span>
+            </button>
+          </section>
+          <section
             v-if="storySections.length"
             class="atlas-stop-story"
             :aria-labelledby="`atlas-stop-story-title-${node.id}`"
@@ -188,8 +224,10 @@
             </header>
             <article
               v-for="experience in experienceStories"
+              :id="`atlas-inline-${experience.id}`"
               :key="`inline-${experience.id}`"
               class="atlas-experience-story"
+              tabindex="-1"
             >
               <EditorialExperienceCard
                 :experience="experience.card"
@@ -322,7 +360,7 @@
           </div>
 
           <section
-            v-if="children.length"
+            v-if="children.length && !hasDestinationIndex"
             id="atlas-journey-stops"
             ref="journeyStops"
             class="atlas-discoveries"
@@ -644,6 +682,35 @@ export default {
         experience => experience.card
       )
     },
+    hasDestinationIndex() {
+      return !this.node.storyLead && this.children.length > 0
+    },
+    destinationIndexItems() {
+      if (!this.hasDestinationIndex) return []
+
+      return [
+        ...this.children.map(child => ({
+          id: child.id,
+          kind: "place",
+          kindLabel: "Place",
+          title: child.title,
+          contextLabel: "",
+          image: child.image || "",
+          hasVideo: false,
+        })),
+        ...this.experienceStories.map(experience => ({
+          id: experience.id,
+          kind: "experience",
+          kindLabel: "Experience",
+          title: experience.card.title,
+          contextLabel: experience.card.contextLabel || "",
+          image: experience.card.image || "",
+          hasVideo: experience.moments.some(moment =>
+            moment.media.some(media => media.kind === "video")
+          ),
+        })),
+      ]
+    },
     storySections() {
       return [
         ...(this.node.storyChapters || []).map(chapter => ({
@@ -846,6 +913,26 @@ export default {
         top: Math.max(0, target.offsetTop - 20),
         behavior,
       })
+    },
+    openDestinationItem(item) {
+      if (item.kind === "place") {
+        this.$emit("select", item.id)
+        return
+      }
+
+      const scroller = this.$refs.detailScroll
+      const target = document.getElementById(`atlas-inline-${item.id}`)
+      if (!scroller || !target) return
+
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "auto"
+        : "smooth"
+      scroller.scrollTo({
+        top: Math.max(0, target.offsetTop - 20),
+        behavior,
+      })
+      target.focus({ preventScroll: true })
     },
     normalizeMedia(entry) {
       const media = typeof entry === "string" ? { src: entry } : entry || {}
@@ -1554,6 +1641,23 @@ export default {
   flex-direction: column;
   gap: 0.2rem;
   font-weight: 700;
+}
+
+.atlas-destination-index em {
+  color: var(--color-text-muted, rgba(255, 255, 255, 0.58));
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.atlas-destination-index .atlas-discovery-placeholder {
+  display: grid;
+  place-items: center;
+}
+
+.atlas-destination-index .atlas-discovery-placeholder.is-video b {
+  color: var(--color-accent-soft, #e6ba68);
+  font-size: 1rem;
 }
 
 .atlas-discoveries small {

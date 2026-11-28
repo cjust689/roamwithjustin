@@ -41,9 +41,9 @@ verification:
     - pull requests 287 and 288 plus Pages run 45898969341 deployed all ten Journey story leads and exact incomplete-Journey Experience projection on 2026-11-26
     - live Chrome rendered both Uvita Experience cards after the progressive Journey deployment on 2026-11-26
     - npm run atlas:test verified Uvita Horses and Uvita House as the single-Moment card titles while retaining parent Experience context
-    - npm run atlas:test verified San José, Drake Bay, and Uvita as Costa Rica stops three through five and retained all seven Whale Tail Moment media items after nesting that stop beneath Uvita
-    - npm run content:validate verified matching Uvita Whale Tail parentage in canonical Place and Atlas presentation records
-    - local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector
+    - npm run atlas:test verified San José, Drake Bay, and Uvita as Costa Rica stops three through five, three child Place pins beneath Uvita, the direct unpinned house Experience, and retained horse and Whale Tail media
+    - npm run content:validate verified matching Uvita child parentage and exact Experience and media geography
+    - local Chrome at 1440 by 1200 CSS pixels rendered the Uvita index with three Place entries and one direct Experience, then rendered Uvita Horses and its existing video inside Rancho La Merced
     - local Chrome MapTiler SDK session check across Atlas, the Utah Journey, and My Atlas on 2026-11-19 found one shared session identifier and no chargeable tile request without mtsid
     - npm run atlas:test verified separate collision layout for World-level Journey roots while preserving child clustering on 2026-11-27
     - local headless Chrome at 390 CSS pixels kept Utah 2025 and Utah 2026 fully inside the viewport with an 8 pixel gap on 2026-11-27
@@ -176,11 +176,20 @@ MapTiler, then rerun the Pages deployment.
 Existing curated records can still be added to the appropriate canonical
 Place, Journey/Visit, and Media modules. A missing Place beneath an existing
 Journey also has an explicit Sheet-backed route: put its name in `Location`,
-choose `New Place` in `Atlas Place`, keep `Atlas Mode = Off`, then preview and apply
-`editorial:register:place`. The command writes the generated geography shard,
+choose `New Place` in `Atlas Place`, set `Atlas Stop = Yes`, keep `Atlas Mode =
+Off`, then preview and apply `editorial:register:place`. The command writes the generated geography shard,
 adds the Visit and child Atlas pin, deploys it through protected branches,
 refreshes the Sheet Catalog, and binds the row. Ordinary post publication never
 creates geography from a Location label.
+
+`Atlas Stop` classifies the row separately from its story. `Yes` permits the
+explicit Place registration flow. `No` keeps the row as an Experience or
+Moment within the selected Place and creates no additional pin. For a new
+Place, enter its pin in the Sheet's `Atlas Coordinates` column as `latitude,
+longitude`. Registration validates and converts it to canonical Place
+coordinates. Existing Places retain their stored coordinates and cannot be
+moved by a post row. The CLI longitude and latitude pair remains available
+only as an explicit recovery override.
 
 Add only Atlas-specific grouping/camera choices to
 `src/content/atlas/presentation.mjs`, then register a destination root in
@@ -190,10 +199,12 @@ hand-maintained `childIds` array. Generated Visits use the explicit
 `--after-place` registration option or append to the Journey; dates do not
 silently determine order.
 
-Costa Rica follows this boundary with Uvita as its fifth top-level stop and
-Uvita Whale Tail as a child stop. The child keeps its independent Visit and
-published Experience association, so nesting changes discovery hierarchy
-without moving its story or media to another record.
+Costa Rica follows this boundary with Uvita as its fifth top-level stop. Uvita
+Whale Tail, Rancho La Merced, and Nauyaca Waterfalls are child Place pins. The
+horse Experience belongs to the Rancho La Merced Place and Visit, while the
+private house story remains a direct Uvita Experience without a separate pin.
+Existing Moment IDs, media IDs, and R2 object keys remain stable when the
+reviewed association moves.
 
 Do not add unverified business information. Only include website, directions,
 phone, or booking actions when the source has been confirmed. External actions
@@ -238,6 +249,13 @@ Visits at one Place stay distinct. Published Experiences join only when their
 `visitId` and `placeId` both match, regardless of the containing Journey's
 publication state. Structural hubs and Journey-only chapters with no Visit
 references do not receive a preview.
+
+A nonroot destination with child Places presents a single `Inside` index. It
+combines child Place entries with Experiences attached directly to the current
+Place. Selecting a Place navigates to its pin. Selecting an Experience focuses
+its inline story without creating a marker. Because Place and Atlas parent
+links are recursive, this pattern works for country, city, district, venue,
+and attraction levels without a fixed maximum depth.
 
 A stop card for an Experience with one distinctly titled Moment leads with the
 Moment title and shows the parent Experience title as context. This keeps Sheet
