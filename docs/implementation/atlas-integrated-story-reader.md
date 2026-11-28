@@ -49,6 +49,8 @@ verification:
     - npm run atlas:test verifies that single-Moment stop cards lead with Uvita Horses and Uvita House while retaining their parent Experience labels
     - npm run atlas:test verifies that the direct Uvita house Experience and Rancho La Merced horse Experience retain their canonical Moments and registered video
     - Local Chrome at 1440 by 1200 CSS pixels rendered three child Place entries plus the direct house Experience inside Uvita, then rendered Uvita Horses and its existing video inside Rancho La Merced
+    - Pull requests 303 and 304 passed required validation, merged through protected develop and main as 2399530799aa7b91e358f8c8722139492ab97332 and 8c9d64850cccf93c11520b9eccf10985c3bd3874, and Pages run 46101408334 succeeded
+    - Live Chrome rendered Uvita Whale Tail, Rancho La Merced, Nauyaca Waterfalls, and Uvita House on the deployed Uvita route, then rendered Uvita Horses on the deployed Rancho La Merced route
     - npm run atlas:test
     - npm run lint
     - npm run content:validate

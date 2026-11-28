@@ -82,7 +82,7 @@ no longer a Journey Visit, Atlas stop, related route edge, or guided stop.
 The owner corrected the top-level chronology to La Fortuna, Bajos del Toro,
 the San José Airbnb, Drake Bay, and Uvita. San José is the third stop, Drake
 Bay is fourth, and Uvita is fifth. Pull requests 301 and 302 deployed that
-chronology and the first Uvita child relationship. The current local follow-up
+chronology and the first Uvita child relationship. The deployed follow-up
 makes Uvita a reusable destination hub with three child Place pins: Uvita
 Whale Tail, Rancho La Merced, and Nauyaca Waterfalls. The existing horse
 Experience and video now belong to the Rancho La Merced Visit. The private
@@ -91,7 +91,10 @@ Uvita detail index combines those child Places with direct Experiences while
 preserving the distinction between a physical pin and a story. Existing media
 asset IDs, Moment IDs, and R2 object keys remain unchanged. The later return
 to San José remains route context rather than a duplicate map pin. This
-recursive destination follow-up is locally verified and not yet deployed.
+recursive destination follow-up passed protected pull requests 303 and 304,
+then Pages run 46101408334 deployed it. Live Chrome verified all three child
+Places plus Uvita House on Uvita and the existing Uvita Horses story on Rancho
+La Merced.
 The live Posts Sheet now includes visible `Atlas Coordinates` and `Atlas Stop`
 fields. `Atlas Stop` is a `Yes` or `No` classification. `Yes` is required when
 a row explicitly registers a Place pin. `No` keeps the row as story content
