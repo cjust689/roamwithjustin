@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: complete
 created: 2026-11-14
-updated: 2026-11-27
+updated: 2026-11-28
 related:
   - media-pipeline
   - gear-system
@@ -293,9 +293,12 @@ When a stop Experience contains exactly one published Moment with a distinct
 title, its Atlas card leads with that Moment title and retains the Experience
 title as context. Multi-Moment Experiences keep their Experience title. The
 stop relationship also carries the canonical Moment projection, including its
-registered media, so the primary Atlas inspector can render that content
-inline without creating another record or copying prose. The compact card and
-the shared Journey story remain available as the nested comparison path.
+registered media, without creating another record or copying prose. The Atlas
+inspector derives a compact preview from the first available summary or Moment
+paragraph and uses one Experience image. Its action opens the exact section in
+the shared Journey reader, where the full text and registered media remain
+available. This is the default presentation for existing and future
+Experience based Journeys.
 
 `src/components/JourneyStoryBody.vue` renders the canonical Journey chapters,
 locations, published Experiences and Moments, and media for both
@@ -304,6 +307,15 @@ or media into a second content shape. The exact Atlas node ID added to a trip
 location remains navigation identity. The stop-to-chapter relationship comes
 from the canonical Visit reference, not from matching a Place slug or map
 node.
+
+The shared full Journey projection orders Experience cards by the Journey's
+explicit `visits` array, then by stable Experience ID only when an Experience
+has no matching Visit. Moment travel dates remain evidence and display data,
+not implicit route ordering. The full Journey surface renders one image-only
+representative per Experience and no aggregate media wall. Only the focused
+Experience renders its complete Moment text and media, so a large stop gallery
+does not overwhelm the Journey overview. Video-only Experiences omit the
+representative image instead of substituting a video player or play icon.
 
 The Atlas reader is presentation state on the existing selected-node route,
 expressed by `?story=1`. `AtlasView.vue` keeps the single `AtlasMap.vue`

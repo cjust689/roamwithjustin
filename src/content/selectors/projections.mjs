@@ -37,6 +37,34 @@ function uniqueMedia(items) {
   )
 }
 
+function firstParagraph(value) {
+  return String(value || "")
+    .trim()
+    .split(/\r?\n\s*\r?\n/, 1)[0]
+    .trim()
+}
+
+function orderedJourneyExperienceViews(journey) {
+  const visitOrder = new Map(
+    (journey?.visits || []).map((visit, index) => [visit.id, index])
+  )
+
+  return getJourneyExperienceViews(journey.id)
+    .map(experience => ({
+      ...experience,
+      summary: firstParagraph(
+        experience.summary ||
+          experience.moments.find(moment => moment.notes)?.notes
+      ),
+    }))
+    .sort((left, right) => {
+      const leftVisit = visitOrder.get(left.visitId) ?? Number.MAX_SAFE_INTEGER
+      const rightVisit =
+        visitOrder.get(right.visitId) ?? Number.MAX_SAFE_INTEGER
+      return leftVisit - rightVisit || left.id.localeCompare(right.id)
+    })
+}
+
 function resolvedSource(reference) {
   return resolveMediaReference(reference)?.src || ""
 }
@@ -154,19 +182,21 @@ function journeyChapterViews(journey) {
 function atlasExperienceCardView(experience) {
   const card = experienceCardView(experience)
   const [moment] = experience.moments || []
+  const summary = firstParagraph(card.summary || moment?.notes)
 
   if (
     experience.moments?.length !== 1 ||
     !moment?.title ||
     moment.title === experience.title
   ) {
-    return card
+    return { ...card, summary }
   }
 
   return {
     ...card,
     title: moment.title,
     contextLabel: experience.title,
+    summary,
   }
 }
 
@@ -187,22 +217,24 @@ function atlasStoryRelationships(journey, visit) {
       }),
     // Experiences are stop-specific only when their canonical record owns
     // both the matching Visit and Place IDs.
-    storyExperiences: getJourneyExperienceViews(journey.id)
+    storyExperiences: orderedJourneyExperienceViews(journey)
       .filter(
         experience =>
           experience.visitId === visit.id &&
           experience.placeId === visit.placeId
       )
-      .map(experience => ({
-        id: `experience-${experience.slug}`,
-        title: experience.title,
-        summary: experience.summary,
-        card: atlasExperienceCardView(experience),
-        // Keep the full canonical Moment projection beside the compact card.
-        // The primary Atlas can show it directly at the selected stop while
-        // the existing Journey reader remains available as a deeper path.
-        moments: experience.moments,
-      })),
+      .map(experience => {
+        const card = atlasExperienceCardView(experience)
+        return {
+          id: `experience-${experience.slug}`,
+          title: card.title || experience.title,
+          summary: card.summary,
+          card,
+          // Retain the complete canonical Moment projection for the shared
+          // Journey reader. The stop inspector uses only the compact preview.
+          moments: experience.moments,
+        }
+      }),
   }
 }
 
@@ -347,7 +379,7 @@ export function buildTripViewModel(journey) {
   )
   const gear = getJourneyGear(journey.id)
   const gearHighlights = journeyGearHighlights(journey, gear)
-  const experiences = getJourneyExperienceViews(journey.id)
+  const experiences = orderedJourneyExperienceViews(journey)
   const chapters = journeyChapterViews(journey)
 
   return {

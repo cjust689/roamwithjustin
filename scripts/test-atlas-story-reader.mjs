@@ -32,6 +32,28 @@ for (const slug of [
   assert.ok(trip.allMedia.length)
 }
 
+const costaRicaTrip = buildTripViewModel(getJourneyBySlug("costa-rica-2025"))
+assert.deepEqual(
+  costaRicaTrip.experiences.map(experience => experience.title),
+  [
+    "La Fortuna Airbnb",
+    "Jurassic Canyon",
+    "Casa Jungla",
+    "Drake Bay",
+    "Uvita The Lost Lemon",
+    "Uvita",
+    "Rancho La Merced",
+    "Manuel Antonio",
+  ],
+  "Experience stories should follow canonical Journey Visit order rather than publication order"
+)
+assert.ok(
+  costaRicaTrip.experiences.every(
+    experience => experience.summary && !experience.summary.includes("\n")
+  ),
+  "Journey Experience cards should use one first-paragraph preview"
+)
+
 assert.match(atlasRoutes, /storyMode: route\.query\.story === "1"/)
 assert.match(atlasView, /<AtlasMap/)
 assert.match(atlasView, /<AtlasStoryReader/)
@@ -53,6 +75,7 @@ assert.match(atlasReader, /getScrollPosition\(\)/)
 assert.match(atlasReader, /cancelScrollRestore/)
 assert.match(atlasReader, /completeInitialRestore/)
 assert.match(atlasReader, /focusInitialSection/)
+assert.match(atlasReader, /:focused-section-id="initialSectionId"/)
 assert.match(atlasReader, /scrollToStorySection\(this\.initialSectionId, \{/)
 assert.match(atlasReader, /focus: true/)
 assert.match(atlasReader, /:role="readerRole"/)
@@ -69,7 +92,12 @@ assert.match(publicStory, /<JourneyStoryBody/)
 assert.match(publicStory, /#between-content/)
 assert.match(sharedBody, /trip\.hasItinerary/)
 assert.match(sharedBody, /trip\.experiences\.length/)
-assert.match(sharedBody, /trip\.allMedia\.length/)
+assert.doesNotMatch(sharedBody, /trip\.allMedia\.length/)
+assert.match(sharedBody, /class="journey-experience-grid"/)
+assert.match(sharedBody, /show-image/)
+assert.match(sharedBody, /isExperienceExpanded\(experience\)/)
+assert.match(sharedBody, /class="journey-experience-details"/)
+assert.match(sharedBody, /Close full experience/)
 assert.match(sharedBody, /loading="lazy"/)
 assert.match(sharedBody, /:preload="embedded \? 'none' : 'metadata'"/)
 assert.match(sharedBody, /embedded && getLocation/)

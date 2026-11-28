@@ -53,6 +53,7 @@
           <JourneyStoryBody
             ref="storyBody"
             :trip="trip"
+            :focused-section-id="initialSectionId"
             embedded
             show-field-notes
             @open-location="openLocation"
