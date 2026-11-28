@@ -60,10 +60,18 @@ const uvitaRelationships = new Map(
 const uvitaCards = new Map(
   Array.from(uvitaRelationships, ([id, experience]) => [id, experience.card])
 )
+const ranchoRelationships = new Map(
+  nodeById
+    .get("rancho-la-merced")
+    .storyExperiences.map(experience => [experience.id, experience])
+)
+const ranchoCards = new Map(
+  Array.from(ranchoRelationships, ([id, experience]) => [id, experience.card])
+)
 assert.deepEqual(
   {
-    title: uvitaCards.get("experience-rancho-la-merced")?.title,
-    contextLabel: uvitaCards.get("experience-rancho-la-merced")?.contextLabel,
+    title: ranchoCards.get("experience-rancho-la-merced")?.title,
+    contextLabel: ranchoCards.get("experience-rancho-la-merced")?.contextLabel,
   },
   { title: "Uvita Horses", contextLabel: "Rancho La Merced" }
 )
@@ -76,7 +84,7 @@ assert.deepEqual(
   { title: "Uvita House", contextLabel: "Uvita The Lost Lemon" }
 )
 assert.deepEqual(
-  uvitaRelationships
+  ranchoRelationships
     .get("experience-rancho-la-merced")
     ?.moments.map(moment => moment.title),
   ["Uvita Horses"],
@@ -90,7 +98,7 @@ assert.deepEqual(
   "Every exact Experience relationship should remain available inline"
 )
 assert.ok(
-  uvitaRelationships
+  ranchoRelationships
     .get("experience-rancho-la-merced")
     ?.moments[0]?.media.some(media => media.kind === "video"),
   "Inline Atlas Experience data should retain its registered media"

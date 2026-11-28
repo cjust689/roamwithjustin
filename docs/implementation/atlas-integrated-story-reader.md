@@ -35,6 +35,8 @@ code_paths:
   - scripts/test-atlas-marker-layout.mjs
   - scripts/test-atlas-story-reader.mjs
   - scripts/test-atlas-story-relationships.mjs
+  - scripts/lib/editorial-place-registration.mjs
+  - scripts/test-editorial-place-registration.mjs
   - package.json
   - docs/audits/atlas-integrated-story-reader-phase-0-2026-11-18.md
 verification:
@@ -45,8 +47,8 @@ verification:
     - npm run atlas:test verifies that all ten registered Journey roots own story leads, incomplete Journeys carry the update note, and published Experiences project to exact stops before Journey completion
     - Pull requests 287 and 288 merged the progressive Journey discovery through develop and main; Pages run 45898969341 succeeded and live Uvita rendered both exact Experience cards
     - npm run atlas:test verifies that single-Moment stop cards lead with Uvita Horses and Uvita House while retaining their parent Experience labels
-    - npm run atlas:test verifies that exact Uvita Experience relationships retain their canonical Moments and registered video for inline stop rendering
-    - Local Chrome at 2000 by 1600 CSS pixels rendered the full Uvita Horses narrative and video followed by Uvita House inside the selected Uvita inspector while retaining the map
+    - npm run atlas:test verifies that the direct Uvita house Experience and Rancho La Merced horse Experience retain their canonical Moments and registered video
+    - Local Chrome at 1440 by 1200 CSS pixels rendered three child Place entries plus the direct house Experience inside Uvita, then rendered Uvita Horses and its existing video inside Rancho La Merced
     - npm run atlas:test
     - npm run lint
     - npm run content:validate
@@ -120,14 +122,14 @@ relates directly to Uvita in the Atlas presentation. The standalone Playa San
 Josecito Place and its source context remain available without projecting a
 Visit, Atlas stop, related route edge, or guided stop into this Journey.
 
-The latest owner chronology correction keeps the existing San José Visit as
-the third top-level stop, after La Fortuna and Bajos del Toro. Drake Bay is
-fourth and Uvita is fifth. Uvita Whale Tail is now a child beneath Uvita in
-both canonical Place and Atlas presentation hierarchy, using the same nested
-hub pattern as Moab. Its Visit, exact Experience and Moment binding, and seven
-registered media items are unchanged. The route still records the later
-return to San José through related navigation, while one broad city pin
-preserves the Casa Jungla story and media without creating overlapping pins.
+The owner chronology correction keeps the existing San José Visit as the
+third top-level stop, after La Fortuna and Bajos del Toro. Drake Bay is fourth
+and Uvita is fifth. Uvita Whale Tail, Rancho La Merced, and Nauyaca Waterfalls
+are child Place pins beneath Uvita. The existing horse Experience and video
+are associated with Rancho La Merced. The house Experience stays directly on
+Uvita without a dedicated pin. The route still records the later return to San
+José through related navigation, while one broad city pin preserves the Casa
+Jungla story and media without creating overlapping pins.
 
 The detail panel now presents the real story lead and `Explore the story`
 action before Journey stops. `View N stops` scrolls the existing panel to the
@@ -164,11 +166,17 @@ Single-Moment Experience cards lead with the recognizable Moment title and
 retain the Experience title as context.
 
 Phase 8 hoists the full matched Moment projection into the primary Atlas stop
-inspector. Selecting Uvita now reveals the Uvita Horses and Uvita House text
-and registered videos in the same scrolling place panel without requiring the
-reader action. The compact cards and their exact Experience reader links remain
-below the inline presentation so the owner can compare both approaches. Both
-surfaces consume the same selector-backed Experience and Moment records.
+inspector. Selecting Uvita reveals the Uvita House text and registered video.
+Selecting Rancho La Merced reveals Uvita Horses and its registered video. The
+compact cards and their exact Experience reader links remain below the inline
+presentation so the owner can compare both approaches. Both surfaces consume
+the same selector-backed Experience and Moment records.
+
+The destination index keeps physical and editorial hierarchy distinct. A
+nonroot Place with children lists those child Place pins and its direct
+Experiences together. Place selection navigates deeper through the recursive
+Atlas tree. Experience selection focuses the existing inline story and does
+not synthesize a map marker. There is no fixed nesting depth.
 
 The bounded Phase 4 refinement leaves more desktop map visible, moves focus to
 an explicitly requested chapter heading, stops the short restoration window
@@ -315,6 +323,27 @@ remains the indexable representation.
 - [x] Keep videos deferred with `preload="none"` until visitor playback.
 - [x] Verify Uvita Horses, Uvita House, and their registered media through
       `npm run atlas:test`.
+
+### Phase 9, recursive destination discovery
+
+- [x] Treat Place parent links as an arbitrary-depth destination tree.
+- [x] Keep map visibility explicit through Atlas Place nodes rather than
+      inferring pins from Experience names.
+- [x] Combine direct Experiences and child Places in a destination index while
+      preserving their different selection behavior.
+- [x] Make Sheet-backed Place registration attach the new Atlas node to the
+      selected parent Place node instead of always attaching it to the Journey
+      root.
+- [x] Add the visible `Atlas Coordinates` Sheet field for explicit new-Place
+      pin placement while protecting canonical coordinates on existing Places.
+- [x] Add the visible `Atlas Stop` `No` or `Yes` classification and require
+      `Yes` before a row can register a new Place pin.
+- [x] Give Whale Tail, Rancho La Merced, and Nauyaca child pins beneath Uvita,
+      move the existing horse association to Rancho La Merced, and keep the
+      house story unpinned on Uvita.
+- [x] Verify hierarchy, exact Experience projection, retained media, and
+      registration behavior with `npm run atlas:test`, `npm run
+      editorial:test`, and `npm run content:validate`.
 
 ## Verified flow after Phase 3
 

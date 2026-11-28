@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-15
-updated: 2026-11-23
+updated: 2026-11-27
 related:
   - editorial-single-row-atlas-publishing
   - content-model
@@ -44,7 +44,9 @@ code_paths:
   - scripts/lib/editorial-publication-plan.mjs
   - scripts/lib/editorial-place-registration.mjs
   - scripts/test-editorial-google.mjs
+  - scripts/test-editorial-migration.mjs
   - scripts/test-editorial-place-registration.mjs
+  - scripts/test-editorial-publication-writeback.mjs
   - scripts/test-editorial-story-generator.mjs
   - src/content/experiences/index.mjs
   - src/content/editorial/generated/records.json
@@ -70,6 +72,7 @@ verification:
     - verified live Atlas Catalog and 106 Journey and Place bindings on 2026-11-16
     - verified 82 live Visit bindings on 2026-11-16
     - creator-authorized Publish To and Atlas Place upgrade verified on 106 rows on 2026-11-16
+    - guarded live migrations added Atlas Coordinates and Atlas Stop as separate schema-only changes and preserved all creator fields, unrelated rows, and 108 eligible Post IDs and bindings on 2026-11-27
     - visible protected Atlas Reference verified with 81 canonical choices on 2026-11-16
     - GitHub pull request 30 merged to develop as 4d88df2 on 2026-11-16
     - develop validate job 133078010450 succeeded on 2026-11-16
@@ -360,6 +363,33 @@ Reference` tab is for review only. `editorial:catalog -- --apply` rebuilds it
 on demand, and every apply-mode publication refreshes it before selection and
 again after successful generated content changes.
 
+The two fields model separate layers. `Atlas Place` is a physical destination
+and map target. It may be the Journey root or any descendant in an arbitrary
+Place tree. `Atlas Experience` is a story within that selected Place and does
+not create a pin. A physical subdestination must first use the explicit Place
+registration flow with its parent Place. A private or intentionally broad
+story should remain on its broader Place rather than creating precise public
+geography.
+
+A new Experience inherits the row's resolved Place and Visit. Once an
+Experience exists, later publication requires the row to resolve to that same
+Place and Visit. Editing the friendly Place cell is not a reparent operation.
+Moving an existing Experience and its media is a separate reviewed migration,
+which prevents a casual Sheet edit from splitting its Moments and placements
+across different pins.
+
+`Atlas Coordinates` supplies the pin for a new Place in `latitude, longitude`
+order, for example `9.182, -83.763`. Registration validates both values,
+converts them to the canonical `[longitude, latitude]` Place representation,
+and writes the normalized value back after success. Existing Places always use
+their canonical coordinates. A row cannot override their position.
+
+`Atlas Stop` is a `No` or `Yes` dropdown that classifies the row separately
+from its story. `Yes` is required before `editorial:register:place` may create a
+Place and map pin. `No` means the row stays story content inside the selected
+`Atlas Place`; it does not create another Place. The field does not remove the
+pin of an existing selected Place.
+
 `Atlas Notes` is private firsthand evidence. `Atlas Story` is reviewed public
 copy. For a row with an Experience, an ordinary Preview command regenerates and
 overwrites `Atlas Story`, including any manual edits to the prior draft. The
@@ -373,23 +403,36 @@ model, and leave `Atlas Story` untouched.
 
 Adding a row never creates geography by inference. To request a missing Place,
 put its name in `Location`, set the row to `Publish To = Atlas` or `Both`,
-select an existing `Atlas Journey`, choose `New Place` in `Atlas Place`, and
-keep `Atlas Mode = Off`. The stable Post ID identifies the request even if the
+select an existing `Atlas Journey`, choose `New Place` in `Atlas Place`, set
+`Atlas Stop = Yes`, and enter `latitude, longitude` in `Atlas Coordinates`.
+Keep `Atlas Mode = Off`. The stable Post ID identifies the request even if the
 Sheet is sorted.
 
 Preview the exact registration first:
 
 ```bash
-npm run editorial:register:place -- --preview --oauth-client "C:\\private\\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID" --post-id "POST_ID" --parent-place "PARENT_PLACE" --longitude "LONGITUDE" --latitude "LATITUDE" --summary "PUBLIC PLACE SUMMARY" --after-place "PRIOR_PLACE"
+npm run editorial:register:place -- --preview --oauth-client "C:\\private\\google-oauth-client.json" --spreadsheet-id "SPREADSHEET_ID" --posts-gid "TAB_GID" --post-id "POST_ID" --parent-place "PARENT_PLACE" --summary "PUBLIC PLACE SUMMARY" --after-place "PRIOR_PLACE"
 ```
 
 Replace `--preview` with `--apply` only after reviewing the output. A new Place
 requires an existing parent Place, or the explicit value `none`, verified
-longitude and latitude, and a short public summary. Category, coordinate
+`Atlas Coordinates`, and a short public summary. The paired `--longitude` and
+`--latitude` options are an explicit recovery override. Category, coordinate
 precision, country/region codes, official links, map links, camera settings,
 and a stable ID override are optional. `--after-place` controls Journey order;
 omitting it appends the Visit. The row date remains display evidence and is not
 used to infer order.
+
+The generated Atlas node uses the Atlas node for that parent Place, so country,
+city, district, venue, and attraction nesting can continue to any depth. The
+command rejects a parent that is not already represented in the selected
+Journey.
+
+Two guarded live migrations on November 27, 2026 added only `Atlas
+Coordinates` and then `Atlas Stop`. The second migration added the `No` or
+`Yes` dropdown without backfilling classifications. Both preserved all
+original creator fields, unrelated rows, 108 eligible Post IDs, and existing
+bindings. The final live baseline proposed no further changes.
 
 If the requested name resolves to an existing canonical Place that lacks a
 Visit in the selected Journey, the command reuses the Place and creates only

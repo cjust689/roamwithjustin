@@ -3,6 +3,7 @@ import {
   ATLAS_POST_HEADERS,
   AUTOMATION_POST_HEADERS,
   EXISTING_POST_HEADERS,
+  placeRegistrationSourceHash,
   postSourceHash,
   storySourceHash,
 } from "./lib/editorial-baseline.mjs"
@@ -171,6 +172,7 @@ assert.match(calls[0].url, /sheet%2Fid:batchUpdate$/)
 const registrationRow = {
   ...row,
   "Atlas Place": "New Place",
+  "Atlas Coordinates": "20.2, -80.2",
   "Atlas Mode": "Off",
   journey_id: "",
   place_id: "",
@@ -181,16 +183,18 @@ const registrationInput = {
   headers,
   rows: [registrationRow],
   postId: "post-123",
-  expectedSheetSourceHash: postSourceHash(registrationRow),
+  expectedSheetSourceHash: placeRegistrationSourceHash(registrationRow),
   requestedPlace: "New Place",
   placeLabel: "Test Cove",
   journeyId: "test-country-2026",
   placeId: "test-cove",
   visitId: "test-country-2026-test-cove",
+  coordinates: [-80.2, 20.2],
 }
 const registration = buildPlaceRegistrationWriteback(registrationInput)
-assert.equal(registration.requests.length, 5)
+assert.equal(registration.requests.length, 6)
 assert.equal(registration.values["Atlas Place"], "Test Cove")
+assert.equal(registration.values["Atlas Coordinates"], "20.2, -80.2")
 assert.equal(registration.values.visit_id, "test-country-2026-test-cove")
 assert.equal(
   buildPlaceRegistrationWriteback({

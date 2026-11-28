@@ -114,10 +114,29 @@ export const costaRicaPlaces = Object.freeze([
       "The Atlas uses the Marino Ballena protected-area coordinate rather than inventing an exact path or drone position.",
   },
   {
+    id: "rancho-la-merced",
+    name: "Rancho La Merced",
+    coordinates: [-83.763, 9.182],
+    parentPlaceId: "uvita-costa-rica",
+    countryCode: "CR",
+    regionCode: "CR-P",
+    category: "wildlife-refuge",
+    evidenceStatus: "confirmed",
+    coordinatePrecision: "protected-area",
+    description:
+      "A wildlife refuge near Uvita where our horseback ride crossed forest, rivers, and beach.",
+    externalLinks: {
+      official:
+        "https://www.visitcostarica.com/planning-your-trip/other-activities/rancho-la-merced",
+    },
+    verificationNotes:
+      "The coordinate represents the wildlife refuge rather than an exact point along the horseback route.",
+  },
+  {
     id: "nauyaca-waterfalls",
     name: "Nauyaca Waterfalls",
     coordinates: [-83.8075411, 9.254635],
-    parentPlaceId: "costa-rica",
+    parentPlaceId: "uvita-costa-rica",
     countryCode: "CR",
     regionCode: "CR-SJ",
     category: "waterfall",

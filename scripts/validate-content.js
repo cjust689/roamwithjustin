@@ -513,16 +513,24 @@ async function main() {
         owner + ' references unknown Journey "' + placement.journeyId + '"'
       )
     }
-    if (
-      placement.experienceId &&
-      !experienceModule.getExperience(placement.experienceId)
-    ) {
-      report(
-        owner +
-          ' references unknown Experience "' +
-          placement.experienceId +
-          '"'
+    if (placement.experienceId) {
+      const experience = experienceModule.getExperience(
+        placement.experienceId
       )
+      if (!experience) {
+        report(
+          owner +
+            ' references unknown Experience "' +
+            placement.experienceId +
+            '"'
+        )
+      } else if (
+        placement.journeyId !== experience.journeyId ||
+        placement.visitId !== experience.visitId ||
+        placement.placeId !== experience.placeId
+      ) {
+        report(owner + " does not match its Experience geography")
+      }
     }
   })
 
@@ -1132,7 +1140,6 @@ async function main() {
     "san-jose-costa-rica",
     "drake-bay",
     "uvita-costa-rica",
-    "nauyaca-waterfalls",
     "manuel-antonio-area",
   ]
   if (
@@ -1143,15 +1150,26 @@ async function main() {
   }
 
   const uvita = completeAtlasViews.find(node => node.id === "uvita-costa-rica")
-  if ((uvita?.childIds || []).join("|") !== "uvita-whale-tail") {
-    report("Uvita does not own the Whale Tail Atlas stop")
+  const expectedUvitaChildren = [
+    "uvita-whale-tail",
+    "rancho-la-merced",
+    "nauyaca-waterfalls",
+  ]
+  const orderedUvitaChildren = projections
+    .orderAtlasNodesByJourney(
+      (uvita?.childIds || [])
+        .map(id => completeAtlasViews.find(node => node.id === id))
+        .filter(Boolean)
+    )
+    .map(node => node.id)
+  if (orderedUvitaChildren.join("|") !== expectedUvitaChildren.join("|")) {
+    report("Uvita does not own its expected physical child stops")
   }
-  if (
-    placeModule.getPlace("uvita-whale-tail")?.parentPlaceId !==
-    "uvita-costa-rica"
-  ) {
-    report("The Whale Tail Place is not parented beneath Uvita")
-  }
+  expectedUvitaChildren.forEach(placeId => {
+    if (placeModule.getPlace(placeId)?.parentPlaceId !== "uvita-costa-rica") {
+      report('Place "' + placeId + '" is not parented beneath Uvita')
+    }
+  })
 
   const utah = completeAtlasViews.find(node => node.id === "utah")
   const orderedUtahOverview = projections
@@ -1227,6 +1245,7 @@ async function main() {
     "san-jose-costa-rica",
     "drake-bay",
     "uvita-whale-tail",
+    "rancho-la-merced",
     "nauyaca-waterfalls",
     "manuel-antonio-area",
   ]
