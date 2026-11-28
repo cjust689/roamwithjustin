@@ -4,7 +4,7 @@ title: Journey Media Ingestion
 kind: implementation
 status: in-progress
 implementation_state: partial
-updated: 2026-11-15
+updated: 2026-11-27
 related:
   - media-pipeline
   - lightroom-publishing
@@ -30,6 +30,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - node scripts/test-media-ingestion.js
     - npm run media:test
     - npm run media:worker:check
     - npm run content:validate
@@ -333,8 +334,8 @@ validation. A failed validation restores the prior generated file.
 
 If images were first prepared without `--place`, they are published as
 Journey-only placements. Preparing the same source later with the correct
-Place creates the same deterministic Media IDs, so ordinary ingestion rejects
-the collision instead of silently moving existing content.
+Place produces the same full checksums, so ordinary ingestion rejects the
+already-published bytes instead of silently moving existing content.
 
 After preparing and uploading the corrected Place package, use the explicit
 reassociation mode. Always dry-run first. For the Red Hook correction in Git
@@ -421,7 +422,14 @@ again after the change is pushed to `main`.
 - Re-running an already applied identical batch is a no-op.
 - Reusing a batch ID with different manifest bytes is rejected.
 - New manifest entries with `assetId: null` receive deterministic generated
-  Media IDs; filenames are not canonical identity.
+  Media IDs; filenames are not canonical identity. Ordinary new entries are
+  compared by full SHA-256 within the incoming manifest and against generated
+  assets already published in the same Journey. Repeated bytes are rejected
+  even when their manifest position changes.
+- Normal generated IDs retain the established 12-character hash prefix. If
+  different bytes ever occupy the same shortened candidate ID, the new ID uses
+  a deterministic longer hash prefix. Existing IDs and in-flight manifests,
+  receipts, placements, and R2 keys are not rewritten.
 - A future republish may set `assetId` to an existing generated Media ID and
   must set `revision` to exactly the next revision. The ingestor preserves the
   ID and existing placement/editorial state while advancing the rendition.

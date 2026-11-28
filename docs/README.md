@@ -114,6 +114,11 @@ Visitor-facing Journey titles no longer repeat their year in parentheses.
 Canonical titles retain the year for editorial automation and identity, while
 trip pages, Atlas cards, map pills, and story leads render the date as a styled
 secondary label.
+Media ingestion now compares each ordinary new asset's full SHA-256 before it
+allocates a generated ID. Repeated bytes are rejected even when the same photo
+moves to another position or batch, while distinct files that share the legacy
+12-character ID prefix receive a deterministic longer prefix. Existing asset
+IDs, prepared manifests, upload receipts, placements, and R2 keys remain valid.
 
 Local Atlas marker follow-up: tightly colliding World-level Journey roots now
 remain individually selectable instead of collapsing into one marker. Their
