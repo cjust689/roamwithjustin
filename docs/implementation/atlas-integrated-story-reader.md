@@ -80,6 +80,7 @@ verification:
     - npm run atlas:test verifies that the Costa Rica Atlas root and story lead resolve the same canonical Journey hero and that mobile CSS does not hide the story-card image
     - npm run atlas:test verifies clean public Journey titles and separate date labels in the Atlas detail hero, story lead, Journey explorer, and map pills
     - npm run atlas:test verifies image-first cover selection, MP4 exclusion from image-only covers and map previews, and the three reparented Uvita House photographs ahead of its retained video
+    - npm run atlas:test verifies Uvita's explicit destination hero, direct Uvita House story handoff from the destination index, and suppression of duplicate inline and full-Journey Experience sections when that index is present
 ---
 
 # Atlas integrated story reader
@@ -140,6 +141,12 @@ are associated with Rancho La Merced. The house Experience stays directly on
 Uvita without a dedicated pin. The route still records the later return to San
 José through related navigation, while one broad city pin preserves the Casa
 Jungla story and media without creating overlapping pins.
+Uvita retains its dedicated destination hero even after newer house images are
+associated with the same Visit. `Inside Uvita` is its single discovery list.
+Child Place entries select their map pins, while the direct unpinned Uvita
+House entry opens the exact Experience section in the Journey reader. Because
+the index already represents that Experience, the Uvita panel omits the
+duplicate inline story and `Continue in the full journey` card.
 
 The detail panel now presents the real story lead and `Explore the story`
 action before Journey stops. `View N stops` scrolls the existing panel to the
@@ -362,6 +369,9 @@ remains the indexable representation.
 - [x] Keep image-only cover surfaces independent of media publication order,
       and associate the three existing Uvita House images with its Experience
       and Moment while retaining the video in the same story gallery.
+- [x] Preserve Uvita's explicit destination hero and make its direct unpinned
+      house entry open the exact story section without repeating the house as
+      inline or secondary Journey content beneath the destination index.
 
 ## Verified flow after Phase 3
 

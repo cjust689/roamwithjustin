@@ -198,6 +198,12 @@ its existing video are associated with Rancho La Merced. The house Experience
 remains directly associated with Uvita and therefore has no separate pin. This
 makes Uvita a nested exploration hub without changing existing Moment IDs,
 media asset IDs, or R2 object keys.
+The Uvita Atlas presentation explicitly retains its destination cover rather
+than allowing newer house media to replace it. Its destination index is the
+single navigation surface for the direct house Experience: child Places select
+map pins, while the unpinned house entry opens the exact Journey story section.
+The panel does not repeat that Experience as an inline story or secondary
+Journey card beneath the index.
 The later return uses the same broad San José geography and closes the related
 route from Manuel Antonio without creating an overlapping map pin. The Casa
 Jungla Experience, Moment, and media remain attached to the unchanged San José
