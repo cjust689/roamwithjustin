@@ -190,6 +190,9 @@
       "sortOrder": 0,
       "visibility": "published",
       "mediaAssetIds": [
+        "image-costa-rica-2025-fd4e32d92375-001",
+        "image-costa-rica-2025-7a839fa7245a-002",
+        "image-costa-rica-2025-81e4d3a9ef6b-003",
         "video-costa-rica-2025-881770ae4854-001"
       ],
       "sourceHash": "2bb0c27170452d327817feb9d2be35301e1d63530c30737906984402af3d943b"
@@ -410,9 +413,13 @@
       "experienceId": "experience-costa-rica-2025-uvita-the-lost-lemon",
       "momentId": "moment-fb822fa8-db21-4f7d-abcd-6c7e1ab36cc2",
       "mediaBatchIds": [
-        "media-costa-rica-2025-uvita-costa-rica-1a5b43685ad17d7f"
+        "media-costa-rica-2025-uvita-costa-rica-1a5b43685ad17d7f",
+        "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
       ],
       "mediaAssetIds": [
+        "image-costa-rica-2025-fd4e32d92375-001",
+        "image-costa-rica-2025-7a839fa7245a-002",
+        "image-costa-rica-2025-81e4d3a9ef6b-003",
         "video-costa-rica-2025-881770ae4854-001"
       ]
     },

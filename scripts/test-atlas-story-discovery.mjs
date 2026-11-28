@@ -4,7 +4,10 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import { atlasPresentation } from "../src/content/atlas/presentation.mjs"
 import { getJourney } from "../src/content/journeys/index.mjs"
-import { resolveMediaReference } from "../src/content/selectors/media.mjs"
+import {
+  firstImageMedia,
+  resolveMediaReference,
+} from "../src/content/selectors/media.mjs"
 import {
   buildAtlasNodeView,
   journeyDisplayTitle,
@@ -109,6 +112,15 @@ assert.deepEqual(
   uvitaNode.storyExperiences.map(experience => experience.card.title),
   ["Uvita House"]
 )
+const uvitaHouse = uvitaNode.storyExperiences[0]
+assert.equal(
+  uvitaHouse.card.image?.id,
+  "image-costa-rica-2025-fd4e32d92375-001"
+)
+assert.deepEqual(
+  uvitaHouse.moments[0]?.media.map(media => media.kind),
+  ["image", "image", "image", "video"]
+)
 const ranchoNode = nodes.find(node => node.id === "rancho-la-merced")
 assert.equal(ranchoNode.parentId, "uvita-costa-rica")
 assert.deepEqual(
@@ -136,6 +148,20 @@ assert.equal(
   }).image,
   explicitRootOverride
 )
+assert.equal(
+  buildAtlasNodeView({
+    ...costaRicaPresentation,
+    hero: { src: "/test/atlas-root-override.mp4", kind: "video" },
+  }).image,
+  costaRicaHero
+)
+assert.equal(
+  firstImageMedia([
+    { src: "/test/first.mp4", kind: "video" },
+    { src: "/test/cover.jpg", kind: "image" },
+  ])?.src,
+  "/test/cover.jpg"
+)
 
 assert.match(detailPanel, /class="atlas-story-lead"/)
 assert.match(detailPanel, />\s*Explore the story\s*</)
@@ -155,6 +181,12 @@ assert.match(
   /<small v-if="node\.dateLabel">\{\{ node\.dateLabel \}\}<\/small>/
 )
 assert.match(atlasMap, /labelMeta\.className = "atlas-marker-meta"/)
+assert.match(atlasMap, /\[node\.image, \.\.\.node\.media\]/)
+assert.match(
+  atlasMap,
+  /item\.kind === "video" \? item\.poster \|\| "" : item\.src/
+)
+assert.match(detailPanel, /image: experience\.card\.image\?\.src \|\| ""/)
 assert.match(detailPanel, />Journey stops</)
 assert.match(detailPanel, />Useful links</)
 assert.match(detailPanel, /usefulActions\.length/)

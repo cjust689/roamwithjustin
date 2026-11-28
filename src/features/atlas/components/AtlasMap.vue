@@ -689,11 +689,15 @@ export default {
 
       this.hidePreview()
 
-      const media = (node.media.length ? node.media : [node.image])
-        .map(item =>
-          typeof item === "string" ? item : item.poster || item.src
+      const media = [node.image, ...node.media]
+        .map(item => {
+          if (typeof item === "string") return item
+          return item.kind === "video" ? item.poster || "" : item.src
+        })
+        .filter(
+          (source, mediaIndex, sources) =>
+            source && sources.indexOf(source) === mediaIndex
         )
-        .filter(Boolean)
       const index = this.previewCounts[node.id] || 0
       const card = document.createElement("article")
       const content = document.createElement("div")

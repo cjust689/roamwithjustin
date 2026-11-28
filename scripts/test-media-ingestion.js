@@ -396,8 +396,122 @@ async function main() {
     )
     assert.match(
       collisionPlan.errors.join("\n"),
-      /collides with generated ID/
+      new RegExp(
+        `duplicates bytes already published as "${firstPlan.assetIds[0]}"`
+      )
     )
+
+    const reorderedDuplicateManifest = JSON.parse(JSON.stringify(manifest))
+    reorderedDuplicateManifest.batchId = "media-usvi-reordered-duplicate"
+    reorderedDuplicateManifest.r2Prefix =
+      "images/usvi-2025/media-usvi-reordered-duplicate/"
+    const newLeadingAsset = JSON.parse(
+      JSON.stringify(reorderedDuplicateManifest.assets[0])
+    )
+    newLeadingAsset.provisionalId = "provisional-new-leading"
+    newLeadingAsset.output.relativePath = "new-leading-001.jpg"
+    newLeadingAsset.output.objectKey =
+      `${reorderedDuplicateManifest.r2Prefix}${newLeadingAsset.output.relativePath}`
+    newLeadingAsset.output.sha256 = "b".repeat(64)
+    newLeadingAsset.placement.sortOrder = 0
+    const reorderedDuplicateAsset = JSON.parse(
+      JSON.stringify(reorderedDuplicateManifest.assets[0])
+    )
+    reorderedDuplicateAsset.provisionalId = "provisional-reordered-duplicate"
+    reorderedDuplicateAsset.output.relativePath = "reordered-duplicate-002.jpg"
+    reorderedDuplicateAsset.output.objectKey =
+      `${reorderedDuplicateManifest.r2Prefix}${reorderedDuplicateAsset.output.relativePath}`
+    reorderedDuplicateAsset.placement.sortOrder = 1
+    reorderedDuplicateManifest.assets = [
+      newLeadingAsset,
+      reorderedDuplicateAsset,
+    ]
+    const reorderedDuplicatePlan = planMediaIngestion(
+      reorderedDuplicateManifest,
+      firstPlan.records,
+      {
+        ...context,
+        manifestSha256: sha256(JSON.stringify(reorderedDuplicateManifest)),
+      }
+    )
+    assert.match(
+      reorderedDuplicatePlan.errors.join("\n"),
+      new RegExp(
+        `Manifest asset 2 duplicates bytes already published as "${firstPlan.assetIds[0]}"`
+      )
+    )
+    assert.strictEqual(reorderedDuplicatePlan.changed, false)
+
+    const withinBatchDuplicateManifest = JSON.parse(
+      JSON.stringify(reorderedDuplicateManifest)
+    )
+    withinBatchDuplicateManifest.batchId = "media-usvi-within-batch-duplicate"
+    withinBatchDuplicateManifest.r2Prefix =
+      "images/usvi-2025/media-usvi-within-batch-duplicate/"
+    withinBatchDuplicateManifest.assets.forEach((asset, index) => {
+      asset.output.sha256 = output.sha256
+      asset.output.objectKey =
+        `${withinBatchDuplicateManifest.r2Prefix}${asset.output.relativePath}`
+      asset.placement.sortOrder = index
+    })
+    const withinBatchDuplicatePlan = planMediaIngestion(
+      withinBatchDuplicateManifest,
+      emptyRecords(),
+      {
+        ...context,
+        manifestSha256: sha256(JSON.stringify(withinBatchDuplicateManifest)),
+      }
+    )
+    assert.match(
+      withinBatchDuplicatePlan.errors.join("\n"),
+      /Manifest asset 2 duplicates manifest asset 1 by full SHA-256/
+    )
+    assert.strictEqual(withinBatchDuplicatePlan.changed, false)
+
+    const collisionHashA = `${"a".repeat(12)}${"1".repeat(52)}`
+    const collisionHashB = `${"a".repeat(12)}${"2".repeat(52)}`
+    const prefixCollisionManifestA = JSON.parse(JSON.stringify(manifest))
+    prefixCollisionManifestA.batchId = "media-usvi-prefix-collision-a"
+    prefixCollisionManifestA.r2Prefix =
+      "images/usvi-2025/media-usvi-prefix-collision-a/"
+    prefixCollisionManifestA.assets[0].output.sha256 = collisionHashA
+    prefixCollisionManifestA.assets[0].output.objectKey =
+      `${prefixCollisionManifestA.r2Prefix}${output.relativePath}`
+    const prefixCollisionPlanA = planMediaIngestion(
+      prefixCollisionManifestA,
+      emptyRecords(),
+      {
+        ...context,
+        manifestSha256: sha256(JSON.stringify(prefixCollisionManifestA)),
+      }
+    )
+    assert.deepStrictEqual(prefixCollisionPlanA.errors, [])
+    assert.strictEqual(
+      prefixCollisionPlanA.assetIds[0],
+      `image-usvi-2025-${collisionHashA.slice(0, 12)}-001`
+    )
+
+    const prefixCollisionManifestB = JSON.parse(JSON.stringify(manifest))
+    prefixCollisionManifestB.batchId = "media-usvi-prefix-collision-b"
+    prefixCollisionManifestB.r2Prefix =
+      "images/usvi-2025/media-usvi-prefix-collision-b/"
+    prefixCollisionManifestB.assets[0].output.sha256 = collisionHashB
+    prefixCollisionManifestB.assets[0].output.objectKey =
+      `${prefixCollisionManifestB.r2Prefix}${output.relativePath}`
+    const prefixCollisionPlanB = planMediaIngestion(
+      prefixCollisionManifestB,
+      prefixCollisionPlanA.records,
+      {
+        ...context,
+        manifestSha256: sha256(JSON.stringify(prefixCollisionManifestB)),
+      }
+    )
+    assert.deepStrictEqual(prefixCollisionPlanB.errors, [])
+    assert.strictEqual(
+      prefixCollisionPlanB.assetIds[0],
+      `image-usvi-2025-${collisionHashB.slice(0, 20)}-001`
+    )
+    assert.strictEqual(prefixCollisionPlanB.records.assets.length, 2)
 
     const reassociationContext = {
       ...context,
