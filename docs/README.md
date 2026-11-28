@@ -119,6 +119,12 @@ allocates a generated ID. Repeated bytes are rejected even when the same photo
 moves to another position or batch, while distinct files that share the legacy
 12-character ID prefix receive a deterministic longer prefix. Existing asset
 IDs, prepared manifests, upload receipts, placements, and R2 keys remain valid.
+Public cover projections now select the first available image rather than the
+first media item, so a newer MP4 cannot become an image-only trip, Place,
+Experience, Atlas card, or map-preview cover. Videos remain in their galleries.
+The three existing Uvita House photographs are now associated with that
+Experience and Moment, ahead of its retained video, without changing their
+asset IDs or R2 objects.
 
 Local Atlas marker follow-up: tightly colliding World-level Journey roots now
 remain individually selectable instead of collapsing into one marker. Their

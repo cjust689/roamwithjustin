@@ -2,7 +2,10 @@ import {
   getExperienceMoments,
   getJourneyExperiences,
 } from "../experiences/index.mjs"
-import { getExperiencePublishedMedia, resolveMediaReference } from "./media.mjs"
+import {
+  firstImageMedia,
+  getExperiencePublishedMedia,
+} from "./media.mjs"
 import { getPartner } from "../partners/index.mjs"
 import {
   EXPERIENCE_CATEGORIES,
@@ -37,11 +40,12 @@ export function getJourneyExperienceViews(journeyId) {
       operator: experience.partnerId
         ? officialExperiencePartner(getPartner(experience.partnerId))
         : null,
-      image: experience.coverAssetId
-        ? resolveMediaReference({ assetId: experience.coverAssetId })
-        : getExperiencePublishedMedia(experience.id).find(
-            media => media.kind === "image"
-          ) || null,
+      image: firstImageMedia([
+        ...(experience.coverAssetId
+          ? [{ assetId: experience.coverAssetId }]
+          : []),
+        ...getExperiencePublishedMedia(experience.id),
+      ]),
       moments: getExperienceMoments(experience.id).map(moment => ({
         id: moment.id,
         title: moment.title,

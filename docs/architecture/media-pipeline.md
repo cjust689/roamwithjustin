@@ -161,6 +161,13 @@ published image becomes the derived display image for the Trip card and Atlas
 node. A Visit with no verified image stays image-free; selectors never use the
 Journey cover as a location-specific fallback.
 
+Image-only cover surfaces skip videos regardless of publication order. A
+Journey without a curated image hero may derive its trip and Atlas-root cover
+from the first published Journey image, while a Visit and Experience remain
+bounded to images associated with their own canonical scope. Posterless MP4s
+stay available in galleries and Moment media but never supply an `<img>` URL or
+a play-icon substitute for a photographic cover.
+
 An Experience-scoped placement is valid only when the referenced Experience
 exists and belongs to the same Journey. `getExperiencePublishedMedia()` and
 the Experience selector project those placements into published Moments on the

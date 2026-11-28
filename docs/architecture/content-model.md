@@ -260,14 +260,16 @@ standalone route. Incomplete Journeys carry a visitor-facing update note while
 published Journeys omit it. This keeps every registered trip discoverable
 without presenting internal publication state as public copy.
 
-Root display media follows one bounded precedence: an explicit Atlas
-presentation hero wins, otherwise the root inherits the canonical Journey
-hero, otherwise it may use the first verified root-scoped image. Child Place
+Root display media follows one bounded precedence among image assets: an
+explicit Atlas presentation image hero wins, otherwise the root inherits the
+canonical Journey image hero, otherwise it may use the first verified image
+published within that Journey. Video references are skipped rather than used
+as photographic covers. Child Place
 nodes do not inherit the Journey hero. They continue to use an explicit Atlas
 or Visit hero and then the first verified image published to that Visit. This
 lets one reviewed Journey cover populate its trip surface and default root map
 pill without implying that the same photograph belongs to every destination.
-The root `storyLead` projection resolves the same canonical Journey hero. Its
+The root `storyLead` projection resolves the same image-only Journey cover. Its
 mobile Atlas card retains that photograph in a bounded single-column layout,
 so the trip header, root inspector, and story entry remain visually consistent.
 

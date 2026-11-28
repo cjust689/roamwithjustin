@@ -714,7 +714,7 @@ export default {
           kindLabel: "Experience",
           title: experience.card.title,
           contextLabel: experience.card.contextLabel || "",
-          image: experience.card.image || "",
+          image: experience.card.image?.src || "",
           hasVideo: experience.moments.some(moment =>
             moment.media.some(media => media.kind === "video")
           ),

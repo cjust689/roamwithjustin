@@ -79,6 +79,7 @@ verification:
     - npm run atlas:test verifies that the reparented Whale Tail stop retains its published High Tide Whale Tail Moment and all seven registered media items
     - npm run atlas:test verifies that the Costa Rica Atlas root and story lead resolve the same canonical Journey hero and that mobile CSS does not hide the story-card image
     - npm run atlas:test verifies clean public Journey titles and separate date labels in the Atlas detail hero, story lead, Journey explorer, and map pills
+    - npm run atlas:test verifies image-first cover selection, MP4 exclusion from image-only covers and map previews, and the three reparented Uvita House photographs ahead of its retained video
 ---
 
 # Atlas integrated story reader
@@ -112,6 +113,11 @@ the presentation does not declare a map-specific override. Explicit Atlas
 heroes remain first in precedence. The fallback applies only to top-level
 Journey roots, so destination pins still require their own Atlas hero, Visit
 hero, or verified Visit image.
+All cover candidates are filtered to images. A video may retain its gallery or
+Moment position, but it cannot become a trip cover, Place cover, Experience
+cover, Atlas card image, or map-hover image. Map previews prefer the projected
+cover and omit videos that have no poster rather than passing an MP4 URL to an
+image element.
 The root `Explore the story` card consumes that same projected hero. Mobile
 layouts now retain it above the card copy with bounded height rather than
 hiding it, keeping the Journey header and story entry visually aligned.
@@ -353,6 +359,9 @@ remains the indexable representation.
 - [x] Verify hierarchy, exact Experience projection, retained media, and
       registration behavior with `npm run atlas:test`, `npm run
       editorial:test`, and `npm run content:validate`.
+- [x] Keep image-only cover surfaces independent of media publication order,
+      and associate the three existing Uvita House images with its Experience
+      and Moment while retaining the video in the same story gallery.
 
 ## Verified flow after Phase 3
 
