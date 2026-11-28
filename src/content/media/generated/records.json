@@ -6556,6 +6556,96 @@
         "byteSize": 171319837,
         "batchId": "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-fd4e32d92375-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-costa-rica/media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41/uvita-costa-rica-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "fd4e32d92375ceae1d70cc979822a8333cce43c1ea16622cae2468b9ba4bc47a",
+        "byteSize": 216804,
+        "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-7a839fa7245a-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-costa-rica/media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41/uvita-costa-rica-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "7a839fa7245a5a4b15a5f034d3f0253e8aaa6d49322b7b8f6d59b74ec1a1d3b2",
+        "byteSize": 288836,
+        "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-81e4d3a9ef6b-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/uvita-costa-rica/media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41/uvita-costa-rica-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1440
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "81e4d3a9ef6b540ea5c28deb11f2d73fefc19373391c96012addf974c94b8f3e",
+        "byteSize": 354209,
+        "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
+      }
     }
   ],
   "placements": [
@@ -9392,6 +9482,45 @@
       "sortOrder": 1,
       "publicationSequence": 32,
       "batchId": "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-costa-rica-image-costa-rica-2025-fd4e32d92375-001",
+      "assetId": "image-costa-rica-2025-fd4e32d92375-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 33,
+      "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-costa-rica-image-costa-rica-2025-7a839fa7245a-002",
+      "assetId": "image-costa-rica-2025-7a839fa7245a-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 33,
+      "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-uvita-costa-rica-image-costa-rica-2025-81e4d3a9ef6b-003",
+      "assetId": "image-costa-rica-2025-81e4d3a9ef6b-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-uvita-costa-rica",
+      "placeId": "uvita-costa-rica",
+      "experienceId": null,
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 33,
+      "batchId": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41"
     }
   ],
   "batches": [
@@ -10002,6 +10131,21 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "58848ef5a8c2b043e65b7174154598164c2fd4e82377cc02fc2389b26d17ff0c"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-uvita-costa-rica-d437ee4f6e2a3a41",
+      "sequence": 33,
+      "manifestSha256": "bde494359a8a27ab72fedf74683d93c2136a4cfdd61af7076a509aeb53878ef7",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-fd4e32d92375-001",
+        "image-costa-rica-2025-7a839fa7245a-002",
+        "image-costa-rica-2025-81e4d3a9ef6b-003"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "ea0e6c3123eb41099d3ed12af9c84e9019ca6a9ebc3b093f622bb339088c9b45"
       }
     }
   ]

@@ -423,7 +423,17 @@
                 type="button"
                 @click="$emit('select', item.id)"
               >
-                {{ item.title }}
+                <svg
+                  class="atlas-related-marker"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 21s6-5.35 6-11a6 6 0 1 0-12 0c0 5.65 6 11 6 11Z"
+                  />
+                  <circle cx="12" cy="10" r="2.25" />
+                </svg>
+                <strong>{{ item.title }}</strong>
               </button>
             </div>
           </section>
@@ -1668,10 +1678,16 @@ export default {
   text-transform: uppercase;
 }
 
-.atlas-related > div,
+.atlas-related > div:last-child,
 .atlas-mini-gallery > div {
   display: flex;
   gap: 0.55rem;
+}
+
+.atlas-related > div:last-child {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
 .atlas-adjacent > div:last-child {
@@ -1715,12 +1731,61 @@ export default {
 }
 
 .atlas-related button {
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  min-height: 4.5rem;
+  gap: 0.65rem;
   border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.14);
-  border-radius: 999px;
-  padding: 0.62rem 0.85rem;
-  background: rgba(var(--color-highlight-rgb, 255, 255, 255), 0.04);
+  border-radius: 14px;
+  padding: 0.75rem 0.8rem;
+  background: linear-gradient(
+    145deg,
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.075),
+    rgba(var(--color-highlight-rgb, 255, 255, 255), 0.025)
+  );
   color: var(--color-text, #fff);
+  font: inherit;
+  line-height: 1.3;
+  text-align: left;
   cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.atlas-related button:only-child {
+  grid-column: 1 / -1;
+}
+
+.atlas-related-marker {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  stroke: var(--color-accent-soft, #f6bd60);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.atlas-related strong {
+  min-width: 0;
+  font-size: max(0.875rem, 14px);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.atlas-related button:hover {
+  border-color: rgba(var(--color-accent-rgb, 246, 189, 96), 0.48);
+  background: rgba(var(--color-accent-rgb, 246, 189, 96), 0.1);
+  transform: translateY(-1px);
+}
+
+.atlas-related button:focus-visible {
+  outline: 3px solid var(--color-focus, #fff);
+  outline-offset: 2px;
 }
 
 .atlas-mini-gallery > div {
@@ -2232,9 +2297,8 @@ export default {
   }
 
   .atlas-related button {
-    min-height: 2.75rem;
-    font: inherit;
-    font-size: 0.9rem;
+    min-height: 4.75rem;
+    padding: 0.8rem;
   }
 
   .atlas-actions a {
