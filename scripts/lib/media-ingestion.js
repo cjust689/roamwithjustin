@@ -456,11 +456,23 @@ function validateGeneratedRecords(records, context) {
   return { errors }
 }
 
-function canonicalAssetId(journey, asset, index) {
+function canonicalAssetId(journey, asset, index, generatedIdHashes = new Map()) {
   const kind = mediaKindForMimeType(asset.output.mimeType) || "media"
-  return `${kind}-${journey.slug}-${asset.output.sha256.slice(0, 12)}-${String(
-    index + 1
-  ).padStart(3, "0")}`
+  const ordinal = String(index + 1).padStart(3, "0")
+  const hashPrefixLengths = [12, 20, 32, 64]
+
+  for (const prefixLength of hashPrefixLengths) {
+    const assetId = `${kind}-${journey.slug}-${asset.output.sha256.slice(
+      0,
+      prefixLength
+    )}-${ordinal}`
+    const existingHash = generatedIdHashes.get(assetId)
+    if (!existingHash || existingHash === asset.output.sha256) return assetId
+  }
+
+  throw new Error(
+    `Unable to allocate a collision-free generated Media ID for SHA-256 ${asset.output.sha256}`
+  )
 }
 
 function upsertById(records, value) {
@@ -553,6 +565,22 @@ function planMediaIngestion(manifest, currentRecords, context) {
       .map(asset => asset.source?.objectKey)
       .filter(Boolean)
   )
+  const generatedIdHashes = new Map(
+    next.assets.map(asset => [asset.id, asset.publication.sha256])
+  )
+  const batchJourneyIds = new Map(
+    next.batches.map(batch => [batch.id, batch.journeyId])
+  )
+  const journeyShaOwners = new Map()
+  next.assets.forEach(asset => {
+    if (
+      batchJourneyIds.get(asset.publication.batchId) === manifest.journeyId &&
+      !journeyShaOwners.has(asset.publication.sha256)
+    ) {
+      journeyShaOwners.set(asset.publication.sha256, asset.id)
+    }
+  })
+  const manifestShaOwners = new Map()
   const assetIds = []
   const batchSequence =
     next.batches.reduce(
@@ -561,9 +589,33 @@ function planMediaIngestion(manifest, currentRecords, context) {
     ) + 1
 
   manifest.assets.forEach((asset, index) => {
+    if (!asset.assetId && !reassociateExisting) {
+      const earlierManifestIndex = manifestShaOwners.get(asset.output.sha256)
+      if (earlierManifestIndex !== undefined) {
+        errors.push(
+          `Manifest asset ${index + 1} duplicates manifest asset ${earlierManifestIndex + 1} by full SHA-256; keep one copy in the batch`
+        )
+        return
+      }
+      manifestShaOwners.set(asset.output.sha256, index)
+
+      const existingShaOwner = journeyShaOwners.get(asset.output.sha256)
+      if (existingShaOwner) {
+        errors.push(
+          `Manifest asset ${index + 1} duplicates bytes already published as "${existingShaOwner}" in Journey "${manifest.journeyId}"; omit it or explicitly republish that asset`
+        )
+        return
+      }
+    }
+
     const assetId =
       asset.assetId ||
-      canonicalAssetId(manifestValidation.journey, asset, index)
+      canonicalAssetId(
+        manifestValidation.journey,
+        asset,
+        index,
+        generatedIdHashes
+      )
     const existing = next.assets.find(record => record.id === assetId)
 
     if (reassociateExisting && !existing) {
@@ -726,6 +778,7 @@ function planMediaIngestion(manifest, currentRecords, context) {
       return
     }
     upsertById(next.assets, mediaRecord)
+    generatedIdHashes.set(assetId, asset.output.sha256)
     if (priorJourneyPlacement) {
       next.placements.splice(
         next.placements.findIndex(

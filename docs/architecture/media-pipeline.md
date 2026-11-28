@@ -5,7 +5,7 @@ kind: architecture
 status: implemented
 implementation_state: partial
 created: 2026-11-14
-updated: 2026-11-23
+updated: 2026-11-27
 related:
   - content-model
   - journey-media-ingestion
@@ -44,6 +44,7 @@ code_paths:
 verification:
   state: verified
   evidence:
+    - node scripts/test-media-ingestion.js
     - npm run gear:test
     - npm run editorial:test
     - npm run media:test
@@ -129,6 +130,16 @@ preserves existing placement state on republish, and atomically updates only
 `src/content/media/generated/records.json`. Failed canonical validation rolls
 the generated file back.
 
+For an ordinary new asset, the planner compares the full SHA-256 with every
+generated asset already published in the same Journey and with earlier assets
+in the incoming manifest. Repeated bytes are rejected regardless of filename,
+batch, or manifest position. The established generated ID format retains its
+12-character hash prefix for normal new assets. If that candidate ID is already
+owned by different bytes, the planner deterministically extends the hash prefix
+until the ID is unique. This changes no existing asset ID, manifest, receipt,
+placement, or immutable R2 object key. Explicit revision and
+`--reassociate-existing` flows retain their narrower identity rules.
+
 An explicit `--reassociate-existing` correction path handles images that were
 first published at Journey scope and later prepared and uploaded with the
 correct Place/Visit scope. It accepts only a checksum-verified, newly prepared
@@ -149,6 +160,13 @@ or curated story galleries. When a Visit has no curated hero, its first
 published image becomes the derived display image for the Trip card and Atlas
 node. A Visit with no verified image stays image-free; selectors never use the
 Journey cover as a location-specific fallback.
+
+Image-only cover surfaces skip videos regardless of publication order. A
+Journey without a curated image hero may derive its trip and Atlas-root cover
+from the first published Journey image, while a Visit and Experience remain
+bounded to images associated with their own canonical scope. Posterless MP4s
+stay available in galleries and Moment media but never supply an `<img>` URL or
+a play-icon substitute for a photographic cover.
 
 An Experience-scoped placement is valid only when the referenced Experience
 exists and belongs to the same Journey. `getExperiencePublishedMedia()` and

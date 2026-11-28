@@ -149,6 +149,15 @@ export function resolveMediaList(references = []) {
   return references.map(resolveMediaReference).filter(Boolean)
 }
 
+// Covers are always photographs. Callers may pass canonical usages, legacy
+// references, or already-resolved media without caring where a video appears
+// in publication order.
+export function firstImageMedia(references = []) {
+  return (
+    resolveMediaList(references).find(media => media.kind === "image") || null
+  )
+}
+
 function getPublishedPlacementMedia(predicate) {
   const seenAssetIds = new Set()
 

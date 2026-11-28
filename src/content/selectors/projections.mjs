@@ -12,6 +12,7 @@ import {
   experienceCardView,
 } from "./experiences.mjs"
 import {
+  firstImageMedia,
   getJourneyPublishedMedia,
   getVisitPublishedMedia,
   resolveMediaList,
@@ -38,6 +39,14 @@ function uniqueMedia(items) {
 
 function resolvedSource(reference) {
   return resolveMediaReference(reference)?.src || ""
+}
+
+function journeyCoverMedia(journey) {
+  return firstImageMedia([
+    journey.hero,
+    ...getJourneyPublishedMedia(journey.id),
+    ...resolveMediaList(journey.gallery),
+  ])
 }
 
 function resolveLodgingImage(reference) {
@@ -200,7 +209,7 @@ function atlasStoryRelationships(journey, visit) {
 function atlasStoryLead(journey) {
   if (!hasJourneyStory(journey)) return null
 
-  const hero = resolveMediaReference(journey.hero)
+  const hero = journeyCoverMedia(journey)
 
   return {
     title: journeyDisplayTitle(journey),
@@ -260,10 +269,7 @@ export function buildTripLocationView(journey, visit) {
   // its first published Place/Visit image is the truthful display default.
   // Never borrow the Journey cover for a specific Place: an empty image is
   // preferable to implying that the destination cover was captured there.
-  const hero =
-    resolveMediaReference(visit.hero) ||
-    media.find(item => item.kind === "image") ||
-    null
+  const hero = firstImageMedia([visit.hero, ...media])
   // A video makes a stop richer, but it does not make the shared Journey
   // cover a verified location photograph. Keep the photo-pending cue visible
   // until this visit owns either a hero or a location-specific image.
@@ -304,11 +310,11 @@ export function buildTripViewModel(journey) {
   if (!journey) return null
 
   const comingSoon = journey.publicationStatus === "coming-soon"
-  const cover = resolvedSource(journey.hero)
+  const publishedMedia = getJourneyPublishedMedia(journey.id)
+  const cover = journeyCoverMedia(journey)?.src || ""
   const fullImage = resolvedSource(journey.fullImage)
-  const resolvedGallery = resolveMediaList(journey.gallery).map(
-    item => item.src
-  )
+  const resolvedGalleryMedia = resolveMediaList(journey.gallery)
+  const resolvedGallery = resolvedGalleryMedia.map(item => item.src)
   const curatedStoryMedia = comingSoon
     ? []
     : resolveMediaList([
@@ -321,7 +327,6 @@ export function buildTripViewModel(journey) {
         ]),
         ...(journey.lodging || []).map(stay => stay.image),
       ])
-  const publishedMedia = getJourneyPublishedMedia(journey.id)
   const allMedia = uniqueMedia([...publishedMedia, ...curatedStoryMedia]).map(
     media => ({
       id: media.id,
@@ -521,12 +526,12 @@ export function buildAtlasNodeView(presentation) {
   // without one shares its canonical Journey cover, while child Places never
   // borrow that broad image. Children still prefer their curated Visit hero,
   // then the first verified image placed on that Visit.
-  const hero =
-    resolveMediaReference(
-      presentation.hero || (isJourneyRoot ? journey.hero : null) || visit?.hero
-    ) ||
-    media.find(item => item.kind === "image") ||
-    null
+  const hero = firstImageMedia([
+    presentation.hero,
+    ...(isJourneyRoot ? [journeyCoverMedia(journey)] : []),
+    visit?.hero,
+    ...media,
+  ])
   const personalNote =
     visit?.summary || visit?.description || journey.atlasNotes?.[place.id] || ""
   const useJourneyIdentity =
