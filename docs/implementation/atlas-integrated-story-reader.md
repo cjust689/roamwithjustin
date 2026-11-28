@@ -51,6 +51,8 @@ verification:
     - Local Chrome at 1440 by 1200 CSS pixels rendered three child Place entries plus the direct house Experience inside Uvita, then rendered Uvita Horses and its existing video inside Rancho La Merced
     - Pull requests 303 and 304 passed required validation, merged through protected develop and main as 2399530799aa7b91e358f8c8722139492ab97332 and 8c9d64850cccf93c11520b9eccf10985c3bd3874, and Pages run 46101408334 succeeded
     - Live Chrome rendered Uvita Whale Tail, Rancho La Merced, Nauyaca Waterfalls, and Uvita House on the deployed Uvita route, then rendered Uvita Horses on the deployed Rancho La Merced route
+    - npm run atlas:test verifies that Continue exploring uses a two-column destination-card grid rather than content-sized pill controls
+    - Local Chrome at 390 CSS pixels rendered four equal 171 by 67 pixel Continue exploring cards in two columns with 14 pixel corners and readable wrapped destination names
     - npm run atlas:test
     - npm run lint
     - npm run content:validate
@@ -179,6 +181,11 @@ nonroot Place with children lists those child Place pins and its direct
 Experiences together. Place selection navigates deeper through the recursive
 Atlas tree. Experience selection focuses the existing inline story and does
 not synthesize a map marker. There is no fixed nesting depth.
+
+Related Place navigation under `Continue exploring` uses a two-column grid of
+compact destination cards. Long names wrap within a consistent rectangular
+control with a map-place cue, avoiding the uneven circular pills created by
+content-sized widths.
 
 The bounded Phase 4 refinement leaves more desktop map visible, moves focus to
 an explicitly requested chapter heading, stops the short restoration window
