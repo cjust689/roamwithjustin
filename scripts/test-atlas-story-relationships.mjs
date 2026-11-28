@@ -155,6 +155,17 @@ assert.match(detailPanel, />Continue in the full journey</)
 assert.match(detailPanel, /actionLabel: "Read this chapter"/)
 assert.match(detailPanel, /open-story-section/)
 assert.match(detailPanel, />Journey sequence</)
+assert.match(detailPanel, />Continue exploring</)
+assert.match(detailPanel, /class="atlas-related-marker"/)
+assert.match(
+  detailPanel,
+  /\.atlas-related > div:last-child \{[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/
+)
+assert.doesNotMatch(
+  detailPanel,
+  /\.atlas-related button \{[^}]*border-radius: 999px/
+)
+assert.match(detailPanel, /\.atlas-related button \{[^}]*border-radius: 14px/)
 assert.match(atlasView, /initial-section-id="readerSectionId"/)
 assert.match(atlasView, /query\.section/)
 assert.match(atlasView, /adjacentStops\(\)/)

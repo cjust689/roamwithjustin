@@ -104,6 +104,10 @@ Place coordinate, and writes the normalized value back after the guarded
 registration. The two verified schema migrations each added one header,
 changed no existing creator fields, and retained all 108 eligible Post IDs and
 bindings.
+The Atlas `Continue exploring` navigation now presents related Places as a
+two-column grid of compact destination cards. Long destination names wrap
+inside consistent rectangular controls instead of expanding into uneven
+circular pills.
 The Costa Rica root also keeps that same canonical Journey hero on its
 `Explore the story` card at mobile widths instead of hiding the card image.
 Visitor-facing Journey titles no longer repeat their year in parentheses.
