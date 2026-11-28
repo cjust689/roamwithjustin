@@ -120,6 +120,11 @@ assert.deepEqual(
 )
 const uvitaHouse = uvitaNode.storyExperiences[0]
 assert.equal(
+  uvitaHouse.card.summary,
+  "Our Airbnb in Uvita feels secluded without putting us far from everything. The shoulder season brings a mix of good weather and rain, and I’m glad we have a private pool for time in the water. I also appreciate something less glamorous, laundry on the property. Between hikes and traveling, we haven’t had much time to catch up on it."
+)
+assert.doesNotMatch(uvitaHouse.card.summary, /\n/)
+assert.equal(
   uvitaHouse.card.image?.id,
   "image-costa-rica-2025-fd4e32d92375-001"
 )
@@ -182,14 +187,13 @@ assert.match(detailPanel, /Inside \{\{ node\.title \}\}/)
 assert.match(detailPanel, /destinationIndexItems/)
 assert.match(detailPanel, /openDestinationItem\(item\)/)
 assert.match(detailPanel, /item\.kindLabel/)
-assert.match(
-  detailPanel,
-  /v-if="!hasDestinationIndex && experienceStories\.length"/
-)
-assert.match(
-  detailPanel,
-  /v-if="!hasDestinationIndex && experienceCards\.length"/
-)
+assert.match(detailPanel, /experience\.card\?\.summary \|\| experience\.summary/)
+assert.match(detailPanel, /experience\.card\?\.image\?\.src \|\| ""/)
+assert.match(detailPanel, /actionLabel: "Read this experience"/)
+assert.match(detailPanel, /v-if="storySections\.length && !hasDestinationIndex"/)
+assert.doesNotMatch(detailPanel, /class="atlas-experience-stories"/)
+assert.doesNotMatch(detailPanel, /class="atlas-experience-moment-media"/)
+assert.doesNotMatch(detailPanel, /Continue in the full journey/)
 assert.match(
   detailPanel,
   /openDestinationItem\(item\)\s*\{[\s\S]*?this\.\$emit\("open-story-section", item\.id\)/

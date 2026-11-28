@@ -5,7 +5,7 @@ kind: implementation
 status: in-progress
 implementation_state: partial
 created: 2026-11-18
-updated: 2026-11-27
+updated: 2026-11-28
 related:
   - atlas-integrated-story-reader-phase-0-2026-11-18
   - atlas-integrated-story-reader-phase-2-2026-11-18
@@ -81,6 +81,8 @@ verification:
     - npm run atlas:test verifies clean public Journey titles and separate date labels in the Atlas detail hero, story lead, Journey explorer, and map pills
     - npm run atlas:test verifies image-first cover selection, MP4 exclusion from image-only covers and map previews, and the three reparented Uvita House photographs ahead of its retained video
     - npm run atlas:test verifies Uvita's explicit destination hero, direct Uvita House story handoff from the destination index, and suppression of duplicate inline and full-Journey Experience sections when that index is present
+    - npm run atlas:test verifies that every Atlas Experience stop uses the compact stop-story presentation, derives its preview from the first story paragraph, keeps at most one verified image, and omits the expanded inline Moment and repeated Journey card
+    - Local Chrome at 1280 by 900 CSS pixels compared Maho Bay and Drake Bay stop inspectors, then verified the exact Drake Bay Experience deep link with its complete text and media in the shared reader on 2026-11-28
 ---
 
 # Atlas integrated story reader
@@ -182,12 +184,15 @@ the current stop without replacing the map or losing the saved reader offset.
 Single-Moment Experience cards lead with the recognizable Moment title and
 retain the Experience title as context.
 
-Phase 8 hoists the full matched Moment projection into the primary Atlas stop
-inspector. Selecting Uvita reveals the Uvita House text and registered video.
-Selecting Rancho La Merced reveals Uvita Horses and its registered video. The
-compact cards and their exact Experience reader links remain below the inline
-presentation so the owner can compare both approaches. Both surfaces consume
-the same selector-backed Experience and Moment records.
+Phase 8 retained the full matched Moment projection and initially exposed it
+inline for comparison with the nested Utah and St. John presentation. The
+resolved presentation keeps the complete Moment and media projection in the
+canonical relationship but renders only one compact story card in a stop
+inspector. Its summary is the first available Experience summary or first
+Moment paragraph, its image is the first verified Experience image when one is
+available, and its action opens the exact Experience section in the shared Journey reader. Costa
+Rica and future Experience based trips receive this behavior without a data
+model or ingestion change.
 
 The destination index keeps physical and editorial hierarchy distinct. A
 nonroot Place with children lists those child Place pins and its direct
@@ -334,17 +339,46 @@ remains the indexable representation.
 - [x] Verify all ten Journey roots and the incomplete Journey stop relationship
       with `npm run atlas:test`.
 
-### Phase 8, inline stop Experiences
+### Phase 8, stop Experience comparison
 
 - [x] Retain the full canonical Moment and media projection on each exact
       Atlas Experience relationship.
-- [x] Render matched Experience text and media directly in the selected stop
-      inspector without opening the nested reader.
-- [x] Keep the existing compact cards and exact Journey reader links below the
-      inline presentation for owner comparison.
-- [x] Keep videos deferred with `preload="none"` until visitor playback.
+- [x] Compare the expanded inline Experience with the existing compact Journey
+      chapter presentation.
+- [x] Resolve the comparison in favor of one compact story preview and its
+      exact Journey reader link.
 - [x] Verify Uvita Horses, Uvita House, and their registered media through
       `npm run atlas:test`.
+
+### Compact Experience presentation, November 28
+
+- [x] Derive an Atlas preview from the explicit Experience summary or the first
+      paragraph of its first Moment.
+- [x] Reuse the compact stop-story card for both Journey chapters and published
+      Experiences.
+- [x] Show one verified Experience image in the compact card and retain the
+      complete media set in the canonical Journey reader.
+- [x] Remove the expanded inline Moment block and repeated full Journey card
+      from every stop inspector.
+- [x] Preserve the Uvita destination index as the only Uvita House entry on the
+      Uvita hub.
+- [x] Verify selector output and shared component behavior with `npm run
+      atlas:test`.
+
+### Compact full Journey media and deterministic sequence, November 28
+
+- [x] Limit every Experience card in the shared full Journey body to one
+      image-only representative and a first-paragraph preview.
+- [x] Remove the aggregate Journey media wall while retaining the projected
+      media records for focused stop and Experience presentation.
+- [x] Expand at most one Experience at a time and automatically expand an
+      exact Experience deep link so its complete Moment text and media remain
+      available.
+- [x] Order Experience cards by canonical Journey Visit order, with stable
+      Experience ID ordering only for unmatched records.
+- [x] Add selector and component regression coverage to `npm run atlas:test`.
+- [x] Browser-check the compact Costa Rica Journey and focused Drake Bay media
+      presentation at 1,280 pixels in local Chrome.
 
 ### Phase 9, recursive destination discovery
 

@@ -135,146 +135,105 @@
         <h2>Experiences and moments</h2>
       </header>
 
-      <article
-        v-for="experience in trip.experiences"
-        :id="`experience-${experience.slug}`"
-        :key="experience.id"
-        :data-story-section="`experience-${experience.slug}`"
-        class="journey-experience-story"
-      >
-        <header>
-          <EditorialExperienceCard
-            :experience="experience"
-            :show-image="!experience.moments.length"
-            story
-          />
-        </header>
-
+      <div class="journey-experience-grid">
         <article
-          v-for="moment in experience.moments"
-          :key="moment.id"
-          class="journey-experience-moment"
+          v-for="experience in trip.experiences"
+          :id="experienceSectionId(experience)"
+          :key="experience.id"
+          :data-story-section="experienceSectionId(experience)"
+          class="journey-experience-story"
+          :class="{
+            'is-expanded': isExperienceExpanded(experience),
+          }"
         >
-          <div class="journey-moment-copy">
-            <span v-if="moment.travelDate">{{ moment.travelDate }}</span>
-            <h4>{{ moment.title }}</h4>
-            <p v-if="moment.notes">{{ moment.notes }}</p>
-          </div>
-          <div v-if="moment.media.length" class="journey-moment-media">
-            <template v-for="media in moment.media">
-              <video
-                v-if="media.kind === 'video'"
-                :key="media.id"
-                controls
-                playsinline
-                :preload="embedded ? 'none' : 'metadata'"
-                :poster="media.poster || null"
-                :aria-label="media.alt"
-              >
-                <source
-                  :src="media.src"
-                  :type="media.mimeType || 'video/mp4'"
-                />
-                Your browser does not support HTML video.
-              </video>
-              <button
-                v-else-if="embedded"
-                :key="media.id"
-                type="button"
-                :aria-label="`Open ${media.alt}`"
-                @click="openMedia(media, $event)"
-              >
-                <img
-                  :src="media.src"
-                  :alt="media.alt"
-                  :width="media.width || null"
-                  :height="media.height || null"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </button>
-              <a
-                v-else
-                :key="media.id"
-                :href="media.src"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  :src="media.src"
-                  :alt="media.alt"
-                  :width="media.width || null"
-                  :height="media.height || null"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </a>
-            </template>
+          <header>
+            <EditorialExperienceCard
+              :experience="experience"
+              show-image
+              :readable="!isExperienceExpanded(experience)"
+              @read="toggleExperience(experience)"
+            />
+          </header>
+
+          <div
+            v-if="isExperienceExpanded(experience)"
+            class="journey-experience-details"
+          >
+            <article
+              v-for="moment in experience.moments"
+              :key="moment.id"
+              class="journey-experience-moment"
+            >
+              <div class="journey-moment-copy">
+                <span v-if="moment.travelDate">{{ moment.travelDate }}</span>
+                <h4>{{ moment.title }}</h4>
+                <p v-if="moment.notes">{{ moment.notes }}</p>
+              </div>
+              <div v-if="moment.media.length" class="journey-moment-media">
+                <template v-for="media in moment.media">
+                  <video
+                    v-if="media.kind === 'video'"
+                    :key="media.id"
+                    controls
+                    playsinline
+                    :preload="embedded ? 'none' : 'metadata'"
+                    :poster="media.poster || null"
+                    :aria-label="media.alt"
+                  >
+                    <source
+                      :src="media.src"
+                      :type="media.mimeType || 'video/mp4'"
+                    />
+                    Your browser does not support HTML video.
+                  </video>
+                  <button
+                    v-else-if="embedded"
+                    :key="media.id"
+                    type="button"
+                    :aria-label="`Open ${media.alt}`"
+                    @click="openMedia(media, $event)"
+                  >
+                    <img
+                      :src="media.src"
+                      :alt="media.alt"
+                      :width="media.width || null"
+                      :height="media.height || null"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
+                  <a
+                    v-else
+                    :key="media.id"
+                    :href="media.src"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      :src="media.src"
+                      :alt="media.alt"
+                      :width="media.width || null"
+                      :height="media.height || null"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </a>
+                </template>
+              </div>
+            </article>
+            <button
+              class="journey-experience-collapse"
+              type="button"
+              @click="toggleExperience(experience)"
+            >
+              Close full experience
+            </button>
           </div>
         </article>
-      </article>
+      </div>
     </section>
 
     <slot name="between-content"></slot>
-
-    <section
-      v-if="trip.allMedia.length"
-      id="all-photography"
-      class="journey-story-section journey-photography-section"
-    >
-      <header class="journey-section-intro compact">
-        <h2>Photography and video</h2>
-        <p>
-          Photographs and videos from this journey, grouped with the places and
-          field notes that give them context.
-        </p>
-      </header>
-
-      <div class="journey-photography-grid">
-        <div
-          v-for="media in trip.allMedia"
-          :key="media.id"
-          class="journey-photography-item"
-        >
-          <video
-            v-if="media.kind === 'video'"
-            controls
-            playsinline
-            :preload="embedded ? 'none' : 'metadata'"
-            :poster="media.poster || null"
-            :aria-label="media.alt"
-          >
-            <source :src="media.src" :type="media.mimeType || 'video/mp4'" />
-            Your browser does not support HTML video.
-          </video>
-          <button
-            v-else-if="embedded"
-            type="button"
-            :aria-label="`Open ${media.alt}`"
-            @click="openMedia(media, $event)"
-          >
-            <img
-              :src="media.src"
-              :alt="media.alt"
-              :width="media.width || null"
-              :height="media.height || null"
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-          <a v-else :href="media.src" target="_blank" rel="noopener noreferrer">
-            <img
-              :src="media.src"
-              :alt="media.alt"
-              :width="media.width || null"
-              :height="media.height || null"
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
-        </div>
-      </div>
-    </section>
 
     <section
       v-if="showFieldNotes && (trip.tips.length || trip.travelNotes.length)"
@@ -315,9 +274,20 @@ export default {
       required: true,
     },
     embedded: Boolean,
+    focusedSectionId: {
+      type: String,
+      default: "",
+    },
     showFieldNotes: Boolean,
   },
   emits: ["open-location", "open-media", "show-stop"],
+  data() {
+    return {
+      expandedExperienceSection: this.focusedSectionId.startsWith("experience-")
+        ? this.focusedSectionId
+        : "",
+    }
+  },
   computed: {
     itineraryIntroduction() {
       return this.trip.itineraryMode === "chapters"
@@ -325,9 +295,19 @@ export default {
         : "Open a place for photographs and field notes, or view its Atlas pin when that stop has a mapped presentation."
     },
   },
+  watch: {
+    focusedSectionId(sectionId) {
+      if (sectionId.startsWith("experience-")) {
+        this.expandedExperienceSection = sectionId
+      }
+    },
+  },
   methods: {
     scrollToStorySection(sectionId, options = {}) {
       if (!sectionId) return false
+      if (sectionId.startsWith("experience-")) {
+        this.expandedExperienceSection = sectionId
+      }
       const section = Array.from(
         this.$el.querySelectorAll("[data-story-section]")
       ).find(element => element.dataset.storySection === sectionId)
@@ -338,6 +318,19 @@ export default {
         section.querySelector("h3")?.focus({ preventScroll: true })
       }
       return true
+    },
+    experienceSectionId(experience) {
+      return `experience-${experience.slug}`
+    },
+    isExperienceExpanded(experience) {
+      return (
+        this.expandedExperienceSection === this.experienceSectionId(experience)
+      )
+    },
+    toggleExperience(experience) {
+      const sectionId = this.experienceSectionId(experience)
+      this.expandedExperienceSection =
+        this.expandedExperienceSection === sectionId ? "" : sectionId
     },
     getLocation(ref) {
       return this.trip.locations.find(location => location.id === ref) || {}
@@ -642,21 +635,30 @@ export default {
 }
 
 .journey-experience-story {
-  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
-  padding: clamp(2.5rem, 6vw, 5rem) 0;
+  min-width: 0;
+  scroll-margin-top: 6rem;
+  border: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.13);
+  border-radius: 20px;
+  padding: 1rem;
+  background: var(--color-surface, #11191d);
 }
 
-.journey-experience-story > header {
-  max-width: 760px;
+.journey-experience-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
 }
 
-.journey-experience-story h3 {
-  margin: 0;
-  font-size: clamp(2.2rem, 5vw, 4.2rem);
-  letter-spacing: -0.045em;
+.journey-experience-story.is-expanded {
+  grid-column: 1 / -1;
 }
 
-.journey-experience-story > header p,
+.journey-experience-details {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(var(--color-highlight-rgb, 255, 255, 255), 0.12);
+  padding-top: 1.25rem;
+}
+
 .journey-moment-copy p {
   color: var(--color-text-muted, rgba(255, 255, 255, 0.68));
   font-size: max(1rem, 16px);
@@ -675,28 +677,33 @@ export default {
   background: var(--color-surface, #11191d);
 }
 
+.journey-experience-collapse {
+  min-height: 2.75rem;
+  margin-top: 1rem;
+  border: 1px solid rgba(var(--color-accent-rgb, 246, 189, 96), 0.6);
+  border-radius: 999px;
+  padding: 0.65rem 0.9rem;
+  background: transparent;
+  color: var(--color-accent-soft, #f8d79f);
+  font: inherit;
+  font-size: max(0.875rem, 14px);
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .journey-moment-copy h4 {
   font-size: clamp(1.5rem, 3vw, 2.4rem);
 }
 
-.journey-moment-media,
-.journey-photography-grid {
+.journey-moment-media {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
 }
 
-.journey-photography-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.85rem;
-}
-
 .journey-moment-media > a,
 .journey-moment-media > button,
-.journey-moment-media > video,
-.journey-photography-item,
-.journey-photography-item > a,
-.journey-photography-item > button {
+.journey-moment-media > video {
   display: block;
   overflow: hidden;
   width: 100%;
@@ -707,15 +714,12 @@ export default {
   aspect-ratio: 4 / 3;
 }
 
-.journey-moment-media > button,
-.journey-photography-item > button {
+.journey-moment-media > button {
   cursor: zoom-in;
 }
 
 .journey-moment-media img,
-.journey-moment-media video,
-.journey-photography-grid img,
-.journey-photography-grid video {
+.journey-moment-media video {
   display: block;
   width: 100%;
   height: 100%;
@@ -779,7 +783,7 @@ export default {
 }
 
 .journey-story-body.is-embedded .journey-location-grid,
-.journey-story-body.is-embedded .journey-photography-grid {
+.journey-story-body.is-embedded .journey-experience-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -797,6 +801,11 @@ a:focus-visible {
     gap: 1.25rem;
   }
 
+  .journey-experience-grid,
+  .journey-story-body.is-embedded .journey-experience-grid {
+    grid-template-columns: 1fr;
+  }
+
   .journey-section-intro > p,
   .journey-day-summary,
   .journey-experience-links,
@@ -812,11 +821,9 @@ a:focus-visible {
   }
 
   .journey-location-grid,
-  .journey-photography-grid,
   .journey-notes-grid,
   .journey-moment-media,
-  .journey-story-body.is-embedded .journey-location-grid,
-  .journey-story-body.is-embedded .journey-photography-grid {
+  .journey-story-body.is-embedded .journey-location-grid {
     grid-template-columns: 1fr;
   }
 
