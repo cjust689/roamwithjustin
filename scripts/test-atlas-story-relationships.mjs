@@ -101,7 +101,7 @@ assert.ok(
   ranchoRelationships
     .get("experience-rancho-la-merced")
     ?.moments[0]?.media.some(media => media.kind === "video"),
-  "Inline Atlas Experience data should retain its registered media"
+  "Atlas Experience relationships should retain registered media for the full reader"
 )
 
 for (const id of ["utah", "moab", "europe"]) {
@@ -149,10 +149,11 @@ const storyBody = read("src/components/JourneyStoryBody.vue")
 const projections = read("src/content/selectors/projections.mjs")
 
 assert.match(detailPanel, /class="atlas-stop-story"/)
-assert.match(detailPanel, /class="atlas-experience-stories"/)
-assert.match(detailPanel, /v-for="moment in experience\.moments"/)
-assert.match(detailPanel, />Continue in the full journey</)
+assert.doesNotMatch(detailPanel, /class="atlas-experience-stories"/)
+assert.doesNotMatch(detailPanel, /v-for="moment in experience\.moments"/)
+assert.doesNotMatch(detailPanel, />Continue in the full journey</)
 assert.match(detailPanel, /actionLabel: "Read this chapter"/)
+assert.match(detailPanel, /actionLabel: "Read this experience"/)
 assert.match(detailPanel, /open-story-section/)
 assert.match(detailPanel, />Journey sequence</)
 assert.match(detailPanel, />Continue exploring</)
@@ -175,5 +176,6 @@ assert.match(storyBody, /data-story-section/)
 assert.match(projections, /chapter\.visitIds\.includes\(visit\.id\)/)
 assert.match(projections, /experience\.visitId === visit\.id/)
 assert.match(projections, /experience\.placeId === visit\.placeId/)
+assert.match(projections, /firstParagraph\(card\.summary \|\| moment\?\.notes\)/)
 
 console.log("Atlas stop and story relationship tests passed.")
