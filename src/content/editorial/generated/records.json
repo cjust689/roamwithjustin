@@ -84,6 +84,18 @@
       "sortOrder": 6,
       "visibility": "published",
       "sourceOwner": "sheet"
+    },
+    {
+      "id": "experience-costa-rica-2025-manuel-antonio",
+      "slug": "manuel-antonio",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "title": "Manuel Antonio",
+      "summary": "",
+      "sortOrder": 7,
+      "visibility": "published",
+      "sourceOwner": "sheet"
     }
   ],
   "moments": [
@@ -220,6 +232,27 @@
         "video-costa-rica-2025-e5e209ecd161-001"
       ],
       "sourceHash": "b4c69448395c9bc296a070c50ab35a8788f045308aac244c914f59e2c3984cf9"
+    },
+    {
+      "id": "moment-08a5637e-5fc5-4308-ada5-eb3532bbbdd1",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "postId": "08a5637e-5fc5-4308-ada5-eb3532bbbdd1",
+      "title": "Manuel Antonio",
+      "notes": "I save Manuel Antonio for the end of the trip, thinking it will be a quick, relaxing stop on the way back to San José. We arrive on a Tuesday. The park is closed. A small detail with a fairly large effect on the plan, but fortunately the stop isn’t much of a detour.\n\nWe do get to enjoy the local harassers, otherwise known as the monkeys. They’re entertaining to watch and definitely not afraid of people, with a reputation for stealing your things. Along the beach, there are vendors and horses available to rent. It isn’t the park visit I had in mind, but we get a look at the area and a good excuse to return. Preferably not on a Tuesday.",
+      "travelDate": "06/03/2025",
+      "sortOrder": 0,
+      "visibility": "published",
+      "mediaAssetIds": [
+        "image-costa-rica-2025-3c2bb1b50e27-001",
+        "image-costa-rica-2025-d9947a994d36-002",
+        "image-costa-rica-2025-8afcd94159c8-003",
+        "image-costa-rica-2025-4a640bd36789-004",
+        "image-costa-rica-2025-188db5909ca1-005",
+        "image-costa-rica-2025-443bb3699d9d-006",
+        "image-costa-rica-2025-b8c4d26e95a9-007",
+        "video-costa-rica-2025-55e546965812-001"
+      ],
+      "sourceHash": "2dae5a2b2d5bdcb446bd7850742b25e7d805c9737e88c2467fe25843e258ee5f"
     }
   ],
   "batches": [
@@ -440,6 +473,27 @@
         "image-costa-rica-2025-7e0b349cb945-004",
         "image-costa-rica-2025-9d15bb80725b-005",
         "video-costa-rica-2025-e5e209ecd161-001"
+      ]
+    },
+    {
+      "id": "editorial-08a5637e-5fc5-4308-ada5-eb3532bbbdd1-2dae5a2b2d5bdcb4",
+      "postId": "08a5637e-5fc5-4308-ada5-eb3532bbbdd1",
+      "sourceHash": "2dae5a2b2d5bdcb446bd7850742b25e7d805c9737e88c2467fe25843e258ee5f",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "momentId": "moment-08a5637e-5fc5-4308-ada5-eb3532bbbdd1",
+      "mediaBatchIds": [
+        "media-costa-rica-2025-manuel-antonio-area-615617d35159711e",
+        "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b"
+      ],
+      "mediaAssetIds": [
+        "image-costa-rica-2025-3c2bb1b50e27-001",
+        "image-costa-rica-2025-d9947a994d36-002",
+        "image-costa-rica-2025-8afcd94159c8-003",
+        "image-costa-rica-2025-4a640bd36789-004",
+        "image-costa-rica-2025-188db5909ca1-005",
+        "image-costa-rica-2025-443bb3699d9d-006",
+        "image-costa-rica-2025-b8c4d26e95a9-007",
+        "video-costa-rica-2025-55e546965812-001"
       ]
     }
   ]

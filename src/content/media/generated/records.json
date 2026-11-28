@@ -6315,6 +6315,247 @@
         "byteSize": 132182897,
         "batchId": "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6"
       }
+    },
+    {
+      "id": "image-costa-rica-2025-3c2bb1b50e27-001",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-001.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1920
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "3c2bb1b50e27c97f849e3dbf5c5c14c53c21a44d5abf5daa2dd4ab8d44c57e00",
+        "byteSize": 390127,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-d9947a994d36-002",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-002.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2390,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 2",
+      "publication": {
+        "revision": 1,
+        "sha256": "d9947a994d365455f52b2bd175055f74948d7ded4bd090955c0324e1ef30eb74",
+        "byteSize": 417287,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-8afcd94159c8-003",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-003.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2390,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 3",
+      "publication": {
+        "revision": 1,
+        "sha256": "8afcd94159c87253b8d0b17048f71bff30a3d3b9463026f7bf5b129260f9c4df",
+        "byteSize": 547751,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-4a640bd36789-004",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-004.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1706
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 4",
+      "publication": {
+        "revision": 1,
+        "sha256": "4a640bd367892eb41b045f2be64b11789fe3e237c7f4891f4d55bcde540c7a4a",
+        "byteSize": 531101,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-188db5909ca1-005",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-005.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 5",
+      "publication": {
+        "revision": 1,
+        "sha256": "188db5909ca1fe6708c64a48ab9391b165a1160a2cabb9da0b500f2ba35e488d",
+        "byteSize": 396665,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-443bb3699d9d-006",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-006.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 1707,
+        "height": 2560
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 6",
+      "publication": {
+        "revision": 1,
+        "sha256": "443bb3699d9df3a0fbabd562008c5677edfa11695d8b7361c00d80935de8d74a",
+        "byteSize": 574437,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "image-costa-rica-2025-b8c4d26e95a9-007",
+      "kind": "image",
+      "source": {
+        "provider": "r2",
+        "objectKey": "images/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-615617d35159711e/manuel-antonio-area-007.jpg"
+      },
+      "intrinsic": {
+        "mimeType": "image/jpeg",
+        "width": 2560,
+        "height": 1707
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey photograph 7",
+      "publication": {
+        "revision": 1,
+        "sha256": "b8c4d26e95a9792ff50c652165d62e380c646c9e833d9690e4bb2953c07558d5",
+        "byteSize": 488033,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+      }
+    },
+    {
+      "id": "video-costa-rica-2025-55e546965812-001",
+      "kind": "video",
+      "source": {
+        "provider": "r2",
+        "objectKey": "videos/costa-rica-2025/manuel-antonio-area/media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b/manuel-antonio-area-001.mp4"
+      },
+      "intrinsic": {
+        "mimeType": "video/mp4",
+        "width": null,
+        "height": null,
+        "durationSeconds": null
+      },
+      "rights": {
+        "owner": "roam-with-justin",
+        "status": "owned"
+      },
+      "capture": {
+        "placeId": null,
+        "capturedAt": null,
+        "cameraModelRaw": null,
+        "lensModelRaw": null
+      },
+      "defaultAlt": "Costa Rica (2025) journey video 1",
+      "publication": {
+        "revision": 1,
+        "sha256": "55e546965812324361909139f3bf9370049803385e8f24b129041742a12987f6",
+        "byteSize": 171319837,
+        "batchId": "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b"
+      }
     }
   ],
   "placements": [
@@ -9047,6 +9288,110 @@
       "sortOrder": 1,
       "publicationSequence": 30,
       "batchId": "media-costa-rica-2025-san-jose-costa-rica-27ef3a5b4156c9f6"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-3c2bb1b50e27-001",
+      "assetId": "image-costa-rica-2025-3c2bb1b50e27-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-d9947a994d36-002",
+      "assetId": "image-costa-rica-2025-d9947a994d36-002",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 2,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-8afcd94159c8-003",
+      "assetId": "image-costa-rica-2025-8afcd94159c8-003",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 3,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-4a640bd36789-004",
+      "assetId": "image-costa-rica-2025-4a640bd36789-004",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 4,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-188db5909ca1-005",
+      "assetId": "image-costa-rica-2025-188db5909ca1-005",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 5,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-443bb3699d9d-006",
+      "assetId": "image-costa-rica-2025-443bb3699d9d-006",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 6,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-image-costa-rica-2025-b8c4d26e95a9-007",
+      "assetId": "image-costa-rica-2025-b8c4d26e95a9-007",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 7,
+      "publicationSequence": 31,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e"
+    },
+    {
+      "id": "placement-costa-rica-2025-costa-rica-2025-manuel-antonio-area-video-costa-rica-2025-55e546965812-001",
+      "assetId": "video-costa-rica-2025-55e546965812-001",
+      "journeyId": "costa-rica-2025",
+      "visitId": "costa-rica-2025-manuel-antonio-area",
+      "placeId": "manuel-antonio-area",
+      "experienceId": "experience-costa-rica-2025-manuel-antonio",
+      "role": "gallery",
+      "visibility": "published",
+      "sortOrder": 1,
+      "publicationSequence": 32,
+      "batchId": "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b"
     }
   ],
   "batches": [
@@ -9625,6 +9970,38 @@
       "verification": {
         "method": "receipt-sha256",
         "receiptSha256": "06e44e6d899ed1f4a8a4620fe05bccc78c7aece65016c850aca6ff90e6d7158c"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-manuel-antonio-area-615617d35159711e",
+      "sequence": 31,
+      "manifestSha256": "93717be95dc567badbadaac6cfabf8dc1eeb347ea45dd53b5fce9ef78c645172",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "image-costa-rica-2025-3c2bb1b50e27-001",
+        "image-costa-rica-2025-d9947a994d36-002",
+        "image-costa-rica-2025-8afcd94159c8-003",
+        "image-costa-rica-2025-4a640bd36789-004",
+        "image-costa-rica-2025-188db5909ca1-005",
+        "image-costa-rica-2025-443bb3699d9d-006",
+        "image-costa-rica-2025-b8c4d26e95a9-007"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "413f4c5eea11e806e679233a8495e5103e4e1590d0652598bd0fe3a517e20002"
+      }
+    },
+    {
+      "id": "media-costa-rica-2025-manuel-antonio-area-87b99d6e3384124b",
+      "sequence": 32,
+      "manifestSha256": "628838e0ef148bb47d0d13fd796a2cad0b307005ef7cd44ddae8311b99b38bcf",
+      "journeyId": "costa-rica-2025",
+      "assetIds": [
+        "video-costa-rica-2025-55e546965812-001"
+      ],
+      "verification": {
+        "method": "receipt-sha256",
+        "receiptSha256": "58848ef5a8c2b043e65b7174154598164c2fd4e82377cc02fc2389b26d17ff0c"
       }
     }
   ]
