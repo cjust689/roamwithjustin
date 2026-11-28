@@ -465,7 +465,7 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 **Suggested ID:** `costa-rica-2025`  
 **Status:** `CONFIRMED` trip, route, and several specific on-site experiences.  
-**Broad route:** **La Fortuna** → **Bajos del Toro** → **San José area** → **Uvita / southern Pacific coast** → **Drake Bay / Osa Peninsula and later Pacific stops** → **San José return**. The owner confirmed that the arrival drive went directly to La Fortuna, the next day continued through Bajos del Toro to a San José Airbnb, and the following day continued to Uvita. Exact dates and some later order details still need trip-journal confirmation.
+**Broad route:** **La Fortuna** → **Bajos del Toro** → **San José area** → **Drake Bay / Osa Peninsula** → **Uvita / southern Pacific coast and later Pacific stops** → **San José return**. The owner confirmed the top-level order as La Fortuna, Bajos del Toro, the San José Airbnb, Drake Bay, and Uvita. Exact dates and some later Pacific order details still need trip-journal confirmation.
 
 ### 7.1 La Fortuna / Bajos del Toro
 
@@ -490,6 +490,9 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 - **IDs:** `uvita-costa-rica`, `uvita-whale-tail`, `marino-ballena`.
 - **Status:** `CONFIRMED` specific walk and media.
+- **Hierarchy:** Uvita is the fifth top-level Journey stop. The Whale Tail is
+  a child Place and Atlas stop beneath Uvita, while its existing Visit and
+  published Experience retain their stable IDs and media references.
 - **Actual experience:** Walked out across the **Whale Tail** formation at **low tide**; wife photographed against/near a palm tree; aerial imagery reveals the distinctive shape.
 - **Story:** The dramatic geographic reveal that only makes sense once you understand the tide—ground-level exploration followed by a high-angle view. Excellent progressive map/card story.
 - **Practical take-away:** Tide timing matters to the visit. Don't publish specific safe tide windows, restricted airspace advice, or detailed access conditions without an up-to-date source.
@@ -518,7 +521,7 @@ The above is the best recovered sequence, but do not assign exact dates to every
 
 ### 7.7 Other Costa Rica material
 
-- **San José route role:** The San José Airbnb is the third distinct stop, after Bajos del Toro and before Uvita. The trip later returned to San José, and the owner has a small final set of photographs from that return. The public Atlas uses one broad city pin ordered by the first stay instead of overlapping city pins. Preserve a separate return Visit only if those final photographs are published as their own story.
+- **San José route role:** The San José Airbnb is the third distinct stop, after Bajos del Toro and before Drake Bay. The trip later returned to San José, and the owner has a small final set of photographs from that return. The public Atlas uses one broad city pin ordered by the first stay instead of overlapping city pins. Preserve a separate return Visit only if those final photographs are published as their own story.
 - **Arrival gateway:** The published La Fortuna story confirms arrival processing at SJO before the direct drive to La Fortuna. The airport is connective context rather than a separate Atlas stop unless the owner later wants an airport-specific chapter.
 - **Unverified/planned only:** Monteverde, Nosara, Golfito Bay, particular rafting/canyoning operators, and specific villas/restaurants floated in itineraries. Do not mark visited without confirming.
 - **Commercial possibilities:** Lodging, boat operators, rainforest guides, waterfall access operators, and tours only when actual experience + official contact info can be established.

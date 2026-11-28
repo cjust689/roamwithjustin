@@ -68,7 +68,9 @@ verification:
     - Local headless Chrome at 390 CSS pixels measured Utah 2025 at pixels 4 through 68 and Utah 2026 at 76 through 140, fully inside the viewport with an 8 pixel gap
     - npm run atlas:test verifies that a root without an Atlas-specific hero inherits its Journey hero, an explicit Atlas hero still overrides it, and child Places remain isolated
     - npm run content:validate verifies that the Costa Rica Journey and guided route omit Playa San Josecito while its standalone Place remains registered
-    - npm run content:validate verifies that the Costa Rica guided route orders San José third and Uvita fourth while preserving one city pin
+    - npm run content:validate verifies that the Costa Rica overview orders San José third, Drake Bay fourth, and Uvita fifth while preserving one city pin
+    - npm run content:validate verifies that Uvita Whale Tail is parented beneath Uvita in both canonical Place and Atlas presentation hierarchy
+    - npm run atlas:test verifies that the reparented Whale Tail stop retains its published High Tide Whale Tail Moment and all seven registered media items
     - npm run atlas:test verifies that the Costa Rica Atlas root and story lead resolve the same canonical Journey hero and that mobile CSS does not hide the story-card image
     - npm run atlas:test verifies clean public Journey titles and separate date labels in the Atlas detail hero, story lead, Journey explorer, and map pills
 ---
@@ -118,12 +120,14 @@ relates directly to Uvita in the Atlas presentation. The standalone Playa San
 Josecito Place and its source context remain available without projecting a
 Visit, Atlas stop, related route edge, or guided stop into this Journey.
 
-The next owner chronology correction moves the existing San José Visit from
-the final guided position to the third distinct stop, after La Fortuna and
-Bajos del Toro. Uvita follows as the fourth distinct stop. The route still
-records the later return to San José through related navigation, while one
-broad city pin preserves the existing Casa Jungla story and media without
-creating overlapping pins or rewriting any published identity.
+The latest owner chronology correction keeps the existing San José Visit as
+the third top-level stop, after La Fortuna and Bajos del Toro. Drake Bay is
+fourth and Uvita is fifth. Uvita Whale Tail is now a child beneath Uvita in
+both canonical Place and Atlas presentation hierarchy, using the same nested
+hub pattern as Moab. Its Visit, exact Experience and Moment binding, and seven
+registered media items are unchanged. The route still records the later
+return to San José through related navigation, while one broad city pin
+preserves the Casa Jungla story and media without creating overlapping pins.
 
 The detail panel now presents the real story lead and `Explore the story`
 action before Journey stops. `View N stops` scrolls the existing panel to the

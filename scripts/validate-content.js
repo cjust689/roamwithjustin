@@ -1118,6 +1118,41 @@ async function main() {
     report("Moab Atlas route does not follow Utah Journey visit order")
   }
 
+  const costaRica = completeAtlasViews.find(node => node.id === "costa-rica")
+  const orderedCostaRicaOverview = projections
+    .orderAtlasNodesByJourney(
+      (costaRica?.childIds || [])
+        .map(id => completeAtlasViews.find(node => node.id === id))
+        .filter(Boolean)
+    )
+    .map(node => node.id)
+  const expectedCostaRicaOverviewOrder = [
+    "la-fortuna-costa-rica",
+    "bajos-del-toro",
+    "san-jose-costa-rica",
+    "drake-bay",
+    "uvita-costa-rica",
+    "nauyaca-waterfalls",
+    "manuel-antonio-area",
+  ]
+  if (
+    orderedCostaRicaOverview.join("|") !==
+    expectedCostaRicaOverviewOrder.join("|")
+  ) {
+    report("Costa Rica Atlas overview does not follow its corrected route")
+  }
+
+  const uvita = completeAtlasViews.find(node => node.id === "uvita-costa-rica")
+  if ((uvita?.childIds || []).join("|") !== "uvita-whale-tail") {
+    report("Uvita does not own the Whale Tail Atlas stop")
+  }
+  if (
+    placeModule.getPlace("uvita-whale-tail")?.parentPlaceId !==
+    "uvita-costa-rica"
+  ) {
+    report("The Whale Tail Place is not parented beneath Uvita")
+  }
+
   const utah = completeAtlasViews.find(node => node.id === "utah")
   const orderedUtahOverview = projections
     .orderAtlasNodesByJourney(
@@ -1190,7 +1225,6 @@ async function main() {
     "la-fortuna-costa-rica",
     "bajos-del-toro",
     "san-jose-costa-rica",
-    "uvita-costa-rica",
     "drake-bay",
     "uvita-whale-tail",
     "nauyaca-waterfalls",
