@@ -102,6 +102,12 @@ assert.deepEqual(
   ]
 )
 const uvitaNode = nodes.find(node => node.id === "uvita-costa-rica")
+assert.equal(
+  uvitaNode.image,
+  resolveMediaReference({
+    assetId: "image-costa-rica-2025-5452162a6717-001",
+  })?.src
+)
 assert.deepEqual(
   orderAtlasNodesByJourney(
     nodes.filter(node => node.parentId === "uvita-costa-rica")
@@ -176,6 +182,18 @@ assert.match(detailPanel, /Inside \{\{ node\.title \}\}/)
 assert.match(detailPanel, /destinationIndexItems/)
 assert.match(detailPanel, /openDestinationItem\(item\)/)
 assert.match(detailPanel, /item\.kindLabel/)
+assert.match(
+  detailPanel,
+  /v-if="!hasDestinationIndex && experienceStories\.length"/
+)
+assert.match(
+  detailPanel,
+  /v-if="!hasDestinationIndex && experienceCards\.length"/
+)
+assert.match(
+  detailPanel,
+  /openDestinationItem\(item\)\s*\{[\s\S]*?this\.\$emit\("open-story-section", item\.id\)/
+)
 assert.match(
   atlasView,
   /<small v-if="node\.dateLabel">\{\{ node\.dateLabel \}\}<\/small>/

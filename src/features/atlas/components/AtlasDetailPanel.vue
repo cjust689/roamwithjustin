@@ -212,7 +212,7 @@
             </div>
           </section>
           <section
-            v-if="experienceStories.length"
+            v-if="!hasDestinationIndex && experienceStories.length"
             class="atlas-experience-stories"
             :aria-labelledby="`atlas-experience-stories-title-${node.id}`"
           >
@@ -287,7 +287,7 @@
             </article>
           </section>
           <section
-            v-if="experienceCards.length"
+            v-if="!hasDestinationIndex && experienceCards.length"
             class="atlas-experience-cards"
             aria-label="Continue in the full journey"
           >
@@ -930,19 +930,7 @@ export default {
         return
       }
 
-      const scroller = this.$refs.detailScroll
-      const target = document.getElementById(`atlas-inline-${item.id}`)
-      if (!scroller || !target) return
-
-      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
-        .matches
-        ? "auto"
-        : "smooth"
-      scroller.scrollTo({
-        top: Math.max(0, target.offsetTop - 20),
-        behavior,
-      })
-      target.focus({ preventScroll: true })
+      this.$emit("open-story-section", item.id)
     },
     normalizeMedia(entry) {
       const media = typeof entry === "string" ? { src: entry } : entry || {}

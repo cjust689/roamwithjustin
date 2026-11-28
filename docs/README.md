@@ -125,6 +125,12 @@ Experience, Atlas card, or map-preview cover. Videos remain in their galleries.
 The three existing Uvita House photographs are now associated with that
 Experience and Moment, ahead of its retained video, without changing their
 asset IDs or R2 objects.
+Uvita keeps its dedicated broad destination photograph as the Atlas hero.
+Its `Inside Uvita` index remains the single list of child Places and the direct
+unpinned Uvita House Experience. Place entries continue into their map pins;
+Uvita House opens its exact Journey story section directly. The duplicate
+inline house story and `Continue in the full journey` card are omitted from
+the Uvita destination panel.
 
 Local Atlas marker follow-up: tightly colliding World-level Journey roots now
 remain individually selectable instead of collapsing into one marker. Their

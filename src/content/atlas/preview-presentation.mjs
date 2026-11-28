@@ -200,6 +200,10 @@ export const previewAtlasPresentation = Object.freeze([
     eyebrow: "Coming soon",
     category: "Southern Pacific base",
     camera: { center: [-83.7363979, 9.1730967], zoom: 11.4, pitch: 54, bearing: 12 },
+    hero: {
+      assetId: "image-costa-rica-2025-5452162a6717-001",
+      role: "hero",
+    },
     relatedIds: [
       "drake-bay",
       "uvita-whale-tail",
